@@ -1400,12 +1400,12 @@ void load_student_grades(std::vector<Student*> &students) {
           for (int e = 0; e < itr.value().size(); e++) {
             if (!itr.value()[e].is_object()) continue;
             if (itr.value()[e].value("id","") == original_id) {
-              original_autograde = itr.value()[e].value("autograding_score",0);
-              original_tagrade = itr.value()[e].value("tagrading_score",0);
+              original_autograde = itr.value()[e].value("autograding_score",0.0);
+              original_tagrade = itr.value()[e].value("tagrading_score",0.0);
 
               // WORKAROUND -- bug in gradesummaries tagrading for unsubmitted assignment
               // ALSO NEED TO DEAL WITH VERSION CONFLICTS BETTER
-              float original_score = itr.value()[e].value("score",0);
+              float original_score = itr.value()[e].value("score",0.0);
               if (original_score < original_tagrade + original_autograde) {
                 original_tagrade = 0;
                 original_autograde = 0;
