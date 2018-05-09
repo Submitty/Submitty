@@ -1,7 +1,6 @@
 <?php
 
 use app\exceptions\BaseException;
-use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
@@ -23,13 +22,8 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-/*
- * Load up the autoloader and register the /app directory to the application
- * such that we can easily and quickly load classes on the fly as needed. All
- * classes should follow the PSR-4 namespace naming conventions
- */
-require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
-AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
+require_once(__DIR__.'/../vendor/autoload.php');
+
 $core = new Core();
 /**
  * Register custom expection and error handlers that will get run anytime our application
