@@ -10,8 +10,6 @@ setup(
     install_requires=[
         'tzlocal'
     ],
-    tests_require=[
-        'parameterized'
-    ],
+    tests_require=[],
     zip_safe=True
 )
