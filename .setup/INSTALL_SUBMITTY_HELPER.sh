@@ -582,7 +582,7 @@ popd
 #building clang ASTMatcher.cpp
 if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
 	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
-	ninja
+	ninja ASTMatcher UnionTool
 	popd
 	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
 	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
