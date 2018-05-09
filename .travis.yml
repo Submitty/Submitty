@@ -35,6 +35,7 @@ jobs:
         - pip3 install python-dateutil
         - pip3 install selenium
         - pip3 install pause
+        - pip3 install tzlocal
       script: skip
     - <<: *00-cache
       php: 7.1
@@ -68,6 +69,9 @@ jobs:
     - &02-python-unit
       language: python
       python: 3.4
+      install:
+        - pip3 install -U pip
+        - pip3 install tzlocal
       script:
         - pushd python_submitty_utils
         - python3 setup.py test
