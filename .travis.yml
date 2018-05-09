@@ -60,9 +60,9 @@ jobs:
         - vendor/bin/phpunit --configuration tests/phpunit.xml
       after_success:
         - travis_retry php vendor/bin/coveralls -v
-    - <<: *02-unit
+    - <<: *02-php-unit
       php: 7.1
-    - <<: *02-unit
+    - <<: *02-php-unit
       php: 7.2
 
     - &02-python-unit
