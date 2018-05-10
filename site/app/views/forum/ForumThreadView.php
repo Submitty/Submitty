@@ -91,7 +91,7 @@ HTML;
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
-					$visible_username = "Anonymous";
+					$visible_username = 'Anonymous';
 				} 
 
 				//convert legacy htmlentities being saved in db
