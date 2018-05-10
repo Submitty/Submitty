@@ -1665,16 +1665,18 @@ ORDER BY gt.{$section_key}", $params);
      *
      * About $csv_options:
      * default behavior is to overwrite all late days for user and timestamp.
-     * null value is for updating via form.  Should do default behavior.
-     * 'overwrite_all' invokes default behavior for csv upload.
-     * 'use_max' will preserve higher values when csv upload value is lower.
+     * null value is for updating via form where radio button selection is
+     * ignored, so it should do default behavior.  'csv_option_overwrite_all'
+     * invokes default behavior for csv upload.  'csv_option_preserve_higher'
+     * will preserve existing values when uploaded csv value is lower.
      *
      * @param string $user_id
      * @param string $timestamp
      * @param integer $days
-     * @param string $csv_option null default value used for update via form.
+     * @param string $csv_option value determined by selected radio button
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+		//q.v. PostgresqlDatabaseQueries.php
 		throw new NotImplementedException();
 	}
 
