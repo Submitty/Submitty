@@ -177,7 +177,7 @@ class Utils {
      * TODO: when we move to Composer inside of site, we should replace usage of this
      * function with ramsey/uuid package.
      *
-     * If for whatever reason random_butes fails, we fall back to uniqid which has a
+     * If for whatever reason random_bytes fails, we fall back to uniqid which has a
      * worse guarantee of being actually unique, but it's more important to not
      * crash out here.
      *
