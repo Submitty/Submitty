@@ -1265,8 +1265,8 @@ function refreshOnResponseLateDays(json) {
 
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
-    var csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': csv_option});
+    var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
     $.ajax({
         url: url,
         type: "POST",
@@ -1282,10 +1282,13 @@ function updateLateDays(data) {
             }
             var form = $("#load-late-days");
             refreshOnResponseLateDays(json);
+            //Reset all form elements
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
-//            $("input:radio[name=csv_option]:checked").val('csv_overwrite');
+            $('#csv_upload').val(this.defaultValue);
+            $('#csv_option_overwrite_all').prop('checked',true);
+            //Display confirmation message
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },

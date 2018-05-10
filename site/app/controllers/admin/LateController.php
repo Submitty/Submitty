@@ -63,10 +63,11 @@ class LateController extends AbstractController {
             }
             else {
                 //Validate OK.  Process CSV.
+                //$_REQUEST['csv_option'] is determined by value attribute of radio buttons in site/app/views/admin/LateDayView.php
+                $csv_option = isset($_REQUEST['csv_option']) ? $_REQUEST['csv_option'] : null;
 				for ($i = 0; $i < count($data); $i++){
 					if ($type == "late"){
-						//$_REQUEST['csv_option'] is determined by value attribute of radio buttons in site/app/views/admin/LateDayView.php
-	                    $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $_REQUEST['csv_option']);
+						$this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
 					}
 					else {
 						$this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
