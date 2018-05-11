@@ -1410,7 +1410,7 @@ HTML;
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changebg="true">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, -1, '{$your_user_id}', {$question->getId()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changebg="true">
                         <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
                         {$message}
 HTML;
@@ -1595,8 +1595,28 @@ HTML;
 </div>
 
 <script type="text/javascript">
+var __unloadSentRequest = false;
 window.onbeforeunload = function() {
-    saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);
+    // Will only work for Chrome
+    if (!__unloadSentRequest) {
+        console.log("before unload");
+        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
+            __unloadSentRequest = true;
+        }, function() {
+            // don't error
+        });
+    }
+}
+window.onunload = function() {
+    // Will work for other browsers
+    if (!__unloadSentRequest) {
+        console.log("unload");
+        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
+            __unloadSentRequest = true;
+        }, function() {
+            // don't error
+        });
+    }
 }
 </script>
 <script type="text/javascript">
