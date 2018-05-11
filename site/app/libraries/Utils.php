@@ -129,7 +129,8 @@ class Utils {
     /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
-     * the cookie data.
+     * the cookie data. This will also set the value in the $_COOKIE superglobal so that it's available without a
+     * page reload.
      *
      * @param string        $name name of the cookie
      * @param string|array  $data data of the cookie, if array, will json_encode it
@@ -142,6 +143,7 @@ class Utils {
             $data = json_encode($data);
         }
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        $_COOKIE[$name] = $data;
         return setcookie($name, $data, $expire, "/", "", $secure);
     }
 
