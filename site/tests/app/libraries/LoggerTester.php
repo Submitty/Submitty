@@ -108,7 +108,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $current_date = getdate(time());
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
-        Logger::logAccess("test", "action");
+        Logger::logAccess("test", "token", "action");
         $file = file_get_contents($this->access);
         $lines = explode("\n", $file);
         $this->assertCount(2, $lines);
@@ -127,8 +127,9 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
             $this->assertStringStartsWith('0', $time[2]);
         }
         $this->assertEquals("test", $line[1]);
-        $this->assertEquals("127.0.0.1", $line[2]);
-        $this->assertEquals("action", $line[3]);
-        $this->assertEquals("PHPUnit", $line[4]);
+        $this->assertEquals("token", $line[2]);
+        $this->assertEquals("127.0.0.1", $line[3]);
+        $this->assertEquals("action", $line[4]);
+        $this->assertEquals("PHPUnit", $line[5]);
     }
 }

@@ -170,6 +170,9 @@ elseif ($core->getUser() === null) {
 }
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
+    if (empty($_COOKIE['submitty_token'])) {
+        Utils::setCookie('submitty_token', Utils::guidv4());
+    }
     $log = false;
     $action = "";
     if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
@@ -189,7 +192,7 @@ if ($core->getUser() !== null) {
         if ($core->getConfig()->isCourseLoaded()) {
             $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
         }
-        Logger::logAccess($core->getUser()->getId(), $action);
+        Logger::logAccess($core->getUser()->getId(), $_COOKIE['submitty_token'], $action);
     }
 }
 
