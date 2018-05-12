@@ -46,7 +46,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     </td> \
     <td colspan="3" style="'+background+'"> \
         <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
-        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', -1, \''+your_user_id+'\', '+question_id+'); showMarklist(this,\''+gradeable_id+'\');"> \
+        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
             <i class="fa fa-users icon-got-this-mark"></i> \
         </span> \
     </td> \
