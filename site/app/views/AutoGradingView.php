@@ -488,11 +488,11 @@ HTML;
         }
         $graders = array();
         $count = 0;
-        //find all names of instructors who graded part(s) of this assignment
+        //find all names of instructors who graded part(s) of this assignment that are full access graders
         if(!$gradeable->getPeerGrading()){
             foreach ($gradeable->getComponents() as $component) {
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
-                if (!in_array($name, $graders)) $graders[] = $name;
+                if (!in_array($name, $graders) && $component->getGrader()->accessFullGrading()) $graders[] = $name;
             }
             $graders = implode(", ",$graders);
         }else{
