@@ -7,7 +7,7 @@ a JSON object that is authenticated and is true or false
 """
 import cgi
 # If things are not working, then this should be enabled for better troubleshooting
-import cgitb; cgitb.enable()
+# import cgitb; cgitb.enable()
 import json
 import os
 import pam
