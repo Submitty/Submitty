@@ -160,13 +160,13 @@ HTML;
 		$return = <<<HTML
 
 		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
-    <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
-    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
-    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
-    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
-    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
-    <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
-    <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
+		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
 
 
@@ -190,31 +190,31 @@ HTML;
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		$return .= <<<HTML
-		<script>
-								function changeName(element, user, visible_username, anon){
-									var new_element = element.getElementsByTagName("strong")[0];
-									anon = (anon == 'true');
-									icon = element.getElementsByClassName("fa fa-eye")[0];
-									if(icon == undefined){
-										icon = element.getElementsByClassName("fa fa-eye-slash")[0];
-										if(anon) {
-											new_element.style.color = "black";
-											new_element.style.fontStyle = "normal";
-										}
-										new_element.innerHTML = visible_username;
-										icon.className = "fa fa-eye";
-										icon.title = "Show full user information";
-									} else {
-										if(anon) {
-											new_element.style.color = "grey";
-											new_element.style.fontStyle = "italic";
-										}
-										new_element.innerHTML = user;
-										icon.className = "fa fa-eye-slash";
-										icon.title = "Hide full user information";
-									} 									
-								}
-		</script>
+			<script>
+				function changeName(element, user, visible_username, anon){
+					var new_element = element.getElementsByTagName("strong")[0];
+					anon = (anon == 'true');
+					icon = element.getElementsByClassName("fa fa-eye")[0];
+					if(icon == undefined){
+						icon = element.getElementsByClassName("fa fa-eye-slash")[0];
+						if(anon) {
+							new_element.style.color = "black";
+							new_element.style.fontStyle = "normal";
+						}
+						new_element.innerHTML = visible_username;
+						icon.className = "fa fa-eye";
+						icon.title = "Show full user information";
+					} else {
+						if(anon) {
+							new_element.style.color = "grey";
+							new_element.style.fontStyle = "italic";
+						}
+						new_element.innerHTML = user;
+						icon.className = "fa fa-eye-slash";
+						icon.title = "Hide full user information";
+					} 									
+				}
+			</script>
 HTML;
 	}
 	if($thread_count > 0) {
@@ -223,41 +223,56 @@ HTML;
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
-
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
-
-			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
-
-		if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
+	if($this->core->getUser()->getGroup() <= 2){
+		
+		$return .= <<<HTML
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 HTML;
-		}
-				$categories = $this->core->getQueries()->getCategories();
-				$onChange = '';
-				if($thread_count > 0) {
-					$onChange = <<<HTML
-						onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});"
+	}
+	$categories = $this->core->getQueries()->getCategories();
+	$onChange = '';
+	if($thread_count > 0) {
+		$onChange = <<<HTML
+		onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});"
 HTML;
-				}
-				$return .= <<<HTML
-				<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
-				<label for="thread_category">Category:</label>
-			  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
-			  	<option value="" selected>None</option>
+	}
+	$return .= <<<HTML
+		<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
+		<label for="thread_category">Category:</label>
+	  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
+	  	<option value="" selected>None</option>
 HTML;
-			    for($i = 0; $i < count($categories); $i++){
-			    	$return .= <<<HTML
-			    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
+	    for($i = 0; $i < count($categories); $i++){
+	    	$return .= <<<HTML
+	    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
 HTML;
-			    } 
+	    } 
 
-$return .= <<<HTML
+	$return .= <<<HTML
 			</select>
 			</div>
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
-
+HTML;
+	if($this->core->getUser()->getGroup() <= 2){
+		$return .= <<<HTML
+			<!-- <p>   -->
+			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$_GET['thread_id']})" value="tree">  
+			<label for="radio">Tree mode</label>  
+			<!-- </p>   -->
+			<!-- <p>   -->
+			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$_GET['thread_id']})" value="time">  
+			<label for="radio2">Chronological</label>  
+			<!-- </p>   -->
+			<!-- <p>   -->
+			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$_GET['thread_id']})" value="alpha">  
+			<label for="radio3">Alphabetical</label>  
+			<!-- </p>   -->
+HTML;
+	}
+	$return .= <<<HTML
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
@@ -345,13 +360,13 @@ HTML;
 HTML;
 					$first = true;
 					$first_post_id = 1;
+					if($display_option == "tree"){
 						$order_array = array();
 						$reply_level_array = array();
 						foreach($posts as $post){
 							if($thread_id == -1) {
 								$thread_id = $post["thread_id"];
 							}
-
 							if($first){
 								$first= false;
 								$first_post_id = $post["id"];
@@ -368,7 +383,6 @@ HTML;
 							} else {
 								array_push($order_array, $post["id"]);
 								array_push($reply_level_array, 1);
-
 							}
 						}
 						$i = 0;
@@ -381,17 +395,24 @@ HTML;
 									} else {
 										$reply_level = $reply_level_array[$i];
 									}
-									
+										
 									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
 									break;
-								}
-								
+								}						
 							}
 							if($first){
 								$first= false;
 							}
 							$i++;
+						}	
+					} else {
+						foreach($posts as $post){
+							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
+							if($first){
+								$first= false;
+							}			
 						}
+					}
 					
 			$return .= <<<HTML
 
@@ -547,7 +568,7 @@ HTML;
 					return $return;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level){
+	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -562,28 +583,13 @@ HTML;
 		if($display_option != 'tree'){
 			$reply_level = 1;
 		}
-
+		
 		if($post["anonymous"]){
 			$visible_username = "Anonymous";
 		} 
 		$classes = "post_box";						
-		
 		if($first){
 			$classes .= " first_post";
-			$return = <<<HTML
-    			<p>  
-        			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions($thread_id, 'tree')" value="tree">  
-        			<label for="radio">Tree mode</label>  
-    			</p>  
-    			<p>  
-        			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions($thread_id, 'time')" value="time">  
-        			<label for="radio2">Chronological</label>  
-    			</p>  
-				<p>  
-        			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions($thread_id, 'alpha')" value="alpha">  
-        			<label for="radio3">Alphabetical</label>  
-    			</p>  
-HTML;
 		}
 
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
@@ -591,7 +597,7 @@ HTML;
 		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
-							$return .= <<<HTML
+							$return = <<<HTML
 								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
@@ -773,7 +779,6 @@ HTML;
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
-
 HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){

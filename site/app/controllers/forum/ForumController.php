@@ -287,7 +287,6 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
-        $option = 'tree';
         $option = $_REQUEST['option'] ?? 'tree';
         if(isset($_REQUEST["thread_id"])){
             if($option == "alpha"){
@@ -299,7 +298,6 @@ class ForumController extends AbstractController {
             //We are at the "Home page"
             //Show the first thread
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
-            
         }
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option);
     }

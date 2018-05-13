@@ -1901,8 +1901,7 @@ AND gc_id IN (
     	return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id){
-
+    public function getPostsForThread($current_user, $thread_id, $option = "tree"){
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
