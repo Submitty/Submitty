@@ -357,7 +357,12 @@ function showMarklist(me, gradeable_id) {
             if (x % 5 == 0)
                 students_html += "<br>";
 
-            students_html += data['data'][x]['gd_user_id'] + (x != data['data'].length - 1 ? ", " : "");
+            var id = data['data'][x]['gd_user_id'];
+            var href = window.location.href.replace(/&who_id=([a-z0-9]*)/, "&who_id="+id);
+            students_html += 
+                "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
+                id + (x != data['data'].length - 1 ? ", " : "") +
+                "</a>";
         }
         
         // Hide all other (potentially) open popups
