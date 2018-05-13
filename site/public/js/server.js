@@ -956,21 +956,22 @@ function enableTabsInTextArea(id){
 }
 
 function changeDisplayOptions(thread_id, option){
-    var url = buildUrl({'component': 'forum', 'page': 'change_display_option'});
-        $.ajax({
-        url: url,
-        type: "POST",
-        data: {
-            thread_id: thread_id,
-            option: option
-        },
-        success: function(data){
-            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id, 'option': option}));
-        },
-        error: function(){
-            window.alert("Something went wrong while trying to change views. Please try again.");
-        }
-    });
+    // var url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id, 'option': option});
+    //     $.ajax({
+    //     url: url,
+    //     type: "POST",
+    //     data: {
+    //         thread_id: thread_id,
+    //         option: option
+    //     },
+    //     success: function(data){
+    //         window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id, 'option': option}));
+    //     },
+    //     error: function(){
+    //         window.alert("Something went wrong while trying to change views. Please try again.");
+    //     }
+    // });
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id, 'option': option}));
 }
 
 function resetScrollPosition(id){

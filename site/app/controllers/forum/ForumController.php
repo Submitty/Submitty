@@ -214,9 +214,7 @@ class ForumController extends AbstractController {
 
         $posts = null;
         $option = 'tree';
-        if(isset($_REQUEST["option"])){
-            $option = $_REQUEST["option"];
-        }
+        $option = $_REQUEST['option'] ?? 'tree';
         if(isset($_REQUEST["thread_id"])){
             if($option == "alpha"){
                 $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"], 'alpha');
