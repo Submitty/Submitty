@@ -1006,6 +1006,12 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 
+ALTER TABLE ONLY categories_list
+    ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+ALTER TABLE ONLY thread_categories
+    ADD CONSTRAINT thread_and_category_unique UNIQUE (thread_id, category_id);
+
 -- End Forum Key relationships
 
 --

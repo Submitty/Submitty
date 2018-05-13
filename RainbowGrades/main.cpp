@@ -575,10 +575,31 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       float maximum = grade_id.value("max",0);
       GRADEABLES[g].setMaximum(token_key,maximum);
 
+      if (grade_id.find("scale_max") != grade_id.end()) {
+        float scale_maximum = grade_id.value("scale_max",0);
+        assert (scale_maximum > 0);
+        GRADEABLES[g].setScaleMaximum(token_key,scale_maximum);
+      }
+      if (grade_id.find("percent") != grade_id.end()) {
+        float item_percentage = grade_id.value("percent",-1.0);
+        assert (item_percentage >= 0 && item_percentage <= 1.0);
+        GRADEABLES[g].setItemPercentage(token_key,item_percentage);
+      }
       float clamp = grade_id.value("clamp",-1);
       GRADEABLES[g].setClamp(token_key,clamp);
-      
-      //std::cout << "scores " << p_score << " "<< a_score << " " << b_score <<  " " << c_score << " " << d_score << std::endl;
+
+      if (grade_id.find("autograde_replacement_percentage") != grade_id.end()) {
+        assert (grade_id.find("original_id") != grade_id.end());
+        assert (grade_id.find("resubmit_id") != grade_id.end());
+        assert (grade_id.find("title") != grade_id.end());
+
+        std::string o_id = grade_id.value("original_id","");
+        std::string r_id = grade_id.value("resubmit_id","");
+        std::string t = grade_id.value("title","");
+        float a_r_p = grade_id.value("autograde_replacement_percentage",0.5);
+
+        GRADEABLES[g].setResubmissionValues(token_key,o_id,r_id,t,a_r_p);
+      }
 
       assert (p_score >= a_score &&
               a_score >= b_score &&
@@ -603,7 +624,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       int active = exam_data["active"].get<int>();
     if (active == 1) {
 
-                  GLOBAL_ACTIVE_TEST_ZONE = k;
+      GLOBAL_ACTIVE_TEST_ZONE = k;
 
         for (nlohmann::json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
           std::string token2 = itr2.key();
@@ -816,412 +837,14 @@ void processcustomizationfile(std::vector<Student*> &students) {
   SetBenchmarkColor("lowest_d"   ,"ff0000"); // red
   SetBenchmarkColor("failing"    ,"c80000"); // dark red
   
-  //std::cout << "it makes it here!!" << std::endl;
-
   preprocesscustomizationfile(students);
-  
-  //std::cout << "it makes it here" << std::endl;
   
   load_student_grades(students);
 
-  /*
-  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
-  assert (istr);
-
   std::string token,token2;
-  //int num;
-  int which;
-  std::string which_token;
-  float p_score,a_score,b_score,c_score,d_score;
 
   std::string iclicker_remotes_filename;
-  std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
-
-  while (istr >> token) {
-
-    //std::cout << "TOKEN " << token << std::endl;
-
-    if (token[0] == '#') {
-      // comment line!
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-    } else if (token == "section") {
-      int section;
-      std::string section_name;
-      istr >> section >> section_name;
-      if (students_loaded == false) {
-        std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
-        assert (!validSection(section)); 
-        sectionNames[section] = section_name;
-        
-        static int counter = 0;
-        if (sectionColors.find(section_name) == sectionColors.end()) {
-          if (counter == 0) {
-            sectionColors[section_name] = "ccffcc"; // lt green
-          } else if (counter == 1) {
-            sectionColors[section_name] = "ffcccc"; // lt salmon
-          } else if (counter == 2) {
-            sectionColors[section_name] = "ffffaa"; // lt yellow
-          } else if (counter == 3) {
-            sectionColors[section_name] = "ccccff"; // lt blue-purple
-          } else if (counter == 4) {
-            sectionColors[section_name] = "aaffff"; // lt cyan
-          } else if (counter == 5) {
-            sectionColors[section_name] = "ffaaff"; // lt magenta
-          } else if (counter == 6) {
-            sectionColors[section_name] = "88ccff"; // blue 
-          } else if (counter == 7) {
-            sectionColors[section_name] = "cc88ff"; // purple 
-          } else if (counter == 8) {
-            sectionColors[section_name] = "88ffcc"; // mint 
-          } else if (counter == 9) {
-            sectionColors[section_name] = "ccff88"; // yellow green
-          } else if (counter == 10) {
-            sectionColors[section_name] = "ff88cc"; // pink
-          } else if (counter == 11) {
-            sectionColors[section_name] = "ffcc88"; // orange
-          } else if (counter == 12) {
-            sectionColors[section_name] = "ffff33"; // yellow
-          } else if (counter == 13) {
-            sectionColors[section_name] = "ff33ff"; // magenta
-          } else if (counter == 14) {
-            sectionColors[section_name] = "33ffff"; // cyan
-          } else if (counter == 15) {
-            sectionColors[section_name] = "6666ff"; // blue-purple
-          } else if (counter == 16) {
-            sectionColors[section_name] = "66ff66"; // green
-          } else if (counter == 17) {
-            sectionColors[section_name] = "ff6666"; // red
-          } else {
-            sectionColors[section_name] = "aaaaaa"; // grey 
-          }
-          counter++;
-        }
-      }
-
-    } else if (token == "message") {
-      // general message at the top of the file
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      if (students_loaded == false) continue;
-      MESSAGES.push_back(line);
-    } else if (token == "warning") {
-      // EWS early warning system [ per student ]
-      std::string username;
-      istr >> username;
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      if (s == NULL) {
-        std::cout << username << std::endl;
-      }
-      assert (s != NULL);
-      s->addWarning(line);
-    } else if (token == "recommend") {
-      // UTA/mentor recommendations [ per student ]
-      //assert ( GLOBAL_recommend_id == "");
-      istr >> GLOBAL_recommend_id;
-
-      // / *
-      std::string username;
-      istr >> username;
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      Student *s = GetStudent(students,username);
-      if (students_loaded == false) continue;
-      assert (s != NULL);
-      s->addRecommendation(line);
-      // * / / *
-
-    } else if (token == "note") {
-      // other grading note [ per student ]
-      std::string username;
-      istr >> username;
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      if (s == NULL) {
-        std::cout << "USERNAME " << username << std::endl;
-      }
-      assert (s != NULL);
-      s->addNote(line);
-
-    } else if (token == "earned_late_days") {
-      DISPLAY_LATE_DAYS = true;
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      GLOBAL_earned_late_days.clear();
-      std::stringstream ss(line);
-      float tmp;
-      while (ss >> tmp) {
-        assert (GLOBAL_earned_late_days.size() == 0 || tmp > GLOBAL_earned_late_days.back());
-        GLOBAL_earned_late_days.push_back(tmp);
-      }
-
-    } else if (token == "iclicker_ids") {
-      istr >> iclicker_remotes_filename;
-    } else if (token == "iclicker") {
-      int which_lecture;
-      std::string clicker_file;
-      int which_column;
-      std::string correct_answer;
-      istr >> which_lecture >> clicker_file >> which_column >> correct_answer;
-      assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
-      if (students_loaded == false) continue;
-      iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
-    } else if (token == "audit") {
-      // other grading note [ per student ]
-      std::string username;
-      istr >> username;
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      assert (s != NULL);
-      assert (s->getAudit() == false);
-      s->setAudit();
-      s->addNote("AUDIT");
-
-    } else if (token == "withdraw") {
-      // other grading note [ per student ]
-      std::string username;
-      istr >> username;
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      assert (s != NULL);
-      assert (s->getWithdraw() == false);
-      s->setWithdraw();
-      s->addNote("LATE WITHDRAW");
-
-
-    } else if (token == "independentstudy") {
-      // other grading note [ per student ]
-      std::string username;
-      istr >> username;
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      assert (s != NULL);
-      assert (s->getIndependentStudy() == false);
-      s->setIndependentStudy();
-      s->addNote("INDEPENDENT STUDY");
-
-    } else if (token == "manual_grade") {
-      std::string username,grade;
-      istr >> username >> grade;
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      assert (s != NULL);
-      s->ManualGrade(grade,line);
-    } else if (token == "moss") {
-      std::string username;
-      int hw;
-      float penalty;
-      istr >> username >> hw >> penalty;
-      assert (hw >= 1 && hw <= 10);
-      assert (penalty >= -0.01 && penalty <= 1.01);
-      // ======================================================================
-      // MOSS
-
-      if (students_loaded == false) continue;
-      Student *s = GetStudent(students,username);
-      if (s == NULL) {
-        std::cout << "unknown username " << username << std::endl;
-      }
-      assert (s != NULL);
-      s->mossify(hw,penalty);
-
-    } else if (token == "final_cutoff") {
-
-      //      FINAL_GRADE = true;
-      std::string grade;
-      float cutoff;
-      istr >> grade >> cutoff;
-      assert (grade == "A" ||
-              grade == "A-" ||
-              grade == "B+" ||
-              grade == "B" ||
-              grade == "B-" ||
-              grade == "C+" ||
-              grade == "C" ||
-              grade == "C-" ||
-              grade == "D+" ||
-              grade == "D");
-      CUTOFFS[grade] = cutoff;
-    } else if (token.size() > 4 && token.substr(0,4) == "num_") {
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      
-    } else if (token == "use") {
-
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      continue;
-
-
-
-
-    } else if (token == "hackmaxprojects") {
-
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      continue;
-
-
-    } else if (token == "display" ||
-               token == "display_benchmark" ||
-               token == "benchmark_percent") {
-
-      char line[MAX_STRING_LENGTH];
-      istr.getline(line,MAX_STRING_LENGTH);
-      continue;
-
-
-    } else if (token == "exam_title") {
-      istr.getline(GLOBAL_EXAM_TITLE,MAX_STRING_LENGTH);
-      continue;
-    } else if (token == "exam_date") {
-      istr.getline(GLOBAL_EXAM_DATE,MAX_STRING_LENGTH);
-      continue;
-    } else if (token == "exam_time") {
-      istr.getline(GLOBAL_EXAM_TIME,MAX_STRING_LENGTH);
-      continue;
-    } else if (token == "exam_default_room") {
-      istr.getline(GLOBAL_EXAM_DEFAULT_ROOM,MAX_STRING_LENGTH);
-      continue;
-    } else if (token == "min_overall_for_zone_assignment") {
-      istr >> GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT;
-      continue;
-    } else if (token == "bonus_latedays") {
-      char x[MAX_STRING_LENGTH];
-      istr.getline(x,MAX_STRING_LENGTH);
-      std::stringstream ssx(x);
-      ssx >> BONUS_WHICH_LECTURE >> BONUS_FILE;
-      std::cout << "BONUS LATE DAYS" << std::endl;
-      continue;
-    } else if (token == "exam_seating") {
-
-      //      DISPLAY_EXAM_SEATING = true;
-
-      if (students_loaded == false) {
-        char line[MAX_STRING_LENGTH];
-        istr.getline(line,MAX_STRING_LENGTH);
-        continue;
-      } else {
-
-        std::cout << "TOKEN IS EXAM SEATING" << std::endl;
-        istr >> token >> token2;
-        
-        LoadExamSeatingFile(token,token2,students);
-
-        MakeRosterFile(students);
-      }
-
-    } else {
-      if (students_loaded == true) continue;
-
-      GRADEABLE_ENUM g;
-      bool success = string_to_gradeable_enum(token,g);
-      
-      if (success) {
-        
-        char gradesline[1000];
-        istr.getline(gradesline,1000);
-        
-        std::stringstream ss(gradesline);
-
-
-        if (g == GRADEABLE_ENUM::HOMEWORK ||  
-            g == GRADEABLE_ENUM::ASSIGNMENT ||      
-            g == GRADEABLE_ENUM::PROBLEM_SET ||     
-            g == GRADEABLE_ENUM::QUIZ ||            
-            g == GRADEABLE_ENUM::TEST ||            
-            g == GRADEABLE_ENUM::EXAM ||            
-            g == GRADEABLE_ENUM::EXERCISE ||        
-            g == GRADEABLE_ENUM::LECTURE_EXERCISE ||
-            g == GRADEABLE_ENUM::READING ||         
-            g == GRADEABLE_ENUM::LAB ||             
-            g == GRADEABLE_ENUM::RECITATION ||      
-            g == GRADEABLE_ENUM::PROJECT ||         
-            g == GRADEABLE_ENUM::PARTICIPATION) {
-
-          ss >> which_token;
-          
-          assert (!GRADEABLES[g].hasCorrespondence(which_token));
-          
-          which = GRADEABLES[g].setCorrespondence(which_token);
-
-        } else {
-          ss >> which;
-        }
-
-        std::cout << gradesline << std::endl;
-
-        if (!(ss >> p_score)) {
-          std::cout << "ERROR READING: '" << gradesline << "'" << std::endl;
-          std::cout << which_token << " " << p_score << std::endl;
-          exit(1);
-        }
-
-        a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
-        b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
-        c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
-        d_score = GetBenchmarkPercentage("lowest_d")*p_score;
-        
-        ss >> a_score >> b_score >> c_score >> d_score;
-        
-        assert (p_score >= a_score &&
-                a_score >= b_score &&
-                b_score >= c_score &&
-                c_score >= d_score);
-
-        assert (which >= 0 && which < GRADEABLES[g].getCount());
-
-
-        perfect->setGradeableItemGrade(g,which, p_score);
-        lowest_a->setGradeableItemGrade(g,which, a_score);
-        lowest_b->setGradeableItemGrade(g,which, b_score);
-        lowest_c->setGradeableItemGrade(g,which, c_score);
-        lowest_d->setGradeableItemGrade(g,which, d_score);
-
-
-      } else {
-        std::cout << "ERROR: UNKNOWN TOKEN  X" << token << std::endl;
-      }
-
-    }
-  }
-  
-  if (students_loaded == false) {
-
-    students.push_back(perfect);
-    students.push_back(student_average);
-    students.push_back(student_stddev);
-    students.push_back(lowest_a);
-    students.push_back(lowest_b);
-    students.push_back(lowest_c);
-    students.push_back(lowest_d);
-
-  } else {
-    MatchClickerRemotes(students, iclicker_remotes_filename);
-    AddClickerScores(students,iclicker_questions);
-  }
-  */
-  
-  //std::ifstream istr(CUSTOMIZATION_FILE.c_str());
-  //assert (istr);
-
-  std::string token,token2;
-  //int num;
-  //int which;
-  //std::string which_token;
-  //float p_score,a_score,b_score,c_score,d_score;
-
-  std::string iclicker_remotes_filename;
-  //std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
   std::vector<std::vector<std::vector<iClickerQuestion> > > iclicker_questions(MAX_LECTURES+1);
-
   
   for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
@@ -1621,11 +1244,18 @@ void load_student_grades(std::vector<Student*> &students) {
                   }
 
                   std::string other_note = "";
-                  //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
                   nlohmann::json::iterator itr3 = itr2->find("components");
                   if (itr3 != itr2->end()) {
                     for (std::size_t i = 0; i < itr3->size(); i++) {
-                      std::string component_title = (*itr3)[i].value("title","");
+                      std::string component_title = "placeholder";
+                      assert ((*itr3)[i].find("title") != (*itr3)[i].end());
+                      if ((*itr3)[i].find("title")->is_string()) {
+                        component_title = (*itr3)[i].value("title","");
+                      } else {
+                        // title is sometimes a number...  convert to string
+                        assert ((*itr3)[i].find("title")->is_number());
+                        component_title = std::to_string((*itr3)[i].value("title",0));
+                      }
                       std::string component_comment = (*itr3)[i].value("comment","");
                       if (component_title == "Notes" && component_comment != "") {
                         other_note += " " + component_comment;
@@ -1747,6 +1377,77 @@ void load_student_grades(std::vector<Student*> &students) {
   if (recommendation != "") {
     s->addRecommendation(recommendation);
   }
+
+
+  // lookup and compute resubmit/replacement gradeable items
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    for (int which = 0; which < GRADEABLES[g].getCount(); which++) {
+      std::string original_id;
+      std::string resubmit_id;
+      float autograde_replacement_percentage;
+      GRADEABLES[g].isResubmit(which,original_id,resubmit_id,autograde_replacement_percentage);
+      if (original_id == "") continue;
+
+      float original_autograde = 0;
+      float original_tagrade = 0;
+      float resubmit_autograde = 0;
+
+      for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
+        std::string token = itr.key();
+
+        if (itr.value().is_array()) {
+          for (int e = 0; e < itr.value().size(); e++) {
+            if (!itr.value()[e].is_object()) continue;
+            if (itr.value()[e].value("id","") == original_id) {
+              original_autograde = itr.value()[e].value("autograding_score",0.0);
+              original_tagrade = itr.value()[e].value("tagrading_score",0.0);
+
+              // WORKAROUND -- bug in gradesummaries tagrading for unsubmitted assignment
+              // ALSO NEED TO DEAL WITH VERSION CONFLICTS BETTER
+              float original_score = itr.value()[e].value("score",0.0);
+              if (original_score < original_tagrade + original_autograde) {
+                original_tagrade = 0;
+                original_autograde = 0;
+              }
+              //std::cout << "student " << std::left << std::setw(10) << s->getUserName() << std::endl;
+              //std::cout << " CHECK " << original_score << " " << original_autograde << " " << original_tagrade << std::endl;
+              assert (fabs( original_score -( original_autograde + original_tagrade)) < 0.1);
+              // END WORKAROUND
+
+            }
+            if (itr.value()[e].value("id","") == resubmit_id) {
+              resubmit_autograde = itr.value()[e].value("autograding_score",0);
+              // SIMILAR WORKAROUND
+              float resubmit_score = itr.value()[e].value("score",0);
+              if (resubmit_score == 0) {
+                resubmit_autograde = 0;
+              }
+              // END WORKAROUND
+
+            }
+          }
+        }
+      }
+      float new_autograde =
+        original_autograde*(1-autograde_replacement_percentage) +
+        resubmit_autograde*(autograde_replacement_percentage);
+      float score =
+        original_tagrade +
+        std::max(original_autograde,new_autograde);
+      if (original_autograde < new_autograde) {
+        std::cout << "student " << std::left << std::setw(10) << s->getUserName() << " had grade increase for ";
+        std::cout << original_id << ": "
+                  << std::right << std::setw(5) << original_tagrade << " + "
+                  << std::right << std::setw(5) << original_autograde << " / "
+                  << std::right << std::setw(5) << resubmit_autograde << " -> "
+                  << std::right << std::setw(5) << new_autograde << " = "
+                  << std::right << std::setw(5) << score << std::endl;
+      }
+      s->setGradeableItemGrade(g,which,score);
+    }
+  }
+
   students.push_back(s);
   }
 
@@ -1939,30 +1640,10 @@ int main(int argc, char* argv[]) {
 
   std::vector<Student*> students;  
   processcustomizationfile(students);
-  //processcustomizationfile(students,false);
-
-  // ======================================================================
-  // LOAD ALL THE STUDENT DATA
-  //load_student_grades(students);
-
-
-  /*
-  std::cout << "LOAD BONUS " << BONUS_FILE << std::endl;
-  if (BONUS_FILE != "") {
-    load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
-  }
-  */
-
-  // ======================================================================
-  // MAKE BENCHMARK STUDENTS FOR THE CURVES
-  //processcustomizationfile(students,true); 
-
 
   // ======================================================================
   // SUGGEST CURVES
-
   suggest_curves(students);
-
 
   // ======================================================================
   // SORT
