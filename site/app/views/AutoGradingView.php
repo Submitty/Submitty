@@ -218,7 +218,6 @@ HTML;
 
 
 public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $popup_css_file, $show_hidden=false) {
-    var_dump($show_hidden);
     $gradeable->loadResultDetails();
     $testcase = $gradeable->getTestcases()[$count];
     $autocheck_cnt = 0;

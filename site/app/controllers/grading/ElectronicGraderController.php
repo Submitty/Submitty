@@ -650,7 +650,7 @@ class ElectronicGraderController extends GradingController {
         }       
 
         $this->core->getOutput()->addCSS($this->core->getConfig()->getBaseUrl()."/css/ta-grading.css");
-        $canViewWholeGradeable = $this->canIViewThis($gradeable, true);
+        $canViewWholeGradeable = $this->canIViewThis($gradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
     }
@@ -858,7 +858,7 @@ class ElectronicGraderController extends GradingController {
 
         $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
         //display hidden testcases only if the user can view the entirety of this gradeable.
-        if($this->canIViewThis($gradeable, true)){
+        if($this->canIViewThis($gradeable)){
             $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, $popup_css, true);
         }
         else{

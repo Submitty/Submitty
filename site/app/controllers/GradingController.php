@@ -33,7 +33,7 @@ class GradingController extends AbstractController {
     * on pages with hidden testcases to recieve a false from this function when the 
     * student owns this gradeable.)
     */
-    protected function canIViewThis($req_gradeable, $objectIsHidden=false){
+    protected function canIViewThis($req_gradeable){
         
         //admins and full access graders can see everything.
         if($this->core->getUser()->accessAdmin() || $this->core->getUser()->accessFullGrading()){
@@ -50,11 +50,7 @@ class GradingController extends AbstractController {
             return true;
         }
 
-        //A user can access their own content if it is not hidden.
-        if($this->core->getUser() === $owner && !objectIsHidden){
-            return true;
-        }
-
+        //If you are not an full access grader or a access grader with appropriate permissions, you cannot view the object.
         return false;
     }
 }
