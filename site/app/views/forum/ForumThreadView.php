@@ -257,17 +257,18 @@ HTML;
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
+		$thread_id = $_GET['thread_id'] ?? -1;
 		$return .= <<<HTML
 			<!-- <p>   -->
-			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$_GET['thread_id']})" value="tree">  
+			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$thread_id})" value="tree">  
 			<label for="radio">Tree mode</label>  
 			<!-- </p>   -->
 			<!-- <p>   -->
-			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$_GET['thread_id']})" value="time">  
+			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$thread_id})" value="time">  
 			<label for="radio2">Chronological</label>  
 			<!-- </p>   -->
 			<!-- <p>   -->
-			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$_GET['thread_id']})" value="alpha">  
+			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$thread_id})" value="alpha">  
 			<label for="radio3">Alphabetical</label>  
 			<!-- </p>   -->
 HTML;
