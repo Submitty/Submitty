@@ -1,6 +1,6 @@
 /.idea/
 /output/
-/tests/report/
+/site/tests/report/
 /.vagrant/
 
 selenium*.jar

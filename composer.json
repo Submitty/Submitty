@@ -1,9 +1,0 @@
-{
-    "name": "submitty/submitty",
-    "require-dev": {
-        "phpunit/phpunit": "5.*",
-        "phpunit/phpunit-selenium": "3.*",
-        "phpdocumentor/phpdocumentor": "2.*",
-        "satooshi/php-coveralls": "1.*"
-    }
-}
