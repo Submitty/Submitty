@@ -14,8 +14,14 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
     HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
 fi
+
 # copy the website from the repo
-rsync -rtz --exclude 'vendor' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+
+# install composer dependencies and generate classmap
+pushd ${SUBMITTY_INSTALL_DIR}/site
+composer install --no-dev --optimize-autoloader
+popd
 
 # set special user $HWPHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${HWPHP_USER}:${HWPHP_USER} {} \;
