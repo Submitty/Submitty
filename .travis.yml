@@ -5,7 +5,7 @@ dist: trusty
 cache:
   pip: true
   directories:
-    - vendor
+    - ${TRAVIS_BUILD_DIR}/site/vendor
     - ${HOME}/.composer/cache
     - ${HOME}/.cache/pip
 
