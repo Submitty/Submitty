@@ -25,7 +25,9 @@ jobs:
       php: 7.0
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
+        - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
+        - popd
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
@@ -57,10 +59,14 @@ jobs:
       stage: 02 unit test
       php: 7.0
       script:
+        - pushd site
         - vendor/bin/phpunit --version
         - vendor/bin/phpunit --configuration tests/phpunit.xml
+        - popd
       after_success:
+        - pushd site
         - travis_retry php vendor/bin/coveralls -v
+        - popd
     - <<: *02-php-unit
       php: 7.1
     - <<: *02-php-unit
@@ -183,25 +189,16 @@ jobs:
       php: 7.2
       env: AUTH_METHOD=2
 
+    # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
+    # it
     - &04-integration
       stage: Integration test
       language: cpp
-      #addons:
-      #  apt:
-      #    sources:
-      #      - ubuntu-toolchain-r-test
-      #      - llvm-toolchain-precise-3.8
-      #    packages:
-      #      - clang-3.8
-      #      - g++-multilib
       addons:
         apt:
           sources:
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
-          # You cannot put just any Ubuntu trusty package here and expect to install them and that
-          # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
-          # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
           packages:
             - build-essential
             - automake
