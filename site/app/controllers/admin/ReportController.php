@@ -153,8 +153,6 @@ class ReportController extends AbstractController {
                 'name' => $gradeable->getName(),
                 'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
                 'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
-                'autograding_score' => $autograding_score,
-                'tagrading_score' => $ta_grading_score
             ];
 
             if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
@@ -165,10 +163,14 @@ class ReportController extends AbstractController {
 
                 if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
                     $entry['score'] = max(0, $autograding_score + $ta_grading_score);
+                    $entry['autograding_score'] = $autograding_score;
+                    $entry['tagrading_score'] = $ta_grading_score;
                     $this->addLateDays($gradeable, $entry, $total_late_used);
                 }
                 else {
                     $entry['score'] = 0;
+                    $entry['autograding_score'] = 0;
+                    $entry['tagrading_score'] = 0;
                     if ($gradeable->validateVersions(-1)) {
                         $entry['note'] = 'This has not been graded yet.';
                         // can't be late if not submitted
