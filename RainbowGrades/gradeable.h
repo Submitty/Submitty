@@ -77,6 +77,18 @@ public:
     return "";
   }
 
+  void isResubmit(int index,
+                  std::string &original_id, std::string &resubmit_id,
+                  float &autograde_replacement_percentage) {
+    std::string id = getID(index);
+    if (original_ids.find(id) == original_ids.end()) return;
+    assert (resubmit_ids.find(id) != resubmit_ids.end());
+    assert (autograde_replacement_percentages.find(id) != autograde_replacement_percentages.end());
+    original_id = original_ids.find(id)->second;
+    resubmit_id = resubmit_ids.find(id)->second;
+    autograde_replacement_percentage = autograde_replacement_percentages.find(id)->second;
+  }
+
   bool hasCorrespondence(const std::string &id) const {
     /*
     for (std::map<std::string,std::pair<int,std::string> >::const_iterator itr = correspondences.begin();
@@ -97,9 +109,21 @@ public:
     assert (released.find(id) != released.end());
     return released.find(id)->second;
   }
-  float getMaximum(const std::string &id) const {
+  float getItemMaximum(const std::string &id) const {
     assert (maximums.find(id) != maximums.end());
     return maximums.find(id)->second;
+  }
+  float getScaleMaximum(const std::string &id) const {
+    if (scale_maximums.find(id) == scale_maximums.end()) {
+      return -1;
+    }
+    return scale_maximums.find(id)->second;
+  }
+  float getItemPercentage(const std::string &id) const {
+    if (item_percentages.find(id) == item_percentages.end())
+      return -1;
+    else
+      return item_percentages.find(id)->second;
   }
   float getClamp(const std::string &id) const {
     assert (clamps.find(id) != clamps.end());
@@ -135,10 +159,30 @@ public:
     assert (maximums.find(id) == maximums.end());
     maximums[id] = maximum;
   }
+  void setScaleMaximum(const std::string&id, float scale_maximum) {
+    assert (hasCorrespondence(id));
+    assert (scale_maximums.find(id) == scale_maximums.end());
+    scale_maximums[id] = scale_maximum;
+  }
+  void setItemPercentage(const std::string&id, float item_percentage) {
+    assert (hasCorrespondence(id));
+    assert (item_percentages.find(id) == item_percentages.end());
+    item_percentages[id] = item_percentage;
+  }
   void setClamp(const std::string&id, float clamp) {
     assert (hasCorrespondence(id));
     assert (clamps.find(id) == clamps.end());
     clamps[id] = clamp;
+  }
+
+  void setResubmissionValues(const std::string &id,
+                             const std::string &original_id, const std::string &resubmit_id,
+                             const std::string &title,
+                             float autograde_replacement_percentage) {
+    setCorrespondenceName(id,title);
+    original_ids[id] = original_id;
+    resubmit_ids[id] = resubmit_id;
+    autograde_replacement_percentages[id] = autograde_replacement_percentage;
   }
 
 private:
@@ -149,8 +193,13 @@ private:
   int remove_lowest;
   std::map<std::string,std::pair<int,std::string> > correspondences;
   std::map<std::string,float> maximums;
+  std::map<std::string,float> scale_maximums;
+  std::map<std::string,float> item_percentages;
   std::map<std::string,float> clamps;
   std::map<std::string,bool> released;
+  std::map<std::string,std::string> original_ids;
+  std::map<std::string,std::string> resubmit_ids;
+  std::map<std::string,float> autograde_replacement_percentages;
 };
 
 // ===============================================================================

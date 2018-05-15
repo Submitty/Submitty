@@ -3,7 +3,7 @@
 # This runs selenium on a local machine without some of the other stuff required for travis (such as installing
 # necessary packages. Run this script after you have done:
 # 1) Install Apache, PHP, and Postgres
-# 2) Have the server being served out of localhost/TAGradingServer & localhost/public
+# 2) Have the server being served out of localhost/public
 # This will then download the selenium jar (if it doesn't exist in this directory), then start it up
 
 

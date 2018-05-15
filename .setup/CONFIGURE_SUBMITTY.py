@@ -10,6 +10,7 @@ import shutil
 import tzlocal
 import tempfile
 
+
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
 
@@ -227,9 +228,7 @@ if not args.worker:
     else:
         AUTHENTICATION_METHOD = 'DatabaseAuthentication'
 
-    TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
-
 
 ##############################################################################
 # make the installation setup directory
@@ -279,7 +278,6 @@ if not args.worker:
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['vcs_url'] = VCS_URL
     config['submission_url'] = SUBMISSION_URL
-    config['tagrading_url'] = TAGRADING_URL
     config['cgi_url'] = CGI_URL
 
     config['institution_name'] = INSTITUTION_NAME
@@ -412,7 +410,6 @@ if not args.worker:
     config['site_log_path'] = TAGRADING_LOG_PATH
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
-    config['tagrading_url'] = TAGRADING_URL
     config['cgi_url'] = CGI_URL
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT

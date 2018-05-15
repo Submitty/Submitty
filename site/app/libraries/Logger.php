@@ -183,12 +183,14 @@ class Logger {
      * (so gradeable id for when they're submitting).
      *
      * @param $user_id
+     * @param $token
      * @param $action
      */
-    public static function logAccess($user_id, $action) {
+    public static function logAccess($user_id, $token, $action) {
         $filename = static::getFilename();
         $log_message[] = static::getTimestamp();
         $log_message[] = $user_id;
+        $log_message[] = $token;
         $log_message[] = $_SERVER['REMOTE_ADDR'];
         $log_message[] = $action;
         //$log_message[] = $_SERVER['REQUEST_URI'];
