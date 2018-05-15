@@ -1410,7 +1410,7 @@ HTML;
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changebg="true">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', -1); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changebg="true">
                         <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
                         {$message}
 HTML;
@@ -1595,9 +1595,29 @@ HTML;
 </div>
 
 <script type="text/javascript">
-window.onbeforeunload = function() {
-    saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);
+//
+// This is needed to resolve conflicts between Chrome and other browsers
+//   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
+//   and other browsers can only do synchronous ajax calls on 'onunload'
+//   
+// Reference:
+//    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
+// 
+var __unloadRequestSent = false;
+function unloadSave() {
+    if (!__unloadRequestSent) {
+        __unloadRequestSent = true;
+        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
+        }, function() {
+            // Unable to save so try saving at a different time
+            __unloadRequestSent = false;
+        });
+    }
 }
+// Will work for Chrome
+window.onbeforeunload = unloadSave;
+// Will work for other browsers
+window.onunload = unloadSave;
 </script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
