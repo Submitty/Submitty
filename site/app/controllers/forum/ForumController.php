@@ -249,7 +249,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function getSortedThreads($category_id){
+    private function getSortedThreads($category_id, &$current_max_thread){
         if($this->isValidCategory($category_id)) {
             $announce_threads = $this->core->getQueries()->loadAnnouncements($category_id);
             $reg_threads = $this->core->getQueries()->loadThreads($category_id);
@@ -257,6 +257,9 @@ class ForumController extends AbstractController {
             $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
             $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
         }
+        $max_announce_id = (count($announce_threads) > 0) ? $announce_threads[0]["id"] : -1;
+        $max_reg_id = (count($reg_threads) > 0) ? $reg_threads[0]["id"] : -1;
+        $current_max_thread = max($max_announce_id, $max_reg_id);
         return array_merge($announce_threads, $reg_threads);
     }
 
@@ -264,7 +267,8 @@ class ForumController extends AbstractController {
 
         $category_id = array_key_exists('thread_category', $_POST) && !empty($_POST["thread_category"]) ? (int)$_POST['thread_category'] : -1;
 
-        $threads = $this->getSortedThreads($category_id);
+        $max_thread = 0;
+        $threads = $this->getSortedThreads($category_id, $max_thread);
 
         $currentCategoryId = array_key_exists('currentCategoryId', $_POST) ? (int)$_POST["currentCategoryId"] : -1; 
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
@@ -282,24 +286,28 @@ class ForumController extends AbstractController {
         
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
-        $threads = $this->getSortedThreads($category_id);
+        $max_thread = 0;
+        $threads = $this->getSortedThreads($category_id, $max_thread);
 
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
         $option = $_REQUEST['option'] ?? 'tree';
-        if(isset($_REQUEST["thread_id"])){
+        if(!empty($_REQUEST["thread_id"])){
+            $thread_id = (int)$_REQUEST["thread_id"];
             if($option == "alpha"){
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"], 'alpha');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'alpha');
             } else {
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $_REQUEST["thread_id"], 'tree');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'tree');
             }
-        } else {
-            //We are at the "Home page"
-            //Show the first thread
+            
+        } 
+
+        if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
         }
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option);
+        
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
     }
 
     public function showCreateThread(){

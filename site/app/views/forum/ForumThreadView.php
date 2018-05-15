@@ -144,7 +144,7 @@ HTML;
 		for a specific thread, in addition to all of the threads
 		that have been created to be displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $display_option) {
+	public function showForumThreads($user, $posts, $threads, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -218,7 +218,7 @@ HTML;
 HTML;
 	}
 	if($thread_count > 0) {
-		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
+		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
 	}
 	$return .= <<<HTML
@@ -259,18 +259,14 @@ HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		$thread_id = $_GET['thread_id'] ?? -1;
 		$return .= <<<HTML
-			<!-- <p>   -->
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$thread_id})" value="tree">  
 			<label for="radio">Tree mode</label>  
-			<!-- </p>   -->
-			<!-- <p>   -->
+
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$thread_id})" value="time">  
 			<label for="radio2">Chronological</label>  
-			<!-- </p>   -->
-			<!-- <p>   -->
+
 			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$thread_id})" value="alpha">  
-			<label for="radio3">Alphabetical</label>  
-			<!-- </p>   -->
+			<label for="radio3">Alphabetical</label>
 HTML;
 	}
 	$return .= <<<HTML
