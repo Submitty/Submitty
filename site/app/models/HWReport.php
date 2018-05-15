@@ -3,17 +3,17 @@ namespace app\models;
 
 use app\models\LateDaysCalculation;
 use app\libraries\Core;
-use app\libraries\FileUtils; 
+use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 
 class HWReport extends AbstractModel {
     /*var Core */
     protected $core;
-    
+
     public function __construct(Core $main_core) {
         $this->core = $main_core;
     }
-    
+
     private function generateReport($gradeable, $ldu) {
 
     	// don't generate reports for things that aren't electronic gradeables with TA grading
@@ -43,9 +43,9 @@ class HWReport extends AbstractModel {
 
         $student_grade = 0;
         $grade_comment = "";
-        
+
         $student_id = "";
-        if ($gradeable->isTeamAssignment() && 
+        if ($gradeable->isTeamAssignment() &&
             $gradeable->getTeam() != NULL) {
           $student_id = $gradeable->getTeam()->getId();
         } else {
@@ -53,7 +53,7 @@ class HWReport extends AbstractModel {
         }
         $student_output_filename = $student_id.".txt";
         $late_days_used_overall = 0;
-        
+
         // Only generate full report when the TA has graded the work, may want to change
         if($gradeable->beenTAgraded()) {
             $names = array();
@@ -71,14 +71,14 @@ class HWReport extends AbstractModel {
                 }
                 else if($component->getGrader() === null) {
                     //nothing happens, this is the case when a ta has not graded a component
-                } 
+                }
                 else if($component->getGrader()->accessFullGrading()) {
                     $names[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()}";
                     $name_and_emails[] = "{$component->getGrader()->getDisplayedFirstName()} {$component->getGrader()->getLastName()} <{$component->getGrader()->getEmail()}>";
                 } else {
                     $name_and_emails[] = $TEMP_EMAIL;
                 }
-                
+
             }
 
             $names = array_unique($names);
@@ -166,14 +166,14 @@ class HWReport extends AbstractModel {
                         $temp_score = $component->getGradedTAPoints();
                         $temp_notes = $component->getGradedTAComments($nl, true) . $nl;
                     }
-                    
+
                     $student_output_ta .= $title . " [ " . $temp_score . " / " . $max_value . " ] ";
                     if (!is_array($component) && $component->getGrader() !== null && $component->getGrader()->accessFullGrading()) {
                         $student_output_ta .= "(Graded by {$component->getGrader()->getId()})".$nl;
                     } else {
                         $student_output_ta .= $nl;
                     }
-                    
+
                     if($student_comment != "") {
                         $student_output_ta .= "Rubric: " . $student_comment . $nl;
                     }
@@ -181,7 +181,7 @@ class HWReport extends AbstractModel {
                     $student_output_ta .= $temp_notes;
 
                     $student_output_ta .= $nl;
-                    
+
                     $student_grade += $temp_score;
                     $rubric_total += $max_value;
                     $ta_max_score += $max_value;
@@ -191,7 +191,7 @@ class HWReport extends AbstractModel {
 
                 $rubric_total += $auto_grading_max_score;
                 $student_grade += $auto_grading_awarded;
-                
+
                 $student_final_grade = max(0,$student_grade);
 
                 if(substr($late_days['status'], 0, 3) == 'Bad') {
@@ -225,7 +225,7 @@ class HWReport extends AbstractModel {
             print "failed to write {$save_filename}\n";
         }
     }
-    
+
     public function generateAllReports() {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
@@ -240,7 +240,7 @@ class HWReport extends AbstractModel {
             }
         }
     }
-    
+
     public function generateSingleReport($student_id, $gradeable_id) {
         $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $student_id, "registration_section");
         $ldu = new LateDaysCalculation($this->core, $student_id);
@@ -248,7 +248,7 @@ class HWReport extends AbstractModel {
             $this->generateReport($gradeable, $ldu);
         }
     }
-    
+
     public function generateAllReportsForGradeable($g_id) {
         $students = $this->core->getQueries()->getAllUsers();
         $stu_ids = array_map(function($stu) {return $stu->getId();}, $students);
@@ -263,7 +263,7 @@ class HWReport extends AbstractModel {
             }
         }
     }
-    
+
     public function generateAllReportsForStudent($stu_id) {
         $gradeables = $this->core->getQueries()->getGradeables(null, $stu_id, "registration_section", "u.user_id", 0);
         $ldu = new LateDaysCalculation($this->core, $stu_id);
@@ -272,4 +272,3 @@ class HWReport extends AbstractModel {
         }
     }
 }
-
