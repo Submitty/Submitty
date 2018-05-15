@@ -108,5 +108,4 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE FUNCTION get_allowed_late_days(character varying, timestamp with time zone) RETURNS integer AS $$ SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <= $2 ORDER BY since_timestamp DESC LIMIT 1; $$ LANGUAGE SQL'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
         # add user/database
-        os.system('adduser www-data hwcronphp')
         print("\n")
