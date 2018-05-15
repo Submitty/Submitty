@@ -555,7 +555,7 @@ HTML;
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-						<span class="label label-default">{$thread["category_desc"]}</span>
+						<span class="label_forum label_forum-default">{$thread["category_desc"]}</span>
 						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
