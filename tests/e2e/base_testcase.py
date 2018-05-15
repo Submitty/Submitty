@@ -23,8 +23,6 @@ class BaseTestCase(unittest.TestCase):
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
-    DRIVER = None
-    """:type : webdriver.Chrome"""
 
     def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
         super().__init__(testname)
@@ -33,6 +31,7 @@ class BaseTestCase(unittest.TestCase):
         else:
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
+        """ :type driver: webdriver.Chrome """
         self.options = Options()
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
@@ -49,7 +48,7 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = webdriver.Chrome(chrome_options=self.options)
+        self.driver = webdriver.Chrome(options=self.options)
         if self.use_log_in:
             self.log_in()
 
@@ -78,12 +77,12 @@ class BaseTestCase(unittest.TestCase):
             user_name = self.user_name
 
         self.get(url)
-        # print(self.driver.page_source)
 
         self.assertIn(title, self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
+        # print(self.driver.page_source)
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
