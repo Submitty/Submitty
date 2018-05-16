@@ -8,6 +8,8 @@ import os
 import pwd
 import shutil
 import tzlocal
+import tempfile
+
 
 def get_uid(user):
     return pwd.getpwnam(user).pw_uid
@@ -37,12 +39,15 @@ def get_input(question, default=""):
 if os.getuid() != 0:
     raise SystemExit('ERROR: This script must be run by root or sudo')
 
+
 parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--debug', action='store_true', default=False, help='Configure Submitty to be in debug mode. '
                                                                         'This should not be used in production!')
+parser.add_argument('--worker', action='store_true', default=False, help='Configure Submitty with autograding only')
 parser.add_argument('--install-dir', default='/usr/local/submitty', help='Set the install directory for Submitty')
 parser.add_argument('--data-dir', default='/var/local/submitty', help='Set the data directory for Submitty')
+
 args = parser.parse_args()
 
 # determine location of SUBMITTY GIT repository
@@ -74,16 +79,18 @@ HWPHP_GROUP = 'hwphp'
 HWCGI_USER = 'hwcgi'
 HWCRON_USER = 'hwcron'
 HWCRON_GROUP = 'hwcron'
-HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
-HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
-HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
 
-# System Groups
-HWCRONPHP_GROUP = 'hwcronphp'
-try:
-    grp.getgrnam(HWCRONPHP_GROUP)
-except KeyError:
-    raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
+if not args.worker:
+    HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
+    HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
+    # System Groups
+    HWCRONPHP_GROUP = 'hwcronphp'
+    try:
+        grp.getgrnam(HWCRONPHP_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
+
+HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
 
 COURSE_BUILDERS_GROUP = 'course_builders'
 try:
@@ -111,7 +118,10 @@ for i in range(1, NUM_UNTRUSTED):
 
 # adjust this number depending on the # of processors
 # available on your hardware
-NUM_GRADING_SCHEDULER_WORKERS = 5
+if args.debug == False:
+    NUM_GRADING_SCHEDULER_WORKERS = 5
+else:
+    NUM_GRADING_SCHEDULER_WORKERS = 1
 
 ##############################################################################
 
@@ -138,7 +148,9 @@ loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
         loaded_defaults = json.load(conf_file)
-    loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+    #no need to authenticate on a worker machine (no website)
+    if not args.worker:
+        loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that 
 # is not in an existing config file.)
@@ -154,69 +166,69 @@ if DEBUGGING_ENABLED:
     print('!! DEBUG MODE ENABLED !!')
     print()
 
+if args.worker:
+    print("CONFIGURING SUBMITTY AS A WORKER !!")
+
 print('Hit enter to use default in []')
 print()
 
-DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
-print()
-
-DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
-print()
-
-default = ''
-if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
-    default = '(Leave blank to use same password)'
-DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
-if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
-    DATABASE_PASS = defaults['database_password']
-print()
-
-TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
-print()
-
-SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
-                           'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
-print()
-
-VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
-print()
-
-INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
-                             defaults['institution_name'])
-if INSTITUTION_NAME.lower() == "none":
-    INSTITUTION_NAME = ''
-print()
-
-if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
-    INSTITUTION_HOMEPAGE = ''
-else:
-    INSTITUTION_HOMEPAGE = get_input("What is the url of your institution\'s homepage? "
-                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'])
-    if INSTITUTION_HOMEPAGE.lower() == "none":
-        INSTITUTION_HOMEPAGE = ''
+if not args.worker:
+    DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
-USERNAME_TEXT = defaults['username_change_text']
+    DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
+    print()
 
-print("What authentication method to use:\n1. PAM\n2. Database\n")
-while True:
-    try:
-        auth = int(get_input('Enter number?', defaults['authentication_method']))
-    except ValueError:
-        auth = 0
-    if 0 < auth < 3:
-        break
-    print('Number must be between 0 and 3')
-print()
-print()
+    default = ''
+    if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
+        default = '(Leave blank to use same password)'
+    DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+    if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
+        DATABASE_PASS = defaults['database_password']
+    print()
 
-if auth == 1:
-    AUTHENTICATION_METHOD = 'PamAuthentication'
-else:
-    AUTHENTICATION_METHOD = 'DatabaseAuthentication'
+    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
+    print()
 
-TAGRADING_URL = SUBMISSION_URL + '/hwgrading'
-CGI_URL = SUBMISSION_URL + '/cgi-bin'
+    SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
+                               'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
+    print()
+
+    VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
+    print()
+
+    INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
+                             defaults['institution_name'])
+    print()
+    
+    if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
+        INSTITUTION_HOMEPAGE = ''
+    else:
+        INSTITUTION_HOMEPAGE = get_input("What is the url of your institution\'s homepage? "
+                                     '(Leave blank/type "none" if not desired)', defaults['institution_homepage'])
+        if INSTITUTION_HOMEPAGE.lower() == "none":
+            INSTITUTION_HOMEPAGE = ''
+        print()
+
+    USERNAME_TEXT = defaults['username_change_text']
+
+    print("What authentication method to use:\n1. PAM\n2. Database\n")
+    while True:
+        try:
+            auth = int(get_input('Enter number?', defaults['authentication_method']))
+        except ValueError:
+            auth = 0
+        if 0 < auth < 3:
+            break
+        print('Number must be between 0 and 3')
+    print()
+
+    if auth == 1:
+        AUTHENTICATION_METHOD = 'PamAuthentication'
+    else:
+        AUTHENTICATION_METHOD = 'DatabaseAuthentication'
+
+    CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
 ##############################################################################
 # make the installation setup directory
@@ -224,6 +236,7 @@ CGI_URL = SUBMISSION_URL + '/cgi-bin'
 if os.path.isdir(SETUP_INSTALL_DIR):
     shutil.rmtree(SETUP_INSTALL_DIR)
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
+
 shutil.chown(SETUP_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(SETUP_INSTALL_DIR, 0o751)
 
@@ -231,52 +244,56 @@ os.chmod(SETUP_INSTALL_DIR, 0o751)
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/.setup
 
 config = OrderedDict()
+
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
-config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
-config['hwphp_user'] = HWPHP_USER
-config['hwcgi_user'] = HWCGI_USER
-config['hwcron_user'] = HWCRON_USER
-config['hwcronphp_group'] = HWCRONPHP_GROUP
+
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 config['num_untrusted'] = NUM_UNTRUSTED
 config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
 config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
-
-config['hwcron_uid'] = HWCRON_UID
-config['hwcron_gid'] = HWCRON_GID
-config['hwphp_uid'] = HWPHP_UID
-config['hwphp_gid'] = HWPHP_GID
-
-config['database_host'] = DATABASE_HOST
-config['database_user'] = DATABASE_USER
-config['database_password'] = DATABASE_PASS
-
-config['authentication_method'] = AUTHENTICATION_METHOD
-
-config['timezone'] = TIMEZONE
-
-config['submission_url'] = SUBMISSION_URL
-config['vcs_url'] = VCS_URL
-config['tagrading_url'] = TAGRADING_URL
-config['cgi_url'] = CGI_URL
-
-config['submission_url'] = SUBMISSION_URL
-config['tagrading_url'] = TAGRADING_URL
-config['cgi_url'] = CGI_URL
-
-config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['site_log_path'] = TAGRADING_LOG_PATH
-
 config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 
-config['debugging_enabled'] = DEBUGGING_ENABLED
 
-config['institution_name'] = INSTITUTION_NAME
-config['username_change_text'] = USERNAME_TEXT
-config['institution_homepage'] = INSTITUTION_HOMEPAGE
+config['hwcron_user'] = HWCRON_USER
+config['hwcron_uid'] = HWCRON_UID
+config['hwcron_gid'] = HWCRON_GID    
+
+if not args.worker:
+    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
+
+    config['hwphp_user'] = HWPHP_USER
+    config['hwcgi_user'] = HWCGI_USER
+    config['hwcronphp_group'] = HWCRONPHP_GROUP
+    config['hwphp_uid'] = HWPHP_UID
+    config['hwphp_gid'] = HWPHP_GID
+
+    config['database_host'] = DATABASE_HOST
+    config['database_user'] = DATABASE_USER
+    config['database_password'] = DATABASE_PASS
+    config['timezone'] = TIMEZONE
+
+    config['authentication_method'] = AUTHENTICATION_METHOD
+    config['vcs_url'] = VCS_URL
+    config['submission_url'] = SUBMISSION_URL
+    config['cgi_url'] = CGI_URL
+
+    config['institution_name'] = INSTITUTION_NAME
+    config['username_change_text'] = USERNAME_TEXT
+    config['institution_homepage'] = INSTITUTION_HOMEPAGE
+    config['debugging_enabled'] = DEBUGGING_ENABLED
+
+    config['site_log_path'] = TAGRADING_LOG_PATH
+
+config['autograding_log_path'] = AUTOGRADING_LOG_PATH
+
+if args.worker:
+    config['worker'] = 1
+else:
+    config['worker'] = 0
+
 
 with open(CONFIGURATION_FILE, 'w') as open_file:
     def write(x=''):
@@ -318,61 +335,92 @@ SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 
+#If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
+tmp_autograding_workers_file = ""
+if not args.worker:
+    if os.path.isfile(WORKERS_JSON):
+        #make a tmp folder and copy autograding workers to it
+        tmp_folder = tempfile.mkdtemp()
+        tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
+        os.rename(WORKERS_JSON, tmp_autograding_workers_file)
+
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
 
+#If the workers.json exists, finish rescuing it (copy it back).
+if not tmp_autograding_workers_file == "":
+    #copy autograding workers back
+    os.rename(tmp_autograding_workers_file, WORKERS_JSON)
+    #remove the tmp folder
+    os.removedirs(tmp_folder)
+    #make sure the permissions are correct.
+    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+    os.chmod(WORKERS_JSON, 0o440)
+
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
 
-if not os.path.isfile(WORKERS_JSON):
-    worker_dict = {
-        "primary": {
-            "capabilities": ["default"],
-            "address": "localhost",
-            "username": "",
-            "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+if not args.worker:
+    if not os.path.isfile(WORKERS_JSON):
+        worker_dict = {
+            "primary": {
+                "capabilities": ["default"],
+                "address": "localhost",
+                "username": "",
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+            }
         }
-    }
 
-    with open(WORKERS_JSON, 'w') as workers_file:
-        json.dump(worker_dict, workers_file, indent=4)
-shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-os.chmod(WORKERS_JSON, 0o440)
+        with open(WORKERS_JSON, 'w') as workers_file:
+            json.dump(worker_dict, workers_file, indent=4)
+    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
+    os.chmod(WORKERS_JSON, 0o440)
 
-config = OrderedDict()
-config['authentication_method'] = AUTHENTICATION_METHOD
-config['database_host'] = DATABASE_HOST
-config['database_user'] = DATABASE_USER
-config['database_password'] = DATABASE_PASS
-config['debugging_enabled'] = DEBUGGING_ENABLED
+##############################################################################
+# Write database json
 
-with open(DATABASE_JSON, 'w') as json_file:
-    json.dump(config, json_file, indent=2)
-shutil.chown(DATABASE_JSON, HWPHP_USER, 'www-data')
-os.chmod(DATABASE_JSON, 0o440)
+if not args.worker:
+    config = OrderedDict()
+    config['authentication_method'] = AUTHENTICATION_METHOD
+    config['database_host'] = DATABASE_HOST
+    config['database_user'] = DATABASE_USER
+    config['database_password'] = DATABASE_PASS
+    config['debugging_enabled'] = DEBUGGING_ENABLED
+
+    with open(DATABASE_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(DATABASE_JSON, HWPHP_USER, 'www-data')
+    os.chmod(DATABASE_JSON, 0o440)
+
+##############################################################################
+# Write submitty json
 
 config = OrderedDict()
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
-config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['site_log_path'] = TAGRADING_LOG_PATH
-config['submission_url'] = SUBMISSION_URL
-config['vcs_url'] = VCS_URL
-config['tagrading_url'] = TAGRADING_URL
-config['cgi_url'] = CGI_URL
 config['timezone'] = tzlocal.get_localzone().zone
-config['institution_name'] = INSTITUTION_NAME
-config['username_change_text'] = USERNAME_TEXT
-config['institution_homepage'] = INSTITUTION_HOMEPAGE
+
+if not args.worker:
+    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
+    config['site_log_path'] = TAGRADING_LOG_PATH
+    config['submission_url'] = SUBMISSION_URL
+    config['vcs_url'] = VCS_URL
+    config['cgi_url'] = CGI_URL
+    config['institution_name'] = INSTITUTION_NAME
+    config['username_change_text'] = USERNAME_TEXT
+    config['institution_homepage'] = INSTITUTION_HOMEPAGE
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 os.chmod(SUBMITTY_JSON, 0o444)
+
+##############################################################################
+# Write users json
 
 config = OrderedDict()
 config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
@@ -381,13 +429,15 @@ config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
 config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
 config['hwcron_uid'] = HWCRON_UID
 config['hwcron_gid'] = HWCRON_GID
-config['hwphp_uid'] = HWPHP_UID
-config['hwphp_gid'] = HWPHP_GID
-config['hwphp_user'] = HWPHP_USER
-config['hwcgi_user'] = HWCGI_USER
 config['hwcron_user'] = HWCRON_USER
-config['hwcronphp_group'] = HWCRONPHP_GROUP
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
+
+if not args.worker:
+    config['hwphp_uid'] = HWPHP_UID
+    config['hwphp_gid'] = HWPHP_GID
+    config['hwphp_user'] = HWPHP_USER
+    config['hwcgi_user'] = HWCGI_USER
+    config['hwcronphp_group'] = HWCRONPHP_GROUP
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)

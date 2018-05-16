@@ -107,8 +107,28 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadThreads($announcements){
-        $this->course_db->query("SELECT * FROM threads WHERE deleted = false and pinned = ? ORDER BY id DESC", array($announcements));
+    public function loadAnnouncements($category_id){
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
+        return $this->course_db->rows();
+    }
+
+    public function loadAnnouncementsWithoutCategory(){
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+            return $this->course_db->rows();
+    }
+
+    public function loadThreadsWithoutCategory(){
+         $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+         return $this->course_db->rows();
+    }
+
+    public function loadThreads($category_id) {
+        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
+        return $this->course_db->rows();
+    }
+
+    public function getCategoryIdForThread($thread_id) {
+        $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", array($thread_id));
         return $this->course_db->rows();
     }
 
@@ -132,6 +152,16 @@ class DatabaseQueries {
         return $this->course_db->rows()[0]["max_id"];
     }
 
+    public function getPosts(){
+        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        return $this->course_db->rows();
+    }
+
+    public function getDeletedPostsByUser($user){
+        $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", array($user));
+        return $this->course_db->rows();
+    }
+
     public function getFirstPostForThread($thread_id) {
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
         return $this->course_db->rows()[0];
@@ -142,12 +172,14 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
+
+
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $category_id){
 
         $this->course_db->beginTransaction();
 
@@ -164,13 +196,18 @@ class DatabaseQueries {
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
 
+        $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
+
         $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
 
         $this->course_db->commit();
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
-
+    public function getThreadTitle($thread_id){
+        $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
+        return $this->course_db->rows()[0];
+    }
     public function setAnnouncement($thread_id, $onOff){
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
@@ -184,6 +221,11 @@ class DatabaseQueries {
             array_push($children, $child_id);
             $this->findChildren($child_id, $thread_id, $children);
         }
+    }
+
+    public function searchThreads($searchQuery){
+    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
+    	return $this->course_db->rows();
     }
 
     public function deletePost($post_id, $thread_id){
@@ -1639,6 +1681,18 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
+     * Delete a given user's allowed late days entry at given effective time
+     * @param string $user_id
+     * @param string $timestamp
+     */
+    public function deleteLateDays($user_id, $timestamp){
+        $this->course_db->query("
+          DELETE FROM late_days
+          WHERE user_id=?
+          AND since_timestamp=?", array($user_id, $timestamp));
+    }
+
+    /**
      * Updates a given user's extensions for a given homework
      * @param string $user_id
      * @param string $g_id
@@ -1833,6 +1887,18 @@ AND gc_id IN (
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
       return $ar;
+    }
+
+    public function addNewCategory($category) {
+        //Can't get "RETURNING category_id" syntax to work
+        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($category));
+        $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
+        return $this->course_db->rows()[0];
+    }
+
+    public function getCategories(){
+    	$this->course_db->query("SELECT * from categories_list ORDER BY category_id DESC");
+    	return $this->course_db->rows();
     }
 
     public function getPostsForThread($current_user, $thread_id){

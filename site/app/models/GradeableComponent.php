@@ -45,6 +45,8 @@ use app\libraries\Core;
  * @method void setGradeTime(\DateTime $date_time)
  * @method bool getHasGrade()
  * @method int getPage()
+ * @method bool getHasMarks()
+ * @method GradeableComponentMark[] getMarks()
  */
 class GradeableComponent extends AbstractModel {
     /** @property @var int Unique identifier for the component */
@@ -172,23 +174,20 @@ class GradeableComponent extends AbstractModel {
                 $points += $mark->getPoints();
             }
         }
-
         $points += $this->score;
-
-        if($points < $this->lower_clamp) {
-            $points = $this->lower_clamp;
-        }
-        if($points > $this->upper_clamp) {
-            $points = $this->upper_clamp;
-        }
-        return $points;
+        return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
-    public function getGradedTAComments($nl, $show_students) {
+    public function getGradedTAComments($nl, $show_students, $use_ascii = true) {
         $text = "";
         $first_text = true;
-        $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
-        $box = '<i class="fa fa-square-o"></i> ';
+        if(!$use_ascii){
+            $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
+            $box = '<i class="fa fa-square-o"></i> ';
+        }else{
+            $checkedBox = '(*)';
+            $box = '( )';
+        }
         foreach ($this->marks as $mark) {
             $points_string = "    ";
             if ($mark->getPoints() != 0) {

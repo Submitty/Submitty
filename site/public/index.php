@@ -1,7 +1,6 @@
 <?php
 
 use app\exceptions\BaseException;
-use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
@@ -23,13 +22,8 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-/*
- * Load up the autoloader and register the /app directory to the application
- * such that we can easily and quickly load classes on the fly as needed. All
- * classes should follow the PSR-4 namespace naming conventions
- */
-require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
-AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
+require_once(__DIR__.'/../vendor/autoload.php');
+
 $core = new Core();
 /**
  * Register custom expection and error handlers that will get run anytime our application
@@ -115,6 +109,8 @@ ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
 
+$core->getOutput()->setInternalResources();
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
 if($core->getConfig()->isDebug()) {
@@ -174,6 +170,9 @@ elseif ($core->getUser() === null) {
 }
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
+    if (empty($_COOKIE['submitty_token'])) {
+        Utils::setCookie('submitty_token', Utils::guidv4());
+    }
     $log = false;
     $action = "";
     if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
@@ -190,7 +189,10 @@ if ($core->getUser() !== null) {
         $action = "login";
     }
     if ($log && $action !== "") {
-        Logger::logAccess($core->getUser()->getId(), $action);
+        if ($core->getConfig()->isCourseLoaded()) {
+            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
+        }
+        Logger::logAccess($core->getUser()->getId(), $_COOKIE['submitty_token'], $action);
     }
 }
 
