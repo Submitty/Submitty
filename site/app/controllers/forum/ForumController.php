@@ -62,6 +62,9 @@ class ForumController extends AbstractController {
             case 'show_stats':
                 $this->showStats();
                 break;
+            case 'merge_thread':
+                $this->mergeThread();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -353,6 +356,24 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    public function mergeThread(){
+        if($this->core->getUser()->getGroup() <= 2){
+            if(isset($_POST["merge_thread_parent"]) && isset($_POST["merge_thread_child"])) {
+                $parent_thread_id = $_POST["merge_thread_parent"];
+                $child_thread_id = $_POST["merge_thread_child"];
+                $message = "";
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
+                    $this->core->addSuccessMessage("Threads merged!");
+                } else {
+                    $this->core->addErrorMessage("Merging Failed! ".$message);
+                }
+            }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
+        $this->showThreads();
     }
 
 }

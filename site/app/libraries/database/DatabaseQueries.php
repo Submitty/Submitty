@@ -1922,6 +1922,50 @@ AND gc_id IN (
       return $result_rows;
     }
 
+    public function mergeThread($parent_thread_id, $child_thread_id, &$message){
+        try{
+            $this->course_db->beginTransaction();
+
+            $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($child_thread_id));
+            $result_rows = $this->course_db->rows();
+            if(count($result_rows)<1) {
+                $message = "Can't find child thread";
+                return false;
+            }
+            $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($parent_thread_id));
+            $result_rows = $this->course_db->rows();
+            if(count($result_rows)<1) {
+                $message = "Can't find parent thread";
+                return false;
+            }
+            $this->course_db->query("SELECT id FROM posts where thread_id=? and parent_id=-1", array($parent_thread_id));
+            $parent_root_post = $this->course_db->rows()[0]['id'];
+            $this->course_db->query("SELECT id FROM posts where thread_id=? and parent_id=-1", array($child_thread_id));
+            $child_root_post = $this->course_db->rows()[0]['id'];
+
+            if($child_root_post <= $parent_root_post) {
+                $message = "Child thread must be newer than parent thread";
+                return false;
+            }
+
+            $children = array($child_root_post);
+            $this->findChildren($child_root_post, $child_thread_id, $children);
+
+            // $merged_id is PK of linking node
+            $this->course_db->query("UPDATE threads SET merged_id = ?, deleted = true WHERE id = ?", array($child_root_post, $child_thread_id));
+            foreach($children as $post_id){
+                $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
+            }
+            $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_root_post, $child_root_post));
+
+            $this->course_db->commit();
+            return true;
+        } catch (DatabaseException $dbException){
+             $this->course_db->rollback();
+        }
+        return false;
+    }
+
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : array($user_id);
 

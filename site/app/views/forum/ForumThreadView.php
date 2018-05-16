@@ -231,6 +231,7 @@ HTML;
 		if($this->core->getUser()->getGroup() <= 2){
 			$return .= <<<HTML
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Merge Threads" onclick="$('#merge_thread_child').val('');$('#merge_thread_parent').val('');$('#merge-threads').css('display', 'block');">Merge Threads</a>
 HTML;
 		}
 				$categories = $this->core->getQueries()->getCategories();
@@ -254,6 +255,13 @@ HTML;
 
 $return .= <<<HTML
 			</select>
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
+			Thread ID: {$currentThread}
+HTML;
+		}
+$return .= <<<HTML
 			</div>
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 
@@ -280,6 +288,16 @@ HTML;
 
 			if($this->core->getUser()->getGroup() <= 2){
 				$return .= <<<HTML
+				<div class="popup-form" id="merge-threads">
+				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'merge_thread'))}">
+					Merge Thread
+					<input type="text" id="merge_thread_child" name="merge_thread_child" placeholder="Child Thread">
+					into
+					<input type="text" id="merge_thread_parent" name="merge_thread_parent" placeholder="Parent Thread"> </br>
+					<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
+					<input class="btn btn-primary" type="submit" value="Submit" />
+				</form>
+				</div>
 				<div class="popup-form" id="edit-user-post">
 
 				<h3 id="edit_user_prompt"></h3>

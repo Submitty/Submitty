@@ -934,7 +934,7 @@ function editPost(post_id, thread_id) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('.popup-form').css('display', 'block');
+                $('#edit-user-post').css('display', 'block');
                 
             },
             error: function(){
