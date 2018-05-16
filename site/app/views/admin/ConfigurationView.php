@@ -141,6 +141,26 @@ class ConfigurationView extends AbstractView {
             </div>
         </div>
 
+        <div class="option">
+            <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
+            <div class="option-desc">
+                <div class="option-title">Add Registration Section</div>
+                <div class="option-alt">
+                    Enter a registration section which is not already a registration section.
+                </div>
+            </div>
+        </div>
+
+        <div class="option">
+            <div class="option-input"><input type="text" name="delete_reg_section" value="" placeholder="Eg: 3" /></div>
+            <div class="option-desc">
+                <div class="option-title">Delete a Registration Section</div>
+                <div class="option-alt">
+                    Registration Section to be deleted should not have any student enrolled in it. 
+                </div>
+            </div>
+        </div>        
+
     </div>
     <div class="post-panel-btn">
         <button class="btn btn-primary" style="float: right" type="submit" form="configForm">

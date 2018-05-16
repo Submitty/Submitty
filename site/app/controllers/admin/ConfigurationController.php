@@ -83,6 +83,67 @@ class ConfigurationController extends AbstractController {
                                                               'action' => 'view')));
         }
 
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $students = $this->core->getQueries()->getAllUsers();
+        if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] != "") {
+            $flag=0;
+            foreach ($reg_sections as $section) {
+                $section = $section['sections_registration_id'];
+                if ($section == intval($_POST['add_reg_section'])){
+                    $flag = 1;
+                    break;
+                }
+            }
+            if ($flag == 1) {
+                $this->core->addErrorMessage("Registration Section already present");
+                $_SESSION['request'] = $_POST;
+                $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
+                                                              'page' => 'configuration',
+                                                              'action' => 'view')));       
+            }
+            else {
+                $this->core->getQueries()->insertNewRegistrationSection(intval($_POST['add_reg_section']));
+            }
+        }
+
+        if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
+            $valid_reg_section_flag=0;
+            foreach ($reg_sections as $section) {
+                $section = $section['sections_registration_id'];
+                if ($section == intval($_POST['delete_reg_section'])){
+                    $valid_reg_section_flag = 1;
+                    break;
+                }
+            }
+            if ($valid_reg_section_flag == 0) {
+                $this->core->addErrorMessage("Not a valid Registration Section");
+                $_SESSION['request'] = $_POST;
+                $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
+                                                              'page' => 'configuration',
+                                                              'action' => 'view'))); 
+            }
+            else {
+                $no_user_flag=1;
+                foreach ($students as $student) {
+                    $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+                    if ($registration == intval($_POST['delete_reg_section'])) {
+                        $no_user_flag=0;
+                        break;
+                    }    
+                }
+                if ($no_user_flag == 0) {
+                    $this->core->addErrorMessage("Registration section which is to be deleted have users");
+                    $_SESSION['request'] = $_POST;
+                    $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
+                                                              'page' => 'configuration',
+                                                              'action' => 'view')));      
+                }
+                else {
+                    $this->core->getQueries()->deleteRegistrationSection(intval($_POST['delete_reg_section']));
+                }    
+            }
+        }
+
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
