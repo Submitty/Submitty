@@ -295,7 +295,7 @@ HTML;
         return $return;
     }
 
-    public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
+    public function rotatingUserForm( $students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
         $return = <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -326,6 +326,85 @@ $(function() {
     });
 });
 </script>
+<div class="content">
+    <h2>Setup Registration Sections</h2>
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_registration_sections'))}" method="POST">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <div class="sub">
+        <div class="box half">
+            <br /><br />
+            <div class="option">
+                <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Add Registration Section</div>
+                    <div class="option-alt">
+                        Enter a registration section which is not already a registration section.
+                    </div>
+                </div>
+            </div>
+            <div class="option">
+                <div class="option-input"><input type="text" name="delete_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Delete a Registration Section</div>
+                    <div class="option-alt">
+                        Registration Section to be deleted should not have any student enrolled in it. 
+                    </div>
+                </div><br />
+                <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+            </div> 
+        </div>
+        <div class="box half">
+            <h2>Student Counts in Registration Sections</h2>
+            <div class="half">
+                <table class="table table-bordered table-striped">
+HTML;
+        $reg_sections_count = array();
+        foreach ($students as $student) {
+            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+            if (array_key_exists($registration, $reg_sections_count)) {
+                $reg_sections_count[$registration] = $reg_sections_count[$registration]+1; 
+            }
+            else {
+                $reg_sections_count[$registration] = 1;
+            }
+        }
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            if (array_key_exists($section, $reg_sections_count)) {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>{$reg_sections_count[$section]}</td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>0</td>
+HTML;
+            }   
+        }
+        if (array_key_exists('NULL', $reg_sections_count)) {
+            $return .= <<<HTML
+                <tr>
+                    <td>Section NULL</td>
+                    <td>{$reg_sections_count['NULL']}</td>
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section NULL</td>
+                        <td>0</td>
+HTML;
+        }    
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>    
+    </div>    
+</div>
 <div class="content">
     <h2>Setup Rotating Sections</h2>
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
@@ -387,6 +466,13 @@ HTML;
         </div>
     </div>
     </form>
+</div>
+<div class="content">
+    <div class="option-alt">
+        <b>Note the difference between Registration Section and Rotation Section</b>:<br />
+        Gradeables assigned by Registration Section are graded by a fixed set of one or more graders per section across all gradeables for the entire term.<br />
+        Gradeables assigned by Rotating Section are graded by a set of users per gradeable (not fixed for the entire term).
+    </div>
 </div>
 HTML;
         return $return;
