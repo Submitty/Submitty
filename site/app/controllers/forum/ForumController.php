@@ -95,7 +95,7 @@ class ForumController extends AbstractController {
         if($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])){
             $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
             return -1;
-        
+
         } return $imageCheck;
     }
 
@@ -107,7 +107,7 @@ class ForumController extends AbstractController {
         foreach($rows as $index => $values){
             if($values["category_id"] === $inputCategoryId)
                 return true;
-        } 
+        }
         return false;
     }
 
@@ -123,7 +123,7 @@ class ForumController extends AbstractController {
             }
         } else {
             $result["error"] = "You do not have permissions to do that.";
-        } 
+        }
         $this->core->getOutput()->renderJson($result);
         return $result;
     }
@@ -141,13 +141,13 @@ class ForumController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         }else if(!$this->isValidCategory($category_id)){
             $this->core->addErrorMessage("You must select a valid category. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));         
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
             if($hasGoodAttachment == -1){
                 return;
             }
-            
+
             $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $category_id);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
@@ -164,9 +164,9 @@ class ForumController extends AbstractController {
                     $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
                     move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                 }
-                
+
             }
-            
+
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
     }
@@ -269,7 +269,7 @@ class ForumController extends AbstractController {
 
         $threads = $this->getSortedThreads($category_id);
 
-        $currentCategoryId = array_key_exists('currentCategoryId', $_POST) ? (int)$_POST["currentCategoryId"] : -1; 
+        $currentCategoryId = array_key_exists('currentCategoryId', $_POST) ? (int)$_POST["currentCategoryId"] : -1;
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
         $current_thread_title = "";
@@ -282,7 +282,7 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-        
+
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $threads = $this->getSortedThreads($category_id);
@@ -296,7 +296,7 @@ class ForumController extends AbstractController {
             //We are at the "Home page"
             //Show the first thread
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
-            
+
         }
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads);
     }
@@ -334,13 +334,13 @@ class ForumController extends AbstractController {
             if(!isset($users[$user])){
                 $users[$user] = array();
                 $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["first_name"] = htmlspecialchars($u -> getFirstName());
+                $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
                 $users[$user]["last_name"] = htmlspecialchars($u -> getLastName());
                 $users[$user]["posts"]=array();
                 $users[$user]["id"]=array();
                 $users[$user]["timestamps"]=array();
                 $users[$user]["total_threads"]=0;
-                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user)); 
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
             }
             if($posts[$i]["parent_id"]==-1){
                 $users[$user]["total_threads"]++;
@@ -352,7 +352,7 @@ class ForumController extends AbstractController {
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 
-            
+
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
