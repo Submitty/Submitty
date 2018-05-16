@@ -12,6 +12,7 @@ would require a new vagrant install (or at least a rerun of install_system.sh).
 import argparse
 import glob
 import os
+import platform
 import pwd
 import shutil
 import json
@@ -91,25 +92,26 @@ def main():
     os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
     os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
     os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
+    distro = platform.linux_distribution()[0].lower()
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
-        os.system("rm -rf {}/*_logs".format(SUBMITTY_DATA_DIR))
-        os.system('rm -rf {}/.vagrant/logs/*'.format(SUBMITTY_REPOSITORY))
+        os.system("rm -rf {}/logs".format(SUBMITTY_DATA_DIR))
+        os.system('rm -rf {}/.vagrant/{}/logs'.format(SUBMITTY_REPOSITORY, distro))
 
-        os.system('mkdir {}/.vagrant/logs/autograding'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/logs/autograding {}/logs/autograding'
-                  .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
+        os.system('mkdir {}/.vagrant/{}/logs'.format(SUBMITTY_REPOSITORY, distro))
+        os.system('ln -s {}/.vagrant/{}/logs {}'.format(SUBMITTY_REPOSITORY, distro, SUBMITTY_DATA_DIR))
 
-        os.system('mkdir {}/.vagrant/logs/access'.format(SUBMITTY_REPOSITORY))
-        os.system('mkdir {}/.vagrant/logs/site_errors'.format(SUBMITTY_REPOSITORY))
-        os.system('ln -s {}/.vagrant/logs/access {}/logs/access'
-                  .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
-        os.system('ln -s {}/.vagrant/logs/site_errors {}/logs/site_errors'
-                  .format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
+
+        os.system('mkdir {}/.vagrant/{}/logs/autograding'.format(SUBMITTY_REPOSITORY, distro))
+        os.system('mkdir {}/.vagrant/{}/logs/access'.format(SUBMITTY_REPOSITORY, distro))
+        os.system('mkdir {}/.vagrant/{}/logs/site_errors'.format(SUBMITTY_REPOSITORY, distro))
 
     if cmd_exists('psql'):
         with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
             submitty_config_json = json.load(submitty_config)
             os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
+        os.system('psql -d postgres -U hsdbu -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
+                  'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
+                  'pid <> pg_backend_pid();"')
         os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
         os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
@@ -131,7 +133,7 @@ def main():
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
-        for queue in ["to_be_graded_batch", "to_be_graded_interactive"]:
+        for queue in ["to_be_graded_queue"]:
             path = os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))
             for queue_file in glob.iglob(path):
                 os.remove(queue_file)

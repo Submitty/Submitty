@@ -54,18 +54,18 @@ if [ ${VAGRANT} == 1 ]; then
     # The VM’s host-only adapter provides a private connection to the VM,
     # but Ubuntu also needs to be configured to use this adapter.
 
-    echo "Binding static IPs to \"Host-Only\" virtual network interface."
+    # echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
     # eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
     # not auto-configured.  eth1 is manually set so that the host-only network
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
     # eth1 is statically bound to 192.168.56.101.
-    printf "auto eth1\niface eth1 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:1\niface eth1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    # printf "auto eth1\niface eth1 inet static\naddress ${SUBMISSION_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    # printf "auto eth1:1\niface eth1 inet static\naddress ${GIT_URL:7}\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 
     # Turn them on.
-    ifup eth1 eth1:1
+    # ifup eth1 eth1:1
 
 
     rm /etc/motd
@@ -92,7 +92,6 @@ if [ ${VAGRANT} == 1 ]; then
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##
 ##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
-##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
 ##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##

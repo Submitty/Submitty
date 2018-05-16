@@ -14,11 +14,17 @@
     z-index: 20;
 }
 
+.draggable_content{
+    width: 100%;
+    height:100%;
+    overflow: auto;
+}
+
 .grading_toolbar {
     position:relative;
     display: block;
     float: left;
-    width: 290px;
+    width: 291px;
     padding-top:3px;
     padding-bottom:3px;
     background-color: #edf6f6;
@@ -28,6 +34,24 @@
     cursor: pointer;
     box-shadow: 0px 0px 5px 5px yellow;
     background-color: yellow;
+}
+
+.banner {
+    border: solid 6px #FFD700;
+    position:relative;
+    display: block;
+    float: left;
+    width: 290px;
+    height: 25px;
+    top: 2px;
+    left: 120px;
+    padding-top:3px;
+    padding-bottom:3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 25px;  
+    font-weight:    bold;
+    background-color: red;
 }
 
 .icon-auto-grading-results {
@@ -138,7 +162,7 @@ progress::-webkit-progress-value {
     background-color: #E9EFEF;
     display: none;
     z-index: 30;
-    overflow:auto;
+    overflow:hidden;
     opacity: 0.95;
 }
 

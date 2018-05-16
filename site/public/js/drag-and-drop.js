@@ -310,7 +310,7 @@ function openFile(url_full) {
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
     var next_count = count+1;
-    var next_input = "#bulk_user_id_" + next_count;
+    var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
         $(next_input).select(); 
@@ -370,7 +370,6 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
     formData.append('user_id', user_id);
 
     var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-
     $.ajax({
         url: url,
         data: formData,
@@ -381,7 +380,32 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    if(data['previous_submission']){
+                        $(function() {
+                            var dialog = $('<p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p>').dialog({
+                                open: function(event, ui) {
+                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+                                },
+                                buttons: {
+                                    "Yes": function() {
+                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                                        dialog.dialog('close');
+
+                                    },
+                                    "No":  function() {
+                                        dialog.dialog('close');
+                                    },
+                                    "Merge":  function() {
+                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
+                                        dialog.dialog('close');
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    else{
+                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                    }
                 }
                 else {
                     alert("ERROR! \n\n" + data['message']);
@@ -407,9 +431,9 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 * @param path
 * @param count
 */
-function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
-
-    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id});
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false) {
+    merge = (merge_previous ? "true" : "false");
+    url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, "merge" : merge_previous});
     return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var formData = new FormData();
@@ -430,7 +454,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count) {
                 if (data['success']) {
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_user_id_" + count).prop("disabled", true);
+                    $("#users_" + count + " :input").prop("disabled", true);
                     var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
@@ -555,7 +579,7 @@ function handleBulk(gradeable_id, num_pages) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-            formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 
@@ -632,7 +656,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
     }
     else if (days_late > 0) {
-        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
+        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
         }
@@ -672,7 +696,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-                formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
             }
         }
         // Files from previous submission
@@ -703,7 +727,6 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('pages', JSON.stringify(pages));
     }
 
-
     $.ajax({
         url: submit_url,
         data: formData,
@@ -732,7 +755,8 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                 console.log(data);
             }
         },
-        error: function() {
+        error: function(error) {
+            console.log(error);
             $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
         }

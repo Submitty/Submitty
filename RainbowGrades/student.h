@@ -1,3 +1,4 @@
+
 #ifndef _STUDENT_H_
 #define _STUDENT_H_
 
@@ -79,7 +80,8 @@ public:
   const std::string& getPreferredName() const { if (preferred_first != "") return preferred_first; return legal_first; }
   const std::string& getLastName()      const { return last; }
   const std::string& getLastUpdate()    const { return lastUpdate; }
-
+  bool getLefty() const { return lefty; }
+  
   // registration status
   int getSection()           const { return section; }
   bool getAudit()            const { return audit; }
@@ -101,7 +103,7 @@ public:
   void add_bonus_late_day(int which_lecture) { bonus_late_days_which_lecture.push_back(which_lecture); }
 
   // other grade-like data
-  const std::string& getRemoteID() const { return remote_id; }
+  const std::vector<std::string>& getRemoteID() const { return remote_id; }
   bool getAcademicIntegrityForm()  const { return academic_integrity_form; }
   int getParticipation()           const { return participation; }
   int getUnderstanding()           const { return understanding; }
@@ -125,9 +127,9 @@ public:
   // personal data
   void setUserName(const std::string &s)      { username=s; }
   void setLegalFirstName(const std::string &s)     { legal_first=s; }
-  void setPreferredFirstName(const std::string &s) { preferred_first=s; }
+  void setPreferredFirstName(const std::string &s) { preferred_first=s.substr(0,10);  }
   void setLastName(const std::string &s)      { last=s; }
-
+  void setLefty() { lefty = true; }
   void setLastUpdate(const std::string &s)    { lastUpdate = s; }
 
   // registration status
@@ -140,10 +142,10 @@ public:
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
   void setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, int late_days_used=0, const std::string &note="",const std::string &status="");
 
-  void mossify(int hw, float penalty);
+  void mossify(const std::string &gradeable, float penalty);
 
   // other grade-like data
-  void setRemoteID(const std::string& r_id) { remote_id = r_id; }
+  void setRemoteID(const std::string& r_id) { remote_id.push_back(r_id); }
   void setAcademicIntegrityForm() { academic_integrity_form = true; }
   void setParticipation(int x) { participation = x; }
   void setUnderstanding(int x) { understanding = x; }
@@ -195,7 +197,8 @@ private:
   std::string legal_first;
   std::string preferred_first;
   std::string last;
-
+  bool lefty;
+  
   std::string lastUpdate;
 
   int current_allowed_late_days;
@@ -216,7 +219,7 @@ private:
   float cached_hw;
 
   // other grade-like data
-  std::string remote_id;
+  std::vector<std::string> remote_id;
   bool academic_integrity_form;
   int participation;
   int understanding;

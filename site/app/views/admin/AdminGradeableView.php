@@ -273,7 +273,8 @@ HTML;
                             <li>user_id OR team_id OR repo_id (only use one)</li>
                         </ul>
                         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
-                        <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/>
+                        <input style='width: 83%' type='text' name='subdirectory' value="" placeholder="(Optional)"/><br />
+                        VCS URL: <kbd id="vcs_url"></kbd>
                         <br />
                     </div>
                     
@@ -318,7 +319,7 @@ HTML;
                         /> No 
                         <br /> <br />
 
-                        Should students be able to download files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+                        Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
                         <input type="radio" id="yes_student_download" name="student_download" value="true"
 HTML;
                         if ($admin_gradeable->getEgStudentDownload()===true) { $html_output .= ' checked="checked"'; }
@@ -2384,8 +2385,7 @@ $('#gradeable-form').on('submit', function(e){
 </div>');
     }
 
-    $('input:radio[name="gradeable_type"]').change(
-    function(){
+    $('input:radio[name="gradeable_type"]').change(function() {
         $('#required_type').hide();
         $('.gradeable_type_options').hide();
         if ($(this).is(':checked')){ 
@@ -2427,7 +2427,21 @@ $('#gradeable-form').on('submit', function(e){
         }
     });
 
+    var vcs_base_url = "{$admin_gradeable->getVcsBaseUrl()}";
+    function setVcsUrl(subdirectory) {
+        if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
+            $('#vcs_url').text(subdirectory);
+        }
+        else {
+            $('#vcs_url').text(vcs_base_url.replace(/[\/]+$/g, '') + '/' + subdirectory);
+        }
+    }
+    
     $(function () {
+        $('input[name="subdirectory"]').on('change paste keyup', function() {
+            setVcsUrl(this.value);
+        });
+        setVcsUrl($('input[name="subdirectory"]').val());
         $("#alert-message").dialog({
             modal: true,
             autoOpen: false,
@@ -2447,6 +2461,7 @@ $('#gradeable-form').on('submit', function(e){
         var date_ta_view = Date.parse($('#date_ta_view').val());
         var date_grade = Date.parse($('#date_grade').val());
         var date_released = Date.parse($('#date_released').val());
+        var vcs_url = $('#vcs_url').text();
         var subdirectory = $('input[name="subdirectory"]').val();
         var config_path = $('input[name=config_path]').val();
         var has_space = gradeable_id.includes(" ");
@@ -2537,8 +2552,9 @@ $('#gradeable-form').on('submit', function(e){
                 var subdirectory_parts = subdirectory.split("{");
                 var x=0;
                 // if this is a vcs path extension, make sure it starts with '/'
-                if ("{$admin_gradeable->getVcsBaseUrl()}" !== "None specified." && subdirectory_parts[0][0] !== "/") {
-                    alert("VCS path needs to start with '/'");
+                console.log(vcs_url);
+                if (vcs_url.indexOf('://') === -1 && vcs_url[0] !== "/") {
+                    alert("VCS path needs to either be a URL or start with a /");
                     return false;
                 }
                 // check that path is made up of valid variables
@@ -2685,8 +2701,8 @@ $('#gradeable-form').on('submit', function(e){
             }
         }
     }
-calculatePercentageTotal();
-calculateTotalScore();
+    calculatePercentageTotal();
+    calculateTotalScore();
     </script>
 HTML;
     $html_output .= <<<HTML

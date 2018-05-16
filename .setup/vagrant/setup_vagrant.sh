@@ -19,7 +19,7 @@ apt-get install libpython${PY3_VERSION}
 # from bootstrap.pypi.io so that we have the latest version (installing from
 # the repo will give us something out-of-date and hard to install/manage)
 if [ ! -x "$(command -v pip)" ]; then
-    wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+    wget -nv --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
     python3 /tmp/get-pip.py
     rm -rf /tmp/get-pip.py
 else

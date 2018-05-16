@@ -79,7 +79,7 @@ class Core {
      * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *
-     * Config model will throw exceptions if we cannot find a given $semester or $course on the fileystem.
+     * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
      * @param $semester
      * @param $course

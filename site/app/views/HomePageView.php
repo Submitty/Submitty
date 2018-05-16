@@ -20,7 +20,7 @@ class HomePageView extends AbstractView {
     <div class="sub">
         <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
         <div class="box half">
-        <h2>About You</h2>
+            <h2>About You</h2>
             <table>
                 <tbody>
                     <tr>
@@ -28,7 +28,7 @@ class HomePageView extends AbstractView {
                     </tr>
                     <tr>
                         <td><b>First Name:</b> {$user->getDisplayedFirstName()} </td>
-                        <td><a onclick="userNameChange('$displayedFirstName')"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                         <script type="text/javascript">
                             function userNameChange() {
                                 $('.popup-form').css('display', 'none');
@@ -92,7 +92,7 @@ HTML;
                 </tbody>
             </table>
         </div>
-        <div class="box", style = "float: none;width:48%;display:block;overflow:hidden;">
+        <div class="box half">
             <h2>Your Courses</h2>
                 <table width='95%'>
                     <tbody>
@@ -107,15 +107,10 @@ HTML;
                         $rankWithCourse[$i] = array();
                     }
 
-                    
-                    foreach($courses as $course){
-
-                        $rank = $this->core->getQueries()->getGroupForUserInClass($course->getTitle(), $user->getId());
-
+                    foreach($courses as $course) {
+                        $rank = $this->core->getQueries()->getGroupForUserInClass($course->getSemester(), $course->getTitle(), $user->getId());
                         array_push($rankWithCourse[$rank], $course);
-
                         $pos++;
-
                     }
 
                     $pos = 0;
@@ -142,10 +137,10 @@ HTML;
                                         $header = "<h3>Student:</h3>";
                                 break;
                         }
-                            
+
                             $return .= <<<HTML
                         <tr>
-                            <td colspan="8">     
+                            <td colspan="8">
                                 {$header}
                             </td>
                         </tr>
@@ -156,12 +151,13 @@ HTML;
                             if($rankWithCourse[$i][$q]->getDisplayName() !== "") {
                                 $display_text .= " " . $rankWithCourse[$i][$q]->getDisplayName();
                             }
-                        
+
                         $return .= <<<HTML
-                        
+
                         <tr>
-                            <td colspan="8">
-                                <a class="btn btn-primary btn-block" style="width:95%;white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                            <td style="width:85%" colspan="30">
+                                <a id="{$rankWithCourse[$i][$q]->getSemester()}_{$rankWithCourse[$i][$q]->getTitle()}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                               
                             </td>
                         </tr>
 HTML;
