@@ -577,16 +577,16 @@ class ElectronicGraderController extends AbstractController {
             if($team){
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section'));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
-                //BUG HERE: need to find submitted teams
+                //BUG HERE: need to implement a getTotalSubmittedTeamCountByGradingSections and replace the line below
                 $total_submitted=array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
             }
-            else{
+            else {
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section'));
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
                 $total_submitted=array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section'));
-                }
             }
-            else {
+        }
+        else {
             $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             if ($this->core->getUser()->accessAdmin() && $sections == null) {
@@ -605,7 +605,7 @@ class ElectronicGraderController extends AbstractController {
                 });
                 //$total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
-               //BUG HERE
+               //BUG HERE: need to implement a getTotalSubmittedTeamCountByGradingSections and replace the line below
                 $total_submitted=array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
             }
             else {
@@ -613,21 +613,21 @@ class ElectronicGraderController extends AbstractController {
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'rotating_section'));
                 $total_submitted=array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'rotating_section'));
             }
-             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
+            $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
         }
         //multiplies users and the number of components a gradeable has together
         if($team) {
             $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         else {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = $total_subsmitted * count($gradeable->getComponents());
         }
         if($total_submitted == 0) {
             $progress = 100;
         }
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
-         }
+        }
         if(!$peer && !$team) {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         }
