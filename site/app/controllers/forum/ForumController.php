@@ -293,7 +293,7 @@ class ForumController extends AbstractController {
 
         $posts = null;
       
-        $option = $_REQUEST['option'] ?? 'tree';
+        $option = ($this->core->getUser()->getGroup() <= 2 && !empty($_REQUEST['option'])) ? $_REQUEST['option'] : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             if($option == "alpha"){
