@@ -360,7 +360,7 @@ class ForumController extends AbstractController {
 
     public function mergeThread(){
         if($this->core->getUser()->getGroup() <= 2){
-            if(isset($_POST["merge_thread_parent"]) && isset($_POST["merge_thread_child"])) {
+            if(isset($_POST["merge_thread_parent"]) && isset($_POST["merge_thread_child"]) && is_numeric($_POST["merge_thread_parent"]) && is_numeric($_POST["merge_thread_child"])) {
                 $parent_thread_id = $_POST["merge_thread_parent"];
                 $child_thread_id = $_POST["merge_thread_child"];
                 $message = "";
