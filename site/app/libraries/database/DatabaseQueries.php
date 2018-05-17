@@ -1930,12 +1930,14 @@ AND gc_id IN (
             $result_rows = $this->course_db->rows();
             if(count($result_rows)<1) {
                 $message = "Can't find child thread";
+                $this->course_db->rollback();
                 return false;
             }
             $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($parent_thread_id));
             $result_rows = $this->course_db->rows();
             if(count($result_rows)<1) {
                 $message = "Can't find parent thread";
+                $this->course_db->rollback();
                 return false;
             }
             $this->course_db->query("SELECT id FROM posts where thread_id=? and parent_id=-1", array($parent_thread_id));
@@ -1945,6 +1947,7 @@ AND gc_id IN (
 
             if($child_root_post <= $parent_root_post) {
                 $message = "Child thread must be newer than parent thread";
+                $this->course_db->rollback();
                 return false;
             }
 
