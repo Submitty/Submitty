@@ -16,8 +16,10 @@ window.addEventListener("load", function() {
  * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
-function buildUrl(parts) {
-    var url = siteUrl;
+function buildUrl(parts, url="") {
+    if(url===""){
+        url = siteUrl;
+    }
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
@@ -27,17 +29,18 @@ function buildUrl(parts) {
     return url + constructed;
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, count, siteUrl=""){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
 
     if(isVisible){
         toggleDiv(orig_div_name);
-        $(orig_div_name).empty();
+        $(div_name).empty();
     }else{
-        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file', 'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
-        console.log(url);
+        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count}, url=siteUrl);
+
         $.ajax({
             url: url,
             success: function(data) {

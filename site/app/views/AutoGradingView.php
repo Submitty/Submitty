@@ -35,7 +35,7 @@ class AutogradingView extends AbstractView {
     // $(window).bind("load", function() {
 
     $(document).ready(function() {
-        toggleDiv(loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0', siteurl=document.body.dataset.data-site-url));
+        loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0', siteurl=document.body.dataset.siteUrl);
     });
 </script>
 HTML;
@@ -234,7 +234,6 @@ HTML;
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 //This is the div which will house the test output (filled by script above.)
-                echo($display_box);
                $return .= <<<HTML
     <div id="{$div_to_populate}" style="display:{$display_box};">
 HTML;
@@ -256,9 +255,14 @@ HTML;
 public static function loadAutoChecks(Gradeable $gradeable, $count, $who_id, $popup_css_file, $show_hidden=false) {
     $gradeable->loadResultDetails();
     $testcase = $gradeable->getTestcases()[$count];
+    $return = "";
+
+    if($testcase->isHidden() && !$show_hidden){
+        return "";
+    }
+
     $autocheck_cnt = 0;
     $autocheck_len = count($testcase->getAutochecks());
-    $return = "";
     foreach ($testcase->getAutochecks() as $autocheck) {
         $description = $autocheck->getDescription();
         $diff_viewer = $autocheck->getDiffViewer();
