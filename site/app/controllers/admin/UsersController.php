@@ -235,6 +235,7 @@ class UsersController extends AbstractController {
 
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $students = $this->core->getQueries()->getAllUsers();
+        $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] != "") {
             $flag=0;
             foreach ($reg_sections as $section) {
@@ -270,6 +271,7 @@ class UsersController extends AbstractController {
             }
             else {
                 $no_user_flag=1;
+                $no_grader_flag=1;
                 foreach ($students as $student) {
                     $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
                     if ($registration == intval($_POST['delete_reg_section'])) {
@@ -277,8 +279,17 @@ class UsersController extends AbstractController {
                         break;
                     }    
                 }
-                if ($no_user_flag == 0) {
-                    $this->core->addErrorMessage("Registration section which is to be deleted have users");
+
+                foreach ($graders as $grader) {
+                    if(($grader->getGroup() == 2) || ($grader->getGroup() == 3)) {
+                        if(in_array(intval($_POST['delete_reg_section']), $grader->getGradingRegistrationSections() )) {
+                            $no_grader_flag=0;
+                            break;
+                        }
+                    }
+                }    
+                if (($no_user_flag != 1) || ($no_grader_flag != 1)) {
+                    $this->core->addErrorMessage("Registration section which is to be deleted have users/graders assigned to it");
                     $_SESSION['request'] = $_POST;
                     $this->core->redirect($return_url);      
                 }

@@ -347,7 +347,7 @@ $(function() {
                 <div class="option-desc">
                     <div class="option-title">Delete a Registration Section</div>
                     <div class="option-alt">
-                        Registration Section to be deleted should not have any student enrolled in it. 
+                        Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section. 
                     </div>
                 </div><br />
                 <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
