@@ -33,7 +33,6 @@ import sys
 
 from submitty_utils import dateutils
 
-
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 

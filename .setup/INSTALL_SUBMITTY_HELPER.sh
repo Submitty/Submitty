@@ -203,6 +203,15 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
+# tmp folder
+mkdir -p ${SUBMITTY_DATA_DIR}/tmp
+chown root:root ${SUBMITTY_DATA_DIR}/tmp
+chmod 511 ${SUBMITTY_DATA_DIR}/tmp
+
+# tmp folder to hold files for PAM authentication. Needs to be writable by hwphp and only readable by hwcgi
+mkdir -p ${SUBMITTY_DATA_DIR}/tmp/pam
+chown hwphp.hwcgi ${SUBMITTY_DATA_DIR}/tmp/pam
+chmod 750 ${SUBMITTY_DATA_DIR}/tmp/pam
 
 ########################################################################################################################
 ########################################################################################################################
@@ -411,7 +420,12 @@ if [ "${WORKER}" == 0 ]; then
     echo -e "Copy the submission website"
 
     # copy the website from the repo
-    rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+    rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+    
+    # install composer dependencies and generate classmap
+    pushd ${SUBMITTY_INSTALL_DIR}/site
+    composer install --no-dev --optimize-autoloader
+    popd
 
     # set special user $HWPHP_USER as owner & group of all website files
     find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
