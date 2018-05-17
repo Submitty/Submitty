@@ -328,6 +328,7 @@ $(function() {
 </script>
 <div class="content">
     <h2>Setup Registration Sections</h2>
+    Gradeables assigned by Registration Section are graded by a fixed set of one or more graders per section across all gradeables for the entire term.<br /><br />
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_registration_sections'))}" method="POST">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
@@ -407,6 +408,7 @@ HTML;
 </div>
 <div class="content">
     <h2>Setup Rotating Sections</h2>
+    Gradeables assigned by Rotating Section are graded by a set of users per gradeable (not fixed for the entire term).<br /><br />
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
@@ -466,13 +468,6 @@ HTML;
         </div>
     </div>
     </form>
-</div>
-<div class="content">
-    <div class="option-alt">
-        <b>Note the difference between Registration Section and Rotation Section</b>:<br />
-        Gradeables assigned by Registration Section are graded by a fixed set of one or more graders per section across all gradeables for the entire term.<br />
-        Gradeables assigned by Rotating Section are graded by a set of users per gradeable (not fixed for the entire term).
-    </div>
 </div>
 HTML;
         return $return;
