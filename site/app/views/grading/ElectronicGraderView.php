@@ -167,7 +167,7 @@ HTML;
                     $valid_graders = array();
                     foreach($section['graders'] as $valid_grader){
                         if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
-                            $valid_graders[] = $valid_grader->getFirstName();
+                            $valid_graders[] = $valid_grader->getDisplayedFirstName();
                         }
                     }
                     $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
@@ -602,7 +602,7 @@ HTML;
                             if ($member_list !== "") {
                                 $member_list = $member_list . ", ";
                             }
- 	 
+
                             $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
                             $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
@@ -610,7 +610,7 @@ HTML;
                         }
                         $return .= <<<HTML
                 <td>{$member_list}</td>
-        
+
 HTML;
                     }
                 }
@@ -1275,7 +1275,7 @@ HTML;
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color); 
+                    $('#bar_banner').css('background-color', $my_color);
                     $('#bar_banner').css('color', 'black');
                 </script>
                 <div class="red-message" style="text-align: center">$my_message</div>
@@ -1300,7 +1300,7 @@ HTML;
             <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
-       
+
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
@@ -1447,7 +1447,7 @@ HTML;
             }
             else if($show_graded_info) {
                 $nl = "<br>";
-                $initial_text = $question->getGradedTAComments($nl, false);
+                $initial_text = $question->getGradedTAComments($nl, false, $gradeable);
             }
 
 
@@ -1478,7 +1478,7 @@ HTML;
                 </tr>
                 <tbody id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
                 </tbody>
-                
+
                 <tbody id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
 HTML;
 
@@ -1505,7 +1505,7 @@ HTML;
             }
             $return .= <<<HTML
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                        <td colspan="1" style="text-align: center; white-space: nowrap;"> 
+                        <td colspan="1" style="text-align: center; white-space: nowrap;">
 
                         <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
@@ -1515,7 +1515,7 @@ HTML;
                         </td>
                     </tr>
                 </tbody>
-                
+
 HTML;
             $c++;
         }
@@ -1599,10 +1599,10 @@ HTML;
 // This is needed to resolve conflicts between Chrome and other browsers
 //   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
 //   and other browsers can only do synchronous ajax calls on 'onunload'
-//   
+//
 // Reference:
 //    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
-// 
+//
 var __unloadRequestSent = false;
 function unloadSave() {
     if (!__unloadRequestSent) {
@@ -1725,7 +1725,7 @@ HTML;
 HTML;
         return $return;
     }
-    
+
     public function popupNewMark() {
         $return = <<<HTML
 <div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">

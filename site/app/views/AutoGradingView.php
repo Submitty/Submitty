@@ -150,7 +150,7 @@ HTML;
                     }else{
                         $hiddenPoints = "";
                     }
-                    
+
                     $return .= <<<HTML
         <div class="badge">Hidden {$hiddenPoints} </div>
 HTML;
@@ -296,7 +296,7 @@ HTML;
                             // Format the image SRC:  data:{mime};base64,{data};
                             $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
                             // insert the sample image data
-                            
+
                             $return .= '<img src="'.$myimagesrc.'" img style="border:2px solid black">';
                         }
                     }
@@ -337,7 +337,7 @@ HTML;
                     }
                     elseif ($diff_viewer->hasDisplayExpected()) {
                     $visible = "visible";
-                    $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t")); 
+                    $tmp_array_string = explode("\n",trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t"));
                     $less_than_30 = true;
                     $arr_count = count($tmp_array_string);
                     for ($x = 0; $x < $arr_count; $x++) {
@@ -534,7 +534,7 @@ HTML;
             <div class = "box half" style="float:right; width: 40%;">
                 <p>Maximum number of late days allowed on this assignment: {$gradeable->getAllowedLateDays()}</p>
                 <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
-                <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p> 
+                <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p>
                 <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
                 <p>Remaining number of late days: {$lateDayData['remaining_days']}</p>
                 <p>Submission Status: <i>{$lateDayData['status']}</i></p>
@@ -547,7 +547,7 @@ HTML;
             </div>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
-            if(is_array($component)) continue;              
+            if(is_array($component)) continue;
             $score = $component->getGradedTAPoints();
             //check if extra credit
             if(trim(strtolower($component->getTitle())) === "extra credit") {
@@ -572,7 +572,7 @@ HTML;
                     <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
                     <div style="float:left;">
                         <p style="padding-bottom: 10px;">{$component->getStudentComment()}</p>
-                        <p>{$component->getGradedTAComments('<br>',true,false)}</p>
+                        <p>{$component->getGradedTAComments('<br>',true,$gradeable,false)}</p>
                     </div>
                 </div>
             </div>

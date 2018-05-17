@@ -96,7 +96,7 @@ class GradeableComponent extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
-    
+
     /** @property @var bool has the grader of this component been modified*/
     protected $grader_modified = false;
 
@@ -166,7 +166,7 @@ class GradeableComponent extends AbstractModel {
         }
 
     }
-    
+
     public function getGradedTAPoints() {
         $points = $this->default;
         foreach ($this->marks as $mark) {
@@ -178,7 +178,7 @@ class GradeableComponent extends AbstractModel {
         return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
-    public function getGradedTAComments($nl, $show_students, $use_ascii = true) {
+    public function getGradedTAComments($nl, $show_students, $gradeable, $use_ascii = true) {
         $text = "";
         $first_text = true;
         if(!$use_ascii){
@@ -191,11 +191,15 @@ class GradeableComponent extends AbstractModel {
         foreach ($this->marks as $mark) {
             $points_string = "    ";
             if ($mark->getPoints() != 0) {
-              $points_string = sprintf("%4.1f",$mark->getPoints());
+              $roundPoints = round($mark->getPoints()/$gradeable->getPointPrecision())*$gradeable->getPointPrecision();
+              if ($gradeable->getPointPrecision() === 0.01)
+                 $points_string = sprintf("%4.2f",$roundPoints);
+              else
+                 $points_string = sprintf("%4.1f",$roundPoints);
             }
             $hasmark = $box;
             if($mark->getHasMark() === true) {
-              $hasmark = $checkedBox;  
+              $hasmark = $checkedBox;
             } else if (!($show_students === true && $mark->getPublish() === 't')) {
               continue;
             }
@@ -214,7 +218,11 @@ class GradeableComponent extends AbstractModel {
             }
             $score_string = "    ";
             if (floatval($this->score) != 0) {
-                $score_string = sprintf("%4.1f",$this->score);
+              $roundScore = round($this->score/$gradeable->getPointPrecision())*$gradeable->getPointPrecision();
+              if ($gradeable->getPointPrecision() === 0.01)
+                 $points_string = sprintf("%4.2f",$roundScore);
+              else
+                 $points_string = sprintf("%4.1f",$roundScore);
             }
             $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
         }
