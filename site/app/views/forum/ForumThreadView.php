@@ -260,7 +260,7 @@ HTML;
 		$thread_id = $_GET['thread_id'] ?? -1;
 		$return .= <<<HTML
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$thread_id})" value="tree">  
-			<label for="radio">Tree mode</label>  
+			<label for="radio">Hierarchical</label>  
 
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$thread_id})" value="time">  
 			<label for="radio2">Chronological</label>  
