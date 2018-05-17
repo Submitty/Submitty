@@ -1912,7 +1912,7 @@ AND gc_id IN (
         }
       }
       if($option == 'alpha'){
-        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? ORDER BY user_lastname;", array($thread_id));
+        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
         $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
       }
