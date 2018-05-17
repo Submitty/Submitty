@@ -156,7 +156,7 @@ HTML;
 
                         <tr>
                             <td style="width:85%" colspan="30">
-                                <a class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                                <a id="{$rankWithCourse[$i][$q]->getSemester()}_{$rankWithCourse[$i][$q]->getTitle()}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
                                
                             </td>
                         </tr>

@@ -151,40 +151,67 @@ class ReportController extends AbstractController {
             $entry = [
                 'id' => $gradeable->getId(),
                 'name' => $gradeable->getName(),
+                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
                 'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
             ];
 
-            if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
-               $entry['score'] = max(0,floatval($autograding_score) + floatval($ta_grading_score));
+            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+                $entry['score'] = max(0, $ta_grading_score);
             }
             else {
-                $entry['score'] = 0;
-                if ($gradeable->validateVersions(-1)) {
-                    $entry['note'] = 'This has not been graded yet.';
-                }
-                elseif ($gradeable->getActiveVersion() !== 0) {
-                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                }
-            }
+                $entry['overall_comment'] = $gradeable->getOverallComment();
 
-            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                $this->addLateDays($gradeable, $entry, $total_late_used);
+                if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
+                    $entry['score'] = max(0, $autograding_score + $ta_grading_score);
+                    $entry['autograding_score'] = $autograding_score;
+                    $entry['tagrading_score'] = $ta_grading_score;
+                    $this->addLateDays($gradeable, $entry, $total_late_used);
+                }
+                else {
+                    $entry['score'] = 0;
+                    $entry['autograding_score'] = 0;
+                    $entry['tagrading_score'] = 0;
+                    if ($gradeable->validateVersions(-1)) {
+                        $entry['note'] = 'This has not been graded yet.';
+                        // can't be late if not submitted
+                        $entry['days_late'] = 0;
+                        $entry['status'] = 'unsubmitted';
+                    }
+                    elseif ($gradeable->getActiveVersion() !== 0) {
+                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $this->addLateDays($gradeable, $entry, $total_late_used);
+                    }
+                }
             }
 
             $entry['components'] = [];
             foreach ($gradeable->getComponents() as $component) {
-                $inner = ['title' => $component->getTitle()];
-                if (!$component->getIsText()) {
-                    $inner['score'] = $component->getScore();
+                $inner = [
+                    'title' => $component->getTitle()
+                ];
+
+                if ($component->getIsText()) {
+                    $inner['comment'] = $component->getComment();
                 }
-                $inner['comment'] = $component->getComment();
-                if ($component->getHasMarks()) {
+                else {
+                    $inner['score'] = $component->getGradedTAPoints();
+                    $inner['default_score'] = $component->getDefault();
+                    $inner['upper_clamp'] = $component->getUpperClamp();
+                    $inner['lower_clamp'] = $component->getLowerClamp();
+                }
+
+                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $marks = [];
-                    foreach ($component->getMarks() as $mark) {
-                        $marks[] = [
-                            'points' => $mark->getPoints(),
-                            'note' => $mark->getNote()
-                        ];
+                    if ($component->getHasMarks()) {
+                        foreach ($component->getMarks() as $mark) {
+                            if ($mark->getHasMark()) {
+                                $marks[] = ['points' => $mark->getPoints(), 'note' => $mark->getNote()];
+                            }
+                        }
+                    }
+
+                    if (!empty($component->getComment()) || $component->getScore() != 0) {
+                        $marks[] = ['points' => $component->getScore(), 'note' => $component->getComment()];
                     }
                     $inner['marks'] = $marks;
                 }
@@ -230,8 +257,9 @@ class ReportController extends AbstractController {
         }
 
         if($status === 'Bad') {
-            $entry["score"] = 0;
+            $entry['score'] = 0;
         }
+
         $entry['status'] = $status;
 
         if ($late_flag && $late_days_used > 0) {
