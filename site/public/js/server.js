@@ -1,10 +1,11 @@
 var siteUrl = undefined;
 var csrfToken = undefined;
 
-function setSiteDetails(url, setCsrfToken) {
-    siteUrl = url;
-    csrfToken = setCsrfToken;
-}
+window.addEventListener("load", function() {
+  for (const elem in document.body.dataset) {
+    window[elem] = document.body.dataset[elem];
+  }
+});
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
