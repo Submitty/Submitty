@@ -32,8 +32,6 @@ class AutogradingView extends AbstractView {
         if ($num_visible_testcases == 1) {
             $return.= <<<HTML
 <script type="text/javascript">
-    // $(window).bind("load", function() {
-
     $(document).ready(function() {
         loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0', siteurl=document.body.dataset.siteUrl);
     });
@@ -136,7 +134,6 @@ HTML;
             }
             $div_click = "";
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
-                //$div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
                 $div_click = "style=\"cursor: pointer;\"";
             }
             $div_to_populate = "testcase_".$count;
@@ -229,7 +226,8 @@ HTML;
             }
             $return .= <<<HTML
             <h4>
-            {$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}</h4>
+                {$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}
+            </h4>
     </div>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {

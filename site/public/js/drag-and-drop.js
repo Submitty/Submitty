@@ -756,7 +756,6 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
             }
         },
         error: function(error) {
-            console.log(error);
             $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
         }
