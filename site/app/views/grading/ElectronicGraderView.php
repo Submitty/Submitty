@@ -849,6 +849,13 @@ HTML;
 
     public function adminTeamForm($gradeable, $sections) {
         $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
+        $students = $this->core->getQueries()->getAllUsers();
+        $student_full = array();
+        foreach ($students as $student) {
+            $student_full[] = array('value' => $student->getId(),
+                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
+        }
+        $student_full = json_encode($student_full);
         $return = <<<HTML
 <div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
@@ -857,6 +864,7 @@ HTML;
     <input type="hidden" name="new_team_user_id" />
     <input type="hidden" name="edit_team_team_id" />
     <input type="hidden" name="num_users" />
+    <input type="hidden" id="student_full_id" value='{$student_full}'/>
 HTML;
     if (isset($_REQUEST['view'])) {
         $return .= <<<HTML
