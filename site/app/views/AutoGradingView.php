@@ -139,8 +139,8 @@ HTML;
             $div_to_populate = "testcase_".$count;
 
             $return .= <<<HTML
-<div class="box" {$background} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
-    <div class="box-title" {$div_click}>
+<div class="box" {$background}>
+    <div class="box-title" {$div_click} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $return .= <<<HTML
@@ -641,16 +641,3 @@ HTML;
     return $return;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
