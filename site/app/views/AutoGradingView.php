@@ -33,7 +33,7 @@ class AutogradingView extends AbstractView {
             $return.= <<<HTML
 <script type="text/javascript">
     $(document).ready(function() {
-        loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0', siteurl=document.body.dataset.siteUrl);
+        loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0');
     });
 </script>
 HTML;

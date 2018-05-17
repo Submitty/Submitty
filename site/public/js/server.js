@@ -16,10 +16,8 @@ window.addEventListener("load", function() {
  * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
-function buildUrl(parts, url="") {
-    if(url===""){
-        url = siteUrl;
-    }
+function buildUrl(parts) {
+    url = document.body.dataset.siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
@@ -29,7 +27,7 @@ function buildUrl(parts, url="") {
     return url + constructed;
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, count, siteUrl=""){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -39,7 +37,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count, siteUrl=""){
         $(div_name).empty();
     }else{
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count}, url=siteUrl);
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
 
         $.ajax({
             url: url,
