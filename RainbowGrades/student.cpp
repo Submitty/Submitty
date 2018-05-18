@@ -109,8 +109,8 @@ bool operator<(const score_object &a, const score_object &b) {
 
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
-  if (GRADEABLES[g].getMaximum() == 0) return 0;
-  assert (GRADEABLES[g].getMaximum() > 0);
+  //if (GRADEABLES[g].getMaximum() == 0) return 0;
+  //assert (GRADEABLES[g].getMaximum() > 0);
   assert (GRADEABLES[g].getPercent() >= 0);
 
   // special rules for tests
@@ -132,7 +132,7 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
     float s = getGradeableItemGrade(g,i).getValue();
     std::string id = GRADEABLES[g].getID(i);
-    float m = GRADEABLES[g].getMaximum(id);
+    float m = GRADEABLES[g].getItemMaximum(id);
     float p = GRADEABLES[g].getItemPercentage(id);
     float sm = GRADEABLES[g].getScaleMaximum(id);
     scores.push_back(score_object(s,m,p,sm));
@@ -161,8 +161,12 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
     float my_max = std::max(m,sm);
     if (p < 0) {
       assert (my_max > 0);
-      assert (sum_max > 0);
-      p = std::max(m,sm) / sum_max;
+      if (sum_max > 0) {
+        p = std::max(m,sm) / sum_max;
+      } else {
+        // pure extra credit category
+        p = std::max(m,sm) / my_max;
+      }
     }
     sum += p * s / my_max;
   }

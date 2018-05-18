@@ -1,10 +1,11 @@
 var siteUrl = undefined;
 var csrfToken = undefined;
 
-function setSiteDetails(url, setCsrfToken) {
-    siteUrl = url;
-    csrfToken = setCsrfToken;
-}
+window.addEventListener("load", function() {
+  for (const elem in document.body.dataset) {
+    window[elem] = document.body.dataset[elem];
+  }
+});
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -135,7 +136,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
     members_div.append('Team Member IDs:<br />');
-
+    var student_full = JSON.parse($('#student_full_id').val());
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -144,6 +145,9 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
         members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
         for (var i = 1; i < max_members; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
     }
     else {
@@ -157,6 +161,9 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
         }
         for (var i = members.length; i < max_members; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
         var team_history_len=user_assignment_setting_json.team_history.length;
         team_history_title_div.append('Team History: ');
@@ -190,6 +197,10 @@ function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
     $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 function addTeamMemberInput(old, i) {
@@ -200,6 +211,10 @@ function addTeamMemberInput(old, i) {
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
         <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 function addCategory(old, i) {
@@ -210,6 +225,10 @@ function addCategory(old, i) {
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
         <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 /**

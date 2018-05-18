@@ -89,6 +89,11 @@ HTML;
 				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
+
+				if($post["anonymous"]){
+					$visible_username = 'Anonymous';
+				} 
+
 				//convert legacy htmlentities being saved in db
                 $post_content = html_entity_decode($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);

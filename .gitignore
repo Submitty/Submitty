@@ -1,6 +1,6 @@
 /.idea/
 /output/
-/tests/report/
+/site/tests/report/
 /.vagrant/
 
 selenium*.jar
@@ -9,8 +9,6 @@ selenium*.jar
 *.orig*
 *~
 *.o
-INSTALL.sh
-logs/
 
 *.pyc
 *.aux
