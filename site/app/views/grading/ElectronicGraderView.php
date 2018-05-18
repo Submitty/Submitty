@@ -167,7 +167,7 @@ HTML;
                     $valid_graders = array();
                     foreach($section['graders'] as $valid_grader){
                         if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
-                            $valid_graders[] = $valid_grader->getFirstName();
+                            $valid_graders[] = $valid_grader->getDisplayedFirstName();
                         }
                     }
                     $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
@@ -602,7 +602,7 @@ HTML;
                             if ($member_list !== "") {
                                 $member_list = $member_list . ", ";
                             }
- 	 
+
                             $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
                             $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
 
@@ -610,7 +610,7 @@ HTML;
                         }
                         $return .= <<<HTML
                 <td>{$member_list}</td>
-        
+
 HTML;
                     }
                 }
@@ -849,6 +849,13 @@ HTML;
 
     public function adminTeamForm($gradeable, $sections) {
         $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
+        $students = $this->core->getQueries()->getAllUsers();
+        $student_full = array();
+        foreach ($students as $student) {
+            $student_full[] = array('value' => $student->getId(),
+                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
+        }
+        $student_full = json_encode($student_full);
         $return = <<<HTML
 <div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
@@ -857,6 +864,7 @@ HTML;
     <input type="hidden" name="new_team_user_id" />
     <input type="hidden" name="edit_team_team_id" />
     <input type="hidden" name="num_users" />
+    <input type="hidden" id="student_full_id" value='{$student_full}'/>
 HTML;
     if (isset($_REQUEST['view'])) {
         $return .= <<<HTML
@@ -1251,14 +1259,32 @@ HTML;
         if(!$gradeable->useTAGrading()) {
             $empty = "empty";
         }
+        $display_verify_all = false;
+        //check if verify all button should be shown or not
+        foreach ($gradeable->getComponents() as $component) {
+            if(!$component->getGrader()){
+              continue;
+            }
+            if($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()){
+                $display_verify_all = true;
+                break;
+            }
+        }
         $return .= <<<HTML
 <div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
     <div class="draggable_content">
     <span class="grading_label">Grading Rubric</span>
 HTML;
         if($gradeable->useTAGrading()) {
-        $return .= <<<HTML
+          $return .= <<<HTML
     <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
+HTML;
+          if($display_verify_all){
+            $return .= <<<HTML
+        <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true);'/>
+HTML;
+          }
+          $return .= <<<HTML
         <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
         <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
     </div>
@@ -1275,7 +1301,7 @@ HTML;
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color); 
+                    $('#bar_banner').css('background-color', $my_color);
                     $('#bar_banner').css('color', 'black');
                 </script>
                 <div class="red-message" style="text-align: center">$my_message</div>
@@ -1300,7 +1326,7 @@ HTML;
             <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
-       
+
         $num_questions = count($gradeable->getComponents());
 
         // if use student components, get the values for pages from the student's submissions
@@ -1401,39 +1427,48 @@ HTML;
             //get the grader's id if it exists
             $grader_id = "";
             $graded_color = "";
+            $displayVerifyUser = false;
             if($question->getGrader() === null || !$show_graded_info) {
                 $grader_id = "Ungraded!";
                 $graded_color = "";
             } else {
                 $grader_id = "Graded by " . $question->getGrader()->getId();
                 $graded_color = " background-color: #eebb77";
+                if($this->core->getUser()->getId() !== $question->getGrader()->getId() && $this->core->getUser()->accessFullGrading()){
+                    $displayVerifyUser = true;
+                }
             }
 
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
-                        <b><span id="progress_points-{$c}" style="display: none;"></span></b>
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" data-changebg="true">
+                        <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
                         {$message}
-HTML;
-
-            $return .= <<<HTML
                         <div style="float: right;">
+HTML;
+            if($displayVerifyUser){
+              $return .= <<<HTML
+                            <span style="display: inline; color: red;">
+                            <input type="button" class = "btn btn-default" onclick="verifyMark('{$gradeable->getId()}','{$question->getId()}','{$user->getAnonId()}')" value = "Verify Grader"/>
+                            </span>
+HTML;
+            }
+            $return .= <<<HTML
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
-                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', -1); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">Done</i> </span>
                         </div>
-                        </span> <span id="ta_note-{$c}" style="display: none;"> {$note}</span>
+                        </span> <span id="ta_note-{$c}" style="display: none;" data-changedisplay1="true"> {$note}</span>
                         <span id="page-{$c}" style="display: none;">{$page}</span>
 HTML;
-
             $student_note = htmlentities($question->getStudentComment());
             if ($student_note != ''){
                 $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
             }
             $return .= <<<HTML
-                        <span id="student_note-{$c}" style="display: none;">{$student_note}</span>
+                        <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
                     </td>
-                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0">
+                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
                         <div>
-                            <span id="cancel-mark-{$c}"onclick="{$break_onclick} cancelMark({$c}, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                            <span id="cancel-mark-{$c}" onclick="{$break_onclick} updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                         </div>
                     </td>
                 </tr>
@@ -1466,17 +1501,20 @@ HTML;
             }
 
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="{$graded_color}" onclick="{$break_onclick} openClose({$c}, {$num_questions}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}');">
+                <tr id="summary-{$c}" style="{$graded_color}" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changedisplay2="true">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>
-                <tbody id="extra-{$c}" style="display: none" colspan="4" data-question_id="{$question->getId()}">
+                <tbody id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
+                </tbody>
+
+                <tbody id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
 HTML;
 
             $d = 0;
@@ -1502,7 +1540,7 @@ HTML;
             }
             $return .= <<<HTML
                     <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                        <td colspan="1" style="text-align: center; white-space: nowrap;"> 
+                        <td colspan="1" style="text-align: center; white-space: nowrap;">
 
                         <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
                         <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
@@ -1512,7 +1550,7 @@ HTML;
                         </td>
                     </tr>
                 </tbody>
-                
+
 HTML;
             $c++;
         }
@@ -1523,17 +1561,17 @@ HTML;
         $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $return .= <<<HTML
                 <tr>
-                    <td id="title-general" colspan="4" onclick="{$break_onclick} openClose(-2, {$num_questions});">
+                    <td id="title-general" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changebg="true">
                         <b>General Comment</b>
                         <div style="float: right;">
-                            <span id="save-mark-general" style="cursor: pointer;  display: none;"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                            <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                         </div>
                     </td>
-                    <td id="title-general-cancel" style="font-size: 12px; display: none; width: 5%" colspan="0">
-                        <span id="cancel-mark-general" onclick="{$break_onclick} cancelMark(-3, '{$gradeable->getId()}', '{$user->getAnonId()}', {$question->getId()}); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                    <td id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
+                        <span id="cancel-mark-general" onclick="{$break_onclick} updateGeneralComment('{$gradeable->getId()}', '{$user->getAnonId()}'); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                     </td>
                 </tr>
-                <tr id="summary-general" style="" onclick="{$break_onclick} openClose(-2, {$num_questions});">
+                <tr id="summary-general" style="" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changedisplay2="true">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
                     </td>
                     <td style="width:98%;" colspan="3">
@@ -1542,10 +1580,10 @@ HTML;
                         </div>
                     </td>
                 </tr>
-                <tbody id="extra-general" style="display: none" colspan="4">
+                <tbody id="extra-general" style="display: none" colspan="4" data-changebg="true" data-changedisplay1="true">
                     <tr>
                         <td colspan="4">
-                            <textarea id="comment-general-id" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
+                            <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
                         </td>
                     </tr>
                 </tbody>
@@ -1592,9 +1630,29 @@ HTML;
 </div>
 
 <script type="text/javascript">
-window.onbeforeunload = function() {
-    saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false);
+//
+// This is needed to resolve conflicts between Chrome and other browsers
+//   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
+//   and other browsers can only do synchronous ajax calls on 'onunload'
+//
+// Reference:
+//    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
+//
+var __unloadRequestSent = false;
+function unloadSave() {
+    if (!__unloadRequestSent) {
+        __unloadRequestSent = true;
+        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
+        }, function() {
+            // Unable to save so try saving at a different time
+            __unloadRequestSent = false;
+        });
+    }
 }
+// Will work for Chrome
+window.onbeforeunload = unloadSave;
+// Will work for other browsers
+window.onunload = unloadSave;
 </script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
@@ -1702,7 +1760,7 @@ HTML;
 HTML;
         return $return;
     }
-    
+
     public function popupNewMark() {
         $return = <<<HTML
 <div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">

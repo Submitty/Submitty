@@ -1,10 +1,11 @@
 var siteUrl = undefined;
 var csrfToken = undefined;
 
-function setSiteDetails(url, setCsrfToken) {
-    siteUrl = url;
-    csrfToken = setCsrfToken;
-}
+window.addEventListener("load", function() {
+  for (const elem in document.body.dataset) {
+    window[elem] = document.body.dataset[elem];
+  }
+});
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -135,7 +136,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
     members_div.append('Team Member IDs:<br />');
-
+    var student_full = JSON.parse($('#student_full_id').val());
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -144,6 +145,9 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
         members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
         for (var i = 1; i < max_members; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
     }
     else {
@@ -157,6 +161,9 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
         }
         for (var i = members.length; i < max_members; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
         var team_history_len=user_assignment_setting_json.team_history.length;
         team_history_title_div.append('Team History: ');
@@ -169,17 +176,17 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
                 if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
                     if(user_assignment_setting_json.team_history[j].added_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');        
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
                 else if(user_assignment_setting_json.team_history[j].action == "admin_create"){
                     if(user_assignment_setting_json.team_history[j].first_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');  
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
             }
-        }      
+        }
     }
 
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
@@ -190,6 +197,10 @@ function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
     $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 function addTeamMemberInput(old, i) {
@@ -200,6 +211,10 @@ function addTeamMemberInput(old, i) {
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
         <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 function addCategory(old, i) {
@@ -210,6 +225,10 @@ function addCategory(old, i) {
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
         <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 /**
@@ -542,7 +561,7 @@ function setupCheckboxCells() {
             elems.push(this);
             scores[$(this).data('id')] = $(this).data('score');
         }
-        
+
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
@@ -713,21 +732,21 @@ function setupNumericTextCells() {
         );
     });
 
-    $("input[class=csvButtonUpload]").change(function() { 
+    $("input[class=csvButtonUpload]").change(function() {
         var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
         "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
         "student id and one column for each field. Columns and field types must match.");
         if (confirmation) {
-            var f = $('#csvUpload').get(0).files[0];                        
+            var f = $('#csvUpload').get(0).files[0];
             if(f) {
                 var reader = new FileReader();
                 reader.readAsText(f);
                 reader.onload = function(evt) {
                     var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
                     var lines = (reader.result).trim().split(/\r\n|\n/);
-                    var tempArray = lines[0].split(','); 
+                    var tempArray = lines[0].split(',');
                     var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
-                    for (var k = 0; k < lines.length && !breakOut; k++) {                        
+                    for (var k = 0; k < lines.length && !breakOut; k++) {
                         tempArray = lines[k].split(',');
                         breakOut = (tempArray.length === csvLength) ? false : true; //if tempArray is not the same length, break out
                     }
@@ -752,16 +771,16 @@ function setupNumericTextCells() {
                                     return false;
                                 }
                                 var k = 3; //checks if the file has the right number of numerics
-                                tempArray = lines[0].split(','); 
+                                tempArray = lines[0].split(',');
                                 if(num_numeric > 0) {
-                                    for (k = 3; k < num_numeric + 4; k++) { 
+                                    for (k = 3; k < num_numeric + 4; k++) {
                                         if (isNaN(Number(tempArray[k]))) {
                                             breakOut = true;
-                                            return false;                                           
+                                            return false;
                                         }
                                     }
                                 }
-                                    
+
                                 //checks if the file has the right number of texts
                                 while (k < csvLength) {
                                     textChecker++;
@@ -798,7 +817,7 @@ function setupNumericTextCells() {
                                                 status_temp_str = status_str + y;
                                                 $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff"); 
+                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff");
                                                 } else {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
                                                 }
@@ -856,7 +875,7 @@ function openPopUp(css, title, count, testcase_num, side) {
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(elem_html);
-    my_window.document.close(); 
+    my_window.document.close();
     my_window.focus();
 }
 
@@ -897,7 +916,7 @@ function checkNumFilesForumUpload(input, post_id){
         $('#messages').fadeOut();
         document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
-            
+
 }
 
 function editPost(post_id, thread_id) {
@@ -935,7 +954,7 @@ function editPost(post_id, thread_id) {
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
                 $('.popup-form').css('display', 'block');
-                
+
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
@@ -1039,7 +1058,7 @@ function addNewCategory(){
                 }
                 var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
                 $('#messages').append(message);
-                $('#new_category_text').val(""); 
+                $('#new_category_text').val("");
                 $('#cat').append('<option value="' + json['categoryId'] + '">' + escape(newCategory) +'</option>');
             },
             error: function(){
@@ -1052,7 +1071,7 @@ function addNewCategory(){
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
     for(var i = 0; i < hide_replies.length; i++){
-        hide_replies[i].style.display = "none"; 
+        hide_replies[i].style.display = "none";
     }
 }
 
@@ -1084,10 +1103,10 @@ function hidePosts(text, id) {
                     selector = $(selector).next().next();
                     nextLvl = $(selector).next().next().attr("reply-level");
                 }
-            } 
+            }
             selector = $(selector).next().next();
         }
-        
+
     } else {
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).hide();
@@ -1134,7 +1153,7 @@ function deletePost(thread_id, post_id, author, time){
                         new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
                     break;
 
-                    
+
                     case "post":
                         new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
                     break;
@@ -1145,7 +1164,7 @@ function deletePost(thread_id, post_id, author, time){
                 window.alert("Something went wrong while trying to delete post. Please try again.");
             }
         })
-    } 
+    }
 }
 
 function alterAnnouncement(thread_id, confirmString, url){
@@ -1179,7 +1198,7 @@ function updateHomeworkExtensions(data) {
         cache: false,
         contentType: false,
         success: function(data) {
-            try { 
+            try {
                 var json = JSON.parse(data);
             } catch(err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
@@ -1265,7 +1284,8 @@ function refreshOnResponseLateDays(json) {
 
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
+    var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
     $.ajax({
         url: url,
         type: "POST",
@@ -1281,10 +1301,13 @@ function updateLateDays(data) {
             }
             var form = $("#load-late-days");
             refreshOnResponseLateDays(json);
+            //Reset all form elements
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
+            $('#csv_option_overwrite_all').prop('checked',true);
+            //Display confirmation message
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },

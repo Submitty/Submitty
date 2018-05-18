@@ -132,7 +132,7 @@ HTML;
     <h3>Invite new teammates by their user ID:</h3>
     <br />
     <form action="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team', 'action' => 'invitation'))}" method="post">
-        <input type="text" name="invite_id" placeholder="User ID" />
+        <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
         <input type="submit" value = "Invite" class="btn btn-primary" />
     </form>
     <br />
@@ -226,6 +226,22 @@ HTML;
 	</div>
 </div>
 HTML;
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_full = array();
+            foreach ($students as $student) {
+                $student_full[] = array('value' => $student->getId(),
+                                        'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+            }
+            $student_full = json_encode($student_full);
+
+$return .= <<<HTML
+<script>
+    $("#invite_id").autocomplete({
+        source: {$student_full}
+    });
+</script>
+HTML;
+
     return $return;
     }
 }
