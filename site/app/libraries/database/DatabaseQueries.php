@@ -1661,24 +1661,24 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Updates a given user's late days allowed effective at a given time
+     * "Upserts" a given user's late days allowed effective at a given time.
+     *
+     * About $csv_options:
+     * default behavior is to overwrite all late days for user and timestamp.
+     * null value is for updating via form where radio button selection is
+     * ignored, so it should do default behavior.  'csv_option_overwrite_all'
+     * invokes default behavior for csv upload.  'csv_option_preserve_higher'
+     * will preserve existing values when uploaded csv value is lower.
+     *
      * @param string $user_id
      * @param string $timestamp
      * @param integer $days
+     * @param string $csv_option value determined by selected radio button
      */
-    public function updateLateDays($user_id, $timestamp, $days){
-        $this->course_db->query("
-          UPDATE late_days
-          SET allowed_late_days=?
-          WHERE user_id=?
-            AND since_timestamp=?", array($days, $user_id, $timestamp));
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query("
-            INSERT INTO late_days
-            (user_id, since_timestamp, allowed_late_days)
-            VALUES(?,?,?)", array($user_id, $timestamp, $days));
-        }
-    }
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+		//q.v. PostgresqlDatabaseQueries.php
+		throw new NotImplementedException();
+	}
 
     /**
      * Delete a given user's allowed late days entry at given effective time
