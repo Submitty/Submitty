@@ -34,6 +34,7 @@ class ElectronicGraderView extends AbstractView {
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
+        //print_r($sections);
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -43,6 +44,12 @@ class ElectronicGraderView extends AbstractView {
             if ($gradeable->isTeamAssignment()) {
                 $no_team_total += $section['no_team'];
             }
+            else{
+            }
+        }
+        //Fixing total_students bug
+        if($gradeable->isTeamAssignment()){
+            $total_students+=$no_team_total;
         }
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
@@ -70,6 +77,10 @@ HTML;
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
+           // echo("graded is ");
+           // echo($graded);
+           // echo("change_value is ");
+           // echo($change_value);
             if($peer) {
                 $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
                 $show_graded = $graded/$change_value;
@@ -182,7 +193,6 @@ HTML;
 HTML;
             }
             if(!$peer) {
-                if(!$gradeable->isTeamAssignment()) {
                     $return .= <<<HTML
         <div class="box half">
             <b>Statistics for Completely Graded Assignments: </b><br/>
@@ -273,8 +283,9 @@ HTML;
                 <br/>Overall Average:  {$overall_score} / {$overall_max} ({$percentage}%)
 HTML;
                         }
-                    }
                 }
+                //This else encompasses the above calculations for Teamss
+                //END OF ELSE
                 $return .= <<<HTML
             </div>
         </div>
