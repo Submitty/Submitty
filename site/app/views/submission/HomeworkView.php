@@ -85,7 +85,7 @@ HTML;
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessGrading()) {
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
                 foreach ($students as $student) {
