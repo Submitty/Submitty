@@ -72,24 +72,25 @@ HTML;
         $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         $late_days_remaining = $late_days_data['remaining_days'];
         $days_late = $gradeable->getActiveDaysLate();
+        $late_days_allowed = $gradeable->getAllowedLateDays();
 
         if ($days_late < 1) {
             $return .= <<<HTML
 <div class="content">
-    <h4>You have {$late_days_remaining} late day(s) available for this homework</h4>
+    <h4>You have {$late_days_remaining} late day(s) left. You can use a maximum of {$late_days_allowed} on this assignment.</h4>
 </div>
 HTML;
         }
         else {
-            if ($late_days_remaining > $days_late) {
+            if (($late_days_remaining >= $days_late) && ($late_days_allowed >= $days_late)) {
                 $style = '';
             }
             else {
                 $style = 'background-color: #d9534f;';
             }
             $return .= <<<HTML
-<div class="content" style=$style>
-    <h4>You are submitting this assignment {$days_late} day(s) late, but have {$late_days_remaining} late day(s) available</h4>
+<div class="content" style="{$style}"">
+    <h4>Submitting to this assignment will charge you {$days_late} late day(s). You have {$late_days_remaining} late day(s) left, and can use a maximum of {$late_days_allowed} on this homework.</h4>
 </div>
 HTML;
         }
