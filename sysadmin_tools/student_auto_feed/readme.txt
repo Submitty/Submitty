@@ -39,10 +39,30 @@ script to run sometime after the data dump is uploaded.
 This code does not need to be run specifically on the Submitty server, but it
 will need access to the Submitty course databases and the CSV data dump file.
 
+The semester may be manually specified on as a command line argument "-s",
+otherwise if this is omitted, the semester will be auto-determined by the
+server's calendar month and year.
+
+For example:
+
+./submitty_student_auto_feed.php -s s18
+ 
+Will run the auto feed for the Spring 2018 semester.
+
 
 accounts.php
 This is a command line script that will auto-create PAM authentication accounts
 for all Submitty users.  THIS IS NOT NEEDED WITH DATABASE AUTHENTICATION.
+
+The semester may be manually specified on as a command line argument "-s",
+otherwise if this is omitted, the semester will be auto-determined by the
+server's calendar month and year.
+
+For example:
+
+./accounts.php -s s18
+ 
+Will run the accounts script for the Spring 2018 semester.
 
 accounts.php is also intended to be run as a cron job, but the requirements are
 more stringent.

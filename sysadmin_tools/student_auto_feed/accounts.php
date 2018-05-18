@@ -15,6 +15,15 @@
  *
  * "30 * * * * /var/local/submitty/bin/accounts.php"
  *
+ * You may now manually specify the semester on the command line with "-s",
+ * otherwise the semester is automatically determined by the server's calendar
+ * month and year.
+ * For example:
+ * 
+ * ./accounts.php -s s18
+ *
+ * Will run the accounts script for the Spring 2018 semester.
+ *
  * @author Peter Bailie, Systems Programmer (RPI dept of computer science)
  */
 
@@ -22,7 +31,7 @@ error_reporting(0);
 ini_set('display_errors', 0);
 
 //List of courses that also need SVN accounts as serialized array.
-//Serialzing the array allows it to be defined as a constant.
+//Serializing the array allows it to be defined as a constant.
 //NOTE: If there are no courses using SVN, the serialized array must still be
 //      defined, but make it an empty array.
 define('SVN_LIST', serialize( array (
@@ -58,7 +67,7 @@ define('ERROR_E_MAIL', 'sysadmins@lists.myuniversity.edu');
  *
  * -------------------------------------------------------------------------- */
 
-//Univeristy campus's timezone.
+//University campus's timezone.
 date_default_timezone_set('America/New_York');
 
 //Start process
@@ -74,13 +83,20 @@ function main() {
 		exit("This script must be run as root." . PHP_EOL);
 	}
 
-	//Determine current semester
-	$month = intval(date("m", time()));
-	$year  = date("y", time());
-
-	//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-	$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
-	$courses  = determine_courses($semester);
+	//Check for semester among CLI arguments.
+	$idx = array_search('-s', $_SERVER['argv']);
+	if ($idx !== false && isset($_SERVER['argv'][$idx+1])) {
+		//semester found among CLI arguments.
+		$semester = $_SERVER['argv'][$idx+1];
+	} else {
+		//semester NOT found among CLI arguments, therefore set automatically by calendar month
+		//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+		$month = intval(date("m", time()));
+		$year  = date("y", time());
+		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+	}
+	$courses = determine_courses($semester);
 
 	foreach($courses as $course) {
 		if (array_search($course, unserialize(SVN_LIST)) !== false) {

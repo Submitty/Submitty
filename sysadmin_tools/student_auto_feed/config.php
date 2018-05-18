@@ -182,7 +182,7 @@ ini_set("allow_url_fopen", true);
 ***************************************************************************** */
 
 //Folder where backup data is stored.  Backups are CSV files sorted into folders
-//by each indiividual Submitty course.  **THIS NEEDS TO BE SET
+//by each individual Submitty course.  **THIS NEEDS TO BE SET
 define('SUBMITTY_AUTO_FEED_BACKUP', '/path/to/user_data_backups');
 
 //How many days of user data backups to retain per course.

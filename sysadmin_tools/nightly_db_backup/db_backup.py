@@ -95,9 +95,9 @@ def main():
 	today_stamp = '{:0>2}{:0>2}{:0>2}'.format(year, today.month, today.day)
 
 	# Default semester code
-	# Jan - May = (s)pring, Jun - July = su(m)mer, Aug - Dec = (f)all
+	# Jan - May = (s)pring, Jun - July = s(u)mmer, Aug - Dec = (f)all
 	# if month <= 5: ... elif month >=8: ... else: ...
-	semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'm' + year)
+	semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'u' + year)
 
 	# default expiration is "no expiration" (value is 0) -- no files are purged.
 	# values greater than 0 indicate how many days of dumps to keep.

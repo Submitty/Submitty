@@ -13,6 +13,15 @@
  *     (and make sure that constants are properly configured)
  * (2) instantiate this class to process a data feed.
  *
+ * You may now manually specify the semester on the command line with "-s",
+ * otherwise the semester is automatically determined by the server's calendar
+ * month and year.
+ * For example:
+ * 
+ * ./submitty_student_auto_feed.php -s s18
+ *
+ * Will run the auto feed for the Spring 2018 semester.
+ *
  * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
  * EXAMPLE FOR YOUR UNIVERSITY'S SYSTEMS PROGRAMMER TO PROVIDE AN
@@ -50,13 +59,19 @@ class submitty_student_auto_feed {
         //Make sure log msg queue string is empty on start.
         self::$log_msg_queue = "";
 
-        //Determine current semester
-        $month = intval(date("m", time()));
-        $year  = date("y", time());
-
-        //(s)pring is month <= 5, (f)all is month >= 8, su(m)mer are months 6 and 7.
-        //if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-        self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
+		//Check for semester among CLI arguments.
+		$idx = array_search('-s', $_SERVER['argv']);
+		if ($idx !== false && isset($_SERVER['argv'][$idx+1])) {
+			//semester found among CLI arguments.
+			self::$semester = $_SERVER['argv'][$idx+1];
+		} else {
+			//semester NOT found among CLI arguments, therefore set automatically by calendar month
+			//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+			//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+			$month = intval(date("m", time()));
+			$year  = date("y", time());
+			self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+		}
 
         //Connect to submitty_db
         $db_host     = DB_HOST;
@@ -238,7 +253,7 @@ class submitty_student_auto_feed {
 
 		/* ---------------------------------------------------------------------
 		 * Individual students can be listed on multiple rows if they are
-		 * enrolled in two mor more courses.  'users' table needs to be
+		 * enrolled in two or more courses.  'users' table needs to be
 		 * deduplicated.  Deduplication will be keyed by 'user_id' since that is
 		 * also the table's primary key.  Note that 'courses_users' should NOT
 		 * be deduplicated.
@@ -356,7 +371,7 @@ SQL;
 	 * @link http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
 	 * @access private
 	 * @param array    $csv_data  empty array used to read CSV data from file
-	 * return boolean  indicates success/failure of loading CSV data
+	 * @return boolean  indicates success/failure of loading CSV data
 	 */
     private function load_csv(&$csv_data) {
 
@@ -532,7 +547,6 @@ WHERE courses_users.user_id IS NULL
 AND courses_users.course IS NULL
 AND courses_users.semester IS NULL
 SQL;
-
 
         //We also need to move students no longer in auto feed to the NULL registered section
         //Make sure this only affects students (AND users.user_group=$1)
