@@ -857,7 +857,7 @@ class Course(object):
                                   endorsed_by=postData[7],
                                   resolved = True if postData[8] == "t" else False,
                                   type=postData[9],
-                                  has_attachment=0)
+                                  has_attachment=False)
 
             
             

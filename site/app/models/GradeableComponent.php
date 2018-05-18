@@ -224,6 +224,7 @@ class GradeableComponent extends AbstractModel {
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
+            $this->modified = true;
         }
         $this->grader = $user;
     }

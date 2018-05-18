@@ -118,10 +118,7 @@ for i in range(1, NUM_UNTRUSTED):
 
 # adjust this number depending on the # of processors
 # available on your hardware
-if args.debug == False:
-    NUM_GRADING_SCHEDULER_WORKERS = 5
-else:
-    NUM_GRADING_SCHEDULER_WORKERS = 1
+NUM_GRADING_SCHEDULER_WORKERS = 5
 
 ##############################################################################
 

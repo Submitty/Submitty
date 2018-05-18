@@ -696,7 +696,8 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);            }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            }
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
@@ -726,7 +727,6 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('pages', JSON.stringify(pages));
     }
 
-
     $.ajax({
         url: submit_url,
         data: formData,
@@ -755,7 +755,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                 console.log(data);
             }
         },
-        error: function() {
+        error: function(error) {
             $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
         }
