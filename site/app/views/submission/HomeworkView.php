@@ -1034,7 +1034,6 @@ HTML;
 HTML;
                 $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
                 $return .= <<<HTML
-    <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
             } else {
                 $return .= <<<HTML

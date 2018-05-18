@@ -7,7 +7,6 @@ from shutil import copyfile
 #print("don't run this - exiting")
 #sys.exit(1)
 
-
 cwd = os.getcwd()
 
 
@@ -61,10 +60,15 @@ cmd = "echo 'add_subdirectory(ASTMatcher)' >> /usr/local/submitty/clang-llvm/llv
 cmd2 = "echo 'add_subdirectory(UnionTool)' >> /usr/local/submitty/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
 os.system(cmd)
 os.system(cmd2)
+<<<<<<< HEAD
 '''
 # Just build targets we need
 subprocess.call(["ninja", "install"])
 #subprocess.call(["ninja", "ASTMatcher", "UnionTool"])
+=======
+# Just build targets we need
+subprocess.call(["ninja", "ASTMatcher", "UnionTool"])
+>>>>>>> 449eee90bc75faca0e10cc3b1c6312fd35732a30
 # TODO/FIXME: add lines to "install" by copying from build dir
 
 

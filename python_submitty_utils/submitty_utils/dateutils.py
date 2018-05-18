@@ -9,7 +9,9 @@ def get_timezone():
     information on what timezone we should be using
 
     :return:
+    :rtype: pytz.tzinfo.DstTzInfo
     """
+    # noinspection PyUnresolvedReferences
     return tzlocal.get_localzone()
 
 
@@ -103,7 +105,6 @@ def parse_datetime(date_string):
     if isinstance(date_string, datetime):
         my_timezone = date_string.tzinfo
         if my_timezone is None:
-            # print ("NO TIMEZONE ",date_string,"assuming local timezone")
             my_timezone = get_timezone()
             date_string = my_timezone.localize(date_string)
         return date_string

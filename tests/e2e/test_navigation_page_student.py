@@ -1,9 +1,9 @@
-import unittest2
-from e2e.base_testcase import BaseTestCase
+from .base_testcase import BaseTestCase
 
 
 class TestNavigationPageStudent(BaseTestCase):
     def test_navigation_page(self):
+        self.driver.find_element_by_id(self.get_current_semester() + '_sample').click()
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(4, len(elements))
         self.assertEqual("open", elements[0].get_attribute('id'))
@@ -28,4 +28,5 @@ class TestNavigationPageStudent(BaseTestCase):
 
 
 if __name__ == "__main__":
-    unittest2.main()
+    import unittest
+    unittest.main()
