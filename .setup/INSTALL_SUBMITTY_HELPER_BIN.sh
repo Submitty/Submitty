@@ -37,6 +37,9 @@ for i in "${array[@]}"; do
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
+chown root:root ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
+chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py
+
 #####################################
 
 echo -e "Copy the non-user scripts"
@@ -44,11 +47,11 @@ echo -e "Copy the non-user scripts"
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin
 chown root:root ${SUBMITTY_INSTALL_DIR}/sbin
+chmod 755 ${SUBMITTY_INSTALL_DIR}/sbin
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin/autograder
 chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder
-
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/sbin
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
