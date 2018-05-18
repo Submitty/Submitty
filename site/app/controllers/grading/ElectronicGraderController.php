@@ -44,15 +44,60 @@ class ElectronicGraderController extends GradingController {
             case 'add_one_new_mark':
                 $this->addOneMark();
                 break;
-             case 'load_student_file':
+            case 'load_student_file':
                 $this->ajaxGetStudentOutput();
+                break;
+            case 'verify_grader':
+                $this->verifyGrader();
+                break;
+            case 'verify_all':
+                $this->verifyGrader(true);
                 break;
             default:
                 $this->showStatus();
                 break;
         }
     }
+    private function verifyGrader($verifyAll = false){
 
+        //check that I am able to verify.
+        if(!$this->core->getUser()->accessAdmin() && !$this->core->getUser()->accessFullGrading()){
+            $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
+            return;
+        }
+
+        $gradeable_id = $_POST['gradeable_id'];
+        $component_id = $_POST['component_id'];
+        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        //stores whether or not we verified at least one gradeable. Should never be false at the end of an execution.
+        $verified = false;
+        //Search across all components for components to verify
+        foreach ($gradeable->getComponents() as $component) {
+            //If this component hasn't been graded, we can't verify it.
+            if(!$component->getGrader()) continue;
+            //If we are either verifying all components or this is the component we were asked to verify,
+            //verify the component.
+            if($verifyAll || $component->getId() == $component_id){
+                //Only verify the component if we weren't already the grader.
+                if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
+                    $component->setGrader($this->core->getUser());
+                    $component->saveGradeableComponentData($gradeable->getGdId());
+                    $verified = true;
+                }
+                //If we aren't verifying all, we have verified the only component we need to.
+                if(!$verifyAll && $component->getId() == $component_id) break;
+            }
+        }
+        $hwReport = new HWReport($this->core);
+        $hwReport->generateSingleReport($user_id, $gradeable_id);
+
+        if($verified){
+            return;
+        }else{
+            $this->core->addErrorMessage("Gradeable component does not exist or was previously verified by you.");
+        }
+    }
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
