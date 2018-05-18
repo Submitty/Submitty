@@ -212,6 +212,23 @@ class DatabaseQueries {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
 
+    public function addPinnedThread($user_id, $thread_id, $added){
+        if($added) {
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", array($user_id, $thread_id));
+        } else {
+            $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", array($user_id, $thread_id));
+        }
+    }
+
+    public function loadPinnedThreads($user_id){
+        $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", array($user_id));
+        $rows = $this->course_db->rows();
+        $favorite_threads = array();
+        foreach ($rows as $row) {
+            $favorite_threads[] = $row['thread_id'];
+        }
+        return $favorite_threads;
+    }
 
     private function findChildren($post_id, $thread_id, &$children){
         $this->course_db->query("SELECT id from posts where deleted=false and parent_id=?", array($post_id));
