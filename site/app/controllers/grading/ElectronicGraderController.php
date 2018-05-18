@@ -10,8 +10,11 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\libraries\FileUtils;
+use app\views\AutoGradingView;
+use app\controllers\GradingController;
 
-class ElectronicGraderController extends AbstractController {
+
+class ElectronicGraderController extends GradingController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'details':
@@ -40,6 +43,9 @@ class ElectronicGraderController extends AbstractController {
                 break;
             case 'add_one_new_mark':
                 $this->addOneMark();
+                break;
+            case 'load_student_file':
+                $this->ajaxGetStudentOutput();
                 break;
             case 'verify_grader':
                 $this->verifyGrader();
@@ -748,8 +754,10 @@ class ElectronicGraderController extends AbstractController {
             $nameBreadCrumb .= $gradeable->getUser()->getId();
         }       
 
+
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section);
+        $canViewWholeGradeable = $this->canIViewThis($gradeable);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
     }
@@ -932,6 +940,33 @@ class ElectronicGraderController extends AbstractController {
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
         $this->core->getOutput()->renderJson($response);
         return $response;
+    }
+
+    
+
+    public function ajaxGetStudentOutput() {
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $who_id = $_REQUEST['who_id'];
+        $count = $_REQUEST['count'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        
+
+        //Turns off the header and footer so that it isn't displayed in the testcase output
+        //Don't re-enable. 
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return = "";
+
+        $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
+        //display hidden testcases only if the user can view the entirety of this gradeable.
+        if($this->canIViewThis($gradeable, $who_id)){
+            $can_view_hidden = $this->canIviewThis($gradeable, $who_id, $hidden=true);
+            $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, $popup_css, $can_view_hidden);
+        }
+        //Returns the html to ajax.
+        echo($return);
     }
 
     public function addOneMark() {
@@ -1127,3 +1162,6 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 }
+
+
+

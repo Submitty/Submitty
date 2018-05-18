@@ -17,7 +17,7 @@ window.addEventListener("load", function() {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    var url = siteUrl;
+    url = document.body.dataset.siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
@@ -26,6 +26,35 @@ function buildUrl(parts) {
     }
     return url + constructed;
 }
+
+function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+    orig_div_name = div_name
+    div_name = "#" + div_name;
+    var isVisible = $( div_name ).is( " :visible" );
+
+    if(isVisible){
+        toggleDiv(orig_div_name);
+        $(div_name).empty();
+    }else{
+        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                $(div_name).empty();
+                $(div_name).html(data);
+                toggleDiv(orig_div_name); 
+            },
+            error: function(e) {
+                alert("Could not load diff, please refresh the page and try again.");
+            }
+        })
+    }
+}
+
+
+
 
 /**
  *
@@ -871,7 +900,7 @@ function getFileExtension(filename){
 
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
-    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />";
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(elem_html);

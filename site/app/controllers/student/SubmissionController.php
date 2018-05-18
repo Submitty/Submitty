@@ -117,8 +117,9 @@ class SubmissionController extends AbstractController {
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
+                    $canViewWholeGradeable = false;
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $late_days_use, $extensions);
+                                                           'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
                 }
             }
             return array('id' => $gradeable_id, 'error' => $error);
