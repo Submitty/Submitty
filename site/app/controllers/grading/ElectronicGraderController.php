@@ -457,6 +457,7 @@ class ElectronicGraderController extends GradingController {
             $vals = array_map('trim', $vals);
             if(count($vals) != 6) {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
+                continue;
             }
             if($row_num == 1) {
                 $row_num += 1;

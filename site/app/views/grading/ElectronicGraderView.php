@@ -922,7 +922,7 @@ HTML;
 <div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
     <h2>Import Teams</h2> 
     <p>&emsp;</p>
-    <p>Format of the teams should be csv with 4 columns:<br />Team id, Registration Section, Rotation Section, Members<br />
+    <p>Format of the teams should be csv with 6 columns:<br />First Name, Last Name, User id, Team id, Team Registration Section, Team Rotation Section<br /><br />
         Note: Teams that will be imported should already exists in the course on some other gradeable.
     </p><br />
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
