@@ -49,9 +49,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin
 chown root:root ${SUBMITTY_INSTALL_DIR}/sbin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/sbin
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/bin/autograder
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder
-chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
@@ -61,8 +59,8 @@ find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 
 # www-data needs to have access to this so that it can authenticate for git
-chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
+chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
@@ -70,9 +68,10 @@ chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 # hwcron only things
 array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
 for i in "${array[@]}"; do
-    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/autograder/*
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/autograder/*
+chown -R root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
