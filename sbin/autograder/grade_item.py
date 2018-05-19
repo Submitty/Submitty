@@ -151,7 +151,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
 
 # give permissions to all created files to the hwcron user
 def untrusted_grant_rwx_access(which_untrusted,my_dir):
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                      which_untrusted,
                      "/usr/bin/find",
                      my_dir,
@@ -488,7 +488,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                os.path.join(tmp_compilation, 'my_compile.out'), queue_obj['gradeable'],
                                                queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
         else:
-            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                which_untrusted,
                                                os.path.join(tmp_compilation,"my_compile.out"),
                                                queue_obj["gradeable"],
@@ -558,7 +558,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                   os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
                                                   queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
             else:
-                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                   which_untrusted,
                                                   os.path.join(tmp_work,"my_runner.out"),
                                                   queue_obj["gradeable"],
@@ -574,9 +574,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
 
-        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                            which_untrusted,
-                                           os.path.join(SUBMITTY_INSTALL_DIR,"bin","killall.py")],
+                                           os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
                                           stdout=logfile)
 
         print ("KILLALL COMPLETE my_runner.out",file=logfile)
@@ -588,13 +588,13 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
 
     if runner_success == 0:
-        print (which_machine,which_untrusted,"RUNNER OK")
+        print (which_machine,which_untrusted, "RUNNER OK")
     else:
-        print (which_machine,which_untrusted,"RUNNER FAILURE")
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="RUNNER FAILURE")
+        print (which_machine,which_untrusted, "RUNNER FAILURE")
+        grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
 
-    untrusted_grant_rwx_access(which_untrusted,tmp_work)
-    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted, tmp_work)
+    untrusted_grant_rwx_access(which_untrusted, tmp_compilation)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -639,7 +639,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                  os.path.join(tmp_work, 'my_validator.out'), queue_obj['gradeable'],
                                                  queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
         else:
-            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"sbin","untrusted_execute"),
                                                  which_untrusted,
                                                  os.path.join(tmp_work,"my_validator.out"),
                                                  queue_obj["gradeable"],

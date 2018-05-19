@@ -35,7 +35,7 @@ def main():
     write_file = os.path.join(INI_PATH, INI_FILE)
     with open(write_file, "w") as open_file:
         open_file.write("""; This sets the CSV fields from a student class list that relate to course DB
-; entries.  Please run 'bin/setcsvfields' to set this configuration.
+; entries.  Please run 'sbin/setcsvfields' to set this configuration.
 
 [student_csv_fields]
 student_first_name = {:d}
