@@ -672,7 +672,7 @@ class ElectronicGraderController extends GradingController {
             $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         else {
-            $total_submitted = $total_subsmitted * count($gradeable->getComponents());
+            $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         if($total_submitted == 0) {
             $progress = 100;
