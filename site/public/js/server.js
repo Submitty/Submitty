@@ -212,6 +212,13 @@ function addCategory(old, i) {
         Add More Users</span>');
 }
 
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details

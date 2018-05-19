@@ -20,6 +20,12 @@ class ElectronicGraderController extends AbstractController {
             case 'submit_team_form':
                 $this->adminTeamSubmit();
                 break;
+            case 'export_teams':
+                $this->exportTeams();
+                break;
+            case 'import_teams':
+                $this->importTeams();
+                break;    
             case 'grade':
                 $this->showGrading();
                 break;
@@ -332,7 +338,8 @@ class ElectronicGraderController extends AbstractController {
                 $rows = array_merge($rows, $individual_rows[""]);
             }
         }
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams);
+        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $all_teams, $empty_teams);
 
         if ($gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin()) {
             if ($gradeable->isGradeByRegistration()) {
@@ -347,8 +354,133 @@ class ElectronicGraderController extends AbstractController {
                 $all_sections[$i] = $section[$key];
             }
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_sections);
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'importTeamForm', $gradeable);
         }
     }
+
+    public function importTeams() {
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+
+        if ($gradeable == null) {
+            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+            $this->core->redirect($return_url);
+        }
+
+        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
+        
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->redirect($return_url);
+        }
+
+        if ($_FILES['upload_team']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $csv_file = $_FILES['upload_team']['tmp_name'];
+        register_shutdown_function(
+            function() use ($csv_file) {
+                unlink($csv_file);
+            }
+        );
+        ini_set("auto_detect_line_endings", true);
+
+        $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($contents === false) {
+            $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
+            $this->core->redirect($return_url);
+        }
+
+        $row_num=1;
+        $error_message="";
+        $team_ids = array();
+        foreach($contents as $content) {
+            $vals = str_getcsv($content);
+            $vals = array_map('trim', $vals);
+            if(count($vals) != 6) {
+                $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
+            }
+            if($row_num == 1) {
+                $row_num += 1;
+                continue;
+            }
+            $team_id = $vals[3];
+            $team = $this->core->getQueries()->getTeamById($team_id);
+            if($team === null) {
+                $error_message .= "ERROR on row {$row_num}, no team with given team_id<br>";
+                continue;
+            }
+            if(!in_array($team_id, $team_ids)) {
+                array_push($team_ids, $team_id);
+            }
+        }
+
+        if($error_message != "") {
+            $this->core->addErrorMessage($error_message);
+            $this->core->redirect($return_url);
+        }
+
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            $this->core->addErrorMEssage("Failed to make folder for this assignment");
+            $this->core->redirect($return_url);
+        }    
+
+        foreach($team_ids as $team_id) {
+            $team = $this->core->getQueries()->getTeamById($team_id);
+            $this->core->getQueries()->addImportedTeamToNewGradeable($gradeable_id, $team_id, $team->getRegistrationSection(), $team->getRotatingSection());
+
+            $this->core->addSuccessMessage("New Team {$team_id} imported to the gradeable");
+
+            $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+            if (!FileUtils::createDir($user_path)) {
+                $this->core->addErrorMEssage("Failed to make folder for this assignment for the team {$team_id}");
+                $this->core->redirect($return_url);
+            }
+
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
+            
+            $json = array("team_history" => array());
+            foreach($team->getMembers() as $member_id) {
+                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,"admin_user" => $this->core->getUser()->getId(), "added_user" => $member_id);
+            }
+
+            if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+                $this->core->addErrorMEssage("Failed to write to team history to settings file for team {$team_id}");
+                $this->core->redirect($return_url);   
+            }
+        }
+
+        $this->core->addSuccessMessage("All Teams are imported to the gradeable");
+        $this->core->redirect($return_url);
+    }
+
+    public function exportTeams() {
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+        $nl = "\n";
+        $csvdata="First Name,Last Name,User_id,Team_id,Team Registration Section,Team Rotation Section".$nl;
+        foreach ($all_teams as $team) {
+            if( $team->getSize() != 0) {
+                foreach(($team->getMembers()) as $member_id) {
+                    $user = $this->core->getQueries()->getUserById($member_id);
+                    $csvdata .= $user->getDisplayedFirstName().",".$user->getLastName().",".$member_id.",".$team->getId().",".$team->getRegistrationSection().",".$team->getRotatingSection().$nl;
+                }
+            }    
+        }
+        $filename = "";
+        $filename = $this->core->getConfig()->getCourse()."_".$gradeable_id."_teams.csv";
+        $this->core->getOutput()->renderFile($csvdata, $filename);
+        return $csvdata;
+    }    
 
     public function adminTeamSubmit() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
