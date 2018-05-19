@@ -63,7 +63,7 @@ HTML;
         $return .= <<<HTML
 </head>
 <script>var onAjaxInit;</script>
-<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}'); if (onAjaxInit) { onAjaxInit(); }">
+<body data-site-url="{$this->core->getConfig()->getSiteUrl()}" data-csrf-token="{$this->core->getCsrfToken()}" onload="if (onAjaxInit) { onAjaxInit(); }">
 {$messages}
 <div id="container">
 

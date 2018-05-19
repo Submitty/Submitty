@@ -52,7 +52,7 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $late_days_use, $extensions) {
+    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable=false) {
         $return = "";
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
@@ -1010,7 +1010,7 @@ HTML;
                         echo $return;
                         $return = "";
                     }
-                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable);
+                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
                     if (!$this->core->getOutput()->bufferOutput()) {
                         echo $return;
                         $return = "";
