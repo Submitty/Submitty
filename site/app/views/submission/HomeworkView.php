@@ -44,6 +44,21 @@ HTML;
 HTML;
     }
 
+
+    public function printLateDayInformationMessage($style,$extensions,$days_late,$late_days_remaining,$late_days_allowed) {
+      $return .= <<<HTML
+<div class="content" style="{$style}"">
+  <h4>
+    Submitting to this assignment will charge you {$days_late} late day(s).
+    <br>
+    You have {$late_days_remaining} late day(s) left, and can use a maximum of {$late_days_allowed} on this homework.
+  </h4>
+</div>
+HTML;
+       return $return;
+    }
+    
+
     /**
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
      *
@@ -88,11 +103,7 @@ HTML;
             else {
                 $style = 'background-color: #d9534f;';
             }
-            $return .= <<<HTML
-<div class="content" style="{$style}"">
-    <h4>Submitting to this assignment will charge you {$days_late} late day(s). You have {$late_days_remaining} late day(s) left, and can use a maximum of {$late_days_allowed} on this homework.</h4>
-</div>
-HTML;
+            $return .= $this->printLateDayInformationMessage($style,$extensions,$days_late,$late_days_remaining,$late_days_allowed);
         }
 
         $upload_message = $this->core->getConfig()->getUploadMessage();
