@@ -552,7 +552,7 @@ input[type="button"].btn-block {
     margin-top: 5px;
 }
 
-.label {
+.label_forum {
   display: inline;
   padding: .2em .6em .3em;
   font-size: 65%;
@@ -565,48 +565,48 @@ input[type="button"].btn-block {
   border-radius: .25em;
 }
 
-.label:empty {
+.label_forum:empty {
   display: none;
 }
-.label-default {
+.label_forum-default {
   background-color: #777;
 }
-.label-default[href]:hover,
-.label-default[href]:focus {
+.label_forum-default[href]:hover,
+.label_forum-default[href]:focus {
   background-color: #5e5e5e;
 }
-.label-primary {
+.label_forum-primary {
   background-color: #337ab7;
 }
-.label-primary[href]:hover,
-.label-primary[href]:focus {
+.label_forum-primary[href]:hover,
+.label_forum-primary[href]:focus {
   background-color: #286090;
 }
-.label-success {
+.label_forum-success {
   background-color: #5cb85c;
 }
-.label-success[href]:hover,
-.label-success[href]:focus {
+.label_forum-success[href]:hover,
+.label_forum-success[href]:focus {
   background-color: #449d44;
 }
-.label-info {
+.label_forum-info {
   background-color: #5bc0de;
 }
-.label-info[href]:hover,
-.label-info[href]:focus {
+.label_forum-info[href]:hover,
+.label_forum-info[href]:focus {
   background-color: #31b0d5;
 }
-.label-warning {
+.label_forum-warning {
   background-color: #f0ad4e;
 }
-.label-warning[href]:hover,
-.label-warning[href]:focus {
+.label_forum-warning[href]:hover,
+.label_forum-warning[href]:focus {
   background-color: #ec971f;
 }
-.label-danger {
+.label_forum-danger {
   background-color: #d9534f;
 }
-.label-danger[href]:hover,
-.label-danger[href]:focus {
+.label_forum-danger[href]:hover,
+.label_forum-danger[href]:focus {
   background-color: #c9302c;
 }
