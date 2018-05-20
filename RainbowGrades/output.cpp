@@ -903,6 +903,7 @@ void start_table_output( bool for_instructor,
       } else {
         grade = this_student->GradeablePercent(g);
       }
+
       std::string color = coloritcolor(grade,
                                        sp->GradeablePercent(g),
                                        sa->GradeablePercent(g),
@@ -1097,127 +1098,6 @@ void start_table_output( bool for_instructor,
     s = students[rank];
     assert (s != NULL);
   }
-
-
-
-  //ostr << "<br>&nbsp;<br>\n";
-
-
-  // -------------------------------------------------------------------------------
-  // BEGIN THE TABLE
-  //ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
-
-  // open the title row
-  //ostr << "<tr>";
-
-  /*
-  // -------------------------------------------------------------------------------
-  // RANK & SECTION
-  if (for_instructor) {
-    ostr << "<td align=center>#</td>";   
-  }
-  ostr << "<td align=center>SECTION</td>";   
-  
-  // -------------------------------------------------------------------------------
-  // INSTRUCTOR NOTES
-  
-  if (for_instructor && DISPLAY_INSTRUCTOR_NOTES) {
-    //ostr << "<td align=center>part.</td>" 
-    //   << "<td align=center>under.</td>";
-    ostr << "<td align=center>notes</td>";
-  }
-  
-  
-  // -------------------------------------------------------------------------------  
-  // NAME
-  ostr << "<td align=center>USERNAME</td>";
-  ostr << "<td align=center>LAST</td>" 
-       << "<td align=center>FIRST</td>";
-  
-  // -------------------------------------------------------------------------------  
-  // EXAM SEATING
-  if (DISPLAY_EXAM_SEATING) {
-    ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    ostr << "<td align=center>exam room</td>";
-    ostr << "<td align=center>exam zone</td>";
-    ostr << "<td align=center>exam time</td>";
-  }
-
-  // -------------------------------------------------------------------------------  
-  // ICLICKER REMOTE
-  if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
-    ostr << "<td align=center>iclicker status</td>";
-  }
-
-  // -------------------------------------------------------------------------------  
-  // GRADE SUMMARY
-  if (DISPLAY_GRADE_SUMMARY && (for_instructor || g == GRADEABLE_ENUM::NONE)) {
-    
-    if (DISPLAY_FINAL_GRADE) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-      ostr << "<td align=center>GRADE</td>";
-
-      if (for_instructor && DISPLAY_MOSS_DETAILS) {
-        ostr << "<td align=center>GRADE BEFORE MOSS</td>";
-      }
-
-    }
-    ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    if (for_instructor && DISPLAY_MOSS_DETAILS) {
-      ostr << "<td align=center>OVERALL AFTER PENALTY</td>";
-    }
-    ostr << "<td align=center>OVERALL</td>";
-    ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      ostr << "<td align=center>" << gradeable_to_string(ALL_GRADEABLES[i]) << " %</td>";
-    }
-  }
-
-
-
-  // -------------------------------------------------------------------------------  
-  // GRADE DETAILS
-  if (DISPLAY_GRADE_DETAILS) {
-    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-
-      if (!for_instructor && g != ALL_GRADEABLES[i]) {
-        continue;
-      }
-        
-      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>"          
-           << "<td align=center colspan=" << GRADEABLES[g].getCount() << ">" <<  gradeable_to_string(g)<< "S";
-      if (g == GRADEABLE_ENUM::HOMEWORK) {
-        ostr << "<br>* = 1 late day used";
-      }
-      ostr << "</td>";
-      if (g == GRADEABLE_ENUM::TEST) {
-        if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
-          ostr << "<td align=center bgcolor=888888>&nbsp;</td>" 
-               << "<td align=center colspan=" << GRADEABLES[g].getCount() << ">ADJUSTED TESTS</td>";
-        }
-      }
-    }
-  }
-   
-  if (DISPLAY_ICLICKER) {
-    // ICLICKER DETAILS
-    if (ICLICKER_QUESTION_NAMES.size() > 0) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-      ostr << "<td align=center>ICLICKER TOTAL</td>";
-      ostr << "<td align=center>ICLICKER RECENT</td>";
-      ostr << "<td align=center>ALLOWED LATE DAYS</td>";
-        ostr << "<td align=center>USED LATE DAYS</td>";
-    }
-    if (ICLICKER_QUESTION_NAMES.size() > 0) {
-        ostr << "<td align=center bgcolor=888888>&nbsp;</td>" 
-             << "<td align=center colspan=" << ICLICKER_QUESTION_NAMES.size() << ">ICLICKER QUESTIONS<br>CORRECT(green)=1.0, INCORRECT(red)=0.5, POLL(yellow)=1.0, NO ANSWER(white)=0.0<br>25.0 iClicker points = 3rd late day, 50.0 iClicker pts = 4th late day, 75.0 iClicker pts = 5th late day<br>&ge;8.0/12.0 most recent=Priority Help Queue (iClicker status highlighted in blue)</td>";
-    }
-  }
-
-  // -------------------------------------------------------------------------------  
-  ostr << "</td></tr>\n";    
-  */  
 }
 
 

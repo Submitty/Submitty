@@ -20,7 +20,7 @@ class HomePageView extends AbstractView {
     <div class="sub">
         <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
         <div class="box half">
-        <h2>About You</h2>
+            <h2>About You</h2>
             <table>
                 <tbody>
                     <tr>
@@ -92,7 +92,7 @@ HTML;
                 </tbody>
             </table>
         </div>
-        <div class="box", style = "float: none;width:48%;display:block;overflow:hidden;">
+        <div class="box half">
             <h2>Your Courses</h2>
                 <table width='95%'>
                     <tbody>
@@ -156,7 +156,7 @@ HTML;
 
                         <tr>
                             <td style="width:85%" colspan="30">
-                                <a class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
+                                <a id="{$rankWithCourse[$i][$q]->getSemester()}_{$rankWithCourse[$i][$q]->getTitle()}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{$this->core->buildUrl(array('component' => 'navigation', 'course' => $rankWithCourse[$i][$q]->getTitle(), 'semester' => $rankWithCourse[$i][$q]->getSemester()))}"> {$display_text}{$user->accessAdmin()}</a>
                                
                             </td>
                         </tr>

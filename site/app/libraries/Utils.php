@@ -69,9 +69,10 @@ class Utils {
      * @param int $bytes
      *
      * @return string
+     * @throws \Exception
      */
     public static function generateRandomString($bytes = 16) {
-        return bin2hex(openssl_random_pseudo_bytes($bytes));
+        return bin2hex(random_bytes($bytes));
     }
     
     /**
@@ -128,7 +129,8 @@ class Utils {
     /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
-     * the cookie data.
+     * the cookie data. This will also set the value in the $_COOKIE superglobal so that it's available without a
+     * page reload.
      *
      * @param string        $name name of the cookie
      * @param string|array  $data data of the cookie, if array, will json_encode it
@@ -141,6 +143,7 @@ class Utils {
             $data = json_encode($data);
         }
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        $_COOKIE[$name] = $data;
         return setcookie($name, $data, $expire, "/", "", $secure);
     }
 
@@ -169,5 +172,33 @@ class Utils {
                 }
             } return true;
         } return false;
+    }
+
+    /**
+     * Generates a unique identifier v4 based on the RFC 4122 - Section 4.4 document.
+     * TODO: when we move to Composer inside of site, we should replace usage of this
+     * function with ramsey/uuid package.
+     *
+     * If for whatever reason random_bytes fails, we fall back to uniqid which has a
+     * worse guarantee of being actually unique, but it's more important to not
+     * crash out here.
+     *
+     * @see http://tools.ietf.org/html/rfc4122#section-4.4
+     *
+     * @return string
+     */
+    public static function guidv4() {
+        try {
+            $data = random_bytes(16);
+
+            $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+            $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+            return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        }
+        catch (\Exception $exc) {
+            return uniqid('', true);
+        }
+
     }
 }
