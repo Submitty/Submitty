@@ -20,7 +20,7 @@ rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DI
 
 # install composer dependencies and generate classmap
 pushd ${SUBMITTY_INSTALL_DIR}/site
-composer install --no-dev --optimize-autoloader
+su - hwphp -c "composer install --no-dev --optimize-autoloader"
 popd
 
 # set special user $HWPHP_USER as owner & group of all website files
