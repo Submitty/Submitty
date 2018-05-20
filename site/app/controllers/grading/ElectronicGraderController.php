@@ -672,7 +672,7 @@ class ElectronicGraderController extends GradingController {
             $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         else {
-            $total_submitted = $total_subsmitted * count($gradeable->getComponents());
+            $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         if($total_submitted == 0) {
             $progress = 100;
@@ -765,7 +765,7 @@ class ElectronicGraderController extends GradingController {
 
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        $canViewWholeGradeable = $this->canIViewThis($gradeable);
+        $canViewWholeGradeable = $this->canIViewThis($gradeable,$who_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');

@@ -7,16 +7,23 @@ all gradeables for example) or on a per gradeable level.
 """
 
 import argparse
+import json
 import os
 import sys
 import shutil
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
-DATABASE_HOST = '__INSTALL__FILLIN__DATABASE_HOST__'
-DATABASE_USER = '__INSTALL__FILLIN__DATABASE_USER__'
-DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
-VCS_FOLDER = os.path.join('__INSTALL__FILLIN__SUBMITTY_DATA_DIR__', 'vcs')
+with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    JSON = json.load(open_file)
+DATABASE_HOST = JSON['database_host']
+DATABASE_USER = JSON['database_user']
+DATABASE_PASS = JSON['database_password']
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    JSON = json.load(open_file)
+VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs')
 
 def create_folder(folder):
     if not os.path.isdir(folder):
