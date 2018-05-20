@@ -1264,9 +1264,9 @@ HTML;
                     $return .= <<<HTML
                         <tr>
                             <th $class style="padding:5px; border:thin solid black">{$test->getName()}</th>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getStudentAllowedLateDays()}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getAllowedLateDays()}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getLateDays()}</td>
                             <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
                             <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
                             <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
