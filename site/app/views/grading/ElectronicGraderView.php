@@ -1220,11 +1220,68 @@ HTML;
 HTML;
 
             //Late day calculation
-            $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-            $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
-            $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
-            $status = $late_days_data['status'];
-
+            // $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
+            // $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
+            // $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
+            // $status = $late_days_data['status'];
+            $return .= <<<HTML
+            <h3>Overall Late Day Usage</h3><br/>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
+                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+HTML;
+            $current_user = null;
+            $total_late_used = 0;
+            $lateday_user = [];
+            $order_by = [ 
+                'g.g_gradeable_type', 
+                'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
+            ];
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', null) as $test) { 
+                // if ($current_user !== $test->getUser()->getId()) {
+                    $current_user = $test->getUser()->getId();
+                    $lateday_user = [];
+                    $class = "";
+                    if($test->getId() == $gradeable->getId()){
+                        $class = "class='yellow-background'";
+                    }
+                    // var_dump($test->getUser()->getId());
+                    // var_dump($test->getAllowedLateDays());
+                    // var_dump($test->getLateDays());
+                    // var_dump($test->getStudentAllowedLateDays());
+                    $return .= <<<HTML
+                        <tr>
+                            <th $class style="padding:5px; border:thin solid black">{$test->getName()}</th>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                        </tr>
+HTML;
+                    $total_late_used = 0;
+                // }
+            }
+            $return .= <<<HTML
+                </tbody>
+            </table>
+HTML;
+            $status = "Good";
             $color = "green";
             if($status != "Good" && $status != "Late") {
                 $color = "red";
