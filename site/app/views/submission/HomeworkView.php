@@ -70,26 +70,28 @@ HTML;
       // ------------------------------------------------------------
       // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
       if ($extensions > 0) {
-        if ($info != "") { $info .= "<br>"; }
         $info .= "You have a {$extensions} day deadline extension for this assignment.";
       }
 
+      // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
       $active_days_charged = max(0,$active_days_late-$extensions);
 
       // ------------------------------------------------------------
-      // IF STUDENT HAS ALREADY SUBMITTED AND THE CURRENT VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
-      if ($active_version >= 1 &&
-          $active_days_late > 0) {
-        if ($info != "") { $info .= "<br>"; }
+      // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
+      if ($active_version >= 1 && $active_days_late > 0) {
 
+        // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
         if ($active_days_charged > $late_days_remaining) {
           $error = true;
-          if ($info != "") { $info .= "<br>"; }
+          if ($info != "") { $info .= "<br><br>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
             . " but you only have XXX remaining late days.  Your grade for this assignment will be recorded as a zero.";
-        } else if ($active_days_charged > $late_days_allowed) {
+        }
+
+        // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
+        else if ($active_days_charged > $late_days_allowed) {
           $error = true;
-          if ($info != "") { $info .= "<br>"; }
+          if ($info != "") { $info .= "<br<br>>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
@@ -97,8 +99,11 @@ HTML;
           } else {
             $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
-        } else {
-          if ($info != "") { $info .= "<br>"; }
+        }
+
+        // LATE STATUS
+        else {
+          if ($info != "") { $info .= "<br><br>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
             . " and you have been charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment.";
           if ($info != "") { $info .= "<br>"; }
@@ -128,10 +133,10 @@ HTML;
              $new_late_charged <= $late_days_allowed)) {
 
           // PRINT WOULD BE HOW MANY DAYS LATE
-          if ($info != "") { $info .= "<br>"; }
+          if ($info != "") { $info .= "<br><br>"; }
           $info .= "The current time is {$would_be_days_late} " . $this->dayOrDays($would_be_days_late) . " past the due date.";
 
-          // INSUFFICIENT LATE DAYS
+          // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
           if ($new_late_charged > $late_days_remaining) {
             if ($info != "") { $info .= "<br>"; }
             if ($late_days_remaining==0) {
@@ -141,10 +146,10 @@ HTML;
             }
             $error = true;
             if ($info != "") { $info .= "<br>"; }
-            $info .= "If you " . $this->submitOrResubmit($active_version) . " to this assignment now, your grade for this assignment will be recorded as a zero.";
+            $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
           }
           
-          // EXCEEDS LIMIT FOR THIS ASSIGNMENT
+          // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
           else if ($new_late_charged > $late_days_allowed) {
             if ($info != "") { $info .= "<br>"; }
             if ($late_days_allowed==0) {
@@ -154,27 +159,26 @@ HTML;
             }
             $error = true;
             if ($info != "") { $info .= "<br>"; }
-            $info .= "If you  " . $this->submitOrResubmit($active_version) . " to this assignment now, your grade for this assignment will be recorded as a zero.";
+            $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
           }
           
-          // MAY SUBMIT LATE 
+          // SUBMISSION NOW WOULD BE LATE
           else {
             if ($info != "") { $info .= "<br>"; }
-            
             $new_late_days_remaining = $late_days_remaining + $active_days_charged - $new_late_charged;
-            
             $info .= "If you  " . $this->submitOrResubmit($active_version) . " to this assignment now," .
               " you will be charged {$new_late_charged} late " . $this->dayOrDays($new_late_charged) . "," .
               " and have $new_late_days_remaining remaining late " . $this->dayOrDays($new_late_days_remaining) . " for future assignments.";
-            
           }
         }
       }
 
+      // ------------------------------------------------------------
+      // IN CASE OF AUTOMATIC ZERO, MAKE THE MESSAGE RED
       $style = "";
       if ($error == true) {
           $style = 'background-color: #d9534f;';
-          if ($info != "") { $info .= "<br>"; }
+          if ($info != "") { $info .= "<br><br>"; }
           $info .= "Contact your instructor if you believe that this is an error or that you should be granted ";
           if ($extensions == 0) {
             $info .= " a deadline extension.";
