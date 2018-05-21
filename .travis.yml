@@ -109,7 +109,7 @@ jobs:
         - echo ${PATH}
         - ls -la $(which composer)
         - sudo su - hwphp -c "which composer"
-        - sudo su - hwphp -c "echo ${PATH}"
+        - sudo su - hwphp -c "/home/travis/.phpenv/shims/composer --help"
         # - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
 
 notifications:
