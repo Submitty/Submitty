@@ -484,7 +484,7 @@ registerKeyHandler('Digit9', function() {
 
 function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
-    if (opened !== -1) {
+    if (opened > 0) {
         selectMark($("#mark_id-" + opened + "-" + index + "-check"));
     }
 }

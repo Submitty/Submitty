@@ -803,6 +803,7 @@ function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
     })
 }
 
+//Open the given mark (if it's not open already), saving changes on any previous mark
 function openMark(id) {
     var rubric = $('#rubric-table')[0].dataset;
     var question = $('#summary-' + id)[0].dataset;
@@ -810,10 +811,20 @@ function openMark(id) {
     saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, question.question_id);
     saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
-    openClose(id, rubric.num_questions);
+
+    //If it's already open, then openClose() will close it
+    if (findCurrentOpenedMark() !== id) {
+        openClose(id, rubric.num_questions);
+    }
 }
 
+//Close the given mark (if it's open), optionally saving changes
 function closeMark(id, save) {
+    //Can't close a closed mark
+    if (findCurrentOpenedMark() !== id) {
+        return;
+    }
+
     var rubric = $('#rubric-table')[0].dataset;
     var question = $('#summary-' + id)[0].dataset;
 
@@ -825,16 +836,26 @@ function closeMark(id, save) {
     setMarkVisible(id, false);
 }
 
+//Open the general message input (if it's not open already), saving changes on any previous mark
 function openGeneralMessage() {
     var rubric = $('#rubric-table')[0].dataset;
 
     saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, '', rubric.your_user_id, '');
     saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
-    updateMarksOnPage(-2, '', '', '', '', rubric.gradeable_id, rubric.user_id, rubric.active_version, '', rubric.your_user_id);
-    openClose(-2, rubric.num_questions);
+
+    //If it's already open, then openClose() will close it
+    if (findCurrentOpenedMark() !== -2) {
+        openClose(-2, rubric.num_questions);
+    }
 }
 
+//Close the general message input (if it's open), optionally saving changes
 function closeGeneralMessage(save) {
+    //Cannot save it if it is not being edited
+    if (findCurrentOpenedMark() !== -2) {
+        return;
+    }
+
     var rubric = $('#rubric-table')[0].dataset;
 
     if (save) {
