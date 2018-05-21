@@ -1804,9 +1804,10 @@ HTML;
         $curr_allowed_term = $this->core->getConfig()->getDefaultStudentLateDays();
         $curr_remaining_late = $this->core->getConfig()->getDefaultStudentLateDays();
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
-        
         foreach($latedays as $ld){
-            if($ld['since_timestamp'] <= $gradeable->getDueDate() &&
+            // var_dump($ld['since_timestamp']);
+            // var_dump(date_format($gradeable->getDueDate(), 'Y-m-d H:i:s'));
+            if($ld['since_timestamp'] <= date_format($gradeable->getDueDate(), 'Y-m-d H:i:s') &&
             $curr_allowed_term < $ld['allowed_late_days']){
                 $curr_allowed_term = $ld['allowed_late_days'];
             }
@@ -1874,7 +1875,7 @@ HTML;
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
         ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', null, $order_by) as $test) { 
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $test) { 
             // if ($current_user !== $test->getUser()->getId()) {
             //     $current_user = $test->getUser()->getId();
             // }
