@@ -2,6 +2,9 @@
 
 namespace lib;
 
+use app\models\Config;
+use app\libraries\Core;
+
 class Logger {
 
     /**
@@ -86,7 +89,10 @@ class Logger {
      * @param $message: message to log to the file
      */
     private static function log($level=0, $message="") {
-        date_default_timezone_set("America/New_York");
+
+        $core = new Core();
+        date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+
         if (!isset(Logger::$log_path)) {
             // don't log anything if we don't have a log path set
             return;
