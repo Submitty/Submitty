@@ -24,6 +24,12 @@ class TeamController extends AbstractController {
             case 'cancel':
                 $this->cancelInvitation();
                 break;
+            case 'seek_team':
+                $this->seekTeam();
+                break;
+            case 'stop_seek_team':
+                $this->stopSeekTeam();
+                break;
             case 'show_page':
             default:
                 $this->showPage();
@@ -51,6 +57,7 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
         $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
         $this->core->addSuccessMessage("Created a new team");
 
@@ -230,6 +237,7 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
         $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
@@ -297,6 +305,44 @@ class TeamController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    public function seekTeam() {
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $user_id = $this->core->getUser()->getId();
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        if ($gradeable == null) {
+            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+        $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
+        
+        $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
+        $this->core->addSuccessMessage("Added to list of users seeking team/partner");
+        $this->core->redirect($return_url);   
+    }
+
+    public function stopSeekTeam() {
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $user_id = $this->core->getUser()->getId();
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        if ($gradeable == null) {
+            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+        $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
+        
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
+        $this->core->redirect($return_url);   
+    }
+
     public function showPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
@@ -312,6 +358,7 @@ class TeamController extends AbstractController {
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
-        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams, $lock);
+        $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
+        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams, $lock, $users_seeking_team);
     }
 }

@@ -17,13 +17,15 @@ class LateDayView extends AbstractView {
                 Students may use these additional late days for any future homeworks (after the specificed date).<br><br><br>
             </p>
             <div class="option-title">Single Student Entry<br></div>
-            <div class="option" style="width:30%; display:inline-block;">Student ID:<br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-            <div class="option" style="width:30%; display:inline-block;">Datestamp (MM/DD/YY):<br><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
-            <div class="option" style="width:15%; display:inline-block;">Late Days:<br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
+            <div class="option" style="width:30%; display:inline-block;"><label for="user_id">Student ID:<br></label><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
+            <div class="option" style="width:30%; display:inline-block;"><label for="datestamp">Datestamp (MM/DD/YY):<br></label><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
+            <div class="option" style="width:15%; display:inline-block;"><label for="late_days">Late Days:<br></label><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
             <div class="option" style="width:15%; display:inline-block; float:right;"><br><input class="btn btn-primary" type="submit" style="float:left"></div>
             <div class="option-title"><br><br>Multiple Student Entry Via CSV Upload</div>
             <div>Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
-            <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
+            <div style="padding-bottom:10px;"><input type="file" name="csv_upload" id="csv_upload" onchange="return updateLateDays($(this));"></div>
+            <div style="padding-bottom:2px;"><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked><label for="csv_option_overwrite_all">Upload overwrites <em>all</em> values</label></div>
+            <div><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="csv_option_preserve_higher" value="csv_option_preserve_higher"><label for="csv_option_preserve_higher">Do not overwrite higher values</label></div>
     </form>
     </div>
 
@@ -36,12 +38,13 @@ class LateDayView extends AbstractView {
             <td>Last Name</td>
             <td>Total Allowed Late Days</td>
             <td>Effective Date</td>
+            <td>Delete</td>
         </thead>
         <tbody>
 HTML;
         if (!is_array($users) || count($users) < 1) {
             $return .= <<<HTML
-    <tr><td colspan="4">No late days are currently entered.</td></tr>
+    <tr><td colspan="6">No late days are currently entered.</td></tr>
 HTML;
         } else {
             foreach ($users as $user) {
@@ -52,6 +55,7 @@ HTML;
             <td>{$user->getLastName()}</td>
             <td>{$user->getAllowedLateDays()}</td>
             <td>{$user->getSinceTimestamp()}</td>
+            <td><a onclick="deleteLateDays('{$user->getId()}', '{$user->getSinceTimestamp()}');"><i class="fa fa-close"></i></a></td>
             </tr>
 HTML;
             }

@@ -1,6 +1,6 @@
 /.idea/
 /output/
-/tests/report/
+/site/tests/report/
 /.vagrant/
 
 selenium*.jar
@@ -9,19 +9,12 @@ selenium*.jar
 *.orig*
 *~
 *.o
-INSTALL.sh
-logs/
 
 *.pyc
 *.aux
 *.log
 *.out
 *.synctex.gz
-
-TAGradingServer/toolbox/configs/*
-!TAGradingServer/toolbox/configs/master_template.php
-!TAGradingServer/toolbox/configs/sample_course.php
-!TAGradingServer/toolbox/configs/course_template.php
 
 /site/config/*
 !/site/config/master_template.ini

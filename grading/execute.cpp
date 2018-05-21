@@ -64,6 +64,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "wc",                      "/usr/bin/wc" },
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
+    { "uniq",                    "/usr/bin/uniq" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
@@ -102,6 +103,10 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Program Analysis course
     { "ghc",                     "/usr/bin/ghc" },
+    { "ocaml",                   "/usr/bin/ocaml" },
+    { "ocamllex",                "/usr/bin/ocamllex" },
+    { "ocamlyacc",               "/usr/bin/ocamlyacc" },
+    { "z3",                      SUBMITTY_INSTALL_DIRECTORY+"/tools/z3" },
 
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },

@@ -76,13 +76,17 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN KEY ("thread_id") REFERENCES "threads"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
-    
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY categories_list ADD CONSTRAINT category_unique UNIQUE (category_desc)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY thread_categories ADD CONSTRAINT thread_and_category_unique UNIQUE (thread_id, category_id)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO categories_list ("category_desc") values {}\"""".format(settings['database_password'], settings['database_host'], settings['database_user'], db, "('Comment')"))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO categories_list ("category_desc") values {}\"""".format(settings['database_password'], settings['database_host'], settings['database_user'], db, "('Question')"))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO thread_categories(thread_id, category_id) SELECT id, 1 as category_id FROM threads\"""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
         # create the forum attachments directory and set the owner, group, and permissions
         course_dir = os.path.join(settings['submitty_data_dir'],"courses",term.name,course.name)
         forum_dir = os.path.join(course_dir,"forum_attachments")
         if not os.path.exists(forum_dir):
-            os.makedirs(forum_dir)
+            os.makedirs(forum_dir)  
             stat_info = os.stat(course_dir)
             uid = stat_info.st_uid
             gid = stat_info.st_gid
@@ -96,5 +100,12 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
                     os.rename(os.path.join(root, filename), os.path.join(root, urllib.parse.unquote(filename)));
 
 
-            
-        print ("\n")
+        # addition of 'seeking team/partner' table for team assignments
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE seeking_team (g_id character varying(255) NOT NULL, user_id character varying NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE seeking_team ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY seeking_team ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE FUNCTION get_allowed_late_days(character varying, timestamp with time zone) RETURNS integer AS $$ SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <= $2 ORDER BY since_timestamp DESC LIMIT 1; $$ LANGUAGE SQL'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+
+        # add user/database
+        print("\n")

@@ -52,6 +52,7 @@ class UsersController extends AbstractController {
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
         $this->renderUserForm('update_student', $use_database);
+        $this->renderDownloadForm('user', $use_database);
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
@@ -60,6 +61,7 @@ class UsersController extends AbstractController {
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
         $this->renderUserForm('update_grader', $use_database);
+        $this->renderDownloadForm('grader', $use_database);
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
     }
 
@@ -67,6 +69,13 @@ class UsersController extends AbstractController {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
+    }
+
+    private function renderDownloadForm($code, $use_database) {
+        $students = $this->core->getQueries()->getAllUsers();
+        $graders = $this->core->getQueries()->getAllGraders();
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'downloadForm', $code, $students, $graders, $reg_sections, $use_database);
     }
 
     public function ajaxGetUserDetails() {
@@ -113,7 +122,7 @@ class UsersController extends AbstractController {
             $user->setGroup(intval($_POST['user_group']));
             $user->setManualRegistration(isset($_POST['manual_registration']));
             $user->setGradingRegistrationSections(!isset($_POST['grading_registration_section']) ? array() : array_map("intval", $_POST['grading_registration_section']));
-			//Instructor updated flag tells auto feed to not clobber some of the users data.
+            //Instructor updated flag tells auto feed to not clobber some of the users data.
             $user->setInstructorUpdated(true);
             $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
             $this->core->addSuccessMessage("Added {$_POST['user_id']} to {$this->core->getConfig()->getCourse()}");
@@ -126,8 +135,8 @@ class UsersController extends AbstractController {
         //First and Last name must be alpha characters, white-space, or certain punctuation.
         $error_message .= User::validateUserData('user_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
         $error_message .= User::validateUserData('user_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
-		//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-		$error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
+        //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
@@ -184,7 +193,7 @@ class UsersController extends AbstractController {
         }
 
         $user->setGroup(intval($_POST['user_group']));
-		//Instructor updated flag tells auto feed to not clobber some of the users data.
+        //Instructor updated flag tells auto feed to not clobber some of the users data.
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));
         if (isset($_POST['grading_registration_section'])) {

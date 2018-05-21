@@ -227,6 +227,10 @@ class FileUtils {
         }
         return $json;
     }
+
+    public static function encodeJson($string) {
+        return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
     
     /**
      * Given a file, returns its mimetype based on the file's so-called maagic bytes.
@@ -303,10 +307,6 @@ class FileUtils {
             }
         }
         return true;
-    }
-
-    public static function encodeJson($string) {
-        return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**

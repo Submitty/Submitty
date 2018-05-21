@@ -112,7 +112,6 @@ class AdminGradeable extends AbstractModel {
 
     protected $default_late_days;
     protected $vcs_base_url;
-    protected $BASE_URL = "http:/localhost/hwgrading";
 
     public function __construct(Core $core) {
         parent::__construct($core);

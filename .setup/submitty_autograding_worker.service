@@ -1,0 +1,14 @@
+[Unit]
+Description=Submitty Autograding Worker
+Documentation=http://submitty.org
+
+[Service]
+User=hwcron
+Restart=always
+Type=simple
+ExecStart=/usr/local/submitty/sbin/submitty_autograding_worker.py
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target

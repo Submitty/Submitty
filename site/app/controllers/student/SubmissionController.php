@@ -117,8 +117,9 @@ class SubmissionController extends AbstractController {
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
+                    $canViewWholeGradeable = false;
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $late_days_use, $extensions);
+                                                           'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
                 }
             }
             return array('id' => $gradeable_id, 'error' => $error);
@@ -406,6 +407,13 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
+
+        $merge_previous = false;
+        if(isset($_REQUEST['merge'])){
+            if($_REQUEST['merge']  === "true"){
+                $merge_previous = true;
+            }
+        }
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -529,6 +537,24 @@ class SubmissionController extends AbstractController {
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
             }
+            //if we are merging in the previous submission (TODO check folder support)
+            if($merge_previous && $new_version !== 1){
+                $old_version = $new_version -1;
+                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
+                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
+                $files = glob($to_search);
+                foreach($files as $file){
+                  $file_base_name = basename($file);
+                  if (strpos($file_base_name, 'version') === false) {
+                    $parts = explode(".", $file_base_name);
+                    $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
+                  }
+                  $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                  if (!copy($file, $move_here)){
+                    return $this->uploadResult("Failed to merge previous version.", false);
+                  }
+                }
+            }
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
@@ -573,7 +599,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...
@@ -850,11 +876,14 @@ class SubmissionController extends AbstractController {
             $previous_files = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
-            for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
-                if (count($tmp[$i]) > 0) {
-                    $previous_files[$i + 1] = $tmp[$i];
+            if (!empty($tmp)) {
+                for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
+                    if (count($tmp[$i]) > 0) {
+                        $previous_files[$i + 1] = $tmp[$i];
+                    }
                 }
             }
+
             
             if (empty($uploaded_files) && empty($previous_files) && $empty_textboxes) {
                 return $this->uploadResult("No files to be submitted.", false);
@@ -1061,7 +1090,7 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
         // create json file...
