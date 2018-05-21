@@ -1,8 +1,0 @@
-/usr/local/submitty/hwgrading_website/
-cgi-bin
-
-# The first two lines contain the suexec document root and the suexec userdir
-# suffix. If one of them is disabled by prepending a # character, suexec will
-# refuse the corresponding type of request.
-# This config file is only used by the apache2-suexec-custom package. See the
-# suexec man page included in the package for more details.

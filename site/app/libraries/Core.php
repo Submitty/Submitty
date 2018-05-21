@@ -75,21 +75,21 @@ class Core {
     }
 
     /**
-     * Load the config details for the application. This takes in a file from the ../../config/master.ini as well as
+     * Load the config details for the application. This takes in a file from the ../../../config as well as
      * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *
-     * Config model will throw exceptions if we cannot find a given $semester or $course on the fileystem.
+     * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
      *
      * @param $semester
      * @param $course
      * @throws \Exception
      */
     public function loadConfig($semester, $course) {
-        $master_ini_path = FileUtils::joinPaths(__DIR__, "..", "..", "config", "master.ini");
+        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
         $this->config = new Config($this, $semester, $course);
-        $this->config->loadMasterIni($master_ini_path);
+        $this->config->loadMasterConfigs($conf_path);
 
         if (!empty($semester) && !empty($course)) {
             $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");

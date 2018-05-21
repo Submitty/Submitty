@@ -1,21 +1,21 @@
-import unittest2
-from e2e.base_testcase import BaseTestCase
+from .base_testcase import BaseTestCase
 
 
 class TestNavigationPageNonStudent(BaseTestCase):
-    def setUp(self):
-        self.driver = BaseTestCase.DRIVER
+    def __init__(self, testname):
+        super().__init__(testname, log_in=False)
 
     def test_instructor(self):
-        self.log_in(user_id="instructor", user_password="instructor", user_name="Quinn")
+        self.log_in(user_id="instructor", user_name="Quinn")
+        self.click_class('sample', 'SAMPLE')
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(6, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))
         self.assertEqual(3, len(self.driver
                          .find_element_by_id('future_tbody')
                          .find_elements_by_class_name("gradeable_row")))
-        self.assertEquals("beta", elements[1].get_attribute('id'))
-        self.assertEquals(3, len(self.driver
+        self.assertEqual("beta", elements[1].get_attribute('id'))
+        self.assertEqual(3, len(self.driver
                                  .find_element_by_id('beta_tbody')
                                  .find_elements_by_class_name('gradeable_row')))
         self.assertEqual("open", elements[2].get_attribute('id'))
@@ -38,7 +38,8 @@ class TestNavigationPageNonStudent(BaseTestCase):
             'gradeable_row').find_elements_by_tag_name('td')))
 
     def test_ta(self):
-        self.log_in(user_id="ta", user_password="ta", user_name="Jill")
+        self.log_in(user_id="ta", user_name="Jill")
+        self.click_class('sample', 'SAMPLE')
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(5, len(elements))
         self.assertEqual("beta", elements[0].get_attribute('id'))
@@ -67,4 +68,5 @@ class TestNavigationPageNonStudent(BaseTestCase):
 
 
 if __name__ == "__main__":
-    unittest2.main()
+    import unittest
+    unittest.main()

@@ -7,7 +7,9 @@ def get_php_db_password(password):
     function (http://php.net/manual/en/function.password-hash.php) generates us a nice secure
     password and takes care of things like salting and hashing.
     :param password:
+    :type: str
     :return: password hash to be inserted into the DB for a user
+    :rtype: str
     """
     proc = subprocess.Popen(
         ["php", "-r", "print(password_hash('{}', PASSWORD_DEFAULT));".format(password)],
