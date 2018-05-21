@@ -14,27 +14,28 @@ import json
 import os
 import time
 import multiprocessing
+from pathlib import Path
 import pwd
 import shutil
 
-import hwcron_jobs
-from hwcron_jobs import jobs
+from python_submitty_jobs import submitty_jobs
+from python_submitty_jobs.submitty_jobs import jobs
 
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+CONFIG_PATH = Path('.', '..', 'config')
+with open(Path(CONFIG_PATH, 'submitty.json')) as open_file:
     JSON_FILE = json.load(open_file)
 DATA_DIR = JSON_FILE['submitty_data_dir']
-QUEUE_DIR = os.path.join(DATA_DIR, 'hwcron_job_queue')
+QUEUE_DIR = Path(DATA_DIR, 'hwcron_job_queue')
 
-with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+with open(Path(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON_FILE = json.load(open_file)
 HWCRON_USER = JSON_FILE['hwcron_user']
 
-hwcron_jobs.DATA_DIR = DATA_DIR
+submitty_jobs.DATA_DIR = DATA_DIR
 
 
 class NewFileHandler(FileSystemEventHandler):
@@ -47,7 +48,8 @@ class NewFileHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         if isinstance(event, FileCreatedEvent):
-            if not os.path.basename(event.src_path).startswith('PROCESSING_'):
+            event_path = Path(event.src_path)
+            if not Path(event.src_path).parts[-1].startswith('PROCESSING_'):
                 self.queue.put(os.path.basename(event.src_path))
 
 
