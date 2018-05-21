@@ -913,8 +913,8 @@ HTML;
         }
         $user = $gradeable->getUser();
         $your_user_id = $this->core->getUser()->getId();
-        $prev_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual))}\"";
-        $next_href = "href=\"{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual))}\"";
+        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual));
+        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual));
         $return = <<<HTML
 <div id="bar_wrapper" class="draggable">
 <div class="grading_toolbar">
@@ -922,7 +922,7 @@ HTML;
     //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
     if(!$studentNotInSection){
     $return .= <<< HTML
-        <a {$prev_href} id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+        <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{$prev_href}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
 HTML;
     }
     else{
@@ -936,7 +936,7 @@ HTML;
     //If the student is in our section, add a clickable next arrow, else add a grayed out one.
     if(!$studentNotInSection){
     $return .= <<<HTML
-    <a {$next_href} id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+    <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{$next_href}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
 HTML;
     }
     else{

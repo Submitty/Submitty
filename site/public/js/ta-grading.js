@@ -317,12 +317,23 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
+//-----------------------------------------------------------------------------
+// Student navigation
+
+function gotoPrevStudent() {
+    window.location = $("#prev-student")[0].dataset.href;
+}
+
+function gotoNextStudent() {
+    window.location = $("#next-student")[0].dataset.href;
+}
+
 //Navigate to the prev / next student buttons
 registerKeyHandler("ArrowLeft", function() {
-    window.location = $("#prev-student").attr("href");
+    gotoPrevStudent();
 });
 registerKeyHandler("ArrowRight", function() {
-    window.location = $("#next-student").attr("href");
+    gotoNextStudent();
 });
 
 //-----------------------------------------------------------------------------
