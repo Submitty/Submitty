@@ -152,7 +152,12 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
 
     $('[name="new_team"]', form).val(new_team);
     $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
-    $('[name="num_users"]', form).val(max_members);
+    if(new_team) {
+        $('[name="num_users"]', form).val(3);    
+    }
+    else if (!new_team) {
+        $('[name="num_users"]', form).val(members.length+2);
+    }
 
     var title_div = $("#admin-team-title");
     title_div.empty();
@@ -172,7 +177,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
 
         title_div.append('Create New Team: ' + who_id);
         members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
-        for (var i = 1; i < max_members; i++) {
+        for (var i = 1; i < 3; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -188,7 +193,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
                 <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
         }
-        for (var i = members.length; i < max_members; i++) {
+        for (var i = members.length; i < (members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -217,8 +222,8 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
             }
         }
     }
-
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+    var param = (new_team ? 3 : members.length+2);
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
 }
 
