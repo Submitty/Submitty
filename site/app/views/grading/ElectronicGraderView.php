@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
+use app\models\GradeableComponent;
 use app\models\User;
 use app\models\LateDaysCalculation;
 use app\views\AbstractView;
@@ -905,7 +906,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage($gradeable, $progress, $prev_id, $next_id, $individual, $studentNotInSection=false, $canViewWholeGradeable=false) {
+    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, string $individual, $studentNotInSection=false, $canViewWholeGradeable=false) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
@@ -1341,7 +1342,7 @@ HTML;
 
         $return .= <<<HTML
     <div style="margin:3px;">
-        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-num_questions="{$num_questions}">
+        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{$gradeable->getId()}" data-user_id="{$user->getAnonId()}" data-active_version="{$gradeable->getActiveVersion()}" data-num_questions="{$num_questions}" data-your_user_id="{$this->core->getUser()->getId()}">
             <tbody>
 HTML;
 
@@ -1353,6 +1354,7 @@ HTML;
         foreach ($gradeable->getComponents() as $component) {
             if($peer && !is_array($component)) continue;
             $question = null;
+            /* @var GradeableComponent $question */
             $show_graded_info = true;
             $num_peer_components = 0;
             if(is_array($component)) {
@@ -1501,7 +1503,7 @@ HTML;
             }
 
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="{$graded_color}" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changedisplay2="true">
+                <tr id="summary-{$c}" style="{$graded_color}" onclick="switchOpenMark({$c});" data-changedisplay2="true" data-question_id="{$question->getId()}" data-min="{$min}" data-max="{$max}" data-precision="{$precision}">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
                     </td>

@@ -792,3 +792,13 @@ function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
         }
     })
 }
+
+function switchOpenMark(id) {
+    var rubric = $('#rubric-table')[0].dataset;
+    var question = $('#summary-' + id)[0].dataset;
+
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, question.question_id);
+    saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    openClose(id, rubric.num_questions);
+}
