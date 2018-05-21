@@ -93,8 +93,8 @@ class ConfigurationController extends AbstractController {
 
         $save_array = array(
             'course_details' => array(
-                'course_name'               => filter_input(INPUT_POST, 'course_name', FILTER_SANITIZE_STRING),
-                'course_home_url'           => filter_input(INPUT_POST, 'course_home_url', FILTER_SANITIZE_STRING),
+                'course_name'               => $_POST['course_name'],
+                'course_home_url'           => $_POST['course_home_url'],
                 'default_hw_late_days'      => $_POST['default_hw_late_days'],
                 'default_student_late_days' => $_POST['default_student_late_days'],
                 'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
