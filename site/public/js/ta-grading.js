@@ -416,7 +416,34 @@ function resetModules() {
 }
 
 //-----------------------------------------------------------------------------
-// Show/hide questions
+// Show/hide components
+
+registerKeyHandler('ArrowDown', function() {
+    var current = findCurrentOpenedMark();
+    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    if (current === -1) {
+        switchOpenMark(1);
+    } else if (current === numQuestions) {
+        switchOpenMark(current);
+    } else {
+        switchOpenMark(current + 1);
+    }
+});
+
+registerKeyHandler('ArrowUp', function() {
+    var current = findCurrentOpenedMark();
+    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    if (current === -1) {
+        switchOpenMark(numQuestions);
+    } else if (current === 1) {
+        switchOpenMark(current);
+    } else {
+        switchOpenMark(current - 1);
+    }
+});
+
+//-----------------------------------------------------------------------------
+// Selecting marks
 
 registerKeyHandler('Digit1', function() {
     selectCurrentMarkCheck(0);
