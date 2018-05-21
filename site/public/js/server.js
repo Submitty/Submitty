@@ -17,14 +17,13 @@ window.addEventListener("load", function() {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    url = document.body.dataset.siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
     }
-    return url + constructed;
+    return document.body.dataset.siteUrl + constructed;
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
