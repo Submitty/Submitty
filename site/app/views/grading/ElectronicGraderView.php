@@ -1250,7 +1250,7 @@ HTML;
                 'g.g_gradeable_type', 
                 'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
             ];
-            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', null, $order_by) as $test) { 
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $test) { 
                 if ($current_user !== $test->getUser()->getId()) {
                     $current_user = $test->getUser()->getId();
                 }
@@ -1842,6 +1842,7 @@ HTML;
     }
     //Temp
     private function addLateDays(Gradeable $gradeable, &$late_days_data, &$total_late_used) {
+        $curr_allowed_term = $this->core->getConfig()->getDefaultStudentLateDays();
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
         $status = 'Good';
         $late_flag = false;
@@ -1874,7 +1875,7 @@ HTML;
         $late_days_data['extensions'] = $gradeable->getLateDayExceptions();
         $late_days_data['days_charged'] = $late_days_used;
         $late_days_data['remaining'] = $gradeable->getStudentAllowedLateDays()-$total_late_used;
-        $late_days_data['allowed_per_student'] = $gradeable->getStudentAllowedLateDays();
+        $late_days_data['allowed_per_student'] = $curr_allowed_term;
         $late_days_data['allowed_per_assignment'] = $gradeable->getAllowedLateDays();
         $late_days_data['days_after_due'] = $gradeable->getLateDays();
     }
