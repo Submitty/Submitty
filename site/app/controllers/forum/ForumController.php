@@ -359,13 +359,15 @@ class ForumController extends AbstractController {
     }
 
     public function mergeThread(){
+        $parent_thread_id = $_POST["merge_thread_parent"];
+        $child_thread_id = $_POST["merge_thread_child"];
+        $thread_id = $child_thread_id;
         if($this->core->getUser()->getGroup() <= 2){
-            if(isset($_POST["merge_thread_parent"]) && isset($_POST["merge_thread_child"]) && is_numeric($_POST["merge_thread_parent"]) && is_numeric($_POST["merge_thread_child"])) {
-                $parent_thread_id = $_POST["merge_thread_parent"];
-                $child_thread_id = $_POST["merge_thread_child"];
+            if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
                 if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
                     $this->core->addSuccessMessage("Threads merged!");
+                    $thread_id = $parent_thread_id;
                 } else {
                     $this->core->addErrorMessage("Merging Failed! ".$message);
                 }
@@ -373,7 +375,7 @@ class ForumController extends AbstractController {
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
-        $this->showThreads();
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
 }
