@@ -321,11 +321,25 @@ function unregisterKeyHandler(code, fn) {
 // Student navigation
 
 function gotoPrevStudent() {
-    window.location = $("#prev-student")[0].dataset.href;
+    var rubric = $('#rubric-table')[0].dataset;
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+        window.location = $("#prev-student")[0].dataset.href;
+    }, function() {
+        if (confirm("Could not save last mark, change student anyway?")) {
+            window.location = $("#prev-student")[0].dataset.href;
+        }
+    });
 }
 
 function gotoNextStudent() {
-    window.location = $("#next-student")[0].dataset.href;
+    var rubric = $('#rubric-table')[0].dataset;
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+        window.location = $("#next-student")[0].dataset.href;
+    }, function() {
+        if (confirm("Could not save last mark, change student anyway?")) {
+            window.location = $("#next-student")[0].dataset.href;
+        }
+    });
 }
 
 //Navigate to the prev / next student buttons
