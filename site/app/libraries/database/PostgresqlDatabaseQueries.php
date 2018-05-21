@@ -624,7 +624,7 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
       WHERE gd.g_id=?
     ) AS gd ON gcd.gd_id=gd.gd_id
     INNER JOIN(
-      SELECT ".$u_or_t.".".$user_or_team_id.", ".$u_or_t."{$section_key}
+      SELECT ".$u_or_t.".".$user_or_team_id.", ".$u_or_t.".{$section_key}
       FROM ".$users_or_teams." AS ".$u_or_t."
       WHERE ".$u_or_t.".".$user_or_team_id." IS NOT NULL
     ) AS ".$u_or_t." ON gd.gd_".$user_or_team_id."=".$u_or_t.".".$user_or_team_id."
