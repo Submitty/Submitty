@@ -1244,7 +1244,8 @@ HTML;
 HTML;
             $current_user = null;
             $total_late_used = 0;
-            $lateday_user = [];
+            $status = "Good";
+            $late_days_data = [];
             $order_by = [ 
                 'g.g_gradeable_type', 
                 'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
@@ -1252,36 +1253,33 @@ HTML;
             foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', null) as $test) { 
                 // if ($current_user !== $test->getUser()->getId()) {
                     $current_user = $test->getUser()->getId();
-                    $lateday_user = [];
+                    $this->addLateDays($test, $late_days_data, $total_late_used);
                     $class = "";
                     if($test->getId() == $gradeable->getId()){
                         $class = "class='yellow-background'";
+                        $status = $late_days_data["status"];
                     }
-                    // var_dump($test->getUser()->getId());
-                    // var_dump($test->getAllowedLateDays());
-                    // var_dump($test->getLateDays());
-                    // var_dump($test->getStudentAllowedLateDays());
                     $return .= <<<HTML
                         <tr>
                             <th $class style="padding:5px; border:thin solid black">{$test->getName()}</th>
-                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getStudentAllowedLateDays()}</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getAllowedLateDays()}</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">{$test->getLateDays()}</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
-                            <td $class align="center" style="padding:5px; border:thin solid black">temp</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_student']}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_assignment']}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_after_due"]}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["extensions"]}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["status"]}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_charged"]}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
+                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["remaining"]}</td>
                         </tr>
 HTML;
-                    $total_late_used = 0;
+                    // $total_late_used = 0;
                 // }
             }
             $return .= <<<HTML
                 </tbody>
             </table>
 HTML;
-            $status = "Good";
+            
             $color = "green";
             if($status != "Good" && $status != "Late") {
                 $color = "red";
@@ -1842,6 +1840,44 @@ HTML;
 </div>
 HTML;
         return $return;
+    }
+    //Temp
+    private function addLateDays(Gradeable $gradeable, &$late_days_data, &$total_late_used) {
+        $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
+        $status = 'Good';
+        $late_flag = false;
+        if ($late_days_used > 0) {
+            $status = "Late";
+            $late_flag = true;
+        }
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($late_days_used > $gradeable->getAllowedLateDays()) {
+            $status = "Bad";
+            $late_flag = false;
+        }
+        // If late days used - extensions applied > allowed per term then status is "Bad..."
+        // Do a max(0, ...) to protect against the case where the student's late days goes down
+        // during the semester and they've already used late days
+        if ($late_days_used > max(0, $gradeable->getStudentAllowedLateDays() - $total_late_used)) {
+            $status = "Bad";
+            $late_flag = false;
+        }
+        $late_days_data['status'] = $status;
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $curr_late_charged = $late_days_used;
+            $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
+            $total_late_used += $curr_late_charged;
+        }
+
+        $late_days_data['days_after_deadline'] = $gradeable->getLateDays();
+        $late_days_data['extensions'] = $gradeable->getLateDayExceptions();
+        $late_days_data['days_charged'] = $late_days_used;
+        $late_days_data['remaining'] = $gradeable->getStudentAllowedLateDays()-$total_late_used;
+        $late_days_data['allowed_per_student'] = $gradeable->getStudentAllowedLateDays();
+        $late_days_data['allowed_per_assignment'] = $gradeable->getAllowedLateDays();
+        $late_days_data['days_after_due'] = $gradeable->getLateDays();
     }
 
 }
