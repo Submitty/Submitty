@@ -415,6 +415,45 @@ function resetModules() {
 	updateCookies();
 }
 
+//-----------------------------------------------------------------------------
+// Show/hide questions
+
+registerKeyHandler('Digit1', function() {
+    selectCurrentMarkCheck(0);
+});
+registerKeyHandler('Digit2', function() {
+    selectCurrentMarkCheck(1);
+});
+registerKeyHandler('Digit3', function() {
+    selectCurrentMarkCheck(2);
+});
+registerKeyHandler('Digit4', function() {
+    selectCurrentMarkCheck(3);
+});
+registerKeyHandler('Digit5', function() {
+    selectCurrentMarkCheck(4);
+});
+registerKeyHandler('Digit6', function() {
+    selectCurrentMarkCheck(5);
+});
+registerKeyHandler('Digit7', function() {
+    selectCurrentMarkCheck(6);
+});
+registerKeyHandler('Digit8', function() {
+    selectCurrentMarkCheck(7);
+});
+registerKeyHandler('Digit9', function() {
+    selectCurrentMarkCheck(8);
+});
+
+function selectCurrentMarkCheck(index) {
+	var opened = findCurrentOpenedMark();
+	if (opened !== -1) {
+		selectMark($("#mark_id-" + opened + "-" + index + "-check"));
+	}
+}
+
+
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
     $("."+click_class + class_modifier).each(function(){

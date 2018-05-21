@@ -39,7 +39,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
     <td colspan="1" style="'+background+'; text-align: center;"> \
-        <span onclick="selectMark(this);"> \
+        <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
         </span> \
         <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
