@@ -1822,14 +1822,14 @@ HTML;
         }
         //If late days used - extensions applied > allowed per assignment then status is "Bad..."
         if ($late_days_used > $gradeable->getAllowedLateDays()) {
-            $status = "Bad";
+            $status = "Bad too many used for this assignment";
             $late_flag = false;
         }
         // If late days used - extensions applied > allowed per term then status is "Bad..."
         // Do a max(0, ...) to protect against the case where the student's late days goes down
         // during the semester and they've already used late days
         if ($late_days_used > max(0, $gradeable->getStudentAllowedLateDays() - $total_late_used)) {
-            $status = "Bad";
+            $status = "Bad too many used this term";
             $late_flag = false;
         }
         $late_days_data['status'] = $status;
