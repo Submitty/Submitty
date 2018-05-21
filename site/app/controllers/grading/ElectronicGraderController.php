@@ -751,7 +751,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         $gradeable->loadResultDetails();
-        $individual = $_REQUEST['individual'];
+        $individual = (bool)$_REQUEST['individual'];
 
         $anon_ids = $this->core->getQueries()->getAnonId(array($prev_id, $next_id));
 
