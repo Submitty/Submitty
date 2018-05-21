@@ -1719,49 +1719,37 @@ ORDER BY {$section_key}", $params);
         ksort($return);
         return $return;
     }
- public function getSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
+public function getSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
         $params = array();
-  //      $sections_query = "";
-        $where="";
+        $where = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
-            $sections_keys=array_values($sections);
-          //  $params = array_merge($sections, $params);
-          //  $where="WHERE {$section_key} IN (";
-         //   echo "HELLO1";
-            foreach($sections_keys as $section){
-         //       echo "HELLO";
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $where = "WHERE {$section_key} IN (";
+            foreach($sections_keys as $section) {
                 $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
                 array_push($params, $section);
             }
-            array_push($params, $g_id);
-          //  $where .= ")";
+            $where .= ")";
         }
-        $sections_query = "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
-       // $params = array_merge($sections, $params);
-     //   echo($where);
-
-  //  INNER JOIN electronic_gradeable_version
-//ON
-   //     electronic_gradeable_version.active_version>0
-//AND electronic_gradeable_version.g_id='{$g_id}'
-       $this->course_db->query("
+        $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM gradeable_teams
-WHERE {$sections_query} g_id=? AND team_id IN (
-SELECT team_id
-FROM teams
-)
+INNER JOIN electronic_gradeable_version
+ON
+gradeable_teams.team_id = electronic_gradeable_version.team_id
+AND gradeable_teams.". $section_key . " IS NOT NULL
+AND electronic_gradeable_version.active_version>0
+AND electronic_gradeable_version.g_id='{$g_id}'
+{$where}
 GROUP BY {$section_key}
 ORDER BY {$section_key}", $params);
+
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
-        foreach ($sections as $section) {
-            if (!isset($return[$section])) $return[$section] = 0;
-        }
-        ksort($return);
+
         return $return;
     }
     public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key) {

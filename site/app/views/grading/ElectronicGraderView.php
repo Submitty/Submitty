@@ -49,7 +49,7 @@ class ElectronicGraderView extends AbstractView {
         }
         //Fixing total_students bug
         if($gradeable->isTeamAssignment()){
-            $total_students+=$no_team_total;
+         //   $total_students+=$no_team_total;
         }
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
