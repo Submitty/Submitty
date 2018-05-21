@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-import argparse
 import configparser
 import json
 import os
@@ -15,17 +12,19 @@ import urllib.parse
 import string
 import random
 import socket
-
-from submitty_utils import dateutils, glob
-import grade_items_logging
-import write_grade_history
-import insert_database_version_data
 import zipfile
 
-# these variables will be replaced by INSTALL_SUBMITTY.sh
-SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
+from submitty_utils import dateutils, glob
+from . import insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
+
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+HWCRON_UID = OPEN_JSON['hwcron_uid']
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
@@ -152,7 +151,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
 
 # give permissions to all created files to the hwcron user
 def untrusted_grant_rwx_access(which_untrusted,my_dir):
-    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+    subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                      which_untrusted,
                      "/usr/bin/find",
                      my_dir,
@@ -489,7 +488,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                os.path.join(tmp_compilation, 'my_compile.out'), queue_obj['gradeable'],
                                                queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
         else:
-            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                which_untrusted,
                                                os.path.join(tmp_compilation,"my_compile.out"),
                                                queue_obj["gradeable"],
@@ -559,7 +558,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                   os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
                                                   queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
             else:
-                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                   which_untrusted,
                                                   os.path.join(tmp_work,"my_runner.out"),
                                                   queue_obj["gradeable"],
@@ -575,9 +574,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
 
-        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                            which_untrusted,
-                                           os.path.join(SUBMITTY_INSTALL_DIR,"bin","killall.py")],
+                                           os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
                                           stdout=logfile)
 
         print ("KILLALL COMPLETE my_runner.out",file=logfile)
@@ -589,13 +588,13 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
 
     if runner_success == 0:
-        print (which_machine,which_untrusted,"RUNNER OK")
+        print (which_machine,which_untrusted, "RUNNER OK")
     else:
-        print (which_machine,which_untrusted,"RUNNER FAILURE")
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="RUNNER FAILURE")
+        print (which_machine,which_untrusted, "RUNNER FAILURE")
+        grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
 
-    untrusted_grant_rwx_access(which_untrusted,tmp_work)
-    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
+    untrusted_grant_rwx_access(which_untrusted, tmp_work)
+    untrusted_grant_rwx_access(which_untrusted, tmp_compilation)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -640,7 +639,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                  os.path.join(tmp_work, 'my_validator.out'), queue_obj['gradeable'],
                                                  queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
         else:
-            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"bin","untrusted_execute"),
+            validator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR,"sbin","untrusted_execute"),
                                                  which_untrusted,
                                                  os.path.join(tmp_work,"my_validator.out"),
                                                  queue_obj["gradeable"],
@@ -830,5 +829,5 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 # ==================================================================================
 
 if __name__ == "__main__":
-    print ("ERROR: Do not call this script directly")
+    raise SystemExit('ERROR: Do not call this script directly')
 

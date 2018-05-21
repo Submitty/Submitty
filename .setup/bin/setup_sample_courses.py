@@ -621,7 +621,7 @@ class Course(object):
         add_to_group(course_group, "hwphp")
         add_to_group(course_group, "hwcron")
         add_to_group(course_group, "hwcgi")
-        os.system("{}/bin/create_course.sh {} {} {} {}"
+        os.system("{}/sbin/create_course.sh {} {} {} {}"
                   .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
 
