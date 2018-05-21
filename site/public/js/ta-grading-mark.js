@@ -35,7 +35,7 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new = false) {
+function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
     <td colspan="1" style="'+background+'; text-align: center;"> \
@@ -137,7 +137,7 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, suc
     })
 }
 
-function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback) {
+function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
@@ -151,7 +151,7 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
         success: function(data) {
             successCallback();
         },
-        error: function() {
+        error: errorCallback ? errorCallback : function() {
             console.error("There was an error with saving the general gradeable comment.");
             alert("There was an error with saving the comment. Please refresh the page and try agian.");
         }
@@ -446,7 +446,7 @@ function updateProgressPoints(question_num) {
     current_progress[0].innerHTML = current_points + " / " + max_points; 
 }
 
-function selectMark(me, first_override = false) {
+function selectMark(me, first_override) {
     var icon = $(me).find("i");
     var skip = true; //if the table is all false initially, skip check marks.
     var question_num = parseInt(icon.attr('name').split('_')[2]);
@@ -470,14 +470,9 @@ function selectMark(me, first_override = false) {
 
 //closes all the questions except the one being opened
 //openClose toggles alot of listed elements in order to work
-function openClose(row_id, num_questions = -1) {
+function openClose(row_id) {
     var row_num = parseInt(row_id);
-    var total_num = 0;
-    if (num_questions === -1) {
-        total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
-    } else {
-        total_num = parseInt(num_questions);
-    }
+    var total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
@@ -594,7 +589,7 @@ function setGeneralVisible(gshow) {
 }
 
 // Saves the general comment
-function saveGeneralComment(gradeable_id, user_id, active_version, sync = true) {
+function saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback ) {
     if ($('#extra-general')[0].style.disply === "none")
         return;
     
@@ -604,13 +599,12 @@ function saveGeneralComment(gradeable_id, user_id, active_version, sync = true) 
     var overwrite = $('#overwrite-id').is(":checked");
     current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
     
-    ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, function() {
-    });
+    ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
 //  have the ta lose their grading data
-function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true, successCallback, errorCallback) {
+function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id, sync, successCallback, errorCallback) {
     // Find open mark
     var index = 1;
     var mark = $('#marks-parent-' + index);
@@ -624,10 +618,10 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, y
         mark = $('#marks-parent-' + (++index));
     }
     // If no open mark was found, then save general comment
-    saveGeneralComment(gradeable_id, user_id, active_version, sync);
+    saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback);
 }
 
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", question_id = -1, sync = true, successCallback, errorCallback) {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, question_id, sync, successCallback, errorCallback) {
     if ($('#marks-parent-' + num)[0].style.display === "none")
         return;
     
@@ -780,7 +774,7 @@ function findCurrentOpenedMark() {
     }
 }
 
-function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
+function verifyMark(gradeable_id, component_id, user_id, verifyAll){
     var action = (verifyAll) ? 'verify_all' : 'verify_grader';
     $.ajax({
         type: "POST",
@@ -808,13 +802,13 @@ function openMark(id) {
     var rubric = $('#rubric-table')[0].dataset;
     var question = $('#summary-' + id)[0].dataset;
 
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, question.question_id);
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
     saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== id) {
-        openClose(id, rubric.num_questions);
+        openClose(id);
     }
 }
 
@@ -829,7 +823,7 @@ function closeMark(id, save) {
     var question = $('#summary-' + id)[0].dataset;
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, question.question_id);
+        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
         saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, -1);
     }
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
@@ -840,12 +834,12 @@ function closeMark(id, save) {
 function openGeneralMessage() {
     var rubric = $('#rubric-table')[0].dataset;
 
-    saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, '', rubric.your_user_id, '');
-    saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
+    saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== -2) {
-        openClose(-2, rubric.num_questions);
+        openClose(-2);
     }
 }
 
@@ -859,7 +853,7 @@ function closeGeneralMessage(save) {
     var rubric = $('#rubric-table')[0].dataset;
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, '', rubric.your_user_id, '');
+        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, rubric.your_user_id);
         saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
     } else {
         updateGeneralComment(rubric.gradeable_id, rubric.user_id);
