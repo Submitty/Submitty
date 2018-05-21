@@ -450,10 +450,19 @@ if [ ${WORKER} == 0 ]; then
 
     apache2ctl -t
 
-    hsdbu_password=`cat /usr/local/submitty/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
 
     PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
     PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
+
+    if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
+    fi
+
 fi
 
 if [ ${WORKER} == 0 ]; then
@@ -468,16 +477,16 @@ if [ ${WORKER} == 0 ]; then
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
@@ -491,7 +500,7 @@ if [ ${WORKER} == 0 ]; then
 
         # Other Universities will need to rerun /bin/setcsvfields to match their
         # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 
