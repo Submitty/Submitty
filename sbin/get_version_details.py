@@ -18,7 +18,11 @@ from datetime import datetime
 import json
 import os
 
-DATA_PATH = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses")
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    JSON = json.load(open_file)
+DATA_PATH = os.path.join(JSON['submitty_data_dir'], "courses")
 
 
 def get_all_versions(semester, course):

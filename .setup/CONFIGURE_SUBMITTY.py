@@ -118,10 +118,7 @@ for i in range(1, NUM_UNTRUSTED):
 
 # adjust this number depending on the # of processors
 # available on your hardware
-if args.debug == False:
-    NUM_GRADING_SCHEDULER_WORKERS = 5
-else:
-    NUM_GRADING_SCHEDULER_WORKERS = 1
+NUM_GRADING_SCHEDULER_WORKERS = 5
 
 ##############################################################################
 
@@ -392,7 +389,7 @@ if not args.worker:
 
     with open(DATABASE_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, HWPHP_USER, 'www-data')
+    shutil.chown(DATABASE_JSON, 'www-data', HWCRONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################

@@ -1,30 +1,32 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import time
 import signal
 import shutil
 import json
-import grade_items_logging
-import grade_item
-from submitty_utils import glob
 from submitty_utils import dateutils
 import multiprocessing
 import contextlib
-import socket
+
+from autograder import grade_items_logging
+from autograder import grade_item
 
 # ==================================================================================
-# these variables will be replaced by INSTALL_SUBMITTY.sh
-NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+NUM_GRADING_SCHEDULER_WORKERS_string = OPEN_JSON['num_grading_scheduler_workers']
 NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
-SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
+HWCRON_UID = OPEN_JSON['hwcron_uid']
 
-
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 JOB_ID = '~WORK~'
+
 
 # ==================================================================================
 # ==================================================================================
