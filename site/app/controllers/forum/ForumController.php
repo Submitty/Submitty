@@ -276,13 +276,18 @@ class ForumController extends AbstractController {
         $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
 
         $ordered_threads = array();
+        // Order : Favourite and Announcements => Announcements only => Favourite only => Others
         foreach ($announce_threads as $thread) {
             if(in_array($thread['id'], $favorite_threads)) {
                 $thread['favorite'] = true;
+                $ordered_threads[] = $thread;
             }
-            $ordered_threads[] = $thread;
         }
-        // Shift favorite_threads in front among $reg_threads
+        foreach ($announce_threads as $thread) {
+            if(!in_array($thread['id'], $favorite_threads)) {
+                $ordered_threads[] = $thread;
+            }
+        }
         foreach ($reg_threads as $thread) {
             if(in_array($thread['id'], $favorite_threads)) {
                 $thread['favorite'] = true;
