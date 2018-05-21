@@ -178,6 +178,17 @@ class GradeableComponent extends AbstractModel {
         return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
+    public function getGradedTAPrecisionValue($gradeable) {
+      $point_precision = $gradeable->getPointPrecision();
+      $str_point_precision = (string) $point_precision;
+      $num_decimals =  strlen(substr(strrchr($str_point_precision, "."), 1));
+
+      $str1 = '%4.';
+      $str2 = 'f';
+      $precision_str = $str1 . (string) $num_decimals . $str2;
+      return $precision_str;
+    }
+
     public function getGradedTAComments($nl, $show_students, $gradeable, $use_ascii = true) {
         $text = "";
         $first_text = true;
@@ -191,11 +202,7 @@ class GradeableComponent extends AbstractModel {
         foreach ($this->marks as $mark) {
             $points_string = "    ";
             if ($mark->getPoints() != 0) {
-              $roundPoints = round($mark->getPoints()/$gradeable->getPointPrecision())*$gradeable->getPointPrecision();
-              if ($gradeable->getPointPrecision() === 0.01)
-                 $points_string = sprintf("%4.2f",$roundPoints);
-              else
-                 $points_string = sprintf("%4.1f",$roundPoints);
+              $points_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $mark->getPoints());
             }
             $hasmark = $box;
             if($mark->getHasMark() === true) {
@@ -218,11 +225,7 @@ class GradeableComponent extends AbstractModel {
             }
             $score_string = "    ";
             if (floatval($this->score) != 0) {
-              $roundScore = round($this->score/$gradeable->getPointPrecision())*$gradeable->getPointPrecision();
-              if ($gradeable->getPointPrecision() === 0.01)
-                 $points_string = sprintf("%4.2f",$roundScore);
-              else
-                 $points_string = sprintf("%4.1f",$roundScore);
+                $score_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $this->score);
             }
             $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
         }
