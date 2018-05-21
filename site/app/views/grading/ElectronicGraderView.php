@@ -1250,7 +1250,7 @@ HTML;
                 'g.g_gradeable_type', 
                 'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
             ];
-            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', null) as $test) { 
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', null, $order_by) as $test) { 
                 // if ($current_user !== $test->getUser()->getId()) {
                     $current_user = $test->getUser()->getId();
                     $this->addLateDays($test, $late_days_data, $total_late_used);
