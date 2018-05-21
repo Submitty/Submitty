@@ -15,6 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newDownloadForm()" class="btn btn-primary">Download Users</a>
         <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
@@ -106,6 +107,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newDownloadForm()" class="btn btn-primary">Download Graders</a>
         <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
@@ -288,6 +290,122 @@ HTML;
     <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
         <input class="btn btn-primary" type="submit" value="Submit" />
+    </div>
+</form>
+</div>
+HTML;
+        return $return;
+    }
+
+    /**
+     * Creates the form box to be displayed when copying or downloading emails on the students/graders pages
+     * @param $code to specify whether it is grader tab or student tab
+     * @param User[] $students
+     * @param Grader[] $graders  
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param bool   $use_database
+     * @return string
+     */
+    public function downloadForm($code, $students, $graders, $reg_sections, $use_database=false) {
+        $download_info = array();
+        $first_name = "";
+        $last_name = "";
+        if ($code === 'user') {
+            foreach ($students as $student) {
+                $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
+                $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+                $grp = "";
+                switch ($student->getGroup()) {
+                    case 0:
+                        $grp = 'Developer';
+                        break;
+                    case 1:
+                        $grp = 'Instructor';
+                        break;
+                    case 2:
+                        $grp = 'Full Access Grader (Grad TA)';
+                        break;
+                    case 3:
+                        $grp = 'Limited Access Grader (Mentor)';
+                        break;
+                    default:
+                        $grp = 'Student';
+                        break;
+                }
+                $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $student->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
+            }
+        }
+        else if ($code === 'grader') {
+            foreach ($graders as $grader) {
+                $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
+                $reg_sec = "";
+                $grp = "";
+                switch ($grader->getGroup()) {
+                    case 0:
+                        $reg_sec = 'All';
+                        $grp = 'Developer';
+                        break;
+                    case 1:
+                        $reg_sec = 'All';
+                        $grp = 'Instructor';
+                        break;
+                    case 2:
+                        $grp = 'Full Access Grader (Grad TA)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                        break;
+                    case 3:
+                        $grp = 'Limited Access Grader (Mentor)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                        break;
+                    default:
+                        $grp = 'UNKNOWN';
+                        $reg_sec = "";
+                        break;
+                }
+                $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $grader->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
+            }   
+        }
+        $download_info_json = json_encode($download_info);
+        $return = <<<HTML
+<div class="popup-form" id="download-form">                                                                   
+<form>
+    <input type="hidden" value='{$download_info_json}' id="download_info_json_id"><br /><br />
+    <div style="width:300px">
+HTML;
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            $return .= <<<HTML
+            <input type="checkbox" value="{$section}">Registration Section {$section}<br \>
+HTML;
+        }
+        $return .= <<<HTML
+        <input type="checkbox" value="NULL">Registration Section NULL<br \>
+    </div>
+HTML;
+        $return .= <<<HTML
+    <div style="width:300px">
+        <input type="checkbox" value="instructor">Instructor<br \>
+        <input type="checkbox" value="full_access_grader">Full Access Graders<br \>
+        <input type="checkbox" value="limited_access_grader">Limited Access Graders<br \>
+    </div><br />
+HTML;
+        if ($use_database) {
+            $return .= <<<HTML
+    <div style="width: 60%">
+        Password:<br />
+        <input type="password" name="user_password" placeholder="New Password" />    
+    </div>
+HTML;
+        }
+        $return .= <<<HTML
+    <div style="float: right; width: auto; margin-top: 10px">
+        <a onclick="$('#download-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="button" value="Download CSV" onclick="downloadCSV('{$code}');" />
+        <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{$code}');" />
     </div>
 </form>
 </div>
