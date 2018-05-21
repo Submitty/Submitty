@@ -1605,10 +1605,6 @@ HTML;
                 </tr>
             </tbody>
         </table>
-        <br>
-        <!-- The go to the next student button -->
-        <a type="button" class="btn btn-info" style="width: 96%; padding-top: 25px; padding-bottom: 25px;" {$next_href}>Go To Next Student</a>
-
 HTML;
         $return .= <<<HTML
         <div style="width:100%;">
