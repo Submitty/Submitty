@@ -922,7 +922,7 @@ HTML;
     //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
     if(!$studentNotInSection){
     $return .= <<< HTML
-        <a {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+        <a {$prev_href} id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
 HTML;
     }
     else{
@@ -936,7 +936,7 @@ HTML;
     //If the student is in our section, add a clickable next arrow, else add a grayed out one.
     if(!$studentNotInSection){
     $return .= <<<HTML
-    <a {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+    <a {$next_href} id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
 HTML;
     }
     else{

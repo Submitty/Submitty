@@ -317,6 +317,7 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
+//Panel toggles
 registerKeyHandler("KeyA", function() {
     toggleAutograding();
     updateCookies();
@@ -336,6 +337,14 @@ registerKeyHandler("KeyS", function() {
 registerKeyHandler("KeyR", function() {
     resetModules();
     updateCookies();
+});
+
+//Navigate to the prev / next student buttons
+registerKeyHandler("ArrowLeft", function() {
+    window.location = $("#prev-student").attr("href");
+});
+registerKeyHandler("ArrowRight", function() {
+    window.location = $("#next-student").attr("href");
 });
 
 //-----------------------------------------------------------------------------
