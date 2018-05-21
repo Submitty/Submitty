@@ -235,23 +235,33 @@ class ElectronicGraderController extends GradingController {
             else {
          //       echo("IN else");
                 foreach ($total_users as $key => $value) {
-                   echo("Value is ");
-                   echo($value);
-                    $sections[$key] = array(
-                        'total_components' => $value * $num_components,
-                        'graded_components' => 0,
-                        'graders' => array()
-                    );
-                    if ($gradeable->isTeamAssignment()) {
-                        $sections[$key]['no_team'] = $no_team_users[$key];
-             //           echo("Sections should be assigned");
-                    }
-                    if (isset($graded_components[$key])) {
-                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                        $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                    }
-                    if (isset($graders[$key])) {
-                        $sections[$key]['graders'] = $graders[$key];
+                   if(array_key_exists($key, $num_submitted)){
+                        echo("Value is ");
+                        echo($num_submitted[$key]);
+                        echo("key is ");
+                        echo($key);
+                            $sections[$key] = array(
+                            'total_components' => $num_submitted[$key] * $num_components,
+                            'graded_components' => 0,
+                            'graders' => array()
+                        );
+                    } else{
+                                $sections[$key] = array(
+                                'total_components' => 0,
+                                'graded_components' => 0,
+                                'graders' => array()
+                            );
+                        if ($gradeable->isTeamAssignment()) {
+                            $sections[$key]['no_team'] = $no_team_users[$key];
+             //             echo("Sections should be assigned");
+                        }
+                        if (isset($graded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                        }
+                        if (isset($graders[$key])) {
+                            $sections[$key]['graders'] = $graders[$key];
+                        }
                     }
                 }
             }

@@ -42,7 +42,7 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-                $no_team_total += $section['no_team'];
+               $no_team_total += $section['no_team'];
             }
             else{
             }
