@@ -436,7 +436,7 @@ class ElectronicGraderController extends GradingController {
                 continue;
             }
             if(in_array($id, $user_ids)) {
-            	$this->core->addErrorMessage("ERROR: {$id} is not a valid User ID");
+            	$this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }
         }
