@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <tuple>
 
 #include "TestCase.h"
 #include "default_config.h"
@@ -271,23 +272,17 @@ void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstre
 }
 
 
-void ValidateATestCase(nlohmann::json config_json, int which_testcase,
-                       int subnum, const std::string &hw_id,
-                       int &automated_points_awarded,
-                       int &automated_points_possible,
-                       int &nonhidden_automated_points_awarded,
-                       int &nonhidden_automated_points_possible,
-                       nlohmann::json &all_testcases,
-                       std::ofstream& gradefile) {
+void calculateScoreForATestCase(nlohmann::json config_json, int which_testcase,
+                       int subnum, const std::string &hw_id, int &testcase_pts,
+                       bool &view_testcase, nlohmann::json &autocheck_js,
+                       std::string &title, std::string &testcase_message) {
 
     TestCase my_testcase(config_json,which_testcase);
-    std::string title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
+    title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
     int possible_points = my_testcase.getPoints();
     std::cout << title << " - points: " << possible_points << std::endl;
-    std::string testcase_message = "";
-    nlohmann::json autocheck_js;
-    int testcase_pts = 0;
-    bool view_testcase = true;
+    testcase_pts = 0;
+    view_testcase = true;
 
     if (my_testcase.isSubmissionLimit()) {
       int max = my_testcase.getMaxSubmissions();
@@ -329,7 +324,20 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       std::cout << "thing " << testcase_pts << " " << my_score * possible_points << std::endl;
       std::cout << "Grade: " << testcase_pts << std::endl;
     }
+}
 
+void updatePointsForATestCase(TestCase &my_testcase, int which_testcase,
+                       int &automated_points_awarded,
+                       int &automated_points_possible,
+                       int &nonhidden_automated_points_awarded,
+                       int &nonhidden_automated_points_possible,
+                       int &testcase_pts, bool &view_testcase,
+                       nlohmann::json &autocheck_js,
+                       std::string &title, std::string &testcase_message,
+                       nlohmann::json &all_testcases,
+                       std::ofstream& gradefile) {
+
+    int possible_points = my_testcase.getPoints();
     // UPDATE CUMMULATIVE POINTS
     automated_points_awarded += testcase_pts;
     if (!my_testcase.getHidden()) {
@@ -374,16 +382,56 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
-    std::cout << "------------------------------------------\n";
-    ValidateATestCase(config_json, i, 
-                      subnum,hw_id,
-                      automated_points_awarded,
-                      automated_points_possible,
-                      nonhidden_automated_points_awarded,
-                      nonhidden_automated_points_possible,
-                      all_testcases,
-                      gradefile);
+  // Local scope for computing scores
+  {
+    int total_pts = 0;
+    int push_extra_pts = 0; // extra needed points to make total_pts non negative
+    std::vector<std::tuple<int, bool, nlohmann::json, std::string, std::string> > im_results;
+    for (unsigned int i = 0; i < tc->size(); i++) {
+      int testcase_pts;
+      bool view_testcase;
+      nlohmann::json autocheck_js;
+      std::string title = "";
+      std::string testcase_message = "";
+
+      std::cout << "------------------------------------------\n";
+      calculateScoreForATestCase(config_json, i, subnum,hw_id, testcase_pts,
+                          view_testcase, autocheck_js, title, testcase_message);
+      im_results.push_back(make_tuple(testcase_pts,view_testcase,autocheck_js,title,testcase_message));
+      total_pts += testcase_pts;
+    }
+
+    push_extra_pts = std::max(-total_pts,0);
+
+    for (unsigned int i = 0; i < tc->size(); i++) {
+      int testcase_pts;
+      bool view_testcase;
+      nlohmann::json autocheck_js;
+      std::string title;
+      std::string testcase_message;
+      tie(testcase_pts, view_testcase, autocheck_js, title, testcase_message) = im_results[i];
+
+      TestCase my_testcase(config_json, i);
+      // Reinitialize negative scores to make total_pts == 0 if total_pts < 0
+      if (push_extra_pts > 0 && testcase_pts < 0) {
+        int add_extra = std::min(-testcase_pts, push_extra_pts);
+        testcase_pts += add_extra;
+        push_extra_pts -= add_extra;
+      }
+
+      std::cout << "------------------------------------------\n";
+      updatePointsForATestCase(my_testcase, i,
+                        automated_points_awarded,
+                        automated_points_possible,
+                        nonhidden_automated_points_awarded,
+                        nonhidden_automated_points_possible,
+                        testcase_pts, view_testcase,
+                        autocheck_js,
+                        title, testcase_message,
+                        all_testcases,
+                        gradefile);
+    }
+    assert (push_extra_pts == 0);
   }
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
