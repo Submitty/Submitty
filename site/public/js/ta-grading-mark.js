@@ -495,92 +495,95 @@ function openClose(row_id, num_questions = -1) {
     general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
     
     for (var x = 1; x <= total_num; x++) {
-        var page = ($('#page-' + x)[0]).innerHTML;
-        
-        var title           = $('#title-' + x);
-        var cancel_button   = $('#title-cancel-' + x);
         var current_summary = $('#summary-' + x);
-
-        // Update the color if it is penalty or extra credit
-        var current_question_num = $('#grade-' + x);
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
-        } else if (question_points < 0) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-        } else {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
-        }
-
-        var show = false;
-        if (x == row_num && current_summary[0].style.display === '') {
-            show = true;
-            updateProgressPoints(x);
-
-            // if the component has a page saved, open the PDF to that page
-            // opening directories/frames based off of code in openDiv and openFrame functions
-
-            // make sure submissions folder has files
-            var submissions = $('#div_viewer_1');
-            if (page > 0 && submissions.children().length > 0) {
-
-                    // find the first file that is a PDF
-                    var divs = $('#div_viewer_1 > div > div');
-                    var pdf_div = "";
-                    for (var i=0; i<divs.length; i++) {
-                        if ($(divs[i]).is('[data-file_url]')) {
-                            file_url = $(divs[i]).attr("data-file_url");
-                            if(file_url.substring(file_url.length - 3) == "pdf") {
-                                pdf_div = $($(divs[i]));
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
-                    if (pdf_div != "") {
-                        submissions.show();
-                        submissions.addClass('open');
-                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-
-                        var file_url = pdf_div.attr("data-file_url");
-                        var file_name = pdf_div.attr("data-file_name");
-                        if (!pdf_div.hasClass('open')) {
-                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
-                        }
-                        var iframeId = pdf_div.attr("id") + "_iframe";
-                        directory = "submissions"; 
-                        src = $("#"+iframeId).prop('src');
-                        if (src.indexOf("#page=") === -1) {
-                            src = src + "#page=" + page;
-                        }
-                        else {
-                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
-                        }
-                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
-
-                        if (!pdf_div.hasClass('open')) {
-                            pdf_div.addClass('open');
-                        }
-                        if (!pdf_div.hasClass('shown')) {
-                            pdf_div.show();
-                            pdf_div.addClass('shown');
-                        }
-                    }
-                }
-        }
-
-        // Updated all the background colors and displays of each element that has
-        //  the corresponding data tag
-        $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
-        $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
-        $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
-        
-        title.attr('colspan', (show ? 3 : 4));
-        cancel_button.attr('colspan', (show ? 1 : 0));
+        setMarkVisible(x, x === row_num && current_summary[0].style.display === '');
     }
 
     updateCookies();
+}
+
+function setMarkVisible(x, show) {
+    var page = ($('#page-' + x)[0]).innerHTML;
+
+    var title           = $('#title-' + x);
+    var cancel_button   = $('#title-cancel-' + x);
+    var current_summary = $('#summary-' + x);
+
+    // Update the color if it is penalty or extra credit
+    var current_question_num = $('#grade-' + x);
+    var question_points = parseFloat(current_question_num[0].innerHTML);
+    if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
+        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
+    } else if (question_points < 0) {
+        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
+    } else {
+        current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
+    }
+
+    if (show) {
+        updateProgressPoints(x);
+
+        // if the component has a page saved, open the PDF to that page
+        // opening directories/frames based off of code in openDiv and openFrame functions
+
+        // make sure submissions folder has files
+        var submissions = $('#div_viewer_1');
+        if (page > 0 && submissions.children().length > 0) {
+
+            // find the first file that is a PDF
+            var divs = $('#div_viewer_1 > div > div');
+            var pdf_div = "";
+            for (var i=0; i<divs.length; i++) {
+                if ($(divs[i]).is('[data-file_url]')) {
+                    file_url = $(divs[i]).attr("data-file_url");
+                    if(file_url.substring(file_url.length - 3) == "pdf") {
+                        pdf_div = $($(divs[i]));
+                        break;
+                    }
+                }
+            }
+
+            // only open submissions folder + PDF is a PDF file exists within the submissions folder
+            if (pdf_div != "") {
+                submissions.show();
+                submissions.addClass('open');
+                $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                var file_url = pdf_div.attr("data-file_url");
+                var file_name = pdf_div.attr("data-file_name");
+                if (!pdf_div.hasClass('open')) {
+                    openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                }
+                var iframeId = pdf_div.attr("id") + "_iframe";
+                var directory = "submissions";
+                var src = $("#"+iframeId).prop('src');
+                if (src.indexOf("#page=") === -1) {
+                    src = src + "#page=" + page;
+                }
+                else {
+                    src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                }
+                pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
+
+                if (!pdf_div.hasClass('open')) {
+                    pdf_div.addClass('open');
+                }
+                if (!pdf_div.hasClass('shown')) {
+                    pdf_div.show();
+                    pdf_div.addClass('shown');
+                }
+            }
+        }
+    }
+
+    // Updated all the background colors and displays of each element that has
+    //  the corresponding data tag
+    $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+    $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
+    $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
+
+    title.attr('colspan', (show ? 3 : 4));
+    cancel_button.attr('colspan', (show ? 1 : 0));
 }
 
 // Saves the general comment
@@ -793,7 +796,7 @@ function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
     })
 }
 
-function switchOpenMark(id) {
+function openMark(id) {
     var rubric = $('#rubric-table')[0].dataset;
     var question = $('#summary-' + id)[0].dataset;
 
@@ -801,4 +804,16 @@ function switchOpenMark(id) {
     saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     openClose(id, rubric.num_questions);
+}
+
+function closeMark(id, save) {
+    var rubric = $('#rubric-table')[0].dataset;
+    var question = $('#summary-' + id)[0].dataset;
+
+    if (save) {
+        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, question.question_id);
+        saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, -1);
+    }
+    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    setMarkVisible(id, false);
 }

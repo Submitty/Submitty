@@ -431,11 +431,11 @@ registerKeyHandler('ArrowDown', function() {
     var current = findCurrentOpenedMark();
     var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
     if (current === -1) {
-        switchOpenMark(1);
+        openMark(1);
     } else if (current === numQuestions) {
-        switchOpenMark(current);
+        openMark(current);
     } else {
-        switchOpenMark(current + 1);
+        openMark(current + 1);
     }
 });
 
@@ -443,11 +443,11 @@ registerKeyHandler('ArrowUp', function() {
     var current = findCurrentOpenedMark();
     var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
     if (current === -1) {
-        switchOpenMark(numQuestions);
+        openMark(numQuestions);
     } else if (current === 1) {
-        switchOpenMark(current);
+        openMark(current);
     } else {
-        switchOpenMark(current - 1);
+        openMark(current - 1);
     }
 });
 
