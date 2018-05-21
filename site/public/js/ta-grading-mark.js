@@ -481,19 +481,8 @@ function openClose(row_id, num_questions = -1) {
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
-    var general_comment_title = $('#title-general');
-    var general_comment_title_cancel = $('#title-cancel-general');
-    var gshow = (row_num === -2 && general_comment[0].style.display === 'none');
+    setGeneralVisible(row_num === -2 && general_comment[0].style.display === 'none');
 
-    // Updated all the background colors and displays of each element that has
-    //  the corresponding data tag for the general component
-    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
-    $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
-    $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
-    
-    general_comment_title.attr('colspan', (gshow ? 3 : 4));
-    general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
-    
     for (var x = 1; x <= total_num; x++) {
         var current_summary = $('#summary-' + x);
         setMarkVisible(x, x === row_num && current_summary[0].style.display === '');
@@ -502,6 +491,7 @@ function openClose(row_id, num_questions = -1) {
     updateCookies();
 }
 
+//Set if the mark at index X should be visible
 function setMarkVisible(x, show) {
     var page = ($('#page-' + x)[0]).innerHTML;
 
@@ -584,6 +574,23 @@ function setMarkVisible(x, show) {
 
     title.attr('colspan', (show ? 3 : 4));
     cancel_button.attr('colspan', (show ? 1 : 0));
+}
+
+//Set if the general comment box should be visible
+function setGeneralVisible(gshow) {
+    var general_comment = $('#extra-general');
+    var general_comment_title = $('#title-general');
+    var general_comment_title_cancel = $('#title-cancel-general');
+
+    // Updated all the background colors and displays of each element that has
+    //  the corresponding data tag for the general component
+    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+    $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
+    $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
+
+    general_comment_title.attr('colspan', (gshow ? 3 : 4));
+    general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
+
 }
 
 // Saves the general comment
@@ -816,4 +823,25 @@ function closeMark(id, save) {
     }
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     setMarkVisible(id, false);
+}
+
+function openGeneralMessage() {
+    var rubric = $('#rubric-table')[0].dataset;
+
+    saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, '', rubric.your_user_id, '');
+    saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
+    updateMarksOnPage(-2, '', '', '', '', rubric.gradeable_id, rubric.user_id, rubric.active_version, '', rubric.your_user_id);
+    openClose(-2, rubric.num_questions);
+}
+
+function closeGeneralMessage(save) {
+    var rubric = $('#rubric-table')[0].dataset;
+
+    if (save) {
+        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, '', rubric.your_user_id, '');
+        saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
+    } else {
+        updateGeneralComment(rubric.gradeable_id, rubric.user_id);
+    }
+    setGeneralVisible(false);
 }

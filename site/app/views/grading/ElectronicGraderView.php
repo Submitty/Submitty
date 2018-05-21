@@ -1563,17 +1563,17 @@ HTML;
         $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $return .= <<<HTML
                 <tr>
-                    <td id="title-general" colspan="4" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changebg="true">
+                    <td id="title-general" colspan="4" onclick="{$break_onclick}; closeGeneralMessage(true);" data-changebg="true">
                         <b>General Comment</b>
                         <div style="float: right;">
                             <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                         </div>
                     </td>
                     <td id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
-                        <span id="cancel-mark-general" onclick="{$break_onclick} updateGeneralComment('{$gradeable->getId()}', '{$user->getAnonId()}'); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                        <span id="cancel-mark-general" onclick="{$break_onclick}; closeGeneralMessage(false);" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                     </td>
                 </tr>
-                <tr id="summary-general" style="" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changedisplay2="true">
+                <tr id="summary-general" style="" onclick="{$break_onclick}; openGeneralMessage();" data-changedisplay2="true">
                     <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
                     </td>
                     <td style="width:98%;" colspan="3">
