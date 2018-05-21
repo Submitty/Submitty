@@ -317,28 +317,6 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
-//Panel toggles
-registerKeyHandler("KeyA", function() {
-    toggleAutograding();
-    updateCookies();
-});
-registerKeyHandler("KeyG", function() {
-    toggleRubric();
-    updateCookies();
-});
-registerKeyHandler("KeyO", function() {
-    toggleSubmissions();
-    updateCookies();
-});
-registerKeyHandler("KeyS", function() {
-    toggleInfo();
-    updateCookies();
-});
-registerKeyHandler("KeyR", function() {
-    resetModules();
-    updateCookies();
-});
-
 //Navigate to the prev / next student buttons
 registerKeyHandler("ArrowLeft", function() {
     window.location = $("#prev-student").attr("href");
@@ -423,6 +401,28 @@ function resetModules() {
     deleteCookies();
     updateCookies();
 }
+
+
+registerKeyHandler("KeyA", function() {
+    toggleAutograding();
+    updateCookies();
+});
+registerKeyHandler("KeyG", function() {
+    toggleRubric();
+    updateCookies();
+});
+registerKeyHandler("KeyO", function() {
+    toggleSubmissions();
+    updateCookies();
+});
+registerKeyHandler("KeyS", function() {
+    toggleInfo();
+    updateCookies();
+});
+registerKeyHandler("KeyR", function() {
+    resetModules();
+    updateCookies();
+});
 
 //-----------------------------------------------------------------------------
 // Show/hide components
