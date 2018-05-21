@@ -107,7 +107,7 @@ jobs:
         - sleep 3 # give xvfb some time to start
       script:
         - echo ${PATH}
-        - composer
+        - which composer
         - sudo su - hwphp -c "which composer"
         - sudo su - hwphp -c "echo ${PATH}"
         # - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
