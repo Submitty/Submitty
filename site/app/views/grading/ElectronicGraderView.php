@@ -1225,6 +1225,7 @@ HTML;
             // $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
             // $status = $late_days_data['status'];
             $status = "Good";
+            $color = "green";
             if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
                 foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                     $team_member = $this->core->getQueries()->getUserById($team_member);
@@ -1233,24 +1234,25 @@ HTML;
                 
             } else {
                 $return .= $this->makeTable($user->getId(), $gradeable, $status);
+                if($status != "Good" && $status != "Late") {
+                    $color = "red";
+                    $my_color="'#F62817'"; // fire engine red
+                    $my_message="Late Submission";
+                    $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
+HTML;
+                }
             }
             
-            $color = "green";
-            if($status != "Good" && $status != "Late") {
-                $color = "red";
-                $my_color="'#F62817'"; // fire engine red
-                $my_message="Late Submission";
-                $return .= <<<HTML
-            <script>
-                $('body').css('background', $my_color);
-                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                $('#bar_banner').css('background-color', $my_color);
-                $('#bar_banner').css('color', 'black');
-            </script>
-HTML;
-            }
+            
+
             $return .= <<<HTML
-            <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
         </div>
     </div>
     </div>
@@ -1811,6 +1813,7 @@ HTML;
         }
         
         $status = 'Good';
+        $curr_late_charged = 0;
         $late_flag = false;
         if ($late_days_used > 0) {
             $status = "Late";
@@ -1838,7 +1841,7 @@ HTML;
         }
 
         $late_days_data['extensions'] = $gradeable->getLateDayExceptions();
-        $late_days_data['days_charged'] = $late_days_used;
+        $late_days_data['days_charged'] = $curr_late_charged;
         $late_days_data['remaining'] = $curr_allowed_term-$total_late_used;
         $late_days_data['allowed_per_student'] = $curr_allowed_term;
         $late_days_data['allowed_per_assignment'] = $gradeable->getAllowedLateDays();
