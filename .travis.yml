@@ -85,7 +85,7 @@ jobs:
         - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
-        - usermod -a -G travis hwphp
+        - sudo usermod -a -G travis hwphp
         - sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
         - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo ./.setup/travis/setup_test_suite.sh
