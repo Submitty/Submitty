@@ -85,6 +85,8 @@ jobs:
         - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
+        - usermod -a -G travis hwphp
+        - sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
         - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo ./.setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
@@ -108,6 +110,7 @@ jobs:
       script:
         - echo ${PATH}
         - ls -la $(which composer)
+        - ls -la /home/travis
         - sudo su - hwphp -c "which composer"
         - sudo su - hwphp -c "/home/travis/.phpenv/shims/composer --help"
         # - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests

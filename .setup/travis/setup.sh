@@ -70,5 +70,3 @@ touch ${SUBMITTY_DATA_DIR}/instructors/valid
 [ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
 chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
 chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
-
-sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
