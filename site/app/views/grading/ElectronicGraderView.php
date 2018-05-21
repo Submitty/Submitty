@@ -1224,60 +1224,16 @@ HTML;
             // $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
             // $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
             // $status = $late_days_data['status'];
-            $return .= <<<HTML
-            <h3>Overall Late Day Usage</h3><br/>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
-                        <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                    </tr>
-                </thead>
-                <tbody>
-HTML;
-            $current_user = null;
-            $total_late_used = 0;
             $status = "Good";
-            $late_days_data = [];
-            $order_by = [ 
-                'g.g_gradeable_type', 
-                'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
-            ];
-            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $test) { 
-                if ($current_user !== $test->getUser()->getId()) {
-                    $current_user = $test->getUser()->getId();
+            if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
+                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                    $team_member = $this->core->getQueries()->getUserById($team_member);
+                    $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
                 }
-                $this->addLateDays($test, $late_days_data, $total_late_used);
-                $class = "";
-                if($test->getId() == $gradeable->getId()){
-                    $class = "class='yellow-background'";
-                    $status = $late_days_data["status"];
-                }
-                $return .= <<<HTML
-                    <tr>
-                        <th $class style="padding:5px; border:thin solid black">{$test->getName()}</th>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_student']}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_assignment']}</td>                            <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_after_due"]}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["extensions"]}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["status"]}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_charged"]}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                        <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["remaining"]}</td>
-                    </tr>
-HTML;
-                    // $total_late_used = 0;
+                
+            } else {
+                $return .= $this->makeTable($user->getId(), $gradeable, $status);
             }
-            $return .= <<<HTML
-                </tbody>
-            </table>
-HTML;
             
             $color = "green";
             if($status != "Good" && $status != "Late") {
@@ -1842,8 +1798,18 @@ HTML;
     }
     //Temp
     private function addLateDays(Gradeable $gradeable, &$late_days_data, &$total_late_used) {
+        $latedays = $this->core->getQueries()->getLateDayUpdates($gradeable->getUser()->getId());
         $curr_allowed_term = $this->core->getConfig()->getDefaultStudentLateDays();
+        $curr_remaining_late = $this->core->getConfig()->getDefaultStudentLateDays();
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
+        
+        foreach($latedays as $ld){
+            if($ld['since_timestamp'] <= $gradeable->getDueDate() &&
+            $curr_allowed_term < $ld['allowed_late_days']){
+                $curr_allowed_term = $ld['allowed_late_days'];
+            }
+        }
+        
         $status = 'Good';
         $late_flag = false;
         if ($late_days_used > 0) {
@@ -1871,13 +1837,70 @@ HTML;
             $total_late_used += $curr_late_charged;
         }
 
-        $late_days_data['days_after_deadline'] = $gradeable->getLateDays();
         $late_days_data['extensions'] = $gradeable->getLateDayExceptions();
         $late_days_data['days_charged'] = $late_days_used;
-        $late_days_data['remaining'] = $gradeable->getStudentAllowedLateDays()-$total_late_used;
+        $late_days_data['remaining'] = $curr_allowed_term-$total_late_used;
         $late_days_data['allowed_per_student'] = $curr_allowed_term;
         $late_days_data['allowed_per_assignment'] = $gradeable->getAllowedLateDays();
         $late_days_data['days_after_due'] = $gradeable->getLateDays();
     }
 
+    private function makeTable($user_id, $gradeable, &$status){
+        $return = <<<HTML
+        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
+                </tr>
+            </thead>
+            <tbody>
+HTML;
+        $current_user = null;
+        $total_late_used = 0;
+        $status = "Good";
+        $late_days_data = [];
+        $order_by = [ 
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
+        ];
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', null, $order_by) as $test) { 
+            // if ($current_user !== $test->getUser()->getId()) {
+            //     $current_user = $test->getUser()->getId();
+            // }
+            $this->addLateDays($test, $late_days_data, $total_late_used);
+            $class = "";
+            if($test->getId() == $gradeable->getId()){
+                $class = "class='yellow-background'";
+                $status = $late_days_data["status"];
+            }
+            $return .= <<<HTML
+                <tr>
+                    <th $class style="padding:5px; border:thin solid black">{$test->getName()}</th>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_student']}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_assignment']}</td> 
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_after_due"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["extensions"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["status"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_charged"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["remaining"]}</td>
+                </tr>
+HTML;
+                // $total_late_used = 0;
+        }
+        $return .= <<<HTML
+            </tbody>
+        </table>
+HTML;
+        return $return;
+    }
+    
 }
