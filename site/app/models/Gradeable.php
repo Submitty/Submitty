@@ -985,6 +985,13 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+    public function getWouldBeDaysLate() {
+        $return =  DateUtils::calculateDayDiff($this->due_date, null);
+        if ($return < 0) {
+            $return = 0;
+        }
+        return $return;
+    }
     
     public function validateVersions($active_check = null) {
         //active check is the gradeable version this gradeable has
