@@ -1922,27 +1922,23 @@ AND gc_id IN (
       return $result_rows;
     }
 
+    public function existsNonMergedThread($thread_id) {
+        $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($thread_id));
+        $result_rows = $this->course_db->rows();
+        return count($result_rows) > 0;
+    }
+
     public function mergeThread($parent_thread_id, $child_thread_id, &$message){
         try{
             $this->course_db->beginTransaction();
-
-            $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($child_thread_id));
-            $result_rows = $this->course_db->rows();
-            if(count($result_rows)<1) {
-                $message = "Can't find child thread";
+            if((!$this->existsNonMergedThread($child_thread_id)) || (!$this->existsNonMergedThread($parent_thread_id))) {
+                $message = "Can't find thread";
                 $this->course_db->rollback();
                 return false;
             }
-            $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($parent_thread_id));
-            $result_rows = $this->course_db->rows();
-            if(count($result_rows)<1) {
-                $message = "Can't find parent thread";
-                $this->course_db->rollback();
-                return false;
-            }
-            $this->course_db->query("SELECT id FROM posts where thread_id=? and parent_id=-1", array($parent_thread_id));
+            $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($parent_thread_id));
             $parent_root_post = $this->course_db->rows()[0]['id'];
-            $this->course_db->query("SELECT id FROM posts where thread_id=? and parent_id=-1", array($child_thread_id));
+            $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($child_thread_id));
             $child_root_post = $this->course_db->rows()[0]['id'];
 
             if($child_root_post <= $parent_root_post) {

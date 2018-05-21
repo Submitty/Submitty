@@ -313,7 +313,8 @@ HTML;
 						}
 						$return .= <<<HTML
 						</select>
-						<div  style='float: right;'>
+						<br>
+						<div  style="float: right; width: auto; margin-top: 10px;">
 							<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
 							<input class="btn btn-primary" type="submit" value="Submit" />
 						</div>
