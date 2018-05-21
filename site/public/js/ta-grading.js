@@ -317,6 +317,30 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
+registerKeyHandler("KeyA", function() {
+	toggleAutograding();
+	updateCookies();
+});
+registerKeyHandler("KeyG", function() {
+	toggleRubric();
+	updateCookies();
+});
+registerKeyHandler("KeyO", function() {
+	toggleSubmissions();
+	updateCookies();
+});
+registerKeyHandler("KeyS", function() {
+	toggleInfo();
+	updateCookies();
+});
+registerKeyHandler("KeyR", function() {
+	resetModules();
+	updateCookies();
+});
+
+//-----------------------------------------------------------------------------
+// Panel show/hide
+
 function isAutogradingVisible() {
     return $("#autograding_results").is(":visible");
 }
@@ -390,27 +414,6 @@ function resetModules() {
 	deleteCookies();
 	updateCookies();
 }
-
-registerKeyHandler("KeyA", function() {
-	toggleAutograding();
-	updateCookies();
-});
-registerKeyHandler("KeyG", function() {
-	toggleRubric();
-	updateCookies();
-});
-registerKeyHandler("KeyO", function() {
-	toggleSubmissions();
-	updateCookies();
-});
-registerKeyHandler("KeyS", function() {
-	toggleInfo();
-	updateCookies();
-});
-registerKeyHandler("KeyR", function() {
-	resetModules();
-	updateCookies();
-});
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
