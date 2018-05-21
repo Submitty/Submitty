@@ -560,7 +560,15 @@ ORDER BY {$section_key}", $params);
         return intval($this->course_db->row()['cnt']);
     }
 
-    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key) {
+    public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+         $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
         $return = array();
         $params = array($g_id);
         $where = "";
@@ -569,18 +577,18 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
-SELECT  u.{$section_key}, count(u.*) as cnt
-FROM users AS u
+SELECT ".$u_or_t.".{$section_key}, count(".$u_or_t.".*) as cnt
+FROM ".$users_or_teams." AS ".$u_or_t."
 INNER JOIN (
   SELECT * FROM gradeable_data AS gd
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
   )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
-) AS gd ON u.user_id = gd.gd_user_id
+) AS gd ON ".$u_or_t.".".$user_or_team_id." = gd.gd_".$user_or_team_id."
 {$where}
-GROUP BY u.{$section_key}
-ORDER BY u.{$section_key}", $params);
+GROUP BY ".$u_or_t.".{$section_key}
+ORDER BY ".$u_or_t.".{$section_key}", $params);
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";

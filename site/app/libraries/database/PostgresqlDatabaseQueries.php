@@ -680,8 +680,8 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
           ", array($g_id));
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-/*
-public function getAverageForGradeable($g_id, $section_key) {
+
+public function getAverageForGradeable($g_id, $section_key, $team_id) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
@@ -721,7 +721,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-*/
+
+    /*
     public function getAverageForGradeable($g_id, $section_key, $is_team) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
@@ -770,7 +771,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-
+*/
     public function getGradeablesPastAndSection() {
         $this->course_db->query("
   SELECT

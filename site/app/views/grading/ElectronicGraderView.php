@@ -60,6 +60,8 @@ class ElectronicGraderView extends AbstractView {
         else{
             $percentage = number_format(($graded / $total) * 100, 1);
         }
+        //echo("Total submitted is:");
+        //echo($total_submitted);
         $return = <<<HTML
 <div class="content">
     <h2>Status of {$gradeable->getName()}</h2>
@@ -154,6 +156,8 @@ HTML;
                     else {
                         $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
+                  //  echo("change_value is:");
+                   // echo($change_value);
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
