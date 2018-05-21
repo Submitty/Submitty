@@ -15,11 +15,11 @@ $(function() {
         //If cookie version is not the same as the current version then toggle the visibility of each
         //rubric panel then update the cookies
         deleteCookies();
-        handleKeyPress("KeyG");
-        handleKeyPress("KeyA");
-        handleKeyPress("KeyS");
-        handleKeyPress("KeyO");
-        handleKeyPress("KeyR");
+        setAutogradingVisible(true);
+        setRubricVisible(true);
+        setSubmissionsVisible(true);
+        setInfoVisible(true);
+        resetModules();
         updateCookies();
     }
     else{
@@ -159,12 +159,12 @@ function readCookies(){
     if (autoscroll == "on") {
         onAjaxInit = function() {
             $('#title-'+opened_mark).click();
-            
+
             if (scroll_pixel > 0) {
                 document.getElementById('grading_rubric').scrollTop = scroll_pixel;
             }
         }
-        
+
         var testcases_array = JSON.parse(testcases);
         testcases_array.forEach(function(element) {
             var id = 'testcase_' + element;
@@ -172,7 +172,7 @@ function readCookies(){
                 toggleDiv(id);
             }
         });
-        
+
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');
@@ -196,7 +196,7 @@ function readCookies(){
                                 current = $(this);
                                 return false;
                             }
-                        });                        
+                        });
                     }
                 });
             }
@@ -267,7 +267,7 @@ function updateCookies(){
     }
 
     var testcases = findOpenTestcases();
-    testcases = JSON.stringify(testcases); 
+    testcases = JSON.stringify(testcases);
     document.cookie = "testcases=" + testcases + "; path=/;";
 
     var files = [];
@@ -276,58 +276,141 @@ function updateCookies(){
             files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
         });
     });
-    files = JSON.stringify(files); 
+    files = JSON.stringify(files);
     document.cookie = "files=" + files + "; path=/;"
 
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
+//-----------------------------------------------------------------------------
+// Keyboard shortcut handling
+
+var keymap = {};
+
 window.onkeydown = function(e) {
     if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
-    handleKeyPress(e.code);
+    if (keymap.hasOwnProperty(e.code)) {
+        keymap[e.code].fns.forEach(function (fn) {
+            fn(e);
+        });
+    }
 };
 
-function handleKeyPress(key) {
-    switch (key) {
-        case "KeyA":
-            $('.fa-list-alt').toggleClass('icon-selected');
-            $("#autograding_results").toggle();
-            hideIfEmpty("#autograding_results");
-            break;
-        case "KeyG":
-            $('.fa-pencil-square-o').toggleClass('icon-selected');
-            $("#grading_rubric").toggle();
-            hideIfEmpty("#grading_rubric");
-            break;
-        case "KeyO":
-            $('.fa-folder-open.icon-header').toggleClass('icon-selected');
-            $("#submission_browser").toggle();
-            hideIfEmpty("#submission_browser");
-            break;
-        case "KeyS":
-            $('.fa-user').toggleClass('icon-selected');
-            $("#student_info").toggle();
-            hideIfEmpty("#student_info");
-            break;
-        case "KeyR":
-            $('.fa-list-alt').addClass('icon-selected');
-            $("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
-            $('.fa-pencil-square-o').addClass('icon-selected');
-            $("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
-            $('.fa-folder-open').addClass('icon-selected');
-            $("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
-            $('.fa-user').addClass('icon-selected');
-            $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
-            $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
-            hideIfEmpty(".rubric_panel");
-            deleteCookies();
-            updateCookies();
-            break;
-        default:
-            break;
+function registerKeyHandler(code, fn) {
+    if (keymap.hasOwnProperty(code)) {
+        keymap[code].fns.append(fn);
+    } else {
+        keymap[code] = {
+            fns: [fn]
+        };
     }
-    updateCookies();
-};
+}
+
+function unregisterKeyHandler(code, fn) {
+	if (keymap.hasOwnProperty(code)) {
+		if (keymap[code].fns.indexOf(fn) !== -1) {
+		    //Delete the function from the list
+		    keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
+		}
+	} else {
+	    //Don't care if this key doesn't exist
+    }
+}
+
+function isAutogradingVisible() {
+    return $("#autograding_results").is(":visible");
+}
+
+function isRubricVisible() {
+    return $("#grading_rubric").is(":visible");
+}
+
+function isSubmissionsVisible() {
+    return $("#submission_browser").is(":visible");
+}
+
+function isInfoVisible() {
+    return $("#student_info").is(":visible");
+}
+
+
+function setAutogradingVisible(visible) {
+	$('.fa-list-alt').toggleClass('icon-selected', visible);
+	$("#autograding_results").toggle(visible);
+	hideIfEmpty("#autograding_results");
+}
+
+function setRubricVisible(visible) {
+	$('.fa-pencil-square-o').toggleClass('icon-selected', visible);
+	$("#grading_rubric").toggle(visible);
+	hideIfEmpty("#grading_rubric");
+}
+
+function setSubmissionsVisible(visible) {
+	$('.fa-folder-open.icon-header').toggleClass('icon-selected', visible);
+	$("#submission_browser").toggle(visible);
+	hideIfEmpty("#submission_browser");
+}
+
+function setInfoVisible(visible) {
+	$('.fa-user').toggleClass('icon-selected', visible);
+	$("#student_info").toggle(visible);
+	hideIfEmpty("#student_info");
+}
+
+
+function toggleAutograding() {
+    setAutogradingVisible(!isAutogradingVisible());
+}
+
+function toggleRubric() {
+    setRubricVisible(!isRubricVisible());
+}
+
+function toggleSubmissions() {
+    setSubmissionsVisible(!isSubmissionsVisible());
+}
+
+function toggleInfo() {
+    setInfoVisible(!isInfoVisible());
+}
+
+
+function resetModules() {
+	$('.fa-list-alt').addClass('icon-selected');
+	$("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
+	$('.fa-pencil-square-o').addClass('icon-selected');
+	$("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
+	$('.fa-folder-open').addClass('icon-selected');
+	$("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
+	$('.fa-user').addClass('icon-selected');
+	$('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
+	$("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
+	hideIfEmpty(".rubric_panel");
+	deleteCookies();
+	updateCookies();
+}
+
+registerKeyHandler("KeyA", function() {
+	toggleAutograding();
+	updateCookies();
+});
+registerKeyHandler("KeyG", function() {
+	toggleRubric();
+	updateCookies();
+});
+registerKeyHandler("KeyO", function() {
+	toggleSubmissions();
+	updateCookies();
+});
+registerKeyHandler("KeyS", function() {
+	toggleInfo();
+	updateCookies();
+});
+registerKeyHandler("KeyR", function() {
+	resetModules();
+	updateCookies();
+});
 
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
@@ -450,7 +533,7 @@ function findOpenTestcases() {
         if (typeof current_testcase[0] !== 'undefined'){
             if (current_testcase[0].style.display != 'none' ) {
                 testcase_num.push(parseInt(current_testcase.attr('id').split('_')[1]));
-            }         
+            }
         }
     });
     return testcase_num;
@@ -460,9 +543,9 @@ function findOpenTestcases() {
 function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
     if (first === true) {
         current_path += path;
-        if ($(elem)[0].classList.contains('open')) {       
+        if ($(elem)[0].classList.contains('open')) {
             stored_paths.push(path);
-        }  
+        }
         else {
             return [];
         }
@@ -476,7 +559,7 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
                 stored_paths.push((current_path + "#$SPLIT#$" + $(this)[0].dataset.file_name));
             }
         });
-        
+
     });
 
     $(elem).children().each(function() {
