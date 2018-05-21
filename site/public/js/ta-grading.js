@@ -307,35 +307,35 @@ function registerKeyHandler(code, fn) {
 }
 
 function unregisterKeyHandler(code, fn) {
-	if (keymap.hasOwnProperty(code)) {
-		if (keymap[code].fns.indexOf(fn) !== -1) {
-		    //Delete the function from the list
-		    keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
-		}
-	} else {
-	    //Don't care if this key doesn't exist
+    if (keymap.hasOwnProperty(code)) {
+        if (keymap[code].fns.indexOf(fn) !== -1) {
+            //Delete the function from the list
+            keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
+        }
+    } else {
+        //Don't care if this key doesn't exist
     }
 }
 
 registerKeyHandler("KeyA", function() {
-	toggleAutograding();
-	updateCookies();
+    toggleAutograding();
+    updateCookies();
 });
 registerKeyHandler("KeyG", function() {
-	toggleRubric();
-	updateCookies();
+    toggleRubric();
+    updateCookies();
 });
 registerKeyHandler("KeyO", function() {
-	toggleSubmissions();
-	updateCookies();
+    toggleSubmissions();
+    updateCookies();
 });
 registerKeyHandler("KeyS", function() {
-	toggleInfo();
-	updateCookies();
+    toggleInfo();
+    updateCookies();
 });
 registerKeyHandler("KeyR", function() {
-	resetModules();
-	updateCookies();
+    resetModules();
+    updateCookies();
 });
 
 //-----------------------------------------------------------------------------
@@ -359,27 +359,27 @@ function isInfoVisible() {
 
 
 function setAutogradingVisible(visible) {
-	$('.fa-list-alt').toggleClass('icon-selected', visible);
-	$("#autograding_results").toggle(visible);
-	hideIfEmpty("#autograding_results");
+    $('.fa-list-alt').toggleClass('icon-selected', visible);
+    $("#autograding_results").toggle(visible);
+    hideIfEmpty("#autograding_results");
 }
 
 function setRubricVisible(visible) {
-	$('.fa-pencil-square-o').toggleClass('icon-selected', visible);
-	$("#grading_rubric").toggle(visible);
-	hideIfEmpty("#grading_rubric");
+    $('.fa-pencil-square-o').toggleClass('icon-selected', visible);
+    $("#grading_rubric").toggle(visible);
+    hideIfEmpty("#grading_rubric");
 }
 
 function setSubmissionsVisible(visible) {
-	$('.fa-folder-open.icon-header').toggleClass('icon-selected', visible);
-	$("#submission_browser").toggle(visible);
-	hideIfEmpty("#submission_browser");
+    $('.fa-folder-open.icon-header').toggleClass('icon-selected', visible);
+    $("#submission_browser").toggle(visible);
+    hideIfEmpty("#submission_browser");
 }
 
 function setInfoVisible(visible) {
-	$('.fa-user').toggleClass('icon-selected', visible);
-	$("#student_info").toggle(visible);
-	hideIfEmpty("#student_info");
+    $('.fa-user').toggleClass('icon-selected', visible);
+    $("#student_info").toggle(visible);
+    hideIfEmpty("#student_info");
 }
 
 
@@ -401,18 +401,18 @@ function toggleInfo() {
 
 
 function resetModules() {
-	$('.fa-list-alt').addClass('icon-selected');
-	$("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
-	$('.fa-pencil-square-o').addClass('icon-selected');
-	$("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
-	$('.fa-folder-open').addClass('icon-selected');
-	$("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
-	$('.fa-user').addClass('icon-selected');
-	$('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
-	$("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
-	hideIfEmpty(".rubric_panel");
-	deleteCookies();
-	updateCookies();
+    $('.fa-list-alt').addClass('icon-selected');
+    $("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
+    $('.fa-pencil-square-o').addClass('icon-selected');
+    $("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
+    $('.fa-folder-open').addClass('icon-selected');
+    $("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
+    $('.fa-user').addClass('icon-selected');
+    $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
+    $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
+    hideIfEmpty(".rubric_panel");
+    deleteCookies();
+    updateCookies();
 }
 
 //-----------------------------------------------------------------------------
@@ -447,10 +447,10 @@ registerKeyHandler('Digit9', function() {
 });
 
 function selectCurrentMarkCheck(index) {
-	var opened = findCurrentOpenedMark();
-	if (opened !== -1) {
-		selectMark($("#mark_id-" + opened + "-" + index + "-check"));
-	}
+    var opened = findCurrentOpenedMark();
+    if (opened !== -1) {
+        selectMark($("#mark_id-" + opened + "-" + index + "-check"));
+    }
 }
 
 
@@ -550,10 +550,10 @@ function downloadZip(grade_id, user_id) {
 function downloadFile(html_file, url_file) {
     var directory = "";
     if (url_file.includes("submissions")) {
-      directory = "submissions";
+        directory = "submissions";
     }
     else if (url_file.includes("results")) {
-      directory = "results";
+        directory = "results";
     }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
