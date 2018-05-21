@@ -218,7 +218,7 @@ function copyToClipboard(code) {
         $('#copybuttonid').prop('value', 'Copied');
     }, 0);
     setTimeout(function() {
-        $('#copybuttonid').prop('value', 'Copy');
+        $('#copybuttonid').prop('value', 'Copy Emails to Clipboard');
     }, 1000);
 }
 
@@ -281,7 +281,7 @@ function downloadCSV(code) {
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
     temp_element.attr('href', address);
-    temp_element.attr('download', 'mails.csv');
+    temp_element.attr('download', 'submitty_user_emails.csv');
     temp_element.css('display', 'none');
     $(document.body).append(temp_element);
     $('#downloadlink')[0].click();

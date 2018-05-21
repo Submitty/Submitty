@@ -404,8 +404,8 @@ HTML;
         $return .= <<<HTML
     <div style="float: right; width: auto; margin-top: 10px">
         <a onclick="$('#download-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-        <input class="btn btn-primary" type="button" value="Download" onclick="downloadCSV('{$code}');" />
-        <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy" onclick="copyToClipboard('{$code}');" />
+        <input class="btn btn-primary" type="button" value="Download CSV" onclick="downloadCSV('{$code}');" />
+        <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{$code}');" />
     </div>
 </form>
 </div>
