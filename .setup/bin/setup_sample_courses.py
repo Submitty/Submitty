@@ -759,8 +759,10 @@ class Course(object):
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
                         submission_count += 1
-                        current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
-
+                        random_days = 1
+                        if random.random() < 0.3:
+                            random_days = random.choice(range(-3,2))
+                        current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days))
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time_string)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
@@ -791,7 +793,6 @@ class Course(object):
 
                 if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, "1")):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
-                        #TODO: Add late HW
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
@@ -1151,6 +1152,8 @@ class Gradeable(object):
                 self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
+            else:
+                self.late_days = random.choice(range(0, 3))
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if 'eg_team_assignment' in gradeable:
