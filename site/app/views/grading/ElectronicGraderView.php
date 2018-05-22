@@ -78,7 +78,6 @@ HTML;
         else{
             $view = null;
             $total_students_final = $team_total+$no_team_total;
-            $team_percentage = round(($team_total/$total_students_final) * 100, 1);
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
@@ -123,6 +122,7 @@ HTML;
 HTML;
             }
             if($gradeable->isTeamAssignment()){
+            $team_percentage = round(($team_total/$total_students_final) * 100, 1);
             $return .= <<<HTML
             Students on a team: {$team_total}/{$total_students_final} ({$team_percentage}%)
             <br />
