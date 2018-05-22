@@ -5,17 +5,14 @@
 :file:     db_backup.py
 :language: python3
 :author:   Peter Bailie (Systems Programmer, Dept. of Computer Science, RPI)
-:date:     April 24 2018
 
 This script will take backup dumps of each individual Submitty course
 database.  This should be set up by a sysadmin to be run on the Submitty
 server as a cron job by root.  Recommend that this is run nightly.
 
-The semester code can be specified as a command line argument "-s".  This allows
-database dumps of previous semesters or of unique semester codes.  If this
-argument is ommitted, the semester code will be determined by the current month
-and year.  e.g. April 2018 would correspond to the Spring 2018 semester code
-"s18".
+The semester code can be specified as a command line argument "-s".
+The "-g" argument will guess the semester by the current month and year.
+Either -s or -g must be specified.
 
 Dumpfile expiration can be specified as a command line argument "-e".  This
 indicates the number of days of dumps to keep.  Older dumps will be purged.
@@ -31,6 +28,7 @@ Change values under CONFIGURATION to match access properties of your
 university's Submitty database and file system.
 """
 
+import argparse
 import datetime
 import os
 import re
@@ -44,14 +42,14 @@ DB_PASS    = 'DB.p4ssw0rd'  # CHANGE THIS!  DO NOT USE 'DB.p4ssw0rd'
 DUMP_PATH  = '/var/local/submitty-dumps'
 
 def delete_obsolete_dumps(working_path, expiration_stamp):
-	"""
-	Recurse through folders/files and delete any obsolete dump file
+    """
+    Recurse through folders/files and delete any obsolete dump files
 
 	:param working_path:     path to recurse through
 	:param expiration_stamp: date to begin purging old dump files
 	:type working_path:      string
 	:type expiration_stamp:  string
-	"""
+    """
 
 	# Filter out '.', '..', and any "hidden" files/directories.
 	# Prepend full path to all directory list elements
@@ -69,7 +67,7 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 			#      The date substring can be located with high confidence by looking for:
 			#        - final token of the full path (the actual file name)
 			#        - file name consists of three tokens delimited by '_' chars
-			#		   - first token is exactly 6 digits, the date stamp.
+			#          - first token is exactly 6 digits, the date stamp.
 			#          - second token is the semester code, at least one 'word' char
 			#          - third token is the course code, at least one 'word' char
 			#          - filename always ends in ".dbdump"
@@ -87,41 +85,30 @@ def main():
 	if os.getuid() != 0:
 		raise SystemExit('Root required. Please contact your sysadmin for assistance.')
 
-	# COMMAND LINE ARGUMENT DEFAULTS
-	# Get current date -- needed throughout the script, but also to determine default semester code.
-	# (today.year % 100) determines the two digit year.  e.g. '2017' -> '17'
-	today       = datetime.date.today()
-	year        = str(today.year % 100)
+	# READ COMMAND LINE ARGUMENTS
+	# Note that -s and -S are different args and mutually exclusive
+	parser = argparse.ArgumentParser(description='Dump all Submitty databases for a particular academic term.')
+	parser.add_argument('-e', nargs='?', action='store', default=0, type=int, help='set number of days expiration of older dumps (default: no expiration).')
+	group = parser.add_mutually_exclusive_group(required=True)
+	group.add_argument('-s', nargs='?', action='store', help='Set the term code.')
+	group.add_argument('-g', action='store_true', help='Guess term code based on calender month and year.')
+	args = parser.parse_args()
+
+	# Get current date -- needed throughout the script, but also used when guessing default term code.
+	# (today.year % 100) determines the two digit year.	 e.g. '2017' -> '17'
+	today		= datetime.date.today()
+	year		= str(today.year % 100)
 	today_stamp = '{:0>2}{:0>2}{:0>2}'.format(year, today.month, today.day)
 
-	# Default semester code
-	# Jan - May = (s)pring, Jun - July = s(u)mmer, Aug - Dec = (f)all
-	# if month <= 5: ... elif month >=8: ... else: ...
-	semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'u' + year)
-
-	# default expiration is "no expiration" (value is 0) -- no files are purged.
-	# values greater than 0 indicate how many days of dumps to keep.
-	expiration = 0
-
-	# READ COMMAND LINE ARGUMENTS
-	# Overwrites default values when specified
-	if "-s" in sys.argv:
-		try:
-			i = sys.argv.index("-s")
-			semester = sys.argv[i+1]
-		except IndexError:
-			raise SystemExit("No value supplied for argument '-s'")
-
-	if "-e" in sys.argv:
-		i = sys.argv.index("-e")
-
-		try:
-			if len(sys.argv[1+1]) > 3 or not str.isdigit(sys.argv[i+1]):
-				raise SystemExit("Expiration must be an integer 0 - 999")
-
-			expiration = int(sys.argv[i+1])
-		except IndexError:
-			raise SystemExit("No value supplied for argument '-e'")
+	# PARSE COMMAND LINE ARGUMENTS
+	expiration = args.e
+	if args.g is True:
+		# Guess the term code by calendar month and year
+		# Jan - May = (s)pring, Jun - July = s(u)mmer, Aug - Dec = (f)all
+		# if month <= 5: ... elif month >=8: ... else: ...
+		semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'u' + year)
+	else:
+		semester = args.s
 
 	# GET ACTIVE COURSES FROM 'MASTER' DB
 	try:

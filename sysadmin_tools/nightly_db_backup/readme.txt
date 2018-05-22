@@ -1,4 +1,4 @@
-Nightly Database Backup Python Script Readme, April 23 2018
+Nightly Database Backup Python Script Readme
 
 THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
 COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
@@ -24,9 +24,11 @@ will dump the submitty 'master' database and all courses registered in the fall
 2017 semester.  This option is useful to dump course databases of previous
 semesters, or to dump course databases that have a non-standard semester code.
 
-If this command line argument is not given, the semester code will be
-automatically determined by the current month and year of the server's set date.
-e.g. April of 2018 will be the semester code "s18".
+Alternatively, the "-sauto" option will have the semester code automatically
+determined by the current month and year of the server's date.   e.g. April of
+2018 will be the semester code "s18".
+
+Either "-s" or "-sauto" is required.
 
 --------------------------------------------------------------------------------
 
