@@ -289,7 +289,7 @@ class UsersController extends AbstractController {
                     }
                 }    
                 if (($no_user_flag != 1) || ($no_grader_flag != 1)) {
-                    $this->core->addErrorMessage("Registration section which is to be deleted have users/graders assigned to it");
+                    $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
                     $_SESSION['request'] = $_POST;
                     $this->core->redirect($return_url);      
                 }
