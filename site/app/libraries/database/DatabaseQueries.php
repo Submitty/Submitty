@@ -1087,6 +1087,14 @@ ORDER BY user_id ASC");
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
     }
 
+    public function insertNewRegistrationSection($section) {
+        $this->course_db->query("INSERT INTO sections_registration (sections_registration_id) VALUES(?)", array($section));
+    }
+
+    public function deleteRegistrationSection($section) {
+        $this->course_db->query("DELETE FROM sections_registration WHERE sections_registration_id=?", array($section));
+    }    
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", array($gradeable_id));
         foreach ($graders as $grader => $sections){

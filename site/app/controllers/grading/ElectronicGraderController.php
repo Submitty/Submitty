@@ -501,6 +501,11 @@ class ElectronicGraderController extends GradingController {
                     $this->core->redirect($return_url);
                 }
                 $user_ids[] = $id;
+                continue;
+            }
+            if(in_array($id, $user_ids)) {
+            	$this->core->addErrorMessage("ERROR: {$id} is already on this team");
+                $this->core->redirect($return_url);
             }
         }
         $new_team = $_POST['new_team'] === 'true' ? true : false;

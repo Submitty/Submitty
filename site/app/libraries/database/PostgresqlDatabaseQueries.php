@@ -286,7 +286,7 @@ SELECT";
   egd.submission_time,
   egv.highest_version,
   COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
-  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late,
+  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)))/86400)::integer) AS days_late,
   get_allowed_late_days(u.user_id, eg.eg_submission_due_date) AS student_allowed_late_days
 FROM users AS u
 NATURAL JOIN gradeable AS g";
