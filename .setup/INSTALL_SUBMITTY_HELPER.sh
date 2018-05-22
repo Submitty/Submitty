@@ -204,6 +204,15 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
+#Add the submitty user to /etc/sudoers if in worker mode.
+if [ "${WORKER}" == 1 ]; then
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to update_and_install_user.py" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/update_and_install_worker.py" >> /etc/sudoers
+    fi
+fi
+
 # tmp folder
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp
 chown root:root ${SUBMITTY_DATA_DIR}/tmp
