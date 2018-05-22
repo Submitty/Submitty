@@ -55,26 +55,30 @@ class LateController extends AbstractController {
         //Check to see if a CSV file was submitted.
         $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name'])) && !$delete) {
+            //Validate
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->getOutput()->renderJson(array('error' => $error));
                 return;
             }
             else {
-                for ($i = 0; $i < count($data); $i++){
-                    if ($type == "late"){
-                        $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2]);
-                    }
-                    else {
-                        $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
-                    }
-                }
-                if ($type == "late"){
-                    $this->getLateDays();
-                }
-                else {
-                    $this->getExtensions($data[0][1]);
-                }
+                //Validate OK.  Process CSV.
+                //$_REQUEST['csv_option'] is determined by value attribute of radio buttons in site/app/views/admin/LateDayView.php
+                $csv_option = isset($_REQUEST['csv_option']) ? $_REQUEST['csv_option'] : null;
+				for ($i = 0; $i < count($data); $i++){
+					if ($type == "late"){
+						$this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
+					}
+					else {
+						$this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
+					}
+				}
+				if ($type == "late"){
+					$this->getLateDays();
+				}
+				else {
+					$this->getExtensions($data[0][1]);
+				}
             }
         }
         else{ // not CSV, it's an individual
