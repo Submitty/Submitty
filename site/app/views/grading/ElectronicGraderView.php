@@ -23,7 +23,8 @@ class ElectronicGraderView extends AbstractView {
         $total_students,
         $registered_but_not_rotating,
         $rotating_but_not_registered,
-        $section_type) {
+        $section_type,
+        $unsubmitted_students) {
 
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
@@ -34,6 +35,7 @@ class ElectronicGraderView extends AbstractView {
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
+        $team_total=0;
         //print_r($sections);
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -43,8 +45,7 @@ class ElectronicGraderView extends AbstractView {
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
                $no_team_total += $section['no_team'];
-            }
-            else{
+               $team_total += $section['team'];
             }
         }
         //Fixing total_students bug
@@ -76,6 +77,8 @@ HTML;
         }
         else{
             $view = null;
+            $total_students_final = $team_total+$no_team_total;
+            $team_percentage = round(($team_total/$total_students_final) * 100, 1);
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
@@ -119,15 +122,23 @@ HTML;
                 <br/>
 HTML;
             }
+            if($gradeable->isTeamAssignment()){
+            $return .= <<<HTML
+            Students on a team: {$team_total}/{$total_students_final} ({$team_percentage}%)
+            <br />
+            <br />
+            Number of teams: {$total_students}
+            <br />
+            <br />
+            Teams who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
+HTML;
+            }
+            else{
             $return .= <<<HTML
             Students who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
             <br />
             <br />
             Current percentage of grading done: {$show_graded}/{$show_total} ({$percentage}%)
-HTML;
-            if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
-                $return .= <<<HTML
-             - {$no_team_total} students with no team
 HTML;
             }
             $return .= <<<HTML
@@ -161,11 +172,11 @@ HTML;
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
-                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%)<br />
+                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%) <br />
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
-                - {$section['no_team']} students with no team
+                - {$section['no_team']} students with no team<br />
 HTML;
                     }
                 }

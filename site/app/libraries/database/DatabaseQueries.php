@@ -832,7 +832,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.".$user_or_team_id."=egd.".$user_or_team_id." AND active_version=g_version AND active_version>0
           )AS auto
         ON gd.g_id=auto.g_id AND gd_".$user_or_team_id."=auto.".$user_or_team_id."
-        INNER JOIN ".$users_or_teams." AS u ON ".$u_or_t.".".$user_or_team_id." = auto.".$user_or_team_id."
+        INNER JOIN ".$users_or_teams." AS ".$u_or_t." ON ".$u_or_t.".".$user_or_team_id." = auto.".$user_or_team_id."
         WHERE gc.g_id=? AND ".$u_or_t.".{$section_key} IS NOT NULL
       )AS parts_of_comp
     )AS comp
@@ -1782,7 +1782,36 @@ ORDER BY {$section_key}", $params);
         ksort($return);
         return $return;
     }
-
+    public function getUsersWithTeamByGradingSections($g_id, $sections, $section_key) {
+        $return = array();
+        $params = array($g_id);
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $params = array_merge($sections, $params);
+        }
+        $this->course_db->query("
+SELECT count(*) as cnt, {$section_key}
+FROM users
+WHERE {$sections_query} user_id IN (
+  SELECT user_id
+  FROM gradeable_teams NATURAL JOIN teams
+  WHERE g_id=?
+  ORDER BY user_id
+)
+GROUP BY {$section_key}
+ORDER BY {$section_key}", $params);
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+        foreach ($sections as $section) {
+            if (!isset($return[$section])) {
+                $return[$section] = 0;
+            }
+        }
+        ksort($return);
+        return $return;
+    }
     public function getGradedComponentsCountByTeamGradingSections($g_id, $sections, $section_key) {
         $return = array();
         $params = array($g_id);
