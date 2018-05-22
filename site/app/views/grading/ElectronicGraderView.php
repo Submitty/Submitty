@@ -176,7 +176,6 @@ HTML;
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
-                - {$section['no_team']} students with no team<br />
 HTML;
                     }
                 }

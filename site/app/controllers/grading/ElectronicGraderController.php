@@ -238,7 +238,7 @@ class ElectronicGraderController extends GradingController {
             }
             else {
          //       echo("IN else");
-                if(!$gradeable->isTeamAssignment()){
+       /*         if(!$gradeable->isTeamAssignment()){
                     foreach ($num_submitted as $key => $value) {
                         $sections[$key] = array(
                             'total_components' => $value * $num_components,
@@ -258,8 +258,8 @@ class ElectronicGraderController extends GradingController {
                             $sections[$key]['graders'] = $graders[$key];
                         }
                     }
-                }
-                else{
+                }*/
+                //else{
                     //$students_array = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                     //$total_individual_students=0;
                     //foreach($students_array as $key => $value){
@@ -305,7 +305,7 @@ class ElectronicGraderController extends GradingController {
                                     $sections[$key]['graders'] = $graders[$key];
                                 }
                             }
-                        }
+                     //   }
                     }
                 }
             }
