@@ -1415,9 +1415,54 @@ HTML;
             if(substr($question->getTitle(), 0, 12) === "AUTO-GRADING") {
                 $disabled = 'disabled';
             }
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
+                $initial_text = "Click me to grade!";
+            }
+            else if($show_graded_info) {
+                $nl = "<br>";
+                $initial_text = $question->getGradedTAComments($nl, false);
+            }
+
+
+            $question_points = $question->getGradedTAPoints();
+
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
+                $question_points = " ";
+            }
+
+            $background = "";
+            if ($question_points > $question->getMaxValue()) {
+                $background = "background-color: #D8F2D8;";
+            }
+            else if ($question_points < 0) {
+                $background = "background-color: #FAD5D3;";
+            }
+     $grader_id = "";
+            $displayVerifyUser = false;
+            if($question->getGrader() === null || !$show_graded_info) {
+                $grader_id = "Ungraded!";
+                $graded_color = "";
+            } else {
+                $grader_id = "Graded by " . $question->getGrader()->getId();
+                if($question->getGradedTAPoints()==$question->getMaxValue()){
+                    $graded_color = " background-color: #006600";
+                }
+                else if($question->getGradedTAPoints()==0){
+                    $graded_color = " background-color: #c00000";
+                }
+                else{
+                    $graded_color = " background-color: #eac73d";
+                }
+                if($this->core->getUser()->getId() !== $question->getGrader()->getId() && $this->core->getUser()->accessFullGrading()){
+                    $displayVerifyUser = true;
+                }
+            }
 
             $return .= <<<HTML
                 <tr>
+<td style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                    </td>
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
@@ -1451,22 +1496,8 @@ HTML;
             }
 
             //get the grader's id if it exists
-            $grader_id = "";
-            $graded_color = "";
-            $displayVerifyUser = false;
-            if($question->getGrader() === null || !$show_graded_info) {
-                $grader_id = "Ungraded!";
-                $graded_color = "";
-            } else {
-                $grader_id = "Graded by " . $question->getGrader()->getId();
-                $graded_color = " background-color: #eebb77";
-                if($this->core->getUser()->getId() !== $question->getGrader()->getId() && $this->core->getUser()->accessFullGrading()){
-                    $displayVerifyUser = true;
-                }
-            }
-
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" data-changebg="true">
+                    <td id="title-{$c}" style="font-size: 12px;" colspan="3" data-changebg="true">
                         <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
                         {$message}
                         <div style="float: right;">
@@ -1527,11 +1558,8 @@ HTML;
             }
 
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="{$graded_color}" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changedisplay2="true">
-                    <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
-                    </td>
-                    <td style="width:98%;" colspan="3">
+                <tr id="summary-{$c}" style="#FBFCFC" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});" data-changedisplay2="true">
+                    <td style="width:98%;" colspan="4">
                         <div id="rubric-{$c}">
                             <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
                         </div>

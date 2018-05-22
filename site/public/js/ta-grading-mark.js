@@ -508,10 +508,18 @@ function openClose(row_id, num_questions = -1) {
             current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
         } else if (question_points < 0) {
             current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-        } else {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
         }
-
+        var question_points = parseFloat(current_question_num[0].innerHTML);
+        var max_points = parseFloat(current_question_num[0].dataset.max_points);
+        if(question_points == max_points){
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#006600";
+        }
+        else if(question_points > 0){
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#eac73d";
+        }
+        else{
+            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#c00000";
+        }
         var show = false;
         if (x == row_num && current_summary[0].style.display === '') {
             show = true;
@@ -719,7 +727,17 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             } else {
                 if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
-                    $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
+                    var question_points = parseFloat(current_question_num[0].innerHTML);
+                    var max_points = parseFloat(current_question_num[0].dataset.max_points);
+                    if(question_points == max_points){
+                        $('#summary-' + num)[0].style.backgroundColor = "#006600";
+                    }
+                    else if(question_points > 0){
+                        $('#summary-' + num)[0].style.backgroundColor = "#eac73d";
+                    }
+                    else{
+                        $('#summary-' + num)[0].style.backgroundColor = "#c00000";
+                    }
                 }
             }
         }
