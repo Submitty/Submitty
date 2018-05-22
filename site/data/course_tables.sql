@@ -139,6 +139,7 @@ CREATE TABLE electronic_gradeable (
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
+    eg_inherit_teams_from character varying(255) NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
 );
 
