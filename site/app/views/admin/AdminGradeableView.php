@@ -205,10 +205,9 @@ HTML;
                             <div>                                
                                 Use teams from a previous gradeable:
 HTML;
-                    if ($type_of_action === "edit" || $type_of_action === "add_template") {
+                    if ($type_of_action === "add" || $type_of_action === "add_template"){
                         $html_output .= <<<HTML
                                 <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' value='{$admin_gradeable->getEgInheritTeamsFrom()}'>
-                            </div>
                             <option value=''>--None--</option>
 HTML;
 
@@ -219,16 +218,18 @@ HTML;
                             if ($type_of_action === "add_template" && $admin_gradeable->getEgInheritTeamsFrom()===$g_id_title['g_id']) { $html_output .= "selected"; }
                             $html_output .= <<<HTML
                             value="{$g_id_title['g_id']}">{$g_id_title['g_title']}
+                            </option>
 HTML;
                         }
                         $html_output .= <<<HTML
-                        </option>
-HTML;                        
+                                </select>
+                            </div>
+HTML;
                     }
                     else {
                         $html_output .= <<<HTML
-                            <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' value='{$admin_gradeable->getEgInheritTeamsFrom()}'/>
-HTML;                            
+                            <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' readonly="true" value='{$admin_gradeable->getEgInheritTeamsFrom()}'/>
+HTML;
                     }
                     $html_output .= <<<HTML
                      <div id="team_config">
@@ -609,8 +610,7 @@ HTML;
         }
     }
     </script>
-HTML;
-    $html_output .= <<<HTML
+
 <div id="alert-message" title="WARNING">
   <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
 </div>
