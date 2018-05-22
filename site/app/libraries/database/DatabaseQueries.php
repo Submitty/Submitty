@@ -1347,11 +1347,11 @@ WHERE gcm_id=?", $params);
     }
 
     /**
-     * Gets id's and titles of the electronic gradeables that have non-inherited teams
+     * Gets id's and titles of all electronic gradeables that have teams
      * @return string
      */
-    public function getAllElectronicGradeablesWithBaseTeams() {
-        $this->course_db->query('SELECT g_id, g_title FROM gradeable WHERE g_id=ANY(SELECT g_id FROM electronic_gradeable WHERE eg_team_assignment IS TRUE AND (eg_inherit_teams_from=\'\') IS NOT FALSE) ORDER BY g_title ASC');
+    public function getAllElectronicGradeablesWithTeams() {
+        $this->course_db->query('SELECT g_id, g_title FROM gradeable WHERE g_id=ANY(SELECT g_id FROM electronic_gradeable WHERE eg_team_assignment IS TRUE) ORDER BY g_title ASC');
         return $this->course_db->rows();
     }
 

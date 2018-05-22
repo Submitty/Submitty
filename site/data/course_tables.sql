@@ -139,7 +139,6 @@ CREATE TABLE electronic_gradeable (
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
-    eg_inherit_teams_from character varying(255) NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
 );
 
@@ -739,6 +738,13 @@ ALTER TABLE ONLY electronic_gradeable_data
 
 ALTER TABLE ONLY electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+--
+-- Name: eg_inherit_teams_from; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable 
+    ADD COLUMN IF NOT EXISTS eg_inherit_teams_from character varying(255) NOT NULL;
 
 
 --
