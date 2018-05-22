@@ -454,7 +454,7 @@ $(function() {
     Each student in the course is assigned to one registration section.<br>
     Students who have dropped the course will be assigned to the <em>NULL</em> registration section.<br>
     <br>
-    From the "Graders" tab in the top menu, each grader may be assigned to zero, one, or multiple registration sections.<br>
+    From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
     Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.<br>
     </p>
     <br />
@@ -462,7 +462,7 @@ $(function() {
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
         <div class="box half">
-            <h2>Student Counts in Registration Sections</h2>
+            <h2>Current Registration Section Counts</h2>
             <div class="half">
                 <table class="table table-bordered table-striped">
 HTML;
@@ -553,9 +553,9 @@ HTML;
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
         <div class="box half">
-            <h2>Student Counts in Rotating Sections</h2>
+            <h2>Current Rotating Section Counts</h2>
             <div class="half">
-                <h3>Registered Students (non NULL registration section)</h3>
+                <h3>Registered Students<br>(non NULL registration section)</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach($not_null_counts as $row) {
@@ -572,7 +572,7 @@ HTML;
                 </table>
             </div>
             <div class="half">
-                <h3>Students with Registration Section=NULL</h3>
+                <h3>Users with<br>Registration Section=NULL</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach ($null_counts as $row) {
