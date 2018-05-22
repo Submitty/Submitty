@@ -14,6 +14,7 @@ use app\models\GradeableComponent;
  * @method void setGradersAllSection()
  * @method void setGradersFromUserTypes()
  * @method void setTemplateList()
+ * @method void setInheritTeamsList()
  */
 class AdminGradeable extends AbstractModel {
     /** @property @var */
@@ -28,6 +29,8 @@ class AdminGradeable extends AbstractModel {
     protected $graders_from_usertypes = array();
     /** @property @var */
     protected $template_list =  array();
+    /** @property @var */
+    protected $inherit_teams_list = array();
 
 
 
@@ -71,6 +74,8 @@ class AdminGradeable extends AbstractModel {
     protected $eg_subdirectory = "";
     /** @property @var bool Is this a team assignment */
     protected $eg_team_assignment = false;
+    /** @property @var string The gradeable id to inherit teams from (blank if not inheriting) */
+    protected $eg_inherit_teams_from = "";
     /** @property @var int maximum allowed team size, Minimum must be 2*/
     protected $eg_max_team_size = 2;
     /** @property @var \DateTime Date when students cannot create/leave/join teams without instructor's help */

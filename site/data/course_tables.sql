@@ -739,6 +739,13 @@ ALTER TABLE ONLY electronic_gradeable_data
 ALTER TABLE ONLY electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
+--
+-- Name: eg_inherit_teams_from; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable 
+    ADD COLUMN IF NOT EXISTS eg_inherit_teams_from character varying(255) NOT NULL;
+
 
 --
 -- Name: electronic_gradeable_gid; Type: FK CONSTRAINT; Schema: public; Owner: -

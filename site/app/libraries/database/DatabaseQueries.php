@@ -1347,6 +1347,15 @@ WHERE gcm_id=?", $params);
     }
 
     /**
+     * Gets id's and titles of all electronic gradeables that have teams
+     * @return string
+     */
+    public function getAllElectronicGradeablesWithTeams() {
+        $this->course_db->query('SELECT g_id, g_title FROM gradeable WHERE g_id=ANY(SELECT g_id FROM electronic_gradeable WHERE eg_team_assignment IS TRUE) ORDER BY g_title ASC');
+        return $this->course_db->rows();
+    }
+
+    /**
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
      * @param string $g_id
      * @param string $user_id
