@@ -257,15 +257,16 @@ HTML;
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
-		$thread_id = $_GET['thread_id'] ?? -1;
+		// $thread_id = $currentThread;
+		
 		$return .= <<<HTML
-			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$thread_id})" value="tree">  
+			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
 			<label for="radio">Hierarchical</label>  
 
-			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$thread_id})" value="time">  
+			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
 			<label for="radio2">Chronological</label>  
 
-			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$thread_id})" value="alpha">  
+			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
 			<label for="radio3">Alphabetical</label>
 HTML;
 	}
@@ -328,13 +329,13 @@ HTML;
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
-			$return .= <<< HTML
+			$return .= <<<HTML
 
 					</div>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
-            $title_html .= <<< HTML
+            $title_html .= <<<HTML
             <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
@@ -352,7 +353,7 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
-                    $title_html .= <<< HTML
+                    $title_html .= <<<HTML
 					{$activeThreadTitle}</h3>
 HTML;
 					$first = true;
@@ -404,13 +405,15 @@ HTML;
 						}	
 					} else {
 						foreach($posts as $post){
+							if($thread_id == -1) {
+								$thread_id = $post["thread_id"];
+							}
 							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
 							if($first){
 								$first= false;
 							}			
 						}
 					}
-					
 			$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
@@ -585,7 +588,7 @@ HTML;
 			$visible_username = "Anonymous";
 		} 
 		$classes = "post_box";						
-		if($first){
+		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
 
@@ -594,130 +597,123 @@ HTML;
 		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
-							$return = <<<HTML
-								<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
+		$return = <<<HTML
+			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
 
-						if($first){
-                            $return .= $title_html;
-                        } 
+		if($first){
+            $return .= $title_html;
+        } 
 
-                        //handle converting links 
+        //handle converting links 
 
 
-                        //convert legacy htmlentities being saved in db
-                        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+        //convert legacy htmlentities being saved in db
+        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
 
-                        if(!empty($pre_post)){
-                        	$post_content = $pre_post;
-                        }
+        if(!empty($pre_post)){
+            $post_content = $pre_post;
+        }
 			
-				        $post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-                        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
-                        $accepted_schemes = array("https", "http");
-                        $pos = 0;
-                        if(count($result) > 0) {
-                        	foreach($result[1] as $url){
-                        		$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
-                        		$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-                        		if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+        $accepted_schemes = array("https", "http");
+        $pos = 0;
+        if(count($result) > 0) {
+            foreach($result[1] as $url){
+                $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+                $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+            	if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+                } else {
+            		$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+                }
+                if(!empty($pre_post)){
+                	$post_content = $pre_post;
+				} 
+				$pre_post = "";
+                $pos++;
+            }
+        }
+        //This code is for legacy posts that had an extra \r per newline
+        if(strpos($post['content'], "\r") !== false){
+            $post_content = str_replace("\r","", $post_content);
+        }
 
-                        		} else {
-                        			$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
-                        		}
-                        		if(!empty($pre_post)){
-                        			$post_content = $pre_post;
-                        		} $pre_post = "";
-                        		 $pos++;
-                        	}
-                        }
+        //end link handling
 
-                        //This code is for legacy posts that had an extra \r per newline
-                        if(strpos($post['content'], "\r") !== false){
-                        	$post_content = str_replace("\r","", $post_content);
-                        }
+        //handle converting code segments
 
-                        //end link handling
+        $codeBracketString = "&lbrack;&sol;code&rsqb;";
+        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+            $codeBracketString = "&NewLine;" . $codeBracketString;
+        }
 
-                        //handle converting code segments
+        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
 
-                        $codeBracketString = "&lbrack;&sol;code&rsqb;";
-                        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-                        	$codeBracketString = "&NewLine;" . $codeBracketString;
-                        }
-
-                        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
-
-						//end code segment handling
-						$return .= <<<HTML
-							<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
-							
-							
-							<hr style="margin-bottom:3px;">
-
+		//end code segment handling
+		$return .= <<<HTML
+			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
+			<hr style="margin-bottom:3px;">
 HTML;
-							if(!$first){
-								$return .= <<<HTML
-								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+		if($display_option == 'tree'){
+			if(!$first){
+				$return .= <<<HTML
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
-							} else {
-								$return .= <<<HTML
-								<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+			} else {
+				$return .= <<<HTML
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
-							}
-
-							$return .= <<<HTML
-								<span style="margin-top:8px;margin-left:10px;float:right;">							
+			}
+		}
+		$return .= <<<HTML
+			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
 
-if($this->core->getUser()->getGroup() <= 2){
-						$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
-						$visible_user_json = json_encode($visible_username);
-						$info_name = json_encode($info_name);
-						$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
-						$jscriptAnonFix = json_encode($jscriptAnonFix);
-						$return .= <<<HTML
-						<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+		if($this->core->getUser()->getGroup() <= 2){
+			$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
+			$visible_user_json = json_encode($visible_username);
+			$info_name = json_encode($info_name);
+			$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
+			$jscriptAnonFix = json_encode($jscriptAnonFix);
+			$return .= <<<HTML
+				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
-						if(!$first){
-							$return .= <<<HTML
-								<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
-HTML;
-						}
-						if($this->core->getUser()->getGroup() <= 2){
-							$wrapped_content = json_encode($post['content']);
-							$return .= <<<HTML
-
-							<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-							<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
-HTML;
-							} 
-
+		if(!$first){
 			$return .= <<<HTML
-			
-<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
+				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+HTML;
+		}
+		if($this->core->getUser()->getGroup() <= 2){
+			$wrapped_content = json_encode($post['content']);
+			$return .= <<<HTML
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
+HTML;
+		} 
+
+		$return .= <<<HTML
+		<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
 HTML;
 
-						if($post["has_attachment"]){
-							$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
-							$files = FileUtils::getAllFiles($post_dir);
-							foreach($files as $file){
-								$path = rawurlencode($file['path']);
-								$name = rawurlencode($file['name']);
-								$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-								$return .= <<<HTML
-							<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+		if($post["has_attachment"]){
+			$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
+			$files = FileUtils::getAllFiles($post_dir);
+			foreach($files as $file){
+				$path = rawurlencode($file['path']);
+				$name = rawurlencode($file['name']);
+				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$return .= <<<HTML
+					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
-
-							}
-							
-						}
-						$offset = $offset + 30;
+			}					
+		}
+			$offset = $offset + 30;
 						$return .= <<<HTML
 </div>
 
