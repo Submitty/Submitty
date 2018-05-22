@@ -5,14 +5,15 @@
 :file:     db_backup.py
 :language: python3
 :author:   Peter Bailie (Systems Programmer, Dept. of Computer Science, RPI)
+:date:     May 22 2018
 
 This script will take backup dumps of each individual Submitty course
 database.  This should be set up by a sysadmin to be run on the Submitty
 server as a cron job by root.  Recommend that this is run nightly.
 
-The semester code can be specified as a command line argument "-s".
+The term code can be specified as a command line argument "-t".
 The "-g" argument will guess the semester by the current month and year.
-Either -s or -g must be specified.
+Either -t or -g must be specified.
 
 Dumpfile expiration can be specified as a command line argument "-e".  This
 indicates the number of days of dumps to keep.  Older dumps will be purged.
@@ -86,11 +87,11 @@ def main():
 		raise SystemExit('Root required. Please contact your sysadmin for assistance.')
 
 	# READ COMMAND LINE ARGUMENTS
-	# Note that -s and -S are different args and mutually exclusive
+	# Note that -t and -g are different args and mutually exclusive
 	parser = argparse.ArgumentParser(description='Dump all Submitty databases for a particular academic term.')
-	parser.add_argument('-e', nargs='?', action='store', default=0, type=int, help='set number of days expiration of older dumps (default: no expiration).')
+	parser.add_argument('-e', action='store', nargs='?', type=int, default=0, help='Set number of days expiration of older dumps (default: no expiration).', metavar='days')
 	group = parser.add_mutually_exclusive_group(required=True)
-	group.add_argument('-s', nargs='?', action='store', help='Set the term code.')
+	group.add_argument('-t', action='store', nargs='?', type=str, help='Set the term code.', metavar='term code')
 	group.add_argument('-g', action='store_true', help='Guess term code based on calender month and year.')
 	args = parser.parse_args()
 
@@ -108,7 +109,7 @@ def main():
 		# if month <= 5: ... elif month >=8: ... else: ...
 		semester = 's' + year if today.month <= 5 else ('f' + year if today.month >= 8 else 'u' + year)
 	else:
-		semester = args.s
+		semester = args.t
 
 	# GET ACTIVE COURSES FROM 'MASTER' DB
 	try:

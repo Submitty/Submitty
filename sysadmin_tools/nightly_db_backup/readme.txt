@@ -1,4 +1,4 @@
-Nightly Database Backup Python Script Readme
+Nightly Database Backup Python Script Readme, May 22 2018
 
 THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
 COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
@@ -6,7 +6,7 @@ EXAMPLE FOR YOUR UNIVERSITY'S SYSTEM'S PROGRAMMER TO PROVIDE AN
 IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
 WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
 
-This script will read a course list, corresponding to a specific semester, from
+This script will read a course list, corresponding to a specific term, from
 the 'master' Submitty database.  With a course list, the script will use
 Postgresql's "pg_dump" tool to retrieve a SQL dump of the submitty 'master'
 database and each registered course's Submitty database of a specific semester.
@@ -14,21 +14,20 @@ The script also has cleanup functionality to automatically remove older dumps.
 
 --------------------------------------------------------------------------------
 
-The semester code can be specified as a command line argument as option "-s".
+The term code can be specified as a command line argument as option "-t".
 
 For example:
 
-./db_backup.py -s f17
+./db_backup.py -t f17
 
 will dump the submitty 'master' database and all courses registered in the fall
-2017 semester.  This option is useful to dump course databases of previous
-semesters, or to dump course databases that have a non-standard semester code.
+2017 term.  This option is useful to dump course databases of previous
+term, or to dump course databases that have a non-standard term code.
 
-Alternatively, the "-sauto" option will have the semester code automatically
-determined by the current month and year of the server's date.   e.g. April of
-2018 will be the semester code "s18".
+Alternatively, the "-g" option will have the semester code guessed by using the
+current month and year of the server's date.
 
-Either "-s" or "-sauto" is required.
+Either "-t" or "-g" is required.
 
 --------------------------------------------------------------------------------
 
@@ -42,25 +41,13 @@ Older dumps can be automatically purged with the command line option "-e".
 
 For example:
 
-./db_backup.py -e 7
+./db_backup.py -t f17 -e 7
 
 will purge any dumps with a stamp seven days or older.  Only dumps of the
-semester being processed will be purged.
+term being processed will be purged, in this example, 'f17'.
 
 The default expiration value is 0 (no expiration -- no files are purged) should
 this argument be ommitted.
-
---------------------------------------------------------------------------------
-
-Both command line options may be used.
-
-For example:
-
-./db_backup.py -s f17 -e 7
-
-will backup current databases for the Fall 2017 semester and purge old database
-dumps that are seven days or older of the Fall 2017 semester (all other semester
-dumps remain untouched).
 
 --------------------------------------------------------------------------------
 
