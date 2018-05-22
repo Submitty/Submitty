@@ -134,6 +134,7 @@ SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
+            'worker_user': 'submitty'
             'vcs_url': '',
             'authentication_method': 1,
             'institution_name' : '',
@@ -169,7 +170,9 @@ if args.worker:
 print('Hit enter to use default in []')
 print()
 
-if not args.worker:
+if args.worker:
+    WORKER_USER = get_input('What user?', defaults['database_host'])
+else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
@@ -258,7 +261,9 @@ config['hwcron_user'] = HWCRON_USER
 config['hwcron_uid'] = HWCRON_UID
 config['hwcron_gid'] = HWCRON_GID    
 
-if not args.worker:
+if args.worker:
+    config['worker_user'] = WORKER_USER
+else:
     config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 
     config['hwphp_user'] = HWPHP_USER

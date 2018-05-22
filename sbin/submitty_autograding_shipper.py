@@ -75,7 +75,6 @@ def update_and_install_autograding_worker(name, formatted_entry):
 # ==================================================================================
 # Tells a foreign autograding worker to update its code (WIP) and reinstall.
 def update_worker_code(name, autograding_worker_to_ship):
-    
     try:
         user = autograding_worker_to_ship[name]['username']
         host = autograding_worker_to_ship[name]['address']
@@ -99,6 +98,7 @@ def update_worker_code(name, autograding_worker_to_ship):
             return
         try:
             command = "python3 {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "update_and_install_worker.py"))
+            print(command)
             (stdin, stdout, stderr) = ssh.exec_command(command)
             status = int(stdout.channel.recv_exit_status())
             if status == 0:
@@ -106,8 +106,8 @@ def update_worker_code(name, autograding_worker_to_ship):
                 print("Success! Good update!")
                 success = True
             else:
-                grade_items_logging.log_message(JOB_ID, message="Failure, bad update :(".format(name))
-                print("Failure, bad update :(")
+                grade_items_logging.log_message(JOB_ID, message="Failure, bad update on {0} :( Status code {1}".format(name, status))
+                print("Failure, bad update on {0} :( Status code {1}".format(name, status))
                 success = False
         except Exception as e:
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not update {0} due to error {1}: ".format(host, str(e)))
@@ -503,6 +503,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock, i
         #If this machine started out down, try to find it every 30 seconds.
         if i_am_alive == False:
             time.sleep(30)
+            print("trying again...")
             i_am_alive = update_and_install_autograding_worker(my_name, my_data)
             continue
         else:
