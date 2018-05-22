@@ -1482,7 +1482,7 @@ HTML;
             }
             else if($show_graded_info) {
                 $nl = "<br>";
-                $initial_text = $question->getGradedTAComments($nl, false);
+                $initial_text = $question->getGradedTAComments($nl, false, $gradeable);
             }
 
 
