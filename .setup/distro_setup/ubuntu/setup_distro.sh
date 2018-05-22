@@ -78,7 +78,6 @@ if [ ${VAGRANT} == 1 ]; then
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##
 ##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
-##    ${SUBMISSION_URL}/hwgrading (tagrading)         ##
 ##    ${GIT_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
@@ -123,7 +122,7 @@ apt-get install -qqy libpam-passwdqc
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3 libapache2-mod-fastcgi
-apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip
+apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy php-xdebug
@@ -141,6 +140,8 @@ libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
+
+apt-get install -qqy ninja-build
 
 #CMAKE
 echo "installing cmake"

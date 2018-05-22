@@ -23,12 +23,14 @@ popd
 # --------------------------------------
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
-wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
-mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+JUNIT_VER=4.12
+HAMCREST_VER=1.3
+
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
