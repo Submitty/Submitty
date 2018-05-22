@@ -97,8 +97,7 @@ def update_worker_code(name, autograding_worker_to_ship):
             print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             return
         try:
-            command = "python3 {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "update_and_install_worker.py"))
-            print(command)
+            command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "update_and_install_worker.py"))
             (stdin, stdout, stderr) = ssh.exec_command(command)
             status = int(stdout.channel.recv_exit_status())
             if status == 0:
