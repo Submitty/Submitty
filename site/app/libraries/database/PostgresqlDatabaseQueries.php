@@ -616,7 +616,15 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
-public function getAverageForGradeable($g_id, $section_key, $team_id) {
+public function getAverageForGradeable($g_id, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
@@ -640,13 +648,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
         LEFT JOIN gradeable_data AS gd ON gd.gd_id=gcd.gd_id
         LEFT JOIN (
-          SELECT egd.g_id, egd.user_id, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding
+          SELECT egd.g_id, egd.".$user_or_team_id.", (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding
           FROM electronic_gradeable_version AS egv
-          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.user_id=egd.user_id AND active_version=g_version
+          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.".$user_or_team_id."=egd.".$user_or_team_id." AND active_version=g_version
           )AS auto
-        ON gd.g_id=auto.g_id AND gd_user_id=auto.user_id
-        INNER JOIN users AS u ON u.user_id = auto.user_id
-        WHERE gc.g_id=? AND u.{$section_key} IS NOT NULL
+        ON gd.g_id=auto.g_id AND gd_user_id=auto.".$user_or_team_id."
+        INNER JOIN ".$users_or_teams." AS ".$u_or_t." ON ".$u_or_t.".".$user_or_team_id." = auto.".$user_or_team_id."
+        WHERE gc.g_id=? AND ".$u_or_t.".{$section_key} IS NOT NULL
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
