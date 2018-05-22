@@ -106,5 +106,6 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY seeking_team ADD CONSTRAINT seeking_team_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE FUNCTION get_allowed_late_days(character varying, timestamp with time zone) RETURNS integer AS $$ SELECT allowed_late_days FROM late_days WHERE user_id = $1 AND since_timestamp <= $2 ORDER BY since_timestamp DESC LIMIT 1; $$ LANGUAGE SQL'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
-            
-        print ("\n")
+
+        # add user/database
+        print("\n")
