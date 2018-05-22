@@ -546,7 +546,7 @@ HTML;
         }else{
             $background = "red-background";
         }
-        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from Grader: " . $gradeable->getOverallComment() : "";
+        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from Grader: " . htmlentities($gradeable->getOverallComment()) : "";
         //late day data
         $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
@@ -563,7 +563,7 @@ HTML;
         }
         $return = <<<HTML
         <div class = "sub">
-            <div class="box half" style="padding: 10px; width: 40%;">
+            <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
                 <p>Graded by: {$graders}</p>
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
