@@ -592,7 +592,7 @@ function saveGeneralComment(gradeable_id, user_id, active_version, sync = true) 
     var gradeable_comment = comment_row.val();
     var current_question_text = $('#rubric-textarea-custom');
     var overwrite = $('#overwrite-id').is(":checked");
-    current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
+    $(current_question_text[0]).children("pre").text(gradeable_comment);
     
     ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, function() {
     });

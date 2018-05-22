@@ -1576,7 +1576,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$overallComment}</pre></span>
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre style="white-space: pre-wrap;word-break: break-all;">{$overallComment}</pre></span>
                         </div>
                     </td>
                 </tr>
