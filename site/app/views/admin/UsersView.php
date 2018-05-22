@@ -404,7 +404,8 @@ HTML;
                 </table>
             </div>
         </div>    
-    </div>    
+    </div>
+    </form>    
 </div>
 <div class="content">
     <h2>Setup Rotating Sections</h2>
