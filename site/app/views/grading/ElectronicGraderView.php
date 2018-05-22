@@ -25,7 +25,6 @@ class ElectronicGraderView extends AbstractView {
         $rotating_but_not_registered,
         $section_type,
         $unsubmitted_students) {
-
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
@@ -36,7 +35,6 @@ class ElectronicGraderView extends AbstractView {
         $total = 0;
         $no_team_total = 0;
         $team_total=0;
-        //print_r($sections);
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -48,10 +46,6 @@ class ElectronicGraderView extends AbstractView {
                $team_total += $section['team'];
             }
         }
-        //Fixing total_students bug
-        if($gradeable->isTeamAssignment()){
-         //   $total_students+=$no_team_total;
-        }
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
         }
@@ -61,8 +55,6 @@ class ElectronicGraderView extends AbstractView {
         else{
             $percentage = number_format(($graded / $total) * 100, 1);
         }
-        //echo("Total submitted is:");
-        //echo($total_submitted);
         $return = <<<HTML
 <div class="content">
     <h2>Status of {$gradeable->getName()}</h2>
@@ -81,17 +73,12 @@ HTML;
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
-           // echo("graded is ");
-           // echo($graded);
-           // echo("change_value is ");
-           // echo($change_value);
             if($peer) {
                 $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
                 $show_graded = $graded/$change_value;
                 $show_total = $total/$change_value;
             }
             $submitted_percentage = round(($show_total / $total_students) * 100, 1);
-
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
             if($section_type === "rotating_section" && $this->core->getUser()->accessFullGrading()){
@@ -102,7 +89,6 @@ HTML;
                     array_push($warnings, "There are ".$rotating_but_not_registered." unregistered students with a rotating section.");
                 }
             }
-
             $return .= <<<HTML
     <div class="sub">
         <div class="box half">
@@ -167,8 +153,6 @@ HTML;
                     else {
                         $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
-                  //  echo("change_value is:");
-                   // echo($change_value);
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
@@ -196,7 +180,6 @@ HTML;
                         }
                     }
                     $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
-
                     $return .= <<<HTML
                 Section {$key}: {$graders}<br />
 HTML;
@@ -238,7 +221,8 @@ HTML;
                     }
                     if($gradeable->getTotalAutograderNonExtraCreditPoints() == 0) {
                         // Don't display any autograding statistics since this gradeable has none
-                    } else {
+                    } 
+                    else {
                         $return .= <<<HTML
             <br/><b>Statistics for Auto-Grading: </b><br/>
             <div style="margin-left: 20px">
@@ -253,7 +237,7 @@ HTML;
 			    $percentage = 0;
                             if($gradeable->getTotalAutograderNonExtraCreditPoints() != 0) {
                                 $percentage = round($autograded_average->getAverageScore()/$gradeable->getTotalAutograderNonExtraCreditPoints()*100);
-			    }
+			                } 
                             $return .= <<<HTML
                 Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} ({$percentage}%)<br/>
                 Standard Deviation: {$autograded_average->getStandardDeviation()} <br/>
@@ -298,8 +282,6 @@ HTML;
 HTML;
                         }
                 }
-                //This else encompasses the above calculations for Teamss
-                //END OF ELSE
                 $return .= <<<HTML
             </div>
         </div>
@@ -945,7 +927,7 @@ HTML;
 HTML;
     //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
     if(!$studentNotInSection){
-    $return .= <<< HTML
+        $return .= <<< HTML
         <a {$prev_href}><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
 HTML;
     }
@@ -959,7 +941,7 @@ HTML;
 HTML;
     //If the student is in our section, add a clickable next arrow, else add a grayed out one.
     if(!$studentNotInSection){
-    $return .= <<<HTML
+        $return .= <<<HTML
     <a {$next_href}><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
 HTML;
     }
@@ -1052,7 +1034,7 @@ $return .= <<<HTML
     </script>
 HTML;
         if(!$peer) {
-        $return .= <<<HTML
+            $return .= <<<HTML
     <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
 HTML;
         }
