@@ -281,7 +281,7 @@ HTML;
             $return .= <<<HTML
     <div style="width: 60%">
         Password:<br />
-        <input type="password" name="user_password" placeholder="New Password" />    
+        <input type="password" name="user_password" placeholder="New Password" />
     </div>
 HTML;
         }
@@ -296,6 +296,7 @@ HTML;
 HTML;
         return $return;
     }
+
 
     /**
      * Creates the form box to be displayed when copying or downloading emails on the students/graders pages
@@ -413,7 +414,7 @@ HTML;
         return $return;
     }
 
-    public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
+    public function rotatingUserForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
         $return = <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -445,10 +446,149 @@ $(function() {
 });
 </script>
 <div class="content">
+    <h2>Setup Registration Sections</h2>
+    <p>
+    Large courses are often split into multiple <em>registrations sections</em> for laboratory or recitation class time.<br>
+    Courses that are cross-listed in different departments may have multiple course codes/prefixes.<br>
+    <br>
+    Each student in the course is assigned to one registration section.<br>
+    Students who have dropped the course will be assigned to the <em>NULL</em> registration section.<br>
+    <br>
+    From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
+    Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.<br>
+    </p>
+    <br />
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_registration_sections'))}" method="POST">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <div class="sub">
+        <div class="box half">
+            <h2>Current Registration Section Counts</h2>
+            <div class="half">
+                <table class="table table-bordered table-striped">
+HTML;
+        $reg_sections_count = array();
+        foreach ($students as $student) {
+            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+            if (array_key_exists($registration, $reg_sections_count)) {
+                $reg_sections_count[$registration] = $reg_sections_count[$registration]+1;
+            }
+            else {
+                $reg_sections_count[$registration] = 1;
+            }
+        }
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            if (array_key_exists($section, $reg_sections_count)) {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>{$reg_sections_count[$section]}</td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>0</td>
+HTML;
+            }
+        }
+        if (array_key_exists('NULL', $reg_sections_count)) {
+            $return .= <<<HTML
+                <tr>
+                    <td>Section NULL</td>
+                    <td>{$reg_sections_count['NULL']}</td>
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section NULL</td>
+                        <td>0</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
+        <div class="box half">
+            <br /><br />
+            <div class="option">
+                <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Add Registration Section</div>
+                    <div class="option-alt">
+                        Enter a registration section which is not already a registration section.
+                    </div>
+                </div>
+            </div>
+            <div class="option">
+                <div class="option-input"><input type="text" name="delete_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Delete a Registration Section</div>
+                    <div class="option-alt">
+                        Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
+                    </div>
+                </div><br />
+                <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+<div class="content">
     <h2>Setup Rotating Sections</h2>
+    <p>
+    Rotating sections are an alternate way to divide the task of grading a large course enrollment among multiple graders.<br>
+    If the registration sections are of significantly different size, rotating sections will allow a more equitable assignment of grading tasks.<br>
+    Furthermore, shuffling or rotating the assignment of graders to rotating sections for each assignment will ensure that each student <br>
+    receives feedback from multiple graders throughout the term and can mitigate the variations in ease or strictness between the graders.<br>
+    <br>
+    Each registered student is assigned to a rotating section for the duration of the course.<br>
+    For each assignment with manual/TA grading assigned by rotating sections, each grader is assigned zero, one, or multiple rotating sections.<br>
+    The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.<br>
+    </p>
+    <br />
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
+        <div class="box half">
+            <h2>Current Rotating Section Counts</h2>
+            <div class="half">
+                <h3>Registered Students<br>(non NULL registration section)</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach($not_null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+            <div class="half">
+                <h3>Users with<br>Registration Section=NULL</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach ($null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
         <div class="box half">
             Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections
             <select name="rotating_type">
@@ -466,44 +606,7 @@ $(function() {
             </label><br />
             <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
         </div>
-        <div class="box half">
-            <h2>Student Counts in Rotating Sections</h2>
-            <div class="half">
-                <h3>Registered Students (non NULL registration section)</h3>
-                <table class="table table-bordered table-striped">
-HTML;
-        foreach($not_null_counts as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return .= <<<HTML
-                    <tr>
-                        <td>Section {$row['rotating_section']}</td>
-                        <td>{$row['count']}</td>
-HTML;
-        }
-        $return .= <<<HTML
-                </table>
-            </div>
-            <div class="half">
-                <h3>Students with Registration Section=NULL</h3>
-                <table class="table table-bordered table-striped">
-HTML;
-        foreach ($null_counts as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return .= <<<HTML
-                    <tr>
-                        <td>Section {$row['rotating_section']}</td>
-                        <td>{$row['count']}</td>
-HTML;
-        }
-        $return .= <<<HTML
-                </table>
-            </div>
-        </div>
-    </div>
+     </div>
     </form>
 </div>
 HTML;
