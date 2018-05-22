@@ -256,16 +256,15 @@ HTML;
 			</div>
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-		// $thread_id = $currentThread;
-		
-		$return .= <<<HTML
+			$return .= <<<HTML
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
 			<label for="radio">Hierarchical</label>  
 
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
-			<label for="radio2">Chronological</label>  
-
+			<label for="radio2">Chronological</label>
+HTML;
+	if($this->core->getUser()->getGroup() <= 2){
+			$return .= <<<HTML
 			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
 			<label for="radio3">Alphabetical</label>
 HTML;
