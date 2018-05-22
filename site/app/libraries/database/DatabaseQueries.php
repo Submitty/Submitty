@@ -1355,13 +1355,12 @@ WHERE gcm_id=?", $params);
      * @return string $team_id
      */
     public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM team_ids");
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
         if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5-strlen($team_id_prefix)) . $team_id_prefix;
         $team_id = "{$team_id_prefix}_{$user_id}";
 
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
-        $this->course_db->query("INSERT INTO team_ids (team_id) VALUES(?)", array($team_id));
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
         return $team_id;
@@ -1427,18 +1426,7 @@ WHERE gcm_id=?", $params);
           WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=? AND t.state=0", array($g_id, $user_id));
     }
 
-    /**
-     * Create a team which is imported through csv
-     * @param string $g_id
-     * @param string $team_id
-     * @param string $registration_section
-     * @param string $rotation_section
-     */
-    public function addImportedTeamToNewGradeable($g_id, $team_id, $registration_section, $rotating_section){
-        $params = array($team_id, $g_id, $registration_section, $rotating_section);
-        $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
-    }
-
+    
     /**
      * Return Team object for team whith given Team ID
      * @param string $team_id

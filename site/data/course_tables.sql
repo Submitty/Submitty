@@ -442,13 +442,6 @@ CREATE TABLE users (
     CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
---
--- Name: team_ids; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE team_ids (
-    team_id character varying(255) NOT NULL
-);
 
 --
 -- Name: gradeable_teams; Type: TABLE; Schema: public; Owner: -
@@ -699,21 +692,12 @@ ALTER TABLE ONLY sessions
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
 
-
---
--- Name: team_ids_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY team_ids
-    ADD CONSTRAINT team_ids_pkey PRIMARY KEY (team_id);
-
-
 --
 -- Name: gradeable_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY gradeable_teams
-    ADD CONSTRAINT gradeable_teams_pkey PRIMARY KEY (team_id, g_id);
+    ADD CONSTRAINT gradeable_teams_pkey PRIMARY KEY (team_id);
 
 
 --
@@ -745,7 +729,7 @@ ALTER TABLE ONLY electronic_gradeable_data
 --
 
 ALTER TABLE ONLY electronic_gradeable_data
-    ADD CONSTRAINT electronic_gradeable_data_team FOREIGN KEY (team_id) REFERENCES team_ids(team_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT electronic_gradeable_data_team FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 
 --
@@ -777,7 +761,7 @@ ALTER TABLE ONLY electronic_gradeable_version
 --
 
 ALTER TABLE ONLY electronic_gradeable_version
-    ADD CONSTRAINT electronic_gradeable_version_team FOREIGN KEY (team_id) REFERENCES team_ids(team_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT electronic_gradeable_version_team FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 
 --
@@ -859,7 +843,7 @@ ALTER TABLE ONLY gradeable_data
 --
 
 ALTER TABLE ONLY gradeable_data
-    ADD CONSTRAINT gradeable_data_gd_team_id_fkey FOREIGN KEY (gd_team_id) REFERENCES team_ids(team_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT gradeable_data_gd_team_id_fkey FOREIGN KEY (gd_team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 
 --
@@ -988,21 +972,12 @@ ALTER TABLE ONLY users
 ALTER TABLE ONLY gradeable_teams
     ADD CONSTRAINT gradeable_teams_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
-
---
--- Name: gradeable_teams_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY gradeable_teams
-    ADD CONSTRAINT gradeable_teams_team_id_fkey FOREIGN KEY (team_id) REFERENCES team_ids(team_id) ON DELETE CASCADE;
-
-
 --
 -- Name: teams_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY teams
-    ADD CONSTRAINT teams_team_id_fkey FOREIGN KEY (team_id) REFERENCES team_ids(team_id) ON DELETE CASCADE;
+    ADD CONSTRAINT teams_team_id_fkey FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
 
 
 --

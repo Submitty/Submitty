@@ -451,7 +451,7 @@ class ElectronicGraderController extends GradingController {
 
         $row_num=1;
         $error_message="";
-        $team_ids = array();
+        $new_teams_members = array();
         foreach($contents as $content) {
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
@@ -464,14 +464,16 @@ class ElectronicGraderController extends GradingController {
                 continue;
             }
             $team_id = $vals[3];
-            $team = $this->core->getQueries()->getTeamById($team_id);
-            if($team === null) {
-                $error_message .= "ERROR on row {$row_num}, no team with given team_id<br>";
-                continue;
+            $user_id = $vals[2];
+            
+            if ($this->core->getQueries()->getUserById($user_id) === null) {
+            	$error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
+                continue;	
             }
-            if(!in_array($team_id, $team_ids)) {
-                array_push($team_ids, $team_id);
+            if(!array_key_exists($team_id, $new_teams_members)) {
+            	$new_teams_members[$team_id] = array();
             }
+            array_push($new_teams_members[$team_id], $user_id);
         }
 
         if($error_message != "") {
@@ -485,30 +487,9 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($return_url);
         }    
 
-        foreach($team_ids as $team_id) {
-            $team = $this->core->getQueries()->getTeamById($team_id);
-            $this->core->getQueries()->addImportedTeamToNewGradeable($gradeable_id, $team_id, $team->getRegistrationSection(), $team->getRotatingSection());
-
-            $this->core->addSuccessMessage("New Team {$team_id} imported to the gradeable");
-
-            $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
-            if (!FileUtils::createDir($user_path)) {
-                $this->core->addErrorMEssage("Failed to make folder for this assignment for the team {$team_id}");
-                $this->core->redirect($return_url);
-            }
-
-            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
-            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
-            
-            $json = array("team_history" => array());
-            foreach($team->getMembers() as $member_id) {
-                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,"admin_user" => $this->core->getUser()->getId(), "added_user" => $member_id);
-            }
-
-            if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
-                $this->core->addErrorMEssage("Failed to write to team history to settings file for team {$team_id}");
-                $this->core->redirect($return_url);   
-            }
+        foreach($new_teams_members as $team_id => $members) {
+        	$leader_id = $members[0];
+        	ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader_id, $members);
         }
 
         $this->core->addSuccessMessage("All Teams are imported to the gradeable");

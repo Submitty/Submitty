@@ -375,12 +375,12 @@ HTML;
     if ($gradeable->isTeamAssignment()) {
         if(count($all_teams) > 0) {
             $return .= <<<HTML
-            <a style="float: right;" class="btn btn-primary" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'export_teams', 'gradeable_id'=>$gradeable->getId()))}">Export Teams</a>
+            <a style="float: right;" class="btn btn-primary" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'export_teams', 'gradeable_id'=>$gradeable->getId()))}">Export Teams Members</a>
 HTML;
         }
         if(count($all_teams) == 0) {
             $return .= <<<HTML
-           <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams</button>
+           <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
 HTML;
         }
     }        
@@ -920,10 +920,10 @@ HTML;
     public function importTeamForm($gradeable) {
         $return = <<<HTML
 <div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
-    <h2>Import Teams</h2> 
+    <h2>Import Teams Members</h2> 
     <p>&emsp;</p>
     <p>Format of the teams should be csv with 6 columns:<br />First Name, Last Name, User id, Team id, Team Registration Section, Team Rotation Section<br /><br />
-        Note: Teams that will be imported should already exists in the course on some other gradeable.
+        Note: Imported Teams will be allotted new team_ids , team registration section, team rotation section.
     </p><br />
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
