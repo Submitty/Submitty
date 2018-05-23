@@ -55,7 +55,6 @@ class UsersController extends AbstractController {
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
         $this->renderDownloadForm('user', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
     public function listGraders() {

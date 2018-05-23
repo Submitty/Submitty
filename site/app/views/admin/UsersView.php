@@ -350,45 +350,4 @@ HTML;
 HTML;
         return $return;
     }
-
-    public function classListForm($use_database) {
-        if ($use_database) {
-            $num_cols = 7;
-            $password_col = "password, ";
-        }
-        else {
-            $num_cols = 6;
-            $password_col = "";
-        }
-        $return = <<<HTML
-<div class="popup-form" id="class-list-form">
-    <h2>Upload Classlist</h2>
-    <p>&emsp;</p>
-    <p>
-        Format your class list as an .xlsx or .csv file with {$num_cols} columns:<br>
-        &emsp;username, first name, last name, email, registration section, {$password_col}preferred first name<br>
-    </p>
-    <p>&emsp;</p>
-    <p>
-        Preferred first name is optional.<br>
-        Registration section can be null.<br>
-        Do not use a header row.<br>
-    </p>
-    <br />
-    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_class_list'))}" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
-        <br />
-        <div>
-            <input type="file" name="upload" accept=".xlsx, .csv">
-        </div>
-        <div style="float: right; width: auto">
-            <a onclick="$('#class-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-            <input class="btn btn-primary" type="submit" value="Submit" />
-        </div>
-    </form>
-</div>
-HTML;
-        return $return;
-    }
 }
