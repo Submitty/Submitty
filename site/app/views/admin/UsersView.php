@@ -136,106 +136,12 @@ HTML;
      * @return string
      */
     public function userForm($reg_sections, $rot_sections, $action, $use_database=false) {
-        $url = array('component' => 'admin', 'page' => 'users', 'action' => $action);
-
-        $reg_select_html = "";
-        foreach ($reg_sections as $section) {
-            $section = $section['sections_registration_id'];
-            $reg_select_html .= "<option value='{$section}'>Section {$section}</option>\n";
-        }
-
-        $rot_select_html = "";
-        foreach ($rot_sections as $section) {
-            $section = $section['sections_rotating_id'];
-            $rot_select_html .= "<option value='{$section}'>Section {$section}</option>\n";
-        }
-
-        $return = <<<HTML
-<div class="popup-form" id="edit-user-form">
-<form method="post" action="{$this->core->buildUrl($url)}">
-    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-    <input type="hidden" name="edit_user" value="false" />
-    <div style="">
-            User ID:<br />
-        <input class="readonly" type="text" name="user_id" readonly="readonly" />
-    </div>
-    <div>
-        First Name:<br />
-        <input type="text" name="user_firstname" />
-    </div>
-    <div>
-        Preferred First Name:<br />
-        <input type="text" name="user_preferred_firstname" />
-    </div>
-    <div>
-        Last Name:<br />
-        <input type="text" name="user_lastname" />
-    </div>
-    <div>
-        Email:<br />
-        <input type="text" name="user_email" />
-    </div>
-    <div>
-        Registered Section:<br />
-        <select name="registered_section">
-            <option value="null">Not Registered</option>
-            {$reg_select_html}
-        </select>
-    </div>
-    <div style="width: 62%">
-            Group:<br />
-        <select name="user_group">
-            <option value="1">Instructor</option>
-            <option value="2">Full Access Grader (Grad TA)</option>
-            <option value="3">Limited Access Grader (Mentor)</option>
-            <option value="4">Student</option>
-        </select>
-    </div>
-    <div>
-        Rotating Section:<br />
-        <select name="rotating_section">
-            <option value="null">No Section</option>
-            {$rot_select_html}
-        </select>
-    </div>
-    <div style="width: 70%">
-        <input type="checkbox" id="manual_registration" name="manual_registration">
-        <label for="manual_registration">Manually Registered User (no automatic updates)</label>
-    </div>
-    <div style="width: 100%">
-        <h3>Assigned Sections (Graders Only)</h3>
-HTML;
-        foreach ($reg_sections as $section) {
-            $section = $section['sections_registration_id'];
-            $return .= <<<HTML
-
-        <div style="width: 20%">
-            <input type="checkbox" id="grs_{$section}" name="grading_registration_section[]" value="{$section}">
-            <label for="grs_{$section}">Section {$section}</label>
-        </div>
-HTML;
-        }
-        $return .= <<<HTML
-    </div>
-HTML;
-        if ($use_database) {
-            $return .= <<<HTML
-    <div style="width: 60%">
-        Password:<br />
-        <input type="password" name="user_password" placeholder="New Password" />
-    </div>
-HTML;
-        }
-
-        $return .= <<<HTML
-    <div style="float: right; width: auto; margin-top: 10px">
-        <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-        <input class="btn btn-primary" type="submit" value="Submit" />
-    </div>
-</form>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("admin/users/UserForm.twig", [
+            "reg_sections" => $reg_sections,
+            "rot_sections" => $rot_sections,
+            "action" => $action,
+            "use_database" => $use_database
+        ]);
     }
 
 
