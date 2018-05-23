@@ -19,7 +19,73 @@ jobs:
     - php: 7.2
 
   include:
+    # Warm up the pip and composer caches to use it for the rest of the build stages
+    - &00-cache
+      stage: 00 warm up cache
+      php: 7.0
+      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - pushd site
+        - travis_retry composer install --prefer-dist --no-interaction
+        - popd
+        - pip3 install -U pip
+        - pip3 install python-pam
+        - pip3 install PyYAML
+        - pip3 install psycopg2-binary
+        - pip3 install sqlalchemy
+        - pip3 install pylint_runner
+        - pip3 install python-dateutil
+        - pip3 install selenium
+        - pip3 install pause
+        - pip3 install tzlocal
+      script: skip
+    - <<: *00-cache
+      php: 7.1
+    - <<: *00-cache
+      php: 7.2
 
+    # Lint the codebase to ensure that the code is compliant to our system
+    - &01-lint
+      stage: 01 lint
+      php: 7.0
+      script:
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+    - <<: *01-lint
+      php: 7.1
+    - <<: *01-lint
+      php: 7.2
+
+    - &02-php-unit
+      stage: 02 unit test
+      php: 7.0
+      script:
+        - pushd site
+        - vendor/bin/phpunit --version
+        - vendor/bin/phpunit --configuration tests/phpunit.xml
+        - popd
+      after_success:
+        - pushd site
+        - travis_retry php vendor/bin/coveralls -v
+        - popd
+    - <<: *02-php-unit
+      php: 7.1
+    - <<: *02-php-unit
+      php: 7.2
+
+    - &02-python-unit
+      language: python
+      python: 3.4
+      install:
+        - pip3 install -U pip
+        - pip3 install tzlocal
+      script:
+        - pushd python_submitty_utils
+        - python3 setup.py test
+        - popd
+    - <<: *02-python-unit
+      python: 3.5
+    - <<: *02-python-unit
+      python: 3.6
 
     - &03-e2e
       stage: 03 e2e test
@@ -110,7 +176,72 @@ jobs:
         - sleep 3 # give xvfb some time to start
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+    - <<: *03-e2e
+      php: 7.1
+    - <<: *03-e2e
+      php: 7.2
+    - <<: *03-e2e
+      php: 7.0
+      env: AUTH_METHOD=2
+    - <<: *03-e2e
+      php: 7.1
+      env: AUTH_METHOD=2
+    - <<: *03-e2e
+      php: 7.2
+      env: AUTH_METHOD=2
 
+    # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
+    # it
+    - &04-integration
+      stage: Integration test
+      language: cpp
+      addons:
+        apt:
+          sources:
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+          packages:
+            - build-essential
+            - automake
+            - cmake
+            - g++-multilib
+            - libseccomp2
+            - seccomp
+            - libseccomp-dev
+            - valgrind
+            - pkg-config
+            - flex
+            - bison
+            - poppler-utils
+            - libpcre3
+            - libpcre3-dev
+            - unzip
+            - libboost-all-dev
+      env: CLANG_VER="5.0.1"
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      install:
+        - sudo apt-get install clang
+        - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
+        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
+        - mkdir ${HOME}/clang+llvm
+        - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
+        - export PATH=${HOME}/clang+llvm/bin:${PATH}
+        - pip3 install -U pip
+        - pip3 install PyYAML
+        - pip3 install python-dateutil
+        - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
+        - python3 setup.py install
+        - popd
+        - sudo chmod -R 555 /usr/local/lib/python*/
+        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
+        - sudo ./.setup/travis/autograder.sh
+        - ./.setup/travis/setup.sh
+        - sudo ./.setup/travis/setup_test_suite.sh
+      script:
+        - sudo /usr/local/submitty/test_suite/integrationTests/run.py
+    - <<: *04-integration
+      env: CLANG_VER="6.0.0"
 
 notifications:
   email: false
