@@ -63,7 +63,7 @@ HTML;
         $return .= <<<HTML
 </head>
 <script>var onAjaxInit;</script>
-<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}'); if (onAjaxInit) { onAjaxInit(); }">
+<body data-site-url="{$this->core->getConfig()->getSiteUrl()}" data-csrf-token="{$this->core->getCsrfToken()}" onload="if (onAjaxInit) { onAjaxInit(); }">
 {$messages}
 <div id="container">
 
@@ -85,7 +85,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Sections</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
@@ -94,7 +94,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absence Extensions</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">Grade Summaries / CSV Report</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}">Plagiarism Detection</a>

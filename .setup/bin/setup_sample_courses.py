@@ -33,7 +33,6 @@ import sys
 
 from submitty_utils import dateutils
 
-
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
@@ -622,7 +621,7 @@ class Course(object):
         add_to_group(course_group, "hwphp")
         add_to_group(course_group, "hwcron")
         add_to_group(course_group, "hwcgi")
-        os.system("{}/bin/create_course.sh {} {} {} {}"
+        os.system("{}/sbin/create_course.sh {} {} {} {}"
                   .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
 
@@ -858,7 +857,7 @@ class Course(object):
                                   endorsed_by=postData[7],
                                   resolved = True if postData[8] == "t" else False,
                                   type=postData[9],
-                                  has_attachment=0)
+                                  has_attachment=False)
 
             
             

@@ -46,7 +46,7 @@ GROUP BY user_id
 WHERE user_id=?", array($user_id));
         return $this->course_db->row();
     }
-    
+
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
@@ -126,9 +126,9 @@ VALUES (?,?,?,?,?,?)", $params);
         $params[] = $user->getId();
 
         $this->submitty_db->query("
-UPDATE users 
-SET 
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, 
+UPDATE users
+SET
+  user_firstname=?, user_preferred_firstname=?, user_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 
@@ -286,7 +286,7 @@ SELECT";
   egd.submission_time,
   egv.highest_version,
   COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
-  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late,
+  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)))/86400)::integer) AS days_late,
   get_allowed_late_days(u.user_id, eg.eg_submission_due_date) AS student_allowed_late_days
 FROM users AS u
 NATURAL JOIN gradeable AS g";
@@ -587,7 +587,7 @@ ORDER BY gc_order
         }
         return $return;
     }
-    
+
     public function getAverageAutogradedScores($g_id, $section_key) {
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
@@ -649,7 +649,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
   FROM (
     SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
-    FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u 
+    FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u
     CROSS JOIN (
       SELECT
         DISTINCT g.g_id,
@@ -658,7 +658,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       LEFT JOIN
         grading_rotating AS gr ON g.g_id = gr.g_id
       WHERE g_grade_by_registration = 'f'
-    ) AS g 
+    ) AS g
   ) as gu
   LEFT JOIN (
     SELECT
@@ -748,5 +748,48 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         }
         return $return;
     }
+
+    /**
+     * "Upserts" a given user's late days allowed effective at a given time.
+     *
+     * Requires Postgresql 9.5+
+     * About $csv_options:
+     * default behavior is to overwrite all late days for user and timestamp.
+     * null value is for updating via form where radio button selection is
+     * ignored, so it should do default behavior.  'csv_option_overwrite_all'
+     * invokes default behavior for csv upload.  'csv_option_preserve_higher'
+     * will preserve existing values when uploaded csv value is lower.
+     *
+     * @param string $user_id
+     * @param string $timestamp
+     * @param integer $days
+     * @param string $csv_option value determined by selected radio button
+     * @todo maybe process csv uploads as a batch transaction
+     */
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+        //Update query and values list.
+		$query = "
+            INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
+            VALUES(?,?,?)
+            ON CONFLICT (user_id, since_timestamp) DO UPDATE
+            SET allowed_late_days=?
+            WHERE late_days.user_id=? AND late_days.since_timestamp=?";
+        $vals = array($user_id, $timestamp, $days, $days, $user_id, $timestamp);
+
+        switch ($csv_option) {
+        case 'csv_option_preserve_higher':
+        	//Does NOT overwrite a higher (or same) value of allowed late days.
+        	$query .= "AND late_days.allowed_late_days<?";
+        	$vals[] = $days;
+        	break;
+        case 'csv_option_overwrite_all':
+        default:
+        	//Default behavior: overwrite all late days for user and timestamp.
+        	//No adjustment to SQL query.
+    	}
+
+        $this->course_db->query($query, $vals);
+    }
+
 }
 
