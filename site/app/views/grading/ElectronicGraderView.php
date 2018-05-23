@@ -1597,15 +1597,14 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-                    <!--<div class="box" id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <div class="box-title">-->
+                    <div class="box" id="mark_custom_id-{$c}" name="mark_custom_{$c}">
+                    <div class="box-title">
                         <span colspan="1" style="text-align: center; white-space: nowrap;">
-
                         <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                        <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
+                        <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
                         </span>
                         <span colspan="3" style="white-space: nowrap;">
-                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
+                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
                         </span>
                     </div></div>
                 </div></div>
@@ -1621,12 +1620,12 @@ HTML;
         $return .= <<<HTML
                 <div class="box" style="background-color:#E9EFEF;">
                 <div class="box-title">
-                    <span id="title-general" colspan="3" saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changebg="true">
+                    <div id="title-general" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveGeneralComment('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-2, {$num_questions});" data-changebg="true">
                         <b>General Comment</b>
                         <span style="float: right;">
                             <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                         </span>
-                    </span>
+                    </div>
                     <span id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
                         <span id="cancel-mark-general" onclick="{$break_onclick} updateGeneralComment('{$gradeable->getId()}', '{$user->getAnonId()}'); openClose(-1, {$num_questions});" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                     </span>

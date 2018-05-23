@@ -455,11 +455,17 @@ function updateProgressPoints(question_num) {
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
     if(current_points=="None Selected"){
         $('#gradebar-' + question_num)[0].style.backgroundColor = "initial";
-        $('#grade-' + question_num)[0].innerHTML = "";
+        $('#grade-' + question_num)[0].innerHTML = "current_points";     
+        //$('#gradebar-' + question_num)[0].innerHTML = "+$current_points";
     }
     else{
+        //extra credit
+        if(current_points > max_points){
+            $('#grade-' + question_num)[0].innerHTML = "+$current_points";     
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
         //current_progress[0].innerHTML = current_points + " / " + max_points; 
-        if(current_points == max_points){
+        else if(current_points == max_points){
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
         }
         else if(current_points > 0){
