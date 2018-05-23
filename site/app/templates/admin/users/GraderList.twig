@@ -19,10 +19,9 @@
         </thead>
         <tbody>
         {% if graders|length > 0 %}
-            {% set count = 1 %}
             {% for grader in graders %}
                 <tr id="user-{{ grader.getId() }}">
-                    <td>{{ count }}</td>
+                    <td>{{ loop.index }}</td>
                     <td style="text-align: left">{{ grader.getId() }}</td>
                     <td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
                     <td style="text-align: left">{{ grader.getLastName() }}</td>
@@ -41,7 +40,6 @@
                     </td>
                     <td><a onclick="editUserForm('{{ grader.getId() }}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 </tr>
-                {% set count = count + 1 %}
             {% endfor %}
         {% else %}
             <tr>
