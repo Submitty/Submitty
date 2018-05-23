@@ -843,9 +843,15 @@ class Course(object):
                 else:
                     conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=2)
                 counter += 1
-
-
+            counter = 1
             for postData in f_data[0]:
+                if(postData[10] != "f"):
+                    attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
+                    os.makedirs(attachment_path)
+                    os.system("chown -R hwphp:{}_tas_www {}".format(self.code, attachment_path))
+                    attachment = open(os.path.join(attachment_path, "file.txt"),"w+")
+                    attachment.write(postData[10])
+                counter += 1
                 conn.execute(forum_posts.insert(),
                                   thread_id=postData[0],
                                   parent_id=postData[1],
@@ -857,7 +863,7 @@ class Course(object):
                                   endorsed_by=postData[7],
                                   resolved = True if postData[8] == "t" else False,
                                   type=postData[9],
-                                  has_attachment=False)
+                                  has_attachment=True if postData[10] != "f" else False)
 
             
             
