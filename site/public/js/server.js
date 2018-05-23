@@ -1370,6 +1370,23 @@ function alterAnnouncement(thread_id, confirmString, url){
     }
 }
 
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
+}
+
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});

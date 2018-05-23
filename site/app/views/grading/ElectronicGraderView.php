@@ -298,7 +298,7 @@ HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
                 $return .= <<<HTML
         <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
+            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId()))}">
             Grade Next Student
         </a>
         <a class="btn btn-primary"
@@ -770,7 +770,7 @@ HTML;
                 $return .= <<<HTML
                 </td>
                 <td>
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
                         {$contents}
                     </a>
                 </td>
@@ -947,15 +947,15 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, string $individual, $studentNotInSection=false, $canViewWholeGradeable=false) {
+    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $studentNotInSection=false, $canViewWholeGradeable=false) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
         $user = $gradeable->getUser();
         $your_user_id = $this->core->getUser()->getId();
-        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual));
-        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual));
+        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id));
+        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id));
         $return = <<<HTML
 <div id="bar_wrapper" class="draggable">
 <div class="grading_toolbar">
@@ -1195,8 +1195,7 @@ HTML;
         <div class="rubric-title">
 HTML;
             $who = $gradeable->getUser()->getId();
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
-                                                      'gradeable_version' => ""))}', this)";
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
             $formatting = "font-size: 13px;";
             $return .= <<<HTML
             <div style="float:right;">
@@ -1219,7 +1218,7 @@ HTML;
                         action="{$this->core->buildUrl(array('component' => 'student',
                                                              'action' => 'update',
                                                              'gradeable_id' => $gradeable->getId(),
-                                                             'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
+                                                             'new_version' => $version, 'ta' => true, 'who' => $who))}">
                     <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
                     {$button}
                 </form>
@@ -1257,7 +1256,6 @@ HTML;
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
                 <input type="hidden" name="u_id" value="{$user->getId()}" />
-                <input type="hidden" name="individual" value="{$individual}" />
                 <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
