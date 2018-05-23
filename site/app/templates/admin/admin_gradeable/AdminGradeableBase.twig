@@ -1,0 +1,83 @@
+<link rel="stylesheet" type="text/css" href="css/admin-gradeable.css">
+<div id="container-rubric">
+    <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
+        method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
+
+        <div class="modal-header" style="overflow: auto;">
+            <h3 id="myModalLabel" style="float: left;">Gradeable Editor {{ label_message }}</h3>
+        </div>
+        <br/>
+        <div id="nav-bar">
+            <text class="nav-bar-item" id="page_0_nav" onClick="onChangeNavTab(0);">Create</text>
+            <text class="nav-bar-item" id="page_1_nav" onClick="onChangeNavTab(1);">Rubric</text>
+            <text class="nav-bar-item" id="page_2_nav" onClick="onChangeNavTab(2);">Dates</text>
+            <text class="nav-bar-item" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="nav-bar-item" id="page_4_nav" onClick="onChangeNavTab(4);">Syllabus</text>
+        </div>
+        <br/>
+        <div id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
+        <div id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+        <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+        <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+        <div id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableSyllabus.twig') }}</div>
+        <br/>
+        <div id="nav-controls">
+            <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Save and Continue</button>
+            <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
+        </div>
+    </form>
+</div>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript">
+
+    adminGradeableNavTab = 0;
+    function onChangeNavTab(tab)
+    {
+        if(tab > 4 || tab < 0)
+        {
+            alert('Invalid Navigation');
+            return;
+        }
+        adminGradeableNavTab = tab;
+        
+        // TODO: all pages display for a short time before they are hidden
+        $('#page_0_content').hide();
+        $('#page_1_content').hide();
+        $('#page_2_content').hide();
+        $('#page_3_content').hide();
+        $('#page_4_content').hide();
+
+        $('#page_' + tab + '_content').show();
+    }
+
+    function disableNavItem(id)
+    {
+        $(id).attr('style', 'background-color: #999999; cursor: default;');
+        $(id).attr('onClick', '');
+    }
+
+    $(document).ready(function() {
+
+
+        // Create mode, so disable naviation via nav bar
+        if('{{mode}}' === 'create')
+        {
+            onChangeNavTab(0);
+
+            // TODO: renable this once submission works
+            /*[
+                '#page_1_nav', 
+                '#page_2_nav', 
+                '#page_3_nav', 
+                '#page_4_nav'
+            ].forEach(disableNavItem);*/
+        }
+        else
+        {
+            onChangeNavTab({{ nav_tab }});
+        }
+    });
+
+</script>
