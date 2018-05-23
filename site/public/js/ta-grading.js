@@ -455,10 +455,12 @@ registerKeyHandler("KeyR", function() {
 registerKeyHandler('ArrowDown', function() {
     var current = findCurrentOpenedMark();
     var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
-    if (current === -1) {
+    if (current === NO_COMPONENT_ID) {
         openMark(1);
     } else if (current === numQuestions) {
-        openMark(current);
+        openGeneralMessage();
+    } else if (current === GENERAL_MESSAGE_ID) {
+        closeGeneralMessage(true);
     } else {
         openMark(current + 1);
     }
@@ -467,10 +469,12 @@ registerKeyHandler('ArrowDown', function() {
 registerKeyHandler('ArrowUp', function() {
     var current = findCurrentOpenedMark();
     var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
-    if (current === -1) {
-        openMark(numQuestions);
+    if (current === NO_COMPONENT_ID) {
+        openGeneralMessage();
     } else if (current === 1) {
         openMark(current);
+    } else if (current === GENERAL_MESSAGE_ID) {
+        openMark(numQuestions);
     } else {
         openMark(current - 1);
     }
