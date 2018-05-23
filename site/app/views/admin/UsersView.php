@@ -104,86 +104,27 @@ HTML;
      * @return string
      */
     public function listGraders($graders) {
-        $return = <<<HTML
-<div class="content">
-    <div style="float: right; margin-bottom: 20px;">
-        <a onclick="newDownloadForm()" class="btn btn-primary">Download Graders</a>
-        <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
-        <a onclick="newUserForm();
-            $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
-    </div>
-    <h2>View Graders</h2>
-    <table class="table table-striped table-bordered persist-area">
-        <thead class="persist-thead">
-            <tr>
-                <td width="4%"></td>
-                <td width="20%" style="text-align: left">User ID</td>
-                <td width="30%" colspan="2">Name</td>
-                <td width="23%">User Group</td>
-                <td width="20%">Registration Sections</td>
-                <td width="3%"></td>
-            </tr>
-        </thead>
-HTML;
-        if (count($graders) > 0) {
-            $count = 1;
-            foreach ($graders as $grader) {
-                switch ($grader->getGroup()) {
-                    case 0:
-                        $group = "Developer";
-                        $registration_sections = "All";
-                        break;
-                    case 1:
-                        $group = "Instructor";
-                        $registration_sections = "All";
-                        break;
-                    case 2:
-                        $group = "Full Access Grader (Grad TA)";
-                        $registration_sections = implode(", ", $grader->getGradingRegistrationSections());
-                        break;
-                    case 3:
-                        $group = "Limited Access Grader (Mentor)";
-                        $registration_sections = implode(", ", $grader->getGradingRegistrationSections());
-                        break;
-                    default:
-                        $group = "UNKNOWN";
-                        $registration_sections = "";
-                        break;
-                }
-                $return .= <<<HTML
-
-            <tr id="user-{$grader->getId()}">
-                <td>{$count}</td>
-                <td style="text-align: left">{$grader->getId()}</td>
-                <td style="text-align: left">{$grader->getDisplayedFirstName()}</td>
-                <td style="text-align: left">{$grader->getLastName()}</td>
-                <td>{$group}</td>
-                <td>{$registration_sections}</td>
-                <td><a onclick="editUserForm('{$grader->getId()}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-            </tr>
-HTML;
-                $count++;
-            }
-            $return .= <<<HTML
-
-        </tbody>
-HTML;
-        }
-        else {
-            $return .= <<<HTML
-        <tr>
-            <td colspan="3">No graders found</td>
-        </tr>
-HTML;
-        }
-
-        $return .= <<<HTML
-
-    </table>
-</div>
-HTML;
-
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
+            "graders" => $graders,
+            "groups" => [
+                0 => [
+                    "name" => "Developer",
+                    "all_sections" => true
+                ],
+                1 => [
+                    "name" => "Instructor",
+                    "all_sections" => true
+                ],
+                2 => [
+                    "name" => "Full Access Grader (Grad TA)",
+                    "all_sections" => false
+                ],
+                3 => [
+                    "name" => "Limited Access Grader (Mentor)",
+                    "all_sections" => false
+                ]
+            ]
+        ]);
     }
 
     /**
@@ -614,49 +555,9 @@ HTML;
     }
 
     public function graderListForm($use_database) {
-        if ($use_database) {
-            $num_cols = 7;
-            $password_col = "password, ";
-        }
-        else {
-            $num_cols = 6;
-            $password_col = "";
-        }
-        $return = <<<HTML
-<div class="popup-form" id="grader-list-form">
-    <h2>Upload Grader List</h2>
-    <p>&emsp;</p>
-    <p>
-        Format your grader data as an .xlsx or .csv file with {$num_cols} columns:<br>
-        &emsp;username, first name, last name, email, grader group, {$password_col}preferred first name<br>
-    </p>
-    <p>&emsp;</p>
-    <p>
-        Where GraderGroup is:<br>
-        &emsp;1=Instructor<br>
-        &emsp;2=Full Access Grader (graduate teaching assistant)<br>
-        &emsp;3=Limited Access Grader (mentor)<br>
-        &emsp;4=Student (no grading access)<br>
-    </p>
-    <p>&emsp;</p>
-    <p>
-        Preferred first name is optional.<br>
-        Do not use a header row.<br>
-    </p>
-    <br />
-    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'upload_grader_list'))}" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        <div>
-            <input type="file" name="upload" accept=".xlsx, .csv">
-        </div>
-        <div style="float: right; width: auto">
-            <a onclick="$('#grader-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-            <input class="btn btn-primary" type="submit" value="Submit" />
-        </div>
-    </form>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderListForm.twig", [
+            "use_database" => $use_database
+        ]);
     }
 
     public function classListForm($use_database) {
