@@ -19,9 +19,7 @@ fi
 rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
 # install composer dependencies and generate classmap
-pushd ${SUBMITTY_INSTALL_DIR}/site
-su - ${HWPHP_USER} -c "composer install --no-dev --optimize-autoloader"
-popd
+su - ${HWPHP_USER} -c "pushd ${SUBMITTY_INSTALL_DIR}/site; composer install --no-dev --optimize-autoloader; popd"
 
 # set special user $HWPHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${HWPHP_USER}:${HWPHP_USER} {} \;
