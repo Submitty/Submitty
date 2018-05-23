@@ -3,12 +3,14 @@
 Script that when run will monitor a given directory and anytime there's a change in it, run the
 appropriate INSTALL_SUBMITTY_HELPER_*.sh script. This should be run from within Vagrant.
 
-usage: code_watcher.py [-h] {site,bin}
+It currently supports watching the following top-level directories:
+- site
+- bin
+- sbin
+
+usage: code_watcher.py [-h]
 
 Watch a directory and install the code
-
-positional arguments:
-  {site,bin}
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -58,7 +60,6 @@ def main():
         raise SystemExit("ERROR: this script should be run as root")
 
     parser = ArgumentParser(description='Watch a directory and install the code')
-    parser.add_argument('directory', nargs='+', choices=['site', 'bin'])
     args = parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
@@ -66,15 +67,13 @@ def main():
     git_path = Path(current_path, '..', '..').resolve()
 
     observer = Observer()
-    if 'site' in args.directory:
-        observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
-    if 'bin' in args.directory:
-        observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
-        observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
+    observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
+    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
+    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
 
     observer.start()
     try:
-        print("Watching {} for changes...".format(', '.join(args.directory)))
+        print("Watching for changes...")
         input("~~Hit enter to exit~~\n")
     finally:
         observer.stop()
