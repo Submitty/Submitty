@@ -41,15 +41,19 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     <td colspan="1" style="'+background+'; text-align: center;"> \
         <span onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
-        </span> \
+            </span> \
         <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
     </td> \
-    <td colspan="3" style="'+background+'"> \
-        <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
-        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-            <i class="fa fa-users icon-got-this-mark"></i> \
-        </span> \
-    </td> \
+    <div class="box"> \
+        <div class="box-title"> \
+            <td colspan="4" style="'+background+'"> \
+                <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">'+note+'</textarea> \
+                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
+                    <i class="fa fa-users icon-got-this-mark"></i> \
+                </span> \
+            </td> \
+        </div> \
+    </div> \
 </tr> \
 ';
 }
@@ -406,7 +410,7 @@ function calculateMarksPoints(question_num) {
     var current_points = parseFloat(current_question_num[0].dataset.default);
     var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
     var arr_length = $('tr[name=mark_'+question_num+']').length;
-
+    var any_selected=false;
 
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'+question_num+'-'+i);
@@ -415,6 +419,7 @@ function calculateMarksPoints(question_num) {
             is_selected = true;
         }
         if (is_selected === true) {
+            any_selected = true;
             current_points += parseFloat(current_row.find('input[name=mark_points_'+question_num+'_'+i+']').val());
         }
     }
@@ -425,8 +430,13 @@ function calculateMarksPoints(question_num) {
         current_points += 0;
     } else {
         current_points += custom_points;
+        if(custom_points!=0){
+            any_selected = true;
+        }
     }
-
+    if(any_selected == false){
+        return "None Selected";
+    }
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -443,7 +453,23 @@ function updateProgressPoints(question_num) {
     var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-    current_progress[0].innerHTML = current_points + " / " + max_points; 
+    if(current_points=="None Selected"){
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "initial";
+        $('#grade-' + question_num)[0].innerHTML = "";
+    }
+    else{
+        //current_progress[0].innerHTML = current_points + " / " + max_points; 
+        if(current_points == max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points > 0){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#eac73d";
+        }
+        else{
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
+        }
+        $('#grade-' + question_num)[0].innerHTML = current_points;
+    }
 }
 
 function selectMark(me, first_override = false) {
@@ -487,7 +513,7 @@ function openClose(row_id, num_questions = -1) {
 
     // Updated all the background colors and displays of each element that has
     //  the corresponding data tag for the general component
-    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+   // $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
     $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
     $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
     
@@ -505,9 +531,9 @@ function openClose(row_id, num_questions = -1) {
         var current_question_num = $('#grade-' + x);
         var question_points = parseFloat(current_question_num[0].innerHTML);
         if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
+            //current_summary.children("td:first-of-type")[0].style."background-color" = "#D8F2D8";
         } else if (question_points < 0) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
+          //  current_summary.children("td:first-of-type")[0].style."background-color" = "#FAD5D3";
         }
         var question_points = parseFloat(current_question_num[0].innerHTML);
         var max_points = parseFloat(current_question_num[0].dataset.max_points);
@@ -580,7 +606,7 @@ function openClose(row_id, num_questions = -1) {
 
         // Updated all the background colors and displays of each element that has
         //  the corresponding data tag
-        $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+       // $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
         $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
         $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
         
@@ -724,20 +750,24 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             if (all_false === true) {
                 $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
                 $('#summary-' + num)[0].style.backgroundColor = "initial";
+                $('#gradebar-' + num)[0].style.backgroundColor = "initial";
+                $('#title-' + num)[0].style.backgroundColor = "initial";
             } else {
                 if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
                     var question_points = parseFloat(current_question_num[0].innerHTML);
                     var max_points = parseFloat(current_question_num[0].dataset.max_points);
                     if(question_points == max_points){
-                        $('#grade-' + num)[0].style.backgroundColor = "#006600";
+                      //  $('#gradebar-' + num)[0].style.backgroundColor = "#006600";
                     }
                     else if(question_points > 0){
-                        $('#grade-' + num)[0].style.backgroundColor = "#eac73d";
+                     //   $('#gradebar-' + num)[0].style.backgroundColor = "#eac73d";
                     }
                     else{
-                        $('#grade-' + num)[0].style.backgroundColor = "#c00000";
+                     //   $('#gradebar-' + num)[0].style.backgroundColor = "#c00000";
                     }
+                    $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+                    $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
                 }
             }
         }
