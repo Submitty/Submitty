@@ -385,3 +385,15 @@ tr.is_publish {
     font-size: 17px;
     padding: 16px;
 }
+
+.graded {
+    background-color: #eebb77;
+}
+
+.grading {
+    background-color: #eeff88;
+}
+
+.ungraded {
+
+}
