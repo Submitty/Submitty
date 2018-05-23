@@ -5,14 +5,9 @@ import os
 from pathlib import Path
 from subprocess import run
 import sys
-import time
 
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
-
-CURRENT_PATH = Path(__file__).resolve().parent
-SETUP_PATH = Path(CURRENT_PATH, '..').resolve()
-GIT_PATH = Path(CURRENT_PATH, '..', '..').resolve()
 
 
 class FileHandler(FileSystemEventHandler):
@@ -26,6 +21,7 @@ class FileHandler(FileSystemEventHandler):
         if event.src_path.endswith('.swp') or event.src_path == '.DS_Store':
             return
         run([str(installer)], stdout=sys.stdout, stderr=sys.stderr)
+        print("DONE\n")
 
     def on_created(self, event):
         self.run_installer(event)
@@ -50,18 +46,21 @@ def main():
     parser.add_argument('section', type=str, choices=['site', 'bin'])
     args = parser.parse_args()
 
+    current_path = Path(__file__).resolve().parent
+    setup_path = Path(current_path, '..').resolve()
+    git_path = Path(current_path, '..', '..').resolve()
+
     observer = Observer()
     if args.section == 'site':
-        observer.schedule(event_handler=FileHandler(GIT_PATH, 'site'), path=str(Path(GIT_PATH, 'site')), recursive=True)
+        observer.schedule(event_handler=FileHandler(setup_path, 'site'), path=str(Path(git_path, 'site')), recursive=True)
     elif args.section == 'bin':
-        observer.schedule(event_handler=FileHandler(GIT_PATH, 'bin'), path=str(Path(GIT_PATH, 'bin')), recursive=True)
-        observer.schedule(event_handler=FileHandler(GIT_PATH, 'sbin'), path=str(Path(GIT_PATH, 'sbin')), recursive=True)
+        observer.schedule(event_handler=FileHandler(setup_path, 'bin'), path=str(Path(git_path, 'bin')), recursive=True)
+        observer.schedule(event_handler=FileHandler(setup_path, 'bin'), path=str(Path(git_path, 'sbin')), recursive=True)
 
     observer.start()
     try:
         print("Watching {} for changes...".format(args.section))
-        while True:
-            time.sleep(1)
+        input("~~Hit enter to exit~~\n")
     finally:
         observer.stop()
         observer.join()
