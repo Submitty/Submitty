@@ -139,8 +139,7 @@ class ConfigurationView extends AbstractView {
                 <div class="option-title">Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
             </div>
-        </div>
-
+        </div>       
     </div>
     <div class="post-panel-btn">
         <button class="btn btn-primary" style="float: right" type="submit" form="configForm">

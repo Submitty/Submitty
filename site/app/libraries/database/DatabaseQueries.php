@@ -940,6 +940,14 @@ ORDER BY user_id ASC");
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
     }
 
+    public function insertNewRegistrationSection($section) {
+        $this->course_db->query("INSERT INTO sections_registration (sections_registration_id) VALUES(?)", array($section));
+    }
+
+    public function deleteRegistrationSection($section) {
+        $this->course_db->query("DELETE FROM sections_registration WHERE sections_registration_id=?", array($section));
+    }    
+
     public function setupRotatingSections($graders, $gradeable_id) {
         $this->course_db->query("DELETE FROM grading_rotating WHERE g_id=?", array($gradeable_id));
         foreach ($graders as $grader => $sections){
@@ -1661,24 +1669,24 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Updates a given user's late days allowed effective at a given time
+     * "Upserts" a given user's late days allowed effective at a given time.
+     *
+     * About $csv_options:
+     * default behavior is to overwrite all late days for user and timestamp.
+     * null value is for updating via form where radio button selection is
+     * ignored, so it should do default behavior.  'csv_option_overwrite_all'
+     * invokes default behavior for csv upload.  'csv_option_preserve_higher'
+     * will preserve existing values when uploaded csv value is lower.
+     *
      * @param string $user_id
      * @param string $timestamp
      * @param integer $days
+     * @param string $csv_option value determined by selected radio button
      */
-    public function updateLateDays($user_id, $timestamp, $days){
-        $this->course_db->query("
-          UPDATE late_days
-          SET allowed_late_days=?
-          WHERE user_id=?
-            AND since_timestamp=?", array($days, $user_id, $timestamp));
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query("
-            INSERT INTO late_days
-            (user_id, since_timestamp, allowed_late_days)
-            VALUES(?,?,?)", array($user_id, $timestamp, $days));
-        }
-    }
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+		//q.v. PostgresqlDatabaseQueries.php
+		throw new NotImplementedException();
+	}
 
     /**
      * Delete a given user's allowed late days entry at given effective time
@@ -1952,5 +1960,30 @@ AND gc_id IN (
     public function getAllAnonIds() {
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
+    }
+
+    /**
+     * Determines if a course is 'active' or if it was dropped.
+     *
+     * This is used to filter out courses displayed on the home screen, for when
+     * a student has dropped a course.  SQL query checks for user_group=4 so
+     * that only students are considered.  Returns false when course is dropped.
+     * Returns true when course is still active, or user is not a student.
+     *
+     * @param string $user_id
+     * @param string $course
+     * @param string $semester
+     * @return boolean
+     */
+    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT
+                CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                ELSE TRUE
+                END
+            AS active
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['active'];
+
     }
 }
