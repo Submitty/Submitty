@@ -30,3 +30,5 @@ db_update.php
 .setup/data/random_users.txt
 .vscode
 *.egg-info/
+site/app/models/Gradeable.php
+site/app/views/grading/ElectronicGraderView.php
