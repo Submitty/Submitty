@@ -85,7 +85,12 @@ HTML;
           $error = true;
           if ($info != "") { $info .= "<br><br>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-            . " but you only have XXX remaining late days.  Your grade for this assignment will be recorded as a zero.";
+            . " but you ";
+          if ($late_days_remaining == 0) {
+            $info .= "have no remaining late days.";
+          } else {
+            $info .= "only have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . ".";
+          }
         }
 
         // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT

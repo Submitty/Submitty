@@ -15,6 +15,7 @@ class UsersView extends AbstractView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newDownloadForm()" class="btn btn-primary">Download Users</a>
         <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
@@ -106,6 +107,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newDownloadForm()" class="btn btn-primary">Download Graders</a>
         <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
@@ -279,7 +281,7 @@ HTML;
             $return .= <<<HTML
     <div style="width: 60%">
         Password:<br />
-        <input type="password" name="user_password" placeholder="New Password" />    
+        <input type="password" name="user_password" placeholder="New Password" />
     </div>
 HTML;
         }
@@ -295,7 +297,124 @@ HTML;
         return $return;
     }
 
-    public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
+
+    /**
+     * Creates the form box to be displayed when copying or downloading emails on the students/graders pages
+     * @param $code to specify whether it is grader tab or student tab
+     * @param User[] $students
+     * @param Grader[] $graders  
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param bool   $use_database
+     * @return string
+     */
+    public function downloadForm($code, $students, $graders, $reg_sections, $use_database=false) {
+        $download_info = array();
+        $first_name = "";
+        $last_name = "";
+        if ($code === 'user') {
+            foreach ($students as $student) {
+                $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
+                $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+                $grp = "";
+                switch ($student->getGroup()) {
+                    case 0:
+                        $grp = 'Developer';
+                        break;
+                    case 1:
+                        $grp = 'Instructor';
+                        break;
+                    case 2:
+                        $grp = 'Full Access Grader (Grad TA)';
+                        break;
+                    case 3:
+                        $grp = 'Limited Access Grader (Mentor)';
+                        break;
+                    default:
+                        $grp = 'Student';
+                        break;
+                }
+                $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $student->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
+            }
+        }
+        else if ($code === 'grader') {
+            foreach ($graders as $grader) {
+                $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
+                $reg_sec = "";
+                $grp = "";
+                switch ($grader->getGroup()) {
+                    case 0:
+                        $reg_sec = 'All';
+                        $grp = 'Developer';
+                        break;
+                    case 1:
+                        $reg_sec = 'All';
+                        $grp = 'Instructor';
+                        break;
+                    case 2:
+                        $grp = 'Full Access Grader (Grad TA)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                        break;
+                    case 3:
+                        $grp = 'Limited Access Grader (Mentor)';
+                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                        break;
+                    default:
+                        $grp = 'UNKNOWN';
+                        $reg_sec = "";
+                        break;
+                }
+                $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
+                $last_name = str_replace("'", "&#039;", $grader->getLastName());
+                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
+            }   
+        }
+        $download_info_json = json_encode($download_info);
+        $return = <<<HTML
+<div class="popup-form" id="download-form">                                                                   
+<form>
+    <input type="hidden" value='{$download_info_json}' id="download_info_json_id"><br /><br />
+    <div style="width:300px">
+HTML;
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            $return .= <<<HTML
+            <input type="checkbox" value="{$section}">Registration Section {$section}<br \>
+HTML;
+        }
+        $return .= <<<HTML
+        <input type="checkbox" value="NULL">Registration Section NULL<br \>
+    </div>
+HTML;
+        $return .= <<<HTML
+    <div style="width:300px">
+        <input type="checkbox" value="instructor">Instructor<br \>
+        <input type="checkbox" value="full_access_grader">Full Access Graders<br \>
+        <input type="checkbox" value="limited_access_grader">Limited Access Graders<br \>
+    </div><br />
+HTML;
+        if ($use_database) {
+            $return .= <<<HTML
+    <div style="width: 60%">
+        Password:<br />
+        <input type="password" name="user_password" placeholder="New Password" />    
+    </div>
+HTML;
+        }
+        $return .= <<<HTML
+    <div style="float: right; width: auto; margin-top: 10px">
+        <a onclick="$('#download-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="button" value="Download CSV" onclick="downloadCSV('{$code}');" />
+        <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{$code}');" />
+    </div>
+</form>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function rotatingUserForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
         $return = <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -327,10 +446,149 @@ $(function() {
 });
 </script>
 <div class="content">
+    <h2>Setup Registration Sections</h2>
+    <p>
+    Large courses are often split into multiple <em>registrations sections</em> for laboratory or recitation class time.<br>
+    Courses that are cross-listed in different departments may have multiple course codes/prefixes.<br>
+    <br>
+    Each student in the course is assigned to one registration section.<br>
+    Students who have dropped the course will be assigned to the <em>NULL</em> registration section.<br>
+    <br>
+    From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
+    Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.<br>
+    </p>
+    <br />
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_registration_sections'))}" method="POST">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <div class="sub">
+        <div class="box half">
+            <h2>Current Registration Section Counts</h2>
+            <div class="half">
+                <table class="table table-bordered table-striped">
+HTML;
+        $reg_sections_count = array();
+        foreach ($students as $student) {
+            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+            if (array_key_exists($registration, $reg_sections_count)) {
+                $reg_sections_count[$registration] = $reg_sections_count[$registration]+1;
+            }
+            else {
+                $reg_sections_count[$registration] = 1;
+            }
+        }
+        foreach ($reg_sections as $section) {
+            $section = $section['sections_registration_id'];
+            if (array_key_exists($section, $reg_sections_count)) {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>{$reg_sections_count[$section]}</td>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+                    <tr>
+                        <td>Section {$section}</td>
+                        <td>0</td>
+HTML;
+            }
+        }
+        if (array_key_exists('NULL', $reg_sections_count)) {
+            $return .= <<<HTML
+                <tr>
+                    <td>Section NULL</td>
+                    <td>{$reg_sections_count['NULL']}</td>
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section NULL</td>
+                        <td>0</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
+        <div class="box half">
+            <br /><br />
+            <div class="option">
+                <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Add Registration Section</div>
+                    <div class="option-alt">
+                        Enter a registration section which is not already a registration section.
+                    </div>
+                </div>
+            </div>
+            <div class="option">
+                <div class="option-input"><input type="text" name="delete_reg_section" value="" placeholder="Eg: 3" /></div>
+                <div class="option-desc">
+                    <div class="option-title">Delete a Registration Section</div>
+                    <div class="option-alt">
+                        Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
+                    </div>
+                </div><br />
+                <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+<div class="content">
     <h2>Setup Rotating Sections</h2>
+    <p>
+    Rotating sections are an alternate way to divide the task of grading a large course enrollment among multiple graders.<br>
+    If the registration sections are of significantly different size, rotating sections will allow a more equitable assignment of grading tasks.<br>
+    Furthermore, shuffling or rotating the assignment of graders to rotating sections for each assignment will ensure that each student <br>
+    receives feedback from multiple graders throughout the term and can mitigate the variations in ease or strictness between the graders.<br>
+    <br>
+    Each registered student is assigned to a rotating section for the duration of the course.<br>
+    For each assignment with manual/TA grading assigned by rotating sections, each grader is assigned zero, one, or multiple rotating sections.<br>
+    The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.<br>
+    </p>
+    <br />
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
+        <div class="box half">
+            <h2>Current Rotating Section Counts</h2>
+            <div class="half">
+                <h3>Registered Students<br>(non NULL registration section)</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach($not_null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+            <div class="half">
+                <h3>Users with<br>Registration Section=NULL</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach ($null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
         <div class="box half">
             Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections
             <select name="rotating_type">
@@ -348,44 +606,7 @@ $(function() {
             </label><br />
             <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
         </div>
-        <div class="box half">
-            <h2>Student Counts in Rotating Sections</h2>
-            <div class="half">
-                <h3>Registered Students (non NULL registration section)</h3>
-                <table class="table table-bordered table-striped">
-HTML;
-        foreach($not_null_counts as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return .= <<<HTML
-                    <tr>
-                        <td>Section {$row['rotating_section']}</td>
-                        <td>{$row['count']}</td>
-HTML;
-        }
-        $return .= <<<HTML
-                </table>
-            </div>
-            <div class="half">
-                <h3>Students with Registration Section=NULL</h3>
-                <table class="table table-bordered table-striped">
-HTML;
-        foreach ($null_counts as $row) {
-            if ($row['rotating_section'] === null) {
-                $row['rotating_section'] = "NULL";
-            }
-            $return .= <<<HTML
-                    <tr>
-                        <td>Section {$row['rotating_section']}</td>
-                        <td>{$row['count']}</td>
-HTML;
-        }
-        $return .= <<<HTML
-                </table>
-            </div>
-        </div>
-    </div>
+     </div>
     </form>
 </div>
 HTML;
