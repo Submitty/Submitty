@@ -822,15 +822,16 @@ class Course(object):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
         
         if(self.code == "sample"):  
-            f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'))
+            f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
             forum_threads = Table("threads", metadata, autoload=True)
             forum_posts = Table("posts", metadata, autoload=True)
             forum_cat_list = Table("categories_list", metadata, autoload=True)
             forum_thread_cat = Table("thread_categories", metadata, autoload=True)
-            conn.execute(forum_cat_list.insert(), category_desc="Comment")
-            conn.execute(forum_cat_list.insert(), category_desc="Question")
-            counter = 1
-            for threadData in f_data[1]:
+
+            for catData in f_data[2]:
+                conn.execute(forum_cat_list.insert(), category_desc=catData[0])
+
+            for thread_id, threadData in enumerate(f_data[1], start = 1):
                 conn.execute(forum_threads.insert(),
                                   title=threadData[0],
                                   created_by=threadData[1],
@@ -838,12 +839,7 @@ class Course(object):
                                   deleted=True if threadData[3] == "t" else False,
                                   merged_id=threadData[4],
                                   is_visible=True if threadData[5] == "t" else False)
-                if(counter < 2):
-                    conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=1)
-                else:
-                    conn.execute(forum_thread_cat.insert(), thread_id=counter, category_id=2)
-                counter += 1
-
+                conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[6])
 
             for postData in f_data[0]:
                 conn.execute(forum_posts.insert(),
@@ -859,8 +855,6 @@ class Course(object):
                                   type=postData[9],
                                   has_attachment=0)
 
-            
-            
             print('Added forum data to sample course.') 
         
 
@@ -880,8 +874,8 @@ class Course(object):
         forum_path = os.path.join(SETUP_DATA_PATH, "forum")
         forum_data = []
         for line in open(os.path.join(forum_path, filename)):
-            l = [ x.strip() for x in line.split("|") ]
-            if(len(l) > 1):
+            l = [ x.replace("\\n","\n").strip() for x in line.split("|") ]
+            if(len(line) > 1):
                 forum_data.append(l)
         return forum_data
 
