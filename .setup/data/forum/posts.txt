@@ -9,4 +9,15 @@
   4 | -1 | aphacker | I can't seem to find the course syllabus. Can someone point me in the right direction?? | 2018-04-03 19:37:45.756451-04 | f | f | | f | 0 | t
   4 |  9 | ta | The course syllabus can be found [url=http://example.com]here.[/url] | 2018-04-03 19:39:14.84398-04  | f | f | | f | 0 | t
   4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | t
-  1 | -1 | instructor | Testing multiple levels | f | f | | f | 0 | t
+  5 | -1 | bitdiddle | Testing multiple levels | 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | t
+  5 | 12 | instructor | This is level 2, testing is important | 2018-04-03 18:47:02.281828-04 | f | f | | f | 0 | t
+  5 | 13 | bitdiddle | Level 3 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | t
+  5 | 14 | aphacker | This level 4 post should be anon | 2018-04-03 19:46:02.281828-04 | t | f | | f | 0 | t
+  5 | 14 | aphacker | Another level 4 post | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | t
+  5 | 15 | instructor | Level 5 | 2018-04-03 20:46:02.281828-04 | f | f | | f | 0 | t
+  5 | 17 | instructor | Level 6 replying to self | 2018-04-03 20:47:02.281828-04 | f | f | | f | 0 | t
+  5 | 18 | aphacker | Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | t
+  5 | 18 | aphacker | Another Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | t
+  5 | 19 | bitdiddle | Level 8, should be last level of indentation | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | t
+  5 | 21 | aphacker | Level 9, child post of bitdiddle, but no indentation | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | t
+  
