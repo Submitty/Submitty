@@ -427,12 +427,6 @@ HTML;
         return $return;
     }
 
-    public function graderListForm($use_database) {
-        return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderListForm.twig", [
-            "use_database" => $use_database
-        ]);
-    }
-
     public function classListForm($use_database) {
         if ($use_database) {
             $num_cols = 7;

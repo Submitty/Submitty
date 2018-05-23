@@ -67,7 +67,6 @@ class UsersController extends AbstractController {
 
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
     }
 
     private function renderUserForm($action, $use_database) {
