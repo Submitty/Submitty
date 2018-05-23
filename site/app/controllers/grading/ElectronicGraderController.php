@@ -751,7 +751,6 @@ class ElectronicGraderController extends GradingController {
         }
 
         $gradeable->loadResultDetails();
-        $individual = $_REQUEST['individual'];
 
         $anon_ids = $this->core->getQueries()->getAnonId(array($prev_id, $next_id));
 
@@ -771,7 +770,7 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $canViewWholeGradeable = $this->canIViewThis($gradeable,$who_id);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $individual, $not_in_my_section, $canViewWholeGradeable);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
     }
