@@ -16,8 +16,6 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
 fi
 
-echo ${SUBMITTY_INSTALL_DIR}
-
 # copy the website from the repo
 rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
