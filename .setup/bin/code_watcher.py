@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+"""
+Script that when run will monitor a given directory and anytime there's a change in it, run the
+appropriate INSTALL_SUBMITTY_HELPER_*.sh script. This should be run from within Vagrant.
+
+usage: code_watcher.py [-h] {site,bin}
+
+Watch a directory and install the code
+
+positional arguments:
+  {site,bin}
+
+optional arguments:
+  -h, --help  show this help message and exit
+"""
 
 from argparse import ArgumentParser
 import os
