@@ -18,9 +18,11 @@ import psutil
 import json
 from submitty_utils import glob
 
-# these variables will be replaced by INSTALL_SUBMITTY.sh
-SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
 
@@ -53,7 +55,7 @@ def main():
                 proc = psutil.Process(pid)
                 if 'hwcron' == proc.username():
                     if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"bin","submitty_autograding_shipper.py")):
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_shipper.py")):
                         num_procs+=1
             except psutil.NoSuchProcess:
                 pass

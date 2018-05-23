@@ -164,7 +164,7 @@ class HWReport extends AbstractModel {
                         $max_value = $component->getMaxValue();
                         $student_comment = $component->getStudentComment();
                         $temp_score = $component->getGradedTAPoints();
-                        $temp_notes = $component->getGradedTAComments($nl, true) . $nl;
+                        $temp_notes = $component->getGradedTAComments($nl, true, $gradeable) . $nl;
                     }
 
                     $student_output_ta .= $title . " [ " . $temp_score . " / " . $max_value . " ] ";
