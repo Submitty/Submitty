@@ -339,6 +339,7 @@ progress::-webkit-progress-value {
     float:left;
     word-break: break-word;
     white-space: pre-line;
+    cursor: pointer;
 }
 
 .ta-rubric-table {
