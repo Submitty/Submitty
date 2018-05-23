@@ -17,14 +17,13 @@ window.addEventListener("load", function() {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    url = document.body.dataset.siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
     }
-    return url + constructed;
+    return document.body.dataset.siteUrl + constructed;
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
@@ -1362,6 +1361,23 @@ function alterAnnouncement(thread_id, confirmString, url){
             }
         })
     }
+}
+
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
 }
 
 function updateHomeworkExtensions(data) {
