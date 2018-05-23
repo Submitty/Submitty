@@ -219,7 +219,7 @@ class UsersController extends AbstractController {
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $students, $reg_sections,
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
     

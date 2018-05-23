@@ -30,7 +30,7 @@
                             <td style="text-align: left">{{ student.getId() }}</td>
                             <td style="text-align: left">{{ student.getDisplayedFirstName() }}</td>
                             <td style="text-align: left">{{ student.getLastName() }}</td>
-                            <td>{{ student.getRotatingSection() == null ? "NULL" : student.getRotatingSection() }}</td>
+                            <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
                             <td><a onclick="editUserForm('{{ student.getId() }}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                         </tr>
