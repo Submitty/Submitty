@@ -101,9 +101,12 @@ HTML;
 
     /**
      * @param User[] $graders
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param array  $rot_sections associative array representing rotating sections in the system
+     * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders) {
+    public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
             "graders" => $graders,
             "groups" => [
@@ -123,7 +126,10 @@ HTML;
                     "name" => "Limited Access Grader (Mentor)",
                     "all_sections" => false
                 ]
-            ]
+            ],
+            "reg_sections" => $reg_sections,
+            "rot_sections" => $rot_sections,
+            "use_database" => $use_database
         ]);
     }
 
