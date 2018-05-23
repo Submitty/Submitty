@@ -27,9 +27,12 @@ class UsersController extends AbstractController {
                 $this->listGraders();
                 break;
             case 'rotating_sections':
-                $this->core->getOutput()->addBreadcrumb('Setup Rotating Sections');
+                $this->core->getOutput()->addBreadcrumb('Setup Sections');
                 $this->rotatingSectionsForm();
                 break;
+            case 'update_registration_sections':
+                $this->updateRegistrationSections();
+                break;    
             case 'update_rotating_sections':
                 $this->updateRotatingSections();
                 break;
@@ -218,12 +221,97 @@ class UsersController extends AbstractController {
     }
 
     public function rotatingSectionsForm() {
+        $students = $this->core->getQueries()->getAllUsers();
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm',
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
+    
+    public function updateRegistrationSections() {
+        $return_url = $this->core->buildUrl(
+            array('component' => 'admin',
+                  'page' => 'users',
+                  'action' => 'rotating_sections')
+        );
+
+        if (!$this->core->checkCsrfToken()) {
+            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
+            $this->core->redirect($return_url);
+        }
+
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $students = $this->core->getQueries()->getAllUsers();
+        $graders = $this->core->getQueries()->getAllGraders();
+        if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] != "") {
+            $flag=0;
+            foreach ($reg_sections as $section) {
+                $section = $section['sections_registration_id'];
+                if ($section == intval($_POST['add_reg_section'])){
+                    $flag = 1;
+                    break;
+                }
+            }
+            if ($flag == 1) {
+                $this->core->addErrorMessage("Registration Section already present");
+                $_SESSION['request'] = $_POST;
+                $this->core->redirect($return_url);       
+            }
+            else {
+                $this->core->getQueries()->insertNewRegistrationSection(intval($_POST['add_reg_section']));
+            }
+        }
+
+        if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
+            $valid_reg_section_flag=0;
+            foreach ($reg_sections as $section) {
+                $section = $section['sections_registration_id'];
+                if ($section == intval($_POST['delete_reg_section'])){
+                    $valid_reg_section_flag = 1;
+                    break;
+                }
+            }
+            if ($valid_reg_section_flag == 0) {
+                $this->core->addErrorMessage("Not a valid Registration Section");
+                $_SESSION['request'] = $_POST;
+                $this->core->redirect($return_url); 
+            }
+            else {
+                $no_user_flag=1;
+                $no_grader_flag=1;
+                foreach ($students as $student) {
+                    $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+                    if ($registration == intval($_POST['delete_reg_section'])) {
+                        $no_user_flag=0;
+                        break;
+                    }    
+                }
+
+                foreach ($graders as $grader) {
+                    if(($grader->getGroup() == 2) || ($grader->getGroup() == 3)) {
+                        if(in_array(intval($_POST['delete_reg_section']), $grader->getGradingRegistrationSections() )) {
+                            $no_grader_flag=0;
+                            break;
+                        }
+                    }
+                }    
+                if (($no_user_flag != 1) || ($no_grader_flag != 1)) {
+                    $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
+                    $_SESSION['request'] = $_POST;
+                    $this->core->redirect($return_url);      
+                }
+                else {
+                    $this->core->getQueries()->deleteRegistrationSection(intval($_POST['delete_reg_section']));
+                }    
+            }
+        }
+
+        $this->core->addSuccessMessage("Registration sections setup");
+        $this->core->redirect($return_url);
+
+    }        
 
     public function updateRotatingSections() {
         $return_url = $this->core->buildUrl(
