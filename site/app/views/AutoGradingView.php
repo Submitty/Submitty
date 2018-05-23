@@ -546,7 +546,7 @@ HTML;
         }else{
             $background = "red-background";
         }
-        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'."Overall note from Grader: " . htmlentities($gradeable->getOverallComment()) : "";
+        $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'. "Overall note from Grader: <span class='gradeable_comment'>" . htmlentities($gradeable->getOverallComment()) . "</span>" : "";
         //late day data
         $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
         $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
@@ -609,7 +609,7 @@ HTML;
                     <h4>{$component->getTitle()} <i>{$componentGrader}</i></h4>
                     <div style="float:left; word-break: break-word;">
                         <p style="padding-bottom: 10px;">{$component->getStudentComment()}</p>
-                        <p>{$component->getGradedTAComments('<br>',true,$gradeable,false)}</p>
+                        <p><span class="gradeable_comment">{$component->getGradedTAComments('<br>',true,$gradeable,false)}</span></p>
                     </div>
                 </div>
             </div>
