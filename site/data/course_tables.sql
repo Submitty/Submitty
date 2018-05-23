@@ -1012,6 +1012,9 @@ ALTER TABLE ONLY categories_list
 ALTER TABLE ONLY thread_categories
     ADD CONSTRAINT thread_and_category_unique UNIQUE (thread_id, category_id);
 
+ALTER TABLE ONLY student_favorites
+    ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
+
 -- End Forum Key relationships
 
 --
