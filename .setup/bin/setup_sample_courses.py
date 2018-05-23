@@ -848,7 +848,7 @@ class Course(object):
                 if(postData[10] != "f"):
                     attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
                     os.makedirs(attachment_path)
-                    os.system("chown -R hwphp:{}_tas_www {}".format(self.code, attachment_path))
+                    # os.system("chown -R hwphp:{}_tas_www {}".format(self.code, attachment_path))
                     attachment = open(os.path.join(attachment_path, "file.txt"),"w+")
                     attachment.write(postData[10])
                 counter += 1
