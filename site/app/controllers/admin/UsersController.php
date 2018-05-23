@@ -54,7 +54,6 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
-        $this->renderUserForm('update_student', $use_database);
         $this->renderDownloadForm('user', $use_database);
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
