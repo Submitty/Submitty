@@ -922,8 +922,10 @@ HTML;
 <div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
     <h2>Import Teams Members</h2> 
     <p>&emsp;</p>
-    <p>Format of the teams should be csv with 6 columns:<br />First Name, Last Name, User id, Team id, Team Registration Section, Team Rotation Section<br /><br />
-        Note: Imported Teams will be allotted new team_ids , team registration section, team rotation section.
+    <p>Format of the teams should be csv with 6 columns:<br />
+First Name, Last Name, User ID, Team ID, Team Registration Section, Team Rotating Section<br />
+The first row of the csv is assumed to be column headings and is ignored.<br /><br />
+        Note: Imported Teams will be assigned new Team IDs, Team Registration Section, and Team Rotating Section.
     </p><br />
     <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />

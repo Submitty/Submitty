@@ -500,7 +500,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $nl = "\n";
-        $csvdata="First Name,Last Name,User_id,Team_id,Team Registration Section,Team Rotation Section".$nl;
+        $csvdata="First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section".$nl;
         foreach ($all_teams as $team) {
             if( $team->getSize() != 0) {
                 foreach(($team->getMembers()) as $member_id) {
