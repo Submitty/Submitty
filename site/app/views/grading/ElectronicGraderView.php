@@ -1794,54 +1794,6 @@ HTML;
 HTML;
         return $return;
     }
-    //Temp
-    private function addLateDays(Gradeable $gradeable, &$late_days_data, &$total_late_used) {
-        $latedays = $this->core->getQueries()->getLateDayUpdates($gradeable->getUser()->getId());
-        $curr_allowed_term = $this->core->getConfig()->getDefaultStudentLateDays();
-        $curr_remaining_late = $this->core->getConfig()->getDefaultStudentLateDays();
-        $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
-        foreach($latedays as $ld){
-            if($ld['since_timestamp'] <= date_format($gradeable->getDueDate(), 'Y-m-d H:i:s') &&
-            $curr_allowed_term != $ld['allowed_late_days']){
-                $curr_allowed_term = $ld['allowed_late_days'];
-            }
-        }
-        
-        $status = 'Good';
-        $curr_late_charged = 0;
-        $late_flag = false;
-        if ($late_days_used > 0) {
-            $status = "Late";
-            $late_flag = true;
-        }
-        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
-        if ($late_days_used > $gradeable->getAllowedLateDays()) {
-            $status = "Bad too many used for this assignment";
-            $late_flag = false;
-        }
-        // If late days used - extensions applied > allowed per term then status is "Bad..."
-        // Do a max(0, ...) to protect against the case where the student's late days goes down
-        // during the semester and they've already used late days
-        if ($late_days_used > max(0, $gradeable->getStudentAllowedLateDays() - $total_late_used)) {
-            $status = "Bad too many used this term";
-            $late_flag = false;
-        }
-        $late_days_data['status'] = $status;
-        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
-        //be less than 0 in cases of excess extensions. Decrement remaining late days.
-        if ($late_flag) {
-            $curr_late_charged = $late_days_used;
-            $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
-            $total_late_used += $curr_late_charged;
-        }
-
-        $late_days_data['extensions'] = $gradeable->getLateDayExceptions();
-        $late_days_data['days_charged'] = $curr_late_charged;
-        $late_days_data['remaining'] = $curr_allowed_term-$total_late_used;
-        $late_days_data['allowed_per_student'] = $curr_allowed_term;
-        $late_days_data['allowed_per_assignment'] = $gradeable->getAllowedLateDays();
-        $late_days_data['days_after_due'] = $gradeable->getLateDays();
-    }
 
     private function makeTable($user_id, $gradeable, &$status){
         $return = <<<HTML
@@ -1862,31 +1814,30 @@ HTML;
             </thead>
             <tbody>
 HTML;
-        $current_user = null;
         $total_late_used = 0;
         $status = "Good";
-        $late_days_data = [];
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
-            $this->addLateDays($g, $late_days_data, $total_late_used);
+            $g->calculateLateDays($total_late_used);
             $class = "";
             if($g->getId() == $gradeable->getId()){
                 $class = "class='yellow-background'";
-                $status = $late_days_data["status"];
+                $status = $g->getLateStatus();
             }
+            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
             $return .= <<<HTML
                 <tr>
                     <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_student']}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data['allowed_per_assignment']}</td> 
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_after_due"]}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["extensions"]}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["status"]}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["days_charged"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$late_days_data["remaining"]}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
                 </tr>
 HTML;
         }

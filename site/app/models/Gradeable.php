@@ -314,10 +314,7 @@ class Gradeable extends AbstractModel {
     protected $late_status = "Good";    
 
     /** @property @var int */
-    protected $this->curr_late_charged = 0;
-
-    /** @property @var int */
-    protected $this->total_late_used = 0;
+    protected $curr_late_charged = 0;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -372,30 +369,6 @@ class Gradeable extends AbstractModel {
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
                 $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
-                $late_flag = false;
-                if ($this->late_days - $this->late_day_exceptions > 0) {
-                    $this->late_status = "Late";
-                    $late_flag = true;
-                }
-                //If late days used - extensions applied > allowed per assignment then status is "Bad..."
-                if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
-                    $this->late_status = "Bad too many used for this assignment";
-                    $late_flag = false;
-                }
-                // If late days used - extensions applied > allowed per term then status is "Bad..."
-                // Do a max(0, ...) to protect against the case where the student's late days goes down
-                // during the semester and they've already used late days
-                if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $this->total_late_used)) {
-                    $status = "Bad too many used this term";
-                    $late_flag = false;
-                }
-                //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
-                //be less than 0 in cases of excess extensions. Decrement remaining late days.
-                if ($late_flag) {
-                    $this->curr_late_charged = $this->late_days_used;
-                    $this->curr_late_charged = ($this->curr_late_charged < 0) ? 0 : $this->curr_late_charged;
-                    $this->total_late_used += $this->curr_late_charged;
-                }
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
@@ -492,6 +465,33 @@ class Gradeable extends AbstractModel {
         // Is it past when the TA grades should be released
         $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
         $this->bucket = $details['g_syllabus_bucket'];
+    }
+
+    public function calculateLateDays(&$total_late_days = 0){
+        $late_flag = false;
+        if ($this->late_days - $this->late_day_exceptions > 0) {
+            $this->late_status = "Late";
+            $late_flag = true;
+        }
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
+            $this->late_status = "Bad too many used for this assignment";
+            $late_flag = false;
+        }
+        // If late days used - extensions applied > allowed per term then status is "Bad..."
+        // Do a max(0, ...) to protect against the case where the student's late days goes down
+        // during the semester and they've already used late days
+        if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
+            $this->late_status = "Bad too many used this term";
+            $late_flag = false;
+        }
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $this->curr_late_charged = $this->late_days - $this->late_day_exceptions;
+            $this->curr_late_charged = ($this->curr_late_charged < 0) ? 0 : $this->curr_late_charged;
+            $total_late_days += $this->curr_late_charged;
+        }
     }
 
     /**
