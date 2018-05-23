@@ -390,10 +390,11 @@ tr.is_publish {
     background-color: #eebb77;
 }
 
-.grading {
-    background-color: #eeff88;
-}
-
 .ungraded {
 
+}
+
+/* So it's more specific than .graded and applies */
+tr.grading {
+    background-color: #eeff88;
 }
