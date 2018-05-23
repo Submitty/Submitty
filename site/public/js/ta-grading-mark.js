@@ -1,3 +1,9 @@
+/// When no component is selected, the current ID will be this value
+NO_COMPONENT_ID = -1;
+
+/// Component ID of the "General Comment" box at the bottom
+GENERAL_MESSAGE_ID = -2;
+
 function fixMarkPointValue(me) {
     var max = parseFloat($(me).attr('max'));
     var min = parseFloat($(me).attr('min'));
@@ -523,7 +529,7 @@ function openClose(row_id) {
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
-    setGeneralVisible(row_num === -2 && general_comment[0].style.display === 'none');
+    setGeneralVisible(row_num === GENERAL_MESSAGE_ID && general_comment[0].style.display === 'none');
 
     for (var x = 1; x <= total_num; x++) {
         var current_summary = $('#summary-' + x);
@@ -816,9 +822,9 @@ function findCurrentOpenedMark() {
         return index;
     } else {
         if ($('#summary-general')[0].style.display === 'none') {
-            return -2;
+            return GENERAL_MESSAGE_ID;
         } else {
-            return -1;
+            return NO_COMPONENT_ID;
         }
     }
 }
@@ -895,15 +901,15 @@ function openGeneralMessage() {
     saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version);
 
     //If it's already open, then openClose() will close it
-    if (findCurrentOpenedMark() !== -2) {
-        openClose(-2);
+    if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
+        openClose(GENERAL_MESSAGE_ID);
     }
 }
 
 //Close the general message input (if it's open), optionally saving changes
 function closeGeneralMessage(save) {
     //Cannot save it if it is not being edited
-    if (findCurrentOpenedMark() !== -2) {
+    if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
         return;
     }
 
