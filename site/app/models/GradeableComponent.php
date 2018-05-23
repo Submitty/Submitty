@@ -200,7 +200,7 @@ class GradeableComponent extends AbstractModel {
             $box = '( )';
         }
         foreach ($this->marks as $mark) {
-            $points_string = "";
+            $points_string = "    ";
             if ($mark->getPoints() != 0) {
               $points_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $mark->getPoints());
             }
@@ -215,7 +215,7 @@ class GradeableComponent extends AbstractModel {
               $newline = "";
               $first_text = false;
             }
-            $text .= $newline . $hasmark . $points_string . " " . $mark->getNote();
+            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
         }
         if($this->score != 0 || $this->comment != "") {
             $newline=$nl;
@@ -223,11 +223,11 @@ class GradeableComponent extends AbstractModel {
               $newline = "";
               $first_text = false;
             }
-            $score_string = "";
+            $score_string = "    ";
             if (floatval($this->score) != 0) {
                 $score_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $this->score);
             }
-            $text .= $newline . $checkedBox . $score_string . " " . $this->comment;
+            $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
         }
         return $text;
     }

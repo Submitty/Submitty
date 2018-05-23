@@ -338,7 +338,7 @@ progress::-webkit-progress-value {
     min-height:20px;
     float:left;
     word-break: break-word;
-    white-space: pre-wrap;
+    white-space: pre-line;
 }
 
 .ta-rubric-table {
