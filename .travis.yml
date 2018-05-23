@@ -112,8 +112,9 @@ jobs:
         - "export DISPLAY=:99.0"
         - "sh -e /etc/init.d/xvfb start"
         - sleep 3 # give xvfb some time to start
-      script:
         - sudo su - hwphp -c "which composer"
+      script:
+
         - sudo su - hwphp -c "composer --help"
         #- TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
 
