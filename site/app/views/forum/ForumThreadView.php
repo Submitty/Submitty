@@ -339,6 +339,15 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
+                    if(isset($activeThread['favorite']) && $activeThread['favorite']) {
+                    	$title_html .= <<<HTML
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fa fa-thumb-tack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+HTML;
+					} else {
+                    	$title_html .= <<<HTML
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fa fa-thumb-tack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+HTML;
+					}
                     $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
 HTML;
@@ -532,11 +541,18 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
+						if(isset($thread['favorite']) && $thread['favorite']) {
+							$return .= <<<HTML
+							<i class="fa fa-thumb-tack" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
+
 						$category_desc = htmlentities($thread["category_desc"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-						<span class="label label-default">{$thread["category_desc"]}</span>
+						<span class="label_forum label_forum-default">{$thread["category_desc"]}</span>
 						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>

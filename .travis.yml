@@ -41,8 +41,10 @@ jobs:
       script: skip
     - <<: *00-cache
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *00-cache
       php: 7.2
+      if: branch = master OR type = pull_request
 
     # Lint the codebase to ensure that the code is compliant to our system
     - &01-lint
@@ -52,8 +54,10 @@ jobs:
         - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
     - <<: *01-lint
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *01-lint
       php: 7.2
+      if: branch = master OR type = pull_request
 
     - &02-php-unit
       stage: 02 unit test
@@ -69,8 +73,10 @@ jobs:
         - popd
     - <<: *02-php-unit
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *02-php-unit
       php: 7.2
+      if: branch = master OR type = pull_request
 
     - &02-python-unit
       language: python
@@ -84,8 +90,10 @@ jobs:
         - popd
     - <<: *02-python-unit
       python: 3.5
+      if: branch = master OR type = pull_request
     - <<: *02-python-unit
       python: 3.6
+      if: branch = master OR type = pull_request
 
     - &03-e2e
       stage: 03 e2e test
@@ -169,7 +177,6 @@ jobs:
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
         - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
         - sudo service apache2 restart
-        - sudo cat /usr/local/submitty/site/config/master.ini
         - "export DISPLAY=:99.0"
         - "sh -e /etc/init.d/xvfb start"
         - sleep 3 # give xvfb some time to start
@@ -177,17 +184,21 @@ jobs:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
     - <<: *03-e2e
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.0
       env: AUTH_METHOD=2
     - <<: *03-e2e
       php: 7.1
       env: AUTH_METHOD=2
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
       env: AUTH_METHOD=2
+      if: branch = master OR type = pull_request
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
     # it
@@ -241,6 +252,7 @@ jobs:
         - sudo /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
       env: CLANG_VER="6.0.0"
+      if: branch = master OR type = pull_request
 
 notifications:
   email: false
