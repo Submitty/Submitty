@@ -36,7 +36,7 @@ class AdminGradeableView extends AbstractView {
             "label_message"   => $label_message,
             "type_of_action"  => $type_of_action,
             "mode"            => "create",
-            "nav_tab"         => "0"    // TODO: allow the request of a particular tab (so save-and-continue on first page doesn't jump back to first page)
+            "nav_tab"         => "0",    // TODO: allow the request of a particular tab (so save-and-continue on first page doesn't jump back to first page)
         ]);
     }
     

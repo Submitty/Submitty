@@ -1,10 +1,16 @@
 <link rel="stylesheet" type="text/css" href="css/admin-gradeable.css">
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">Gradeable Editor {{ label_message }}</h3>
+            <br />
+            <br />
+            <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
         </div>
         <br/>
         <div id="nav-bar">
@@ -15,11 +21,13 @@
             <text class="nav-bar-item" id="page_4_nav" onClick="onChangeNavTab(4);">Syllabus</text>
         </div>
         <br/>
-        <div id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
-        <div id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
-        <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
-        <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
-        <div id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableSyllabus.twig') }}</div>
+        <div class="modal-body">
+            <div id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
+            <div id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+            <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+            <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+            <div id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableSyllabus.twig') }}</div>
+        </div>
         <br/>
         <div id="nav-controls">
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Save and Continue</button>
@@ -27,9 +35,6 @@
         </div>
     </form>
 </div>
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript">
 
     adminGradeableNavTab = 0;
@@ -59,8 +64,6 @@
     }
 
     $(document).ready(function() {
-
-
         // Create mode, so disable naviation via nav bar
         if('{{mode}}' === 'create')
         {

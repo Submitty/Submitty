@@ -2,6 +2,10 @@ body {
     overflow: scroll;
 }
 
+input[readonly] {
+    background-color: #999999;
+}
+
 select {
     margin-top:7px;
     width: 60px;
