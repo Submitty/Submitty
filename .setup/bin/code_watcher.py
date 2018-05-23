@@ -31,6 +31,7 @@ class FileHandler(FileSystemEventHandler):
         self.helper = helper
 
     def run_installer(self, event):
+        print('Running INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
         installer = Path(self.setup_path, 'INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
         if event.src_path.endswith('.swp') or event.src_path == '.DS_Store':
             return
@@ -57,7 +58,7 @@ def main():
         raise SystemExit("ERROR: this script should be run as root")
 
     parser = ArgumentParser(description='Watch a directory and install the code')
-    parser.add_argument('section', type=str, choices=['site', 'bin'])
+    parser.add_argument('directory', nargs='+', choices=['site', 'bin'])
     args = parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
@@ -65,15 +66,15 @@ def main():
     git_path = Path(current_path, '..', '..').resolve()
 
     observer = Observer()
-    if args.section == 'site':
-        observer.schedule(event_handler=FileHandler(setup_path, 'site'), path=str(Path(git_path, 'site')), recursive=True)
-    elif args.section == 'bin':
-        observer.schedule(event_handler=FileHandler(setup_path, 'bin'), path=str(Path(git_path, 'bin')), recursive=True)
-        observer.schedule(event_handler=FileHandler(setup_path, 'bin'), path=str(Path(git_path, 'sbin')), recursive=True)
+    if 'site' in args.directory:
+        observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
+    if 'bin' in args.directory:
+        observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
+        observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
 
     observer.start()
     try:
-        print("Watching {} for changes...".format(args.section))
+        print("Watching {} for changes...".format(', '.join(args.directory)))
         input("~~Hit enter to exit~~\n")
     finally:
         observer.stop()
