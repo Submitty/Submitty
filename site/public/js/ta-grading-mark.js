@@ -64,7 +64,6 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
-            async: false,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
@@ -230,19 +229,18 @@ function haveMarksChanged(num, data) {
 
 function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var parent = $('#marks-parent-'+num);
+    parent.children().remove();
+    parent.append("<tr><td colspan='4'>Loading</td></tr>");
     ajaxGetMarkData(gradeable_id, user_id, question_id, function(data) {
         data = JSON.parse(data);
-        
+
         // If nothing has changed, then don't update
         if (!haveMarksChanged(num, data))
             return;
-        
+
         // Clear away all marks
-        var marks = $('[name=mark_'+num+']');
-        for (var x = 0; x < marks.length; x++) {
-            marks[x].remove();
-        }
-            
+        parent.children().remove();
+
         // Custom mark
         {
             var x = data['data'].length-1;
@@ -742,6 +740,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         }
         
         all_false = false;
+    }
+
+    if (all_false) {
+        new_text = "Click me to grade!";
     }
     
     // Clamp points

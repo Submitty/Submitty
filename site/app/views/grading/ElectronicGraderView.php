@@ -1510,6 +1510,9 @@ HTML;
                     </td>
                 </tr>
                 <tbody id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
+                    <tr>
+                        <td colspan='4'>Loading...</td>
+                    </tr>
                 </tbody>
 
                 <tbody id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
