@@ -302,9 +302,6 @@ xdebug.remote_port=9000
 xdebug.remote_host=10.0.2.2
 EOF
         fi
-
-        # Setup composer for tests
-        su -lc "composer install -d ${SUBMITTY_REPOSITORY}/site" vagrant
     fi
 
     cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
