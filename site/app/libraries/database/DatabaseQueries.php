@@ -1953,7 +1953,7 @@ AND gc_id IN (
         return count($result_rows) > 0;
     }
 
-    public function mergeThread($parent_thread_id, $child_thread_id, &$message){
+    public function mergeThread($parent_thread_id, $child_thread_id, $makeAnnouncement, &$message){
         try{
             $this->course_db->beginTransaction();
             if((!$this->existsNonMergedThread($child_thread_id)) || (!$this->existsNonMergedThread($parent_thread_id))) {
@@ -1977,6 +1977,7 @@ AND gc_id IN (
 
             // $merged_id is PK of linking node
             $this->course_db->query("UPDATE threads SET merged_id = ?, deleted = true WHERE id = ?", array($child_root_post, $child_thread_id));
+            $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($makeAnnouncement, $parent_thread_id));
             foreach($children as $post_id){
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }

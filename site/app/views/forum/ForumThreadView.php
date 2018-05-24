@@ -279,13 +279,16 @@ HTML;
 		} else {
 
 			if($this->core->getUser()->getGroup() <= 2){
+				$current_thread = null;
 				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
 				$merge_thread_list = array();
 				for($i = 0; $i < count($threads); $i++){
 					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
 					$date = date_create($first_post['timestamp']);
-					if($current_thead_date>$date) {
+					if($currentThread == $threads[$i]["id"]) {
+						$current_thread = $threads[$i];
+					} else if($current_thead_date>$date) {
 						array_push($merge_thread_list, $threads[$i]);
 					}
 				}
@@ -305,19 +308,39 @@ HTML;
 						<input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{$currentThread}" data-ays-ignore="true">
 						<select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
 HTML;
+						$currentThreadPinned = $current_thread["pinned"];
 						for($i = 0; $i < count($merge_thread_list); $i++){
+							$pinned = $merge_thread_list[$i]["pinned"];
+							$announcement_default = ($currentThreadPinned || $pinned) ? "true" : "false";
 							$first_post = $this->core->getQueries()->getFirstPostForThread($merge_thread_list[$i]["id"]);
 							$return.= <<<HTML
-							 <option value='{$merge_thread_list[$i]["id"]}'>{$merge_thread_list[$i]['title']} ({$merge_thread_list[$i]["id"]})</option>
+							 <option value='{$merge_thread_list[$i]["id"]}' announcement_default="{$announcement_default}">{$merge_thread_list[$i]['title']} ({$merge_thread_list[$i]["id"]})</option>
 HTML;
 						}
 						$return .= <<<HTML
 						</select>
 						<br>
 						<div  style="float: right; width: auto; margin-top: 10px;">
+							<label style="display:inline-block;" for="Announcement">Make Parent Thread Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" id="merge_announcement" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+
+
 							<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
 							<input class="btn btn-primary" type="submit" value="Submit" />
 						</div>
+						<script type="text/javascript">
+							function refresh_merge_thread_announcement() {
+								var optionSelected = $("option:selected", $("[name='merge_thread_parent']")[0]);
+								if(optionSelected.attr("announcement_default") == "true") {
+									$("#merge_announcement").prop('checked', true);
+								} else {
+									$("#merge_announcement").prop('checked', false);
+								}
+							}
+							$("[name='merge_thread_parent']").on("change", function() {
+								refresh_merge_thread_announcement();
+							});
+							refresh_merge_thread_announcement();
+						</script>
 					</form>
 HTML;
 				}
