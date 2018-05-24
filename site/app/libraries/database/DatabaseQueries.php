@@ -594,30 +594,18 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
-<<<<<<< HEAD
-SELECT ".$u_or_t.".{$section_key}, count(".$u_or_t.".*) as cnt
-FROM ".$users_or_teams." AS ".$u_or_t."
-=======
 SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
 FROM {$users_or_teams} AS {$u_or_t}
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
 INNER JOIN (
   SELECT * FROM gradeable_data AS gd
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
   )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
-<<<<<<< HEAD
 ) AS gd ON ".$u_or_t.".".$user_or_team_id." = gd.gd_".$user_or_team_id."
 {$where}
 GROUP BY ".$u_or_t.".{$section_key}
 ORDER BY ".$u_or_t.".{$section_key}", $params);
-=======
-) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
-{$where}
-GROUP BY {$u_or_t}.{$section_key}
-ORDER BY {$u_or_t}.{$section_key}", $params);
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
@@ -626,66 +614,6 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
-<<<<<<< HEAD
-    /*
-    public function getAverageComponentScores($g_id, $section_key, $is_team) {
-        if($is_team){
-            
-=======
-    public function getAverageComponentScores($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
-        if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
-        }
-        $return = array();
-        $this->course_db->query("
-SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
-  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
-  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-    SELECT gcd.gc_id, gd.gd_{$user_or_team_id}, egv.{$user_or_team_id}, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
-    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
-    FROM gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-    LEFT JOIN(
-      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
-      FROM gradeable_component_mark_data AS gcmd
-      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
-      GROUP BY gcmd.gc_id, gcmd.gd_id
-      )AS marks
-    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-    LEFT JOIN(
-      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
-      FROM gradeable_data AS gd
-      WHERE gd.g_id=?
-    ) AS gd ON gcd.gd_id=gd.gd_id
-    INNER JOIN(
-      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
-      FROM {$users_or_teams} AS {$u_or_t}
-      WHERE {$u_or_t}.{$section_key} IS NOT NULL
-    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    INNER JOIN(
-      SELECT egv.{$user_or_team_id}, egv.active_version
-      FROM electronic_gradeable_version AS egv
-      WHERE egv.g_id=? AND egv.active_version>0
-    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    WHERE g_id=?
-  )AS parts_of_comp
-)AS comp
-GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
-ORDER BY gc_order
-        ", array($g_id, $g_id, $g_id));
-        foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleStat($this->core, $row);
-        }
-        return $return;
-    }*/
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -739,10 +667,6 @@ ORDER BY gc_order
         }
         return $return;
     }
-<<<<<<< HEAD
-    /*
-    public function getAverageAutogradedScores($g_id, $section_key) {
-=======
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -752,41 +676,6 @@ ORDER BY gc_order
             $users_or_teams="gradeable_teams";
             $user_or_team_id="team_id";
         }
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
-        $this->course_db->query("
-SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
-   SELECT * FROM (
-      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv
-      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
-   )g
-) as individual;
-          ", array($g_id));
-        if(count($this->course_db->rows()) == 0){
-          echo("why");
-          return;
-        }
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
-    }
-<<<<<<< HEAD
-    */
-    /*
-
-    */
-    public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
-=======
-    public function getAverageForGradeable($g_id, $section_key, $is_team) {
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
-        if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
-        }
-<<<<<<< HEAD
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
@@ -803,55 +692,6 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
-   /*
-   public function getAverageForGradeable($g_id, $section_key) {
-=======
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
-        $this->course_db->query("
-SELECT COUNT(*) from gradeable_component where g_id=?
-          ", array($g_id));
-        $count = $this->course_db->rows()[0][0];
-        $this->course_db->query("
-SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
-  SELECT * FROM(
-    SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
-      SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
-      CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-      WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-      ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-        SELECT gcd.gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
-        CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score, CASE WHEN autograding IS NULL THEN 0 ELSE autograding END AS autograding
-        FROM gradeable_component_data AS gcd
-        LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-        LEFT JOIN(
-          SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
-          FROM gradeable_component_mark_data AS gcmd
-          LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
-          GROUP BY gcmd.gc_id, gcmd.gd_id
-          )AS marks
-        ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-        LEFT JOIN gradeable_data AS gd ON gd.gd_id=gcd.gd_id
-        LEFT JOIN (
-          SELECT egd.g_id, egd.{$user_or_team_id}, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding
-          FROM electronic_gradeable_version AS egv
-          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.{$user_or_team_id}=egd.{$user_or_team_id} AND active_version=g_version AND active_version>0
-          )AS auto
-        ON gd.g_id=auto.g_id AND gd_{$user_or_team_id}=auto.{$user_or_team_id}
-        INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
-        WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
-      )AS parts_of_comp
-    )AS comp
-    GROUP BY gd_id, autograding
-  )g WHERE count=?
-)AS individual
-          ", array($g_id, $count));
-        if(count($this->course_db->rows()) == 0){
-          echo("why");
-          return;
-        }
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
-    }
-   */
     public function getAverageForGradeable($g_id, $section_key, $team_id) {
          $u_or_t="u";
         $users_or_teams="users";
@@ -1789,11 +1629,7 @@ ORDER BY {$section_key}", $params);
     }
 public function getSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
-<<<<<<< HEAD
         $params = array();
-=======
-        $params = array($g_id);
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
         $where = "";
         if (count($sections) > 0) {
             // Expand out where clause
@@ -1813,27 +1649,13 @@ ON
 gradeable_teams.team_id = electronic_gradeable_version.team_id
 AND gradeable_teams.". $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
-<<<<<<< HEAD
 AND electronic_gradeable_version.g_id='{$g_id}'
 {$where}
 GROUP BY {$section_key}
 ORDER BY {$section_key}", $params);
-
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
-
-=======
-AND electronic_gradeable_version.g_id=?
-{$where}
-GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
-
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row[$section_key]] = intval($row['cnt']);
-        }
-
->>>>>>> 129af049baca8f484d604657571b257d6d49085a
         return $return;
     }
     public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key) {
