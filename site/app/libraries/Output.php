@@ -131,7 +131,7 @@ class Output {
      * @param array $context Associative array of variables to pass into the Twig renderer
      * @return string Rendered page content
      */
-    public function renderTwigTemplate($filename, $context) {
+    public function renderTwigTemplate($filename, $context = []) {
         try {
             return $this->twig->render($filename, $context);
         } catch (\Twig_Error $e) {
@@ -146,7 +146,7 @@ class Output {
      * @param string $filename Template file basename, file should be in site/app/templates
      * @param array $context Associative array of variables to pass into the Twig renderer
      */
-    public function renderTwigOutput($filename, $context) {
+    public function renderTwigOutput($filename, $context = []) {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
         } else {
