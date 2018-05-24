@@ -36,6 +36,23 @@ function checkIfSelected(me) {
 }
 
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new = false) {
+    /*question_num = parseInt(num);
+    var arr_length = $('tr[name=mark_'+question_num+']').length;
+    var any_selected=false;
+    for (var i = 0; i < arr_length; i++) {
+        var current_row = $('#mark_id-'+question_num+'-'+i);
+        var is_selected = false;
+        if (current_row.find('i[name=mark_icon_'+question_num+'_'+i+']')[0].classList.contains('fa-square')) {
+            is_selected = true;
+        }
+        if (is_selected === true) {
+            any_selected = true;
+        }
+    }
+    var custom_points = parseFloat(current_row.find('input[name=mark_points_custom_'+question_num+']').val());
+    if(any_selected==false && custom_points==0){
+        //$('#summary-' + num)[0].style.display === 'none';
+    }*/
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
     <td colspan="1" style="'+background+'; text-align: center;"> \
@@ -435,8 +452,13 @@ function calculateMarksPoints(question_num) {
         }
     }
     if(any_selected == false){
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#summary-' + question_num)[0].innerHTML = "Click here to start grading";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         return "None Selected";
     }
+    $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
+    $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -455,14 +477,14 @@ function updateProgressPoints(question_num) {
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
     if(current_points=="None Selected"){
         $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
-       // $('#grade-' + question_num)[0].innerHTML = "current_points";     
+        $('#grade-' + question_num)[0].innerHTML = "";     
         //$('#gradebar-' + question_num)[0].innerHTML = "+$current_points";
     }
     else{
         //extra credit
         if(current_points > max_points){
-            $('#grade-' + question_num)[0].innerHTML = "+$current_points";     
-            $('#gradebar-' + question_num)[0].style.backgroundColor = "#0016FF";
+            $('#gradebar-' + question_num)[0].innerHTML = ('+' + current_points);     
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
         }
         //current_progress[0].innerHTML = current_points + " / " + max_points; 
         else if(current_points == max_points){
@@ -476,6 +498,18 @@ function updateProgressPoints(question_num) {
         }
         $('#grade-' + question_num)[0].innerHTML = current_points;
     }
+   /* var arr_length = $('tr[name=mark_'+question_num+']').length;
+    var any_selected=false;
+    for (var i = 0; i < arr_length; i++) {
+        var current_row = $('#mark_id-'+question_num+'-'+i);
+        var is_selected = false;
+        if (current_row.find('i[name=mark_icon_'+question_num+'_'+i+']')[0].classList.contains('fa-square')) {
+            is_selected = true;
+        }
+        if (is_selected === true) {
+            any_selected = true;
+        }
+    }*/
 }
 
 function selectMark(me, first_override = false) {
@@ -554,9 +588,8 @@ function openClose(row_id, num_questions = -1) {
         }
         var show = false;
         if (x == row_num && current_summary[0].style.display === '') {
-            show = true;
             updateProgressPoints(x);
-
+            show = true;
             // if the component has a page saved, open the PDF to that page
             // opening directories/frames based off of code in openDiv and openFrame functions
 
@@ -755,9 +788,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         if (data['modified'] === true) {
             if (all_false === true) {
                 $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
-                $('#summary-' + num)[0].style.backgroundColor = "#999";
-                $('#gradebar-' + num)[0].style.backgroundColor = "#999";
-                $('#title-' + num)[0].style.backgroundColor = "#999";
             } else {
                 if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
