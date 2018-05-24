@@ -236,25 +236,24 @@ class ElectronicGraderController extends GradingController {
             else {
                 foreach ($total_users as $key => $value) {                           
                     if(array_key_exists($key, $num_submitted)){
-                    $sections[$key] = array(
+                        $sections[$key] = array(
                             'total_components' => $num_submitted[$key] * $num_components,
-                        'graded_components' => 0,
-                        'graders' => array()
-                    );
-                    if ($gradeable->isTeamAssignment()) {
-                        $sections[$key]['no_team'] = $no_team_users[$key];
-                            $sections[$key]['team'] = $team_users[$key];
-                    }
+                            'graded_components' => 0,
+                            'graders' => array()
+                        );
+                        if ($gradeable->isTeamAssignment()) {
+                            $sections[$key]['no_team'] = $no_team_users[$key];
+                                $sections[$key]['team'] = $team_users[$key];
+                        }
                         if (isset($graders[$key])) {
                             $sections[$key]['graders'] = $graders[$key];
                         }
-                    if (isset($graded_components[$key])) {
-                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                        $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                    }
-                    }
-                    else{
-                            $sections[$key] = array(
+                        if (isset($graded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                        }
+                    } else{
+                        $sections[$key] = array(
                             'total_components' => 0,
                             'graded_components' => 0,
                             'graders' => array()
@@ -267,12 +266,12 @@ class ElectronicGraderController extends GradingController {
                             // Clamp to total components if unsubmitted assigment is graded for whatever reason
                             $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                         }
-                    if (isset($graders[$key])) {
-                        $sections[$key]['graders'] = $graders[$key];
+                        if (isset($graders[$key])) {
+                            $sections[$key]['graders'] = $graders[$key];
+                        }
                     }
                 }
             }
-        }
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());

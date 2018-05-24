@@ -44,7 +44,7 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-                $no_team_total += $section['no_team'];
+               $no_team_total += $section['no_team'];
                $team_total += $section['team'];
             }
         }
@@ -92,7 +92,7 @@ HTML;
             }
             $submitted_percentage = 0;
             if($total_students!=0){
-            $submitted_percentage = round(($show_total / $total_students) * 100, 1);
+                $submitted_percentage = round(($show_total / $total_students) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
