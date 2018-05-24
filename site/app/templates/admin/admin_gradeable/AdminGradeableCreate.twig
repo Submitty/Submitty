@@ -19,90 +19,87 @@
 {# 
     Primary Form
 #}
-<div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
+<!-- Gradeable ID (readonly in edit mode, required) -->
+What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
+    <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" 
+        value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
 
-    <!-- Gradeable ID (readonly in edit mode, required) -->
-    What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
-        <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" 
-            value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
+<br />
+
+<!-- Gradeable Title (read/write in all modes) -->
+What is the title of this gradeable?: 
+    <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" 
+        value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
+
+<br />
+
+<!-- Instruction URL (read/write in all modes) -->
+What is the URL to the assignment instructions? (shown to student) 
+    <input style='width: 227px' type='text' name='instructions_url' 
+        value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
+
+<br /> 
+
+<!-- Gradeable Type radio buttons (readonly in edit mode) -->
+What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
+    <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
+        {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
+        {{ action == "edit" ? disabled : null }}> Electronic File
+
+    <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
+        {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
+        {{ action == "edit" ? disabled : null }}> Checkpoints
+
+    <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
+        {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
+        {{ action == "edit" ? disabled : null }}> Numeric/Text 
+
+    <div id="required_type" style="color:red; display:inline;">(Required)</div>
+
+<br />
+
+<!-- This is only relevant to Electronic Files -->
+<fieldset class="gradeable_type_options electronic_file" id="electronic_file">
 
     <br />
-
-    <!-- Gradeable Title (read/write in all modes) -->
-    What is the title of this gradeable?: 
-        <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" 
-            value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
-
+    Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
     <br />
+        <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
+            {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
+            {{ action == "edit" ? 'disabled' : '' }}> Yes
 
-    <!-- Instruction URL (read/write in all modes) -->
-    What is the URL to the assignment instructions? (shown to student) 
-        <input style='width: 227px' type='text' name='instructions_url' 
-            value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
+        <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
+            {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
+            {{ action == "edit" ? 'disabled' : '' }}> No
 
-    <br /> 
+    <!-- Team settings (read only in edit mode) -->
+    <div id="team_settings">
+        <div class="team_assignment team_yes" id="team_yes">
+            <br />
 
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-    What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
-        <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
-            {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ action == "edit" ? disabled : null }}> Electronic File
+            <!-- Inherit teams from a nother gradeable? -->
+            Use teams from a previous gradeable:
 
-        <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
-            {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ action == "edit" ? disabled : null }}> Checkpoints
+            {# 
+                Use a combo box if we can edit the value, otherwise show a text box (readonly)
+            #}
+            {% if action == 'add' %}
+                <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
+                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                    <option value=''>--None--</option>
 
-        <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
-            {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ action == "edit" ? disabled : null }}> Numeric/Text 
-
-        <div id="required_type" style="color:red; display:inline;">(Required)</div>
-
-    <br />
-
-    <!-- This is only relevant to Electronic Files -->
-    <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-
-        <br />
-        Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
-        <br />
-            <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
-                {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-                {{ action == "edit" ? 'disabled' : '' }}> Yes
-
-            <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
-                {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-                {{ action == "edit" ? 'disabled' : '' }}> No
-
-        <!-- Team settings (read only in edit mode) -->
-        <div id="team_settings">
-            <div class="team_assignment team_yes" id="team_yes">
-                <br />
-
-                <!-- Inherit teams from a nother gradeable? -->
-                Use teams from a previous gradeable:
-
-                {# 
-                    Use a combo box if we can edit the value, otherwise show a text box (readonly)
-                #}
-                {% if action == 'add' %}
-                    <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
-                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
-                        <option value=''>--None--</option>
-
-                        {% for parent in admin_gradeable.getInheritTeamsList() %}
-                            <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
-                                value="{{ parent.g_id }}">{{ parent.g_title }}</option>
-                        {% endfor %}
-                    </select>
-                {% else %}
-                    <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' 
-                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
-                {% endif %}
-            </div>
+                    {% for parent in admin_gradeable.getInheritTeamsList() %}
+                        <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                            value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' 
+                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+            {% endif %}
         </div>
-    </fieldset>
-</div>
+    </div>
+</fieldset>
 
 <script type="text/javascript">
     //
