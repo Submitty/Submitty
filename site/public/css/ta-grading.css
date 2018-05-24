@@ -332,6 +332,16 @@ progress::-webkit-progress-value {
   background-color: #f9f9f9;
 }
 
+.rubric-textarea {
+    width:95%;
+    height:100%;
+    min-height:20px;
+    float:left;
+    word-break: break-word;
+    white-space: pre-line;
+    cursor: pointer;
+}
+
 .ta-rubric-table {
     border: 1px solid #dddddd;
     border-collapse: separate;
