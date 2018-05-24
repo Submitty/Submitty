@@ -1,8 +1,4 @@
-import grade_item
-import insert_database_version_data
-import grade_items_logging
-import write_grade_history
-import CONFIG_PATH
+from . import grade_item, insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
 # ==================================================================================
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))

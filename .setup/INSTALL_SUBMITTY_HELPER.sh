@@ -334,8 +334,11 @@ chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
 
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/track_git_version.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 ########################################################################################################################
@@ -620,6 +623,8 @@ do
     chown hwcron:$myuser $mydir
     chmod 770 $mydir
 done
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 
 # If the submitty_autograding_shipper.service or submitty_autograding_worker.service
 # files have changed, we should reload the units:

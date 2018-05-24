@@ -47,11 +47,28 @@ def initialize(untrusted_queue):
     """
     multiprocessing.current_process().untrusted = untrusted_queue.get()
 
+# ==================================================================================
+def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
 
+    submitty_config  = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')
+
+    try:
+        with open(submitty_config) as infile:
+            submitty_details = json.load(infile)
+            installed_commit = submitty_details['installed_commit']
+            most_recent_tag  = submitty_details['most_recent_git_tag']
+    except FileNotFoundError as e:
+        raise SystemExit("ERROR, could not locate the submitty.json:", e)
+
+    autograding_worker_json[entry]['server_name']     = socket.getfqdn()
+    autograding_worker_json[entry]['primary_commit']  = installed_commit
+    autograding_worker_json[entry]['most_recent_tag'] = most_recent_tag
+    return autograding_worker_json
 # ==================================================================================
 def update_all_foreign_autograding_workers():
     success_map = dict()
     all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
+
     try:
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
@@ -60,17 +77,16 @@ def update_all_foreign_autograding_workers():
 
     for key, value in autograding_workers.items():
         formatted_entry = {key: value}
-        server_name = socket.getfqdn()
-        formatted_entry[key]['server_name']=server_name
+        formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, key)
         success = update_and_install_autograding_worker(key, formatted_entry)
         success_map[key] = success
     return success_map
 # ==================================================================================
 # A small helper function which calls update_worker_code and update_worker_json
 def update_and_install_autograding_worker(name, formatted_entry):
-    success = update_worker_code(name, formatted_entry)
-    if success == False:
-        return success
+    # success = update_worker_code(name, formatted_entry)
+    # if success == False:
+    #     return success
     success = update_worker_json(name, formatted_entry)
     return success
 # ==================================================================================
@@ -588,12 +604,13 @@ def launch_shippers(worker_status_map):
                 full_address = "{0}@{1}".format(machine["username"], machine["address"])
             elif not machine["username"] == "":
                 Raise('ERROR: username for primary (localhost) must be ""')
+
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:
                 raise SystemExit("ERROR: num_workers_on_machine for '{0}' must be non-negative.".format(which_machine))
+
             single_machine_data = {name : machine}
-            server_name = socket.getfqdn()
-            single_machine_data[name]['server_name']=server_name
+            single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
         except Exception as e:
             print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
             grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
