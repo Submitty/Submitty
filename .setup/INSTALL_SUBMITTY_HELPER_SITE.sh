@@ -8,7 +8,7 @@ echo -e "Copy the submission website"
 
 if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     # constants are not initialized,
-    CONF_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"/../../config
+    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
     HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
@@ -18,14 +18,12 @@ fi
 # copy the website from the repo
 rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
-# install composer dependencies and generate classmap
-pushd ${SUBMITTY_INSTALL_DIR}/site
-composer install --no-dev --optimize-autoloader
-popd
-
 # set special user $HWPHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${HWPHP_USER}:${HWPHP_USER} {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${HWCGI_USER}:${HWCGI_USER} {} \;
+
+# install composer dependencies and generate classmap
+su - ${HWPHP_USER} -c "pushd ${SUBMITTY_INSTALL_DIR}/site; composer install --no-dev --optimize-autoloader; popd"
 
 # TEMPORARY (until we have generalized code for generating charts in html)
 # copy the zone chart images
