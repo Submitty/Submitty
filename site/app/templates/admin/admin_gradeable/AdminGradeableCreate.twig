@@ -1,13 +1,3 @@
-<!-- Debugging Stuff -->
-{{ admin_gradeable.getGGradeableType() }}
-{{ admin_gradeable.getEgInheritTeamsFrom() }}
-<br />
-
-
-
-TODO: Add necessary lines (finding locations of eg_team_assignment for reference) to 
-    fetch eg_inherit_teams_from from the database and insert it if required (see stash maybe)
-
 {#
     Combo box for choosing an existing gradeable as a template for the new one
         (Only show this option if we aren't in edit mode).
@@ -54,20 +44,19 @@ TODO: Add necessary lines (finding locations of eg_team_assignment for reference
 
     <!-- Gradeable Type radio buttons (readonly in edit mode) -->
     What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
-        <!-- TODO: this should disappear once a type is selected -->
-        <div id="required_type" style="color:red; display:inline;">(Required)</div>
-
         <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
-            {{ (admin_gradeable.getGGradeableType() == 0) ? 'checked' : '' }}
+            {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
             {{ type_of_action == "edit" ? disabled : null }}> Electronic File
 
         <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
-            {{ (admin_gradeable.getGGradeableType() == 1) ? 'checked' : '' }}
+            {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
             {{ type_of_action == "edit" ? disabled : null }}> Checkpoints
 
         <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
-            {{ (admin_gradeable.getGGradeableType() == 2) ? 'checked' : '' }}
+            {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
             {{ type_of_action == "edit" ? disabled : null }}> Numeric/Text 
+
+        <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
     <br />
 
@@ -131,6 +120,14 @@ TODO: Add necessary lines (finding locations of eg_team_assignment for reference
     // Event Handlers
     //
     function onGradeableTypeChange() {
+        // Hide red text once user selects an option
+        if($('#radio_electronic_file').is(':checked') ||
+           $('#radio_checkpoints').is(':checked') ||
+           $('#radio_numeric').is(':checked')) {
+               $('#required_type').hide();
+        }        
+
+        // Display team options if the user selects electronic gradeables
         if($('#radio_electronic_file').is(':checked')) {
             $('#electronic_file').show();
             onTeamAssignmentChange();
