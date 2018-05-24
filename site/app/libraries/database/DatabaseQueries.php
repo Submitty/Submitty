@@ -1451,6 +1451,7 @@ WHERE gcm_id=?", $params);
           WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=? AND t.state=0", array($g_id, $user_id));
     }
 
+    
     /**
      * Return Team object for team whith given Team ID
      * @param string $team_id

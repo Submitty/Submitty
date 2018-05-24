@@ -329,7 +329,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function detailsPage($gradeable, $rows, $graders, $empty_teams) {
+    public function detailsPage($gradeable, $rows, $graders, $all_teams, $empty_teams) {
         $return = <<<HTML
 <div class="content">
 
@@ -372,7 +372,22 @@ HTML;
         $show_auto_grading_points = true;
         $return .= <<<HTML
     <h2>Grade Details for {$gradeable->getName()}</h2>
-    <table class="table table-striped table-bordered persist-area">
+HTML;
+    if ($gradeable->isTeamAssignment()) {
+
+        if(count($all_teams) > count($empty_teams)) {
+            $return .= <<<HTML
+            <a style="float: right;" class="btn btn-primary" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'export_teams', 'gradeable_id'=>$gradeable->getId()))}">Export Teams Members</a>
+HTML;
+        }
+        if(count($all_teams) == count($empty_teams)) {
+            $return .= <<<HTML
+           <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
+HTML;
+        }
+    }        
+        $return .= <<<HTML
+    <br /><br /><br /><table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
 HTML;
@@ -903,6 +918,32 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function importTeamForm($gradeable) {
+        $return = <<<HTML
+<div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
+    <h2>Import Teams Members</h2> 
+    <p>&emsp;</p>
+    <p>Format of the teams should be csv with 6 columns:<br />
+First Name, Last Name, User ID, Team ID, Team Registration Section, Team Rotating Section<br />
+The first row of the csv is assumed to be column headings and is ignored.<br /><br />
+        Note: Imported Teams will be assigned new Team IDs, Team Registration Section, and Team Rotating Section.
+    </p><br />
+    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        <div>
+            <input type="file" name="upload_team" accept=".csv">
+        </div>
+        <div style="float:right; width:auto;">
+            <a onclick="$('#import-team-form').css('display', 'none')" class="btn btn-danger">Cancel</a>    
+            <input class="btn btn-primary" type="submit" value="Import">    
+        </div>    
+    </form>
+</div>
+HTML;
+        return $return;
+    }
+
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
