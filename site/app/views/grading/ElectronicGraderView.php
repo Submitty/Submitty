@@ -1548,7 +1548,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" class="rubric-textarea">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>
@@ -1617,7 +1617,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$overallComment}</pre></span>
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{$overallComment}</span>
                         </div>
                     </td>
                 </tr>
