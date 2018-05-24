@@ -692,7 +692,6 @@ ALTER TABLE ONLY sessions
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
 
-
 --
 -- Name: gradeable_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
@@ -972,7 +971,6 @@ ALTER TABLE ONLY users
 
 ALTER TABLE ONLY gradeable_teams
     ADD CONSTRAINT gradeable_teams_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
 
 --
 -- Name: teams_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
