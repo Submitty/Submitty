@@ -366,6 +366,19 @@ class ForumController extends AbstractController {
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
                 if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
+                    $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
+                    if(is_dir($child_thread_dir)) {
+                        $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
+                        if(!is_dir($parent_thread_dir)) {
+                            FileUtils::createDir($parent_thread_dir);
+                        }
+                        $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
+                        foreach ($child_posts_dirs as $post_id) {
+                            $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
+                            $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
+                            rename($child_post_dir, $parent_post_dir);
+                        }
+                    }
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
