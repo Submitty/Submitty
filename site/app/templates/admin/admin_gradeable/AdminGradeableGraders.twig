@@ -1,4 +1,105 @@
-<h1>Graders</h1>
-<p class="important">
-    Configure Graders
-</p>
+{% import _self as self %} {# Required to use macros in same template #}
+{# 
+Macros
+#}
+{# Display the checkboxes for selecting section for entire grader level #}
+{% macro display_grader_heading_cb(prefix, section_numbers) %}
+    {% for rs in section_numbers %}
+        <th><input type="checkbox" name="{{prefix}}_all_{{rs}}" id="{{prefix}}_all_{{rs}}"/></th>
+    {% endfor %}
+{% endmacro %}
+
+{# Display the checkboxes for a given set of graders at a grader level #}
+{% macro display_graders(graders, prefix, section_numbers) %}
+    {% for grader in graders %}
+        <tr>
+            <th>{{grader.user_id}}</th>
+            {% for rs in section_numbers %}
+                <td><input type="checkbox" name="{{prefix}}_{{grader.user_id}}_{{rs}}" id="{{prefix}}_{{grader.user_id}}_{{rs}}"
+                        {{ (rs in grader.sections) ? 'checked' : ''}}/></td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+{% endmacro %}
+
+
+{#
+Variables
+#}
+{# Get array of section numbers #}
+{% set section_numbers = range(1, admin_gradeable.getNumSections()) %}
+
+{# 
+Form
+#}
+How should graders be assigned to grade this item?
+<fieldset>    
+    <input type="radio" name="section_type" value="reg_section" id="registration-section"
+        {{ (admin_gradeable.getGGradeByRegistration() == true or action == "add") ? 'checked' : '' }}> Registration Section
+
+    <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
+        {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
+
+    <div id="rotating_data">
+        <table>
+            {# Helpful debuging line.  Uncomment to view graders data #}
+            {# <tr>{{all_graders|json_encode()}}</tr> #}
+            <tr>
+                <th />
+                {% for rs in section_numbers %}
+                    <th>{{rs}}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>Instructor Graders</th>
+                <!-- Checkboxes for giving all instructors a section -->
+                {{ self.display_grader_heading_cb('inst', section_numbers) }}
+            </tr>
+            <!-- Instructors -->
+            {{ self.display_graders(all_graders[0], 'inst', section_numbers) }}
+            <tr>
+                <th>Full Access Graders</th>
+                <!-- Checkboxes for giving all Full Access Graders a section -->
+                {{ self.display_grader_heading_cb('full', section_numbers) }}
+            </tr>
+            <!-- Full Access Graders -->
+            {{ self.display_graders(all_graders[1], 'full', section_numbers) }}
+            <tr>
+                <th>Limited Access Graders</th>
+                <!-- Checkboxes for giving all Limited Access Graders a section -->
+                {{ self.display_grader_heading_cb('ltd', section_numbers) }}
+            </tr>
+            <!-- Limited Access Graders -->
+            {{ self.display_graders(all_graders[2], 'ltd', section_numbers) }}
+        </table>
+    </div>
+</fieldset>
+
+
+<script type="text/javascript">
+
+    // Updates the checkboxes for all graders of a certain type.
+    //  This feature purely a front-end convenience.
+    function updateAllCheckBoxes() {
+
+    }
+
+    function onSectionTypeChange() {
+        if($('#rotating-section').is(':checked')) {
+            $('#rotating_data').show();
+        }
+        else {
+            $('#rotating_data').hide();
+        }
+    }
+
+    $(document).ready(function() {
+
+        // Hide rotating sections settings if on registration sections
+        onSectionTypeChange();
+        $('[name="section_type"]').change(onSectionTypeChange);
+
+    });
+
+
+</script>

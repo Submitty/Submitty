@@ -675,7 +675,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getGradersForAllRotatingSections($gradeable_id) {
         $this->course_db->query("
     SELECT
-        u.user_id, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
+        u.user_id, u.user_group, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
     FROM
         users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
     WHERE

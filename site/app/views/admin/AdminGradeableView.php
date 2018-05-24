@@ -16,10 +16,33 @@ class AdminGradeableView extends AbstractView {
         $submit_text      = "Submit";
         $label_message    = "";
         $gradeables_array = array();
-
-        foreach ($admin_gradeable->getTemplateList() as $g_id_title) { //makes an array of gradeable ids for javascript
+        
+        //makes an array of gradeable ids for javascript
+        foreach ($admin_gradeable->getTemplateList() as $g_id_title) {
             array_push($gradeables_array, $g_id_title['g_id']);
         }
+
+        // Generate an array by user_group for the graders
+        $graders_by_usertype = $admin_gradeable->getGradersFromUsertypes();
+        $graders = array();
+        for($x = 0; $x < sizeof($graders_by_usertype); $x++) {
+            $graders[$x] = array();
+            foreach($graders_by_usertype[$x] as $grader) {
+                $graders[$x][$grader['user_id']] = $grader;
+            }
+        }
+        // For each grader with sections assigned to them, add their
+        //  sections to the array generated above
+        foreach($admin_gradeable->getGradersAllSection() as $grader) {
+            //parses the sections from string "{1, 2, 3, 4}" to a php array [1,2,3,4]
+            $sections = $grader['sections'];
+            $sections = ltrim($sections, '{');
+            $sections = rtrim($sections, '}');
+            $sections = $explode(',', $sections);
+
+            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
+        }
+
 
         // //if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
@@ -37,6 +60,9 @@ class AdminGradeableView extends AbstractView {
             "action"          => $action,
             "submit_text"     => $submit_text,
             "nav_tab"         => "0",    // TODO: allow the request of a particular tab (so save-and-continue on first page doesn't jump back to first page)
+            
+            // Graders Page Specific
+            "all_graders"    => $graders
         ]);
     }
     
