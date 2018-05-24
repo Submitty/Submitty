@@ -2,6 +2,25 @@
 # HELPER FUNCTION FOR INSTALLING INDIVIDUAL HOMEWORKS
 ##########################################################################
 
+function clean_homework {
+
+    # which assignment to cleanup
+    semester=$1
+    course=$2
+    assignment=$3
+    course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
+
+    # cleanup all files associated with this assignment
+    rm -rf $course_dir/test_input/${3}
+    rm -rf $course_dir/test_output/${3}
+    rm -rf $course_dir/provided_code/${3}
+    rm -rf $course_dir/custom_validation_code/${3}
+    rm -rf $course_dir/build/${3}
+    rm -rf $course_dir/bin/${3}
+    rm -rf $course_dir/config/build/build_${3}.json
+    rm -rf $course_dir/config/complete_config/complete_config_${3}.json
+}
+
 
 function build_homework {
 
@@ -115,15 +134,23 @@ function build_homework {
     if [ -d $hw_build_path/custom_validation_code/ ]; then
 	rsync -ruz --delete $hw_build_path/custom_validation_code/    $course_dir/custom_validation_code/$assignment/
     fi
-    
+
+    # change permissions so other instructor users in this course & hwcron can re-run the build course script
+    find $course_dir/build/                   -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/build/                   -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/build/                           -exec chgrp -f ${course_group} {} \;
     find $course_dir/provided_code/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/provided_code/           -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/provided_code/                   -exec chgrp -f ${course_group} {} \;
     find $course_dir/test_input/              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/test_input/              -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/test_input/                      -exec chgrp -f ${course_group} {} \;
     find $course_dir/test_output/             -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/test_output/             -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/test_output/                     -exec chgrp -f ${course_group} {} \;
     find $course_dir/custom_validation_code/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/custom_validation_code/  -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/custom_validation_code/          -exec chgrp -f ${course_group} {} \;
 
     popd > /dev/null
 }
