@@ -681,6 +681,11 @@ table tr.table-header {
 /*    background-color: #E9EFEF*/
 }
 
+.gradeable_comment {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
 #search_wrapper{
     background-color: #E9EFEF;
     border-radius: 3px;
