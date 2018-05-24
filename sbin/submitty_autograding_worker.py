@@ -27,6 +27,8 @@ SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 JOB_ID = '~WORK~'
 
+ALL_WORKERS_JSON = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
+
 
 # ==================================================================================
 # ==================================================================================
@@ -80,7 +82,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 
 # ==================================================================================
 # ==================================================================================
-def launch_workers(my_name, my_stats):
+def launch_workers(my_name, my_stats, time_last_modified):
     num_workers = my_stats['num_autograding_workers']
 
     # verify the hwcron user is running this script
@@ -121,6 +123,11 @@ def launch_workers(my_name, my_stats):
                 grade_items_logging.log_message(JOB_ID, message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
+            modified, new_time = check_autograding_worker_json(time_last_modified)
+            if modified:
+                time_last_modified = new_time
+                print("This is where we would kill this program.")
+
 
     except KeyboardInterrupt:
         grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py keyboard interrupt")
@@ -145,11 +152,18 @@ def launch_workers(my_name, my_stats):
 
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py terminated")
 # ==================================================================================
-
+# Given the last time the autograding worker json was modified, checks to see if it
+#   been modified since then.
+def check_autograding_worker_json(time_last_modified):
+    curr_time_last_modified = os.stat(ALL_WORKERS_JSON)
+    if curr_time_last_modified != time_last_modified:
+        return (True, curr_time_last_modified)
+    else:
+        return (False, 0) 
+# ==================================================================================
 def read_autograding_worker_json():
-    all_workers_json   = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
     try:
-        with open(all_workers_json, 'r') as infile:
+        with open(ALL_WORKERS_JSON, 'r') as infile:
             name_and_stats = json.load(infile)
             #grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]
@@ -160,4 +174,5 @@ def read_autograding_worker_json():
 # ==================================================================================
 if __name__ == "__main__":
     my_name, my_stats = read_autograding_worker_json()
-    launch_workers(my_name, my_stats)
+    time_last_modified = os.stat(ALL_WORKERS_JSON)
+    launch_workers(my_name, my_stats, time_last_modified)
