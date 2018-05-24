@@ -99,17 +99,6 @@
                     <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' 
                         value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
                 {% endif %}
-
-                <br />
-
-                <!-- If not inheriting, what are the team settings? -->
-                <div id="team_details">
-                    
-                    <!-- Maximum Team Size -->
-                    What is the maximum team size? 
-                        <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" 
-                            value="{{ admin_gradeable.getEgMaxTeamSize() }}"/>
-                </div>
             </div>
         </div>
     </fieldset>
@@ -147,15 +136,6 @@
         }
     }
 
-    function onGradeableTeamsInheritChange() {
-        if($('#gradeable_teams').val() !== '') {
-            $('#team_details').hide();
-        }
-        else {
-            $('#team_details').show();
-        }
-    }
-
     $(document).ready(function() {
 
         //
@@ -189,10 +169,5 @@
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
-
-        // Hide the team config if user selects a parent
-        //      to inherit teams from        
-        onGradeableTeamsInheritChange();
-        $('[name="gradeable_teams"]').change(onGradeableTeamsInheritChange);
     });
 </script>
