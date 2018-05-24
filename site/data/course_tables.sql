@@ -692,7 +692,6 @@ ALTER TABLE ONLY sessions
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
 
-
 --
 -- Name: gradeable_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
@@ -973,7 +972,6 @@ ALTER TABLE ONLY users
 ALTER TABLE ONLY gradeable_teams
     ADD CONSTRAINT gradeable_teams_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
-
 --
 -- Name: teams_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -1005,6 +1003,15 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+
+ALTER TABLE ONLY categories_list
+    ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+ALTER TABLE ONLY thread_categories
+    ADD CONSTRAINT thread_and_category_unique UNIQUE (thread_id, category_id);
+
+ALTER TABLE ONLY student_favorites
+    ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
 
 -- End Forum Key relationships
 

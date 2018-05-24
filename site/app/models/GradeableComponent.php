@@ -96,7 +96,7 @@ class GradeableComponent extends AbstractModel {
 
     /** @property @var \app\models\GradeableComponentMark[] */
     protected $marks = array();
-    
+
     /** @property @var bool has the grader of this component been modified*/
     protected $grader_modified = false;
 
@@ -166,7 +166,7 @@ class GradeableComponent extends AbstractModel {
         }
 
     }
-    
+
     public function getGradedTAPoints() {
         $points = $this->default;
         foreach ($this->marks as $mark) {
@@ -178,7 +178,18 @@ class GradeableComponent extends AbstractModel {
         return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
-    public function getGradedTAComments($nl, $show_students, $use_ascii = true) {
+    public function getGradedTAPrecisionValue($gradeable) {
+      $point_precision = $gradeable->getPointPrecision();
+      $str_point_precision = (string) $point_precision;
+      $num_decimals =  strlen(substr(strrchr($str_point_precision, "."), 1));
+
+      $str1 = '%4.';
+      $str2 = 'f';
+      $precision_str = $str1 . (string) $num_decimals . $str2;
+      return $precision_str;
+    }
+
+    public function getGradedTAComments($nl, $show_students, $gradeable, $use_ascii = true) {
         $text = "";
         $first_text = true;
         if(!$use_ascii){
@@ -191,11 +202,11 @@ class GradeableComponent extends AbstractModel {
         foreach ($this->marks as $mark) {
             $points_string = "    ";
             if ($mark->getPoints() != 0) {
-              $points_string = sprintf("%4.1f",$mark->getPoints());
+              $points_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $mark->getPoints());
             }
             $hasmark = $box;
             if($mark->getHasMark() === true) {
-              $hasmark = $checkedBox;  
+              $hasmark = $checkedBox;
             } else if (!($show_students === true && $mark->getPublish() === 't')) {
               continue;
             }
@@ -214,7 +225,7 @@ class GradeableComponent extends AbstractModel {
             }
             $score_string = "    ";
             if (floatval($this->score) != 0) {
-                $score_string = sprintf("%4.1f",$this->score);
+                $score_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $this->score);
             }
             $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
         }
@@ -224,6 +235,7 @@ class GradeableComponent extends AbstractModel {
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
+            $this->modified = true;
         }
         $this->grader = $user;
     }

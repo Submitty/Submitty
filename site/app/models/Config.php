@@ -27,7 +27,6 @@ use app\libraries\Utils;
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
  * @method array getCourseDatabaseParams()
- * @method array getDatabaseParams()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -127,9 +126,6 @@ class Config extends AbstractModel {
     protected $username_change_text = "";
 
     /** @property @var array */
-    protected $database_params = array();
-
-    /** @property @var array */
     protected $submitty_database_params = array();
 
     /** @property @var array */
@@ -177,62 +173,66 @@ class Config extends AbstractModel {
         $this->course = $course;
     }
 
-    public function loadMasterIni($master_ini_path) {
-        if (!file_exists($master_ini_path)) {
-            throw new ConfigException("Could not find master ini file: ". $master_ini_path, true);
+    public function loadMasterConfigs($config_path) {
+        if (!is_dir($config_path)) {
+            throw new ConfigException("Could not find config directory: ". $config_path, true);
         }
-        $this->config_path = dirname($master_ini_path);
+        $this->config_path = $config_path;
         // Load config details from the master config file
-        try {
-            $master = IniParser::readFile($master_ini_path);
-        }
-        catch (\Throwable $throwable) {
-            throw new ConfigException($throwable->getMessage());
-        }
+        $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
 
-
-        $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'vcs_url', 'cgi_url', 'submitty_path', 'authentication'));
-
-        if (!isset($master['database_details']) || !is_array($master['database_details'])) {
-            throw new ConfigException("Missing config section database_details in ini file");
+        if (!$database_json) {
+            throw new ConfigException("Could not find {$this->config_path}/database.json");
         }
 
-        if (!isset($master['submitty_database_details']) || !is_array($master['submitty_database_details'])) {
-            throw new ConfigException("Missing config section submitty_database_details in ini file");
+        $this->submitty_database_params = [
+            'dbname' => 'submitty',
+            'host' => $database_json['database_host'],
+            'username' => $database_json['database_user'],
+            'password' => $database_json['database_password']
+        ];
+
+        if (isset($database_json['driver'])) {
+            $this->database_driver = $database_json['driver'];
         }
 
-        $this->database_params = $master['database_details'];
-        $this->submitty_database_params = array_merge($master['database_details'], $master['submitty_database_details']);
+        $this->authentication = $database_json['authentication_method'];
+        $this->debug = $database_json['debugging_enabled'] === true;
 
-        if (isset($master['site_details']['debug'])) {
-           $this->debug = $master['site_details']['debug'] === true;
+        $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
+        if (!$submitty_json) {
+            throw new ConfigException("Could not find {$this->config_path}/submitty.json");
         }
 
-        if (isset($master['site_details']['timezone'])) {
-            $this->timezone = $master['site_details']['timezone'];
+        $this->submitty_log_path = $submitty_json['site_log_path'];
+        $this->log_exceptions = true;
+
+        $this->base_url = $submitty_json['submission_url'];
+        $this->vcs_url = $submitty_json['vcs_url'];
+        $this->cgi_url = $submitty_json['cgi_url'];
+        $this->submitty_path = $submitty_json['submitty_data_dir'];
+
+        if (isset($submitty_json['timezone'])) {
+            $this->timezone = $submitty_json['timezone'];
             if (!in_array($this->timezone, \DateTimeZone::listIdentifiers())) {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
         }
 
-        if (isset($master['site_details']['institution_name'])) {
-            $this->institution_name = $master['site_details']['institution_name'];
+        if (isset($submitty_json['institution_name'])) {
+            $this->institution_name = $submitty_json['institution_name'];
         }
 
-        if (isset($master['site_details']['institution_url'])) {
-            $this->institution_homepage = $master['site_details']['institution_url'];
+        if (isset($submitty_json['institution_homepage'])) {
+            $this->institution_homepage = $submitty_json['institution_homepage'];
         }
 
-        if (isset($master['site_details']['username_change_text'])) {
-            $this->username_change_text = $master['site_details']['username_change_text'];
+        if (isset($submitty_json['username_change_text'])) {
+            $this->username_change_text = $submitty_json['username_change_text'];
         }
 
         $this->timezone = new \DateTimeZone($this->timezone);
 
-        if (isset($master['database_details']['driver'])) {
-            $this->database_driver = $master['database_details']['driver'];
-        }
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
 
@@ -267,7 +267,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Missing config section 'database_details' in ini file");
         }
 
-        $this->course_database_params = array_merge($this->database_params, $this->course_ini['database_details']);
+        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_ini['database_details']);
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
@@ -280,9 +280,9 @@ class Config extends AbstractModel {
                 $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";;
             }
         }
-        
+
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
-        
+
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }
@@ -292,7 +292,7 @@ class Config extends AbstractModel {
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
-    
+
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
         $this->course_loaded = true;
    }

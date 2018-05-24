@@ -238,7 +238,6 @@ table tr.table-header {
 }
 
 #nav li {
-    border-left: 1px solid #6e6e6ecc;
     float: left;
 }
 
@@ -682,6 +681,16 @@ table tr.table-header {
 /*    background-color: #E9EFEF*/
 }
 
+.gradeable_comment {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#search_wrapper{
+    background-color: #E9EFEF;
+    border-radius: 3px;
+}
+
 #forum_wrapper{
     height: 70vh;
     margin-left:20px;
@@ -761,7 +770,6 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
-    max-height: 85px;
     
 }
 

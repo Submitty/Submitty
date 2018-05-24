@@ -46,7 +46,7 @@ GROUP BY user_id
 WHERE user_id=?", array($user_id));
         return $this->course_db->row();
     }
-    
+
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
@@ -126,9 +126,9 @@ VALUES (?,?,?,?,?,?)", $params);
         $params[] = $user->getId();
 
         $this->submitty_db->query("
-UPDATE users 
-SET 
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, 
+UPDATE users
+SET
+  user_firstname=?, user_preferred_firstname=?, user_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 
@@ -286,7 +286,7 @@ SELECT";
   egd.submission_time,
   egv.highest_version,
   COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
-  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400)::integer) AS days_late,
+  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)))/86400)::integer) AS days_late,
   get_allowed_late_days(u.user_id, eg.eg_submission_due_date) AS student_allowed_late_days
 FROM users AS u
 NATURAL JOIN gradeable AS g";
@@ -541,8 +541,15 @@ ORDER BY ".implode(", ", $order_by);
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
-
-    public function getAverageComponentScores($g_id, $section_key) {
+public function getAverageComponentScores($g_id, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
         $return = array();
         $this->course_db->query("
 SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
@@ -562,20 +569,20 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
       )AS marks
     ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
     LEFT JOIN(
-      SELECT gd.gd_user_id, gd.gd_id
+      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
       FROM gradeable_data AS gd
       WHERE gd.g_id=?
     ) AS gd ON gcd.gd_id=gd.gd_id
     INNER JOIN(
-      SELECT u.user_id, u.{$section_key}
-      FROM users AS u
-      WHERE u.{$section_key} IS NOT NULL
-    ) AS u ON gd.gd_user_id=u.user_id
+      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+      FROM {$users_or_teams} AS {$u_or_t}
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     INNER JOIN(
-      SELECT egv.user_id, egv.active_version
+      SELECT egv.{$user_or_team_id}, egv.active_version
       FROM electronic_gradeable_version AS egv
       WHERE egv.g_id=? AND egv.active_version>0
-    ) AS egv ON egv.user_id=u.user_id
+    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     WHERE g_id=?
   )AS parts_of_comp
 )AS comp
@@ -587,22 +594,37 @@ ORDER BY gc_order
         }
         return $return;
     }
-    
-    public function getAverageAutogradedScores($g_id, $section_key) {
+    public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
       SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
       FROM electronic_gradeable_data AS egv
-      INNER JOIN users AS u ON u.user_id = egv.user_id, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND u.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.user_id=egv.user_id
+      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
+      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
    )g
 ) as individual;
           ", array($g_id));
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
-    public function getAverageForGradeable($g_id, $section_key) {
+public function getAverageForGradeable($g_id, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
@@ -626,13 +648,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
         LEFT JOIN gradeable_data AS gd ON gd.gd_id=gcd.gd_id
         LEFT JOIN (
-          SELECT egd.g_id, egd.user_id, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding
+          SELECT egd.g_id, egd.{$user_or_team_id}, (autograding_non_hidden_non_extra_credit + autograding_non_hidden_extra_credit + autograding_hidden_non_extra_credit + autograding_hidden_extra_credit) AS autograding
           FROM electronic_gradeable_version AS egv
-          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.user_id=egd.user_id AND active_version=g_version
+          LEFT JOIN electronic_gradeable_data AS egd ON egv.g_id=egd.g_id AND egv.{$user_or_team_id}=egd.{$user_or_team_id} AND active_version=g_version
           )AS auto
-        ON gd.g_id=auto.g_id AND gd_user_id=auto.user_id
-        INNER JOIN users AS u ON u.user_id = auto.user_id
-        WHERE gc.g_id=? AND u.{$section_key} IS NOT NULL
+        ON gd.g_id=auto.g_id AND gd_user_id=auto.{$user_or_team_id}
+        INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = auto.{$user_or_team_id}
+        WHERE gc.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
       )AS parts_of_comp
     )AS comp
     GROUP BY gd_id, autograding
@@ -642,14 +664,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-
     public function getGradeablesPastAndSection() {
         $this->course_db->query("
   SELECT
     gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
   FROM (
     SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
-    FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u 
+    FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u
     CROSS JOIN (
       SELECT
         DISTINCT g.g_id,
@@ -658,7 +679,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       LEFT JOIN
         grading_rotating AS gr ON g.g_id = gr.g_id
       WHERE g_grade_by_registration = 'f'
-    ) AS g 
+    ) AS g
   ) as gu
   LEFT JOIN (
     SELECT
@@ -748,5 +769,48 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         }
         return $return;
     }
+
+    /**
+     * "Upserts" a given user's late days allowed effective at a given time.
+     *
+     * Requires Postgresql 9.5+
+     * About $csv_options:
+     * default behavior is to overwrite all late days for user and timestamp.
+     * null value is for updating via form where radio button selection is
+     * ignored, so it should do default behavior.  'csv_option_overwrite_all'
+     * invokes default behavior for csv upload.  'csv_option_preserve_higher'
+     * will preserve existing values when uploaded csv value is lower.
+     *
+     * @param string $user_id
+     * @param string $timestamp
+     * @param integer $days
+     * @param string $csv_option value determined by selected radio button
+     * @todo maybe process csv uploads as a batch transaction
+     */
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+        //Update query and values list.
+		$query = "
+            INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
+            VALUES(?,?,?)
+            ON CONFLICT (user_id, since_timestamp) DO UPDATE
+            SET allowed_late_days=?
+            WHERE late_days.user_id=? AND late_days.since_timestamp=?";
+        $vals = array($user_id, $timestamp, $days, $days, $user_id, $timestamp);
+
+        switch ($csv_option) {
+        case 'csv_option_preserve_higher':
+        	//Does NOT overwrite a higher (or same) value of allowed late days.
+        	$query .= "AND late_days.allowed_late_days<?";
+        	$vals[] = $days;
+        	break;
+        case 'csv_option_overwrite_all':
+        default:
+        	//Default behavior: overwrite all late days for user and timestamp.
+        	//No adjustment to SQL query.
+    	}
+
+        $this->course_db->query($query, $vals);
+    }
+
 }
 

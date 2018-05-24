@@ -117,8 +117,9 @@ class SubmissionController extends AbstractController {
                     if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
                         $gradeable->updateUserViewedDate();
                     }
+                    $canViewWholeGradeable = false;
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $late_days_use, $extensions);
+                                                           'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
                 }
             }
             return array('id' => $gradeable_id, 'error' => $error);
@@ -875,11 +876,14 @@ class SubmissionController extends AbstractController {
             $previous_files = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
-            for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
-                if (count($tmp[$i]) > 0) {
-                    $previous_files[$i + 1] = $tmp[$i];
+            if (!empty($tmp)) {
+                for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
+                    if (count($tmp[$i]) > 0) {
+                        $previous_files[$i + 1] = $tmp[$i];
+                    }
                 }
             }
+
             
             if (empty($uploaded_files) && empty($previous_files) && $empty_textboxes) {
                 return $this->uploadResult("No files to be submitted.", false);
@@ -1174,7 +1178,6 @@ class SubmissionController extends AbstractController {
         if (isset($_REQUEST['ta'])){
             $ta = $_REQUEST['ta'];
             $who = $_REQUEST['who'];
-            $individual = $_REQUEST['individual'];
             $mylist = new GradeableList($this->core, $this->core->getQueries()->getUserById($who));
             $gradeable_list = $mylist->getSubmittableElectronicGradeables();
         }
@@ -1281,8 +1284,7 @@ class SubmissionController extends AbstractController {
         if($ta) {
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
                                                     'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-                                                    'who_id'=>$who, 'individual'=>$individual,
-                                                          'gradeable_version' => $new_version)));
+                                                    'who_id'=>$who, 'gradeable_version' => $new_version)));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
