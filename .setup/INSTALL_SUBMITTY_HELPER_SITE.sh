@@ -22,6 +22,13 @@ rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DI
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${HWPHP_USER}:${HWPHP_USER} {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${HWCGI_USER}:${HWCGI_USER} {} \;
 
+# set these masks just for when composer to run, and then they can be set to whatever
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
+    chmod 640 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
+    chmod 640 ${SUBMITTY_INSTALL_DIR}/site/vendor/autoload.php
+    chmod 640 ${SUBMITTY_INSTALL_DIR}/site/vendor/composer/*
+fi
+
 # install composer dependencies and generate classmap
 su - ${HWPHP_USER} -c "pushd ${SUBMITTY_INSTALL_DIR}/site; composer install --no-dev --optimize-autoloader; popd"
 
