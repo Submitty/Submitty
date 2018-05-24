@@ -1461,7 +1461,7 @@ HTML;
             }
 
             $return .= <<<HTML
-                <div id="title-{$c}" class="box" onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', -1); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <div id="title-{$c}" class="box" style="cursor: pointer"; onclick="{$break_onclick} saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', -1); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
                 <div class="box-title">
 <span id="gradebar-{$c}" style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
@@ -1535,7 +1535,7 @@ HTML;
                     <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
                             <span id="cancel-mark-{$c}" onclick="{$break_onclick} updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose(-1, {$num_questions});" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                     </span>
-                    </div></div>
+                   <!-- </div></div> -->
 HTML;
 
             //gets the initial point value and text
@@ -1565,15 +1565,17 @@ HTML;
             }
            // if(false){
             $return .= <<<HTML
-                <div class="box" id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
-                <div class="box-title">
+               <!-- <div class="box" id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
+                <div class="box-title"> -->
                <!--<span>-->
+                <div id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true">
                     <span style="width:98%;" colspan="4">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{$initial_text}</span>
                         </div>
                     </span>
                 </div></div>
+                </div>
                 <div class="box" id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
                 <div class="box-title">
                 </div></div>

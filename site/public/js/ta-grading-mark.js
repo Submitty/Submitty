@@ -453,7 +453,7 @@ function calculateMarksPoints(question_num) {
     }
     if(any_selected == false){
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
-        $('#summary-' + question_num)[0].innerHTML = "Click here to start grading";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         return "None Selected";
     }
@@ -476,14 +476,14 @@ function updateProgressPoints(question_num) {
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
     if(current_points=="None Selected"){
-        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#grade-' + question_num)[0].innerHTML = "";     
         //$('#gradebar-' + question_num)[0].innerHTML = "+$current_points";
     }
     else{
+        $('#grade-' + question_num)[0].innerHTML = current_points;
         //extra credit
         if(current_points > max_points){
-            $('#gradebar-' + question_num)[0].innerHTML = ('+' + current_points);     
+            //$('#gradebar-' + question_num)[0].innerHTML = ('+' + current_points);     
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
         }
         //current_progress[0].innerHTML = current_points + " / " + max_points; 
@@ -496,7 +496,6 @@ function updateProgressPoints(question_num) {
         else{
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
         }
-        $('#grade-' + question_num)[0].innerHTML = current_points;
     }
    /* var arr_length = $('tr[name=mark_'+question_num+']').length;
     var any_selected=false;
@@ -743,7 +742,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
             var prepend = (!first_text) ? ("\<br>") : ("");
             var points  = (parseFloat(mark_data[i].points) != 0) ? ("(" + mark_data[i].points + ") ") : ("");
             
-            new_text += prepend + "* " + points + mark_data[i].note;
+            new_text += prepend + "*" + points + mark_data[i].note;
             if (first_text) {
                 first_text = false;
             }
@@ -763,7 +762,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         var prepend = (!first_text) ? ("\<br>") : ("");
         var points  = (parseFloat(custom_points) != 0) ? ("(" + custom_points + ") ") : ("");
         
-        new_text += prepend + "* " + points + custom_message;
+        new_text += prepend + "*" + points + custom_message;
         if (first_text) {
             first_text = false;
         }
