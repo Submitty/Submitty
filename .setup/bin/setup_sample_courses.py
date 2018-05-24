@@ -823,7 +823,7 @@ class Course(object):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
         
         if(self.code == "sample"): 
-            #set sampel course to have forum enabled by default
+            #set sample course to have forum enabled by default
             config = configparser.ConfigParser()    
             config.read(os.path.join(course_path, "config", "config.ini"))
             config.set("course_details", "forum_enabled", "true")
