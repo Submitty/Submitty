@@ -5,7 +5,7 @@
   2 |  3 | ta | You should print out to two decimal places (this includes for example "5.00"). | 2018-04-03 19:17:37.832837-04 | f | f | | f | 0 | f
   2 |  5 | student | For the example "5.537" should that print out "5.54" or "5.53"? | 2018-04-03 19:31:02.627012-04 | f | f | | f | 0 | f
   3 | -1 | student | It seems like my homework isn't working. I used the code provided from lecture as a starting point, but it won't execute. I am getting this error: [code]Traceback (most recent call last): File "<stdin>", line 1, in <module> NameError: name 'math' is not defined[/code] Can anyone provide some help on what to do? I am not sure why it is saying that it can't find the math module. | 2018-04-03 19:35:03.220528-04 | t | f | | f | 0 | f
-  3 |  7 | aphacker | Make sure that you have imported the math module. You can do so by including this in the top of your python file: [code]import math[/code] | 2018-04-03 19:36:48.551748-04 | t | f | | f | 0 | t 
+  3 |  7 | aphacker | Make sure that you have imported the math module. You can do so by including this in the top of your python file: [code]import math[/code] | 2018-04-03 19:36:48.551748-04 | t | f | | f | 0 | f 
   4 | -1 | aphacker | I can't seem to find the course syllabus. Can someone point me in the right direction?? | 2018-04-03 19:37:45.756451-04 | f | f | | f | 0 | f
   4 |  9 | ta | The course syllabus can be found [url=http://example.com]here.[/url] | 2018-04-03 19:39:14.84398-04  | f | f | | f | 0 | f
   4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | f
@@ -20,4 +20,4 @@
   5 | 18 | aphacker | Another Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
   5 | 19 | bitdiddle | Level 8, should be last level of indentation | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
   5 | 21 | aphacker | Level 9, child post of bitdiddle, but no indentation | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f
-  6 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | test
+  6 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | t

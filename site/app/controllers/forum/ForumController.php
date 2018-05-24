@@ -201,7 +201,8 @@ class ForumController extends AbstractController {
 
             if($hasGoodAttachment == 1) {
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
+                var_dump(is_dir($post_dir));
+                FileUtils::createDir($post_dir); 
                 for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
                     $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
                     move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
