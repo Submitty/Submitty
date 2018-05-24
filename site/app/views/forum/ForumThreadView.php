@@ -429,6 +429,7 @@ HTML;
 					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
+						<input type="hidden" name="display_option" value="{$display_option}" />
 	            		<br/>
 	            		<div style="margin-bottom:10px;" class="form-group row">
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>

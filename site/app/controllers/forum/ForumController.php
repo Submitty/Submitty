@@ -189,6 +189,7 @@ class ForumController extends AbstractController {
         }
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
@@ -213,7 +214,7 @@ class ForumController extends AbstractController {
                     move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                 }
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id)));
         }
     }
 
