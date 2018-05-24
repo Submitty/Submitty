@@ -73,7 +73,11 @@ def main():
 
     observer.start()
     try:
-        print("Watching for changes...")
+        print("Watching the following folders for change:")
+        print("    - site")
+        print("    - bin")
+        print("    - sbin")
+        print()
         input("~~Hit enter to exit~~\n")
     finally:
         observer.stop()
