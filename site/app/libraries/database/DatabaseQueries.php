@@ -212,6 +212,23 @@ class DatabaseQueries {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
 
+    public function addPinnedThread($user_id, $thread_id, $added){
+        if($added) {
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", array($user_id, $thread_id));
+        } else {
+            $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", array($user_id, $thread_id));
+        }
+    }
+
+    public function loadPinnedThreads($user_id){
+        $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", array($user_id));
+        $rows = $this->course_db->rows();
+        $favorite_threads = array();
+        foreach ($rows as $row) {
+            $favorite_threads[] = $row['thread_id'];
+        }
+        return $favorite_threads;
+    }
 
     private function findChildren($post_id, $thread_id, &$children){
         $this->course_db->query("SELECT id from posts where deleted=false and parent_id=?", array($post_id));
@@ -1434,6 +1451,7 @@ WHERE gcm_id=?", $params);
           WHERE gt.g_id=? AND gt.team_id = t.team_id AND t.user_id=? AND t.state=0", array($g_id, $user_id));
     }
 
+    
     /**
      * Return Team object for team whith given Team ID
      * @param string $team_id
@@ -1909,8 +1927,7 @@ AND gc_id IN (
     	return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id){
-
+    public function getPostsForThread($current_user, $thread_id, $option = "tree"){
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
@@ -1920,8 +1937,12 @@ AND gc_id IN (
           $thread_id = $announcement_id;
         }
       }
-
-      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+      if($option == 'alpha'){
+        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND deleted = false ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+      } else {
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+      }
+      
       $result_rows = $this->course_db->rows();
 
       if(count($result_rows) > 0){

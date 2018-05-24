@@ -259,8 +259,9 @@ popd > /dev/null
 #Set up website if not in worker mode
 if [ ${WORKER} == 0 ]; then
     # install composer which is needed for the website
-    curl -sS https://getcomposer.org/installer -o composer-setup.php
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    rm -f /tmp/composer-setup.php
 
     a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
