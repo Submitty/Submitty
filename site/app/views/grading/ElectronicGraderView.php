@@ -44,7 +44,7 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-               $no_team_total += $section['no_team'];
+                $no_team_total += $section['no_team'];
                $team_total += $section['team'];
             }
         }
@@ -92,7 +92,7 @@ HTML;
             }
             $submitted_percentage = 0;
             if($total_students!=0){
-                $submitted_percentage = round(($show_total / $total_students) * 100, 1);
+            $submitted_percentage = round(($show_total / $total_students) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
@@ -174,7 +174,7 @@ HTML;
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
-                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%) <br />
+                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%)<br />
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
@@ -300,7 +300,7 @@ HTML;
                 <br/>Overall Average:  {$overall_score} / {$overall_max} ({$percentage}%)
 HTML;
                         }
-                }
+                    }
                 //This else encompasses the above calculations for Teamss
                 //END OF ELSE
                 $return .= <<<HTML
