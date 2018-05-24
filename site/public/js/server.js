@@ -407,6 +407,13 @@ function addCategory(old, i) {
     });
 }
 
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -1361,6 +1368,23 @@ function alterAnnouncement(thread_id, confirmString, url){
             }
         })
     }
+}
+
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
 }
 
 function updateHomeworkExtensions(data) {

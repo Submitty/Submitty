@@ -288,7 +288,7 @@ function updateCookies(){
 var keymap = {};
 
 window.onkeydown = function(e) {
-    if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
+    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
     if (keymap.hasOwnProperty(e.code)) {
         keymap[e.code].fns.forEach(function (fn) {
             fn(e);
