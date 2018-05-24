@@ -2,6 +2,7 @@
 
 namespace app\libraries;
 use app\exceptions\OutputException;
+use app\models\Breadcrumb;
 
 /**
  * Class Output
@@ -183,7 +184,7 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css, $this->js);
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
         }
         else {
             return '';
@@ -298,27 +299,6 @@ class Output {
     }
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
-        if ($url !== null && $url !== "") {
-            if(!$icon){
-                if ($top === true) {
-                    $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-                }
-                else {
-                    $string = "<a href='{$url}'>{$string}</a>";
-                }
-            }
-            else {
-                $string = '<a class="external" href="'.$url.'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-            }   
-        }
-        if(empty($url) && empty($string)) {
-            return;
-        }
-        if($icon){
-            $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
-        }
-        else {
-           $this->breadcrumbs[] = $string;
-        }
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
     }
 }

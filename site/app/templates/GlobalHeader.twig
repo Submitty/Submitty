@@ -48,7 +48,22 @@
                 {% endif %}
             </h2>
             <h2>
-                {{ breadcrumbs|raw }}
+                {% for b in breadcrumbs %}
+                    {% if loop.index0 > 0 and not breadcrumbs[loop.index0 - 1].icon %}
+                        &gt;
+                    {% endif %}
+                    {% if b.getUrl() != null and b.getUrl() != "" %}
+                        {% if not b.getIcon() %}
+                            {% if b.getTop() %}
+                                <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                            {% else %}
+                                <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                            {% endif %}
+                        {% else %}
+                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
             </h2>
         </div>
     </div>
