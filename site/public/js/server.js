@@ -421,15 +421,15 @@ function importTeamForm() {
  */
 function togglePageDetails() {
     var element = document.getElementById('page-info');
-    if (element.style.display === 'none') {
-        element.style.display = 'hidden';
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
     }
     else {
-        element.style.visibility = 'visible';
+        element.style.display = 'block';
         // Hide the box if you click outside of it
         document.body.addEventListener('mouseup', function pageInfo(event) {
             if (!element.contains(event.target)) {
-                element.style.visibility = 'hidden';
+                element.style.display = 'none';
                 document.body.removeEventListener('mouseup', pageInfo, false);
             }
         });
