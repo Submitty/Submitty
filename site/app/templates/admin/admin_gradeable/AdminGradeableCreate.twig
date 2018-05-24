@@ -170,4 +170,35 @@
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
     });
+
+    function checkFormCreate() {
+        var gradeable_id = $('#gradeable_id').val();
+        var gradeable_title = $('gradeable_title_id').val();
+        var has_space = gradeable_id.includes(" ");
+        var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
+
+        var check1 = $('#radio_electronic_file').is(':checked');
+        var check2 = $('#radio_checkpoints').is(':checked');
+        var check3 = $('#radio_numeric').is(':checked');
+        
+        var all_gradeable_ids = {{js_gradeables_array|raw}};
+        
+        if ('{{action}}' == 'add') {
+            if(all_gradeable_ids.find(element => element == gradeable_id)) {
+                alert("Gradeable already exists");
+                return false;
+            }
+        }
+        if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
+            $( "#alert-message" ).dialog( "open" );
+            return false;
+        }
+        if(!check1 && !check2 && !check3) {
+            alert("A type of gradeable must be selected");
+            return false;
+        }
+
+        return true;
+    }
+
 </script>
