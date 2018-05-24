@@ -228,6 +228,13 @@ function haveMarksChanged(num, data) {
     if (data['data'][marks.length]['custom_score'] != custom_mark_points.val())
         return true;
 
+    // We always have a custom mark, so if length is 1 we have no common marks.
+    // This is Very Bad because there should always be at least the No Credit mark.
+    // Only thing we can do from here though is let requests go.
+    if (data['data'].length === 1) {
+        return true;
+    }
+
     return false;
 }
 
