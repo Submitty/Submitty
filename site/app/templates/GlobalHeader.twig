@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ pageTitle }}</title>
+    <link rel="shortcut icon" href="{{ core.getConfig().getBaseUrl() }}img/favicon.ico" type="image/x-icon" />
+
+    {% for css_ref in css %}
+    <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
+    {% endfor %}
+
+
+    {% for js_ref in js %}
+    <script type='text/javascript' src='{{ js_ref }}'></script>
+    {% endfor %}
+</head>
+<script>var onAjaxInit;</script>
+<body data-site-url="{{ core.getConfig().getSiteUrl() }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<div id='messages'>
+    {% for message in messages %}
+    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
+        <a class="fa fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+        <i class="fa fa-times-circle"></i> {{ message.error }}
+    </div>
+    {% endfor %}
+</div>
+<div id="container">
+{% if navURLs|length > 0 %}
+    <div id="nav">
+        <ul>
+            {% for url in navURLs %}
+            <li>
+                <a href="{{ url.href }}">{{ url.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+    <div id="header">
+        <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
+        <div id="header-text">
+            <h2>
+                {% if core.userLoaded() %}
+                <span id="login">
+                    Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
+                {% else %}
+                <span id="login-guest">Welcome to Submitty</span>
+                {% endif %}
+            </h2>
+            <h2>
+                {{ breadcrumbs|raw }}
+            </h2>
+        </div>
+    </div>
