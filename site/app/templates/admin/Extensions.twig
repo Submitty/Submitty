@@ -9,8 +9,8 @@
                 <div class="option">Select Rubric:<br>
                     <select name="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
                         <option disabled selected value> -- select an option -- </option>
-                        {% for index, gradeable in gradeables %}
-                            <option value="{{ gradeable['g_id'] }}">{{ gradeable['g_title'] }}</option>
+                        {% for index, value in gradeable_ids %}
+                            <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
                         {% endfor %}
                     </select>
                 </div>
