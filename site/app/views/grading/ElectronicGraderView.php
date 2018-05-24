@@ -90,8 +90,10 @@ HTML;
                 $show_graded = $graded/$change_value;
                 $show_total = $total/$change_value;
             }
-            $submitted_percentage = round(($show_total / $total_students) * 100, 1);
-
+            $submitted_percentage = 0;
+            if($total_students!=0){
+                $submitted_percentage = round(($show_total / $total_students) * 100, 1);
+            }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
             if($section_type === "rotating_section" && $this->core->getUser()->accessFullGrading()){
