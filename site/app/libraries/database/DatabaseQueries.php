@@ -1927,8 +1927,7 @@ AND gc_id IN (
     	return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id){
-
+    public function getPostsForThread($current_user, $thread_id, $option = "tree"){
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
@@ -1938,8 +1937,12 @@ AND gc_id IN (
           $thread_id = $announcement_id;
         }
       }
-
-      $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+      if($option == 'alpha'){
+        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND deleted = false ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+      } else {
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+      }
+      
       $result_rows = $this->course_db->rows();
 
       if(count($result_rows) > 0){

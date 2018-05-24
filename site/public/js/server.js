@@ -1167,6 +1167,10 @@ function enableTabsInTextArea(id){
 
 }
 
+function changeDisplayOptions(option, thread_id){
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+}
+
 function resetScrollPosition(id){
     if(sessionStorage.getItem(id+"_scrollTop") != 0) {
         sessionStorage.setItem(id+"_scrollTop", 0);
