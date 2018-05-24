@@ -849,8 +849,8 @@ class Course(object):
                 if(postData[10] != "f"):
                     attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
                     os.makedirs(attachment_path)
-                    os.system("chown -R hwphp:sample_tas_www {}".format(self.code, attachment_path))
-                    copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", "Capture.PNG"), os.path.join(attachment_path, "Capture.PNG"))
+                    os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(course_path, "forum_attachments", str(postData[0]))))
+                    copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
                 counter += 1
                 conn.execute(forum_posts.insert(),
                                   thread_id=postData[0],
@@ -863,7 +863,7 @@ class Course(object):
                                   endorsed_by=postData[7],
                                   resolved = True if postData[8] == "t" else False,
                                   type=postData[9],
-                                  has_attachment=True if postData[10] == "t" else False)
+                                  has_attachment=True if postData[10] != "f" else False)
 
             
             

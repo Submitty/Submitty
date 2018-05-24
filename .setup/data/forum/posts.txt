@@ -20,4 +20,5 @@
   5 | 18 | aphacker | Another Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
   5 | 19 | bitdiddle | Level 8, should be last level of indentation | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
   5 | 21 | aphacker | Level 9, child post of bitdiddle, but no indentation | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f
-  6 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | t
+  6 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | Secret.png
+  6 | 23 | bitdiddle | I think I know the answer | 2018-05-23 21:49:03.281828-04 | f | f | | f | 0 | Answer.png
