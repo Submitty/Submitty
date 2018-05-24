@@ -64,6 +64,11 @@ class ForumController extends AbstractController {
                 break;
             case 'merge_thread':
                 $this->mergeThread();
+            case 'pin_thread':
+                $this->pinThread(1);
+                break;
+            case 'unpin_thread':
+                $this->pinThread(0);
                 break;
             case 'view_thread':
             default:
@@ -223,6 +228,15 @@ class ForumController extends AbstractController {
         }
     }
 
+    public function pinThread($type){
+        $thread_id = $_POST["thread_id"];
+        $current_user = $this->core->getUser()->getId();
+        $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
+        $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
+        $this->core->getOutput()->renderJson($response);
+        return $response;
+    }
+
     public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
 
@@ -253,6 +267,7 @@ class ForumController extends AbstractController {
     }
 
     private function getSortedThreads($category_id){
+        $current_user = $this->core->getUser()->getId();
         if($this->isValidCategory($category_id)) {
             $announce_threads = $this->core->getQueries()->loadAnnouncements($category_id);
             $reg_threads = $this->core->getQueries()->loadThreads($category_id);
@@ -260,7 +275,33 @@ class ForumController extends AbstractController {
             $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
             $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
         }
-        return array_merge($announce_threads, $reg_threads);
+        $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
+
+        $ordered_threads = array();
+        // Order : Favourite and Announcements => Announcements only => Favourite only => Others
+        foreach ($announce_threads as $thread) {
+            if(in_array($thread['id'], $favorite_threads)) {
+                $thread['favorite'] = true;
+                $ordered_threads[] = $thread;
+            }
+        }
+        foreach ($announce_threads as $thread) {
+            if(!in_array($thread['id'], $favorite_threads)) {
+                $ordered_threads[] = $thread;
+            }
+        }
+        foreach ($reg_threads as $thread) {
+            if(in_array($thread['id'], $favorite_threads)) {
+                $thread['favorite'] = true;
+                $ordered_threads[] = $thread;
+            }
+        }
+        foreach ($reg_threads as $thread) {
+            if(!in_array($thread['id'], $favorite_threads)) {
+                $ordered_threads[] = $thread;
+            }
+        }
+        return $ordered_threads;
     }
 
     public function getThreads(){
