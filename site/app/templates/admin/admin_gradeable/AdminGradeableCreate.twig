@@ -2,7 +2,7 @@
     Combo box for choosing an existing gradeable as a template for the new one
         (Only show this option if we aren't in edit mode).
 #}
-{% if ((type_of_action == 'add') or (type_of_action == 'add_template')) %}
+{% if action == 'add' %}
     <div>
         From Template: 
         <select name="gradeable_template" style='width: 170px;' value=''>
@@ -24,7 +24,7 @@
     <!-- Gradeable ID (readonly in edit mode, required) -->
     What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
         <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" 
-            value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ type_of_action == 'edit' ? 'readonly' : 'required' }} />
+            value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
 
     <br />
 
@@ -46,15 +46,15 @@
     What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
         <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
             {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ type_of_action == "edit" ? disabled : null }}> Electronic File
+            {{ action == "edit" ? disabled : null }}> Electronic File
 
         <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
             {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ type_of_action == "edit" ? disabled : null }}> Checkpoints
+            {{ action == "edit" ? disabled : null }}> Checkpoints
 
         <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
             {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-            {{ type_of_action == "edit" ? disabled : null }}> Numeric/Text 
+            {{ action == "edit" ? disabled : null }}> Numeric/Text 
 
         <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
@@ -68,11 +68,11 @@
         <br />
             <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
                 {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-                {{ type_of_action == "edit" ? 'disabled' : '' }}> Yes
+                {{ action == "edit" ? 'disabled' : '' }}> Yes
 
             <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
                 {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-                {{ type_of_action == "edit" ? 'disabled' : '' }}> No
+                {{ action == "edit" ? 'disabled' : '' }}> No
 
         <!-- Team settings (read only in edit mode) -->
         <div id="team_settings">
@@ -85,7 +85,7 @@
                 {# 
                     Use a combo box if we can edit the value, otherwise show a text box (readonly)
                 #}
-                {% if (type_of_action == 'add' or type_of_action == 'add_template') %}
+                {% if action == 'add' %}
                     <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
                         value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                         <option value=''>--None--</option>
@@ -125,7 +125,7 @@
            $('#radio_checkpoints').is(':checked') ||
            $('#radio_numeric').is(':checked')) {
                $('#required_type').hide();
-        }        
+        }
 
         // Display team options if the user selects electronic gradeables
         if($('#radio_electronic_file').is(':checked')) {

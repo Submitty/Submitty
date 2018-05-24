@@ -3,7 +3,7 @@
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <div id="container-rubric">
-    <form id="gradeable-form" class="form-signin" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action))}" 
+    <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
@@ -30,7 +30,8 @@
         </div>
         <br/>
         <div id="nav-controls">
-            <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Save and Continue</button>
+            <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{{submit_text}}</button>
+            <button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
             <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
         </div>
     </form>
@@ -38,10 +39,8 @@
 <script type="text/javascript">
 
     adminGradeableNavTab = 0;
-    function onChangeNavTab(tab)
-    {
-        if(tab > 4 || tab < 0)
-        {
+    function onChangeNavTab(tab) {
+        if(tab > 4 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -55,17 +54,24 @@
         $('#page_4_content').hide();
 
         $('#page_' + tab + '_content').show();
+
+        // Hide "next" button if we're on the last page
+        if(adminGradeableNavTab === 4) {
+            $('#next_button').hide();
+        }
+        else {
+            $('#next_button').show();
+        }
     }
 
-    function disableNavItem(id)
-    {
+    function disableNavItem(id) {
         $(id).attr('style', 'background-color: #999999; cursor: default;');
         $(id).attr('onClick', '');
     }
 
     $(document).ready(function() {
         // Create mode, so disable naviation via nav bar
-        if('{{mode}}' === 'create')
+        if('{{action}}' === 'add')
         {
             onChangeNavTab(0);
 
@@ -76,11 +82,23 @@
                 '#page_3_nav', 
                 '#page_4_nav'
             ].forEach(disableNavItem);*/
+
+            // Hide next button
+            $('#next_button').hide();
         }
         else
         {
             onChangeNavTab({{ nav_tab }});
         }
     });
+
+    // Only succeeds if all child forms succeed
+    function checkForm() {
+        return checkFormCreate()/* && 
+               checkFormRubric() && 
+               checkFormDates() && 
+               checkFormGraders() && 
+               checkFormSyllabus()*/;
+    }
 
 </script>
