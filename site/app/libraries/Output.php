@@ -28,7 +28,6 @@ class Output {
 
     private $twig = null;
     private $twig_loader = null;
-    private $twig_templates = array();
 
     /**
      * @var Core
@@ -43,7 +42,8 @@ class Output {
         $this->twig = new \Twig_Environment($this->twig_loader, [
             'cache' => false //TODO: Use cache
         ]);
-;    }
+        $this->twig->addGlobal("core", $core);
+    }
 
     public function setInternalResources() {
         $this->addCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
@@ -133,9 +133,6 @@ class Output {
      */
     public function renderTwigTemplate($filename, $context) {
         try {
-            if (!array_key_exists("core", $context)) {
-                $context["core"] = $this->core;
-            }
             return $this->twig->render($filename, $context);
         } catch (\Twig_Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
