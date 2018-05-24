@@ -36,7 +36,6 @@ class ElectronicGraderView extends AbstractView {
         $total = 0;
         $no_team_total = 0;
         $team_total=0;
-        //print_r($sections);
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -48,10 +47,6 @@ class ElectronicGraderView extends AbstractView {
                $team_total += $section['team'];
             }
         }
-        //Fixing total_students bug
-        if($gradeable->isTeamAssignment()){
-         //   $total_students+=$no_team_total;
-        }
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
         }
@@ -61,8 +56,6 @@ class ElectronicGraderView extends AbstractView {
         else{
             $percentage = number_format(($graded / $total) * 100, 1);
         }
-        //echo("Total submitted is:");
-        //echo($total_submitted);
         $return = <<<HTML
 <div class="content">
     <h2>Status of {$gradeable->getName()}</h2>
@@ -81,10 +74,6 @@ HTML;
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
-           // echo("graded is ");
-           // echo($graded);
-           // echo("change_value is ");
-           // echo($change_value);
             if($peer) {
                 $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
                 $show_graded = $graded/$change_value;
@@ -169,8 +158,6 @@ HTML;
                     else {
                         $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
-                  //  echo("change_value is:");
-                   // echo($change_value);
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
@@ -178,7 +165,6 @@ HTML;
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
-                - {$section['no_team']} students with no team<br />
 HTML;
                     }
                 }
