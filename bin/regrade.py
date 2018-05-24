@@ -19,7 +19,10 @@ import time
 import datetime
 import pause
 
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 
 def arg_parse():

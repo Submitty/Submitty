@@ -8,21 +8,28 @@ This script is a work-in-progress.  Additional checks will be added or
 revised as needed.
 """
 
+import json
 import os
 import pwd
 import stat
 import grp
 import sys
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    JSON = json.load(open_file)
 # Will be filled in by INSTALL_SUBMITTY.sh
-SUBMITTY_INSTALL_DIR="__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_DATA_DIR="__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+SUBMITTY_INSTALL_DIR = JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = JSON['submitty_data_dir']
 
-HWPHP_USER="__INSTALL__FILLIN__HWPHP_USER__"
-HWCRON_USER="__INSTALL__FILLIN__HWCRON_USER__"
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    JSON = json.load(open_file)
+HWPHP_USER = JSON['hwphp_user']
+HWCRON_USER = JSON['hwcron_user']
 
-COURSE_BUILDERS_GROUP="__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__"
+COURSE_BUILDERS_GROUP = JSON['course_builders_group']
+
 
 ###########################################################################
 def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits, must_exist=True):

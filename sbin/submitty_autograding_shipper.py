@@ -1,36 +1,38 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import time
 import signal
 import json
-import grade_items_logging
-import grade_item
+
 import shutil
 import contextlib
 import datetime
-from submitty_utils import glob
 import multiprocessing
 from submitty_utils import dateutils, glob
 import operator
 import paramiko
 import tempfile
 import socket
-# ==================================================================================
-# these variables will be replaced by INSTALL_SUBMITTY.sh
 
-# NOTE: DEPRECATED
-# NUM_GRADING_SCHEDULER_WORKERS_string = "__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__"
-# NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
+from autograder import grade_items_logging
+from autograder import grade_item
 
-AUTOGRADING_LOG_PATH="__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__"
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
-HWCRON_UID = "__INSTALL__FILLIN__HWCRON_UID__"
-SUBMITTY_INSTALL_DIR= "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+HWCRON_UID = OPEN_JSON['hwcron_uid']
+
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
 JOB_ID = '~SHIP~'
+
 
 # ==================================================================================
 def initialize(untrusted_queue):
@@ -44,6 +46,7 @@ def initialize(untrusted_queue):
     """
     multiprocessing.current_process().untrusted = untrusted_queue.get()
 
+
 # ==================================================================================
 def update_all_foreign_autograding_workers():
     all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
@@ -54,17 +57,17 @@ def update_all_foreign_autograding_workers():
         raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
     for key, value in autograding_workers.items():
-        formatted_entry = {}
-        formatted_entry[key] = value
+        formatted_entry = {key: value}
         server_name = socket.getfqdn()
         formatted_entry[key]['server_name']=server_name
         update_foreign_autograding_worker_json(key, formatted_entry)
+
 
 # ==================================================================================
 def update_foreign_autograding_worker_json(name, entry):
 
     fd, tmp_json_path = tempfile.mkstemp()
-    foreign_json   = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO","autograding_worker.json")
+    foreign_json = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
     autograding_worker_to_ship = entry
 
     try:
