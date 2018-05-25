@@ -2041,24 +2041,32 @@ AND gc_id IN (
       return $result_rows;
     }
 
-    public function existsNonMergedThread($thread_id) {
-        $this->course_db->query("SELECT 1 FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($thread_id));
+    public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($thread_id));
         $result_rows = $this->course_db->rows();
-        return count($result_rows) > 0;
+        if(count($result_rows) == 0) {
+            $message = "Can't find thread";
+            return false;
+        }
+        $title = $result_rows[0]['title'] . "\n";
+        $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($thread_id));
+        $root_post = $this->course_db->rows()[0]['id'];
+        return $root_post;
     }
 
     public function mergeThread($parent_thread_id, $child_thread_id, $makeAnnouncement, &$message){
         try{
             $this->course_db->beginTransaction();
-            if((!$this->existsNonMergedThread($child_thread_id)) || (!$this->existsNonMergedThread($parent_thread_id))) {
-                $message = "Can't find thread";
+            $parent_thread_title = null;
+            $child_thread_title = null;
+            if(!($parent_root_post = $this->getRootPostOfNonMergedThread($parent_thread_id, $parent_thread_title, $message))) {
                 $this->course_db->rollback();
                 return false;
             }
-            $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($parent_thread_id));
-            $parent_root_post = $this->course_db->rows()[0]['id'];
-            $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($child_thread_id));
-            $child_root_post = $this->course_db->rows()[0]['id'];
+            if(!($child_root_post = $this->getRootPostOfNonMergedThread($child_thread_id, $child_thread_title, $message))) {
+                $this->course_db->rollback();
+                return false;
+            }
 
             if($child_root_post <= $parent_root_post) {
                 $message = "Child thread must be newer than parent thread";
@@ -2075,7 +2083,7 @@ AND gc_id IN (
             foreach($children as $post_id){
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }
-            $this->course_db->query("UPDATE posts SET parent_id = ? WHERE id = ?", array($parent_root_post, $child_root_post));
+            $this->course_db->query("UPDATE posts SET parent_id = ?, content = ? || content WHERE id = ?", array($parent_root_post, $child_thread_title, $child_root_post));
 
             $this->course_db->commit();
             return true;
