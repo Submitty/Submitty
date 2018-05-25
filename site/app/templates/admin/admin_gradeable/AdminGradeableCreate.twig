@@ -64,11 +64,11 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     <br />
     Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
     <br />
-        <input type="radio" id = "team_yes_radio" class="team_yes" name="team_assignment" value="true"
+        <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
             {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
             {{ action == "edit" ? 'disabled' : '' }}> Yes
 
-        <input type="radio" id = "team_no_radio" class="team_no" name="team_assignment" value ="false"
+        <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
             {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
             {{ action == "edit" ? 'disabled' : '' }}> No
 
@@ -113,7 +113,6 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                $('#required_type').hide();
         }
 
-
         $('.electronic_file').hide();
         $('.checkpoints').hide();
         $('.numeric').hide();
@@ -133,10 +132,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
     function onTeamAssignmentChange() {
         if($('#team_yes_radio').is(':checked')) {
-            $('#team_yes').show();
+            $('.team_yes').show();
         }
         else {
-            $('#team_yes').hide();
+            $('.team_yes').hide();
         }
     }
 
