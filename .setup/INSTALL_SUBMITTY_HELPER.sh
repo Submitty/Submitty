@@ -368,12 +368,12 @@ fi
 
 echo -e 'Copy the DB migrations'
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
-chmod 755 ${SUBMITTY_INSTALL_DIR}/migrations
+mkdir -p ${SUBMITTY_INSTALL_DIR}/db
+chown root:root ${SUBMITTY_INSTALL_DIR}/db
+chmod 755 ${SUBMITTY_INSTALL_DIR}/db
 
-rsync -rtz  ${SUBMITTY_REPOSITORY}/migrations   ${SUBMITTY_INSTALL_DIR}
-find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 550 {} \;
+rsync -rtz  ${SUBMITTY_REPOSITORY}/db/*   ${SUBMITTY_INSTALL_DIR}/db/
+find ${SUBMITTY_INSTALL_DIR}/db -type f -exec chmod 500 {} \;
 
 
 ################################################################################################################
