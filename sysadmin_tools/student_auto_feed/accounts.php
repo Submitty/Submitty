@@ -181,14 +181,18 @@ function log_it($msg) {
 /** @static Class to parse command line arguments */
 class cli_args {
 
+    /** @var array holds all CLI argument flags and their values */
 	private static $args;
+    /** @var string usage help message */
 	private static $help_usage      = "Usage: accounts.php [-h | --help] (-t [term code] | -g)" . PHP_EOL;
+    /** @var string short description help message */
 	private static $help_short_desc = "Read student enrollment from Submitty DB and create accounts for PAM auth." . PHP_EOL;
+    /** @var string argument list help message */
 	private static $help_args_list  = <<<HELP
 Arguments
--h --help         Show this help message
--t [term code]    Term code associated with student enrollment.
--g                Guess the term code based on calendar month and year.
+-h --help       Show this help message.
+-t [term code]  Term code associated with student enrollment.
+-g              Guess the term code based on calendar month and year.
 
 NOTE: -t and -g are mutally exclusive.  One is required.
 
@@ -200,39 +204,36 @@ HELP;
 	 * Called with 'cli_args::parse_args()'
 	 *
 	 * @access public
-	 * @return mixed term code string or boolean false when no term code present.
+	 * @return mixed term code as string or boolean false when no term code is present.
 	 */
 	public static function parse_args() {
 
 		self::$args = getopt('hgt:', array('help'));
 
-		if (isset(self::$args['h']) || isset(self::$args['help'])) {
-			//print extended help.
+		switch(true) {
+		case array_key_exists('h', self::$args):
+		case array_key_exists('help', self::$args):
 			self::print_help();
 			return false;
-		}
-
-		if (isset(self::$args['g'])) {
-			if (isset(self::$args['t'])) {
+		case array_key_exists('g', self::$args):
+			if (array_key_exists('t', self::$args)) {
 				//-t and -g are mutually exclusive
-				die('-g and -t cannot be used together.' . PHP_EOL);
+				print "-g and -t cannot be used together." . PHP_EOL;
+				return false;
+			} else {
+				//Guess current term
+				//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+				//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+				$month = intval(date("m", time()));
+				$year  = date("y", time());
+				return ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
 			}
-			//Guess current term
-			//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
-			//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-			$month = intval(date("m", time()));
-			$year  = date("y", time());
-			return ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
-		}
-
-		if (isset(self::$args['t'])) {
-			//read term code set on command line
+		case array_key_exists('t', self::$args):
 			return self::$args['t'];
+		default:
+			print self::$help_usage . PHP_EOL;
+			return false;
 		}
-
-        //No term code on command line
-		print self::$help_usage . PHP_EOL;
-		return false;
 	}
 
 	/**
@@ -246,7 +247,7 @@ HELP;
 		print self::$help_usage . PHP_EOL;
 		//Short description
 		print self::$help_short_desc . PHP_EOL;
-		//Long help
+		//Arguments list
 		print self::$help_args_list . PHP_EOL;
 	}
 }

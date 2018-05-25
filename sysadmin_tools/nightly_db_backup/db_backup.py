@@ -43,14 +43,14 @@ DB_PASS    = 'DB.p4ssw0rd'  # CHANGE THIS!  DO NOT USE 'DB.p4ssw0rd'
 DUMP_PATH  = '/var/local/submitty-dumps'
 
 def delete_obsolete_dumps(working_path, expiration_stamp):
-    """
-    Recurse through folders/files and delete any obsolete dump files
+	"""
+	Recurse through folders/files and delete any obsolete dump files
 
 	:param working_path:     path to recurse through
 	:param expiration_stamp: date to begin purging old dump files
 	:type working_path:      string
 	:type expiration_stamp:  string
-    """
+	"""
 
 	# Filter out '.', '..', and any "hidden" files/directories.
 	# Prepend full path to all directory list elements
