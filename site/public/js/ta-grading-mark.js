@@ -36,20 +36,34 @@ function checkIfSelected(me) {
 }
 
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
+    editable="";
+    bgColor="#F9F9F9";
+    if(note=="Full Credit"){
+        editable="readonly";
+        bgColor="#E2FFEB";
+    }
+    if(note=="No Credit"){
+        editable="readonly";
+        bgColor="#FFE2E2";
+    }
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
     <td colspan="1" style="'+background+'; text-align: center;"> \
         <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
-        </span> \
-        <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
+            </span> \
+        <input name="mark_points_'+num+'_'+x+'" type="number" '+editable+' onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px; background-color: '+bgColor+'"> \
     </td> \
-    <td colspan="3" style="'+background+'"> \
-        <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
-        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-            <i class="fa fa-users icon-got-this-mark"></i> \
-        </span> \
-    </td> \
+    <div class="box"> \
+        <div class="box-title"> \
+            <td colspan="4" style="'+background+'"> \
+                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none; background-color: '+bgColor+'">'+note+'</textarea> \
+                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
+                    <i class="fa fa-users icon-got-this-mark"></i> \
+                </span> \
+            </td> \
+        </div> \
+    </div> \
 </tr> \
 ';
 }
@@ -416,7 +430,7 @@ function calculateMarksPoints(question_num) {
     var current_points = parseFloat(current_question_num[0].dataset.default);
     var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
     var arr_length = $('tr[name=mark_'+question_num+']').length;
-
+    var any_selected=false;
 
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'+question_num+'-'+i);
@@ -425,6 +439,7 @@ function calculateMarksPoints(question_num) {
             is_selected = true;
         }
         if (is_selected === true) {
+            any_selected = true;
             current_points += parseFloat(current_row.find('input[name=mark_points_'+question_num+'_'+i+']').val());
         }
     }
@@ -434,9 +449,19 @@ function calculateMarksPoints(question_num) {
     if (isNaN(custom_points)) {
         current_points += 0;
     } else {
-        current_points += custom_points;
+        if(custom_points!=0){
+            current_points += custom_points;
+            any_selected = true;
+        }
     }
-
+    if(any_selected == false){
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        return "None Selected";
+    }
+    $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
+    $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -453,7 +478,28 @@ function updateProgressPoints(question_num) {
     var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-    current_progress[0].innerHTML = current_points + " / " + max_points; 
+    if(current_points=="None Selected"){
+        $('#grade-' + question_num)[0].innerHTML = "";     
+         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+    }
+    else{
+        $('#grade-' + question_num)[0].innerHTML = current_points;
+        //extra credit
+        if(current_points > max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points == max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points > 0){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#eac73d";
+        }
+        else{
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
+        }
+    }
 }
 
 function selectMark(me, first_override) {
@@ -480,21 +526,106 @@ function selectMark(me, first_override) {
 
 //closes all the questions except the one being opened
 //openClose toggles alot of listed elements in order to work
-function openClose(row_id) {
+function openClose(row_id, num_questions = -1) {
     var row_num = parseInt(row_id);
-    var total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var total_num = 0;
+    if (num_questions === -1) {
+        total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
+    } else {
+        total_num = parseInt(num_questions);
+    }
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
-    setGeneralVisible(row_num === -2 && general_comment[0].style.display === 'none');
+    var general_comment_title = $('#title-general');
+    var general_comment_title_cancel = $('#title-cancel-general');
+    var gshow = (row_num === -2 && general_comment[0].style.display === 'none');
 
+    // Updated all the background colors and displays of each element that has
+    //  the corresponding data tag for the general component
+   // $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+    $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
+    $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
+    
+    general_comment_title.attr('colspan', (gshow ? 3 : 4));
+    general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
+    
     for (var x = 1; x <= total_num; x++) {
+        var page = ($('#page-' + x)[0]).innerHTML;
+        
+        var title           = $('#title-' + x);
+        var cancel_button   = $('#title-cancel-' + x);
         var current_summary = $('#summary-' + x);
-        setMarkVisible(x, x === row_num && current_summary[0].style.display === '');
+        var show = false;
+        if (x == row_num && current_summary[0].style.display === '') {
+            updateProgressPoints(x);
+            show = true;
+            // if the component has a page saved, open the PDF to that page
+            // opening directories/frames based off of code in openDiv and openFrame functions
+
+            // make sure submissions folder has files
+            var submissions = $('#div_viewer_1');
+            if (page > 0 && submissions.children().length > 0) {
+
+                    // find the first file that is a PDF
+                    var divs = $('#div_viewer_1 > div > div');
+                    var pdf_div = "";
+                    for (var i=0; i<divs.length; i++) {
+                        if ($(divs[i]).is('[data-file_url]')) {
+                            file_url = $(divs[i]).attr("data-file_url");
+                            if(file_url.substring(file_url.length - 3) == "pdf") {
+                                pdf_div = $($(divs[i]));
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
+                    if (pdf_div != "") {
+                        submissions.show();
+                        submissions.addClass('open');
+                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                        var file_url = pdf_div.attr("data-file_url");
+                        var file_name = pdf_div.attr("data-file_name");
+                        if (!pdf_div.hasClass('open')) {
+                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                        }
+                        var iframeId = pdf_div.attr("id") + "_iframe";
+                        directory = "submissions"; 
+                        src = $("#"+iframeId).prop('src');
+                        if (src.indexOf("#page=") === -1) {
+                            src = src + "#page=" + page;
+                        }
+                        else {
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                        }
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
+
+                        if (!pdf_div.hasClass('open')) {
+                            pdf_div.addClass('open');
+                        }
+                        if (!pdf_div.hasClass('shown')) {
+                            pdf_div.show();
+                            pdf_div.addClass('shown');
+                        }
+                    }
+                }
+        }
+
+        // Updated all the background colors and displays of each element that has
+        //  the corresponding data tag
+       // $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+        $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
+        $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
+        
+        title.attr('colspan', (show ? 3 : 4));
+        cancel_button.attr('colspan', (show ? 1 : 0));
     }
 
     updateCookies();
 }
+
 
 //Set if the mark at index X should be visible
 function setMarkVisible(x, show) {
@@ -503,17 +634,6 @@ function setMarkVisible(x, show) {
     var title           = $('#title-' + x);
     var cancel_button   = $('#title-cancel-' + x);
     var current_summary = $('#summary-' + x);
-
-    // Update the color if it is penalty or extra credit
-    var current_question_num = $('#grade-' + x);
-    var question_points = parseFloat(current_question_num[0].innerHTML);
-    if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
-    } else if (question_points < 0) {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-    } else {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
-    }
 
     if (show) {
         updateProgressPoints(x);
@@ -589,13 +709,88 @@ function setGeneralVisible(gshow) {
 
     // Updated all the background colors and displays of each element that has
     //  the corresponding data tag for the general component
-    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+   // $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
     $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
     $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
-
+    var total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
     general_comment_title.attr('colspan', (gshow ? 3 : 4));
     general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
+    for (var x = 1; x <= total_num; x++) {
+        var page = ($('#page-' + x)[0]).innerHTML;
+        
+        var title           = $('#title-' + x);
+        var cancel_button   = $('#title-cancel-' + x);
+        var current_summary = $('#summary-' + x);
 
+        var show = false;
+        var row_num = parseInt(gshow);
+        if (x == row_num && current_summary[0].style.display === '') {
+            updateProgressPoints(x);
+            show = true;
+            // if the component has a page saved, open the PDF to that page
+            // opening directories/frames based off of code in openDiv and openFrame functions
+
+            // make sure submissions folder has files
+            var submissions = $('#div_viewer_1');
+            if (page > 0 && submissions.children().length > 0) {
+
+                    // find the first file that is a PDF
+                    var divs = $('#div_viewer_1 > div > div');
+                    var pdf_div = "";
+                    for (var i=0; i<divs.length; i++) {
+                        if ($(divs[i]).is('[data-file_url]')) {
+                            file_url = $(divs[i]).attr("data-file_url");
+                            if(file_url.substring(file_url.length - 3) == "pdf") {
+                                pdf_div = $($(divs[i]));
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
+                    if (pdf_div != "") {
+                        submissions.show();
+                        submissions.addClass('open');
+                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                        var file_url = pdf_div.attr("data-file_url");
+                        var file_name = pdf_div.attr("data-file_name");
+                        if (!pdf_div.hasClass('open')) {
+                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                        }
+                        var iframeId = pdf_div.attr("id") + "_iframe";
+                        directory = "submissions"; 
+                        src = $("#"+iframeId).prop('src');
+                        if (src.indexOf("#page=") === -1) {
+                            src = src + "#page=" + page;
+                        }
+                        else {
+                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                        }
+                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
+
+                        if (!pdf_div.hasClass('open')) {
+                            pdf_div.addClass('open');
+                        }
+                        if (!pdf_div.hasClass('shown')) {
+                            pdf_div.show();
+                            pdf_div.addClass('shown');
+                        }
+                    }
+                }
+        }
+
+        // Updated all the background colors and displays of each element that has
+        //  the corresponding data tag
+       // $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+        $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
+        $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
+        
+        title.attr('colspan', (show ? 3 : 4));
+        cancel_button.attr('colspan', (show ? 1 : 0));
+    }
+
+    updateCookies();
 }
 
 // Saves the general comment
@@ -644,12 +839,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         }
         return;
     }
-    
     var arr_length = $('tr[name=mark_'+num+']').length;
     
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
-    
     // Gathers all the mark's data (ex. points, note, etc.)
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'       +num+'-'+i);
@@ -666,7 +859,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         info_mark[0].style.display = '';
         existing_marks_num++;
     }
-
     var current_row = $('#mark_custom_id-'+num);
     
     var custom_points  = current_row.find('input[name=mark_points_custom_'+num+']').val();
@@ -694,7 +886,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
             var prepend = (!first_text) ? ("\<br>") : ("");
             var points  = (parseFloat(mark_data[i].points) != 0) ? ("(" + mark_data[i].points + ") ") : ("");
             
-            new_text += prepend + "* " + points + mark_data[i].note;
+            new_text += prepend + "*" + points + mark_data[i].note;
             if (first_text) {
                 first_text = false;
             }
@@ -714,7 +906,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         var prepend = (!first_text) ? ("\<br>") : ("");
         var points  = (parseFloat(custom_points) != 0) ? ("(" + custom_points + ") ") : ("");
         
-        new_text += prepend + "* " + points + custom_message;
+        new_text += prepend + "*" + points + custom_message;
         if (first_text) {
             first_text = false;
         }
@@ -732,18 +924,18 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
     calculatePercentageTotal();
 
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    
     ajaxSaveMarks(gradeable_id, user_id, gc_id, arr_length, active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
-
         if (data['modified'] === true) {
             if (all_false === true) {
                 $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
-                $('#summary-' + num)[0].style.backgroundColor = "initial";
             } else {
                 if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
-                    $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
+                    var question_points = parseFloat(current_question_num[0].innerHTML);
+                    var max_points = parseFloat(current_question_num[0].dataset.max_points);
+                    $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+                    $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
                 }
             }
         }
