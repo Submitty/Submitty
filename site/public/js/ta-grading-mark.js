@@ -38,11 +38,11 @@ function checkIfSelected(me) {
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
     editable="";
     bgColor="#F9F9F9";
-    if(note=="Full Credit" || note=="full credit"){
+    if(note=="Full Credit"){
         editable="readonly";
         bgColor="#E2FFEB";
     }
-    if(note=="No Credit" || note=="no credit"){
+    if(note=="No Credit"){
         editable="readonly";
         bgColor="#FFE2E2";
     }
