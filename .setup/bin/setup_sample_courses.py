@@ -30,6 +30,7 @@ import uuid
 import os.path
 import string
 import sys
+import configparser
 
 from submitty_utils import dateutils
 
@@ -821,7 +822,13 @@ class Course(object):
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
         
-        if(self.code == "sample"):  
+        if(self.code == "sample"): 
+            #set sample course to have forum enabled by default
+            config = configparser.ConfigParser()    
+            config.read(os.path.join(course_path, "config", "config.ini"))
+            config.set("course_details", "forum_enabled", "true")
+            with open(os.path.join(course_path, "config", "config.ini"), 'w') as configfile:
+                config.write(configfile)
             f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'))
             forum_threads = Table("threads", metadata, autoload=True)
             forum_posts = Table("posts", metadata, autoload=True)
