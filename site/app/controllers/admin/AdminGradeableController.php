@@ -536,11 +536,12 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException("Error.");
         }
 
-        //set up roating sections
+        //set up rotating sections
         $graders = array();
         foreach ($_POST as $k => $v ) {
             if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
-                $graders[explode('_', $k)[1]]=explode(',',trim($v));
+                $sections = explode('_', $k);
+                $graders[$sections[3]][] = $sections[2];
             }
         }
 

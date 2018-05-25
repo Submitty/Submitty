@@ -11,7 +11,7 @@ class AdminGradeableView extends AbstractView {
      */
 	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable) {
 
-        $action           = "add"; //decides how the page's data is displayed
+        $action           = "new"; //decides how the page's data is displayed
         $button_string    = "Add";
         $submit_text      = "Submit";
         $label_message    = "";
@@ -38,7 +38,7 @@ class AdminGradeableView extends AbstractView {
             $sections = $grader['sections'];
             $sections = ltrim($sections, '{');
             $sections = rtrim($sections, '}');
-            $sections = $explode(',', $sections);
+            $sections = explode(',', $sections);
 
             $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
         }
@@ -53,7 +53,7 @@ class AdminGradeableView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
-            "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => $action)),
+            "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
             "admin_gradeable" => $admin_gradeable,
             "label_message"   => $label_message,
