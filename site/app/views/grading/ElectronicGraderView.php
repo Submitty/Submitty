@@ -191,11 +191,11 @@ HTML;
                 Section {$key}: {$graders}<br />
 HTML;
                 }
-                $viewed_percent = number_format(($viewed_grade / $total_students) * 100, 1);
                 $return .= <<<HTML
             </div>
 HTML;
                 if ($gradeable->taGradesReleased()) {
+                    $viewed_percent = number_format(($viewed_grade / $total_students) * 100, 1);
                     $return .= <<<HTML
             <br />
             Number of students who have viewed their grade: {$viewed_grade} / {$total_students} ({$viewed_percent}%)
