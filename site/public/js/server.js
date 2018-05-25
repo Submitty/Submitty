@@ -17,14 +17,13 @@ window.addEventListener("load", function() {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    url = document.body.dataset.siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
     }
-    return url + constructed;
+    return document.body.dataset.siteUrl + constructed;
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
@@ -408,17 +407,32 @@ function addCategory(old, i) {
     });
 }
 
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
  * useful for developers, but shouldn't be shown to normal users
  */
 function togglePageDetails() {
-    if (document.getElementById('page-info').style.visibility == 'visible') {
-        document.getElementById('page-info').style.visibility = 'hidden';
+    var element = document.getElementById('page-info');
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
     }
     else {
-        document.getElementById('page-info').style.visibility = 'visible';
+        element.style.display = 'block';
+        // Hide the box if you click outside of it
+        document.body.addEventListener('mouseup', function pageInfo(event) {
+            if (!element.contains(event.target)) {
+                element.style.display = 'none';
+                document.body.removeEventListener('mouseup', pageInfo, false);
+            }
+        });
     }
 }
 
@@ -1161,6 +1175,10 @@ function enableTabsInTextArea(id){
 
 }
 
+function changeDisplayOptions(option, thread_id){
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+}
+
 function resetScrollPosition(id){
     if(sessionStorage.getItem(id+"_scrollTop") != 0) {
         sessionStorage.setItem(id+"_scrollTop", 0);
@@ -1362,6 +1380,23 @@ function alterAnnouncement(thread_id, confirmString, url){
             }
         })
     }
+}
+
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
 }
 
 function updateHomeworkExtensions(data) {

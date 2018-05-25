@@ -415,7 +415,8 @@ table tr.table-header {
 }
 
 #page-info {
-    visibility: hidden;
+    visibility: visible;
+    display: none;
     position: absolute;
     top: 40px;
     left: 40px;
@@ -679,6 +680,11 @@ table tr.table-header {
 .gradeable_list tr:nth-child(odd),
 .gradeable_list tr:nth-child(even) {
 /*    background-color: #E9EFEF*/
+}
+
+.gradeable_comment {
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 #search_wrapper{
