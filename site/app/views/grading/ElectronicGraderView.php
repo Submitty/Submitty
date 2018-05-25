@@ -198,7 +198,7 @@ HTML;
                 if ($gradeable->taGradesReleased()) {
                     $return .= <<<HTML
             <br />
-            Number of students who have viewed their grade: {$viewed_grade}/{$total_students} ({$viewed_percent}%)
+            Number of students who have viewed their grade: {$viewed_grade} / {$total_students} ({$viewed_percent}%)
 HTML;
                 }
                 $return .= <<<HTML
