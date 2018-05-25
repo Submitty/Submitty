@@ -31,75 +31,86 @@ Variables
 {# 
 Form
 #}
-What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
-    lowest privileged user group</a> that can grade this?
-<select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
-    {% for num, role in grading_groups %}
-        <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
-    {% endfor %}
-</select>
-<br />
-<a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
-<br />
-<fieldset>    
-    <input type="radio" name="section_type" value="reg_section" id="registration-section"
-        {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
-
-    <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
-        {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
-
-    <div id="rotating_data">
+<div class="electronic_file">
+    Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
+    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
+           {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
+            {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
+    <div id="manual_grading">
+        What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
+            lowest privileged user group</a> that can grade this?
+        <select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+            {% for num, role in grading_groups %}
+                <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+            {% endfor %}
+        </select>
         <br />
-        Rotating Section History By Grader:
+        <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
         <br />
-        <table id="grader-history" style="border: 3px solid black;">
-            <tr>
-                <th></th>
-                {% for row in admin_gradeable.getRotatingGradeables() %}
-                    <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
-                {% endfor %}
-            </tr>
-            <tr>
-                {% set last = '' %}
-                {% for row in admin_gradeable.getGradeableSectionHistory() %}
-                    {% if row.user_id != last %}
-                        </tr>
-                        <tr class="g_history g{{ row.user_group-1 }}">
-                            <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
-                    {% endif %}
-                    <td style="padding: 8px; border: 3px solid black; text-align: center;">{{ sections }}</td>
-                    {% set last = row.user_id %}
-                {% endfor %}
-        </table>
-        <table>
-            {# Helpful debuging line.  Uncomment to view graders data #}
-            {# <tr>{{all_graders|json_encode()}}</tr> #}
-            <tr>
-                <th />
-                <th>All</th>
-                {% for rs in section_numbers %}
-                    <th>{{rs}}</th>
-                {% endfor %}
-            </tr>
-            <tr class="inst">
-                <th>Instructor Graders</th>
-            </tr>
-            <!-- Instructors -->
-            {{ self.display_graders(all_graders[0], 'g0', section_numbers) }}
-            <tr class="g1">
-                <th>Full Access Graders</th>
-            </tr>
-            <!-- Full Access Graders -->
-            {{ self.display_graders(all_graders[1], 'g1', section_numbers) }}
-            <tr class="g2">
-                <th>Limited Access Graders</th>
-            </tr>
-            <!-- Limited Access Graders -->
-            {{ self.display_graders(all_graders[2], 'g2', section_numbers) }}
-        </table>
+        <fieldset>
+            <input type="radio" name="section_type" value="reg_section" id="registration-section"
+                {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+
+            <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
+                {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
+
+            <div id="rotating_data">
+                <br />
+                Rotating Section History By Grader:
+                <br />
+                <table id="grader-history" style="border: 3px solid black;">
+                    <tr>
+                        <th></th>
+                        {% for row in admin_gradeable.getRotatingGradeables() %}
+                            <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% set last = '' %}
+                        {% for row in admin_gradeable.getGradeableSectionHistory() %}
+                            {% if row.user_id != last %}
+                                </tr>
+                                <tr class="g_history g{{ row.user_group-1 }}">
+                                    <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
+                            {% endif %}
+                            <td style="padding: 8px; border: 3px solid black; text-align: center;">{{ sections }}</td>
+                            {% set last = row.user_id %}
+                        {% endfor %}
+                </table>
+                <table>
+                    {# Helpful debuging line.  Uncomment to view graders data #}
+                    {# <tr>{{all_graders|json_encode()}}</tr> #}
+                    <tr>
+                        <th />
+                        <th>All</th>
+                        {% for rs in section_numbers %}
+                            <th>{{rs}}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr class="inst">
+                        <th>Instructor Graders</th>
+                    </tr>
+                    <!-- Instructors -->
+                    {{ self.display_graders(all_graders[0], 'g0', section_numbers) }}
+                    <tr class="g1">
+                        <th>Full Access Graders</th>
+                    </tr>
+                    <!-- Full Access Graders -->
+                    {{ self.display_graders(all_graders[1], 'g1', section_numbers) }}
+                    <tr class="g2">
+                        <th>Limited Access Graders</th>
+                    </tr>
+                    <!-- Limited Access Graders -->
+                    {{ self.display_graders(all_graders[2], 'g2', section_numbers) }}
+                </table>
+            </div>
+        </fieldset>
     </div>
-</fieldset>
-
+</div>
+<div class="numeric checkpoints">
+    Nothing to do here!
+</div>
 
 <script type="text/javascript">
 
@@ -127,6 +138,15 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             ;
 
             $(base_all_cb_name + 'all_' + id).prop('checked', all_checked);
+        }
+    }
+
+    function onManualGradingChange() {
+        if($('#yes_ta_grade').is(':checked')) {
+            $('#manual_grading').show();
+        }
+        else {
+            $('#manual_grading').hide();
         }
     }
 
@@ -158,6 +178,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
     $(document).ready(function() {
 
+        // Only show most of the form if manual grading is enabled
+        onManualGradingChange();
+        $('[name="ta_grading"]').change(onManualGradingChange);
+
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
         $('[name="section_type"]').change(onSectionTypeChange);
@@ -178,6 +202,20 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         {% endfor %}
 
     });
+
+    function checkFormGraders() {
+        var checkRegister = $('#registration-section').is(':checked');
+        var checkRotate = $('#rotating-section').is(':checked');
+
+        // This seems pretty unlikely to happen since the input is a boolean and
+        if($('[name="ta_grading"]').is(':checked') || check2 || check3) {
+            if(!checkRegister && !checkRotate) {
+                alert("A type of way for TAs to grade must be selected");
+                return false;
+            }
+        }
+        return true;
+    }
 
 
 </script>

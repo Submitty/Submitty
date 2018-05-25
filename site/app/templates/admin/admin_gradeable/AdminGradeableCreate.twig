@@ -42,15 +42,15 @@ What is the URL to the assignment instructions? (shown to student)
 
 <!-- Gradeable Type radio buttons (readonly in edit mode) -->
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
-    <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
+    <input type='radio' id="radio_electronic_file" name="gradeable_type" value="Electronic File"
         {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
         {{ action == "edit" ? disabled : null }}> Electronic File
 
-    <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
+    <input type='radio' id="radio_checkpoints" name="gradeable_type" value="Checkpoints"
         {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
         {{ action == "edit" ? disabled : null }}> Checkpoints
 
-    <input type='radio' id="radio_numeric" class="numeric" name="gradeable_type" value="Numeric"
+    <input type='radio' id="radio_numeric" name="gradeable_type" value="Numeric"
         {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
         {{ action == "edit" ? disabled : null }}> Numeric/Text 
 
@@ -113,14 +113,21 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                $('#required_type').hide();
         }
 
-        // Display team options if the user selects electronic gradeables
+
+        $('.electronic_file').hide();
+        $('.checkpoints').hide();
+        $('.numeric').hide();
+
+        // Display the correct options for all forms depending
+        //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
-            $('#electronic_file').show();
-            onTeamAssignmentChange();
+            $('.electronic_file').show();
         }
-        else {
-            $('#electronic_file').hide();
-            $('#team_yes').hide();
+        else if ($('#radio_checkpoints').is(':checked')) {
+            $('.checkpoints').show();
+        }
+        else if ($('#radio_numeric').is(':checked')) {
+            $('.numeric').show();
         }
     }
 
