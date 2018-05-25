@@ -264,61 +264,11 @@ class ElectronicGraderController extends GradingController {
                         }
                     }
                 }
-               /* else{
-                    //$students_array = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-                    //$total_individual_students=0;
-                    //foreach($students_array as $key => $value){
-                     //   $total_individual_students+=$students_array[$key];
-                    //}
-                    foreach ($total_users as $key => $value) {                           
-                            if(array_key_exists($key, $num_submitted)){
-                                    $sections[$key] = array(
-                                    'total_components' => $num_submitted[$key] * $num_components,
-                                    'graded_components' => 0,
-                                    'graders' => array()
-                                ); 
-                                if ($gradeable->isTeamAssignment()) {
-                                    $sections[$key]['no_team'] = $no_team_users[$key];
-                                    $sections[$key]['team'] = $team_users[$key];
-                 //             echo("Sections should be assigned");
-                                }  
-                                if (isset($graders[$key])) {
-                                    $sections[$key]['graders'] = $graders[$key];
-                                }
-                                if (isset($graded_components[$key])) {
-                                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                                }
-                            }
-                            else{
-                                    $sections[$key] = array(
-                                    'total_components' => 0,
-                                    'graded_components' => 0,
-                                    'graders' => array()
-                                );
-                                if ($gradeable->isTeamAssignment()) {
-                                    $sections[$key]['no_team'] = $no_team_users[$key];
-                                    $sections[$key]['team'] = $team_users[$key];
-                 //             echo("Sections should be assigned");
-                                }
-                                if (isset($graded_components[$key])) {
-                                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                                }
-                                if (isset($graders[$key])) {
-                                    $sections[$key]['graders'] = $graders[$key];
-                                }
-                            }
-                        }
-                    }*/
-                }
             }
+        }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
         $unsubmitted_students=0;
-       // $unsubmitted_students = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key)) - array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key));
-       // echo("unsubmitted students is ");
-        //echo($unsubmitted_students);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students, $registered_but_not_rotating, $rotating_but_not_registered, $section_key, $unsubmitted_students);
     }
     public function showDetails() {

@@ -45,9 +45,6 @@ class ElectronicGraderView extends AbstractView {
             }
         }
         //Fixing total_students bug
-        if($gradeable->isTeamAssignment()){
-         //   $total_students+=$no_team_total;
-        }
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
         }
@@ -57,8 +54,6 @@ class ElectronicGraderView extends AbstractView {
         else{
             $percentage = number_format(($graded / $total) * 100, 1);
         }
-        //echo("Total submitted is:");
-        //echo($total_submitted);
         $return = <<<HTML
 <div class="content">
     <h2>Status of {$gradeable->getName()}</h2>
@@ -77,10 +72,6 @@ HTML;
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
-           // echo("graded is ");
-           // echo($graded);
-           // echo("change_value is ");
-           // echo($change_value);
             if($peer) {
                 $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
                 $show_graded = $graded/$change_value;
@@ -1524,11 +1515,7 @@ HTML;
             else if ($question_points < 0) {
                 $background = "background-color: #FAD5D3;";
             }
-           // if(false){
             $return .= <<<HTML
-               <!-- <div class="box" id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true" onclick="saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}', {$question->getId()}); saveMark({$c},'{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); updateMarksOnPage({$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); openClose({$c}, {$num_questions});">
-                <div class="box-title"> -->
-               <!--<span>-->
                 <div id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true">
                     <span style="width:98%;" colspan="4">
                         <div id="rubric-{$c}">
@@ -1543,7 +1530,6 @@ HTML;
                 <div class="box" id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
                 <div class="box-title">
 HTML;
-       //     }
             $d = 0;
             $first = true;
             $noChange = "";
@@ -1557,13 +1543,10 @@ HTML;
             $icon_mark = ($has_custom_mark === true) ? "fa-square" : "fa-square-o";
             if(!$peer) {
                 $return .= <<<HTML
-                    <!--<div class="box">
-                    <div class="box-title">-->
                         <span colspan="4">
                             <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                             Add New Common Mark</span>
                         </span>
-                  <!--  </div></div> -->
 HTML;
             }
             $return .= <<<HTML

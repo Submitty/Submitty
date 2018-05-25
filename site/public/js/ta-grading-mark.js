@@ -473,16 +473,13 @@ function updateProgressPoints(question_num) {
          $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
-        //$('#gradebar-' + question_num)[0].innerHTML = "+$current_points";
     }
     else{
         $('#grade-' + question_num)[0].innerHTML = current_points;
         //extra credit
         if(current_points > max_points){
-            //$('#gradebar-' + question_num)[0].innerHTML = ('+' + current_points);     
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
         }
-        //current_progress[0].innerHTML = current_points + " / " + max_points; 
         else if(current_points == max_points){
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
         }
@@ -493,18 +490,6 @@ function updateProgressPoints(question_num) {
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
         }
     }
-   /* var arr_length = $('tr[name=mark_'+question_num+']').length;
-    var any_selected=false;
-    for (var i = 0; i < arr_length; i++) {
-        var current_row = $('#mark_id-'+question_num+'-'+i);
-        var is_selected = false;
-        if (current_row.find('i[name=mark_icon_'+question_num+'_'+i+']')[0].classList.contains('fa-square')) {
-            is_selected = true;
-        }
-        if (is_selected === true) {
-            any_selected = true;
-        }
-    }*/
 }
 
 function selectMark(me, first_override) {
@@ -561,26 +546,6 @@ function openClose(row_id, num_questions = -1) {
         var title           = $('#title-' + x);
         var cancel_button   = $('#title-cancel-' + x);
         var current_summary = $('#summary-' + x);
-
-        // Update the color if it is penalty or extra credit
-        var current_question_num = $('#grade-' + x);
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-            //current_summary.children("td:first-of-type")[0].style."background-color" = "#D8F2D8";
-        } else if (question_points < 0) {
-          //  current_summary.children("td:first-of-type")[0].style."background-color" = "#FAD5D3";
-        }
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        var max_points = parseFloat(current_question_num[0].dataset.max_points);
-        if(question_points == max_points){
-            //current_summary.children("td:first-of-type")[0].style.backgroundColor = "#006600";
-        }
-        else if(question_points > 0){
-       //     current_summary.children("td:first-of-type")[0].style.backgroundColor = "#eac73d";
-        }
-        else{
-        //    current_summary.children("td:first-of-type")[0].style.backgroundColor = "#c00000";
-        }
         var show = false;
         if (x == row_num && current_summary[0].style.display === '') {
             updateProgressPoints(x);
@@ -659,17 +624,6 @@ function setMarkVisible(x, show) {
     var title           = $('#title-' + x);
     var cancel_button   = $('#title-cancel-' + x);
     var current_summary = $('#summary-' + x);
-
-    // Update the color if it is penalty or extra credit
-    var current_question_num = $('#grade-' + x);
-    var question_points = parseFloat(current_question_num[0].innerHTML);
-    if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-     //   current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
-    } else if (question_points < 0) {
-     //   current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-    } else {
-       // current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
-    }
 
     if (show) {
         updateProgressPoints(x);
@@ -758,25 +712,6 @@ function setGeneralVisible(gshow) {
         var cancel_button   = $('#title-cancel-' + x);
         var current_summary = $('#summary-' + x);
 
-        // Update the color if it is penalty or extra credit
-        var current_question_num = $('#grade-' + x);
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-            //current_summary.children("td:first-of-type")[0].style."background-color" = "#D8F2D8";
-        } else if (question_points < 0) {
-          //  current_summary.children("td:first-of-type")[0].style."background-color" = "#FAD5D3";
-        }
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        var max_points = parseFloat(current_question_num[0].dataset.max_points);
-        if(question_points == max_points){
-            //current_summary.children("td:first-of-type")[0].style.backgroundColor = "#006600";
-        }
-        else if(question_points > 0){
-       //     current_summary.children("td:first-of-type")[0].style.backgroundColor = "#eac73d";
-        }
-        else{
-        //    current_summary.children("td:first-of-type")[0].style.backgroundColor = "#c00000";
-        }
         var show = false;
         var row_num = parseInt(gshow);
         if (x == row_num && current_summary[0].style.display === '') {
@@ -894,12 +829,10 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         }
         return;
     }
-    
     var arr_length = $('tr[name=mark_'+num+']').length;
     
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
-    
     // Gathers all the mark's data (ex. points, note, etc.)
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'       +num+'-'+i);
@@ -916,7 +849,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         info_mark[0].style.display = '';
         existing_marks_num++;
     }
-
     var current_row = $('#mark_custom_id-'+num);
     
     var custom_points  = current_row.find('input[name=mark_points_custom_'+num+']').val();
@@ -982,10 +914,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
     calculatePercentageTotal();
 
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    
     ajaxSaveMarks(gradeable_id, user_id, gc_id, arr_length, active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
-
         if (data['modified'] === true) {
             if (all_false === true) {
                 $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
@@ -994,15 +924,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
                     var question_points = parseFloat(current_question_num[0].innerHTML);
                     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-                    if(question_points == max_points){
-                      //  $('#gradebar-' + num)[0].style.backgroundColor = "#006600";
-                    }
-                    else if(question_points > 0){
-                     //   $('#gradebar-' + num)[0].style.backgroundColor = "#eac73d";
-                    }
-                    else{
-                     //   $('#gradebar-' + num)[0].style.backgroundColor = "#c00000";
-                    }
                     $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
                     $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
                 }
