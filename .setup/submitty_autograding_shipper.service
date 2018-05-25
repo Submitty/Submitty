@@ -6,7 +6,7 @@ Documentation=http://submitty.org
 User=hwcron
 Restart=always
 Type=simple
-ExecStart=/usr/local/submitty/bin/submitty_autograding_shipper.py
+ExecStart=/usr/local/submitty/sbin/submitty_autograding_shipper.py
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 

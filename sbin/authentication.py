@@ -9,14 +9,20 @@ import requests
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 from submitty_utils.user import get_php_db_password
 
-CGI_URL = '__INSTALL__FILLIN__CGI_URL__'
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
-DATABASE_HOST = '__INSTALL__FILLIN__DATABASE_HOST__'
-DATABASE_USER = '__INSTALL__FILLIN__DATABASE_USER__'
-DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+DATA_DIR = OPEN_JSON['submitty_data_dir']
+CGI_URL = OPEN_JSON['cgi_url']
 
-AUTHENTICATION_METHOD = '__INSTALL__FILLIN__AUTHENTICATION_METHOD__'
-DATA_DIR = '__INSTALL__FILLIN__SUBMITTY_DATA_DIR__'
+with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+DATABASE_HOST = OPEN_JSON['database_host']
+DATABASE_USER = OPEN_JSON['database_user']
+DATABASE_PASS = OPEN_JSON['database_password']
+
+AUTHENTICATION_METHOD = OPEN_JSON['authentication_method']
 
 
 def check_password(environ, user, password):
@@ -178,6 +184,7 @@ def check_database(username, password, connection, metadata):
         authenticated = subprocess.check_output(['php', '-r', php]) == 'true'
 
     return authenticated
+
 
 if __name__ == "__main__":
     """

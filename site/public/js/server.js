@@ -17,15 +17,43 @@ window.addEventListener("load", function() {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    var url = siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
     }
-    return url + constructed;
+    return document.body.dataset.siteUrl + constructed;
 }
+
+function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+    orig_div_name = div_name
+    div_name = "#" + div_name;
+    var isVisible = $( div_name ).is( " :visible" );
+
+    if(isVisible){
+        toggleDiv(orig_div_name);
+        $(div_name).empty();
+    }else{
+        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                $(div_name).empty();
+                $(div_name).html(data);
+                toggleDiv(orig_div_name); 
+            },
+            error: function(e) {
+                alert("Could not load diff, please refresh the page and try again.");
+            }
+        })
+    }
+}
+
+
+
 
 /**
  *
@@ -101,6 +129,19 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
 
+function newDownloadForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $('#download-form');
+    form.css('display', 'block');
+    $("#download-form input:checkbox").each(function() {
+        if ($(this).val() === 'NULL') {
+            $(this).prop('checked', false);
+        } else {
+            $(this).prop('checked', true);
+        }
+    });
+}
+
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
@@ -116,6 +157,136 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function copyToClipboard(code) {
+    var download_info = JSON.parse($('#download_info_json_id').val());
+    var required_emails = [];
+    
+    $('#download-form input:checkbox').each(function() {
+        if ($(this).is(':checked')) {
+            var thisVal = $(this).val();
+
+            if (thisVal === 'instructor') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === 'Instructor') {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else if (thisVal === 'full_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === 'Full Access Grader (Grad TA)') {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else if (thisVal === 'limited_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === "Limited Access Grader (Mentor)") {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (code === 'user') {
+                        if (download_info[i].reg_section === thisVal) {
+                            required_emails.push(download_info[i].email);
+                        }
+                    }
+                    else if (code === 'grader') {
+                        if (download_info[i].reg_section === 'All') {
+                            required_emails.push(download_info[i].email);
+                        }
+
+                        if ($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) {
+                            required_emails.push(download_info[i].email);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    required_emails = $.unique(required_emails);
+    var temp_element = $("<textarea></textarea>").text(required_emails.join(','));
+    $(document.body).append(temp_element);
+    temp_element.select();
+    document.execCommand('copy');
+    temp_element.remove();
+    setTimeout(function() {
+        $('#copybuttonid').prop('value', 'Copied');
+    }, 0);
+    setTimeout(function() {
+        $('#copybuttonid').prop('value', 'Copy Emails to Clipboard');
+    }, 1000);
+}
+
+function downloadCSV(code) {
+    var download_info = JSON.parse($('#download_info_json_id').val());
+    var csv_data = 'First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+    var required_user_id = [];
+
+    $('#download-form input:checkbox').each(function() {
+        if ($(this).is(':checked')) {
+            var thisVal = $(this).val();
+
+            if (thisVal === 'instructor') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else if (thisVal === 'full_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else if (thisVal === 'limited_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (code === 'user') {
+                        if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                    }
+                    else if (code === 'grader') {
+                        if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                        if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    var temp_element = $('<a id="downloadlink"></a>');
+    var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
+    temp_element.attr('href', address);
+    temp_element.attr('download', 'submitty_user_emails.csv');
+    temp_element.css('display', 'none');
+    $(document.body).append(temp_element);
+    $('#downloadlink')[0].click();
+    $('#downloadlink').remove();
+}
+
 function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
@@ -123,7 +294,12 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
 
     $('[name="new_team"]', form).val(new_team);
     $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
-    $('[name="num_users"]', form).val(max_members);
+    if(new_team) {
+        $('[name="num_users"]', form).val(3);    
+    }
+    else if (!new_team) {
+        $('[name="num_users"]', form).val(members.length+2);
+    }
 
     var title_div = $("#admin-team-title");
     title_div.empty();
@@ -143,7 +319,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
 
         title_div.append('Create New Team: ' + who_id);
         members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
-        for (var i = 1; i < max_members; i++) {
+        for (var i = 1; i < 3; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -159,7 +335,7 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
                 <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
         }
-        for (var i = members.length; i < max_members; i++) {
+        for (var i = members.length; i < (members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -188,8 +364,8 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
             }
         }
     }
-
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+    var param = (new_team ? 3 : members.length+2);
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
 }
 
@@ -229,6 +405,13 @@ function addCategory(old, i) {
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
     });
+}
+
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
 }
 
 /**
@@ -871,7 +1054,7 @@ function getFileExtension(filename){
 
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
-    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />";
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(elem_html);
@@ -982,6 +1165,10 @@ function enableTabsInTextArea(id){
             }
         };
 
+}
+
+function changeDisplayOptions(option, thread_id){
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
 function resetScrollPosition(id){
@@ -1185,6 +1372,23 @@ function alterAnnouncement(thread_id, confirmString, url){
             }
         })
     }
+}
+
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
 }
 
 function updateHomeworkExtensions(data) {
