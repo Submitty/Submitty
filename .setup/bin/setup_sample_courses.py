@@ -848,7 +848,7 @@ class Course(object):
                                   merged_id=threadData[4],
                                   is_visible=True if threadData[5] == "t" else False)
                 conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[6])
-
+            counter = 1
             for postData in f_data[0]:
                 if(postData[10] != "f"):
                     attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
