@@ -69,7 +69,7 @@ CREATE TABLE courses_users (
     user_group integer NOT NULL,
     registration_section integer,
     manual_registration boolean DEFAULT false,
-    CONSTRAINT users_user_group_check CHECK ((user_group >= 0) AND (user_group <= 4))
+    CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 
 

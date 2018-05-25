@@ -71,4 +71,8 @@ touch ${SUBMITTY_DATA_DIR}/instructors/valid
 chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
 chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
 
-sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
+sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
+# necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
+sudo usermod -a -G travis hwphp
+sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean

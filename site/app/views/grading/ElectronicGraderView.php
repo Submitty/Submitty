@@ -35,6 +35,7 @@ class ElectronicGraderView extends AbstractView {
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
+        $team_total=0;
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -42,7 +43,8 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-                $no_team_total += $section['no_team'];
+               $no_team_total += $section['no_team'];
+               $team_total += $section['team'];
             }
         }
         if ($total === 0 && $no_team_total === 0){
@@ -68,6 +70,7 @@ HTML;
         }
         else{
             $view = null;
+            $total_students_final = $team_total+$no_team_total;
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
@@ -76,8 +79,10 @@ HTML;
                 $show_graded = $graded/$change_value;
                 $show_total = $total/$change_value;
             }
-            $submitted_percentage = round(($show_total / $total_students) * 100, 1);
-
+            $submitted_percentage = 0;
+            if($total_students!=0){
+                $submitted_percentage = round(($show_total / $total_students) * 100, 1);
+            }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
             if($section_type === "rotating_section" && $this->core->getUser()->accessFullGrading()){
@@ -107,15 +112,24 @@ HTML;
                 <br/>
 HTML;
             }
+            if($gradeable->isTeamAssignment()){
+            $team_percentage = round(($team_total/$total_students_final) * 100, 1);
+            $return .= <<<HTML
+            Students on a team: {$team_total}/{$total_students_final} ({$team_percentage}%)
+            <br />
+            <br />
+            Number of teams: {$total_students}
+            <br />
+            <br />
+            Teams who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
+HTML;
+            }
+            else{
             $return .= <<<HTML
             Students who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
             <br />
             <br />
             Current percentage of grading done: {$show_graded}/{$show_total} ({$percentage}%)
-HTML;
-            if ($gradeable->isTeamAssignment() && $no_team_total > 0) {
-                $return .= <<<HTML
-             - {$no_team_total} students with no team
 HTML;
             }
             $return .= <<<HTML
@@ -151,7 +165,6 @@ HTML;
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
-                - {$section['no_team']} students with no team
 HTML;
                     }
                 }
@@ -183,7 +196,6 @@ HTML;
 HTML;
             }
             if(!$peer) {
-                if(!$gradeable->isTeamAssignment()) {
                     $return .= <<<HTML
         <div class="box half">
             <b>Statistics for Completely Graded Assignments: </b><br/>
@@ -275,7 +287,8 @@ HTML;
 HTML;
                         }
                     }
-                }
+                //This else encompasses the above calculations for Teamss
+                //END OF ELSE
                 $return .= <<<HTML
             </div>
         </div>
@@ -298,7 +311,7 @@ HTML;
             if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
                 $return .= <<<HTML
         <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'individual'=>'0'))}">
+            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId()))}">
             Grade Next Student
         </a>
         <a class="btn btn-primary"
@@ -329,7 +342,7 @@ HTML;
      * @param array       $graders
      * @return string
      */
-    public function detailsPage($gradeable, $rows, $graders, $empty_teams) {
+    public function detailsPage($gradeable, $rows, $graders, $all_teams, $empty_teams) {
         $return = <<<HTML
 <div class="content">
 
@@ -372,7 +385,22 @@ HTML;
         $show_auto_grading_points = true;
         $return .= <<<HTML
     <h2>Grade Details for {$gradeable->getName()}</h2>
-    <table class="table table-striped table-bordered persist-area">
+HTML;
+    if ($gradeable->isTeamAssignment()) {
+
+        if(count($all_teams) > count($empty_teams)) {
+            $return .= <<<HTML
+            <a style="float: right;" class="btn btn-primary" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'export_teams', 'gradeable_id'=>$gradeable->getId()))}">Export Teams Members</a>
+HTML;
+        }
+        if(count($all_teams) == count($empty_teams)) {
+            $return .= <<<HTML
+           <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
+HTML;
+        }
+    }        
+        $return .= <<<HTML
+    <br /><br /><br /><table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
 HTML;
@@ -755,7 +783,7 @@ HTML;
                 $return .= <<<HTML
                 </td>
                 <td>
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId(), 'individual'=>'1'))}">
+                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
                         {$contents}
                     </a>
                 </td>
@@ -904,17 +932,43 @@ HTML;
         return $return;
     }
 
+    public function importTeamForm($gradeable) {
+        $return = <<<HTML
+<div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
+    <h2>Import Teams Members</h2> 
+    <p>&emsp;</p>
+    <p>Format of the teams should be csv with 6 columns:<br />
+First Name, Last Name, User ID, Team ID, Team Registration Section, Team Rotating Section<br />
+The first row of the csv is assumed to be column headings and is ignored.<br /><br />
+        Note: Imported Teams will be assigned new Team IDs, Team Registration Section, and Team Rotating Section.
+    </p><br />
+    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        <div>
+            <input type="file" name="upload_team" accept=".csv">
+        </div>
+        <div style="float:right; width:auto;">
+            <a onclick="$('#import-team-form').css('display', 'none')" class="btn btn-danger">Cancel</a>    
+            <input class="btn btn-primary" type="submit" value="Import">    
+        </div>    
+    </form>
+</div>
+HTML;
+        return $return;
+    }
+
+
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, string $individual, $studentNotInSection=false, $canViewWholeGradeable=false) {
+    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $studentNotInSection=false, $canViewWholeGradeable=false) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
         $user = $gradeable->getUser();
         $your_user_id = $this->core->getUser()->getId();
-        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id, 'individual'=>$individual));
-        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id, 'individual'=>$individual));
+        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id));
+        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id));
         $return = <<<HTML
 <div id="bar_wrapper" class="draggable">
 <div class="grading_toolbar">
@@ -946,20 +1000,20 @@ HTML;
     }
     $return .= <<< HTML
 
-    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="toggleAutograding(); updateCookies();"></i>
-    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleRubric(); updateCookies();"></i>
+    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
+    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
 HTML;
     if ($gradeable->useTAGrading()) {
             $return .= <<<HTML
-    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
+    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
 HTML;
         }
         $return .= <<<HTML
-    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleInfo(); updateCookies();"></i>
+    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
 HTML;
         if(!$peer) {
             $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="resetModules(); updateCookies();"></i>
+    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
 HTML;
         }
         $return .= <<<HTML
@@ -1154,8 +1208,7 @@ HTML;
         <div class="rubric-title">
 HTML;
             $who = $gradeable->getUser()->getId();
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'individual'=>$individual,
-                                                      'gradeable_version' => ""))}', this)";
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
             $formatting = "font-size: 13px;";
             $return .= <<<HTML
             <div style="float:right;">
@@ -1178,7 +1231,7 @@ HTML;
                         action="{$this->core->buildUrl(array('component' => 'student',
                                                              'action' => 'update',
                                                              'gradeable_id' => $gradeable->getId(),
-                                                             'new_version' => $version, 'ta' => true, 'who' => $who, 'individual' => $individual))}">
+                                                             'new_version' => $version, 'ta' => true, 'who' => $who))}">
                     <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
                     {$button}
                 </form>
@@ -1216,7 +1269,6 @@ HTML;
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
                 <input type="hidden" name="u_id" value="{$user->getId()}" />
-                <input type="hidden" name="individual" value="{$individual}" />
                 <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
@@ -1509,7 +1561,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px;  float:left; cursor: pointer;">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" class="rubric-textarea">{$initial_text}</span>
                         </div>
                     </td>
                 </tr>
@@ -1578,7 +1630,7 @@ HTML;
                     </td>
                     <td style="width:98%;" colspan="3">
                         <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" style="width:95%; height:100%; min-height:20px;  float:left;"><pre>{$overallComment}</pre></span>
+                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{$overallComment}</span>
                         </div>
                     </td>
                 </tr>
