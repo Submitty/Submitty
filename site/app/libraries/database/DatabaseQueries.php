@@ -861,7 +861,6 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
 
     /**
      * Gets all registration sections from the sections_registration table
-
      * @return array
      */
     public function getRegistrationSections() {
@@ -2066,5 +2065,28 @@ AND gc_id IN (
     public function getAllAnonIds() {
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
+    }
+        /**
+     * Determines if a course is 'active' or if it was dropped.
+     *
+     * This is used to filter out courses displayed on the home screen, for when
+     * a student has dropped a course.  SQL query checks for user_group=4 so
+     * that only students are considered.  Returns false when course is dropped.
+     * Returns true when course is still active, or user is not a student.
+     *
+     * @param string $user_id
+     * @param string $course
+     * @param string $semester
+     * @return boolean
+     */
+    public function checkStudentActiveInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT
+                CASE WHEN registration_section IS NULL AND user_group=4 THEN FALSE
+                ELSE TRUE
+                END
+            AS active
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['active'];
     }
 }
