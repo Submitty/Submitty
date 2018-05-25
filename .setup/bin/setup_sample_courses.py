@@ -756,40 +756,43 @@ class Course(object):
                             (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
                             (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
-
-                        os.system("mkdir -p " + os.path.join(submission_path, "1"))
-                        submitted = True
-                        submission_count += 1
-                        current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
-
-                        conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                     g_version=1, submission_time=current_time_string)
-                        conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                     active_version=1)
-                        with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time_string}]},
-                                      open_file)
-                        with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time_string + "\n")
-
-                        if isinstance(gradeable.submissions, dict):
-                            for key in gradeable.submissions:
-                                os.system("mkdir -p " + os.path.join(submission_path, "1", key))
-                                submission = random.choice(gradeable.submissions[key])
-                                src = os.path.join(gradeable.sample_path, submission)
-                                dst = os.path.join(submission_path, "1", key)
-                                create_gradeable_submission(src, dst)
-                        else:
-                            submission = random.choice(gradeable.submissions)
-                            if isinstance(submission, list):
-                                submissions = submission
+                        versions_to_submit = 2
+                        json_history = {"active_version": versions_to_submit, "history": []}
+                        for version in range(1, versions_to_submit+1):
+                            os.system("mkdir -p " + os.path.join(submission_path, str(version)))
+                            submitted = True
+                            submission_count += 1
+                            random_days = 1
+                            if random.random() < 0.3:
+                                random_days = random.choice(range(-3,2))
+                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
+                            conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                        g_version=version, submission_time=current_time_string)
+                            conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                        active_version=versions_to_submit)
+                            json_history["history"].append({"version": version, "time": current_time_string})
+                            with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                open_file.write(current_time_string + "\n")
+                            if isinstance(gradeable.submissions, dict):
+                                for key in gradeable.submissions:
+                                    os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
+                                    submission = random.choice(gradeable.submissions[key])
+                                    src = os.path.join(gradeable.sample_path, submission)
+                                    dst = os.path.join(submission_path, str(version), key)
+                                    create_gradeable_submission(src, dst)
                             else:
-                                submissions = [submission]
-                            for submission in submissions:
-                                src = os.path.join(gradeable.sample_path, submission)
-                                dst = os.path.join(submission_path, "1")
-                                create_gradeable_submission(src, dst)
-
+                                submission = random.choice(gradeable.submissions)
+                                if isinstance(submission, list):
+                                    submissions = submission
+                                else:
+                                    submissions = [submission]
+                                for submission in submissions:
+                                    src = os.path.join(gradeable.sample_path, submission)
+                                    dst = os.path.join(submission_path, str(version))
+                                    create_gradeable_submission(src, dst)
+                        
+                        with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
+                                json.dump(json_history, open_file)
                 if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, "1")):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
@@ -1151,6 +1154,8 @@ class Gradeable(object):
                 self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
+            else:
+                self.late_days = random.choice(range(0, 3))
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if 'eg_team_assignment' in gradeable:
