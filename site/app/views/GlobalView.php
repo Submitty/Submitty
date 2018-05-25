@@ -101,13 +101,6 @@ HTML;
             </li>
 
 HTML;
-
-                    if ($this->core->getUser()->isDeveloper()) {
-                        $return .= <<<HTML
-            <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
-
-HTML;
-                    }
                     $return .= <<<HTML
         </ul>
     </div>
@@ -160,14 +153,31 @@ HTML;
             <i class="fa fa-github fa-lg"></i>
         </a>
     </span>
+HTML;
+    if ($this->core->getConfig()->isDebug()) {
+            $return .= <<<HTML
+    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+HTML;
+    }
+    $return .= <<<HTML
 </div>
 HTML;
-        if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
+        if ($this->core->getConfig()->isDebug()) {
             $return .= <<<HTML
 <div id='page-info'>
-    Total Queries: {$this->core->getCourseDB()->getQueryCount()}<br />
-    Runtime: {$runtime}<br />
-    Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
+    Runtime: {$runtime}<br /><br />
+    <h3>Site Details</h3>
+    Total Submitty Details: {$this->core->getSubmittyDB()->getQueryCount()}<br /><br />
+    Submitty Queries:<br /> {$this->core->getSubmittyDB()->getPrintQueries()}
+HTML;
+            if ($this->core->getConfig()->isCourseLoaded()) {
+                $return .= <<<HTML
+    <h3>Course Details</h3>
+    Total Course Queries: {$this->core->getCourseDB()->getQueryCount()}<br /><br />
+    Course Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
+HTML;
+            }
+        $return .= <<<HTML
 </div>
 HTML;
         }
