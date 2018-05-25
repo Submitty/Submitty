@@ -2,6 +2,7 @@
 namespace app\views;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
+use app\libraries\FileUtils;
 
 
 class NavigationView extends AbstractView {
@@ -252,7 +253,33 @@ HTML;
                     $gradeable_title = '<label>'.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
                 }
                 else{
-                    $gradeable_title = '<label>'.$g_data->getName().'</label>';
+                    if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                        $no_teams_flag=1;
+                        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable);
+                        if (!empty($all_teams)) {      
+                            $no_teams_flag=0;
+                        }
+                        $no_submission_flag=1;
+                        $semester = $this->core->getConfig()->getSemester();
+                        $course = $this->core->getConfig()->getCourse();
+                        $submission_path = "/var/local/submitty/courses/".$semester."/".$course."/"."submissions/".$gradeable;
+                        if(is_dir($submission_path)) {
+                            $no_submission_flag=0;
+                        }
+                        if(($no_submission_flag == 1) && ($no_teams_flag == 1)) {
+                            $form_action=$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable ));
+                            $gradeable_title = <<<HTML
+                    <label>{$g_data->getName()}</label>&nbsp;
+                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$g_data->getName()}");'></i>
+HTML;
+                        }
+                        else {
+                            $gradeable_title = '<label>'.$g_data->getName().'</label>';
+                        }
+                    }
+                    else {
+                        $gradeable_title = '<label>'.$g_data->getName().'</label>';    
+                    }
                 }
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
                     $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/Y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/Y{$time}")."</span>)";
@@ -653,6 +680,28 @@ HTML;
         $return .= <<<HTML
                             </table>
                         </div>
+HTML;
+        return $return;
+    }
+
+    public function deleteGradeableForm() {
+        $return = <<<HTML
+    <div class="popup-form" id="delete-gradeable-form" style="width:550px; margin-left:-250px;">
+        <h2>Delete Gradeable</h2> 
+        <p>&emsp;</p>
+        <p>Note: A Gradeable can only be deleted if it do not have any team and submission.
+        </p><br />
+        <form name="delete-confirmation" method="post" action="">
+         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+         Are you sure you want to delete 
+         <div name="delete-gradeable-message">
+         </div><br />
+         <div style="float:right; width:auto;">
+            <a onclick="$('#delete-gradeable-form').css('display', 'none')" class="btn btn-danger">Cancel</a>    
+             <input class="btn btn-primary" type="submit" value="Delete">    
+         </div>    
+     </form>
+ </div>
 HTML;
         return $return;
     }

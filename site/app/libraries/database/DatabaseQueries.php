@@ -2094,4 +2094,11 @@ AND gc_id IN (
         return $this->submitty_db->row()['active'];
 
     }
+
+    /**
+     * @param string $g_id
+     */
+    public function deleteGradeable($g_id) {
+        $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
+    }
 }

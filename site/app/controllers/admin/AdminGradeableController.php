@@ -11,6 +11,7 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use \DateTime;
+use app\libraries\FileUtils;
 
 class AdminGradeableController extends AbstractController {
 	public function run() {
@@ -33,6 +34,9 @@ class AdminGradeableController extends AbstractController {
             case 'quick_link':
                 $this->quickLink();
                 break;
+            case 'delete_gradeable':
+                $this->deleteGradeable();
+                break;    
             default:
                 $this->viewPage();
                 break;
@@ -568,6 +572,67 @@ class AdminGradeableController extends AbstractController {
           die("Failed to write file {$config_build_file}");
         }
 
+
+        $this->returnToNav();
+    }
+
+    private function deleteGradeable() {
+        $g_id = $_REQUEST['id'];
+
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            $this->core->addErrorMessage("Invalid CSRF Token");
+            $this->returnToNav();
+        }
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Only admins can edit teams");
+            $this->returnToNav();
+        }
+        $this->core->getQueries()->deleteGradeable($g_id);
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        
+        $file = FileUtils::joinPaths($course_path,"config","build","build_".$g_id.".json");
+        if ((file_exists($file)) && (!unlink($file))) {
+            $this->core->addErrorMessage("Cannot delete build_".$g_id.".json");
+        }
+        $file = FileUtils::joinPaths($course_path,"config","complete_config","complete_config_".$g_id.".json");
+        if ((file_exists($file)) && (!unlink($file))){
+            $this->core->addErrorMessage("Cannot delete complete_config_".$g_id.".json");
+        }
+        $file = FileUtils::joinPaths($course_path,"config","form","form_".$g_id.".json");
+        if ((file_exists($file)) && (!unlink($file))){
+            $this->core->addErrorMessage("Cannot delete form_".$g_id.".json");
+        }
+
+        $dir = FileUtils::joinPaths($course_path,"build",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"results",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+         
+        $dir = FileUtils::joinPaths($course_path,"test_input",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"uploads","bulk_pdf",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"uploads","split_pdf",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"bin",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"test_output",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+        
+        $dir = FileUtils::joinPaths($course_path,"custom_validation_code",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"provided_code",$g_id);
+        FileUtils::recursiveRmdir($dir);  
+
+        $dir = FileUtils::joinPaths($course_path,"checkout",$g_id);
+        FileUtils::recursiveRmdir($dir);  
 
         $this->returnToNav();
     }
