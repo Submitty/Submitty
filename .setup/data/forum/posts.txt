@@ -1,24 +1,32 @@
-  1 | -1 | instructor | Homework 1 has been posted on the course website. You can find the assignment [url=http://example.com]here.[/url] | 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | f
-  1 |  1 | aphacker | It was mentioned in lecture that we are going to get extra late days for this assignment. Is this true? | 2018-04-03 19:08:18.772907-04 | f | f | | f | 0 | f
-  2 | -1 | bitdiddle | The example code for one of the functions that we need to implement is: [code] def area_circle(radius): [/code] Which we are then supposed to print the output: [code]print(area_circle(radius))[/code] How many decimal places are we supposed to print out? | 2018-04-03 19:15:40.083039-04 | f         | f       |             | f        |    0 | f
-  1 |  2 | ta | Yes, the instructor will be giving one extra late day for this assignment. | 2018-04-03 19:16:53.942187-04 | f | f | | f | 0 | f
-  2 |  3 | ta | You should print out to two decimal places (this includes for example "5.00"). | 2018-04-03 19:17:37.832837-04 | f | f | | f | 0 | f
-  2 |  5 | student | For the example "5.537" should that print out "5.54" or "5.53"? | 2018-04-03 19:31:02.627012-04 | f | f | | f | 0 | f
-  3 | -1 | student | It seems like my homework isn't working. I used the code provided from lecture as a starting point, but it won't execute. I am getting this error: [code]Traceback (most recent call last): File "<stdin>", line 1, in <module> NameError: name 'math' is not defined[/code] Can anyone provide some help on what to do? I am not sure why it is saying that it can't find the math module. | 2018-04-03 19:35:03.220528-04 | t | f | | f | 0 | f
-  3 |  7 | aphacker | Make sure that you have imported the math module. You can do so by including this in the top of your python file: [code]import math[/code] | 2018-04-03 19:36:48.551748-04 | t | f | | f | 0 | f 
-  4 | -1 | aphacker | I can't seem to find the course syllabus. Can someone point me in the right direction?? | 2018-04-03 19:37:45.756451-04 | f | f | | f | 0 | f
-  4 |  9 | ta | The course syllabus can be found [url=http://example.com]here.[/url] | 2018-04-03 19:39:14.84398-04  | f | f | | f | 0 | f
-  4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | f
-  5 | -1 | bitdiddle | Testing multiple levels | 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | f
-  5 | 12 | instructor | This is level 2, testing is important | 2018-04-03 18:47:02.281828-04 | f | f | | f | 0 | f
-  5 | 13 | bitdiddle | Level 3 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
-  5 | 14 | aphacker | This level 4 post should be anon | 2018-04-03 19:46:02.281828-04 | t | f | | f | 0 | f
-  5 | 14 | aphacker | Another level 4 post | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
-  5 | 15 | instructor | Level 5 | 2018-04-03 20:46:02.281828-04 | f | f | | f | 0 | f
-  5 | 17 | instructor | Level 6 replying to self | 2018-04-03 20:47:02.281828-04 | f | f | | f | 0 | f
-  5 | 18 | aphacker | Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
-  5 | 18 | aphacker | Another Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
-  5 | 19 | bitdiddle | Level 8, should be last level of indentation | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
-  5 | 21 | aphacker | Level 9, child post of bitdiddle, but no indentation | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f
-  6 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | Secret.png
-  6 | 23 | bitdiddle | I think I know the answer | 2018-05-23 21:49:03.281828-04 | f | f | | f | 0 | Answer.png
+  1 | -1 | instructor | Homework 1 has been posted on the course website. You can find the assignment [url=http://example.com]here.[/url] | 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | t
+  1 |  1 | aphacker | It was mentioned in lecture that we are going to get extra late days for this assignment. Is this true? | 2018-04-03 19:08:18.772907-04 | f | f | | f | 0 | t
+  2 | -1 | bitdiddle | The example code for one of the functions that we need to implement is: [code] def area_circle(radius): [/code] Which we are then supposed to print the output: [code]print(area_circle(radius))[/code] How many decimal places are we supposed to print out? | 2018-04-03 19:15:40.083039-04 | f         | f       |             | f        |    0 | t
+  1 |  2 | ta | Yes, the instructor will be giving one extra late day for this assignment. | 2018-04-03 19:16:53.942187-04 | f | f | | f | 0 | t
+  2 |  3 | ta | You should print out to two decimal places (this includes for example "5.00"). | 2018-04-03 19:17:37.832837-04 | f | f | | f | 0 | t
+  2 |  5 | student | For the example "5.537" should that print out "5.54" or "5.53"? | 2018-04-03 19:31:02.627012-04 | f | f | | f | 0 | t
+  3 | -1 | student | It seems like my homework isn't working. I used the code provided from lecture as a starting point, but it won't execute. I am getting this error: [code]Traceback (most recent call last): File "<stdin>", line 1, in <module> NameError: name 'math' is not defined[/code] Can anyone provide some help on what to do? I am not sure why it is saying that it can't find the math module. | 2018-04-03 19:35:03.220528-04 | t | f | | f | 0 | t
+  3 |  7 | aphacker | Make sure that you have imported the math module. You can do so by including this in the top of your python file: [code]import math[/code] | 2018-04-03 19:36:48.551748-04 | t | f | | f | 0 | t 
+  4 | -1 | aphacker | I can't seem to find the course syllabus. Can someone point me in the right direction?? | 2018-04-03 19:37:45.756451-04 | f | f | | f | 0 | t
+  4 |  9 | ta | The course syllabus can be found [url=http://example.com]here.[/url] | 2018-04-03 19:39:14.84398-04  | f | f | | f | 0 | t
+  4 |  9 | aphacker | Thanks! | 2018-04-03 19:39:46.032541-04 | f | f | | f | 0 | t
+  5 | -1 | kessll | Can anyone share few good links for `python` beginner? | 2018-05-23 10:55:22.192817-04 | f | f |  | f | 0 | t
+  5 | 12 | renneh | Try this for quick overview\n[url=https://developers.google.com/edu/python/introduction]https://developers.google.com/edu/python/introduction[/url]\n | 2018-05-23 11:01:11.483217-04 | f | f |  | f | 0 | t
+  5 | 12 | rueckm | Offical documentation is better for methods specific search.\n[url=https://docs.python.org/3/contents.html]https://docs.python.org/3/contents.html[/url]\n | 2018-05-23 11:07:24.611849-04 | f | f |  | f | 0 | t
+  5 | 12 | vonruf | I tried [url=https://www.w3schools.com/python/]https://www.w3schools.com/python/[/url] | 2018-05-23 11:14:41.912376-04 | f | f |  | f | 0 | t
+  6 | -1 | bitdiddle | Can someone share multithreading example snippets in C++ | 2018-05-23 11:45:24.049959-04 | f | f |  | f | 0 | t
+  6 | 16 | baliss | Sample code snippet\n[code]\n#include <iostream>\n#include <thread>\nvoid foo(std::string msg)\n{\n    std::cout<<msg<<std::endl;\n}\nint main() {\n   std::thread t1(foo, "Test 1");\n   std::thread t2(foo, "Test 2");\n   t1.join();\n   t2.join();\n   return 0;\n}\n[/code]\n | 2018-05-23 11:46:14.864177-04 | f | f |  | f | 0 | t
+  6 | 17 | aphacker | While compiling with gcc use -pthread argument. | 2018-05-23 11:55:27.142647-04 | f | f |  | f | 0 | t
+  6 | 16 | willia | You can even try C style threading\n[code]\n#include <iostream>\n#include <pthread.h>\nusing namespace std;\n\nvoid *func(void *vargp)\n{\n    cout<<"Sample function\n";\n}\n  \nint main()\n{\n    pthread_t t1,t2;\n    pthread_create(&t1, NULL, func, NULL);\n    pthread_create(&t2, NULL, func, NULL);\n    pthread_join(t1, NULL);\n    pthread_join(t2, NULL);\n    return 0;\n}\n[/code]\n\nAn use '-pthread' flag while compiling. | 2018-05-23 12:19:33.987203-04 | f | f |  | f | 0 | t
+  7 | -1 | bitdiddle | Testing multiple levels | 2018-04-03 18:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 20 | instructor | This is level 2, testing is important | 2018-04-03 18:47:02.281828-04 | f | f | | f | 0 | f
+  7 | 21 | bitdiddle | Level 3 | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 22 | aphacker | This level 4 post should be anon | 2018-04-03 19:46:02.281828-04 | t | f | | f | 0 | f
+  7 | 22 | aphacker | Another level 4 post | 2018-04-03 19:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 23 | instructor | Level 5 | 2018-04-03 20:46:02.281828-04 | f | f | | f | 0 | f
+  7 | 25 | instructor | Level 6 replying to self | 2018-04-03 20:47:02.281828-04 | f | f | | f | 0 | f
+  7 | 26 | aphacker | Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
+  7 | 26 | aphacker | Another Level 7 | 2018-04-03 20:48:02.281828-04 | f | f | | f | 0 | f
+  7 | 28 | bitdiddle | Level 8, should be last level of indentation | 2018-04-03 20:49:02.281828-04 | f | f | | f | 0 | f
+  7 | 29 | aphacker | Level 9, child post of bitdiddle, but no indentation | 2018-04-03 20:49:03.281828-04 | f | f | | f | 0 | f
+  8 | -1 | instructor | The file attached contains the secret phrase. Decode it to earn extra credit. | 2018-05-23 20:49:03.281828-04 | f | f | | f | 0 | Secret.png
+  8 | 31 | bitdiddle | I think I know the answer | 2018-05-23 21:49:03.281828-04 | f | f | | f | 0 | Answer.png
