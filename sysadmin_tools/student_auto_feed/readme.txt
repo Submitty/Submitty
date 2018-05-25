@@ -4,7 +4,7 @@ These are code examples for any University to use as a basis to have student
 enrollment data inserted or updated into any or every course's database.  Users
 table data backup and recovery example code is also provided.
 
-Requires at least PHP 5.4 with pgsql, iconv, and ssh2 extensions.
+Requires at least PHP 5.6 with pgsql, iconv, and ssh2 extensions.
 
 Instructions can be found at http://submitty.org/sysadmin/student_auto_feed
 
@@ -46,7 +46,7 @@ server's calendar month and year.
 For example:
 
 ./submitty_student_auto_feed.php -s s18
- 
+
 Will run the auto feed for the Spring 2018 semester.
 
 
@@ -61,7 +61,7 @@ server's calendar month and year.
 For example:
 
 ./accounts.php -s s18
- 
+
 Will run the accounts script for the Spring 2018 semester.
 
 accounts.php is also intended to be run as a cron job, but the requirements are
