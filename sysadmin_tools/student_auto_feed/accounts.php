@@ -15,14 +15,13 @@
  *
  * "30 * * * * /var/local/submitty/bin/accounts.php"
  *
- * You may now manually specify the semester on the command line with "-s",
- * otherwise the semester is automatically determined by the server's calendar
- * month and year.
+ * You may specify the term on the command line with "-t".
+ * "-g" can be used to guess the term by the server's calendar month and year.
  * For example:
- * 
- * ./accounts.php -s s18
  *
- * Will run the accounts script for the Spring 2018 semester.
+ * ./accounts.php -t s18
+ *
+ * Will create PAM auth accounts for the Spring 2018 semester.
  *
  * @author Peter Bailie, Systems Programmer (RPI dept of computer science)
  */
@@ -74,9 +73,7 @@ date_default_timezone_set('America/New_York');
 main();
 exit(0);
 
-/**
- * Main process
- */
+/** Main process */
 function main() {
 	//IMPORTANT: This script needs to be run as root!
 	if (posix_getuid() !== 0) {
@@ -84,18 +81,11 @@ function main() {
 	}
 
 	//Check for semester among CLI arguments.
-	$idx = array_search('-s', $_SERVER['argv']);
-	if ($idx !== false && isset($_SERVER['argv'][$idx+1])) {
-		//semester found among CLI arguments.
-		$semester = $_SERVER['argv'][$idx+1];
-	} else {
-		//semester NOT found among CLI arguments, therefore set automatically by calendar month
-		//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
-		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-		$month = intval(date("m", time()));
-		$year  = date("y", time());
-		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+	$semester = cli_args::parse_args();
+	if ($semester === false) {
+	    exit(1);
 	}
+
 	$courses = determine_courses($semester);
 
 	foreach($courses as $course) {
@@ -186,6 +176,79 @@ function log_it($msg) {
     $msg = date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
     error_log(msg, 1, ERROR_E_MAIL);
    	error_log(msg, 3, ERROR_LOG_FILE);
+}
+
+/** @static Class to parse command line arguments */
+class cli_args {
+
+	private static $args;
+	private static $help_usage      = "Usage: accounts.php [-h | --help] (-t [term code] | -g)" . PHP_EOL;
+	private static $help_short_desc = "Read student enrollment from Submitty DB and create accounts for PAM auth." . PHP_EOL;
+	private static $help_args_list  = <<<HELP
+Arguments
+-h --help         Show this help message
+-t [term code]    Term code associated with student enrollment.
+-g                Guess the term code based on calendar month and year.
+
+NOTE: -t and -g are mutally exclusive.  One is required.
+
+HELP;
+
+	/**
+	 * Parse command line arguments
+	 *
+	 * Called with 'cli_args::parse_args()'
+	 *
+	 * @access public
+	 * @return mixed term code string or boolean false when no term code present.
+	 */
+	public static function parse_args() {
+
+		self::$args = getopt('hgt:', array('help'));
+
+		if (isset(self::$args['h']) || isset(self::$args['help'])) {
+			//print extended help.
+			self::print_help();
+			return false;
+		}
+
+		if (isset(self::$args['g'])) {
+			if (isset(self::$args['t'])) {
+				//-t and -g are mutually exclusive
+				die('-g and -t cannot be used together.' . PHP_EOL);
+			}
+			//Guess current term
+			//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+			//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+			$month = intval(date("m", time()));
+			$year  = date("y", time());
+			return ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+		}
+
+		if (isset(self::$args['t'])) {
+			//read term code set on command line
+			return self::$args['t'];
+		}
+
+        //No term code on command line
+		print self::$help_usage . PHP_EOL;
+		return false;
+	}
+
+	/**
+	 * Print extended help to console
+	 *
+	 * @access private
+	 */
+	private static function print_help() {
+
+		//Usage
+		print self::$help_usage . PHP_EOL;
+		//Short description
+		print self::$help_short_desc . PHP_EOL;
+		//Long help
+		print self::$help_args_list . PHP_EOL;
+	}
 }
 
 /* EOF ====================================================================== */
