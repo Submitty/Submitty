@@ -83,7 +83,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             {# 
                 Use a combo box if we can edit the value, otherwise show a text box (readonly)
             #}
-            {% if action == 'add' %}
+            {% if action == 'new' %}
                 <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
                     value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                     <option value=''>--None--</option>
