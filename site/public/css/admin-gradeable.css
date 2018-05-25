@@ -90,3 +90,9 @@ legend{
     cursor: pointer;
     padding-right: 20px;
 }
+
+.date_picker {
+    cursor: auto;
+    background-color: #FFF;
+    width: 250px;
+}

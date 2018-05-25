@@ -1,7 +1,9 @@
-<link rel="stylesheet" type="text/css" href="css/admin-gradeable.css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<link type='text/css' rel='stylesheet' href="http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css" />
+<link type="text/css" rel="stylesheet" href="css/admin-gradeable.css"> <!-- Make sure this one is LAST -->
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
@@ -96,8 +98,8 @@
     function checkForm() {
         return checkFormCreate() &&
                /*checkFormRubric() &&
-               checkFormDates() && 
-               */checkFormGraders()/* &&
+               */checkFormDates() &&
+               checkFormGraders()/* &&
                checkFormSyllabus()*/;
     }
 
