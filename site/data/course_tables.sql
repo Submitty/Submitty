@@ -439,7 +439,7 @@ CREATE TABLE users (
     rotating_section integer,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
+    CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 
 
