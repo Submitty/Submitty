@@ -199,11 +199,19 @@ HTML;
             </div>
 HTML;
                 if ($gradeable->taGradesReleased()) {
-                    $viewed_percent = number_format(($viewed_grade / max($total_students, 1)) * 100, 1);
-                    $return .= <<<HTML
+                    $show_total = $total/$change_value;
+                    $viewed_percent = number_format(($viewed_grade / max($show_total, 1)) * 100, 1);
+                    if ($gradeable->isTeamAssignment()) {
+                        $return .= <<<HTML
             <br />
-            Number of students who have viewed their grade: {$viewed_grade} / {$total_students} ({$viewed_percent}%)
+            Number of teams who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
 HTML;
+                    } else {
+                        $return .= <<<HTML
+            <br />
+            Number of students who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
