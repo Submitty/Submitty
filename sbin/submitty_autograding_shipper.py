@@ -84,55 +84,8 @@ def update_all_foreign_autograding_workers():
 # ==================================================================================
 # A small helper function which calls update_worker_code and update_worker_json
 def update_and_install_autograding_worker(name, formatted_entry):
-    # success = update_worker_code(name, formatted_entry)
-    # if success == False:
-    #     return success
     success = update_worker_json(name, formatted_entry)
     return success
-# ==================================================================================
-# Tells a foreign autograding worker to update its code (WIP) and reinstall.
-def update_worker_code(name, autograding_worker_to_ship):
-    try:
-        user = autograding_worker_to_ship[name]['username']
-        host = autograding_worker_to_ship[name]['address']
-    except Exception as e:
-        print("ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
-        grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
-        return
-
-    #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
-    if host == "localhost":
-        return True
-    else:
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.get_host_keys()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user)
-        except Exception as e:
-            grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
-            print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
-            return
-        try:
-            command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "update_and_install_worker.py"))
-            (stdin, stdout, stderr) = ssh.exec_command(command)
-            status = int(stdout.channel.recv_exit_status())
-            if status == 0:
-                grade_items_logging.log_message(JOB_ID, message="Success! Good update!".format(name))
-                print("Success! Good update!")
-                success = True
-            else:
-                grade_items_logging.log_message(JOB_ID, message="Failure, bad update on {0} :( Status code {1}".format(name, status))
-                print("Failure, bad update on {0} :( Status code {1}".format(name, status))
-                success = False
-        except Exception as e:
-            grade_items_logging.log_message(JOB_ID, message="ERROR: could not update {0} due to error {1}: ".format(host, str(e)))
-            print("ERROR: could not update {0} due to error {1}: ".format(host, str(e)))
-            success = False
-        finally:
-            ssh.close()
-            return success
-
 
 # ==================================================================================
 # Updates the autograding_worker.json in a workers autograding_TODO folder (tells it)

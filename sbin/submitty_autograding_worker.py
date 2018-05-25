@@ -123,11 +123,6 @@ def launch_workers(my_name, my_stats, time_last_modified):
                 grade_items_logging.log_message(JOB_ID, message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
-            modified, new_time = check_autograding_worker_json(time_last_modified)
-            if modified:
-                time_last_modified = new_time
-                print("This is where we would kill this program.")
-
 
     except KeyboardInterrupt:
         grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py keyboard interrupt")
@@ -151,15 +146,7 @@ def launch_workers(my_name, my_stats, time_last_modified):
             processes[i].join()
 
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py terminated")
-# ==================================================================================
-# Given the last time the autograding worker json was modified, checks to see if it
-#   been modified since then.
-def check_autograding_worker_json(time_last_modified):
-    curr_time_last_modified = os.stat(ALL_WORKERS_JSON)
-    if curr_time_last_modified != time_last_modified:
-        return (True, curr_time_last_modified)
-    else:
-        return (False, 0) 
+
 # ==================================================================================
 def read_autograding_worker_json():
     try:
@@ -174,5 +161,4 @@ def read_autograding_worker_json():
 # ==================================================================================
 if __name__ == "__main__":
     my_name, my_stats = read_autograding_worker_json()
-    time_last_modified = os.stat(ALL_WORKERS_JSON)
     launch_workers(my_name, my_stats, time_last_modified)
