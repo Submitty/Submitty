@@ -43,9 +43,12 @@ class TestForumMergeThread(BaseTestCase):
         assert 'page=view_thread' in self.driver.current_url
         return len(self.driver.find_elements_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))) > 0
 
-    def view_thread(self, title):
+    def view_thread(self, title, check_announcement = None):
         assert 'page=view_thread' in self.driver.current_url
-        self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)).click()
+        thread_box = self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
+        if check_announcement is not None:
+            assert not check_announcement ^ (len(thread_box.find_elements(By.XPATH, ".//i[contains(@class, 'fa-star')]")) > 0)
+        thread_box.click()
 
     def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
         if move_to_thread is not None:
@@ -98,7 +101,7 @@ class TestForumMergeThread(BaseTestCase):
         urllib.request.urlretrieve(image_url, tf)
         return tf
 
-    def merge_threads(self, child_thread_title, parent_thread_title, press_cancel = False):
+    def merge_threads(self, child_thread_title, parent_thread_title, press_cancel = False, mark_announcement = None):
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element_by_id("merge-threads")
         self.driver.find_element_by_xpath("//a[contains(text(),'Merge Threads')]").click()
@@ -111,6 +114,10 @@ class TestForumMergeThread(BaseTestCase):
             submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Submit']")
             possible_parents = self.driver.find_element_by_name("merge_thread_parent")
             possible_parents.find_element(By.XPATH, ".//option[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
+            if mark_announcement is not None:
+                merge_announcement_checkbox = self.driver.find_element_by_id('merge_announcement')
+                if merge_announcement_checkbox.is_selected() ^ mark_announcement:
+                    merge_announcement_checkbox.click()
             if press_cancel:
                 cancel_button.click()
             else:
@@ -153,6 +160,7 @@ class TestForumMergeThread(BaseTestCase):
         reply2 = "E2E Reply 2"
         reply3 = "E2E Reply 3"
 
+        ## Normal Merging Test with and without attachments
         content1_attachment = self.create_thread(title1, content1, upload_attachment = True)
         self.reply_and_test(content1, reply1, first_post = True)
         self.create_thread(title2, content2)
@@ -182,6 +190,22 @@ class TestForumMergeThread(BaseTestCase):
 
         # Cleanup
         self.delete_thread(title3)
+        self.delete_thread(title1)
+
+        ## Merging with announcement test
+        self.create_thread(title1, content1)
+        self.create_thread(title2, content2)
+        self.create_thread(title3, content3)
+
+        self.merge_threads(title2, title1, mark_announcement = True)
+        self.view_thread(title1, check_announcement = True)
+        self.merge_threads(title3, title1) # Default option should mark announcement as False
+        self.view_thread(title1, check_announcement = True)
+
+        assert not self.thread_exists(title2)
+        assert not self.thread_exists(title3)
+
+        # Cleanup
         self.delete_thread(title1)
 
 if __name__ == "__main__":
