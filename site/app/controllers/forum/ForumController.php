@@ -415,12 +415,11 @@ class ForumController extends AbstractController {
     public function mergeThread(){
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
-        $makeAnnouncement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement") ? "true" : "false";
         $thread_id = $child_thread_id;
         if($this->core->getUser()->getGroup() <= 2){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
-                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $makeAnnouncement, $message)) {
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
                     $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
                     if(is_dir($child_thread_dir)) {
                         $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
