@@ -162,7 +162,7 @@ function get_user_list_from_course_db($semester, $course) {
         log_it("Submitty Auto Account Creation: Cannot read user list for {$course}, skipping...");
 		return array();
 	}
-	$user_list = pg_fetch_all_columns($db_conn, 0);
+	$user_list = pg_fetch_all_columns($db_query, 0);
 	pg_close($db_conn);
 	return $user_list;
 }
@@ -174,11 +174,11 @@ function get_user_list_from_course_db($semester, $course) {
  */
 function log_it($msg) {
     $msg = date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
-    error_log(msg, 1, ERROR_E_MAIL);
-   	error_log(msg, 3, ERROR_LOG_FILE);
+    error_log($msg, 1, ERROR_E_MAIL);
+   	error_log($msg, 3, ERROR_LOG_FILE);
 }
 
-/** @static Class to parse command line arguments */
+/** @static class to parse command line arguments */
 class cli_args {
 
     /** @var array holds all CLI argument flags and their values */
