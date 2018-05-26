@@ -10,6 +10,8 @@ function clean_homework {
     assignment=$3
     course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
 
+    echo "clean old build: $course_dir $3"
+
     # cleanup all files associated with this assignment
     rm -rf $course_dir/test_input/${3}
     rm -rf $course_dir/test_output/${3}
