@@ -149,7 +149,7 @@ HTML;
                         for($q = 0; $q < count($rankWithCourse[$i]); $q++){
                             $display_text = $rankWithCourse[$i][$q]->getSemester() . " " . $rankWithCourse[$i][$q]->getTitle();
                             if($rankWithCourse[$i][$q]->getDisplayName() !== "") {
-                                $display_text .= " " . $rankWithCourse[$i][$q]->getDisplayName();
+                                $display_text .= " " . htmlentities($rankWithCourse[$i][$q]->getDisplayName());
                             }
 
                         $return .= <<<HTML
