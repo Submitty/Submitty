@@ -850,7 +850,9 @@ class Course(object):
                 conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[6])
             counter = 1
             for postData in f_data[0]:
-                if(postData[10] != "f"):
+                if(postData[10] != "f" && postData[10] != ""):
+                    #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in 
+                    #the column, then it will be treated as the file name.
                     attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
                     os.makedirs(attachment_path)
                     os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(course_path, "forum_attachments", str(postData[0]))))
