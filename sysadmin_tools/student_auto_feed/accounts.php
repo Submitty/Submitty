@@ -15,6 +15,14 @@
  *
  * "30 * * * * /var/local/submitty/bin/accounts.php"
  *
+ * You may specify the term on the command line with "-t".
+ * "-g" can be used to guess the term by the server's calendar month and year.
+ * For example:
+ *
+ * ./accounts.php -t s18
+ *
+ * Will create PAM auth accounts for the Spring 2018 semester.
+ *
  * @author Peter Bailie, Systems Programmer (RPI dept of computer science)
  */
 
@@ -22,7 +30,7 @@ error_reporting(0);
 ini_set('display_errors', 0);
 
 //List of courses that also need SVN accounts as serialized array.
-//Serialzing the array allows it to be defined as a constant.
+//Serializing the array allows it to be defined as a constant.
 //NOTE: If there are no courses using SVN, the serialized array must still be
 //      defined, but make it an empty array.
 define('SVN_LIST', serialize( array (
@@ -58,29 +66,27 @@ define('ERROR_E_MAIL', 'sysadmins@lists.myuniversity.edu');
  *
  * -------------------------------------------------------------------------- */
 
-//Univeristy campus's timezone.
+//University campus's timezone.
 date_default_timezone_set('America/New_York');
 
 //Start process
 main();
 exit(0);
 
-/**
- * Main process
- */
+/** Main process */
 function main() {
 	//IMPORTANT: This script needs to be run as root!
 	if (posix_getuid() !== 0) {
 		exit("This script must be run as root." . PHP_EOL);
 	}
 
-	//Determine current semester
-	$month = intval(date("m", time()));
-	$year  = date("y", time());
+	//Check for semester among CLI arguments.
+	$semester = cli_args::parse_args();
+	if ($semester === false) {
+	    exit(1);
+	}
 
-	//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-	$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
-	$courses  = determine_courses($semester);
+	$courses = determine_courses($semester);
 
 	foreach($courses as $course) {
 		if (array_search($course, unserialize(SVN_LIST)) !== false) {
@@ -156,7 +162,7 @@ function get_user_list_from_course_db($semester, $course) {
         log_it("Submitty Auto Account Creation: Cannot read user list for {$course}, skipping...");
 		return array();
 	}
-	$user_list = pg_fetch_all_columns($db_conn, 0);
+	$user_list = pg_fetch_all_columns($db_query, 0);
 	pg_close($db_conn);
 	return $user_list;
 }
@@ -168,8 +174,82 @@ function get_user_list_from_course_db($semester, $course) {
  */
 function log_it($msg) {
     $msg = date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
-    error_log(msg, 1, ERROR_E_MAIL);
-   	error_log(msg, 3, ERROR_LOG_FILE);
+    error_log($msg, 1, ERROR_E_MAIL);
+   	error_log($msg, 3, ERROR_LOG_FILE);
+}
+
+/** @static class to parse command line arguments */
+class cli_args {
+
+    /** @var array holds all CLI argument flags and their values */
+	private static $args;
+    /** @var string usage help message */
+	private static $help_usage      = "Usage: accounts.php [-h | --help] (-t [term code] | -g)" . PHP_EOL;
+    /** @var string short description help message */
+	private static $help_short_desc = "Read student enrollment from Submitty DB and create accounts for PAM auth." . PHP_EOL;
+    /** @var string argument list help message */
+	private static $help_args_list  = <<<HELP
+Arguments
+-h --help       Show this help message.
+-t [term code]  Term code associated with student enrollment.
+-g              Guess the term code based on calendar month and year.
+
+NOTE: -t and -g are mutally exclusive.  One is required.
+
+HELP;
+
+	/**
+	 * Parse command line arguments
+	 *
+	 * Called with 'cli_args::parse_args()'
+	 *
+	 * @access public
+	 * @return mixed term code as string or boolean false when no term code is present.
+	 */
+	public static function parse_args() {
+
+		self::$args = getopt('hgt:', array('help'));
+
+		switch(true) {
+		case array_key_exists('h', self::$args):
+		case array_key_exists('help', self::$args):
+			self::print_help();
+			return false;
+		case array_key_exists('g', self::$args):
+			if (array_key_exists('t', self::$args)) {
+				//-t and -g are mutually exclusive
+				print "-g and -t cannot be used together." . PHP_EOL;
+				return false;
+			} else {
+				//Guess current term
+				//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+				//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+				$month = intval(date("m", time()));
+				$year  = date("y", time());
+				return ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+			}
+		case array_key_exists('t', self::$args):
+			return self::$args['t'];
+		default:
+			print self::$help_usage . PHP_EOL;
+			return false;
+		}
+	}
+
+	/**
+	 * Print extended help to console
+	 *
+	 * @access private
+	 */
+	private static function print_help() {
+
+		//Usage
+		print self::$help_usage . PHP_EOL;
+		//Short description
+		print self::$help_short_desc . PHP_EOL;
+		//Arguments list
+		print self::$help_args_list . PHP_EOL;
+	}
 }
 
 /* EOF ====================================================================== */
