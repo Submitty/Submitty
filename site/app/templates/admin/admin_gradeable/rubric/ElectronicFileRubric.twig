@@ -1,0 +1,63 @@
+<div id="ta_instructions_id">
+    What overall instructions should be provided to the TA?:<br />
+    <!--NOTE: "textarea" contents (space between <textarea> and </textarea>") should not have any extra characters
+                    (that's why the '>' is on the next line)-->
+    <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;"
+    >{{ admin_gradeable.getGOverallTaInstructions() }}</textarea>
+</div>
+<br /><br />
+
+Is this a PDF with a page assigned to each component?
+<fieldset>
+    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+            {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+            {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
+
+    <div id="pdf_page">
+        <br />
+        Who will assign pages to components?
+        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+                {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
+        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+                {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+    </div>
+
+</fieldset>
+
+<script type="text/javascript">
+    function onPdfChange() {
+        if($('#yes_pdf_page').is(':checked')) {
+            $('#pdf_page').show();
+            $('.pdf_page_input').show();
+        }
+        else {
+            $('#pdf_page').hide();
+            $('.pdf_page_input').hide();
+        }
+    }
+
+    function onPdfStudentChange() {
+        if($('#yes_pdf_page_student').is(':checked')) {
+            $('.pdf_page_input').hide();
+        }
+        else {
+            $('.pdf_page_input').show();
+        }
+    }
+
+    $(document).ready(function() {
+
+        // Hide PDF settings if not in use
+        onPdfChange();
+        $('[name="pdf_page"]').change(onPdfChange);
+
+        // Hide PDF pages in Rubric if students assign them
+        onPdfStudentChange();
+        $('[name="pdf_page_student"]').change(onPdfStudentChange);
+    });
+
+    function checkFormRubricElec() {
+        return true;
+    }
+</script>
