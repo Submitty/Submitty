@@ -1,37 +1,33 @@
-What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
 <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
+<em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs)
 
 <br />
 
 
 <div class="electronic_file">
-    How many late days may students use on this assignment?
-    <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text"/>
-
-    <br />
 
     <div class="team_yes">
-        What is the <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams):
         <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
+        <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams)
 
         <br />
     </div>
 
-    What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
     <input id="date_submit" name="date_submit" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
+    <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students)
     <em style='color: orange;'>must be >= TA Beta Testing Date</em>
 
     <br />
 </div>
 
-What is the <em style='color: orange;'><b>Due Date</b></em>?
 <input id="date_due" name="date_due" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
+<em style='color: orange;'><b>Due Date</b></em>?
 <em style='color: orange;'>must be >= Submission Open Date</em>
 
 <br />
 
-What is the <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
 <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
+<em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
 <em style='color: orange;'>must be >=
     <span class="electronic_file">Due Date (+ max allowed late days)</span>
     <span class="checkpoints numeric">Due Date</span>
@@ -39,12 +35,18 @@ What is the <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (gr
 
 <br />
 
-What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
 <input name="date_released" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
-<em style='color: orange;'>must be >=
-    <span class="electronic_file">Due Date (+ max allowed late days) and Manual Grading Open Date</span>
-    <span class="checkpoints numeric">Manual Grading Open Date</span>
-</em>
+<em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
+<em style='color: orange;'>must be >= Manual Grading Open Date</em>
+
+<br />
+
+<div class="electronic_file">
+    How many late days may students use on this assignment?
+    <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text"/>
+
+    <br />
+</div>
 
 <script type="text/javascript">
 
