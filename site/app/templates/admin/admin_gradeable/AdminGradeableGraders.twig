@@ -93,7 +93,7 @@ Form
                                 <tr class="g_history g{{ row.user_group-1 }}">
                                     <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
                             {% endif %}
-                            <td style="padding: 8px; border: 3px solid black; text-align: center;">{{ sections }}</td>
+                            <td style="padding: 8px; border: 3px solid black; text-align: center;">{{ row.sections_rotating_id }}</td>
                             {% set last = row.user_id %}
                         {% endfor %}
                 </table>
