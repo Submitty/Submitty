@@ -752,25 +752,32 @@ class Course(object):
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
+                    versions_to_submit = random.choice(range(0,10))
+                    if(versions_to_submit) < 2:
+                        versions_to_submit = 3
+                    elif versions_to_submit < 5 and versions_to_submit >= 2:
+                        versions_to_submit = 2
+                    else:
+                        versions_to_submit = 1
                     if (gradeable.gradeable_config is not None and \
                             (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
                             (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
-                        versions_to_submit = 2
                         json_history = {"active_version": versions_to_submit, "history": []}
+                        random_days = 1
+                        if random.random() < 0.3:
+                            random_days = random.choice(range(-3,2))
                         for version in range(1, versions_to_submit+1):
                             os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                             submitted = True
                             submission_count += 1
-                            random_days = 1
-                            if random.random() < 0.3:
-                                random_days = random.choice(range(-3,2))
-                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=1))
+                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                             conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                         g_version=version, submission_time=current_time_string)
-                            conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                        active_version=versions_to_submit)
-                            json_history["history"].append({"version": version, "time": current_time_string})
+                            if version == versions_to_submit:
+                                conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                            active_version=versions_to_submit)
+                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
@@ -793,7 +800,7 @@ class Course(object):
                         
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
-                if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, "1")):
+                if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
@@ -812,7 +819,7 @@ class Course(object):
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment="lorem ipsum",
-                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=1)
+                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
                                 first = True
                                 first_set = False
                                 for mark in component.marks:
