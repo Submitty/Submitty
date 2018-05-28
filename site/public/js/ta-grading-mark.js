@@ -54,7 +54,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
 ';
 }
 
-function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback) {
+function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, errorCallback) {
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
@@ -65,16 +65,18 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback) {
                 'gradeable_component_id' : question_id,
             },
             success: function(data) {
-                successCallback(data);
+                if (typeof(successCallback) === "function") {
+                    successCallback(data);
+                }
             },
-            error: function(err) {
+            error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
                 console.error("Something went wront with fetching marks!");
                 alert("There was an error with fetching marks. Please refresh the page and try agian.");
             }
     })
 }
 
-function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback) {
+function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
@@ -83,16 +85,18 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback) {
             'anon_id' : user_id
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("Couldn't get the general gradeable comment");
             alert("Failed to retrieve the general comment");
         }
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, successCallback) {
+function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
@@ -109,17 +113,19 @@ function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, 
                 'note' : note,
                 'points' : points
             },
-            success: function() {
-                successCallback();
+            success: function(data) {
+                if (typeof(successCallback) === "function") {
+                    successCallback(data);
+                }
             },
-            error: function() {
+            error: (typeof(errorCallback) === "function") ? errorCallback : function() {
                 console.error("Something went wrong with adding a mark...");
                 alert("There was an error with adding a mark. Please refresh the page and try agian.");
             }
         })
 }
 
-function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback) {
+function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
@@ -129,9 +135,11 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, suc
             'order_num' : order_num
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("Couldn't get the information on marks");
         }
     })
@@ -149,9 +157,11 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
             'gradeable_comment' : gradeable_comment
         },
         success: function(data) {
-            successCallback();
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: errorCallback ? errorCallback : function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("There was an error with saving the general gradeable comment.");
             alert("There was an error with saving the comment. Please refresh the page and try agian.");
         }
@@ -176,11 +186,11 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
             'num_existing_marks' : num_existing_marks,
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
-            errorCallback();
-        }
+        error: errorCallback
     })
 }
 
@@ -590,14 +600,19 @@ function setGeneralVisible(gshow) {
 
 // Saves the general comment
 function saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback ) {
-    if ($('#extra-general')[0].style.disply === "none")
+    if ($('#extra-general')[0].style.display === "none") {
+        //Nothing to save so we are fine
+        if (typeof(successCallback) === "function") {
+            successCallback();
+        }
         return;
+    }
     
     var comment_row = $('#comment-id-general');
     var gradeable_comment = comment_row.val();
     var current_question_text = $('#rubric-textarea-custom');
     var overwrite = $('#overwrite-id').is(":checked");
-    current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
+    $(current_question_text[0]).text(gradeable_comment);
     
     ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback);
 }
@@ -622,8 +637,13 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id,
 }
 
 function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, question_id, sync, successCallback, errorCallback) {
-    if ($('#marks-parent-' + num)[0].style.display === "none")
+    if ($('#marks-parent-' + num)[0].style.display === "none") {
+        //Nothing to save so we are fine
+        if (typeof(successCallback) === "function") {
+            successCallback();
+        }
         return;
+    }
     
     var arr_length = $('tr[name=mark_'+num+']').length;
     
@@ -733,7 +753,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
                 $('#wrong_version_' + num)[0].innerHTML = "";
         }
         
-        if (successCallback)
+        if (typeof(successCallback) === "function")
             successCallback(data);
             
     }, errorCallback ? errorCallback : function() {

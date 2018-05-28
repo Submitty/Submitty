@@ -158,15 +158,7 @@ class User extends AbstractModel {
      * @return bool
      */
     public function accessAdmin() {
-        return $this->group <= 1;
-    }
-
-    /**
-     * Gets whether the user is considered a developer (and thus should have access to debug information)
-     * @return int
-     */
-    public function isDeveloper() {
-        return $this->group === 0;
+        return $this->group === 1;
     }
 
     public function setPassword($password) {

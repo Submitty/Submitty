@@ -564,6 +564,13 @@ class AdminGradeableController extends AbstractController {
                                    "course" => $course,
                                    "gradeable" =>  $_POST['gradeable_id']);
 
+
+        // FIXME/TODO: How to implement delete gradeable...
+        //$config_build_data = array("semester" => $semester,
+        //                           "course" => $course,
+        //                           "no_build" => true);
+
+
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
           die("Failed to write file {$config_build_file}");
         }
