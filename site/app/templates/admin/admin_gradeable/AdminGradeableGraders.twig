@@ -76,7 +76,9 @@ Form
                                 <tr class="g_history g{{ row.user_group-1 }}">
                                     <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
                             {% endif %}
-                            <td style="padding: 8px; border: 3px solid black; text-align: center;">{{ row.sections_rotating_id }}</td>
+                            <td style="padding: 8px; border: 3px solid black; text-align: center;">
+                                {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
+                            </td>
                             {% set last = row.user_id %}
                         {% endfor %}
                 </table>
@@ -111,7 +113,7 @@ Form
     </div>
 </div>
 <div class="numeric checkpoints">
-    Nothing to do here!
+    TODO: helpful message describing why this page is blank (nothing needs to be configured)
 </div>
 
 <script type="text/javascript">
@@ -209,7 +211,7 @@ Form
         var checkRegister = $('#registration-section').is(':checked');
         var checkRotate = $('#rotating-section').is(':checked');
 
-        // This seems pretty unlikely to happen since the input is a boolean and
+        // This seems pretty unlikely to happen since the input is a boolean
         if($('[name="ta_grading"]').is(':checked') || check2 || check3) {
             if(!checkRegister && !checkRotate) {
                 alert("A type of way for TAs to grade must be selected");
