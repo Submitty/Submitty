@@ -4,5 +4,5 @@ Homework 1 not running         | student    | f      | f       |        -1 | t |
 Course syllabus                | aphacker   | f      | f       |        -1 | t | 1
 Python Tutorials               | kessll     | f      | f       |        -1 | t | 3
 Simple C++ threading example   | bitdiddle  | f      | f       |        -1 | t | 1
-Different Levels               | bitdiddle  | f      | f       |        -1 | t | 1
+Different Levels& display order| bitdiddle  | f      | f       |        -1 | t | 1
 Attachment contains secret     | instructor | f      | f       |        -1 | t | 1
