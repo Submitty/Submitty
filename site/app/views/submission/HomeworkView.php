@@ -1280,6 +1280,18 @@ HTML;
           </div>
         </div>
       </div>
+      <script type = "text/javascript">
+        var regradeBox = document.getElementById("regradeBox");
+        var modal =document.getElementById("modal-container");
+        function showPopUp(){
+            regradeBox.style.display = "block";
+            modal.style.display = "block";
+        }  
+        function hidePopUp(){
+            regradeBox.style.display = "none";
+            modal.style.display = "none";
+        }; 
+      </script>
 HTML;
       return $return;
     }
