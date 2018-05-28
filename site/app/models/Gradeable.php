@@ -310,6 +310,9 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $student_allowed_late_days = 0;
 
+    /** @property @var int The status of the regrade, -1=in process, 0=no regrade, 1=request reviewed*/
+    protected $regrade_status = 0;
+
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -349,6 +352,7 @@ class Gradeable extends AbstractModel {
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
@@ -1137,5 +1141,9 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
+    }
+
+    public function getRegradeStatus(){
+        return $this->regrade_status;
     }
 }

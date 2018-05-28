@@ -395,3 +395,7 @@ tr.is_publish {
     font-size: 17px;
     padding: 16px;
 }
+
+#regrade_request_box.rubric_panel{
+    border:5px solid #f47a42 ;
+}

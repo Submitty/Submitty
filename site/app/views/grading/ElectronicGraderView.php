@@ -734,9 +734,15 @@ HTML;
                 }
                 else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
-                        $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-			            $graded += $row->getGradedTAPoints();
+                        if($row->getRegradeStatus() === 0){
+                          $btn_class = "btn-default";
+                          $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                          $graded += $row->getGradedTAPoints();
+                        }
+                        else if($row->getRegradeStatus() === -1){
+                          $btn_class = "btn-danger";
+                          $contents = "Regrade Requested";
+                        }
                     }
                     else{
                         $btn_class = "btn-primary";
@@ -1037,6 +1043,12 @@ HTML;
             $return .= <<<HTML
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
 HTML;
+            if($gradeable->getRegradeStatus() !== 0){
+                $class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
+                $return .= <<<HTML
+                <input type="button" class ="$class" value="!" onclick="showRequestDiscussion()">
+HTML;
+            }
         }
         $return .= <<<HTML
 </div>
@@ -1701,6 +1713,22 @@ HTML;
         $return .= <<<HTML
 </div>
 
+<div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
+    <div class="draggable_content">
+        <div class = "inner-container">
+        <div class = "content">
+            <div class = "sub">
+                <input type="button" class = "btn btn-default" style="float:right; margin: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
+HTML;
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+                $return .= <<<HTML
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
 //
 // This is needed to resolve conflicts between Chrome and other browsers
@@ -1798,6 +1826,14 @@ window.onunload = unloadSave;
           textarea.style.height = "";
           textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
         };
+        function hideRequestDiscussion(){
+            var displayRequests = document.getElementById("regrade_request_box");
+            displayRequests.style.display = "none";
+        }
+        function showRequestDiscussion(){
+            var displayRequests = document.getElementById("regrade_request_box");
+            displayRequests.style.display = "block";
+        }
 </script>
 HTML;
         return $return;

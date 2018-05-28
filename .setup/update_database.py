@@ -116,5 +116,11 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         # Remove developer group
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users DROP CONSTRAINT users_user_group_check'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ADD CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))'""".format(*variables))
+
+        #Regrade Request system
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_requests" ("id" serial NOT NULL, "gradeable_id" VARCHAR(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL, "student_user_id" VARCHAR(255) NOT NULL, "status" INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_discussion" ("id" serial NOT NULL, "user_id" varchar(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL,"content" TEXT,"regrade_id" VARCHAR(255) NOT NULL,"deleted" BOOLEAN default false NOT NULL,thread_id INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_regrade_requests_id_fk" FOREIGN KEY ("thread_id") REFERENCES "regrade_requests"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         # add user/database
         print("\n")

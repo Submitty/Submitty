@@ -1214,9 +1214,140 @@ HTML;
             }
             $return .= <<<HTML
 </div>
+  <div class="content"> 
+HTML;
+    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+    if($gradeable->getRegradeStatus() !== 0)
+      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    $return .= <<<HTML
+  </div>
 HTML;
         }
 
         return $return;
+    }
+    public function showRequestForm($gradeable){
+      $return = <<<HTML
+      <div class = "sub">
+        <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
+HTML;
+        $is_disabled = "";
+        $action = "";
+        $url = "";
+        $class = "btn-default";
+        if($gradeable->getRegradeStatus() === 0){
+          $message = "Request Regrade";
+          $action = "showPopUp()";
+          $url = $this->core->buildUrl(array('component' => 'student',
+                                             'action' => 'request_regrade',
+                                             'gradeable_id' => $gradeable->getId(),
+                                             'student_id' =>$this->core->getUser()->getId()
+                                        ));
+        }else if($gradeable->getRegradeStatus() === 1){
+          $message = "Delete Request";
+          $class = "btn-danger";
+          $is_disabled = "";
+          $url = "";
+        }else{
+          $is_disabled = "disabled";
+          $message = "Request in Review";
+          $url = "";
+        }
+        //if grader, allow ability to delete request
+        if($this->core->getUser()->accessGrading()){
+          $message = "Delete Request";
+          $class = "btn-danger";
+          $is_disabled = "";
+        }
+        $return .= <<<HTML
+        <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
+
+        <div class="modal" id="modal-container">
+          <div class="modal-content" id="regradeBox">
+            <h3>Request Regrade</h3>
+            <hr>
+            <p class = "red-message">Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p>
+            <br style = "margin-bottom: 10px;">
+            <form id="requestRegradeForm" method="POST" action="{$url}">
+              <div style="text-align: center;">
+                <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
+                placeholder="please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
+                <br style = "margin-bottom: 10px;">
+                <input type="submit" value="submit" class="btn btn-default" style="margin: 15px;">
+                <input type="button" id = "cancelRegrade" value="cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+HTML;
+      return $return;
+    }
+    public function showRegradeDiscussion($gradeable){
+        $return = <<<HTML
+        <div style="margin-top: 20px ">
+HTML;
+          $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+          $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+          $user = $this->core->getUser()->getId();
+          $first = true;
+          if($this->core->getUser()->accessGrading()){
+            $replyMessage = "Reply"; 
+            $replyPlaceHolder = "";
+          }
+          else{
+            $replyMessage = "Request further TA/Instructor action"; 
+            $replyPlaceHolder = "If you believe you require more review, enter a reply here to request a TA/Instructor action...";
+          }
+          foreach ($threads as $thread) {
+            $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
+            $id = $thread['id'];
+            $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
+            $date = date_create($thread['timestamp']);
+            $content = $thread['content'];
+            if($first){
+              $class .= " first_post";
+              $first = false;
+            }
+            $function_date = 'date_format';
+            $return .= <<<HTML
+            <div class = '$class' style="padding:20px;">
+              <p>{$content}</p>
+              <hr>
+              <div style="float:right">
+                <b>{$name}</b> &nbsp
+                {$function_date($date,"m/d/Y g:i A")}
+              </div>
+            </div>
+HTML;
+          }
+        $return .= <<<HTML
+        <div style="padding:20px;">
+        <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
+                                                       'action'=> 'make_request_post',
+                                                       'thread_id'=> $thread_id,
+                                                       'gradeable_id' => $gradeable->getId(),
+                                                       'user_id' =>$this->core->getUser()->getId()
+                                                      ))}">
+            <textarea name = "replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{$replyPlaceHolder}" id="makeRequestPost" required></textarea>
+            <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right;">
+        </form>
+        <script type = "text/javascript">
+          $("#replyTextForm").submit(function(event) {
+            $.ajax({
+              type: "POST",
+              url: $(this).attr("action"),
+              data: $("#replyTextForm").serialize(), 
+              success: function(data){
+                 window.location.reload();
+              }
+            });
+            event.preventDefault();
+          });
+        </script>
+      </div>
+      </div>
+HTML;
+      return $return;
     }
 }
