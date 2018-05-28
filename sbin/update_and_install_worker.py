@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
       local_directory = submitty_repository
       remote_host = '{0}@{1}'.format(user, host)
-      foreign_file = submitty_repository
+      foreign_directory = submitty_repository
 
 
       #rsynch the file

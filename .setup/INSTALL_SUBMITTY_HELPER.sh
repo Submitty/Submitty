@@ -209,7 +209,7 @@ if [ "${WORKER}" == 1 ]; then
     if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to update_and_install_user.py" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/update_and_install_worker.py" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
     fi
 fi
 
@@ -624,6 +624,7 @@ do
     chmod 770 $mydir
 done
 
+#Obtains the current git hash and tag and stores them in the appropriate jsons.
 python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 
 # If the submitty_autograding_shipper.service or submitty_autograding_worker.service
