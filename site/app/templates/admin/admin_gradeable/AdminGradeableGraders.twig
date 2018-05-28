@@ -37,7 +37,26 @@ Form
            {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
             {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
+    <br />
     <div id="manual_grading">
+        <br />
+        Is this a PDF with a page assigned to each component?
+        <fieldset>
+            <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+                    {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
+            <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+                    {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
+
+            <div id="pdf_page">
+                <br />
+                Who will assign pages to components?
+                <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+                        {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
+                <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+                        {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+            </div>
+
+        </fieldset>
         What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
             lowest privileged user group</a> that can grade this?
         <select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
@@ -150,6 +169,26 @@ Form
         }
     }
 
+    function onPdfChange() {
+        if($('#yes_pdf_page').is(':checked')) {
+            $('#pdf_page').show();
+            $('.pdf_page_input').show();
+        }
+        else {
+            $('#pdf_page').hide();
+            $('.pdf_page_input').hide();
+        }
+    }
+
+    function onPdfStudentChange() {
+        if($('#yes_pdf_page_student').is(':checked')) {
+            $('.pdf_page_input').hide();
+        }
+        else {
+            $('.pdf_page_input').show();
+        }
+    }
+
     function onSectionTypeChange() {
         if($('#rotating-section').is(':checked')) {
             $('#rotating_data').show();
@@ -181,6 +220,14 @@ Form
         // Only show most of the form if manual grading is enabled
         onManualGradingChange();
         $('[name="ta_grading"]').change(onManualGradingChange);
+
+        // Hide PDF settings if not in use
+        onPdfChange();
+        $('[name="pdf_page"]').change(onPdfChange);
+
+        // Hide PDF pages in Rubric if students assign them
+        onPdfStudentChange();
+        $('[name="pdf_page_student"]').change(onPdfStudentChange);
 
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
