@@ -1,0 +1,35 @@
+<div class="electronic_file">
+    <b>Full path to the directory containing the autograding config.json file:</b><br>
+    See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
+    <kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
+    <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
+    <kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
+
+    <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
+    <br /> <br />
+</div>
+<div class="checkpoints numeric">
+    TODO: this should not be viewable if not an electronic file
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+    });
+
+
+    function checkFormAuto() {
+        var check1 = $('#radio_electronic_file').is(':checked');
+        var config_path = $('input[name=config_path]').val();
+
+        if(check1) {
+            if(config_path == "" || config_path === null) {
+                alert("The config path should not be empty");
+                return false;
+            }
+        }
+        return true;
+    }
+
+</script>

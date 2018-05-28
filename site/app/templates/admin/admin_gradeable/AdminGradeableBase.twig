@@ -21,6 +21,9 @@
             <text class="nav-bar-item" id="page_2_nav" onClick="onChangeNavTab(2);">Dates</text>
             <text class="nav-bar-item" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
             <text class="nav-bar-item" id="page_4_nav" onClick="onChangeNavTab(4);">Syllabus</text>
+            <!-- TODO: hide this and update navigation if electronic file is not set -->
+            <text class="nav-bar-item" id="page_5_nav" onclick="onChangeNavTab(5);">Student Settings</text>
+            <text class="nav-bar-item" id="page_5_nav" onclick="onChangeNavTab(6);">Auto Grading</text>
         </div>
         <br/>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
@@ -29,6 +32,8 @@
             <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
             <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
             <div id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableSyllabus.twig') }}</div>
+            <div id="page_5_content">{{ include('admin/admin_gradeable/AdminGradeableStudent.twig')  }}</div>
+            <div id="page_6_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
         </div>
         <br/>
         <div id="nav-controls">
@@ -40,9 +45,9 @@
 </div>
 <script type="text/javascript">
 
-    adminGradeableNavTab = 0;
+    var adminGradeableNavTab = 0;
     function onChangeNavTab(tab) {
-        if(tab > 4 || tab < 0) {
+        if(tab > 6 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -54,6 +59,8 @@
         $('#page_2_content').hide();
         $('#page_3_content').hide();
         $('#page_4_content').hide();
+        $('#page_5_content').hide();
+        $('#page_6_content').hide();
 
         $('#page_' + tab + '_content').show();
 
@@ -97,10 +104,12 @@
     // Only succeeds if all child forms succeed
     function checkForm() {
         return checkFormCreate() &&
-               /*checkFormRubric() &&
-               */checkFormDates() &&
-               checkFormGraders()/* &&
-               checkFormSyllabus()*/;
+                /*checkFormRubric() &&*/
+                checkFormDates() &&
+                checkFormGraders() &&
+                /*checkFormSyllabus()&& */
+                checkFormStudent() &&
+                checkFormAuto();
     }
 
 </script>
