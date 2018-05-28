@@ -157,8 +157,6 @@ class ElectronicGraderController extends GradingController {
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
             $num_components = $gradeable->getNumTAComponents();
-        //    echo("IN registration sections is");
-        //    print_r($sections);
         }
         //grading by rotating section
         else {
@@ -268,8 +266,7 @@ class ElectronicGraderController extends GradingController {
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
-        $unsubmitted_students=0;
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students, $registered_but_not_rotating, $rotating_but_not_registered, $section_key, $unsubmitted_students);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_students, $registered_but_not_rotating, $rotating_but_not_registered, $section_key);
     }
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -1206,7 +1203,6 @@ class ElectronicGraderController extends GradingController {
                 );
                 if ($gradeable->isTeamAssignment()) {
                     $sections[$key]['no_team'] = $no_team_users[$key];
-                   // $sections[$key]['team'] = $value-$no_team_users[$key];
                 }
                 if (isset($graded_components[$key])) {
                     $sections[$key]['graded_components'] = intval($graded_components[$key]);

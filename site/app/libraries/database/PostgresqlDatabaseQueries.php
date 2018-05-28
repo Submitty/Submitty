@@ -549,20 +549,20 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
       )AS marks
     ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
     LEFT JOIN(
-      SELECT gd.gd_".$user_or_team_id.", gd.gd_id
+      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
       FROM gradeable_data AS gd
       WHERE gd.g_id=?
     ) AS gd ON gcd.gd_id=gd.gd_id
     INNER JOIN(
-      SELECT ".$u_or_t.".".$user_or_team_id.", ".$u_or_t.".{$section_key}
-      FROM ".$users_or_teams." AS ".$u_or_t."
-      WHERE ".$u_or_t.".".$user_or_team_id." IS NOT NULL
-    ) AS ".$u_or_t." ON gd.gd_".$user_or_team_id."=".$u_or_t.".".$user_or_team_id."
+      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+      FROM {$users_or_teams} AS {$u_or_t}
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     INNER JOIN(
-      SELECT egv.".$user_or_team_id.", egv.active_version
+      SELECT egv.{$user_or_team_id}, egv.active_version
       FROM electronic_gradeable_version AS egv
       WHERE egv.g_id=? AND egv.active_version>0
-    ) AS egv ON egv.".$user_or_team_id."=".$u_or_t.".".$user_or_team_id."
+    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     WHERE g_id=?
   )AS parts_of_comp
 )AS comp
@@ -574,7 +574,7 @@ ORDER BY gc_order
         }
         return $return;
     }
- public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
+    public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
@@ -588,8 +588,8 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
    SELECT * FROM (
       SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
       FROM electronic_gradeable_data AS egv
-      INNER JOIN ".$users_or_teams." AS ".$u_or_t." ON ".$u_or_t.".".$user_or_team_id." = egv.".$user_or_team_id.", electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND ".$u_or_t.".{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.".$user_or_team_id."=egv.".$user_or_team_id."
+      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
+      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
    )g
 ) as individual;
           ", array($g_id));

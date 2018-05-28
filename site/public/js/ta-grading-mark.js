@@ -41,7 +41,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     <td colspan="1" style="'+background+'; text-align: center;"> \
         <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
-            </span> \
+                </span> \
         <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
     </td> \
     <div class="box"> \
@@ -470,7 +470,7 @@ function updateProgressPoints(question_num) {
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
     if(current_points=="None Selected"){
         $('#grade-' + question_num)[0].innerHTML = "";     
-         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
     }
@@ -876,7 +876,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
             var prepend = (!first_text) ? ("\<br>") : ("");
             var points  = (parseFloat(mark_data[i].points) != 0) ? ("(" + mark_data[i].points + ") ") : ("");
             
-            new_text += prepend + "*" + points + mark_data[i].note;
+            new_text += prepend + "* " + points + mark_data[i].note;
             if (first_text) {
                 first_text = false;
             }
@@ -896,7 +896,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         var prepend = (!first_text) ? ("\<br>") : ("");
         var points  = (parseFloat(custom_points) != 0) ? ("(" + custom_points + ") ") : ("");
         
-        new_text += prepend + "*" + points + custom_message;
+        new_text += prepend + "* " + points + custom_message;
         if (first_text) {
             first_text = false;
         }

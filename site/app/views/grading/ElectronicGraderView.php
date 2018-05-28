@@ -21,8 +21,7 @@ class ElectronicGraderView extends AbstractView {
         $total_students,
         $registered_but_not_rotating,
         $rotating_but_not_registered,
-        $section_type,
-        $unsubmitted_students) {
+        $section_type) {
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
