@@ -68,7 +68,6 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
-            async: false,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
@@ -234,19 +233,18 @@ function haveMarksChanged(num, data) {
 
 function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var parent = $('#marks-parent-'+num);
+    parent.children().remove();
+    parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable_id, user_id, question_id, function(data) {
         data = JSON.parse(data);
-        
+
         // If nothing has changed, then don't update
         if (!haveMarksChanged(num, data))
             return;
-        
+
         // Clear away all marks
-        var marks = $('[name=mark_'+num+']');
-        for (var x = 0; x < marks.length; x++) {
-            marks[x].remove();
-        }
-            
+        parent.children().remove();
+
         // Custom mark
         {
             var x = data['data'].length-1;
@@ -548,8 +546,6 @@ function setMarkVisible(x, show) {
     var current_summary = $('#summary-' + x);
 
     if (show) {
-        updateProgressPoints(x);
-
         // if the component has a page saved, open the PDF to that page
         // opening directories/frames based off of code in openDiv and openFrame functions
 
@@ -754,7 +750,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         
         all_false = false;
     }
-    
+
+    if (all_false) {
+        new_text = "Click me to grade!";
+    }
+
     // Clamp points
     current_points = Math.min(Math.max(current_points, lower_clamp), upper_clamp);
     
@@ -764,22 +764,24 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
 
     calculatePercentageTotal();
 
+    var gradedByElement = $('#graded-by-' + num);
+    var ungraded = gradedByElement.text() === "Ungraded!";
+    gradedByElement.text("Saving...");
+
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     
     ajaxSaveMarks(gradeable_id, user_id, gc_id, arr_length, active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
 
-        if (data['modified'] === true) {
-            if (all_false === true) {
-                $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
-            } else {
-                if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
-                    $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
-                    var question_points = parseFloat(current_question_num[0].innerHTML);
-                    var max_points = parseFloat(current_question_num[0].dataset.max_points);
-                    $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
-                    $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
-                }
+        if (all_false === true) {
+            gradedByElement.text("Ungraded!");
+        } else {
+            if(ungraded || (overwrite === "true")) {
+                gradedByElement.text("Graded by " + your_user_id + "!");
+                var question_points = parseFloat(current_question_num[0].innerHTML);
+                var max_points = parseFloat(current_question_num[0].dataset.max_points);
+                $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+                $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
             }
         }
 
