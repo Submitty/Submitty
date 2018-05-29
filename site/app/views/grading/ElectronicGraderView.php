@@ -1415,7 +1415,7 @@ HTML;
         }
 
         $return .= <<<HTML
-    <div style="margin:3px;">
+    <div class="inner-container">
         <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{$gradeable->getId()}" data-user_id="{$user->getAnonId()}" data-active_version="{$gradeable->getActiveVersion()}" data-num_questions="{$num_questions}" data-your_user_id="{$this->core->getUser()->getId()}">
             <tbody>
 HTML;
@@ -1505,7 +1505,7 @@ HTML;
                 }
             }
             $return .= <<<HTML
-                <div id="title-{$c}" class="box" style="cursor: pointer"; onclick="{$break_onclick}; toggleMark({$c}, true);">
+                <div id="title-{$c}" class="box" style="cursor: pointer" onclick="{$break_onclick}; toggleMark({$c}, true);">
                 <div class="box-title">
 <span id="gradebar-{$c}" style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
                         <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
