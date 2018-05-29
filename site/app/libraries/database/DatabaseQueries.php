@@ -746,6 +746,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
+    public function getNumUsersWhoViewedGrade($g_id) {
+        $this->course_db->query("
+SELECT COUNT(*) as cnt FROM gradeable_data
+WHERE g_id = ?
+AND gd_user_viewed_date IS NOT NULL
+        ", array($g_id));
+
+        return intval($this->course_db->row()['cnt']);
+    }
+
     //gets ids of students with non null registration section and null rotating section
     public function getRegisteredUsersWithNoRotatingSection(){
        $this->course_db->query("

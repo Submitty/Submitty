@@ -415,7 +415,8 @@ table tr.table-header {
 }
 
 #page-info {
-    visibility: hidden;
+    visibility: visible;
+    display: none;
     position: absolute;
     top: 40px;
     left: 40px;

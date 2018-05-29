@@ -420,11 +420,19 @@ function importTeamForm() {
  * useful for developers, but shouldn't be shown to normal users
  */
 function togglePageDetails() {
-    if (document.getElementById('page-info').style.visibility == 'visible') {
-        document.getElementById('page-info').style.visibility = 'hidden';
+    var element = document.getElementById('page-info');
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
     }
     else {
-        document.getElementById('page-info').style.visibility = 'visible';
+        element.style.display = 'block';
+        // Hide the box if you click outside of it
+        document.body.addEventListener('mouseup', function pageInfo(event) {
+            if (!element.contains(event.target)) {
+                element.style.display = 'none';
+                document.body.removeEventListener('mouseup', pageInfo, false);
+            }
+        });
     }
 }
 
