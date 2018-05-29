@@ -3,7 +3,6 @@
 namespace tests\app\libraries;
 
 use app\libraries\IniParser;
-use PHPUnit\Runner\Exception;
 
 class IniParserTester extends \PHPUnit\Framework\TestCase {
     /**
@@ -11,7 +10,7 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
      * @param $writeData
      * @param string $message
      */
-    private static function assertReadWriteEquals($writeData, $message = "") {
+    private function assertReadWriteEquals($writeData) {
         $tmpFile = tempnam(sys_get_temp_dir(), "iniparsetest");
         unlink($tmpFile); //Because tempnam creates the file as well
 
@@ -20,11 +19,13 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
             $conts = file_get_contents($tmpFile);
             $readData = IniParser::readFile($tmpFile);
         } finally {
-            unlink($tmpFile); //Clean up
+            //Clean up
+            if (is_file($tmpFile)) {
+                unlink($tmpFile);
+            }
         }
 
-        self::assertNotFalse($readData, "Written contents: " . $conts);
-        self::assertEquals($writeData, $readData, "Written contents: " . $conts);
+        $this->assertEquals($writeData, $readData, "Written contents: " . $conts);
     }
 
     /**
@@ -35,69 +36,91 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
         IniParser::readFile("invalid_file");
     }
 
-    public function testBasicUsage() {
-        self::assertReadWriteEquals([
-            "test" => [
-                "hello" => "world"
-            ]
-        ]);
-        self::assertReadWriteEquals([
-            "test" => [
-                "hello" => "world",
-                "foo" => "bar"
-            ]
-        ]);
-        self::assertReadWriteEquals([
-            "test" => [
-                "hello" => "world"
-            ],
-            "foo" => [
-                "hello" => "world"
-            ]
-        ]);
+    /**
+     * @dataProvider provider
+     */
+    public function testBasicUsage($data) {
+        $this->assertReadWriteEquals($data);
     }
 
-    public function testWeirderStrings()
-    {
-        self::assertReadWriteEquals([
-            "foo" => "bar"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "bar",
-            "foO" => "Bar",
-            "FoO" => "BAr",
-            "fOO" => "BaRr"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "ba\"r"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "ba\'r"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => ""
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "bar\n"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "bar\r"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "bar\t"
-        ]);
-        self::assertReadWriteEquals([
-            "foo" => "bar\\\\\\\\\\\\\\\\\\\\\n"
-        ]);
-    }
-    public function testCRLF() {
-        // Pretty much directly from #2024
-        self::assertReadWriteEquals([
-            "course_details" => [
-                "zero_rubric_grades" => false,
-                "upload_message" => "By clicking \"Submit\" you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.<br />\r\n<br />\r\nwhy",
-                "keep_previous_files" => false
+    public function provider() {
+        return [
+            [
+                [
+                    "test" => [
+                        "hello" => "world",
+                        "foo" => "bar"
+                    ]
+                ]
+            ],
+            [
+                [
+                    "test" => [
+                        "hello" => "world"
+                    ],
+                    "foo" => [
+                        "hello" => "world"
+                    ]
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar"
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar",
+                    "foO" => "Bar",
+                    "FoO" => "BAr",
+                    "fOO" => "BaRr"
+                ]
+            ],
+            [
+                [
+                    "foo" => "ba\"r"
+                ]
+            ],
+            [
+                [
+                    "foo" => "ba\'r"
+                ]
+            ],
+            [
+                [
+                    "foo" => ""
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar\n"
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar\r"
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar\t"
+                ]
+            ],
+            [
+                [
+                    "foo" => "bar\\\\\\\\\\\\\\\\\\\\\n"
+                ]
+            ],
+            [
+                [
+                    // Pretty much directly from #2024
+                    "course_details" => [
+                        "zero_rubric_grades" => false,
+                        "upload_message" => "By clicking \"Submit\" you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.<br />\r\n<br />\r\nwhy",
+                        "keep_previous_files" => false
+                    ]
+                ]
             ]
-        ]);
+        ];
     }
 }
