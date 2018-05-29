@@ -92,6 +92,9 @@ class ForumController extends AbstractController {
 
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
+        if($_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
+            return 0;
+        }
         if(count($_FILES[$file_post]['tmp_name']) > 5) {
             $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
             return -1;
