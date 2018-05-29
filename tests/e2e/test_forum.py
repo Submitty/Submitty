@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from .base_testcase import BaseTestCase
 
-class TestForumMergeThread(BaseTestCase):
+class TestForum(BaseTestCase):
     def __init__(self,testname):
         super().__init__(testname,user_id="instructor", user_password="instructor", user_name="Quinn")
 
