@@ -1572,9 +1572,9 @@ HTML;
             }
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
-                    <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
+           <!--         <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
                             <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                    </span>
+                    </span> -->
 HTML;
 
             //gets the initial point value and text
@@ -1697,12 +1697,12 @@ HTML;
         else {
             $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
         }
-
+        //Must replace the 0 below
         $return .= <<<HTML
                  <div class="box">
                 <div class="box-title">
                     <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
-                    <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total">0 / {$total_points}&emsp;&emsp;&emsp;
+                    <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> 0/ {$total_points}&emsp;&emsp;&emsp;
                         AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong></td>
                     <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></td>
                 </div></div>

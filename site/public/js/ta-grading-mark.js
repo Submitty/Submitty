@@ -538,7 +538,7 @@ function setMarkVisible(x, show) {
     var page = ($('#page-' + x)[0]).innerHTML;
 
     var title           = $('#title-' + x);
-    var cancel_button   = $('#title-cancel-' + x);
+ //   var cancel_button   = $('#title-cancel-' + x);
     var current_summary = $('#summary-' + x);
 
     if (show) {
@@ -604,7 +604,7 @@ function setMarkVisible(x, show) {
     $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
 
     title.attr('colspan', (show ? 3 : 4));
-    cancel_button.attr('colspan', (show ? 1 : 0));
+  //  cancel_button.attr('colspan', (show ? 1 : 0));
 }
 
 //Set if the general comment box should be visible
