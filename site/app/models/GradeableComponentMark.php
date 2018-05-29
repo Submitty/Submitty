@@ -87,16 +87,32 @@ class GradeableComponentMark extends AbstractModel {
 
     /**
      * Get an associative array of all the data needed to render this mark.
-     * Contains no submission-specific data like if the mark is selected.
+     * Does not contain submission-specific data like if the mark is selected.
      * @return array
      */
     public function getStaticData() {
         return [
-            "id" => $this->getId(),
-            "name" => $this->getNote(),
-            "order" => $this->getOrder(),
-            "points" => $this->getPoints(),
-            "publish" => $this->getPublish()
+            "id" => $this->id,
+            "name" => $this->note,
+            "order" => $this->order,
+            "points" => $this->points,
+            "publish" => $this->publish
+        ];
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this mark.
+     * Contains submission-specific data like if the mark is selected.
+     * @return array
+     */
+    public function getGradedData() {
+        return [
+            "id" => $this->id,
+            "name" => $this->note,
+            "order" => $this->order,
+            "points" => $this->points,
+            "publish" => $this->publish,
+            "has" => $this->has_mark
         ];
     }
 }

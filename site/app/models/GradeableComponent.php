@@ -270,32 +270,75 @@ class GradeableComponent extends AbstractModel {
 
     /**
      * Get an associative array of all the data needed to render this component and its marks.
-     * Contains no submission-specific data like comments or which marks are selected.
+     * Does not contain submission-specific data like comments or which marks are selected.
      * @return array
      */
     public function getStaticData() {
         $compData = [
-            "id" => $this->getId(),
-            "name" => $this->getTitle(),
-            "order" => $this->getOrder(),
-            "upper_bound" => $this->getUpperClamp(),
-            "lower_bound" => $this->getLowerClamp(),
-            "max_points" => $this->getMaxValue(),
-            "default" => $this->getDefault(),
-            "page" => $this->getPage(),
+            "id" => $this->id,
+            "title" => $this->title,
+            "order" => $this->order,
+            "upper_clamp" => $this->upper_clamp,
+            "lower_clamp" => $this->lower_clamp,
+            "max_value" => $this->max_value,
+            "default" => $this->default,
+            "ta_comment" => $this->ta_comment,
+            "student_comment" => $this->student_comment,
+            "page" => $this->page,
+            "is_text" => $this->is_text,
+            "is_peer" => $this->is_peer,
             "marks" => []
         ];
 
-        $marks = $this->getMarks();
-        for ($i = 0; $i < count($marks); $i ++) {
-            $mark = $marks[$i];
-
+        foreach ($this->getMarks() as $mark) {
             //Ignore
             if ($mark->getOrder() == -1) {
                 continue;
             }
 
             $compData["marks"][] = $mark->getStaticData();
+        }
+
+        return $compData;
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this component and its marks.
+     * Contains submission-specific data like comments and which marks are selected.
+     * @return array
+     */
+    public function getGradedData() {
+        $compData = [
+            "id" => $this->id,
+            "name" => $this->title,
+            "order" => $this->order,
+            "upper_clamp" => $this->upper_clamp,
+            "lower_clamp" => $this->lower_clamp,
+            "max_value" => $this->max_value,
+            "default" => $this->default,
+            "ta_comment" => $this->ta_comment,
+            "student_comment" => $this->student_comment,
+            "page" => $this->page,
+            "is_text" => $this->is_text,
+            "is_peer" => $this->is_peer,
+            "score" => $this->score,
+            "comment" => $this->comment,
+            "grader" => $this->grader,
+            "graded_version" => $this->graded_version,
+            "grade_time" => $this->grade_time,
+            "has_grade" => $this->has_grade,
+            "has_marks" => $this->has_marks,
+            "grader_modified" => $this->grader_modified,
+            "marks" => []
+        ];
+
+        foreach ($this->getMarks() as $mark) {
+            //Ignore
+            if ($mark->getOrder() == -1) {
+                continue;
+            }
+
+            $compData["marks"][] = $mark->getGradedData();
         }
 
         return $compData;
