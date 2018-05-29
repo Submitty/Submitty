@@ -39,7 +39,7 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider provider
      */
-    public function testBasicUsage($data) {
+    public function testWriteFileReadFile($data) {
         $this->assertReadWriteEquals($data);
     }
 
