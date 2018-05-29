@@ -879,6 +879,14 @@ function closeMark(id, save) {
     setMarkVisible(id, false);
 }
 
+function toggleMark(id, save) {
+    if (findCurrentOpenedMark() === id) {
+        closeMark(id, save);
+    } else {
+        openMark(id);
+    }
+}
+
 //Open the general message input (if it's not open already), saving changes on any previous mark
 function openGeneralMessage() {
     var rubric = $('#rubric-table')[0].dataset;
@@ -908,4 +916,12 @@ function closeGeneralMessage(save) {
         updateGeneralComment(rubric.gradeable_id, rubric.user_id);
     }
     setGeneralVisible(false);
+}
+
+function toggleGeneralMessage(save) {
+    if (findCurrentOpenedMark() === -2) {
+        closeGeneralMessage(save);
+    } else {
+        openGeneralMessage();
+    }
 }
