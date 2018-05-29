@@ -1103,6 +1103,7 @@ HTML;
 
 $return .= <<<HTML
     <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+
     <script type="text/javascript">
         $(document).ready(function(){
             //note the commented out code here along with the code where files are displayed that is commented out
@@ -1116,6 +1117,11 @@ $return .= <<<HTML
                 //     console.log('HELLLO');
                 // });
             })
+
+            var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+            var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+            $('#' + currentCodeStyleRadio).parent().addClass('active');
+            $('#' + currentCodeStyleRadio).prop('checked', true);
         });
     </script>
 HTML;
@@ -1125,6 +1131,15 @@ HTML;
 HTML;
         }
         $return .= <<<HTML
+        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
+            </label>
+        </div>
+
     <br />
     <div class="inner-container" id="file-container">
 HTML;
