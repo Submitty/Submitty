@@ -1305,7 +1305,7 @@ HTML;
                 
             } else {
                 $return .= $this->makeTable($user->getId(), $gradeable, $status);
-                if($status != "Good" && $status != "Late") {
+                if($status != "Good" && $status != "Late" && $status != "No submission") {
                     $color = "red";
                     $my_color="'#F62817'"; // fire engine red
                     $my_message="Late Submission";
@@ -1898,6 +1898,9 @@ HTML;
                 $class = "class='yellow-background'";
                 $status = $g->getLateStatus();
             }
+            if(!$g->hasSubmitted()){
+                $status = "No submission";
+            }
             $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
             $return .= <<<HTML
                 <tr>
@@ -1906,7 +1909,7 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
