@@ -21,9 +21,10 @@ class ElectronicGraderView extends AbstractView {
         $component_averages,
         $autograded_average,
         $overall_average,
-        $total_students,
+        $total_submissions,
         $registered_but_not_rotating,
         $rotating_but_not_registered,
+        $viewed_grade,
         $section_type) {
 
         $peer = false;
@@ -70,7 +71,11 @@ HTML;
         }
         else{
             $view = null;
-            $total_students_final = $team_total+$no_team_total;
+            if ($gradeable->isTeamAssignment()) {
+                $total_students = $team_total + $no_team_total;
+            } else {
+                $total_students = $total_submissions;
+            }
             $change_value = $gradeable->getNumTAComponents();
             $show_total = $total/$change_value;
             $show_graded = round($graded/$change_value, 2);
@@ -80,8 +85,8 @@ HTML;
                 $show_total = $total/$change_value;
             }
             $submitted_percentage = 0;
-            if($total_students!=0){
-                $submitted_percentage = round(($show_total / $total_students) * 100, 1);
+            if($total_submissions!=0){
+                $submitted_percentage = round(($show_total / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
@@ -113,20 +118,20 @@ HTML;
 HTML;
             }
             if($gradeable->isTeamAssignment()){
-            $team_percentage = round(($team_total/$total_students_final) * 100, 1);
+            $team_percentage = round(($team_total/$total_students) * 100, 1);
             $return .= <<<HTML
-            Students on a team: {$team_total}/{$total_students_final} ({$team_percentage}%)
+            Students on a team: {$team_total}/{$total_students} ({$team_percentage}%)
             <br />
             <br />
-            Number of teams: {$total_students}
+            Number of teams: {$total_submissions}
             <br />
             <br />
-            Teams who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
+            Teams who have submitted: {$show_total} / {$total_submissions} ({$submitted_percentage}%)
 HTML;
             }
             else{
             $return .= <<<HTML
-            Students who have submitted: {$show_total} / {$total_students} ({$submitted_percentage}%)
+            Students who have submitted: {$show_total} / {$total_submissions} ({$submitted_percentage}%)
             <br />
             <br />
             Current percentage of grading done: {$show_graded}/{$show_total} ({$percentage}%)
@@ -192,6 +197,23 @@ HTML;
                 }
                 $return .= <<<HTML
             </div>
+HTML;
+                if ($gradeable->taGradesReleased()) {
+                    $show_total = $total/$change_value;
+                    $viewed_percent = number_format(($viewed_grade / max($show_total, 1)) * 100, 1);
+                    if ($gradeable->isTeamAssignment()) {
+                        $return .= <<<HTML
+            <br />
+            Number of teams who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
+HTML;
+                    } else {
+                        $return .= <<<HTML
+            <br />
+            Number of students who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
+HTML;
+                    }
+                }
+                $return .= <<<HTML
         </div>
 HTML;
             }
@@ -600,8 +622,10 @@ HTML;
 
 HTML;
                         if($row->getTeam()=== null) {
+                            $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
+                            $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$reg_section}", "{$rot_section}", [], [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
@@ -611,8 +635,10 @@ HTML;
                             $user_assignment_setting = FileUtils::readJsonFile($settings_file);
                             $user_assignment_setting_json = json_encode($user_assignment_setting);
                             $members = json_encode($row->getTeam()->getMembers());
+                            $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL": $row->getTeam()->getRegistrationSection();
+                            $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL": $row->getTeam()->getRotatingSection();
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
@@ -847,11 +873,13 @@ HTML;
                 $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
                 $user_assignment_setting = FileUtils::readJsonFile($settings_file);
                 $user_assignment_setting_json=json_encode($user_assignment_setting);
+                $reg_section = ($team->getRegistrationSection() === null) ? "NULL": $team->getRegistrationSection();
+                $rot_section = ($team->getRotatingSection() === null) ? "NULL": $team->getRotatingSection();
                 $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
-                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
@@ -876,8 +904,7 @@ HTML;
         return $return;
     }
 
-    public function adminTeamForm($gradeable, $sections) {
-        $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
+    public function adminTeamForm($gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = array();
         foreach ($students as $student) {
@@ -905,10 +932,21 @@ HTML;
     <br />
     <div id="admin-team-members" style="width:50%;"></div>
     <div>
-        {$reg_or_rot} Section:<br />
-        <select name="section">
+        Registration Section:<br />
+        <select name="reg_section">
 HTML;
-        foreach ($sections as $section) {
+        foreach ($all_reg_sections as $section) {
+            $return .= <<<HTML
+            <option value="{$section}">Section {$section}</option>
+HTML;
+        }
+        $return .= <<<HTML
+            <option value="NULL">Section NULL</option>
+        </select><br /><br />
+        Rotating Section:<br />
+        <select name="rot_section">
+HTML;
+        foreach ($all_rot_sections as $section) {
             $return .= <<<HTML
             <option value="{$section}">Section {$section}</option>
 HTML;
