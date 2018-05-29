@@ -37,30 +37,12 @@ function checkIfSelected(me) {
 
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
     editable="";
+    editableAppearanceChanges="";
     bgColor="#F9F9F9";
-    if(note=="Full Credit" || note=="No Credit"){
+    if(x==0){
         editable="readonly";
+        editableAppearanceChanges="cursor: all-scroll; outline: none; border:none;";
         bgColor="#e6e6e6";
-    return ' \
-<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
-    <td colspan="1" style="'+background+'; text-align: center;"> \
-        <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
-            <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
-            </span> \
-        <input name="mark_points_'+num+'_'+x+'" type="number" '+editable+' onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; cursor: all-scroll; outline: none; border:none; resize:none; min-width: 50px; background-color: '+bgColor+'"> \
-    </td> \
-    <div class="box"> \
-        <div class="box-title"> \
-            <td colspan="4" style="'+background+'"> \
-                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none; cursor: all-scroll; outline: none; border:none; background-color: '+bgColor+'">'+note+'</textarea> \
-                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-                    <i class="fa fa-users icon-got-this-mark"></i> \
-                </span> \
-            </td> \
-        </div> \
-    </div> \
-</tr> \
-';
     }
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
@@ -68,12 +50,12 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
         <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
             </span> \
-        <input name="mark_points_'+num+'_'+x+'" type="number" '+editable+' onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px; background-color: '+bgColor+'"> \
+        <input name="mark_points_'+num+'_'+x+'" type="number" '+editable+' onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; none;'+editableAppearanceChanges+' resize:none; min-width: 50px; background-color: '+bgColor+'"> \
     </td> \
     <div class="box"> \
         <div class="box-title"> \
             <td colspan="4" style="'+background+'"> \
-                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none; background-color: '+bgColor+'">'+note+'</textarea> \
+                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none; '+editableAppearanceChanges+' background-color: '+bgColor+'">'+note+'</textarea> \
                 <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
                     <i class="fa fa-users icon-got-this-mark"></i> \
                 </span> \
