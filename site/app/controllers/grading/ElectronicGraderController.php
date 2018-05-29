@@ -413,18 +413,19 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $all_teams, $empty_teams);
 
         if ($gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin()) {
-            if ($gradeable->isGradeByRegistration()) {
-                $all_sections = $this->core->getQueries()->getRegistrationSections();
-                $key = 'sections_registration_id';
+            $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
+            $key = 'sections_registration_id';
+            foreach ($all_reg_sections as $i => $section) {
+                $all_reg_sections[$i] = $section[$key];
             }
-            else {
-                $all_sections = $this->core->getQueries()->getRotatingSections();
-                $key = 'sections_rotating_id';
+
+            $all_rot_sections = $this->core->getQueries()->getRotatingSections();
+            $key = 'sections_rotating_id';
+            
+            foreach ($all_rot_sections as $i => $section) {
+                $all_rot_sections[$i] = $section[$key];
             }
-            foreach ($all_sections as $i => $section) {
-                $all_sections[$i] = $section[$key];
-            }
-            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_sections);
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections);
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'importTeamForm', $gradeable);
         }
     }
@@ -605,13 +606,10 @@ class ElectronicGraderController extends GradingController {
                 }
             }
 
-            $section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-            if ($gradeable->isGradeByRegistration()) {
-                $this->core->getQueries()->updateTeamRegistrationSection($team_id, $section);
-            }
-            else {
-                $this->core->getQueries()->updateTeamRotatingSection($team_id, $section);
-            }
+            $reg_section = $_POST['reg_section'] === "NULL" ? null : intval($_POST['reg_section']);
+            $rot_section = $_POST['rot_section'] === "NULL" ? null : intval($_POST['rot_section']);
+            $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section);
+            $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section);
             foreach($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
