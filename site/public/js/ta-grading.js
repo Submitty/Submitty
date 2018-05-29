@@ -345,6 +345,15 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
+function changeEditorStyle(newStyle){
+    if(newStyle === 'style_light'){
+        localStorage.setItem("codeDisplayStyle", "light");
+    } else {
+        localStorage.setItem("codeDisplayStyle", "dark");
+    }
+    window.location.reload();
+}
+
 //-----------------------------------------------------------------------------
 // Student navigation
 
