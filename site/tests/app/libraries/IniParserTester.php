@@ -6,11 +6,19 @@ use app\libraries\IniParser;
 
 class IniParserTester extends \PHPUnit\Framework\TestCase {
     /**
-     * Test that an array writes correctly and is then read back exactly the same
-     * @param $writeData
-     * @param string $message
+     * @expectedException \app\exceptions\FileNotFoundException
+     * @expectedExceptionMessage Could not find ini file to parse: invalid_file
      */
-    private function assertReadWriteEquals($writeData) {
+    public function testNonExistFile() {
+        IniParser::readFile("invalid_file");
+    }
+
+    /**
+     * Test that an array writes correctly and is then read back exactly the same
+     * @dataProvider provider
+     * @param $writeData
+     */
+    public function testWriteFileReadFile($writeData) {
         $tmpFile = tempnam(sys_get_temp_dir(), "iniparsetest");
         unlink($tmpFile); //Because tempnam creates the file as well
 
@@ -26,21 +34,6 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
         }
 
         $this->assertEquals($writeData, $readData, "Written contents: " . $conts);
-    }
-
-    /**
-     * @expectedException \app\exceptions\FileNotFoundException
-     * @expectedExceptionMessage Could not find ini file to parse: invalid_file
-     */
-    public function testNonExistFile() {
-        IniParser::readFile("invalid_file");
-    }
-
-    /**
-     * @dataProvider provider
-     */
-    public function testWriteFileReadFile($data) {
-        $this->assertReadWriteEquals($data);
     }
 
     public function provider() {
