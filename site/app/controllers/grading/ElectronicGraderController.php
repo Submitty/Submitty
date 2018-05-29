@@ -140,6 +140,7 @@ class ElectronicGraderController extends GradingController {
         $num_submitted = array();
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
+        $viewed_grade = 0;
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
