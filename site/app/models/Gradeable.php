@@ -1138,4 +1138,34 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components
+     * and their marks. Contains no submission-specific data like comments or which marks are selected.
+     * @return array
+     */
+    public function getStaticData() {
+        $data = [
+            "id" => $this->getId(),
+            "name" => $this->getName(),
+            "precision" => $this->getPointPrecision(),
+            "active_version" => $this->getActiveVersion(),
+            "user_id" => $this->getUser()->getAnonId(),
+            "components" => []
+        ];
+
+        $comps = $this->getComponents();
+        for ($i = 0; $i < count($comps); $i ++) {
+            $comp = $comps[$i];
+
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getStaticData();
+        }
+
+        return $data;
+    }
 }

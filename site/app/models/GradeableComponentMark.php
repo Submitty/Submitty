@@ -84,4 +84,19 @@ class GradeableComponentMark extends AbstractModel {
     public function getNote() {
         return(urldecode($this->note));
     }
+
+    /**
+     * Get an associative array of all the data needed to render this mark.
+     * Contains no submission-specific data like if the mark is selected.
+     * @return array
+     */
+    public function getStaticData() {
+        return [
+            "id" => $this->getId(),
+            "name" => $this->getNote(),
+            "order" => $this->getOrder(),
+            "points" => $this->getPoints(),
+            "publish" => $this->getPublish()
+        ];
+    }
 }

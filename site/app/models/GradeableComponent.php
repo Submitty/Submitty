@@ -268,4 +268,37 @@ class GradeableComponent extends AbstractModel {
         }
     }
 
+    /**
+     * Get an associative array of all the data needed to render this component and its marks.
+     * Contains no submission-specific data like comments or which marks are selected.
+     * @return array
+     */
+    public function getStaticData() {
+        $compData = [
+            "id" => $this->getId(),
+            "name" => $this->getTitle(),
+            "order" => $this->getOrder(),
+            "upper_bound" => $this->getUpperClamp(),
+            "lower_bound" => $this->getLowerClamp(),
+            "max_points" => $this->getMaxValue(),
+            "default" => $this->getDefault(),
+            "page" => $this->getPage(),
+            "marks" => []
+        ];
+
+        $marks = $this->getMarks();
+        for ($i = 0; $i < count($marks); $i ++) {
+            $mark = $marks[$i];
+
+            //Ignore
+            if ($mark->getOrder() == -1) {
+                continue;
+            }
+
+            $compData["marks"][] = $mark->getStaticData();
+        }
+
+        return $compData;
+    }
+
 }
