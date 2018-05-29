@@ -663,7 +663,7 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id,
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
             var gradeable_component_id = parseInt(mark[0].dataset.question_id);
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, -1, sync, successCallback, errorCallback);
+            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync, successCallback, errorCallback);
             return;
         }
         mark = $('#marks-parent-' + (++index));
@@ -672,7 +672,7 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id,
     saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback);
 }
 
-function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, question_id, sync, successCallback, errorCallback) {
+function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, sync, successCallback, errorCallback) {
     if ($('#marks-parent-' + num)[0].style.display === "none") {
         //Nothing to save so we are fine
         if (typeof(successCallback) === "function") {
@@ -866,8 +866,8 @@ function openMark(id) {
     var rubric = $('#rubric-table')[0].dataset;
     var question = $('#summary-' + id)[0].dataset;
 
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
-    saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+    saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
 
     //If it's already open, then openClose() will close it
@@ -887,8 +887,8 @@ function closeMark(id, save) {
     var question = $('#summary-' + id)[0].dataset;
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
-        saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, -1);
+        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+        saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
     }
     updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
     setMarkVisible(id, false);
@@ -906,8 +906,8 @@ function toggleMark(id, save) {
 function openGeneralMessage() {
     var rubric = $('#rubric-table')[0].dataset;
 
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id);
-    saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version);
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+    saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version, true);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
@@ -925,8 +925,8 @@ function closeGeneralMessage(save) {
     var rubric = $('#rubric-table')[0].dataset;
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, rubric.your_user_id);
-        saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version);
+        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+        saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version, true);
     } else {
         updateGeneralComment(rubric.gradeable_id, rubric.user_id);
     }
