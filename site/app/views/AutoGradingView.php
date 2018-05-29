@@ -618,7 +618,12 @@ HTML;
         //add total points if both autograding and instructor grading exist
         $display = "none";
         $current = $gradeable->getCurrentVersion();
-        $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
+        if ($current !== null) {
+            $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
+        } else {
+            //No submission, use the # of points from the TA grading
+            $totalPointsEarned = $gradeable->getGradedTAPoints();
+        }
         $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
         $background = "";
         if($totalPointsEarned >= $maxPossiblePoints){
