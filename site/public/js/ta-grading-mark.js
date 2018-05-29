@@ -38,18 +38,22 @@ function checkIfSelected(me) {
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
-    <td colspan="1" style="'+background+'; text-align: center;"> \
+    <td colspan="1" style="'+background+'; width: 90px; text-align: center;"> \
         <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
         </span> \
         <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
     </td> \
-    <td colspan="3" style="'+background+'"> \
-        <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
-        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-            <i class="fa fa-users icon-got-this-mark"></i> \
-        </span> \
-    </td> \
+    <div class="box"> \
+        <div class="box-title"> \
+            <td colspan="4" style="'+background+'"> \
+                <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">'+note+'</textarea> \
+                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
+                    <i class="fa fa-users icon-got-this-mark"></i> \
+                </span> \
+            </td> \
+        </div> \
+    </div> \
 </tr> \
 ';
 }
@@ -416,7 +420,7 @@ function calculateMarksPoints(question_num) {
     var current_points = parseFloat(current_question_num[0].dataset.default);
     var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
     var arr_length = $('tr[name=mark_'+question_num+']').length;
-
+    var any_selected=false;
 
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'+question_num+'-'+i);
@@ -425,6 +429,7 @@ function calculateMarksPoints(question_num) {
             is_selected = true;
         }
         if (is_selected === true) {
+            any_selected = true;
             current_points += parseFloat(current_row.find('input[name=mark_points_'+question_num+'_'+i+']').val());
         }
     }
@@ -434,9 +439,20 @@ function calculateMarksPoints(question_num) {
     if (isNaN(custom_points)) {
         current_points += 0;
     } else {
-        current_points += custom_points;
+        if(custom_points!=0){
+            current_points += custom_points;
+            any_selected = true;
+        }
     }
 
+    if(any_selected == false){
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        return "None Selected";
+    }
+    $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
+    $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -453,7 +469,28 @@ function updateProgressPoints(question_num) {
     var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-    current_progress[0].innerHTML = current_points + " / " + max_points; 
+    if(current_points=="None Selected"){
+        $('#grade-' + question_num)[0].innerHTML = "";     
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+    }
+    else{
+        $('#grade-' + question_num)[0].innerHTML = current_points;
+        //extra credit
+        if(current_points > max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points == max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points > 0){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#eac73d";
+        }
+        else{
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
+        }
+    }
 }
 
 function selectMark(me, first_override) {
@@ -501,19 +538,8 @@ function setMarkVisible(x, show) {
     var page = ($('#page-' + x)[0]).innerHTML;
 
     var title           = $('#title-' + x);
-    var cancel_button   = $('#title-cancel-' + x);
+ //   var cancel_button   = $('#title-cancel-' + x);
     var current_summary = $('#summary-' + x);
-
-    // Update the color if it is penalty or extra credit
-    var current_question_num = $('#grade-' + x);
-    var question_points = parseFloat(current_question_num[0].innerHTML);
-    if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
-    } else if (question_points < 0) {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-    } else {
-        current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
-    }
 
     if (show) {
         updateProgressPoints(x);
@@ -573,12 +599,12 @@ function setMarkVisible(x, show) {
 
     // Updated all the background colors and displays of each element that has
     //  the corresponding data tag
-    $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+    // $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
     $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
     $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
 
     title.attr('colspan', (show ? 3 : 4));
-    cancel_button.attr('colspan', (show ? 1 : 0));
+  //  cancel_button.attr('colspan', (show ? 1 : 0));
 }
 
 //Set if the general comment box should be visible
@@ -589,13 +615,14 @@ function setGeneralVisible(gshow) {
 
     // Updated all the background colors and displays of each element that has
     //  the corresponding data tag for the general component
-    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+    // $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
     $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
     $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
 
     general_comment_title.attr('colspan', (gshow ? 3 : 4));
     general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
 
+    updateCookies();
 }
 
 // Saves the general comment
@@ -739,11 +766,13 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         if (data['modified'] === true) {
             if (all_false === true) {
                 $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
-                $('#summary-' + num)[0].style.backgroundColor = "initial";
             } else {
                 if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
                     $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
-                    $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
+                    var question_points = parseFloat(current_question_num[0].innerHTML);
+                    var max_points = parseFloat(current_question_num[0].dataset.max_points);
+                    $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+                    $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
                 }
             }
         }
@@ -850,6 +879,14 @@ function closeMark(id, save) {
     setMarkVisible(id, false);
 }
 
+function toggleMark(id, save) {
+    if (findCurrentOpenedMark() === id) {
+        closeMark(id, save);
+    } else {
+        openMark(id);
+    }
+}
+
 //Open the general message input (if it's not open already), saving changes on any previous mark
 function openGeneralMessage() {
     var rubric = $('#rubric-table')[0].dataset;
@@ -879,4 +916,12 @@ function closeGeneralMessage(save) {
         updateGeneralComment(rubric.gradeable_id, rubric.user_id);
     }
     setGeneralVisible(false);
+}
+
+function toggleGeneralMessage(save) {
+    if (findCurrentOpenedMark() === -2) {
+        closeGeneralMessage(save);
+    } else {
+        openGeneralMessage();
+    }
 }
