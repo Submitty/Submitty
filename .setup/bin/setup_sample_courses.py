@@ -32,6 +32,7 @@ import os.path
 import string
 import sys
 import configparser
+import csv
 
 from submitty_utils import dateutils
 
@@ -702,7 +703,6 @@ class Course(object):
                     add_to_group(self.code + "_archive", user.id)
                 if user.get_detail(self.code, "group") <= 2:
                     add_to_group(self.code + "_tas_www", user.id)
-
         gradeable_table = Table("gradeable", metadata, autoload=True)
         electronic_table = Table("electronic_gradeable", metadata, autoload=True)
         reg_table = Table("grading_rotating", metadata, autoload=True)
@@ -713,6 +713,8 @@ class Course(object):
         gradeable_component_mark_data = Table('gradeable_component_mark_data', metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
+        gradeable_teams_table = Table("gradeable_teams", metadata, autoload=True)
+        teams_table = Table("teams", metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
@@ -734,12 +736,27 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
+            #create_teams
+            if gradeable.team_assignment is True:
+                ucounter = 0
+                for user in self.users:
+                    unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+                    print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
+                    conn.execute(gradeable_teams_table.insert(),
+                                team_id=unique_team_id,
+                                g_id=gradeable.id,
+                                registration_section=user.get_detail(self.code, "registration_section"),
+                                rotation_section=None)
+                    conn.execute(teams_table.insert(),
+                                team_id=unique_team_id, 
+                                user_id=user.get_detail(self.code, "id"),
+                                state=1)
+                    ucounter+=1
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
                  gradeable.config_path is None):
                     continue
-
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
 
             if gradeable.type == 0:
@@ -1240,6 +1257,8 @@ class Gradeable(object):
         for rotate in self.grading_rotating:
             conn.execute(reg_table.insert(), g_id=self.id, user_id=rotate['user_id'],
                          sections_rotating=rotate['section_rotating_id'])
+
+        
 
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
