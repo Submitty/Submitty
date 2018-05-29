@@ -48,7 +48,6 @@ class ElectronicGraderView extends AbstractView {
                $team_total += $section['team'];
             }
         }
-        //Fixing total_students bug
         if ($total === 0 && $no_team_total === 0){
             $percentage = -1;
         }
@@ -164,16 +163,13 @@ HTML;
                     else {
                         $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
-                  //  echo("change_value is:");
-                   // echo($change_value);
                     $show_graded = round($section['graded_components']/$change_value, 1);
                     $show_total = $section['total_components']/$change_value;
                     $return .= <<<HTML
-                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%) <br />
+                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%)<br />
 HTML;
                     if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
                         $return .= <<<HTML
-                - {$section['no_team']} students with no team<br />
 HTML;
                     }
                 }
@@ -1625,6 +1621,7 @@ HTML;
                 <div class="box" id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
                 <div class="box-title">
 HTML;
+
             $d = 0;
             $first = true;
             $noChange = "";
