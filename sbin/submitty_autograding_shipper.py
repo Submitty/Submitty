@@ -78,14 +78,9 @@ def update_all_foreign_autograding_workers():
     for key, value in autograding_workers.items():
         formatted_entry = {key: value}
         formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, key)
-        success = update_and_install_autograding_worker(key, formatted_entry)
+        success = update_worker_json(key, formatted_entry)
         success_map[key] = success
     return success_map
-# ==================================================================================
-# A small helper function which calls update_worker_code and update_worker_json
-def update_and_install_autograding_worker(name, formatted_entry):
-    success = update_worker_json(name, formatted_entry)
-    return success
 
 # ==================================================================================
 # Updates the autograding_worker.json in a workers autograding_TODO folder (tells it)
@@ -450,7 +445,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock, i_am_alive):
+def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -466,33 +461,25 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock, i
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     counter=0
-    #TODO start from here.
     while True:
-        #If this machine started out down, try to find it every 30 seconds.
-        if i_am_alive == False:
-            time.sleep(30)
-            print("trying again...")
-            i_am_alive = update_and_install_autograding_worker(my_name, my_data)
-            continue
-        else:
-            try:
-                my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
-                if not my_job == "":
+        try:
+            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            if not my_job == "":
+                counter=0
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
+                continue
+            else:
+                if counter == 0 or counter >= 10:
+                    print ("{0} {1}: no available job".format(my_name, which_untrusted))
                     counter=0
-                    grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
-                    continue
-                else:
-                    if counter == 0 or counter >= 10:
-                        print ("{0} {1}: no available job".format(my_name, which_untrusted))
-                        counter=0
-                    counter+=1
-                    time.sleep(1)
-
-            except Exception as e:
-                my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " + str(e)
-                print (my_message)
-                grade_items_logging.log_message(JOB_ID, message=my_message)
+                counter+=1
                 time.sleep(1)
+
+        except Exception as e:
+            my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " + str(e)
+            print (my_message)
+            grade_items_logging.log_message(JOB_ID, message=my_message)
+            time.sleep(1)
 
 
 
@@ -548,6 +535,10 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        if worker_status_map[name] == False:
+            print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
+            grade_items_logging.log_message(JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
+            continue
         if machine['enabled'] == False:
             print("{0} is disabled, so we are not spinning up shipper threads.".format(name))
             grade_items_logging.log_message(JOB_ID, message="{0} is disabled, so we are not spinning up shipper threads.")
@@ -576,7 +567,7 @@ def launch_shippers(worker_status_map):
         # launch the shipper threads
         for i in range(0,num_workers_on_machine):
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock, worker_status_map[name]))
+            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock))
             p.start()
             processes.append(p)
         total_num_workers += num_workers_on_machine

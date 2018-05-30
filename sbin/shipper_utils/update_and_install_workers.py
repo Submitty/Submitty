@@ -104,8 +104,6 @@ if __name__ == "__main__":
         print("Rebooting {0}...".format(worker))
         exit_code = run_systemctl_command(worker, 'start')
       else:
-        print("Failed to update {0}. This likely indicates an error when installing submitty on the worker. Please attempt an\
-          install locally on the worker and inspect for errors.".format(worker))
-        print('Making sure {0} is turned off.')
+        print("Failed to update {0}. This likely indicates an error when installing submitty on the worker. Please attempt an install locally on the worker and inspect for errors.".format(worker))
         exit_code = run_systemctl_command(worker, 'stop')
       print()
