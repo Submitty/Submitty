@@ -2,7 +2,7 @@
     Combo box for choosing an existing gradeable as a template for the new one
         (Only show this option if we aren't in edit mode).
 #}
-{% if action == 'add' %}
+{% if action == 'new' %}
     <div>
         From Template: 
         <select name="gradeable_template" style='width: 170px;' value=''>
@@ -38,7 +38,27 @@ What is the URL to the assignment instructions? (shown to student)
     <input style='width: 227px' type='text' name='instructions_url' 
         value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
 
-<br /> 
+<br />
+
+<!-- Gradeable bucket (read/write in all modes) -->
+What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
+
+{% set valid_assignment_type = ['homework','assignment','problem-set',
+    'quiz','test','exam',
+    'exercise','lecture-exercise','reading','lab','recitation',
+    'project',
+    'participation','note',
+    'none (for practice only)'] %}
+
+<select name="gradeable_buckets" style="width: 170px;">
+    {% for type in valid_assignment_type %}
+        <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
+            {{ type | title }}
+        </option>
+    {% endfor %}
+</select>
+
+<br />
 
 <!-- Gradeable Type radio buttons (readonly in edit mode) -->
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
@@ -100,6 +120,9 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         </div>
     </div>
 </fieldset>
+<div id="alert-message" title="WARNING">
+    <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
+</div>
 
 <script type="text/javascript">
     //
@@ -138,6 +161,18 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             $('.team_yes').hide();
         }
     }
+
+    $(function () {
+        $("#alert-message").dialog({
+            modal: true,
+            autoOpen: false,
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
 
     $(document).ready(function() {
 

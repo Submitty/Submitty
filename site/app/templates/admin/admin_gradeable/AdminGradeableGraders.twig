@@ -38,7 +38,7 @@ Form
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
             {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
     <br />
-    <div id="manual_grading">
+    <div id="manual_grading" class="manual_grading">
         <br />
         What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
             lowest privileged user group</a> that can grade this?
@@ -147,10 +147,10 @@ Form
 
     function onManualGradingChange() {
         if($('#yes_ta_grade').is(':checked')) {
-            $('#manual_grading').show();
+            $('.manual_grading').show();
         }
         else {
-            $('#manual_grading').hide();
+            $('.manual_grading').hide();
         }
     }
 

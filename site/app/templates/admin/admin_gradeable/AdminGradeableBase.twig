@@ -20,10 +20,6 @@
             <text class="nav-bar-item" id="page_1_nav" onClick="onChangeNavTab(1);">Rubric</text>
             <text class="nav-bar-item" id="page_2_nav" onClick="onChangeNavTab(2);">Dates</text>
             <text class="nav-bar-item" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
-            <text class="nav-bar-item" id="page_4_nav" onClick="onChangeNavTab(4);">Syllabus</text>
-            <!-- TODO: hide this and update navigation if electronic file is not set -->
-            <text class="nav-bar-item" id="page_5_nav" onclick="onChangeNavTab(5);">Student Settings</text>
-            <text class="nav-bar-item" id="page_5_nav" onclick="onChangeNavTab(6);">Auto Grading</text>
         </div>
         <br/>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
@@ -31,9 +27,6 @@
             <div id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
             <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
             <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
-            <div id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableSyllabus.twig') }}</div>
-            <div id="page_5_content">{{ include('admin/admin_gradeable/AdminGradeableStudent.twig')  }}</div>
-            <div id="page_6_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
         </div>
         <br/>
         <div id="nav-controls">
@@ -47,7 +40,7 @@
 
     var adminGradeableNavTab = 0;
     function onChangeNavTab(tab) {
-        if(tab > 6 || tab < 0) {
+        if(tab > 4 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -99,6 +92,167 @@
         {
             onChangeNavTab({{ nav_tab }});
         }
+
+        // TODO: below is selectively copied from previous ui
+        $( "input" ).change(function() {
+            var max = parseFloat($(this).attr('max'));
+            var skip1 = (isNaN(max)) ? true : false;
+            var min = parseFloat($(this).attr('min'));
+            var skip2 = (isNaN(min)) ? true : false;
+            if (!skip1 && $(this).val() > max)
+            {
+                $(this).val(max);
+            }
+            else if (!skip2 && $(this).val() < min)
+            {
+                $(this).val(min);
+            }
+        });
+
+        $('input:radio[name="peer_grading"]').change(function() {
+            $('.peer_input').hide();
+            $('#peer_averaging_scheme').hide();
+            if ($(this).is(':checked')) {
+                if($(this).val() == 'true') {
+                    $('.peer_input').show();
+                    $('#peer_averaging_scheme').show();
+                    if($('#team_yes_radio').is(':checked')) {
+                        $('#team_yes_radio').prop('checked', false);
+                        $('#team_no_radio').prop('checked', true);
+                        $('input:radio[name="team_assignment"]').trigger("change");
+                    }
+                }
+            }
+        });
+        $('input:radio[name="student_view"]').change(function() {
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $('#student_submit_download_view').show();
+                } else {
+                    $('#no_student_submit').prop('checked', true);
+                    $('#no_student_download').prop('checked',true);
+                    $('#yes_student_any_version').prop('checked',true);
+                    $('#student_submit_download_view').hide();
+                }
+            }
+        });
+
+        $('input:radio[name="pdf_page"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+            $('.pdf_page_input').hide();
+            $('#pdf_page').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                    $('#pdf_page').show();
+                }
+            }
+        });
+
+        $('input:radio[name="pdf_page_student"]').change(function() {
+            $("input[name^='page_component']").each(function() {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
+            $('.pdf_page_input').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'false') {
+                    $("input[name^='page_component']").each(function() {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                }
+            }
+        });
+        $('input:radio[name="team_assignment"]').change(
+            function(){
+                if($('#team_yes_radio').is(':checked')){
+                    $('input[name="eg_max_team_size"]').val('{$admin_gradeable->getEgMaxTeamSize()}');
+                    $('input[name="date_team_lock"]').val('{$admin_gradeable->getEgTeamLockDate()}');
+                    $('#team_yes').show();
+                    if($('#peer_yes_radio').is(':checked')) {
+                        $('#peer_yes_radio').prop('checked', false);
+                        $('#peer_no_radio').prop('checked', true);
+                        $('input:radio[name="peer_grading"]').trigger("change");
+                    }
+                }
+                else {
+                    $('#team_yes').hide();
+                }
+            });
+
+        $('input:radio[name="gradeable_type"]').change(
+            function(){
+                $('#required_type').hide();
+                $('.gradeable_type_options').hide();
+                if ($(this).is(':checked')){
+                    if($(this).val() == 'Electronic File'){
+                        $('#electronic_file').show();
+                        $('#ta_instructions_id').hide();
+                        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                            $('#rubric_questions').hide();
+                            $('#grading_questions').hide();
+                        }
+
+                        $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
+                        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                            $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
+                        } else {
+                            $('#grades_released_compare_date').html('Manual Grading Open Date');
+                        }
+
+                        if($('#team_yes_radio').is(':checked')){
+                            $('input[name="eg_max_team_size"]').val('{$admin_gradeable->getEgMaxTeamSize()}');
+                            $('input[name="date_team_lock"]').val('{$admin_gradeable->getEgTeamLockDate()}');
+                            $('#team_yes').show();
+                        }
+                        else {
+                            $('#team_yes').hide();
+                        }
+                    }
+                    else if ($(this).val() == 'Checkpoints'){
+                        $('#ta_instructions_id').show();
+                        $('#checkpoints').show();
+                        $('#grading_questions').show();
+                        $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                        $('#grades_released_compare_date').html('Manual Grading Open Date');
+                    }
+                    else if ($(this).val() == 'Numeric'){
+                        $('#ta_instructions_id').show();
+                        $('#numeric').show();
+                        $('#grading_questions').show();
+                        $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                        $('#grades_released_compare_date').html('Manual Grading Open Date');
+                    }
+                }
+            });
+
+        if($('#rotating-section').is(':checked')){
+            $('#rotating-sections').show();
+        }
+        $('input:radio[name="section_type"]').change(
+            function(){
+                $('#rotating-sections').hide();
+                if ($(this).is(':checked')){
+                    if($(this).val() == 'rotating-section'){
+                        $('#rotating-sections').show();
+                    }
+                }
+            });
+
+        // End copied section
     });
 
     // Only succeeds if all child forms succeed
@@ -111,5 +265,198 @@
                 checkFormStudent() &&
                 checkFormAuto();
     }
+
+    $('#gradeable-form').on('submit', function(e){
+        $('<input />').attr('type', 'hidden')
+            .attr('name', 'gradeableJSON')
+            .attr('value', JSON.stringify($('form').serializeObject()))
+            .appendTo('#gradeable-form');
+        if ($("input[name='section_type']:checked").val() == 'reg_section'){
+            $('#rotating-sections :input').prop('disabled',true);
+        }
+    });
+
+    // It would be really good to split this up into the sub-files
+    $.fn.serializeObject = function(){
+        var o = {};
+        var a = this.serializeArray();
+        var ignore = ["numeric_label_0", "max_score_0", "numeric_extra_0", "numeric_extra_0",
+            "text_label_0", "checkpoint_label_0", "num_numeric_items", "num_text_items"];
+
+        $('.ignore').each(function(){
+            ignore.push($(this).attr('name'));
+        });
+
+        // export appropriate users
+        if ($('[name="minimum_grading_group"]').prop('value') == 1){
+            $('#full-access-graders').find('.grader').each(function(){
+                ignore.push($(this).attr('name'));
+            });
+        }
+
+        if ($('[name="minimum_grading_group"]').prop('value') <= 2){
+            $('#limited-access-graders').find('.grader').each(function(){
+                ignore.push($(this).attr('name'));
+            });
+        }
+
+        $(':radio').each(function(){
+            if(! $(this).is(':checked')){
+                if($(this).attr('class') !== undefined){
+                    // now remove all of the child elements names for the radio button
+                    $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
+                        ignore.push($(this).attr('name'));
+                    });
+                }
+            }
+        });
+
+        //parse checkpoints
+
+        $('.checkpoints-table').find('.multi-field').each(function(){
+            var label = '';
+            var extra_credit = false;
+            var skip = false;
+
+            $(this).find('.checkpoint_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            $(this).find('.checkpoint_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['checkpoints'] === undefined){
+                o['checkpoints'] = [];
+            }
+            o['checkpoints'].push({"label": label, "extra_credit": extra_credit});
+        });
+
+
+        // parse text items
+
+        $('.text-table').find('.multi-field').each(function(){
+            var label = '';
+            var skip = false;
+
+            $(this).find('.text_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            if (o['text_questions'] === undefined){
+                o['text_questions'] = [];
+            }
+            o['text_questions'].push({'label' : label});
+        });
+
+        // parse numeric items
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            var label = '';
+            var max_score = 0;
+            var extra_credit = false;
+            var skip = false;
+
+            $(this).find('.numeric_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            $(this).find('.max_score').each(function(){
+                max_score = parseFloat($(this).val());
+                ignore.push($(this).attr('name'));
+            });
+
+            $(this).find('.numeric_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['numeric_questions'] === undefined){
+                o['numeric_questions'] = [];
+            }
+            o['numeric_questions'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
+
+        });
+
+
+        $.each(a, function() {
+            if($.inArray(this.name,ignore) !== -1) {
+                return;
+            }
+            var val = this.value;
+            if($("[name="+this.name+"]").hasClass('int_val')){
+                val = parseInt(val);
+            }
+            else if($("[name="+this.name+"]").hasClass('float_val')){
+                val = parseFloat(val);
+            }
+
+            else if($("[name="+this.name+"]").hasClass('bool_val')){
+                val = (this.value === 'true');
+            }
+
+            if($("[name="+this.name+"]").hasClass('grader')){
+                var tmp = this.name.split('_');
+                var grader = tmp[1];
+                if (o['grader'] === undefined){
+                    o['grader'] = [];
+                }
+                var arr = {};
+                arr[grader] = this.value.trim();
+                o['grader'].push(arr);
+            }
+            else if ($("[name="+this.name+"]").hasClass('points')){
+                if (o['points'] === undefined){
+                    o['points'] = [];
+                }
+                o['points'].push(parseFloat(this.value));
+            }
+            else if($("[name="+this.name+"]").hasClass('complex_type')){
+                var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
+                classes.splice( classes.indexOf('complex_type'), 1);
+                var complex_type = classes[0];
+
+                if (o[complex_type] === undefined){
+                    o[complex_type] = [];
+                }
+                o[complex_type].push(val);
+            }
+            else if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(val || '');
+            } else {
+                o[this.name] = val || '';
+            }
+        });
+        return o;
+    };
+
 
 </script>

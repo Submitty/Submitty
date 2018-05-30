@@ -43,6 +43,7 @@ class AdminGradeableView extends AbstractView {
             $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
         }
 
+        $marks = array();
 
         // //if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
@@ -50,7 +51,27 @@ class AdminGradeableView extends AbstractView {
             $button_string = "Save changes to";
             $submit_text   = "Save Changes";
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
+
+            // Generate marks array if we're editing an electronic gradeable with TA grading
+            if($admin_gradeable->getGGradeableType() == 0 and $admin_gradeable->getEgUseTaGrading()) {
+                $old_components = $admin_gradeable->getOldComponents();
+                for($x = 0; $x < sizeof($old_components); $x++) {
+                    $component_id = $old_components[$x]->getId();
+                    $my_marks = $this->core->getQueries()->getGradeableComponentsMarks($component_id);
+                    $marks[$component_id] = array();
+                    foreach($my_marks as $i => $mark) {
+                        $marks[$component_id][$i] = array(
+                            'publish'   => $mark->getPublish(),
+                            'order'     => $mark->getOrder(),
+                            'id'        => $mark->getId(),
+                            'points'    => $mark->getPoints());
+                    }
+                }
+            }
         }
+
+        // $marks_json = json_encode($marks);
+        // $old_components_json = $admin_gradeable->getOldComponentsJson();
 
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
@@ -60,7 +81,11 @@ class AdminGradeableView extends AbstractView {
             "action"          => $action,
             "submit_text"     => $submit_text,
             "nav_tab"         => "0",    // TODO: allow the request of a particular tab (so save-and-continue on first page doesn't jump back to first page)
-            
+
+            // "old_components"  => $old_components_json,
+            // "marks"           => $marks_json,
+            "marks"           => $marks,
+
             // Graders Page Specific
             "all_graders"    => $graders
         ]);
