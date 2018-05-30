@@ -75,51 +75,9 @@ class GlobalView extends AbstractView {
      }
 
     public function footer($runtime) {
-        $return = <<<HTML
-    <div id="push"></div>
-</div>
-<div id="footer">
-    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-    <span id="github">
-        <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
-            <i class="fa fa-github fa-lg"></i>
-        </a>
-    </span>
-HTML;
-    if ($this->core->getConfig()->isDebug()) {
-            $return .= <<<HTML
-    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
-HTML;
-    }
-    $return .= <<<HTML
-</div>
-HTML;
-        if ($this->core->getConfig()->isDebug()) {
-            $return .= <<<HTML
-<div id='page-info'>
-    Runtime: {$runtime}<br /><br />
-    <h3>Site Details</h3>
-    Total Submitty Details: {$this->core->getSubmittyDB()->getQueryCount()}<br /><br />
-    Submitty Queries:<br /> {$this->core->getSubmittyDB()->getPrintQueries()}
-HTML;
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $return .= <<<HTML
-    <h3>Course Details</h3>
-    Total Course Queries: {$this->core->getCourseDB()->getQueryCount()}<br /><br />
-    Course Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
-HTML;
-            }
-        $return .= <<<HTML
-</div>
-HTML;
-        }
-        $return .= <<<HTML
-</body>
-</html>
-
-HTML;
-
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
+            "runtime" => $runtime
+        ]);
     }
 
     public function invalidPage($page) {
