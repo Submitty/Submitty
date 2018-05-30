@@ -20,8 +20,6 @@ class GradeableView extends AbstractView {
 
 
 
-        $num_questions = count($gradeable->getComponents());
-
         // if use student components, get the values for pages from the student's submissions
         $files = $gradeable->getSubmittedFiles();
         $student_pages = array();
@@ -31,12 +29,6 @@ class GradeableView extends AbstractView {
                 $student_pages = FileUtils::readJsonFile($content["path"]);
             }
         }
-
-        $return .= <<<HTML
-    <div class="inner-container">
-        <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{$gradeable->getId()}" data-user_id="{$user->getAnonId()}" data-active_version="{$gradeable->getActiveVersion()}" data-num_questions="{$num_questions}" data-your_user_id="{$this->core->getUser()->getId()}">
-            <tbody>
-HTML;
 
         $c = 1;
         $precision = floatval($gradeable->getPointPrecision());
@@ -271,101 +263,11 @@ HTML;
 HTML;
             $c++;
         }
-        if ($peer) {
-            $break_onclick = 'return false;';
-            $disabled = 'disabled';
-        }
+
         $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $return .= <<<HTML
-                <div class="box" style="background-color:#E9EFEF;">
-                <div class="box-title">
-                    <div id="title-general" onclick="{$break_onclick}; toggleGeneralMessage(true);" data-changebg="true">
-                        <b>General Comment</b>
-                        <span style="float: right;">
-                            <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
-                        </span>
-                    </div>
-                    <span id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
-                        <span id="cancel-mark-general" onclick="{$break_onclick}; closeGeneralMessage(false);" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                    </span>
-                </div><div>
-                <div class="box" id="summary-general" style="" onclick="{$break_onclick}; openGeneralMessage();" data-changedisplay2="true">
-                <div class"box-title">    
-                    <span style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
-                    </span>
-                    <span style="width:98%;" colspan="3">
-                        <div id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{$overallComment}</span>
-                        </div>
-                    </span>
-                </div></div>
-                <span id="extra-general" style="display: none" colspan="4" data-changebg="true" data-changedisplay1="true">
-                    <div class="box">
-                    <div class="box-title">
-                        <span colspan="4">
-                            <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
-                        </span>
-                    </div></div></div></div>
-                </span>
-HTML;
 
-        if ($peer) {
-            $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
-        }
-        else {
-            $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
-        }
-        //Must replace the 0 below
-        $return .= <<<HTML
-                 <div class="box">
-                <div class="box-title">
-                    <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
-                    <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> 0/ {$total_points}&emsp;&emsp;&emsp;
-                        AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong></td>
-                    <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></td>
-                </div></div>
-            </span>
-        </table>
-HTML;
-        $return .= <<<HTML
-        <div style="width:100%;">
-HTML;
-        $now = new \DateTime('now');
-        $return .= <<<HTML
-            </form>
-        </div>
-HTML;
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-
-        $return .= <<<HTML
-<script type="text/javascript">
-//
-// This is needed to resolve conflicts between Chrome and other browsers
-//   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
-//   and other browsers can only do synchronous ajax calls on 'onunload'
-//
-// Reference:
-//    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
-//
-var __unloadRequestSent = false;
-function unloadSave() {
-    if (!__unloadRequestSent) {
-        __unloadRequestSent = true;
-        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
-        }, function() {
-            // Unable to save so try saving at a different time
-            __unloadRequestSent = false;
-        });
-    }
-}
-// Will work for Chrome
-window.onbeforeunload = unloadSave;
-// Will work for other browsers
-window.onunload = unloadSave;
-</script>
-HTML;
         $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
 
         return $return;
     }
