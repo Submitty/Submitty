@@ -1470,32 +1470,6 @@ HTML;
 
         $return .= <<<HTML
 </div>
-
-<script type="text/javascript">
-//
-// This is needed to resolve conflicts between Chrome and other browsers
-//   where Chrome can only do synchronous ajax calls on 'onbeforeunload'
-//   and other browsers can only do synchronous ajax calls on 'onunload'
-//
-// Reference:
-//    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
-//
-var __unloadRequestSent = false;
-function unloadSave() {
-    if (!__unloadRequestSent) {
-        __unloadRequestSent = true;
-        saveLastOpenedMark('{$gradeable->getId()}' ,'{$user->getAnonId()}', {$gradeable->getActiveVersion()}, '{$your_user_id}', '-1', false, function() {
-        }, function() {
-            // Unable to save so try saving at a different time
-            __unloadRequestSent = false;
-        });
-    }
-}
-// Will work for Chrome
-window.onbeforeunload = unloadSave;
-// Will work for other browsers
-window.onunload = unloadSave;
-</script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
