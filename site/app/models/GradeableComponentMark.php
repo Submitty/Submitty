@@ -93,7 +93,7 @@ class GradeableComponentMark extends AbstractModel {
     public function getStaticData() {
         return [
             "id" => $this->id,
-            "name" => $this->note,
+            "name" => $this->getNote(),
             "order" => $this->order,
             "points" => $this->points,
             "publish" => $this->publish
@@ -108,7 +108,7 @@ class GradeableComponentMark extends AbstractModel {
     public function getGradedData() {
         return [
             "id" => $this->id,
-            "name" => $this->note,
+            "name" => $this->getNote(),
             "order" => $this->order,
             "points" => $this->points,
             "publish" => $this->publish,

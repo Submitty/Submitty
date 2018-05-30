@@ -15,7 +15,7 @@
 
 <div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
     <div class="box-title">
-        <span id="gradebar-{{ c_index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge">
+        <span id="gradebar-{{ c_index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1" class="badge">
             <strong>
                 <span id="grade-{{ c_index }}" name="grade-{{ c_index }}" class="grades" data-lower_clamp="{{ component.lower_clamp }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="{{ component.upper_clamp }}"> X</span> / {{ component.max_value }}
             </strong>
