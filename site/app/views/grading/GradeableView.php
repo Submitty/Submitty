@@ -114,13 +114,6 @@ class GradeableView extends AbstractView {
                     $displayVerifyUser = true;
                 }
             }
-            $return .= <<<HTML
-                <div id="title-{$c}" class="box" style="cursor: pointer" onclick="{$break_onclick}; toggleMark({$c}, true);">
-                <div class="box-title">
-<span id="gradebar-{$c}" style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
-                    </span>
-HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
             $message = "<b>{$message}</b>";  // {$num_peer_components}</b>";
@@ -153,12 +146,6 @@ HTML;
             }
 
             //get the grader's id if it exists
-            $return .= <<<HTML
-                    <span style="font-size: 12px;" colspan="3" data-changebg="true">
-                        <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
-                        {$message}
-                        <span style="float: right;">
-HTML;
             if($displayVerifyUser){
                 $return .= <<<HTML
                             <span style="display: inline; color: red;">
@@ -166,26 +153,10 @@ HTML;
                             </span>
 HTML;
             }
-            $return .= <<<HTML
-                            <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
-                         <!--  <span id="save-mark-{$c}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick}; closeMark({$c}, true);">Done</i> </span> -->
-                        </span>
-                        </span> <span id="ta_note-{$c}" style="display: none;" data-changedisplay1="true"> {$note}</span>
-                        <span id="page-{$c}" style="display: none;">{$page}</span>
-                        <span style="float: right;">
-                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none; font-size: 12px; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
-                        </span>
-HTML;
             $student_note = htmlentities($question->getStudentComment());
             if ($student_note != ''){
                 $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
             }
-            $return .= <<<HTML
-                        <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
-           <!--         <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-                            <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                    </span> -->
-HTML;
 
             //gets the initial point value and text
 
@@ -213,22 +184,6 @@ HTML;
                 $background = "background-color: #FAD5D3;";
             }
 
-            $return .= <<<HTML
-                <div id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true" data-question_id="{$question->getId()}" data-min="{$min}" data-max="{$max}" data-precision="{$precision}">
-                    <span style="width:98%;" colspan="4">
-                        <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{$initial_text}</span>
-                        </div>
-                    </span>
-                </div></div>
-                </div>
-                <div class="box" id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
-                <div class="box-title">
-                </div></div>
-                <div class="box" id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
-                <div class="box-title">
-HTML;
-
             $d = 0;
             $first = true;
             $noChange = "";
@@ -248,19 +203,6 @@ HTML;
                         </span>
 HTML;
             }
-            $return .= <<<HTML
-                    <div class="box" id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                    <div class="box-title">
-                        <span colspan="1" style="text-align: center; white-space: nowrap;">
-                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                        <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
-                        </span>
-                        <span colspan="3" style="white-space: nowrap;">
-                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
-                        </span>
-                    </div></div>
-                </div></div>
-HTML;
             $c++;
         }
 

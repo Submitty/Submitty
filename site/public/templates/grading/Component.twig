@@ -1,38 +1,55 @@
-<div id="title-{{ loop.index }}" class="box" style="cursor: pointer" onclick="{$break_onclick}; toggleMark({{ loop.index }}, true);">
-    <div class="box-title">
-        <span id="gradebar-{{ loop.index }}" style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
-        <strong><span id="grade-{{ loop.index }}" name="grade-{{ loop.index }}" class="grades" data-lower_clamp="{{ component.lower_clamp }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="T{{ component.upper_clamp }}"> {$question_points}</span> / {{ component.max_value }}</strong>
-        </span>
+{% set initial_text = "Click me to grade!" %}
+{% set grader_id = grader == null ? "Ungraded!" : grader.id %}
 
+<div id="title-{{ loop.index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ loop.index }}, true);">
+    <div class="box-title">
+        <span id="gradebar-{{ loop.index }}" style="{$graded_color}; white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
+            <strong>
+                <span id="grade-{{ loop.index }}" name="grade-{{ loop.index }}" class="grades" data-lower_clamp="{{ component.lower_clamp }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="{{ component.upper_clamp }}"> X</span> / {{ component.max_value }}
+            </strong>
+        </span>
         <span style="font-size: 12px;" colspan="3" data-changebg="true">
-                        <b><span id="progress_points-{{ loop.index }}" style="display: none;" data-changedisplay1="true"></span></b>
-                        {$message}
-                        <span style="float: right;">
+            <b><span id="progress_points-{{ loop.index }}" style="display: none;" data-changedisplay1="true"></span></b>
+            {$message}
+            <span style="float: right;">
 
         {# todo: verify user #}
 
-        <span id="graded-by-{{ loop.index }}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
-        <!--  <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick}; closeMark({{ loop.index }}, true);">Done</i> </span> -->
+                <span id="graded-by-{{ loop.index }}" style="font-style: italic; padding-right: 10px;">{{ grader_id }}</span>
+        <!--  <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{{ break_onclick }}; closeMark({{ loop.index }}, true);">Done</i> </span> -->
+            </span>
         </span>
-        </span> <span id="ta_note-{{ loop.index }}" style="display: none;" data-changedisplay1="true"> {$note}</span>
+        <span id="ta_note-{{ loop.index }}" style="display: none;" data-changedisplay1="true"> {$note}</span>
         <span id="page-{{ loop.index }}" style="display: none;">{$page}</span>
         <span style="float: right;">
-                            <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none; font-size: 12px; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
-                        </span>
+            <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none; font-size: 12px; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+        </span>
+
+        <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
+        <!--         <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
+                         <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+                 </span> -->
 
         {# todo: student notes #}
 
-        <div id="summary-{{ loop.index }}" style="#FBFCFC" display="none" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{$min}" data-max="{$max}" data-precision="{$precision}">
-                    <span style="width:98%;" colspan="4">
-                        <div id="rubric-{{ loop.index }}">
-                            <span id="rubric-textarea-{{ loop.index }}" name="comment-{{ loop.index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{$initial_text}</span>
-                        </div>
-                    </span>
-        </div></div>
+        <div id="summary-{{ loop.index }}" style="#FBFCFC" display="none" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ precision }}">
+            <span style="width:98%;" colspan="4">
+                <div id="rubric-{{ loop.index }}">
+                    <span id="rubric-textarea-{{ loop.index }}" name="comment-{{ loop.index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>
+                </div>
+            </span>
+        </div>
+    </div>
 </div>
+
+{# Marks table #}
+
 <div class="box" id="marks-parent-{{ loop.index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-    <div class="box-title">
-    </div></div>
+    {# todo: marks #}
+</div>
+
+{# Custom mark #}
+
 <div class="box" id="marks-extra-{{ loop.index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
     <div class="box-title">
 
@@ -40,12 +57,14 @@
 
         <div class="box" id="mark_custom_id-{{ loop.index }}" name="mark_custom_{{ loop.index }}">
             <div class="box-title">
-                        <span colspan="1" style="text-align: center; white-space: nowrap;">
-                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{{ loop.index }}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                        <input name="mark_points_custom_{{ loop.index }}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ loop.index }});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
-                        </span>
+                <span colspan="1" style="text-align: center; white-space: nowrap;">
+                    <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{{ loop.index }}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
+                    <input name="mark_points_custom_{{ loop.index }}" type="number" step="{{ precision }}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ loop.index }});" value="{{ component.score }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
+                </span>
                 <span colspan="3" style="white-space: nowrap;">
-                            Custom: <textarea name="mark_text_custom_{{ loop.index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({{ loop.index }});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
-                        </span>
-            </div></div>
-    </div></div>
+                    Custom: <textarea name="mark_text_custom_{{ loop.index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({{ loop.index }});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

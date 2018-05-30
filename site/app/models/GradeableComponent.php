@@ -323,7 +323,6 @@ class GradeableComponent extends AbstractModel {
             "is_peer" => $this->is_peer,
             "score" => $this->score,
             "comment" => $this->comment,
-            "grader" => $this->grader,
             "graded_version" => $this->graded_version,
             "grade_time" => $this->grade_time,
             "has_grade" => $this->has_grade,
@@ -331,6 +330,15 @@ class GradeableComponent extends AbstractModel {
             "grader_modified" => $this->grader_modified,
             "marks" => []
         ];
+
+        if ($this->grader === null) {
+            $compData["grader"] = null;
+        } else {
+            $compData["grader"] = [
+                "id" => $this->grader->getId(),
+
+            ];
+        }
 
         foreach ($this->getMarks() as $mark) {
             //Ignore
