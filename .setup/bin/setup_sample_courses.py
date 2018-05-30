@@ -39,7 +39,7 @@ from submitty_utils import dateutils
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -739,19 +739,55 @@ class Course(object):
             #create_teams
             if gradeable.team_assignment is True:
                 ucounter = 0
+                test_counter = 0
                 for user in self.users:
                     unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+                    reg_section = user.get_detail(self.code, "registration_section")
+                    if reg_section is None:
+                        continue
                     print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
-                    conn.execute(gradeable_teams_table.insert(),
-                                team_id=unique_team_id,
-                                g_id=gradeable.id,
-                                registration_section=user.get_detail(self.code, "registration_section"),
-                                rotation_section=None)
-                    conn.execute(teams_table.insert(),
-                                team_id=unique_team_id, 
-                                user_id=user.get_detail(self.code, "id"),
-                                state=1)
-                    ucounter+=1
+                    teams_registration = select([gradeable_teams_table]).where(
+                        gradeable_teams_table.c['registration_section'] == reg_section)
+                    res = conn.execute(teams_registration)
+                    if res.rowcount == 0:
+                        test_counter+=1
+                        print(test_counter)
+                        conn.execute(gradeable_teams_table.insert(),
+                                     team_id=unique_team_id,
+                                     g_id=gradeable.id,
+                                     registration_section=reg_section,
+                                     rotation_section=None)
+                        conn.execute(teams_table.insert(),
+                                        team_id=unique_team_id, 
+                                        user_id=user.get_detail(self.code, "id"),
+                                        state=1)
+                        ucounter+=1
+                        continue
+                    else:
+                        added = False
+                        for team_in_section in res:  
+                            members_in_team = select([teams_table]).where(
+                                teams_table.c['team_id'] == team_in_section['team_id'])
+                            res = conn.execute(members_in_team)
+                            if res.rowcount < 3:                        
+                                conn.execute(teams_table.insert(),
+                                            team_id=team_in_section['team_id'], 
+                                            user_id=user.get_detail(self.code, "id"),
+                                            state=1)
+                                added = True
+                                continue
+                        if not added:
+                            conn.execute(gradeable_teams_table.insert(),
+                                        team_id=unique_team_id,
+                                        g_id=gradeable.id,
+                                        registration_section=reg_section,
+                                                rotation_section=None)
+                            conn.execute(teams_table.insert(),
+                                        team_id=unique_team_id, 
+                                        user_id=user.get_detail(self.code, "id"),
+                                        state=1)
+                            ucounter+=1
+
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
