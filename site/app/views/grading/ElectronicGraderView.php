@@ -1606,6 +1606,9 @@ HTML;
             }
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
+                   <!-- <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">   
+                            <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>    
+                        </span> -->
 HTML;
 
             //gets the initial point value and text
