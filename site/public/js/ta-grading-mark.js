@@ -772,8 +772,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
     calculatePercentageTotal();
 
     var gradedByElement = $('#graded-by-' + num);
+    var savingElement = $('#graded-saving-' + num);
     var ungraded = gradedByElement.text() === "Ungraded!";
-    gradedByElement.text("Saving...");
+
+    gradedByElement.hide();
+    savingElement.show();
 
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     
@@ -781,16 +784,19 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         data = JSON.parse(data);
 
         if (all_false === true) {
+            //We've reset
             gradedByElement.text("Ungraded!");
-        } else {
-            if(ungraded || (overwrite === "true")) {
-                gradedByElement.text("Graded by " + your_user_id + "!");
-                var question_points = parseFloat(current_question_num[0].innerHTML);
-                var max_points = parseFloat(current_question_num[0].dataset.max_points);
-                $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
-                $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
-            }
+        } else if(ungraded || (overwrite === "true")) {
+            //Just graded it
+            gradedByElement.text("Graded by " + your_user_id + "!");
+            var question_points = parseFloat(current_question_num[0].innerHTML);
+            var max_points = parseFloat(current_question_num[0].dataset.max_points);
+            $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+            $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
         }
+
+        gradedByElement.show();
+        savingElement.hide();
 
         if(data['version_updated'] === "true") {
             if ($('#wrong_version_' + num).length)
