@@ -1,4 +1,32 @@
+import configparser
+import json
+import os
+import tempfile
+import shutil
+import subprocess
+import time
+import dateutil
+import dateutil.parser
+import urllib.parse
+import string
+import random
+import socket
+import zipfile
+
+from submitty_utils import dateutils, glob
+
 from . import grade_item, insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
+
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
+
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_JSON = json.load(open_file)
+HWCRON_UID = OPEN_JSON['hwcron_uid']
+
+
 # ==================================================================================
 def get_queue_time(next_directory,next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory,next_to_grade)))

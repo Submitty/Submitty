@@ -166,7 +166,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         address = which_machine.split('@')[1]
     # prepare the zip files
     try:
-        autograding_zip_tmp,submission_zip_tmp = grade_item.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+        autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -223,7 +223,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             return success
 
     # log completion of job preparation
-    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = "regrade" in obj and obj["regrade"]
@@ -237,7 +237,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     # variables needed for logging
-    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = "regrade" in obj and obj["regrade"]
@@ -304,7 +304,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
                 return False
     # archive the results of grading
     try:
-        grade_item.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+        packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
@@ -343,7 +343,6 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
             if shipper_counter >= 10:
                 prints(my_name, which_untrusted, "shipper prep loop: ",queue_file)
                 shipper_counter=0
-
         # then wait for grading to be completed
         shipper_counter=0
         while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
@@ -549,14 +548,20 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        if machine['enabled'] == False:
+            print("{0} is disabled, so we are not spinning up shipper threads.".format(name))
+            grade_items_logging.log_message(JOB_ID, message="{0} is disabled, so we are not spinning up shipper threads.")
+            continue
         try:
             full_address = ""
             if machine["address"] != "localhost":
                 if machine["username"] == "":
                     raise SystemExit("ERROR: empty username for worker machine {0} ".format(machine["address"]))
                 full_address = "{0}@{1}".format(machine["username"], machine["address"])
-            elif not machine["username"] == "":
-                Raise('ERROR: username for primary (localhost) must be ""')
+            else:
+                if not machine["username"] == "":
+                    Raise('ERROR: username for primary (localhost) must be ""')
+                full_address = machine['address']
 
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:

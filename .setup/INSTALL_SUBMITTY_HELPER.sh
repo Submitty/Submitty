@@ -217,13 +217,13 @@ if [ "${WORKER}" == 1 ]; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
         echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
-        echo "#grant the submitty user on this worker machine access to the daemon utilities" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
 echo "#grant the hwcron user access to the daemon utilities" >> /etc/sudoers
-echo "%${HWCRON_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py" >> /etc/sudoers
+echo "%${HWCRON_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
 
 
 # tmp folder
@@ -581,7 +581,7 @@ fi
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
     echo -e "\nStopping worker daemons"
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py stop --machine_id perform_on_all_workers
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --machine_id perform_on_all_workers
     echo -e "\n"
 fi
 
@@ -747,5 +747,5 @@ fi
 # Update any foreign worker machines
 if [ "${WORKER}" == 0 ]; then
     echo -e Updating worker machines
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/update_and_install_workers.py
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
 fi

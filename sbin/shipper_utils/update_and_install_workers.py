@@ -8,7 +8,7 @@ import paramiko
 import subprocess
 # from autograder import grade_items_logging
 
-CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..', '..','config')
+CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
 AUTOGRADING_WORKERS_PATH = path.join(CONFIG_PATH, 'autograding_workers.json')
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
@@ -19,9 +19,12 @@ with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
     SUBMITTY_CONFIG = json.load(open_file)
 SUBMITTY_INSTALL_DIR = SUBMITTY_CONFIG['submitty_install_dir']
 
+SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
+
+
 # ==================================================================================
 # Tells a foreign autograding worker to reinstall.
-def update_worker_code(user, host):
+def install_worker(user, host):
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
         return True
@@ -51,7 +54,7 @@ def update_worker_code(user, host):
             return success
 
 def run_systemctl_command(machine, command):
-  command = [systemctl_utils, command, '--machine_id', machine]
+  command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--machine_id', machine]
   process = subprocess.Popen(command)
   process.communicate()
   exit_code = process.wait()
@@ -70,24 +73,20 @@ if __name__ == "__main__":
       autograding_workers = json.load(infile)
 
   submitty_repository = submitty_config['submitty_repository']
-  
-  systemctl_utils = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin','worker_shipper_utils','shipper_utils','daemon_utils.py')
+
   for worker, stats in autograding_workers.items():
       user = stats['username']
       host = stats['address']
 
       if worker == 'primary' or host == 'localhost':
-          continue 
-
-      print("{0}:".format(worker))
+          continue
 
       exit_code = run_systemctl_command(worker, 'status')
       if exit_code == 1:
         print("ERROR: {0}'s worker daemon was active when before rsynching began. Attempting to turn off.".format(worker))
         exit_code = run_systemctl_command(worker, 'stop')
-        if exit_code == 1:
-          print("ERROR: could not shut off {0}. Abandoning efforts to work with it.".format(worker))
-          continue
+        if exit_code != 0:
+          print("Could not turn off {0}'s daemon. Please allow rsynching to continue and then attempt another install.".format(worker))
 
       local_directory = submitty_repository
       remote_host = '{0}@{1}'.format(user, host)
@@ -97,23 +96,16 @@ if __name__ == "__main__":
       # rsynch the file
       print("performing rsynch to {0}...".format(worker))
       command = "rsync -a --no-o --no-g --exclude=.git {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
-      # os.system(command)
+      os.system(command)
 
-      success = update_worker_code(user, host)
+      success = install_worker(user, host)
       if success == True:
         print("Installed Submitty on {0}".format(worker))
         print("Rebooting {0}...".format(worker))
         exit_code = run_systemctl_command(worker, 'start')
-        if exit_code != 1:
-          print("ERROR: {0} was not properly rebooted.".format(worker))
       else:
         print("Failed to update {0}. This likely indicates an error when installing submitty on the worker. Please attempt an\
           install locally on the worker and inspect for errors.".format(worker))
         print('Making sure {0} is turned off.')
         exit_code = run_systemctl_command(worker, 'stop')
-        if exit_code == 1:
-          print("ERROR: could not shut off {0}.".format(worker))
       print()
-
-      
-

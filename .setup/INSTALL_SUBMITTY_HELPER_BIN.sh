@@ -50,6 +50,7 @@ chown root:root ${SUBMITTY_INSTALL_DIR}/sbin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/sbin
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
@@ -77,12 +78,9 @@ chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
-    chown -R root:${SUBMITTY_SUPERVISOR} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
+    chown -R root:${SUBMITTY_SUPERVISOR} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
-    chown -R root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
+    chown -R root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
-chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
-chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/worker_utils
-chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils
-chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/worker_utils/*
-chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/*
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*
