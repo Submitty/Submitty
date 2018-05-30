@@ -32,7 +32,7 @@
 
                 {% if display_verify_user %}
                     <span style="display: inline; color: red;">
-                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ id }}','{{ component.id }}','{{ user_id }}')" value = "Verify Grader"/>
+                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}')" value = "Verify Grader"/>
                     </span>
                 {% endif %}
 
@@ -80,20 +80,20 @@
 
 {# Marks table #}
 
-<div class="box" id="marks-parent-{{ c_index }}" style="display: block; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+<table class="box" id="marks-parent-{{ c_index }}" style="display: block; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
     {% for mark in component.marks %}
         {% include "Mark.twig" %}
     {% endfor %}
-</div>
+</table>
 
 {# Custom mark #}
 
-<div class="box" id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+<div class="box" id="marks-extra-{{ c_index }}" style="display: block; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
     <div class="box-title">
 
         {# todo: peer #}
         <span colspan="4">
-            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ precision }}', '{{ id }}', '{{ user_id }}', {{ active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ precision }}', '{{ gradeable.id }}', '{{ gradeable.user_id }}', {{ gradeable.active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
 

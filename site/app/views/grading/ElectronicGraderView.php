@@ -1436,10 +1436,12 @@ HTML;
                 $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
             }
 
-            $grading_data = $gradeable->getGradedData();
-            $grading_data["your_user_id"] = $this->core->getUser()->getId();
-            $grading_data["disabled"] = $disabled === "disabled";
-            $grading_data["total_points"] = $total_points;
+            $grading_data = [
+                "gradeable" => $gradeable->getGradedData(),
+                "your_user_id" => $this->core->getUser()->getId(),
+                "disabled" => $disabled === "disabled",
+                "total_points" => $total_points,
+            ];
 
             $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 

@@ -8,18 +8,8 @@ use app\views\AbstractView;
 class GradeableView extends AbstractView {
 
     public function renderComponentTable(Gradeable $gradeable, string $disabled) {
-        $user = $gradeable->getUser();
-        $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
-            $peer = true;
-        }
 
-        $break_onclick = "";
-        if ($disabled === "disabled") {
-            $break_onclick = "return false;";
-        }
-
-
+        //TODO: Put this into the model
 
         // if use student components, get the values for pages from the student's submissions
         $files = $gradeable->getSubmittedFiles();
@@ -31,14 +21,7 @@ class GradeableView extends AbstractView {
             }
         }
 
-        $c = 1;
-        $precision = floatval($gradeable->getPointPrecision());
-        $num_questions = count($gradeable->getComponents());
-        $your_user_id = $this->core->getUser()->getId();
-
         foreach ($gradeable->getComponents() as $component) {
-            if($peer && !is_array($component)) continue;
-            $question = null;
             /* @var GradeableComponent $question */
             $question = $component;
 
@@ -60,11 +43,6 @@ class GradeableView extends AbstractView {
                 }
             }
         }
-
-        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
-
-        return $return;
     }
 
 }

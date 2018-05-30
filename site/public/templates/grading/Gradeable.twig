@@ -1,11 +1,13 @@
 {% set break_onclick = disabled ? "return false;" : "" %}
-<table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{{ id }}" data-user_id="{{ user_id }}" data-active_version="{{ active_version }}" data-num_questions="{{ components|length }}" data-your_user_id="{{ your_user_id }}">
+<table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{{ gradeable.id }}" data-user_id="{{ gradeable.user_id }}" data-active_version="{{ gradeable.active_version }}" data-num_questions="{{ gradeable.components|length }}" data-your_user_id="{{ your_user_id }}">
     <tbody>
-        {% for component in components %}
+    {# Components #}
+        {% for component in gradeable.components %}
             {% if component.order != -1 %}
                 {% include "Component.twig" %}
             {% endif %}
         {% endfor %}
+    {# /Components #}
 
     {# General Comment #}
         <div class="box" style="background-color:#E9EFEF;">
@@ -26,7 +28,7 @@
                         <span style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1"></span>
                         <span style="width:98%;" colspan="3">
                             <div id="rubric-custom">
-                                <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{{ overallComment }}</span>
+                                <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{{ gradeable.overallComment }}</span>
                             </div>
                         </span>
                     </div>
@@ -35,7 +37,7 @@
                     <div class="box">
                         <div class="box-title">
                             <span colspan="4">
-                                <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {{ disabled ? "disabled" : "" }}>{{ overall_comment }}</textarea>
+                                <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {{ gradeable.disabled ? "disabled" : "" }}>{{ gradeable.overall_comment }}</textarea>
                             </span>
                         </div>
                     </div>
@@ -48,8 +50,8 @@
         <div class="box">
             <div class="box-title">
                 <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></span>
-                <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> 0 / {{ total_points }}&emsp;&emsp;&emsp;
-AUTO-GRADING {{ graded_autograder_points }} / {{ total_autograder_non_extra_credit_points }}</strong></span>
+                <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> 0 / {{ gradeable.total_points }}&emsp;&emsp;&emsp;
+AUTO-GRADING {{ gradeable.graded_autograder_points }} / {{ gradeable.total_autograder_non_extra_credit_points }}</strong></span>
                 <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></span>
             </div>
         </div>
@@ -70,7 +72,7 @@ AUTO-GRADING {{ graded_autograder_points }} / {{ total_autograder_non_extra_cred
     function unloadSave() {
         if (!__unloadRequestSent) {
             __unloadRequestSent = true;
-            saveLastOpenedMark('{{ id }}' ,'{{ user_id }}', {{ active_version }}, '{{ your_user_id }}', '-1', false, function() {
+            saveLastOpenedMark('{{ gradeable.id }}' ,'{{ gradeable.user_id }}', {{ gradeable.active_version }}, '{{ your_user_id }}', '-1', false, function() {
             }, function() {
                 // Unable to save so try saving at a different time
                 __unloadRequestSent = false;
