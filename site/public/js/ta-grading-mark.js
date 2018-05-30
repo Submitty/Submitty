@@ -42,8 +42,9 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     if(x==0){
         color="#e6e6e6";
         editable="readonly";
-        appearEditable="cursor: all-scroll; border:none; outline:none;";
+        appearEditable="cursor: not-allowed; border:none; outline:none;";
     }
+    //onkeyup="autoResizeComment(event) removed from textarea
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
     <td colspan="1"; width: 90px; text-align: center;"> \
@@ -55,7 +56,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     <div class="box"> \
         <div class="box-title"> \
             <td colspan="4"> \
-                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="background:'+color+';width:90%;'+appearEditable+' resize:none;">'+note+'</textarea> \
+                <textarea '+editable+' name="mark_text_'+num+'_'+x+'" onkeyup="" rows="1" cols="120" style="background:'+color+';width:90%;'+appearEditable+' resize:none;">'+note+'</textarea> \
                 <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
                     <i class="fa fa-users icon-got-this-mark"></i> \
                 </span> \
@@ -224,7 +225,6 @@ function haveMarksChanged(num, data) {
               mark_scores[x].value != data['data'][x]['score'])
             return true;
     }
-    
     // Check to see if custom mark changed
     if (data['data'][marks.length]['custom_note'] != custom_mark_text.val())
         return true;
@@ -265,7 +265,6 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
                      icon.toggleClass("fa-square-o fa-square");
             }
         }
-        
         // Add all marks back
         // data['data'].length - 2 to ignore the custom mark
         for (var x = data['data'].length-2; x >= 0; x--) {
@@ -444,15 +443,30 @@ function calculateMarksPoints(question_num) {
 
     current_row = $('#mark_custom_id-'+question_num);
     var custom_points = parseFloat(current_row.find('input[name=mark_points_custom_'+question_num+']').val());
-    if (isNaN(custom_points)) {
-        current_points += 0;
-    } else {
-        if(custom_points!=0){
-            current_points += custom_points;
-            any_selected = true;
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+question_num+']').val();
+    if(custom_message == ""){
+        $('#mark_points_custom-' + question_num)[0].disabled=true;
+        $('#mark_points_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_points_custom-' + question_num)[0].value="";
+    }
+    else{
+        $('#mark_points_custom-' + question_num)[0].disabled=false;
+        $('#mark_points_custom-' + question_num)[0].style.cursor="default";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor="pointer";
+        if($('#mark_points_custom-' + question_num)[0].value==""){
+            $('#mark_points_custom-' + question_num)[0].value="0";
+        }
+        if (isNaN(custom_points)) {
+            current_points += 0;
+        } 
+        else {
+            if(custom_points!=0){
+                current_points += custom_points;
+                any_selected = true;
+            }
         }
     }
-
     if(any_selected == false){
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
@@ -756,7 +770,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         
         all_false = false;
     }
-    
     // Clamp points
     current_points = Math.min(Math.max(current_points, lower_clamp), upper_clamp);
     
