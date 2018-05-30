@@ -753,10 +753,12 @@ class Course(object):
                 submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     os.makedirs(submission_path)
-                    versions_to_submit = random.choice(range(0,10))
-                    if(versions_to_submit) < 2:
+                    versions_to_submit = 0
+                    #The chance of a student submitting 3 versions is 20%, submitting 2 versions is 30%, and submitting 1 version is 50%.
+                    random_num = random.choice(range(0,100))
+                    if(random_num) < 20:
                         versions_to_submit = 3
-                    elif versions_to_submit < 5 and versions_to_submit >= 2:
+                    elif random_num < 50 and random_num >= 20:
                         versions_to_submit = 2
                     else:
                         versions_to_submit = 1
@@ -764,7 +766,8 @@ class Course(object):
                             (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
                             (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
-                        json_history = {"active_version": versions_to_submit, "history": []}
+                        active_version = random.choice(range(1, versions_to_submit+1))
+                        json_history = {"active_version": active_version, "history": []}
                         random_days = 1
                         if random.random() < 0.3:
                             random_days = random.choice(range(-3,2))
@@ -777,7 +780,7 @@ class Course(object):
                                         g_version=version, submission_time=current_time_string)
                             if version == versions_to_submit:
                                 conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                            active_version=versions_to_submit)
+                                            active_version=active_version)
                             json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
@@ -798,7 +801,7 @@ class Course(object):
                                     src = os.path.join(gradeable.sample_path, submission)
                                     dst = os.path.join(submission_path, str(version))
                                     create_gradeable_submission(src, dst)
-                            random_days-=1
+                            random_days-=0.5
                         
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
