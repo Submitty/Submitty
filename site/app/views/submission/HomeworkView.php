@@ -1227,6 +1227,13 @@ HTML;
         return $return;
     }
     public function showRequestForm($gradeable){
+      $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+      $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+      $existsStaffPost = false;
+      foreach ($threads as $thread) {
+        if($this->core->getQueries()->isStaffPost($thread['user_id'])) $existsStaffPost = true;
+        break;
+      }
       $return = <<<HTML
       <div class = "sub">
         <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
@@ -1235,33 +1242,53 @@ HTML;
         $action = "";
         $url = "";
         $class = "btn-default";
+        $deleteMode = false;
         if($gradeable->getRegradeStatus() === 0){
           $message = "Request Regrade";
           $action = "showPopUp()";
+          $deleteMode = false;
           $url = $this->core->buildUrl(array('component' => 'student',
                                              'action' => 'request_regrade',
                                              'gradeable_id' => $gradeable->getId(),
                                              'student_id' =>$this->core->getUser()->getId()
                                         ));
-        }else if($gradeable->getRegradeStatus() === 1){
-          $message = "Delete Request";
-          $class = "btn-danger";
-          $is_disabled = "";
-          $url = "";
+        }else if($gradeable->getRegradeStatus() === -1){
+          if(!$existsStaffPost || $this->core->getUser()->accessGrading()){
+            $message = "Delete Request";
+            $class = "btn-danger";
+            $is_disabled = "";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                                               'action'=> 'delete_request',
+                                               'gradeable_id' => $gradeable->getId(),
+                                               'student_id' => $gradeable->getUser()->getId()
+                                            ));
+            $deleteMode = true;
+          }else{
+            $is_disabled = "disabled";
+            $message = "Request in Review";
+            $url = "";
+            $deleteMode = false;
+          }
         }else{
+          $message = "Request Reviewed";
           $is_disabled = "disabled";
-          $message = "Request in Review";
           $url = "";
+          $deleteMode = false;
         }
-        //if grader, allow ability to delete request
-        if($this->core->getUser()->accessGrading()){
-          $message = "Delete Request";
-          $class = "btn-danger";
-          $is_disabled = "";
+        if(!$deleteMode){
+        $return .= <<<HTML
+          <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
+HTML;
+        }else{
+          $return .= <<<HTML
+          <div style="float:right">
+            <form method="POST" action="{$url}" id="deleteRequest">
+              <button class = "btn {$class}" type = "submit">$message</button>
+            </form>
+          </div>
+HTML;
         }
         $return .= <<<HTML
-        <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
-
         <div class="modal" id="modal-container">
           <div class="modal-content" id="regradeBox">
             <h3>Request Regrade</h3>
@@ -1271,7 +1298,7 @@ HTML;
             <form id="requestRegradeForm" method="POST" action="{$url}">
               <div style="text-align: center;">
                 <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
-                placeholder="please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
+                placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
                 <br style = "margin-bottom: 10px;">
                 <input type="submit" value="submit" class="btn btn-default" style="margin: 15px;">
                 <input type="button" id = "cancelRegrade" value="cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
@@ -1281,6 +1308,17 @@ HTML;
         </div>
       </div>
       <script type = "text/javascript">
+        $("#deleteRequest").submit(function(event) {
+          $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: $(this).serialize(), 
+            success: function(data){
+               window.location.reload();
+            }
+          });
+          event.preventDefault();
+        });
         var regradeBox = document.getElementById("regradeBox");
         var modal =document.getElementById("modal-container");
         function showPopUp(){
@@ -1305,11 +1343,11 @@ HTML;
           $first = true;
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
-            $replyPlaceHolder = "";
+            $replyPlaceHolder = "Enter your reply here";
           }
           else{
             $replyMessage = "Request further TA/Instructor action"; 
-            $replyPlaceHolder = "If you believe you require more review, enter a reply here to request a TA/Instructor action...";
+            $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
           }
           foreach ($threads as $thread) {
             $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
@@ -1319,18 +1357,18 @@ HTML;
             $content = $thread['content'];
             if($first){
               $class .= " first_post";
-              $first = false;
-            }
-            $function_date = 'date_format';
-            $return .= <<<HTML
-            <div class = '$class' style="padding:20px;">
-              <p>{$content}</p>
-              <hr>
-              <div style="float:right">
-                <b>{$name}</b> &nbsp
-                {$function_date($date,"m/d/Y g:i A")}
-              </div>
-            </div>
+              $first = false;                                      
+            }                                      
+            $function_date = 'date_format';                                      
+            $return .= <<<HTML                                       
+            <div class = '$class' style="padding:20px;">                                       
+              <p>{$content}</p>                                      
+              <hr>                                       
+              <div style="float:right">                                      
+                <b>{$name}</b> &nbsp                                       
+                {$function_date($date,"m/d/Y g:i A")}                                      
+              </div>                                       
+            </div>                                       
 HTML;
           }
         $return .= <<<HTML
@@ -1349,7 +1387,7 @@ HTML;
             $.ajax({
               type: "POST",
               url: $(this).attr("action"),
-              data: $("#replyTextForm").serialize(), 
+              data: $(this).serialize(), 
               success: function(data){
                  window.location.reload();
               }

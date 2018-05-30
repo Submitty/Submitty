@@ -2146,4 +2146,9 @@ AND gc_id IN (
     public function modifyRegradeStatus($thread_id, $status){
         $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = '$status' WHERE id = '$thread_id'" );
     }
+    public function deleteRegradeRequest($gradeable_id, $student_id){
+        $thread_id = $this->getRegradeRequestID($gradeable_id, $student_id);
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = '$thread_id'");
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = '$thread_id'");
+    }
 }

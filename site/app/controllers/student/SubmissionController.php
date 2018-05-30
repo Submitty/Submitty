@@ -64,6 +64,9 @@ class SubmissionController extends AbstractController {
             case 'make_request_post':
                 return $this->makeRequestPost();
                 break;
+            case 'delete_request':
+                return $this->deleteRequest();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -96,6 +99,12 @@ class SubmissionController extends AbstractController {
         }else{
             $this->core->getQueries()->modifyRegradeStatus($thread_id, -1);
         }
+    }
+
+    private function deleteRequest(){
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
     }
 
     private function popUp() {
