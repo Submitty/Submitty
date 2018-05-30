@@ -17,7 +17,6 @@ if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     exit 1
 fi
 
-
 ########################################################################################################################
 ########################################################################################################################
 # this script must be run by root or sudo
@@ -98,6 +97,14 @@ function replace_fillin_variables {
 
 ########################################################################################################################
 ########################################################################################################################
+# if this is not a worker machine, make sure that the submitty checkout belongs to the hwcron group
+if [ "${WORKER}" == 1 ]; then
+    chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
+else
+    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+fi
+
+
 # if the top level INSTALL directory does not exist, then make it
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 
@@ -208,10 +215,16 @@ fi
 if [ "${WORKER}" == 1 ]; then
     if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
         echo "" >> /etc/sudoers
-        echo "#grant the submitty user on this worker machine access to update_and_install_user.py" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
         echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the daemon utilities" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py" >> /etc/sudoers
     fi
 fi
+
+echo "#grant the hwcron user access to the daemon utilities" >> /etc/sudoers
+echo "%${HWCRON_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py" >> /etc/sudoers
+
 
 # tmp folder
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp
@@ -526,6 +539,8 @@ if [[ "$is_active_tmp" == "0" ]]; then
 fi
 
 
+
+
 #############################################################
 # stop the worker daemon (if it's running)
 systemctl is-active --quiet submitty_autograding_worker
@@ -540,8 +555,6 @@ if [[ "$is_active_tmp" == "0" ]]; then
     echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
     exit 1
 fi
-
-
 
 #############################################################
 # NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
@@ -564,6 +577,13 @@ if [[ "$is_active_tmp" == "0" ]]; then
     exit 1
 fi
 # END TO BE DELETED
+
+if [ "${WORKER}" == 0 ]; then
+    # Stop all foreign worker daemons
+    echo -e "\nStopping worker daemons"
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/daemon_utils.py stop --machine_id perform_on_all_workers
+    echo -e "\n"
+fi
 
 
 #############################################################
@@ -721,5 +741,11 @@ if [ "${WORKER}" == 0 ]; then
         echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
     fi
 fi
+
 ################################################################################################################
 ################################################################################################################
+# Update any foreign worker machines
+if [ "${WORKER}" == 0 ]; then
+    echo -e Updating worker machines
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/update_and_install_workers.py
+fi

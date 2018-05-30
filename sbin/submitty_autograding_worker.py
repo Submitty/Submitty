@@ -82,7 +82,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 
 # ==================================================================================
 # ==================================================================================
-def launch_workers(my_name, my_stats, time_last_modified):
+def launch_workers(my_name, my_stats):
     num_workers = my_stats['num_autograding_workers']
 
     # verify the hwcron user is running this script
@@ -161,4 +161,4 @@ def read_autograding_worker_json():
 # ==================================================================================
 if __name__ == "__main__":
     my_name, my_stats = read_autograding_worker_json()
-    launch_workers(my_name, my_stats, time_last_modified)
+    launch_workers(my_name, my_stats)

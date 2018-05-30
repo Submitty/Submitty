@@ -75,3 +75,14 @@ done
 chown -R root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
+
+if [ "${WORKER}" == 1 ]; then
+    chown -R root:${SUBMITTY_SUPERVISOR} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
+else
+    chown -R root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
+fi
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/worker_utils
+chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/worker_utils/*
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/worker_shipper_utils/shipper_utils/*
