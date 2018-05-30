@@ -1430,7 +1430,19 @@ HTML;
 HTML;
             }
 
-            $grading_data = json_encode($gradeable->getStaticData(), JSON_PRETTY_PRINT);
+            if ($peer) {
+                $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
+            } else {
+                $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
+            }
+
+            $grading_data = $gradeable->getGradedData();
+            $grading_data["your_user_id"] = $this->core->getUser()->getId();
+            $grading_data["disabled"] = $disabled === "disabled";
+            $grading_data["total_points"] = $total_points;
+
+            $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
+
 
             $return .= <<<HTML
     <div class="inner-container" id="grading-box">
@@ -1443,8 +1455,8 @@ HTML;
 HTML;
 
             $this->core->getOutput()->addInternalJs('ta-grading.js');
-            $this->core->getOutput()->addInternalJs('twig.min.js');
             $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+            $this->core->getOutput()->addInternalJs('twig.min.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
 
             $return .= <<<HTML
