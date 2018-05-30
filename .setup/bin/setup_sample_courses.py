@@ -758,7 +758,7 @@ class Course(object):
                     random_num = random.choice(range(0,100))
                     if(random_num) < 20:
                         versions_to_submit = 3
-                    elif random_num < 50 and random_num >= 20:
+                    elif random_num < 50:
                         versions_to_submit = 2
                     else:
                         versions_to_submit = 1
