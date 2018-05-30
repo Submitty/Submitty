@@ -35,27 +35,12 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
-    return ' \
-<tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
-    <td colspan="1" style="'+background+'; width: 90px; text-align: center;"> \
-        <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
-            <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
-        </span> \
-        <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
-    </td> \
-    <div class="box"> \
-        <div class="box-title"> \
-            <td colspan="4" style="'+background+'"> \
-                <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">'+note+'</textarea> \
-                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-                    <i class="fa fa-users icon-got-this-mark"></i> \
-                </span> \
-            </td> \
-        </div> \
-    </div> \
-</tr> \
-';
+function getMarkView(num, x) {
+    return Twig.twig({ref: "Mark"}).render({
+        gradeable: grading_data.gradeable,
+        component: grading_data.gradeable.components[num - 1],
+        mark: grading_data.gradeable.components[num - 1].marks[x]
+    });
 }
 
 function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, errorCallback) {
@@ -236,10 +221,7 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
             return;
         
         // Clear away all marks
-        var marks = $('[name=mark_'+num+']');
-        for (var x = 0; x < marks.length; x++) {
-            marks[x].remove();
-        }
+        parent.children().remove();
             
         // Custom mark
         {
@@ -266,7 +248,7 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
             var score      = data['data'][x]['score'];
             var note       = data['data'][x]['note'];
                         
-            parent.prepend(getMarkView(num, x, is_publish, hasMark, note, score, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id));
+            parent.prepend(getMarkView(num, x));
         }
     });
 }
@@ -303,7 +285,7 @@ function addMark(me, num, background, min, max, precision, gradeable_id, user_id
             var parent = $('#marks-parent-'+num);
             var x      = $('tr[name=mark_'+num+']').length;
             
-            parent.append(getMarkView(num, x, false, false, note, points, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, true));
+            parent.append(getMarkView(num, x));
 
             
             // Add new mark and then update

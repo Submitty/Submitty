@@ -11,4 +11,14 @@ function renderGradeable(into, grading_data) {
             console.log(e);
         }
     });
+    Twig.twig({
+        id: "Component",
+        href: "templates/grading/Component.twig",
+        async: true
+    });
+    Twig.twig({
+        id: "Mark",
+        href: "templates/grading/Mark.twig",
+        async: true
+    });
 }
