@@ -76,7 +76,7 @@
 
         // Add the existing checkpoints
         if ($('#radio_checkpoints').is(':checked')){
-            var components = {{ admin_gradeable.getOldComponentsJson() }};
+            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
             // remove the default checkpoint
             removeCheckpoint();
             $.each(components, function(i,elem){
