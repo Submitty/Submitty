@@ -107,7 +107,7 @@ class Gradeable extends AbstractModel {
     protected $team_assignment = false;
 
     /** @property @var string Which gradeable to inherit teams from */
-    protected $inherit_teams_from = "";
+    // protected $inherit_teams_from = "";
 
     /** @property @var int maximum allowed team size */
     protected $max_team_size = 0;
@@ -350,7 +350,7 @@ class Gradeable extends AbstractModel {
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
-            $this->inherit_teams_from = $details['eg_inherit_teams_from'];
+            //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
             if ($this->team_assignment) {

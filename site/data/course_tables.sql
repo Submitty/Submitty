@@ -125,7 +125,7 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_team_assignment boolean NOT NULL,
-    eg_inherit_teams_from character varying(255) NOT NULL,
+    --eg_inherit_teams_from character varying(255) NOT NULL,
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,

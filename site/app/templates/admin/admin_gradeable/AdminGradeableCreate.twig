@@ -77,12 +77,11 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         <div class="team_assignment team_yes" id="team_yes">
             <br />
 
-            <!-- Inherit teams from a nother gradeable? -->
-            Use teams from a previous gradeable:
+            <!-- Inherit teams from another gradeable? -->
+            {#Use teams from a previous gradeable:
 
-            {# 
-                Use a combo box if we can edit the value, otherwise show a text box (readonly)
-            #}
+                <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+
             {% if action == 'new' %}
                 <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
                     value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
@@ -97,6 +96,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                 <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' 
                     value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
             {% endif %}
+            #}
         </div>
     </div>
 </fieldset>

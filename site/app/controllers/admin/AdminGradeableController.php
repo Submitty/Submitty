@@ -75,7 +75,7 @@ class AdminGradeableController extends AbstractController {
         $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
         $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
         $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
-        $admin_gradeable->setInheritTeamsList($this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams());
+        // $admin_gradeable->setInheritTeamsList($this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams());
         return $admin_gradeable;
     }
 
@@ -127,7 +127,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
             }
             $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
-            $gradeable->setInheritTeamsFrom($_POST['eg_inherit_teams_from']);
+            // $gradeable->setInheritTeamsFrom($_POST['eg_inherit_teams_from']);
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
             $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));

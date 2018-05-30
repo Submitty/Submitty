@@ -223,7 +223,6 @@ SELECT";
   eg.eg_is_repository,
   eg.eg_subdirectory,
   eg.eg_team_assignment,
-  eg.eg_inherit_teams_from,
   eg.eg_max_team_size,
   eg.eg_team_lock_date,
   eg.eg_use_ta_grading,
