@@ -1,0 +1,53 @@
+<div class="content">
+    <div style="float: right; margin-bottom: 20px;">
+        <a onclick="newDownloadForm()" class="btn btn-primary">Download Graders</a>
+        <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
+        <a onclick="newUserForm();
+            $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
+    </div>
+    <h2>View Graders</h2>
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+        <tr>
+            <td width="4%"></td>
+            <td width="20%" style="text-align: left">User ID</td>
+            <td width="30%" colspan="2">Name</td>
+            <td width="23%">User Group</td>
+            <td width="20%">Registration Sections</td>
+            <td width="3%"></td>
+        </tr>
+        </thead>
+        <tbody>
+        {% if graders|length > 0 %}
+            {% for grader in graders %}
+                <tr id="user-{{ grader.getId() }}">
+                    <td>{{ loop.index }}</td>
+                    <td style="text-align: left">{{ grader.getId() }}</td>
+                    <td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
+                    <td style="text-align: left">{{ grader.getLastName() }}</td>
+                    <td>{{ groups[grader.getGroup()].name }}</td>
+                    <td>
+                    {%- if groups[grader.getGroup()].all_sections -%}
+                        All
+                    {%- else -%}
+                        {%- set first = true -%}
+                        {%- for section in grader.getGradingRegistrationSections() -%}
+                            {{- first ? "" : ", " -}}
+                            {%- set first = false -%}
+                            {{- section -}}
+                        {%- endfor -%}
+                    {%- endif -%}
+                    </td>
+                    <td><a onclick="editUserForm('{{ grader.getId() }}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3">No graders found</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+{% include('admin/users/UserForm.twig') with {'action': 'update_grader'} %}
+{% include('admin/users/GraderListForm.twig') %}

@@ -1,0 +1,77 @@
+<div class="popup-form" id="edit-user-form">
+    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="edit_user" value="false" />
+        <div style="">
+            User ID:<br />
+            <input class="readonly" type="text" name="user_id" readonly="readonly" />
+        </div>
+        <div>
+            First Name:<br />
+            <input type="text" name="user_firstname" />
+        </div>
+        <div>
+            Preferred First Name:<br />
+            <input type="text" name="user_preferred_firstname" />
+        </div>
+        <div>
+            Last Name:<br />
+            <input type="text" name="user_lastname" />
+        </div>
+        <div>
+            Email:<br />
+            <input type="text" name="user_email" />
+        </div>
+        <div>
+            Registered Section:<br />
+            <select name="registered_section">
+                <option value="null">Not Registered</option>
+                {% for section in reg_sections %}
+                    <option value='{{ section.sections_registration_id }}'>Section {{ section.sections_registration_id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="width: 62%">
+            Group:<br />
+            <select name="user_group">
+                <option value="1">Instructor</option>
+                <option value="2">Full Access Grader (Grad TA)</option>
+                <option value="3">Limited Access Grader (Mentor)</option>
+                <option value="4">Student</option>
+            </select>
+        </div>
+        <div>
+            Rotating Section:<br />
+            <select name="rotating_section">
+                <option value="null">No Section</option>
+                {% for section in rot_sections %}
+                    <option value='{{ section.sections_rotating_id }}'>Section {{ section.sections_rotating_id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="width: 70%">
+            <input type="checkbox" id="manual_registration" name="manual_registration">
+            <label for="manual_registration">Manually Registered User (no automatic updates)</label>
+        </div>
+        <div style="width: 100%">
+            <h3>Assigned Sections (Graders Only)</h3>
+            {% for section in reg_sections %}
+                <div style="width: 20%">
+                    <input type="checkbox" id="grs_{{ section.sections_registration_id }}" name="grading_registration_section[]" value="{{ section.sections_registration_id }}">
+                    <label for="grs_{{ section.sections_registration_id }}">Section {{ section.sections_registration_id }}</label>
+                </div>
+
+            {% endfor %}
+        </div>
+        {% if use_database %}
+        <div style="width: 60%">
+            Password:<br />
+            <input type="password" name="user_password" placeholder="New Password" />
+        </div>
+        {% endif %}
+        <div style="float: right; width: auto; margin-top: 10px">
+            <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>

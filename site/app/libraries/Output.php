@@ -25,7 +25,10 @@ class Output {
     private $use_footer = true;
     
     private $start_time;
-    
+
+    private $twig = null;
+    private $twig_loader = null;
+
     /**
      * @var Core
      */
@@ -34,6 +37,12 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+
+        $this->twig_loader = new \Twig_Loader_Filesystem(FileUtils::joinPaths(dirname(__DIR__), 'templates'));
+        $this->twig = new \Twig_Environment($this->twig_loader, [
+            'cache' => false //TODO: Use cache
+        ]);
+        $this->twig->addGlobal("core", $core);
     }
 
     public function setInternalResources() {
@@ -114,6 +123,35 @@ class Output {
         header("Content-Type: ".$filetype);
         header("Content-Disposition: attachment; filename=".$filename);
         header("Content-Length: " . strlen($contents));
+    }
+
+    /**
+     * Render a Twig template from the templates directory
+     * @param string $filename Template file basename, file should be in site/app/templates
+     * @param array $context Associative array of variables to pass into the Twig renderer
+     * @return string Rendered page content
+     */
+    public function renderTwigTemplate($filename, $context) {
+        try {
+            return $this->twig->render($filename, $context);
+        } catch (\Twig_Error $e) {
+            throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
+        }
+    }
+
+    /**
+     * Render a Twig template from the templates directory and immediately output the
+     * rendered page.
+     * @see renderOutput() The same idea except for Twig
+     * @param string $filename Template file basename, file should be in site/app/templates
+     * @param array $context Associative array of variables to pass into the Twig renderer
+     */
+    public function renderTwigOutput($filename, $context) {
+        if ($this->buffer_output) {
+            $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
+        } else {
+            echo $this->renderTwigTemplate($filename, $context);
+        }
     }
 
     /**
