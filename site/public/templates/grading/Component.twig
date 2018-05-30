@@ -23,7 +23,7 @@
         <span style="font-size: 12px;" colspan="3" data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
             <b>{{ component.name }}</b>
-            {% if component.graded_version == -1 and active_version != component.graded_version %}
+            {% if component.graded_version == -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>
                     Please edit or ensure that comments from version {{ component.graded_version }} still apply.
                 </span>
@@ -69,7 +69,7 @@
                          <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                  </span> -->
 
-        <div id="summary-{{ c_index }}" style="display:block" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ precision }}">
+        <div id="summary-{{ c_index }}" style="display:block" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ gradeable.precision }}">
             <span style="width:98%;" colspan="4">
                 <div id="rubric-{{ c_index }}">
                     <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>
@@ -94,7 +94,7 @@
 
         {# todo: peer #}
         <span colspan="4">
-            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ precision }}', '{{ gradeable.id }}', '{{ gradeable.user_id }}', {{ gradeable.active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ gradeable.precision }}', '{{ gradeable.id }}', '{{ gradeable.user_id }}', {{ gradeable.active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
 
@@ -103,7 +103,7 @@
             <div class="box-title">
                 <span colspan="1" style="text-align: center; white-space: nowrap;">
                     <span onclick=""> <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                    <input name="mark_points_custom_{{ c_index }}" type="number" step="{{ precision }}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" value="{{ component.score }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
+                    <input name="mark_points_custom_{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" value="{{ component.score }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
                 </span>
                 <span colspan="3" style="white-space: nowrap;">
                     Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({{ c_index }});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{{ component.comment }}</textarea>
