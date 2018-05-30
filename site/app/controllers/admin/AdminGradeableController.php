@@ -93,8 +93,8 @@ class AdminGradeableController extends AbstractController {
         } else {
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
         }        
-        $gradeable->setName(htmlentities($_POST['gradeable_title']));
-        $gradeable->setInstructionsUrl($_POST['instructions_url']);
+        $gradeable->setName(filter_input(INPUT_POST, 'gradeable_title', FILTER_SANITIZE_SPECIAL_CHARS));
+        $gradeable->setInstructionsUrl(filter_input(INPUT_POST, 'instructions_url', FILTER_SANITIZE_SPECIAL_CHARS));
         $gradeable->setTaInstructions($_POST['ta_instructions']);
         $gradeable_type = $_POST['gradeable_type'];
         if ($gradeable_type === "Electronic File") {
@@ -563,6 +563,13 @@ class AdminGradeableController extends AbstractController {
         $config_build_data = array("semester" => $semester,
                                    "course" => $course,
                                    "gradeable" =>  $_POST['gradeable_id']);
+
+
+        // FIXME/TODO: How to implement delete gradeable...
+        //$config_build_data = array("semester" => $semester,
+        //                           "course" => $course,
+        //                           "no_build" => true);
+
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
           die("Failed to write file {$config_build_file}");

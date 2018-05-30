@@ -1,3 +1,9 @@
+/// When no component is selected, the current ID will be this value
+NO_COMPONENT_ID = -1;
+
+/// Component ID of the "General Comment" box at the bottom
+GENERAL_MESSAGE_ID = -2;
+
 function fixMarkPointValue(me) {
     var max = parseFloat($(me).attr('max'));
     var min = parseFloat($(me).attr('min'));
@@ -35,46 +41,51 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
-function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new = false) {
+function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
-    <td colspan="1" style="'+background+'; text-align: center;"> \
-        <span onclick="selectMark(this);"> \
+    <td colspan="1" style="'+background+'; width: 90px; text-align: center;"> \
+        <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
         </span> \
         <input name="mark_points_'+num+'_'+x+'" type="number" onchange="fixMarkPointValue(this);" step="'+precision+'" value="'+pointValue+'" min="'+min+'" max="'+max+'" style="width: 50%; resize:none; min-width: 50px;"> \
     </td> \
-    <td colspan="3" style="'+background+'"> \
-        <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" style="width:90%; resize:none;">'+note+'</textarea> \
-        <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
-            <i class="fa fa-users icon-got-this-mark"></i> \
-        </span> \
-    </td> \
+    <div class="box"> \
+        <div class="box-title"> \
+            <td colspan="4" style="'+background+'"> \
+                <textarea name="mark_text_'+num+'_'+x+'" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">'+note+'</textarea> \
+                <span id="mark_info_id-'+num+'-'+x+'" style="display: visible" onclick="saveMark('+num+',\''+gradeable_id+'\' ,\''+user_id+'\','+get_active_version+', '+question_id+', \''+your_user_id+'\', -1); showMarklist(this,\''+gradeable_id+'\');"> \
+                    <i class="fa fa-users icon-got-this-mark"></i> \
+                </span> \
+            </td> \
+        </div> \
+    </div> \
 </tr> \
 ';
 }
 
-function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback) {
+function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, errorCallback) {
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
-            async: false,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
                 'gradeable_component_id' : question_id,
             },
             success: function(data) {
-                successCallback(data);
+                if (typeof(successCallback) === "function") {
+                    successCallback(data);
+                }
             },
-            error: function(err) {
+            error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
                 console.error("Something went wront with fetching marks!");
                 alert("There was an error with fetching marks. Please refresh the page and try agian.");
             }
     })
 }
 
-function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback) {
+function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
@@ -83,16 +94,18 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback) {
             'anon_id' : user_id
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("Couldn't get the general gradeable comment");
             alert("Failed to retrieve the general comment");
         }
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, successCallback) {
+function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
@@ -109,17 +122,19 @@ function ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, sync, 
                 'note' : note,
                 'points' : points
             },
-            success: function() {
-                successCallback();
+            success: function(data) {
+                if (typeof(successCallback) === "function") {
+                    successCallback(data);
+                }
             },
-            error: function() {
+            error: (typeof(errorCallback) === "function") ? errorCallback : function() {
                 console.error("Something went wrong with adding a mark...");
                 alert("There was an error with adding a mark. Please refresh the page and try agian.");
             }
         })
 }
 
-function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback) {
+function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
@@ -129,15 +144,17 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, suc
             'order_num' : order_num
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("Couldn't get the information on marks");
         }
     })
 }
 
-function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback) {
+function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
@@ -149,9 +166,11 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
             'gradeable_comment' : gradeable_comment
         },
         success: function(data) {
-            successCallback();
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
+        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
             console.error("There was an error with saving the general gradeable comment.");
             alert("There was an error with saving the comment. Please refresh the page and try agian.");
         }
@@ -176,11 +195,11 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
             'num_existing_marks' : num_existing_marks,
         },
         success: function(data) {
-            successCallback(data);
+            if (typeof(successCallback) === "function") {
+                successCallback(data);
+            }
         },
-        error: function() {
-            errorCallback();
-        }
+        error: errorCallback
     })
 }
 
@@ -209,24 +228,30 @@ function haveMarksChanged(num, data) {
     if (data['data'][marks.length]['custom_score'] != custom_mark_points.val())
         return true;
 
+    // We always have a custom mark, so if length is 1 we have no common marks.
+    // This is Very Bad because there should always be at least the No Credit mark.
+    // Only thing we can do from here though is let requests go.
+    if (data['data'].length === 1) {
+        return true;
+    }
+
     return false;
 }
 
 function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
     var parent = $('#marks-parent-'+num);
+    parent.children().remove();
+    parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable_id, user_id, question_id, function(data) {
         data = JSON.parse(data);
-        
+
         // If nothing has changed, then don't update
         if (!haveMarksChanged(num, data))
             return;
-        
+
         // Clear away all marks
-        var marks = $('[name=mark_'+num+']');
-        for (var x = 0; x < marks.length; x++) {
-            marks[x].remove();
-        }
-            
+        parent.children().remove();
+
         // Custom mark
         {
             var x = data['data'].length-1;
@@ -406,7 +431,7 @@ function calculateMarksPoints(question_num) {
     var current_points = parseFloat(current_question_num[0].dataset.default);
     var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
     var arr_length = $('tr[name=mark_'+question_num+']').length;
-
+    var any_selected=false;
 
     for (var i = 0; i < arr_length; i++) {
         var current_row = $('#mark_id-'+question_num+'-'+i);
@@ -415,6 +440,7 @@ function calculateMarksPoints(question_num) {
             is_selected = true;
         }
         if (is_selected === true) {
+            any_selected = true;
             current_points += parseFloat(current_row.find('input[name=mark_points_'+question_num+'_'+i+']').val());
         }
     }
@@ -424,9 +450,20 @@ function calculateMarksPoints(question_num) {
     if (isNaN(custom_points)) {
         current_points += 0;
     } else {
-        current_points += custom_points;
+        if(custom_points!=0){
+            current_points += custom_points;
+            any_selected = true;
+        }
     }
 
+    if(any_selected == false){
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        return "None Selected";
+    }
+    $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
+    $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -443,10 +480,31 @@ function updateProgressPoints(question_num) {
     var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
     var max_points = parseFloat(current_question_num[0].dataset.max_points);
-    current_progress[0].innerHTML = current_points + " / " + max_points; 
+    if(current_points=="None Selected"){
+        $('#grade-' + question_num)[0].innerHTML = "";     
+        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
+        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+    }
+    else{
+        $('#grade-' + question_num)[0].innerHTML = current_points;
+        //extra credit
+        if(current_points > max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points == max_points){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
+        }
+        else if(current_points > 0){
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#eac73d";
+        }
+        else{
+            $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
+        }
+    }
 }
 
-function selectMark(me, first_override = false) {
+function selectMark(me, first_override) {
     var icon = $(me).find("i");
     var skip = true; //if the table is all false initially, skip check marks.
     var question_num = parseInt(icon.attr('name').split('_')[2]);
@@ -470,137 +528,134 @@ function selectMark(me, first_override = false) {
 
 //closes all the questions except the one being opened
 //openClose toggles alot of listed elements in order to work
-function openClose(row_id, num_questions = -1) {
+function openClose(row_id) {
     var row_num = parseInt(row_id);
-    var total_num = 0;
-    if (num_questions === -1) {
-        total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
-    } else {
-        total_num = parseInt(num_questions);
-    }
+    var total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
-    var general_comment_title = $('#title-general');
-    var general_comment_title_cancel = $('#title-cancel-general');
-    var gshow = (row_num === -2 && general_comment[0].style.display === 'none');
+    setGeneralVisible(row_num === GENERAL_MESSAGE_ID && general_comment[0].style.display === 'none');
 
-    // Updated all the background colors and displays of each element that has
-    //  the corresponding data tag for the general component
-    $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
-    $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
-    $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
-    
-    general_comment_title.attr('colspan', (gshow ? 3 : 4));
-    general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
-    
     for (var x = 1; x <= total_num; x++) {
-        var page = ($('#page-' + x)[0]).innerHTML;
-        
-        var title           = $('#title-' + x);
-        var cancel_button   = $('#title-cancel-' + x);
         var current_summary = $('#summary-' + x);
-
-        // Update the color if it is penalty or extra credit
-        var current_question_num = $('#grade-' + x);
-        var question_points = parseFloat(current_question_num[0].innerHTML);
-        if (question_points > parseFloat(current_question_num[0].dataset.max_points)) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#D8F2D8";
-        } else if (question_points < 0) {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "#FAD5D3";
-        } else {
-            current_summary.children("td:first-of-type")[0].style.backgroundColor = "initial";
-        }
-
-        var show = false;
-        if (x == row_num && current_summary[0].style.display === '') {
-            show = true;
-            updateProgressPoints(x);
-
-            // if the component has a page saved, open the PDF to that page
-            // opening directories/frames based off of code in openDiv and openFrame functions
-
-            // make sure submissions folder has files
-            var submissions = $('#div_viewer_1');
-            if (page > 0 && submissions.children().length > 0) {
-
-                    // find the first file that is a PDF
-                    var divs = $('#div_viewer_1 > div > div');
-                    var pdf_div = "";
-                    for (var i=0; i<divs.length; i++) {
-                        if ($(divs[i]).is('[data-file_url]')) {
-                            file_url = $(divs[i]).attr("data-file_url");
-                            if(file_url.substring(file_url.length - 3) == "pdf") {
-                                pdf_div = $($(divs[i]));
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // only open submissions folder + PDF is a PDF file exists within the submissions folder
-                    if (pdf_div != "") {
-                        submissions.show();
-                        submissions.addClass('open');
-                        $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-
-                        var file_url = pdf_div.attr("data-file_url");
-                        var file_name = pdf_div.attr("data-file_name");
-                        if (!pdf_div.hasClass('open')) {
-                            openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
-                        }
-                        var iframeId = pdf_div.attr("id") + "_iframe";
-                        directory = "submissions"; 
-                        src = $("#"+iframeId).prop('src');
-                        if (src.indexOf("#page=") === -1) {
-                            src = src + "#page=" + page;
-                        }
-                        else {
-                            src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
-                        }
-                        pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
-
-                        if (!pdf_div.hasClass('open')) {
-                            pdf_div.addClass('open');
-                        }
-                        if (!pdf_div.hasClass('shown')) {
-                            pdf_div.show();
-                            pdf_div.addClass('shown');
-                        }
-                    }
-                }
-        }
-
-        // Updated all the background colors and displays of each element that has
-        //  the corresponding data tag
-        $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
-        $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
-        $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
-        
-        title.attr('colspan', (show ? 3 : 4));
-        cancel_button.attr('colspan', (show ? 1 : 0));
+        setMarkVisible(x, x === row_num && current_summary[0].style.display === '');
     }
 
     updateCookies();
 }
 
+//Set if the mark at index X should be visible
+function setMarkVisible(x, show) {
+    var page = ($('#page-' + x)[0]).innerHTML;
+
+    var title           = $('#title-' + x);
+ //   var cancel_button   = $('#title-cancel-' + x);
+    var current_summary = $('#summary-' + x);
+
+    if (show) {
+        // if the component has a page saved, open the PDF to that page
+        // opening directories/frames based off of code in openDiv and openFrame functions
+
+        // make sure submissions folder has files
+        var submissions = $('#div_viewer_1');
+        if (page > 0 && submissions.children().length > 0) {
+
+            // find the first file that is a PDF
+            var divs = $('#div_viewer_1 > div > div');
+            var pdf_div = "";
+            for (var i=0; i<divs.length; i++) {
+                if ($(divs[i]).is('[data-file_url]')) {
+                    file_url = $(divs[i]).attr("data-file_url");
+                    if(file_url.substring(file_url.length - 3) == "pdf") {
+                        pdf_div = $($(divs[i]));
+                        break;
+                    }
+                }
+            }
+
+            // only open submissions folder + PDF is a PDF file exists within the submissions folder
+            if (pdf_div != "") {
+                submissions.show();
+                submissions.addClass('open');
+                $($($(submissions.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+
+                var file_url = pdf_div.attr("data-file_url");
+                var file_name = pdf_div.attr("data-file_name");
+                if (!pdf_div.hasClass('open')) {
+                    openFrame(file_name,file_url,pdf_div.attr("id").substring(pdf_div.attr("id").lastIndexOf("_")+1));
+                }
+                var iframeId = pdf_div.attr("id") + "_iframe";
+                var directory = "submissions";
+                var src = $("#"+iframeId).prop('src');
+                if (src.indexOf("#page=") === -1) {
+                    src = src + "#page=" + page;
+                }
+                else {
+                    src = src.slice(0,src.indexOf("#page=")) + "#page=" + page;
+                }
+                pdf_div.html("<iframe id='" + iframeId + "' src='" + src + "' width='95%' height='1200px' style='border: 0'></iframe>");
+
+                if (!pdf_div.hasClass('open')) {
+                    pdf_div.addClass('open');
+                }
+                if (!pdf_div.hasClass('shown')) {
+                    pdf_div.show();
+                    pdf_div.addClass('shown');
+                }
+            }
+        }
+    }
+
+    // Updated all the background colors and displays of each element that has
+    //  the corresponding data tag
+    // $("[id$='-"+x+"'][data-changebg='true']")      .css("background-color", (show ? "#e6e6e6" : "initial"));
+    $("[id$='-"+x+"'][data-changedisplay1='true']").css("display",          (show ? "" : "none"));
+    $("[id$='-"+x+"'][data-changedisplay2='true']").css("display",          (show ? "none" : ""));
+
+    title.attr('colspan', (show ? 3 : 4));
+  //  cancel_button.attr('colspan', (show ? 1 : 0));
+}
+
+//Set if the general comment box should be visible
+function setGeneralVisible(gshow) {
+    var general_comment = $('#extra-general');
+    var general_comment_title = $('#title-general');
+    var general_comment_title_cancel = $('#title-cancel-general');
+
+    // Updated all the background colors and displays of each element that has
+    //  the corresponding data tag for the general component
+    // $("[id$='-general'][data-changebg='true']")      .css("background-color", (gshow ? "#e6e6e6" : "initial"));
+    $("[id$='-general'][data-changedisplay1='true']").css("display",          (gshow ? "" : "none"));
+    $("[id$='-general'][data-changedisplay2='true']").css("display",          (gshow ? "none" : ""));
+
+    general_comment_title.attr('colspan', (gshow ? 3 : 4));
+    general_comment_title_cancel.attr('colspan', (gshow ? 1 : 0));
+
+    updateCookies();
+}
+
 // Saves the general comment
-function saveGeneralComment(gradeable_id, user_id, active_version, sync = true) {
-    if ($('#extra-general')[0].style.disply === "none")
+function saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback ) {
+    if ($('#extra-general')[0].style.display === "none") {
+        //Nothing to save so we are fine
+        if (typeof(successCallback) === "function") {
+            successCallback();
+        }
         return;
+    }
     
     var comment_row = $('#comment-id-general');
     var gradeable_comment = comment_row.val();
     var current_question_text = $('#rubric-textarea-custom');
     var overwrite = $('#overwrite-id').is(":checked");
-    current_question_text[0].innerHTML = '<pre>' + gradeable_comment + '</pre>';
+    $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, function() {
-    });
+    ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
 //  have the ta lose their grading data
-function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", sync = true, successCallback, errorCallback) {
+function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id, sync, successCallback, errorCallback) {
     // Find open mark
     var index = 1;
     var mark = $('#marks-parent-' + index);
@@ -608,18 +663,23 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, gc_id = -1, y
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
             var gradeable_component_id = parseInt(mark[0].dataset.question_id);
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, -1, sync, successCallback, errorCallback);
+            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync, successCallback, errorCallback);
             return;
         }
         mark = $('#marks-parent-' + (++index));
     }
     // If no open mark was found, then save general comment
-    saveGeneralComment(gradeable_id, user_id, active_version, sync);
+    saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback);
 }
 
-function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_user_id = "", question_id = -1, sync = true, successCallback, errorCallback) {
-    if ($('#marks-parent-' + num)[0].style.display === "none")
+function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, sync, successCallback, errorCallback) {
+    if ($('#marks-parent-' + num)[0].style.display === "none") {
+        //Nothing to save so we are fine
+        if (typeof(successCallback) === "function") {
+            successCallback();
+        }
         return;
+    }
     
     var arr_length = $('tr[name=mark_'+num+']').length;
     
@@ -697,7 +757,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
         
         all_false = false;
     }
-    
+
+    if (all_false) {
+        new_text = "Click me to grade!";
+    }
+
     // Clamp points
     current_points = Math.min(Math.max(current_points, lower_clamp), upper_clamp);
     
@@ -707,29 +771,39 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id = -1, your_u
 
     calculatePercentageTotal();
 
+    var gradedByElement = $('#graded-by-' + num);
+    var savingElement = $('#graded-saving-' + num);
+    var ungraded = gradedByElement.text() === "Ungraded!";
+
+    gradedByElement.hide();
+    savingElement.show();
+
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     
     ajaxSaveMarks(gradeable_id, user_id, gc_id, arr_length, active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
 
-        if (data['modified'] === true) {
-            if (all_false === true) {
-                $('#graded-by-' + num)[0].innerHTML = "Ungraded!";
-                $('#summary-' + num)[0].style.backgroundColor = "initial";
-            } else {
-                if($('#graded-by-' + num)[0].innerHTML === "Ungraded!" || (overwrite === "true")) {
-                    $('#graded-by-' + num)[0].innerHTML = "Graded by " + your_user_id + "!";
-                    $('#summary-' + num)[0].style.backgroundColor = "#eebb77";
-                }
-            }
+        if (all_false === true) {
+            //We've reset
+            gradedByElement.text("Ungraded!");
+        } else if(ungraded || (overwrite === "true")) {
+            //Just graded it
+            gradedByElement.text("Graded by " + your_user_id + "!");
+            var question_points = parseFloat(current_question_num[0].innerHTML);
+            var max_points = parseFloat(current_question_num[0].dataset.max_points);
+            $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
+            $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
         }
+
+        gradedByElement.show();
+        savingElement.hide();
 
         if(data['version_updated'] === "true") {
             if ($('#wrong_version_' + num).length)
                 $('#wrong_version_' + num)[0].innerHTML = "";
         }
         
-        if (successCallback)
+        if (typeof(successCallback) === "function")
             successCallback(data);
             
     }, errorCallback ? errorCallback : function() {
@@ -763,14 +837,14 @@ function findCurrentOpenedMark() {
         return index;
     } else {
         if ($('#summary-general')[0].style.display === 'none') {
-            return -2;
+            return GENERAL_MESSAGE_ID;
         } else {
-            return -1;
+            return NO_COMPONENT_ID;
         }
     }
 }
 
-function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
+function verifyMark(gradeable_id, component_id, user_id, verifyAll){
     var action = (verifyAll) ? 'verify_all' : 'verify_grader';
     $.ajax({
         type: "POST",
@@ -791,4 +865,84 @@ function verifyMark(gradeable_id, component_id, user_id,verifyAll = false){
             alert("failed to verify grader");
         }
     })
+}
+
+//Open the given mark (if it's not open already), saving changes on any previous mark
+function openMark(id) {
+    var rubric = $('#rubric-table')[0].dataset;
+    var question = $('#summary-' + id)[0].dataset;
+
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+    saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
+    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+
+    //If it's already open, then openClose() will close it
+    if (findCurrentOpenedMark() !== id) {
+        openClose(id);
+    }
+}
+
+//Close the given mark (if it's open), optionally saving changes
+function closeMark(id, save) {
+    //Can't close a closed mark
+    if (findCurrentOpenedMark() !== id) {
+        return;
+    }
+
+    var rubric = $('#rubric-table')[0].dataset;
+    var question = $('#summary-' + id)[0].dataset;
+
+    if (save) {
+        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+        saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
+    }
+    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    setMarkVisible(id, false);
+}
+
+function toggleMark(id, save) {
+    if (findCurrentOpenedMark() === id) {
+        closeMark(id, save);
+    } else {
+        openMark(id);
+    }
+}
+
+//Open the general message input (if it's not open already), saving changes on any previous mark
+function openGeneralMessage() {
+    var rubric = $('#rubric-table')[0].dataset;
+
+    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+    saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version, true);
+
+    //If it's already open, then openClose() will close it
+    if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
+        openClose(GENERAL_MESSAGE_ID);
+    }
+}
+
+//Close the general message input (if it's open), optionally saving changes
+function closeGeneralMessage(save) {
+    //Cannot save it if it is not being edited
+    if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
+        return;
+    }
+
+    var rubric = $('#rubric-table')[0].dataset;
+
+    if (save) {
+        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, rubric.your_user_id, true);
+        saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version, true);
+    } else {
+        updateGeneralComment(rubric.gradeable_id, rubric.user_id);
+    }
+    setGeneralVisible(false);
+}
+
+function toggleGeneralMessage(save) {
+    if (findCurrentOpenedMark() === -2) {
+        closeGeneralMessage(save);
+    } else {
+        openGeneralMessage();
+    }
 }
