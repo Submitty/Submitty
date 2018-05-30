@@ -677,6 +677,12 @@ $(function() {
 });
 */
 
+function showSimpleGraderStats(action) {
+    $('.popup').css('display', 'none');
+    var popup = $("#simple-stats-popup");
+    popup.css("display", "block");
+}
+
 function updateCheckpointCell(elem, setFull) {
     elem = $(elem);
     if (!setFull && elem.data("score") === 1.0) {
@@ -727,10 +733,12 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
 }
 
 function setupCheckboxCells() {
+    // Query for the <td> elements whose class attribute starts with "cell-"
     $("td[class^=cell-]").click(function() {
         var parent = $(this).parent();
         var elems = [];
         var scores = {};
+        // If an entry in the User ID column is clicked, click all the checkpoint cells in that row
         if ($(this).hasClass('cell-all')) {
             var lastScore = null;
             var setFull = false;
@@ -748,12 +756,21 @@ function setupCheckboxCells() {
                 scores[$(this).data('id')] = $(this).data('score');
             });
         }
+        // Otherwise, a single checkpoint cell was clicked
         else {
             updateCheckpointCell(this);
             elems.push(this);
             scores[$(this).data('id')] = $(this).data('score');
         }
 
+        // find number of users (num of td elements whose id starts with "cell-" and ends with 0)
+        var num_users = $("td[id^=cell-][id$=0]").length;
+        // find stats popup to access later
+        var stats_popup = $("#simple-stats-popup");
+        var num_graded_elem = stats_popup.find("#num-graded");
+
+        // Update the buttons to reflect that they were clicked
+        // also update the statistics
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
@@ -764,7 +781,55 @@ function setupCheckboxCells() {
             },
             function() {
                 elems.forEach(function(elem) {
-                    $(elem).animate({"border-right-width": "0px"}, 400);
+                    elem = $(elem);
+                    elem.animate({"border-right-width": "0px"}, 400);                               // animate the box
+                    elem.attr("data-score", elem.data("score"));                                    // update the score
+                    var question_num = elem.attr("id").split("-")[2].toString();                    // find number of components
+                    var avg_elem = stats_popup.find("#avg-" + question_num);                        // find the average element in the popup (popup in SimpleGraderView.simpleDisplay)
+                    var stddev_elem = stats_popup.find("#stddev-" + question_num);                  // find the stddev element in the popup (                  ^                     )
+                    var average = parseFloat(avg_elem.attr("value"));                               // parse the average
+                    var stddev = parseFloat(stddev_elem.attr("value"));                             // parse the stddev
+                    var num_graded_change = 0;
+                    switch(elem.attr("data-score")) {
+                        case "1": // increased from 0 to 1: update average and stddev
+                            avg_elem.attr("value", Math.min(1, average+1/num_users).toString());
+                            stddev_elem.attr("value", Math.sqrt(Math.max(0, stddev**2 + 2*(1 - average)/num_users - (num_users + 1)/(num_users**2) )).toString());
+                            var has_grade = 0;
+                            elem.parent().children(".cell-grade").each(function() {
+                                if($(this).attr("data-score") != 0) {
+                                    has_grade++;
+                                }
+                            });
+                            if(has_grade == 1) {
+                                num_graded_change = 1;
+                            }
+                            break;
+                        case "0.5": // decreased from 1 to 0.5: update average and stddev
+                            avg_elem.attr("value", Math.max(0, average-0.5/num_users).toString());
+                            stddev_elem.attr("value", Math.sqrt(Math.max(0, stddev**2 - (0.5 - average)/num_users - (num_users + 1)/(4*num_users**2) )).toString());
+                            break;
+                        case "0":   // decreased from 0.5 to 0: update average and stddev
+                            avg_elem.attr("value", Math.max(0, average-0.5/num_users).toString());
+                            stddev_elem.attr("value", Math.sqrt(Math.max(0, stddev**2 + average/num_users - (num_users + 1)/(4*num_users**2) )).toString());
+                            var has_grade = false;
+                            elem.parent().children(".cell-grade").each(function() {
+                                if($(this).attr("data-score") != 0) {
+                                    has_grade = true;
+                                }
+                            });
+                            if(!has_grade) {
+                                num_graded_change = -1;
+                            }
+                            break;
+                        default:
+                            console.log("Invalid checkpoint score.");
+                    }
+                    avg_elem.text(parseFloat(avg_elem.attr("value")).toFixed(2));
+                    stddev_elem.text(parseFloat(stddev_elem.attr("value")).toFixed(2));
+                    if(num_graded_change != 0) {
+                        var split_text = num_graded_elem.text().split("/");
+                        $(num_graded_elem).text((parseInt(split_text[0]) + num_graded_change).toString() + "/" + split_text[1]);
+                    }
                 });
             },
             function() {
@@ -775,6 +840,7 @@ function setupCheckboxCells() {
                 });
             }
         );
+
     });
 }
 
@@ -912,11 +978,88 @@ function setupNumericTextCells() {
             });
         });
 
+        // find number of users (num of input elements whose id starts with "cell-" and ends with 0)
+        var num_users = $("input[id^=cell-][id$=0]").length;
+        // find stats popup to access later
+        var stats_popup = $("#simple-stats-popup");
+        var num_graded_elem = stats_popup.find("#num-graded");
+
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            {
+                'csrf_token': csrfToken,
+                'user_id': $(this).parent().parent().data("user"),
+                'g_id': $(this).parent().parent().data('gradeable'),
+                'scores': scores
+            },
             function() {
-                $(elem).css("background-color", "#ffffff");
+                $(elem).css("background-color", "#ffffff");                    // change the color
+                
+                // find the previous value, store the new value
+                var prev_value = parseFloat($(elem).attr("value"));
+                var new_value = parseFloat(elem.value);
+
+                var num_graded_change = 0;
+                var has_grade = false;
+                // if the new grade is 0 and the old was not 0...
+                if(new_value == 0 && prev_value != 0) {
+                    $(elem).parent().parent().children("td.option-small-input").each(function() {
+                        $(this).children(".option-small-box").each(function() {
+                            if($(this).data('num') == true && this.value != 0)
+                            has_grade = true;
+                        });
+                    });
+                    // ...and the user has no other grades, then this user no longer has grades
+                    if(!has_grade) {
+                        num_graded_change = -1;
+                    }
+                }
+                // if the new grade is not 0 and the old was 0...
+                else if (new_value != 0 && prev_value == 0){
+                    $(elem).parent().parent().children("td.option-small-input").each(function() {
+                        $(this).children(".option-small-box").each(function() {
+                            if($(this).data('num') == true && $(this).attr("value") != 0)
+                            has_grade = true;
+                        });
+                    });
+                    // ...and the user has no other grades, then this user just got their first grade
+                    if(!has_grade) {
+                        num_graded_change = 1;
+                    }
+                }
+                if(num_graded_change != 0) {
+                    var split_text = num_graded_elem.text().split("/");
+                    $(num_graded_elem).text((parseInt(split_text[0]) + num_graded_change).toString() + "/" + split_text[1]);
+                }
+
+                // Stores the new input value
+                $(elem).attr("value", elem.value);
+                // Finds the element that stores the total and updates it to reflect increase
+                $(elem).parent().parent().children("td.option-small-output").each(function() {
+                    $(this).children(".option-small-box").each(function() {
+                        $(this).attr("value", this.value);
+                    });
+                });
+
+                // Recalculate the average and stddev without looking through the whole dataset
+
+                var avg_diff = (new_value - prev_value) / num_users;                            // find the difference between the new average and the old average
+                var question_num = $(elem).attr("id").split("-")[2];                            // find number of components
+                var avg_elem = stats_popup.find("#avg-" + question_num);                        // find the average element in the popup (popup in SimpleGraderView.simpleDisplay)
+                var stddev_elem = stats_popup.find("#stddev-" + question_num);                  // find the stddev element in the popup (                  ^                     )
+                var average = parseFloat(avg_elem.attr("value"));                               // parse the average
+                var stddev = parseFloat(stddev_elem.attr("value"));                             // parse the stddev
+                // new average is old average plus the difference
+                avg_elem.attr("value", (average + avg_diff).toString());
+                // new stddev is more complex to calculate
+                stddev_elem.attr("value", Math.sqrt(Math.max(0, stddev**2 + 2*avg_diff*(new_value - average) - (num_users + 1)*avg_diff**2)).toString());
+                avg_elem.text(parseFloat(avg_elem.attr("value")).toFixed(2));
+                stddev_elem.text(parseFloat(stddev_elem.attr("value")).toFixed(2));
+
+                if(prev_value == 0 && new_value != 0) {
+
+                }
+
             },
             function() {
                 $(elem).css("background-color", "#ff7777");
