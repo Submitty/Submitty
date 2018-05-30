@@ -1382,59 +1382,59 @@ HTML;
     <span class="grading_label">Grading Rubric</span>
 HTML;
         if($gradeable->useTAGrading()) {
-            $return .= <<<HTML
+          $return .= <<<HTML
     <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
 HTML;
-            if ($display_verify_all) {
-                $return .= <<<HTML
+          if($display_verify_all){
+            $return .= <<<HTML
         <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true);'/>
 HTML;
-            }
-            $return .= <<<HTML
+          }
+          $return .= <<<HTML
         <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
         <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
     </div>
 HTML;
-            $disabled = '';
-            if ($gradeable->getActiveVersion() == 0) {
-                $disabled = 'disabled';
-                $my_color = "'#FF8040'"; // mango orange
-                $my_message = "Cancelled Submission";
-                if ($gradeable->hasSubmitted()) {
-                    $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
-HTML;
-                } else {
-                    $my_color = "'#C38189'";  // lipstick pink (purple)
-                    $my_message = "No Submission";
-                    $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
-HTML;
-                }
-            } else if ($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()) {
-                $disabled = 'disabled';
+        $disabled = '';
+        if($gradeable->getActiveVersion() == 0){
+            $disabled='disabled';
+            $my_color="'#FF8040'"; // mango orange
+            $my_message="Cancelled Submission";
+            if($gradeable->hasSubmitted()){
                 $return .= <<<HTML
-            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
+HTML;
+            } else {
+                $my_color="'#C38189'";  // lipstick pink (purple)
+                $my_message="No Submission";
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <div class="red-message" style="text-align: center">$my_message</div>
 HTML;
             }
+        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
+            $disabled='disabled';
+            $return .= <<<HTML
+            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+HTML;
+        }
 
             if ($peer) {
                 $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
             } else {
                 $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
-            }
+                }
 
             $grading_data = [
                 "gradeable" => $gradeable->getGradedData(),
@@ -1449,7 +1449,7 @@ HTML;
             $return .= <<<HTML
     <div class="inner-container" id="grading-box">
 
-    </div>
+                    </div>
     <script type="application/javascript">
         var grading_data = {$grading_data};
         renderGradeable($("#grading-box"), grading_data);
@@ -1461,10 +1461,10 @@ HTML;
             $this->core->getOutput()->addInternalJs('twig.min.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
 
-            $return .= <<<HTML
+        $return .= <<<HTML
+        </div>
         </div>
     </div>
-</div>
 HTML;
         }
 
