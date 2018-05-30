@@ -19,14 +19,6 @@ class GradeableView extends AbstractView {
         }
 
 
-        $grading_data = json_encode($gradeable->getStaticData(), JSON_PRETTY_PRINT);
-
-        $return = <<<HTML
-    <script type="application/javascript">
-        var grading_data = {$grading_data};
-    </script>
-HTML;
-
 
         $num_questions = count($gradeable->getComponents());
 

@@ -1430,7 +1430,22 @@ HTML;
 HTML;
             }
 
-            $return .= $this->core->getOutput()->renderTemplate("grading\\Gradeable", "renderComponentTable", $gradeable, $disabled);
+            $grading_data = json_encode($gradeable->getStaticData(), JSON_PRETTY_PRINT);
+
+            $return .= <<<HTML
+    <div class="inner-container" id="grading-box">
+
+    </div>
+    <script type="application/javascript">
+        var grading_data = {$grading_data};
+        renderGradeable($("#grading-box"), grading_data);
+    </script>
+HTML;
+
+            $this->core->getOutput()->addInternalJs('ta-grading.js');
+            $this->core->getOutput()->addInternalJs('twig.min.js');
+            $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+            $this->core->getOutput()->addInternalJs('gradeable.js');
 
             $return .= <<<HTML
         </div>
