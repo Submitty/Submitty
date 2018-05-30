@@ -42,9 +42,9 @@ function checkIfSelected(me) {
 }
 
 function getMarkView(num, x, is_publish, checked, note, pointValue, precision, min, max, background, gradeable_id, user_id, get_active_version, question_id, your_user_id, is_new) {
-    editable="";
-    appearEditable="";
-    color=background;
+    var editable="";
+    var appearEditable="";
+    var color=background;
     if(x==0){
         color="#e6e6e6";
         editable="readonly";
@@ -53,7 +53,7 @@ function getMarkView(num, x, is_publish, checked, note, pointValue, precision, m
     //onkeyup="autoResizeComment(event) removed from textarea
     return ' \
 <tr id="mark_id-'+num+'-'+x+'" name="mark_'+num+'" class="'+(is_publish ? 'is_publish' : '')+'"'+(is_new ? 'data-newmark="true"' : '')+'> \
-    <td colspan="1"; width: 90px; text-align: center;"> \
+    <td colspan="1"; style=""; width: 90px; text-align: center;"> \
         <span id="mark_id-'+num+'-'+x+'-check" onclick="selectMark(this);"> \
             <i class="fa fa-square'+(checked ? '' : '-o')+' mark fa-lg" name="mark_icon_'+num+'_'+x+'" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i> \
         </span> \
@@ -472,10 +472,8 @@ function calculateMarksPoints(question_num) {
             current_points += 0;
         } 
         else {
-            if(custom_points!=0){
-                current_points += custom_points;
-                any_selected = true;
-            }
+            current_points += custom_points;
+            any_selected = true;
         }
     }
     if(any_selected == false){
