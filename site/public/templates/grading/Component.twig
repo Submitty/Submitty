@@ -1,5 +1,4 @@
 {% set initial_text = "Click me to grade!" %}
-{% set grader_id = component.grader == null ? "Ungraded!" : component.grader.id %}
 {% set graded_color = component.grader == null ? "" : "background-color: #eac73d;" %}
 
 {% set c_index = loop.index %}
@@ -23,7 +22,7 @@
         <span style="font-size: 12px;" colspan="3" data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
             <b>{{ component.name }}</b>
-            {% if component.graded_version == -1 and gradeable.active_version != component.graded_version %}
+            {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>
                     Please edit or ensure that comments from version {{ component.graded_version }} still apply.
                 </span>
@@ -36,7 +35,13 @@
                     </span>
                 {% endif %}
 
-                <span id="graded-by-{{ c_index }}" style="font-style: italic; padding-right: 10px;">{{ grader_id }}</span>
+                <span id="graded-by-{{ c_index }}" style="font-style: italic; padding-right: 10px;">
+                    {% if component.grader == null %}
+                        Ungraded!
+                    {% else %}
+                        Graded by {{ component.grader.id }}
+                    {% endif %}
+                </span>
                 <span id="graded-saving-{{ c_index }}" style="display: none; font-style: italic; padding-right: 10px;">Saving...</span>
         <!--  <span id="save-mark-{{ c_index }}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{{ break_onclick }}; closeMark({{ c_index }}, true);">Done</i> </span> -->
             </span>
