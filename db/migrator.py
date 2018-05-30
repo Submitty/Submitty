@@ -22,7 +22,7 @@ MIGRATIONS_PATH = DIR_PATH.parent / 'migrations'
 
 def parse_args():
     parser = ArgumentParser(description='Migration script for upgrading/downgrading the database')
-    parser.add_argument('--environment', '-e', choices=['master', 'course'], required=True)
+    parser.add_argument('--environment', '-e', choices=['master', 'course'])
     parser.add_argument('--config', '-c', dest='config_path', type=str, required=True)
     subparsers = parser.add_subparsers(metavar='command', dest='command')
     sub = subparsers.add_parser('create', help='Create migration')
@@ -66,15 +66,28 @@ def migrate(args):
     with Path(args.config_path,  'database.json').open() as open_file:
         database = json.load(open_file)
 
-    with psycopg2.connect(dbname='submitty', host=database['database_host'], user=database['database_user'],
-                          password=database['database_password']) as connection:
-        migrate_connection(connection, MIGRATIONS_PATH, 'core', args)
+    if args.environment is None or args.environment == 'master':
+        params = {
+            'dbname': 'submitty',
+            'host': database['database_host'],
+            'user': database['database_user'],
+            'password': database['database_password']
+        }
 
-    for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
-        for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
-            with psycopg2.connect(dbname='submitty_{}_{}'.format(semester, course), host=database['database_host'],
-                                  user=database['database_user'], password=database['database_password']) as connection:
-                migrate_connection(connection, MIGRATIONS_PATH, 'course', args)
+        with psycopg2.connect(**params) as connection:
+            migrate_connection(connection, MIGRATIONS_PATH, 'core', args)
+
+    if args.environment is None or args.environment == 'course':
+        params = {
+            'host': database['database_host'],
+            'user': database['database_user'],
+            'password': database['database_password']
+        }
+        for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
+            for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
+                params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                with psycopg2.connect(**params) as connection:
+                    migrate_connection(connection, MIGRATIONS_PATH, 'course', args)
 
 
 def migrate_connection(connection, migrations_path, mig_type, args):

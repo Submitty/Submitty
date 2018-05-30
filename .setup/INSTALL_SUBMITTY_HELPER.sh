@@ -10,12 +10,12 @@
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
-
-
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
     exit 1
 fi
+
+SUBMITTY_CONFIG_DIR = ${SUBMITTY_INSTALL_DIR}/config
 
 
 ########################################################################################################################
@@ -364,17 +364,11 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# COPY THE DB Migrations
+# Run THE DB MIGRATIONS
 
-echo -e 'Copy the DB migrations'
+echo -e 'Running the DB migrations'
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/db
-chown root:root ${SUBMITTY_INSTALL_DIR}/db
-chmod 755 ${SUBMITTY_INSTALL_DIR}/db
-
-rsync -rtz  ${SUBMITTY_REPOSITORY}/db/*   ${SUBMITTY_INSTALL_DIR}/db/
-find ${SUBMITTY_INSTALL_DIR}/db -type f -exec chmod 500 {} \;
-
+${SUBMITTY_REPOSITORY}/db/migrator.py -c ${SUBMITTY_CONFIG_DIR} migrate
 
 ################################################################################################################
 ################################################################################################################
