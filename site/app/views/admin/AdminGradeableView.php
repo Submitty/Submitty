@@ -64,7 +64,8 @@ class AdminGradeableView extends AbstractView {
                             'publish'   => $mark->getPublish(),
                             'order'     => $mark->getOrder(),
                             'id'        => $mark->getId(),
-                            'points'    => $mark->getPoints());
+                            'points'    => $mark->getPoints(),
+                            'note'      => $mark->getNote());
                     }
                 }
             }

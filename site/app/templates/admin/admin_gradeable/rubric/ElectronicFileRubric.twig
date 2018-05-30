@@ -100,6 +100,8 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
         <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
                 {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
 
+        <br />
+
         <div id="pdf_page">
             <br />
             Who will assign pages to components?
@@ -153,14 +155,14 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
                             {% set first = true %}
                             {% set hide_icons = "" %}
                             {% for mark in marks[question.getId()] %}
-                                <div id="mark_id-{{ num }}-{{ mark.getOrder() }}" name="mark_{{ num }}" data-gcm_id="{{ mark.getId() }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
-                                    <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.getOrder() }}" value="{{ mark.getId() }}">
+                                <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                                    <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
                                     <i class="fa fa-circle" aria-hidden="true"></i>
-                                    <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.getOrder() }}"
-                                           value="{{ mark.getPoints() }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                                    <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getNote() }}</textarea>
+                                    <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
+                                           value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                                    <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
                                     {% if not first %}
-                                        <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.getOrder() }}" {{ mark.getPublish() ? 'checked' : '' }}> Publish
+                                        <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
                                     {% endif %}
 
                                     <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
