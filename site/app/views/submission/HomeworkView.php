@@ -1200,7 +1200,7 @@ HTML;
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if ($gradeable->hasGradeFile()) {
+            if ($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;

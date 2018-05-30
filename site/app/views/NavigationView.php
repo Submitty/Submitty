@@ -215,7 +215,7 @@ HTML;
                         $title = "CLOSED";
                     }
                 }
-                if ($g_data->beenAutograded() && $g_data->beenTAgraded() && $g_data->getUserViewedDate() !== null){
+                if ($g_data->useTAGrading() && $g_data->beenTAgraded() && $g_data->getUserViewedDate() !== null){
                     $title_to_button_type_submission['GRADED'] = "btn-default";
                 }
                 /** @var Gradeable $g_data */

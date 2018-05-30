@@ -1333,9 +1333,28 @@ WHERE gcm_id=?", $params);
      * @param \app\models\Gradeable $gradeable
      */
     public function updateUserViewedDate(Gradeable $gradeable) {
-        if ($gradeable->getGdId() !== null) {
-            $this->course_db->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=?",
-                array($gradeable->getGdId()));
+        if ($gradeable->getGdId() !== null && $gradeable->getUser() !== null) {
+            $this->course_db->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=? and gd_user_id=?",
+                array($gradeable->getGdId(), $gradeable->getUser()->getId()));
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * This updates the viewed date on a gradeable object (assuming that it has a set
+     * $user object associated with it).
+     *
+     * @param \app\models\Gradeable $gradeable
+     */
+    public function resetUserViewedDate(Gradeable $gradeable) {
+        if ($gradeable->getGdId() !== null && $gradeable->getUser() !== null) {
+            $this->course_db->query("UPDATE gradeable_data SET gd_user_viewed_date = NULL WHERE gd_id=? and gd_user_id=?",
+                array($gradeable->getGdId(), $gradeable->getUser()->getId()));
+            return true;
+        } else {
+            return false;
         }
     }
 
