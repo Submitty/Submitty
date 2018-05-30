@@ -17,6 +17,7 @@ from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from shutil import copyfile
 import glob
 import grp
 import hashlib
@@ -847,8 +848,15 @@ class Course(object):
                                   merged_id=threadData[4],
                                   is_visible=True if threadData[5] == "t" else False)
                 conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[6])
-
+            counter = 1
             for postData in f_data[0]:
+                if(postData[10] != "f" and postData[10] != ""):
+                    #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
+                    attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
+                    os.makedirs(attachment_path)
+                    os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(course_path, "forum_attachments", str(postData[0]))))
+                    copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
+                counter += 1
                 conn.execute(forum_posts.insert(),
                                   thread_id=postData[0],
                                   parent_id=postData[1],
@@ -860,7 +868,7 @@ class Course(object):
                                   endorsed_by=postData[7],
                                   resolved = True if postData[8] == "t" else False,
                                   type=postData[9],
-                                  has_attachment=False)
+                                  has_attachment=True if postData[10] != "f" else False)
 
             print('Added forum data to sample course.') 
         
