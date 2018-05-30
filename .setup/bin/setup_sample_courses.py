@@ -739,7 +739,6 @@ class Course(object):
             #create_teams
             if gradeable.team_assignment is True:
                 ucounter = 0
-                test_counter = 0
                 for user in self.users:
                     unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
                     reg_section = user.get_detail(self.code, "registration_section")
@@ -750,8 +749,6 @@ class Course(object):
                         gradeable_teams_table.c['registration_section'] == reg_section)
                     res = conn.execute(teams_registration)
                     if res.rowcount == 0:
-                        test_counter+=1
-                        print(test_counter)
                         conn.execute(gradeable_teams_table.insert(),
                                      team_id=unique_team_id,
                                      g_id=gradeable.id,
@@ -762,6 +759,7 @@ class Course(object):
                                         user_id=user.get_detail(self.code, "id"),
                                         state=1)
                         ucounter+=1
+                        res.close()
                         continue
                     else:
                         added = False
@@ -769,7 +767,7 @@ class Course(object):
                             members_in_team = select([teams_table]).where(
                                 teams_table.c['team_id'] == team_in_section['team_id'])
                             res = conn.execute(members_in_team)
-                            if res.rowcount < 3:                        
+                            if res.rowcount < gradeable.max_team_size:                        
                                 conn.execute(teams_table.insert(),
                                             team_id=team_in_section['team_id'], 
                                             user_id=user.get_detail(self.code, "id"),
@@ -787,7 +785,7 @@ class Course(object):
                                         user_id=user.get_detail(self.code, "id"),
                                         state=1)
                             ucounter+=1
-
+                    res.close()
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
@@ -803,9 +801,23 @@ class Course(object):
             max_submissions = gradeable.max_random_submissions
             for user in self.users:
                 submitted = False
-                submission_path = os.path.join(gradeable_path, user.id)
+                team_id = None
+                if gradeable.team_assignment is True:
+                    what_team = select([teams_table]).where(
+                        teams_table.c['user_id'] == user.id)
+                    res = conn.execute(what_team)
+                    temp = res.fetchall()
+                    if(temp):
+                        team_id = temp[0][0]
+                    res.close()
+                if team_id is not None:
+                    submission_path = os.path.join(gradeable_path, team_id)
+                else: 
+                    submission_path = os.path.join(gradeable_path, user.id)
+
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    os.makedirs(submission_path)
+                    if not os.path.exists(submission_path):
+                        os.makedirs(submission_path)
                     versions_to_submit = random.choice(range(0,10))
                     if(versions_to_submit) < 2:
                         versions_to_submit = 3
@@ -826,11 +838,24 @@ class Course(object):
                             submitted = True
                             submission_count += 1
                             current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
-                            conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                        g_version=version, submission_time=current_time_string)
-                            if version == versions_to_submit:
-                                conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                            active_version=versions_to_submit)
+                            if team_id is not None:
+                                previous_submission = select([electronic_gradeable_data]).where(
+                                    electronic_gradeable_data.c['team_id'] == team_id)
+                                res = conn.execute(previous_submission)
+                                if res.rowcount == 0:
+                                    conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
+                                                team_id=team_id, g_version=version, submission_time=current_time_string)
+                                    if version == versions_to_submit:
+                                        conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
+                                                    team_id=team_id, active_version=versions_to_submit)
+                                else: 
+                                    continue
+                            else:
+                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                            g_version=version, submission_time=current_time_string)
+                                if version == versions_to_submit:
+                                    conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                                active_version=versions_to_submit)
                             json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
@@ -1244,7 +1269,7 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
-            if self.gradeable_config is not None and self.team_assignment is not True:
+            if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
                         self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
