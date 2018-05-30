@@ -772,7 +772,7 @@ class Course(object):
                             os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                             submitted = True
                             submission_count += 1
-                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
+                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days))
                             conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                         g_version=version, submission_time=current_time_string)
                             if version == versions_to_submit:
@@ -798,6 +798,7 @@ class Course(object):
                                     src = os.path.join(gradeable.sample_path, submission)
                                     dst = os.path.join(submission_path, str(version))
                                     create_gradeable_submission(src, dst)
+                            random_days-=1
                         
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
