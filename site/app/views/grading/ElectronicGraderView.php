@@ -1522,7 +1522,8 @@ HTML;
             if($question->getGrader() === null || !$show_graded_info) {
                 $grader_id = "Ungraded!";
                 $graded_color = "";
-            } else {
+            } 
+            else {
                 $grader_id = "Graded by " . $question->getGrader()->getId();
                 if($question->getGradedTAPoints()==$question->getMaxValue()){
                     $graded_color = " background-color: #006600";
