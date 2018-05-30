@@ -2,6 +2,8 @@
 {% set grader_id = component.grader == null ? "Ungraded!" : component.grader.id %}
 {% set graded_color = component.grader == null ? "" : "background-color: #eac73d;" %}
 
+{% set c_index = loop.index %}
+
 {# todo: need to check if current user is full access grader #}
 {% set display_verify_user = component.grader != null and component.grader.id != your_user_id %}
 
@@ -11,18 +13,18 @@
     {# todo: auto determine page # #}
 {% endif %}
 
-<div id="title-{{ loop.index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ loop.index }}, true);">
+<div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
     <div class="box-title">
-        <span id="gradebar-{{ loop.index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge">
+        <span id="gradebar-{{ c_index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge">
             <strong>
-                <span id="grade-{{ loop.index }}" name="grade-{{ loop.index }}" class="grades" data-lower_clamp="{{ component.lower_clamp }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="{{ component.upper_clamp }}"> X</span> / {{ component.max_value }}
+                <span id="grade-{{ c_index }}" name="grade-{{ c_index }}" class="grades" data-lower_clamp="{{ component.lower_clamp }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="{{ component.upper_clamp }}"> X</span> / {{ component.max_value }}
             </strong>
         </span>
         <span style="font-size: 12px;" colspan="3" data-changebg="true">
-            <b><span id="progress_points-{{ loop.index }}" style="display: none;" data-changedisplay1="true"></span></b>
+            <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
             <b>{{ component.name }}</b>
             {% if component.graded_version == -1 and active_version != component.graded_version %}
-                <span id='wrong_version_{{ loop.index }}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>
+                <span id='wrong_version_{{ c_index }}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>
                     Please edit or ensure that comments from version {{ component.graded_version }} still apply.
                 </span>
             {% endif %}
@@ -34,11 +36,11 @@
                     </span>
                 {% endif %}
 
-                <span id="graded-by-{{ loop.index }}" style="font-style: italic; padding-right: 10px;">{{ grader_id }}</span>
-        <!--  <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{{ break_onclick }}; closeMark({{ loop.index }}, true);">Done</i> </span> -->
+                <span id="graded-by-{{ c_index }}" style="font-style: italic; padding-right: 10px;">{{ grader_id }}</span>
+        <!--  <span id="save-mark-{{ c_index }}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{{ break_onclick }}; closeMark({{ c_index }}, true);">Done</i> </span> -->
             </span>
         </span>
-        <span id="ta_note-{{ loop.index }}" style="display: none;" data-changedisplay1="true">
+        <span id="ta_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
             {% if component.ta_comment != "" %}
                 <br/>
                 <div style='margin-bottom:5px; color:#777;'>
@@ -46,30 +48,30 @@
                 </div>
             {% endif %}
         </span>
-        <span id="page-{{ loop.index }}" style="display: none;">
+        <span id="page-{{ c_index }}" style="display: none;">
             {% if component.page != 0 %}
                 <i>Page #: {{ page }}</i>
             {% endif %}
         </span>
         <span style="float: right;">
-            <span id="save-mark-{{ loop.index }}" style="cursor: pointer;  display: none; font-size: 12px; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+            <span id="save-mark-{{ c_index }}" style="cursor: pointer;  display: none; font-size: 12px; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
         </span>
 
-        <span id="student_note-{{ loop.index }}" style="display: none;" data-changedisplay1="true">
+        <span id="student_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
             {% if component.student_comment != "" %}
                 <div style='margin-bottom:5px; color:#777;'>
                     <i><b>Note to Student: </b>{{ component.student_comment }}</i>
                 </div>
             {% endif %}
         </span>
-        <!--         <span id="title-cancel-{{ loop.index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-                         <span id="cancel-mark-{{ loop.index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+        <!--         <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
+                         <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                  </span> -->
 
-        <div id="summary-{{ loop.index }}" style="display:none" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ precision }}">
+        <div id="summary-{{ c_index }}" style="display:none" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ precision }}">
             <span style="width:98%;" colspan="4">
-                <div id="rubric-{{ loop.index }}">
-                    <span id="rubric-textarea-{{ loop.index }}" name="comment-{{ loop.index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>
+                <div id="rubric-{{ c_index }}">
+                    <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>
                 </div>
             </span>
         </div>
@@ -78,30 +80,32 @@
 
 {# Marks table #}
 
-<div class="box" id="marks-parent-{{ loop.index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-    {# todo: marks #}
+<div class="box" id="marks-parent-{{ c_index }}" style="display: block; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    {% for mark in component.marks %}
+        {% include "Mark.twig" %}
+    {% endfor %}
 </div>
 
 {# Custom mark #}
 
-<div class="box" id="marks-extra-{{ loop.index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+<div class="box" id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
     <div class="box-title">
 
         {# todo: peer #}
         <span colspan="4">
-            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ loop.index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ precision }}', '{{ id }}', '{{ user_id }}', {{ active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ component.lower_clamp }}, {{ component.upper_clamp }}, '{{ precision }}', '{{ id }}', '{{ user_id }}', {{ active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
 
 
-        <div class="box" id="mark_custom_id-{{ loop.index }}" name="mark_custom_{{ loop.index }}">
+        <div class="box" id="mark_custom_id-{{ c_index }}" name="mark_custom_{{ c_index }}">
             <div class="box-title">
                 <span colspan="1" style="text-align: center; white-space: nowrap;">
-                    <span onclick=""> <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ loop.index }}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                    <input name="mark_points_custom_{{ loop.index }}" type="number" step="{{ precision }}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ loop.index }});" value="{{ component.score }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
+                    <span onclick=""> <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
+                    <input name="mark_points_custom_{{ c_index }}" type="number" step="{{ precision }}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" value="{{ component.score }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
                 </span>
                 <span colspan="3" style="white-space: nowrap;">
-                    Custom: <textarea name="mark_text_custom_{{ loop.index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({{ loop.index }});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{{ component.comment }}</textarea>
+                    Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({{ c_index }});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{{ component.comment }}</textarea>
                 </span>
             </div>
         </div>

@@ -1,1 +1,20 @@
-<!-- todo -->
+{% set m_index = loop.index %}
+
+<tr id="mark_id-{{ c_index }}-{{ m_index }}" name="mark_{{ c_index }}" class="'+(is_publish ? 'is_publish' : '')+'">
+    <td colspan="1" style="; width: 90px; text-align: center;">
+        <span id="mark_id-{{ c_index }}-{{ m_index }}-check" onclick="selectMark(this);">
+                <i class="fa fa-square{{ mark.has ? "" : "-o" }} mark fa-lg" name="mark_icon_{{ c_index }}_{{ m_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>
+            </span>
+        <input name="mark_points_{{ c_index }}_{{ m_index }}" type="number" onchange="fixMarkPointValue(this);" step="{{ precision }}" value="{{ mark.points }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none; min-width: 50px;">
+    </td>
+    <div class="box">
+        <div class="box-title">
+            <td colspan="4">
+                <textarea name="mark_text_{{ c_index }}_{{ m_index }}" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">{{ mark.name }}</textarea>
+                <span id="mark_info_id-{{ c_index }}-{{ m_index }}" onclick="saveMark({{ c_index }},'{{ id }}' ,'{{ user_id }}',{{ active_version }}, {{ component.id }},'{{ your_user_id }}', -1); showMarklist(this,'{{ id }}');">
+                    <i class="fa fa-users icon-got-this-mark"></i>
+                </span>
+            </td>
+        </div>
+    </div>
+</tr>
