@@ -287,13 +287,14 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
 
     $('[name="new_team"]', form).val(new_team);
-    $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
+    $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
+    $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
     if(new_team) {
         $('[name="num_users"]', form).val(3);    
     }
@@ -407,17 +408,32 @@ function addCategory(old, i) {
     });
 }
 
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
  * useful for developers, but shouldn't be shown to normal users
  */
 function togglePageDetails() {
-    if (document.getElementById('page-info').style.visibility == 'visible') {
-        document.getElementById('page-info').style.visibility = 'hidden';
+    var element = document.getElementById('page-info');
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
     }
     else {
-        document.getElementById('page-info').style.visibility = 'visible';
+        element.style.display = 'block';
+        // Hide the box if you click outside of it
+        document.body.addEventListener('mouseup', function pageInfo(event) {
+            if (!element.contains(event.target)) {
+                element.style.display = 'none';
+                document.body.removeEventListener('mouseup', pageInfo, false);
+            }
+        });
     }
 }
 
@@ -1158,6 +1174,10 @@ function enableTabsInTextArea(id){
             }
         };
 
+}
+
+function changeDisplayOptions(option, thread_id){
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
 function resetScrollPosition(id){
