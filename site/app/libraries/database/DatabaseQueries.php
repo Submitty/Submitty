@@ -1989,6 +1989,12 @@ AND gc_id IN (
         return $return;
     }
 
+    public function existsThread($thread_id){
+        $this->course_db->query("SELECT 1 FROM threads where deleted = false AND id = ?", array($thread_id));
+        $result = $this->course_db->rows();
+        return count($result) > 0;
+    }
+
     public function existsAnnouncements(){
         $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
         $result = $this->course_db->rows();
