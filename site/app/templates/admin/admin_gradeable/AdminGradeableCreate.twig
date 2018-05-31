@@ -78,8 +78,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
 
-    <br />
-    Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
+    Is this a team assignment?
     <br />
         <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
             {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Yes
@@ -131,14 +130,14 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                $('#required_type').hide();
         }
 
-        disableElementChildren('.electronic-file');
+        disableElementChildren('.electronic_file');
         disableElementChildren('.checkpoints');
         disableElementChildren('.numeric');
 
         // Display the correct options for all forms depending
         //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
-            disableElementChildren('.electronic-file', false);
+            disableElementChildren('.electronic_file', false);
         }
         else if ($('#radio_checkpoints').is(':checked')) {
             disableElementChildren('.checkpoints', false);
