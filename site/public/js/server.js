@@ -296,13 +296,14 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
 
     $('[name="new_team"]', form).val(new_team);
-    $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
+    $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
+    $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
     if(new_team) {
         $('[name="num_users"]', form).val(3);    
     }
