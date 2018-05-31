@@ -4,28 +4,55 @@ NO_COMPONENT_ID = -1;
 /// Component ID of the "General Comment" box at the bottom
 GENERAL_MESSAGE_ID = -2;
 
+/**
+ * Get the page-wide Gradeable object (see Gradeable.php/getGradedData())
+ * @returns Object Gradeable data
+ */
 function getGradeable() {
     return grading_data.gradeable;
 }
 
+/**
+ * Get a specific component in the global Gradeable (see GradeableComponent.php/getGradedData())
+ * @param c_index 1-indexed component index
+ * @returns Object Component data
+ */
 function getComponent(c_index) {
     return grading_data.gradeable.components[c_index - 1];
 }
 
+/**
+ * Get a specific mark in a mark in the global Gradeable (see GradeableComponentMark.php/getGradeData())
+ * @param c_index 1-indexed component index
+ * @param m_index 0-indexed mark index
+ * @returns Object Mark data
+ */
 function getMark(c_index, m_index) {
     return grading_data.gradeable.components[c_index - 1].marks[m_index];
 }
 
+/**
+ * DOM callback for changing the number of points for a mark
+ * @param me DOM Element for the mark points entry
+ */
 function updateMarkPoints(me) {
     getMark(me.dataset.component_index, me.dataset.mark_index).points = parseFloat($(me).val());
     updateProgressPoints(me.dataset.component_index);
 }
 
+/**
+ * DOM callback for changing the note for a mark
+ * @param me DOM Element for the mark note entry
+ */
 function updateMarkText(me) {
     getMark(me.dataset.component_index, me.dataset.mark_index).name = $(me).val();
     updateProgressPoints(me.dataset.component_index);
 }
 
+/**
+ * DOM callback for changing the number of points for a common mark
+ * @param me DOM Element for the common mark points entry
+ */
 function updateCustomMarkPoints(me) {
     var component = getComponent(me.dataset.component_index);
     var val = $(me).val();
@@ -33,10 +60,16 @@ function updateCustomMarkPoints(me) {
     updateProgressPoints(me.dataset.component_index);
 }
 
+/**
+ * DOM callback for changing the note for a common mark
+ * @param me DOM Element for the common mark note entry
+ */
 function updateCustomMarkText(me) {
     var component = getComponent(me.dataset.component_index);
     var val = $(me).val();
     component.comment = val;
+
+    //If we set custom mark to empty then we're clearing it. So unset the point value too.
     if (val === "") {
         component.score = 0;
     }
@@ -70,6 +103,12 @@ function checkIfSelected(me) {
     checkMarks(question_num);
 }
 
+/**
+ * Render and return a view for the given mark
+ * @param num 1-indexed component index of the mark
+ * @param x 0-indexed mark index
+ * @returns DOM structure for the mark
+ */
 function getMarkView(num, x) {
     return Twig.twig({ref: "Mark"}).render({
         gradeable: getGradeable(),
@@ -254,6 +293,10 @@ function haveMarksChanged(num, data) {
     return false;
 }
 
+/**
+ * Reload marks for a component and render them in the list
+ * @param num 1-indexed component index
+ */
 function updateMarksOnPage(num) {
     var gradeable = getGradeable();
     var component = getComponent(num);
@@ -308,6 +351,7 @@ function updateMarksOnPage(num) {
         }
     });
 }
+
 
 function updateGeneralComment() {
     var gradeable = getGradeable();
@@ -460,7 +504,11 @@ function checkMarks(question_num) {
     } 
 }
 
-//calculate the number of points a component has with the given selected marks
+/**
+ * Calculate the number of points a component has with the given selected marks
+ * @param question_num 1-indexed component index
+ * @returns Either "None Selected" or the point value
+ */
 function calculateMarksPoints(question_num) {
     question_num = parseInt(question_num);
     var component = getComponent(question_num);
@@ -504,6 +552,10 @@ function calculateMarksPoints(question_num) {
     return current_points;
 }
 
+/**
+ * Update the display of a component's score, marks, and background
+ * @param question_num 1-indexed component index
+ */
 function updateProgressPoints(question_num) {
     question_num = parseInt(question_num);
     var current_progress = $('#progress_points-' + question_num);
@@ -581,12 +633,18 @@ function updateProgressPoints(question_num) {
     calculatePercentageTotal();
 }
 
+/**
+ * Update the display of all components' scores, marks, and backgrounds
+ */
 function updateAllProgressPoints() {
     for (var i = 1; i <= getGradeable().components.length; i ++) {
         updateProgressPoints(i);
     }
 }
 
+/**
+ * Update the Total / Auto-Grading Total labels on the bottom of the form
+ */
 function calculatePercentageTotal() {
     var gradeable = getGradeable();
     var total = 0;
@@ -611,7 +669,11 @@ function calculatePercentageTotal() {
     $("#score_total").html(earned + " / " + parseFloat(autoTotal + total) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + autoEarned + "/" + autoTotal);
 }
 
-function selectMark(me, first_override) {
+/**
+ * DOM callback for toggling a mark
+ * @param me DOM mark icon element
+ */
+function selectMark(me) {
     var icon = $(me).find("i");
     var skip = true; //if the table is all false initially, skip check marks.
     var question_num = me.dataset.component_index;
@@ -638,8 +700,11 @@ function selectMark(me, first_override) {
     updateProgressPoints(question_num);        
 }
 
-//closes all the questions except the one being opened
-//openClose toggles alot of listed elements in order to work
+/**
+ * Closes all the questions except the one being opened
+ * openClose toggles alot of listed elements in order to work
+ * @param row_id 1-indexed component index
+ */
 function openClose(row_id) {
     var row_num = parseInt(row_id);
     var total_num = getGradeable().components.length;
@@ -656,7 +721,11 @@ function openClose(row_id) {
     updateCookies();
 }
 
-//Set if the mark at index X should be visible
+/**
+ * Set if a component should be visible
+ * @param x 1-indexed component index
+ * @param show If the component should be visible
+ */
 function setMarkVisible(x, show) {
     var page = ($('#page-' + x)[0]).innerHTML;
 
@@ -728,7 +797,10 @@ function setMarkVisible(x, show) {
   //  cancel_button.attr('colspan', (show ? 1 : 0));
 }
 
-//Set if the general comment box should be visible
+/**
+ * Set if the general comment box should be visible
+ * @param gshow If it should be visible
+ */
 function setGeneralVisible(gshow) {
     var general_comment = $('#extra-general');
     var general_comment_title = $('#title-general');
@@ -985,7 +1057,10 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
     })
 }
 
-//Open the given mark (if it's not open already), saving changes on any previous mark
+/**
+ * Open the given component (if it's not open already), saving changes on any previous components
+ * @param id 1-indexed component index
+ */
 function openMark(id) {
     saveLastOpenedMark(true);
     saveMark(id, true);
@@ -997,7 +1072,11 @@ function openMark(id) {
     }
 }
 
-//Close the given mark (if it's open), optionally saving changes
+/**
+ * Close the given component (if it's open), optionally saving changes
+ * @param id 1-indexed component index
+ * @param save If changes should be saved
+ */
 function closeMark(id, save) {
     //Can't close a closed mark
     if (findCurrentOpenedMark() !== id) {
@@ -1012,6 +1091,11 @@ function closeMark(id, save) {
     setMarkVisible(id, false);
 }
 
+/**
+ * Toggle if a component should be visible
+ * @param id 1-indexed component index
+ * @param save If changes should be saved
+ */
 function toggleMark(id, save) {
     if (findCurrentOpenedMark() === id) {
         closeMark(id, save);
@@ -1020,7 +1104,9 @@ function toggleMark(id, save) {
     }
 }
 
-//Open the general message input (if it's not open already), saving changes on any previous mark
+/**
+ * Open the general message input (if it's not open already), saving changes on any previous mark
+ */
 function openGeneralMessage() {
     saveLastOpenedMark(true);
     saveGeneralComment(true);
@@ -1031,7 +1117,10 @@ function openGeneralMessage() {
     }
 }
 
-//Close the general message input (if it's open), optionally saving changes
+/**
+ * Close the general message input (if it's open), optionally saving changes
+ * @param save If changes should be saved
+ */
 function closeGeneralMessage(save) {
     //Cannot save it if it is not being edited
     if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
@@ -1047,6 +1136,10 @@ function closeGeneralMessage(save) {
     setGeneralVisible(false);
 }
 
+/**
+ * Toggle if the general comment should be visible
+ * @param save If changes should be saved
+ */
 function toggleGeneralMessage(save) {
     if (findCurrentOpenedMark() === -2) {
         closeGeneralMessage(save);
