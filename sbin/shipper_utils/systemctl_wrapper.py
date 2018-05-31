@@ -28,7 +28,7 @@ else:
 # 0 = After performing the specified action, the requested daemon is dead
 # 1 = After performing the specified action, the requested daemon is alive
 # 2 = failure in performing operation
-# 3 = invalid mode, daemon, or machine_id 
+# 3 = invalid mode, daemon, or target
 EXIT_CODES = {
   'inactive'  : 0,
   'active'    : 1,
@@ -60,24 +60,24 @@ def perform_systemctl_command_on_all_workers(daemon, mode):
   # Right now, this script returns the greatesr (worst) status it recieves from a worker.
   greatest_status = 0
 
-  for machine_id in WORKERS.keys():
+  for target in WORKERS.keys():
     # Don't run on local machines
-    if machine_id == 'primary' or WORKERS[machine_id]['address'] == 'localhost':
+    if target == 'primary' or WORKERS[target]['address'] == 'localhost':
       continue
-    status = perform_systemctl_command_on_worker(daemon, mode, machine_id)
-    print_status_message(status, mode, daemon, machine_id)
-    verify_systemctl_status_code(status, mode, daemon, machine_id, disable_on_failure=True)
+    status = perform_systemctl_command_on_worker(daemon, mode, target)
+    print_status_message(status, mode, daemon, target)
+    verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=True)
     greatest_status = max(greatest_status, status)
   return greatest_status
 
 # This function performs a systemctl command (mode) on a given daemon on a given machine
-def perform_systemctl_command_on_worker(daemon, mode, machine_id):
-  if not machine_id in WORKERS:
-    print("There is no machine with the key {0}".format(machine_id))
+def perform_systemctl_command_on_worker(daemon, mode, target):
+  if not target in WORKERS:
+    print("There is no machine with the key {0}".format(target))
     sys.exit(EXIT_CODES['bad_arguments'])
 
-  user = WORKERS[machine_id]['username']
-  host = WORKERS[machine_id]['address']
+  user = WORKERS[target]['username']
+  host = WORKERS[target]['address']
 
   if host == 'localhost' or user == '':
     print("Please don't specify machine id if you wish to run locally.")
@@ -103,17 +103,17 @@ def perform_systemctl_command_on_worker(daemon, mode, machine_id):
       ssh.close()
       return status
 
-def disable_machine(machine_id):
+def disable_machine(target):
   if WORKERS == None:
     print('Cannot disable as autograding_workers.json does not exist.')
     return
-  print('Disabling', machine_id)
-  WORKERS[machine_id]['enabled'] = False
+  print('Disabling', target)
+  WORKERS[target]['enabled'] = False
 
   with open(AUTOGRADING_WORKERS_PATH, 'w') as json_file:
     json.dump(WORKERS, json_file, indent=4)
 
-def verify_systemctl_status_code(status, mode, daemon, machine_id, disable_on_failure=False):
+def verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=False):
   if not mode in VALID_MODES:
     print("ERROR: Invalid mode")
     return False
@@ -125,9 +125,9 @@ def verify_systemctl_status_code(status, mode, daemon, machine_id, disable_on_fa
     correct = False
 
   if correct == False:
-    print("ERROR: Could not {0} the {1} daemon on {2}".format(mode, daemon, machine_id))
+    print("ERROR: Could not {0} the {1} daemon on {2}".format(mode, daemon, target))
     if disable_on_failure:
-      disable_machine(machine_id)
+      disable_machine(target)
 
   return correct
 
@@ -136,10 +136,10 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='A wrapper for the various systemctl functions. \
     This script must be run as the submitty supervisor.',
     epilog='ERROR CODES: 0 = After performing the specified action, the requested daemon is dead, 1 = After performing the \
-    specified action, the requested daemon is alive, 2 = Failure performing operation, 3 = invalid mode, daemon, or machine_id')
+    specified action, the requested daemon is alive, 2 = Failure performing operation, 3 = invalid mode, daemon, or target')
   parser.add_argument("--daemon", metavar="DAEMON", type=str, help="Optional. Valid options are worker and shipper. \
     If unspecified, worker is assumed.")
-  parser.add_argument("--machine_id", metavar="MACHINE", type=str, help="Optional. Give the id of a machine in the \
+  parser.add_argument("--target", metavar="TARGET", type=str, help="Optional. Give the id of a machine in the \
     autograding_workers json and this script will perform the desired function on that machine. If perform_on_all_workers is\
     specified, the command will be processed on all worker machines. If not specified, the status of this machine is checked.")
   parser.add_argument("mode", metavar="MODE", type=str, help="Valid modes are status, start, restart, and stop")
@@ -147,7 +147,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   daemon = 'worker'
-  machine_id = args.machine_id
+  target = args.target
   mode = args.mode.lower()
 
   # daemon is an optional argument which must be either shipper or worker. If it is anything else, throw an error.
@@ -159,7 +159,7 @@ if __name__ == "__main__":
       sys.exit(EXIT_CODES['bad_arguments'])
 
   # determine whether we are working on a local or foreign machine
-  local = False if (machine_id != None and machine_id.lower() != 'primary') else True
+  local = False if (target != None and target.lower() != 'primary') else True
 
   # make sure a valid command is being passed to the daemon.
   if not mode in VALID_MODES:
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     text = os.popen(status_command).read().strip()
     status = EXIT_CODES['active'] if (text == 'active') else EXIT_CODES['inactive']
     # verifies that after performing the 'mode' command, the resulting status is correct.
-    verify_systemctl_status_code(status, mode, daemon, machine_id, disable_on_failure=False)
+    verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=False)
     # local is a keyword which causes print_status_message to print no machine prefix.
     print_status_message(status, mode, daemon, 'local')
   else:
@@ -197,17 +197,14 @@ if __name__ == "__main__":
       sys.exit(EXIT_CODES['failure'])
     # perform_on_all_workers is a keyword that causes us to run the command on every worker machine.
     #   This is helpful for performing start all or stop all commands.
-    if machine_id.lower() == "perform_on_all_workers":
+    if target.lower() == "perform_on_all_workers":
       status = perform_systemctl_command_on_all_workers(daemon, mode)
     else:
-      status = perform_systemctl_command_on_worker(daemon, mode, machine_id)
+      status = perform_systemctl_command_on_worker(daemon, mode, target)
       # verifies that after performing the 'mode' command, the resulting status is correct.
-      verify_systemctl_status_code(status, mode, daemon, machine_id, disable_on_failure=True)
-      print_status_message(status, mode, daemon, machine_id)
+      verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=True)
+      print_status_message(status, mode, daemon, target)
 
 
   sys.exit(status)
-
-
   
-    

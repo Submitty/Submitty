@@ -580,8 +580,8 @@ fi
 
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
-    echo -e "\nStopping worker daemons"
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --machine_id perform_on_all_workers
+    echo -e "\nStopping worker machine daemons"
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "\n"
 fi
 

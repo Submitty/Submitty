@@ -54,7 +54,7 @@ def install_worker(user, host):
             return success
 
 def run_systemctl_command(machine, command):
-  command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--machine_id', machine]
+  command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
   process = subprocess.Popen(command)
   process.communicate()
   exit_code = process.wait()
