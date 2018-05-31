@@ -85,7 +85,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Sections</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
@@ -94,20 +94,13 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absence Extensions</a>
             </li>
             <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">HWReports, CSV Reports, and Grade Summaries</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">Grade Summaries / CSV Report</a>
             </li>
             <li>
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}">Plagiarism Detection</a>
             </li>
 
 HTML;
-
-                    if ($this->core->getUser()->isDeveloper()) {
-                        $return .= <<<HTML
-            <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
-
-HTML;
-                    }
                     $return .= <<<HTML
         </ul>
     </div>
@@ -160,14 +153,31 @@ HTML;
             <i class="fa fa-github fa-lg"></i>
         </a>
     </span>
+HTML;
+    if ($this->core->getConfig()->isDebug()) {
+            $return .= <<<HTML
+    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+HTML;
+    }
+    $return .= <<<HTML
 </div>
 HTML;
-        if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
+        if ($this->core->getConfig()->isDebug()) {
             $return .= <<<HTML
 <div id='page-info'>
-    Total Queries: {$this->core->getCourseDB()->getQueryCount()}<br />
-    Runtime: {$runtime}<br />
-    Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
+    Runtime: {$runtime}<br /><br />
+    <h3>Site Details</h3>
+    Total Submitty Details: {$this->core->getSubmittyDB()->getQueryCount()}<br /><br />
+    Submitty Queries:<br /> {$this->core->getSubmittyDB()->getPrintQueries()}
+HTML;
+            if ($this->core->getConfig()->isCourseLoaded()) {
+                $return .= <<<HTML
+    <h3>Course Details</h3>
+    Total Course Queries: {$this->core->getCourseDB()->getQueryCount()}<br /><br />
+    Course Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
+HTML;
+            }
+        $return .= <<<HTML
 </div>
 HTML;
         }

@@ -240,7 +240,7 @@ HTML;
                 <em style='color: orange;'>must be >= Submission Open Date</em>
                 <br />
 
-                How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
+                How many late days may students use on this assignment? <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br /> <br />
 
@@ -2474,6 +2474,7 @@ $('#gradeable-form').on('submit', function(e){
         var checkRegister = $('#registration-section').is(':checked');
         var checkRotate = $('#rotating-section').is(':checked');
         var all_gradeable_ids = $js_gradeables_array;
+        var eg_late_ms = $('#eg_late_days').val() * 86400000;
         if($('#peer_yes_radio').is(':checked')) {
             var found_peer_component = false;
             var found_reg_component = false;
@@ -2591,8 +2592,11 @@ $('#gradeable-form').on('submit', function(e){
         }
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
             if(date_grade < date_due) {
-                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= Due Date (+ max allowed late days)");
+                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= Due Date");
                 return false;
+            }
+            else if(date_grade < date_due + eg_late_ms) {
+                alert("DATE CONSISTENCY:  [Warning] Manual Grading Open Date should be >= Due Date (+ max allowed late days)");
             }
             if(date_released < date_due) {
                 alert("DATE CONSISTENCY:  Grades Released Date must be >= Manual Grading Open Date");

@@ -121,6 +121,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
+    rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
@@ -306,66 +307,7 @@ popd > /dev/null
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
-echo -e "Copy the scripts"
-
-# make the directory (has a different name)
-mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
-
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
-chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
-
-# copy all of the files
-rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
-
-#replace necessary variables in the copied scripts
-array=( authentication.py adduser.py create_course.sh generate_repos.py grade_item.py \
-        submitty_autograding_shipper.py submitty_autograding_worker.py \
-        grade_items_logging.py grading_done.py regrade.py check_everything.py build_homework_function.sh setcsvfields \
-        setcsvfields.py get_version_details.py insert_database_version_data.py )
-for i in "${array[@]}"; do
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/${i}
-done
-
-# most of the scripts should be root only
-find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
-find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
-
-# www-data needs to have access to this so that it can authenticate for git
-chown root:www-data ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/authentication.py
-
-# all course builders (instructors & head TAs) need read/execute access to these scripts
-array=( regrade.py grading_done.py read_iclicker_ids.py left_right_parse.py)
-for i in "${array[@]}"; do
-    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
-done
-
-# everyone needs to run this script
-chmod 555 ${SUBMITTY_INSTALL_DIR}/bin/killall.py
-
-# course builders & hwcron need access to these scripts
-array=( build_homework_function.sh make_assignments_txt_file.py )
-for i in "${array[@]}"; do
-    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
-done
-
-# hwcron only things
-array=( insert_database_version_data.py grade_item.py \
-        submitty_autograding_shipper.py submitty_autograding_worker.py grade_items_logging.py \
-        write_grade_history.py build_config_upload.py )
-for i in "${array[@]}"; do
-    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
-done
-
-# root only things
-array=( untrusted_canary.py check_everything.py get_version_details.py )
-for i in "${array[@]}"; do
-    chown root:root ${SUBMITTY_INSTALL_DIR}/bin/${i}
-    chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/${i}
-done
+source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -405,61 +347,19 @@ pushd ${SUBMITTY_INSTALL_DIR}/.setup/ > /dev/null
 chown root:root untrusted_execute.c
 chmod 500 untrusted_execute.c
 # compile the code
-g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
+g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 # change permissions & set suid: (must be root)
-chown root  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
-chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
-chmod 4550  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
+chown root  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
 
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
-if [ "${WORKER}" == 0 ]; then
-    echo -e "Copy the submission website"
-
-    # copy the website from the repo
-    rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
-    
-    # install composer dependencies and generate classmap
-    pushd ${SUBMITTY_INSTALL_DIR}/site
-    composer install --no-dev --optimize-autoloader
-    popd
-
-    # set special user $HWPHP_USER as owner & group of all website files
-    find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
-
-    # TEMPORARY (until we have generalized code for generating charts in html)
-    # copy the zone chart images
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
-    cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
-
-    # set the permissions of all files
-    # $HWPHP_USER can read & execute all directories and read all files
-    # "other" can cd into all subdirectories
-    chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
-    find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
-
-    # "other" can read all of these files
-    array=( css otf jpg png ico txt )
-    for i in "${array[@]}"; do
-        find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.${i} -exec chmod o+r {} \;
-    done
-
-    # "other" can read & execute these files
-    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
-
-    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
-    mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
-
-    # return the course index page (only necessary when 'clean' option is used)
-    if [ -f "$mytempcurrentcourses" ]; then
-        echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
-        mv ${mytempcurrentcourses} ${originalcurrentcourses}
-    fi
+if [ ${WORKER} == 0 ]; then
+    source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
 fi
 
 ################################################################################################################
@@ -478,7 +378,7 @@ echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"  
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
-printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py  >  /dev/null\n"  >> ${HWCRON_CRONTAB_FILE}
+printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${HWCRON_CRONTAB_FILE}
 
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
