@@ -598,7 +598,7 @@ function calculatePercentageTotal() {
     for (var i = 1; i <= gradeable.components.length; i ++) {
         var component = getComponent(i);
         total += component.max_value;
-        
+
         var points = calculateMarksPoints(i);
         if (points !== "None Selected") {
             earned += points;
@@ -987,9 +987,6 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
 
 //Open the given mark (if it's not open already), saving changes on any previous mark
 function openMark(id) {
-    var gradeable = getGradeable();
-    var component = getComponent(id);
-
     saveLastOpenedMark(true);
     saveMark(id, true);
     updateMarksOnPage(id);
@@ -1006,9 +1003,6 @@ function closeMark(id, save) {
     if (findCurrentOpenedMark() !== id) {
         return;
     }
-
-    var gradeable = getGradeable();
-    var component = getComponent(id);
 
     if (save) {
         saveLastOpenedMark(true);
@@ -1028,8 +1022,6 @@ function toggleMark(id, save) {
 
 //Open the general message input (if it's not open already), saving changes on any previous mark
 function openGeneralMessage() {
-    var gradeable = getGradeable();
-
     saveLastOpenedMark(true);
     saveGeneralComment(true);
 
@@ -1045,8 +1037,6 @@ function closeGeneralMessage(save) {
     if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
         return;
     }
-
-    var gradeable = getGradeable();
 
     if (save) {
         saveLastOpenedMark(true);
