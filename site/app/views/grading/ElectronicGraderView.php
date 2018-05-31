@@ -1191,13 +1191,13 @@ HTML;
                     <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
                         <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a>
-                </div>
+                </div><br/>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
                     display_files($contents, $count, $indent+1, $return, $filename);
                     $return .= <<<HTML
-                </div><br/>
+                </div>
             </div>
 HTML;
                 }
