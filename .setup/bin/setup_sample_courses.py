@@ -40,7 +40,7 @@ from submitty_utils import dateutils
 # TODO: Remove this and purely use shutil once we move totally to Python 3
 from zipfile import ZipFile
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
 import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -737,12 +737,12 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
-            # if gradeable.id == 'closed_team_homework':
-                # pdb.set_trace()
             #create_teams
             if gradeable.team_assignment is True:
                 ucounter = 0
                 for user in self.users:
+                    #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
+                    #example: 00001_aphacker
                     unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
                     team_in_other_gradeable = select([teams_table]).where(
                         teams_table.c['team_id'] == unique_team_id)
@@ -754,6 +754,8 @@ class Course(object):
                     reg_section = user.get_detail(self.code, "registration_section")
                     if reg_section is None:
                         continue
+                    #The teams are created based on the order of the users. As soon as the number of teamates
+                    #exceeds the max team size, then a new team will be created within the same registration section
                     print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
                     teams_registration = select([gradeable_teams_table]).where(
                         (gradeable_teams_table.c['registration_section'] == reg_section) &
@@ -787,14 +789,14 @@ class Course(object):
                                 continue
                         if not added:
                             conn.execute(gradeable_teams_table.insert(),
-                                        team_id=unique_team_id,
-                                        g_id=gradeable.id,
-                                        registration_section=reg_section,
-                                                rotation_section=None)
+                                         team_id=unique_team_id,
+                                         g_id=gradeable.id,
+                                         registration_section=reg_section,
+                                         rotation_section=None)
                             conn.execute(teams_table.insert(),
-                                        team_id=unique_team_id, 
-                                        user_id=user.get_detail(self.code, "id"),
-                                        state=1)
+                                         team_id=unique_team_id, 
+                                         user_id=user.get_detail(self.code, "id"),
+                                         state=1)
                             ucounter+=1
                     res.close()
             if gradeable.type == 0 and \
@@ -802,6 +804,7 @@ class Course(object):
                  gradeable.sample_path is None or
                  gradeable.config_path is None):
                     continue
+            #creating the folder containing all the submissions
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
 
             if gradeable.type == 0:
@@ -810,13 +813,13 @@ class Course(object):
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
+            #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
                 submitted = False
                 team_id = None
                 if gradeable.team_assignment is True:
-                    what_team = select([teams_table]).where(
-                        teams_table.c['user_id'] == user.id)
-                    res = conn.execute(what_team)
+                    res = conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                    ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                     temp = res.fetchall()
                     if(temp):
                         team_id = temp[0][0]
@@ -837,6 +840,7 @@ class Course(object):
                     versions_to_submit = 0
                     #The chance of a student submitting 3 versions is 20%, submitting 2 versions is 30%, and submitting 1 version is 50%.
                     random_num = random.choice(range(0,100))
+                    #TODO: make this configureable
                     if(random_num) < 20:
                         versions_to_submit = 3
                     elif random_num < 50:
@@ -924,7 +928,7 @@ class Course(object):
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
-        
+        #This segment adds the sample forum posts for the sample course only
         if(self.code == "sample"): 
             #set sample course to have forum enabled by default
             config = configparser.ConfigParser()    
