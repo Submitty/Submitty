@@ -10,19 +10,11 @@
     {# todo: auto determine page # #}
 {% endif %}
 
-{% if component.default == 0 %}
-    {% set min = component.lower_clamp %}
-    {% set max = component.upper_clamp %}
-{% else %}
-    {% set min = -component.upper_clamp %}
-    {% set max = -component.lower_clamp %}
-{% endif %}
-
 <div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
     <div class="box-title">
         <span id="gradebar-{{ c_index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1" class="badge">
             <strong>
-                <span id="grade-{{ c_index }}" name="grade-{{ c_index }}" class="grades" data-lower_clamp="{{ min }}" data-default="{{ component.default }}" data-max_points="{{ component.max_value }}" data-upper_clamp="{{ max }}"> ?</span> / {{ component.max_value }}
+                <span id="grade-{{ c_index }}" name="grade-{{ c_index }}" class="grades"> ?</span> / {{ component.max_value }}
             </strong>
         </span>
         <span colspan="3" data-changebg="true">
@@ -81,7 +73,7 @@
         </span>
         #}
 
-        <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ min }}" data-max="{{ max }}" data-precision="{{ gradeable.precision }}">
+        <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
             <span style="width:98%;" colspan="4">
                 <div id="rubric-{{ c_index }}">
                     <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>

@@ -1,5 +1,5 @@
 {% set break_onclick = disabled ? "return false;" : "" %}
-<table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{{ gradeable.id }}" data-user_id="{{ gradeable.user_id }}" data-active_version="{{ gradeable.active_version }}" data-num_questions="{{ gradeable.components|length }}" data-your_user_id="{{ your_user_id }}">
+<table class="ta-rubric-table ta-rubric-table-background" id="rubric-table">
     <tbody>
     {# Components #}
         {% for component in gradeable.components %}
