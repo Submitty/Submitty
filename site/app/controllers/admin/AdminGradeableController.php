@@ -22,7 +22,7 @@ class AdminGradeableController extends AbstractController {
                 $this->modifyGradeable(0);
                 break;
             case 'edit_gradeable_page':
-                $this->editPage();
+                $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
                 break;
             case 'upload_edit_gradeable':
                 $this->modifyGradeable(1);
@@ -57,10 +57,10 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with pulled data from the gradeable to be edited
-    private function editPage() {
+    private function editPage($nav_tab = 0) {
         $admin_gradeable = $this->getAdminGradeable($_REQUEST['id']);
         $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable, $nav_tab);
     }
 
     private function getAdminGradeable($gradeable_id) {
@@ -93,7 +93,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setId($_POST['gradeable_id']);
         } else {
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
-        }        
+        }
         $gradeable->setName(htmlentities($_POST['gradeable_title']));
         $gradeable->setInstructionsUrl($_POST['instructions_url']);
         $gradeable->setTaInstructions($_POST['ta_instructions']);
@@ -572,7 +572,12 @@ class AdminGradeableController extends AbstractController {
         }
 
 
-        $this->returnToNav();
+        if($edit_gradeable === 0) {
+            $this->redirectToEdit(); // redirect to next page of the form
+        }
+        else {
+            $this->returnToNav();
+        }
     }
 
     private function quickLink() {
@@ -595,5 +600,14 @@ class AdminGradeableController extends AbstractController {
     private function returnToNav() {
         $url = $this->core->buildUrl(array());
         header('Location: '. $url);
+    }
+    private function redirectToEdit() {
+	    $url = $this->core->buildUrl([
+	        'component' => 'admin',
+            'page'      => 'admin_gradeable',
+            'action'    => 'edit_gradeable_page',
+            'id'        => $_POST['gradeable_id'],
+            'nav_tab'   => '1']);
+	    header('Location: '.$url);
     }
 }

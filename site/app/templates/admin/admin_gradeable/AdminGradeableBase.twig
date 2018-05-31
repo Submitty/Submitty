@@ -16,7 +16,7 @@
         </div>
         <br/>
         <div id="nav-bar">
-            <text class="nav-bar-item" id="page_0_nav" onClick="onChangeNavTab(0);">Create</text>
+            <text class="nav-bar-item" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
             <text class="nav-bar-item" id="page_1_nav" onClick="onChangeNavTab(1);">Rubric</text>
             <text class="nav-bar-item" id="page_2_nav" onClick="onChangeNavTab(2);">Dates</text>
             <text class="nav-bar-item" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
@@ -63,9 +63,6 @@
         $('#page_1_content').hide();
         $('#page_2_content').hide();
         $('#page_3_content').hide();
-        $('#page_4_content').hide();
-        $('#page_5_content').hide();
-        $('#page_6_content').hide();
 
         $('#page_' + tab + '_content').show();
 
@@ -88,14 +85,12 @@
         if('{{action}}' === 'new')
         {
             onChangeNavTab(0);
-
-            // TODO: renable this once submission works
-            /*[
-                '#page_1_nav', 
-                '#page_2_nav', 
-                '#page_3_nav', 
-                '#page_4_nav'
-            ].forEach(disableNavItem);*/
+            
+            [
+                '#page_1_nav',
+                '#page_2_nav',
+                '#page_3_nav'
+            ].forEach(disableNavItem);
 
             // Hide next button
             $('#next_button').hide();

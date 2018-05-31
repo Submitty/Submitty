@@ -9,7 +9,7 @@ class AdminGradeableView extends AbstractView {
     /**
      * Shows creation part
      */
-	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable) {
+	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable, $nav_tab = 0) {
 
         $action           = "new"; //decides how the page's data is displayed
         $button_string    = "Add";
@@ -74,7 +74,7 @@ class AdminGradeableView extends AbstractView {
             "action"          => $action,
             "template"        => $type_of_action == "add_template",
             "submit_text"     => $submit_text,
-            "nav_tab"         => "0",    // TODO: allow the request of a particular tab (so save-and-continue on first page doesn't jump back to first page)
+            "nav_tab"         => $nav_tab,
 
             // "old_components"  => $old_components_json,
             // "marks"           => $marks_json,
