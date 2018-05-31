@@ -852,7 +852,7 @@ class Course(object):
                             (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
                         active_version = random.choice(range(1, versions_to_submit+1))
-                        json_history = {"active_version": active_version, "history": []}
+                        json_history = {"active_version": active_version, "team_history": []}
                         random_days = 1
                         if random.random() < 0.3:
                             random_days = random.choice(range(-3,2))
