@@ -1516,19 +1516,6 @@ HTML;
         return false;
     }
 
-    function calculatePercentageTotal() {
-        var total=0;
-
-        $('#rubric-table').find('.grades').each(function() {
-            if(!isNaN(parseFloat($(this)[0].innerHTML))) {
-                total += parseFloat($(this)[0].innerHTML);
-            }
-        });
-
-        total = Math.max(parseFloat(total + {$gradeable->getGradedAutograderPoints()}), 0);
-
-        $("#score_total").html(({$gradeable->getGradedTAPoints()} + {$gradeable->getGradedAutograderPoints()})+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});     
-    }
     function openFile(html_file, url_file) {
         var directory = "";
         if (url_file.includes("submissions")) {

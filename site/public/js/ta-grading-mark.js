@@ -563,12 +563,33 @@ function updateProgressPoints(question_num) {
         }
     }
     current_question_text.html(summary_text);
+    calculatePercentageTotal();
 }
 
 function updateAllProgressPoints() {
     for (var i = 1; i <= getGradeable().components.length; i ++) {
         updateProgressPoints(i);
     }
+}
+
+function calculatePercentageTotal() {
+    var gradeable = getGradeable();
+    var total = 0;
+    var earned = 0;
+    var autoTotal = gradeable.total_autograder_non_extra_credit_points;
+    var autoEarned = gradeable.graded_autograder_points;
+
+
+    for (var i = 1; i <= gradeable.components.length; i ++) {
+        var component = getComponent(i);
+        total += component.max_value;
+        earned += calculateMarksPoints(i);
+    }
+
+    total = Math.max(total, 0);
+    earned = Math.max(earned, 0);
+
+    $("#score_total").html(earned + " / " + parseFloat(autoTotal + total) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + autoEarned + "/" + autoTotal);
 }
 
 function selectMark(me, first_override) {

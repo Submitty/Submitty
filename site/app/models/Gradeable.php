@@ -1182,6 +1182,8 @@ class Gradeable extends AbstractModel {
             "overall_comment" => $this->overall_comment,
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
+            "graded_ta_points" => $this->getGradedTAPoints(),
+            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
             "components" => []
         ];
 
