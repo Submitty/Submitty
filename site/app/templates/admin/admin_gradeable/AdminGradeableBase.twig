@@ -4,7 +4,7 @@
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
-<div id="container-rubric">
+<div id="container-rubric" style="display:none;">
     <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
@@ -45,7 +45,7 @@
         // $('select' + c).attr('disabled', dis);
 
         // TODO: this is too powerful.  Our controller can't handle
-        //  missing data yet
+        //  missing data yet (https://stackoverflow.com/a/4838229/2972004)
         // $(c + ' *').attr('disabled', dis);
     }
 
@@ -265,6 +265,9 @@
             });
 
         // End copied section
+
+        // Don't show page until all settings loaded
+        $("#container-rubric").show();
     });
 
     // Only succeeds if all child forms succeed
@@ -272,10 +275,7 @@
         return checkFormCreate() &&
                 checkFormRubric() &&
                 checkFormDates() &&
-                checkFormGraders() &&
-                /*checkFormSyllabus()&& */
-                checkFormStudent() &&
-                checkFormAuto();
+                checkFormGraders();
     }
 
     $('#gradeable-form').on('submit', function(e){
@@ -288,7 +288,7 @@
         }
     });
 
-    // It would be really good to split this up into the sub-files
+    // TODO: this probably isn't necessary anymore.  Look into removing it.
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
