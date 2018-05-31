@@ -68,6 +68,11 @@ select {
     display: none;
 }
 
+.nav-bar {
+    cursor: pointer;
+    padding-right: 20px;
+}
+
 /* align the radio, buttons and checkboxes with labels */
 input[type="radio"],input[type="checkbox"] {
     margin-top: -1px;
@@ -77,22 +82,11 @@ input[type="radio"],input[type="checkbox"] {
 fieldset {
     margin: 8px;
     border: 1px solid silver;
-    padding: 8px;    
+    padding: 8px;
     border-radius: 4px;
 }
 
 legend{
-    padding: 2px;  
+    padding: 2px;
     font-size: 12pt;
-}
-
-.nav-bar-item {
-    cursor: pointer;
-    padding-right: 20px;
-}
-
-.date_picker {
-    cursor: auto;
-    background-color: #FFF;
-    width: 250px;
 }
