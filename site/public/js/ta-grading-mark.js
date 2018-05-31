@@ -16,35 +16,8 @@ function getMark(c_index, m_index) {
     return grading_data.gradeable.components[c_index - 1].marks[m_index];
 }
 
-function clampComponentValue(c_index, value) {
-    var component = getComponent(c_index);
-    var upper = component.upper_clamp;
-    var lower = component.lower_clamp;
-    if (component.default !== 0) {
-        //Count down, so -component.upper_clamp <= value <= -component.lower_clamp
-        upper = -component.lower_clamp;
-        lower = -component.upper_clamp;
-    } else {
-        //Count up, so component.lower_clamp <= value <= component.upper_clamp
-        //Value already set
-    }
-    if (value < lower) {
-        value = lower;
-    }
-    if (value > upper) {
-        value = upper;
-    }
-    return value;
-}
-
 function fixMarkPointValue(me) {
-    var current_value = parseFloat($(me).val());
-    var clamped = clampComponentValue(me.dataset.component_index, current_value);
-    if (clamped !== current_value) {
-        $(me).val(clamped);
-    }
-
-    getMark(me.dataset.component_index, me.dataset.mark_index).points = current_value;
+    getMark(me.dataset.component_index, me.dataset.mark_index).points = parseFloat($(me).val());
     updateProgressPoints(me.dataset.component_index);
 }
 
