@@ -57,7 +57,7 @@ Form
             <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
                 {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
-            <div id="rotating_data">
+            <div id="rotating_data" style="{{ admin_gradeable.getRotatingGradeables()|length == 0 ? 'display:none;' : '' }}">
                 <br />
                 Rotating Section History By Grader:
                 <br />
