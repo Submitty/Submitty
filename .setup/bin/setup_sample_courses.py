@@ -33,6 +33,7 @@ import string
 import sys
 import configparser
 import csv
+import pdb
 
 from submitty_utils import dateutils
 
@@ -811,6 +812,11 @@ class Course(object):
                         team_id = temp[0][0]
                     res.close()
                 if team_id is not None:
+                    previous_submission = select([electronic_gradeable_version]).where(
+                                                  electronic_gradeable_version.c['team_id'] == team_id)
+                    res = conn.execute(previous_submission)
+                    if res.rowcount > 0:
+                        continue
                     submission_path = os.path.join(gradeable_path, team_id)
                 else: 
                     submission_path = os.path.join(gradeable_path, user.id)
@@ -842,23 +848,17 @@ class Course(object):
                             submission_count += 1
                             current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                             if team_id is not None:
-                                previous_submission = select([electronic_gradeable_data]).where(
-                                    electronic_gradeable_data.c['team_id'] == team_id)
-                                res = conn.execute(previous_submission)
-                                if res.rowcount == 0:
-                                    conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
-                                                team_id=team_id, g_version=version, submission_time=current_time_string)
-                                    if version == versions_to_submit:
-                                        conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
-                                                    team_id=team_id, active_version=versions_to_submit)
-                                else: 
-                                    continue
+                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                             team_id=team_id, g_version=version, submission_time=current_time_string)
+                                if version == versions_to_submit:
+                                    conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
+                                                 team_id=team_id, active_version=active_version)
                             else:
                                 conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                             g_version=version, submission_time=current_time_string)
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                                active_version=versions_to_submit)
+                                                active_version=active_version)
                             json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
