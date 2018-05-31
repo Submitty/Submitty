@@ -756,7 +756,7 @@ class Course(object):
                     versions_to_submit = 0
                     #The chance of a student submitting 3 versions is 20%, submitting 2 versions is 30%, and submitting 1 version is 50%.
                     random_num = random.choice(range(0,100))
-                    if(random_num) < 20:
+                    if random_num < 20:
                         versions_to_submit = 3
                     elif random_num < 50:
                         versions_to_submit = 2
