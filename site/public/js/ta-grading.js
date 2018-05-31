@@ -358,9 +358,9 @@ function changeEditorStyle(newStyle){
 
 function gotoPrevStudent() {
     var gradeable = getGradeable();
-    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#prev-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#prev-student")[0].dataset.href;
         }
@@ -369,9 +369,9 @@ function gotoPrevStudent() {
 
 function gotoNextStudent() {
     var gradeable = getGradeable();
-    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#next-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#next-student")[0].dataset.href;
         }

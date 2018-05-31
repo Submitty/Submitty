@@ -75,8 +75,8 @@ AUTO-GRADING {{ gradeable.graded_autograder_points }} / {{ gradeable.total_autog
     function unloadSave() {
         if (!__unloadRequestSent) {
             __unloadRequestSent = true;
-            saveLastOpenedMark('{{ gradeable.id }}' ,'{{ gradeable.user_id }}', {{ gradeable.active_version }}, '{{ your_user_id }}', '-1', false, function() {
-            }, function() {
+            saveLastOpenedMark(false, function () {
+            }, function () {
                 // Unable to save so try saving at a different time
                 __unloadRequestSent = false;
             });

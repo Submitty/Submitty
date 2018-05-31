@@ -254,11 +254,14 @@ function haveMarksChanged(num, data) {
     return false;
 }
 
-function updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+function updateMarksOnPage(num) {
+    var gradeable = getGradeable();
+    var component = getComponent(num);
+
     var parent = $('#marks-parent-'+num);
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
-    ajaxGetMarkData(gradeable_id, user_id, question_id, function(data) {
+    ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
         data = JSON.parse(data);
 
         // If nothing has changed, then don't update
@@ -306,15 +309,16 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
     });
 }
 
-function updateGeneralComment(gradeable_id, user_id) {
-    ajaxGetGeneralCommentData(gradeable_id, user_id, function(data) {
+function updateGeneralComment() {
+    var gradeable = getGradeable();
+    ajaxGetGeneralCommentData(gradeable.id, gradeable.user_id, function(data) {
         data = JSON.parse(data);
         
         $('#comment-id-general').val(data['data']);
     });
 }
 
-function addMark(me, num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id) {
+function addMark(me, num) {
     // Hide all other (potentially) open popups
     $('.popup-form').css('display', 'none');
     
@@ -383,12 +387,14 @@ function deleteMark(me, num, last_num) {
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
-function showMarklist(me, gradeable_id) {
+function showMarklist(me) {
+    var gradeable = getGradeable();
+
     var question_num = parseInt($(me).attr('id').split('-')[1]);
     var order_num = parseInt($(me).attr('id').split('-')[2]);
     var gradeable_component_id = $('#marks-parent-' + question_num)[0].dataset.question_id;
     
-    ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, function(data) {
+    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, order_num, function(data) {
         data = JSON.parse(data);
 
         // Calculate total and graded component amounts
@@ -737,7 +743,9 @@ function setGeneralVisible(gshow) {
 }
 
 // Saves the general comment
-function saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback ) {
+function saveGeneralComment(sync, successCallback, errorCallback) {
+    var gradeable = getGradeable();
+
     if ($('#extra-general')[0].style.display === "none") {
         //Nothing to save so we are fine
         if (typeof(successCallback) === "function") {
@@ -752,12 +760,14 @@ function saveGeneralComment(gradeable_id, user_id, active_version, sync, success
     var overwrite = $('#overwrite-id').is(":checked");
     $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback);
+    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
 //  have the ta lose their grading data
-function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id, sync, successCallback, errorCallback) {
+function saveLastOpenedMark(sync, successCallback, errorCallback) {
+    var gradeable = getGradeable();
+
     // Find open mark
     var index = 1;
     var mark = $('#marks-parent-' + index);
@@ -765,16 +775,18 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id,
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
             var gradeable_component_id = getComponent(index).id;
-            saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync, successCallback, errorCallback);
+            saveMark(index, sync, successCallback, errorCallback);
             return;
         }
         mark = $('#marks-parent-' + (++index));
     }
     // If no open mark was found, then save general comment
-    saveGeneralComment(gradeable_id, user_id, active_version, sync, successCallback, errorCallback);
+    saveGeneralComment(sync, successCallback, errorCallback);
 }
 
-function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_id, sync, successCallback, errorCallback) {
+function saveMark(num, sync, successCallback, errorCallback) {
+    var gradeable = getGradeable();
+
     if ($('#marks-parent-' + num)[0].style.display === "none") {
         //Nothing to save so we are fine
         if (typeof(successCallback) === "function") {
@@ -884,7 +896,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
 
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     
-    ajaxSaveMarks(gradeable_id, user_id, gc_id, arr_length, active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
+    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
 
         if (all_false === true) {
@@ -892,7 +904,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
             gradedByElement.text("Ungraded!");
         } else if(ungraded || (overwrite === "true")) {
             //Just graded it
-            gradedByElement.text("Graded by " + your_user_id + "!");
+            gradedByElement.text("Graded by " + grading_data.your_user_id + "!");
             var question_points = parseFloat(current_question_num[0].innerHTML);
             var max_points = parseFloat(component.max_value);
         }
@@ -974,9 +986,9 @@ function openMark(id) {
     var gradeable = getGradeable();
     var component = getComponent(id);
 
-    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
-    saveMark(id, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id, true);
-    updateMarksOnPage(id, '', component.lower_clamp, component.upper_clamp, gradeable.precision, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id);
+    saveLastOpenedMark(true);
+    saveMark(id, true);
+    updateMarksOnPage(id);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== id) {
@@ -995,10 +1007,10 @@ function closeMark(id, save) {
     var component = getComponent(id);
 
     if (save) {
-        saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
-        saveMark(id, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id, true);
+        saveLastOpenedMark(true);
+        saveMark(id, true);
     }
-    updateMarksOnPage(id, '', component.lower_clamp, component.upper_clamp, gradeable.precision, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id);
+    updateMarksOnPage(id);
     setMarkVisible(id, false);
 }
 
@@ -1014,8 +1026,8 @@ function toggleMark(id, save) {
 function openGeneralMessage() {
     var gradeable = getGradeable();
 
-    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
-    saveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, true);
+    saveLastOpenedMark(true);
+    saveGeneralComment(true);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
@@ -1033,10 +1045,10 @@ function closeGeneralMessage(save) {
     var gradeable = getGradeable();
 
     if (save) {
-        saveLastOpenedMark(gradeable.id ,gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
-        saveGeneralComment(gradeable.id ,gradeable.user_id, gradeable.active_version, true);
+        saveLastOpenedMark(true);
+        saveGeneralComment(true);
     } else {
-        updateGeneralComment(gradeable.id, gradeable.user_id);
+        updateGeneralComment();
     }
     setGeneralVisible(false);
 }

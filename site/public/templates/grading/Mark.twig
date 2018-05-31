@@ -17,7 +17,7 @@
     </td>
     <td colspan="4">
         <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_index }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
-        <span id="mark_info_id-{{ c_index }}-{{ m_index }}" onclick="saveMark({{ c_index }},'{{ gradeable.id }}' ,'{{ gradeable.user_id }}',{{ gradeable.active_version }}, {{ component.id }},'{{ your_user_id }}', -1); showMarklist(this,'{{ gradeable.id }}');">
+        <span id="mark_info_id-{{ c_index }}-{{ m_index }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this);">
             <i class="fa fa-users icon-got-this-mark"></i>
         </span>
     </td>
