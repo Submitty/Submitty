@@ -92,7 +92,10 @@
 
         {% endif %}
 
-        // TODO: below is selectively copied from previous ui
+        // TODO: below is selectively copied from previous ui.  It updates various
+        //      UI element values when other elements change.  This keeps the form
+        //      state valid/submittible since there is no server-side checking as
+        //      of now (summer 2018)
         $( "input" ).change(function() {
             var max = parseFloat($(this).attr('max'));
             var skip1 = (isNaN(max)) ? true : false;

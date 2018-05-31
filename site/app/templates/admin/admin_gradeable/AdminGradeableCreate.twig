@@ -120,6 +120,35 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             #}
         </div>
     </div>
+    <br />
+
+    Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
+    <fieldset>
+
+        <input type="radio" id="upload_file_radio" name="upload_type" value="upload_file"
+                {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
+
+        <input type="radio" id="repository_radio" name="upload_type" value="repository"
+                {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
+
+        <div id="repository">
+            <br />
+            <b>Path for the Version Control System (VCS) repository:</b><br />
+            VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
+            The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
+            You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+            <ul style="list-style-position: inside;">
+                <li>gradeable_id</li>
+                <li>user_id OR team_id OR repo_id (only use one)</li>
+            </ul>
+            ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+            <input style='width: 83%' type='text' id="subdirectory" name='subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
+            VCS URL: <kbd id="vcs_url"></kbd>
+            <br />
+        </div>
+
+        <br />
+    </fieldset>
 </fieldset>
 <div id="alert-message" title="WARNING">
     <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
@@ -141,10 +170,13 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         disableElementChildren('.checkpoints');
         disableElementChildren('.numeric');
 
+        $('#page_1_nav').hide();
+
         // Display the correct options for all forms depending
         //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
             disableElementChildren('.electronic_file', false);
+            $('#page_1_nav').show();
         }
         else if ($('#radio_checkpoints').is(':checked')) {
             disableElementChildren('.checkpoints', false);
@@ -177,6 +209,27 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             $('#page_3_nav').hide();
         }
     }
+
+    function onVcsSubdirChange() {
+        setVcsUrl($('#subdirectory').val());
+    }
+
+    var vcs_base_url = "{{ admin_gradeable.getVcsBaseUrl() }}";
+    function setVcsUrl(subdirectory) {
+        if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
+            $('#vcs_url').text(subdirectory);
+        }
+        else {
+            $('#vcs_url').text(vcs_base_url.replace(/[\/]+$/g, '') + '/' + subdirectory);
+        }
+    }
+
+    $(function () {
+        $('input[name="subdirectory"]').on('change paste keyup', function() {
+            setVcsUrl(this.value);
+        });
+        setVcsUrl($('input[name="subdirectory"]').val());
+    });
 
     $(function () {
         $("#alert-message").dialog({
@@ -225,6 +278,16 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
+
+        // Only show repo settings if the gradeable is using repo upload
+        onUploadTypeChange();
+        $('[name="upload_type"]').change(onUploadTypeChange);
+
+        // Upload the vcs url in real time
+        onVcsSubdirChange();
+        $('#subdirectory').keypress(onVcsSubdirChange);
+        $('#subdirectory').keyup(onVcsSubdirChange);
+
     });
 
     function checkFormCreate() {
@@ -252,6 +315,44 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         if(!check1 && !check2 && !check3) {
             alert("A type of gradeable must be selected");
             return false;
+        }
+
+        var subdirectory = $('input[name="subdirectory"]').val();
+        var vcs_url = $('#vcs_url').text();
+        var config_path = $('input[name=config_path]').val();
+
+
+        if (config_path == "" || config_path === null) {
+            alert("The config path should not be empty");
+            return false;
+        }
+        if ($('repository_radio').is(':checked')) {
+            var subdirectory_parts = subdirectory.split("{");
+            // if this is a vcs path extension, make sure it starts with '/'
+            console.log(vcs_url);
+            if (vcs_url.indexOf('://') === -1 && vcs_url[0] !== "/") {
+                alert("VCS path needs to either be a URL or start with a /");
+                return false;
+            }
+            // check that path is made up of valid variables
+            var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+            var used_id = false;
+            for (var x = 1; x < subdirectory_parts.length; x++) {
+                var subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
+                if (allowed_variables.indexOf(subdirectory_part) === -1) {
+                    alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                    return false;
+                }
+                if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    used_id = true;
+                    continue;
+                }
+                if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
+                    return false;
+                }
+            }
+
         }
 
         return true;
