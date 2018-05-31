@@ -185,29 +185,30 @@ class submitty_student_auto_feed {
                 	$validation_flag = false;
                 	break;
                 //User ID must contain only lowercase alpha, numbers, underscore, and hyphen
-                case (preg_match("~^[a-z0-9_\-]+$~", $row[COLUMN_USER_ID])):
+                case boolval((preg_match("~^[a-z0-9_\-]+$~", $row[COLUMN_USER_ID]))):
                 	$this->log_it("Row {$index} failed user ID validation ({$row[COLUMN_USER_ID]}).");
                 	$validation_flag = false;
                 	break;
                 //First name must be alpha characters, white-space, or certain punctuation.
-                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FIRSTNAME])):
+                case boolval((preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_FIRSTNAME]))):
                     $this->log_it("Row {$index} failed validation for student first name ({$row[COLUMN_FNAME]}).");
                     $validation_flag = false;
                     break;
-                //Last name must be alpha characters white-space, or certain punctuation.
-                case (preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LASTNAME])):
+                //Last name must be alpha characters, white-space, or certain punctuation.
+                case boolval((preg_match("~^[a-zA-Z'`\-\. ]+$~", $row[COLUMN_LASTNAME]))):
                     $this->log_it("Row {$index} failed validation for student last name ({$row[COLUMN_LNAME]}).");
                     $validation_flag = false;
                     break;
-                //Student section must be greater than zero.
-                case ($section > 0):
+                //Student registration section must be alphanumeric, '_', or '-'.
+                case boolval((preg_match("~^[a-zA-Z_\-]+$~", $row[COLUMN_SECTION]))):
                     $this->log_it("Row {$index} failed validation for student section ({$section}).");
                     $validation_flag = false;
                     break;
 	            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-                case (preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL])):
+                case boolval((preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $row[COLUMN_EMAIL]))):
                     $this->log_it("Row {$index} failed validation for student email ({$row[COLUMN_EMAIL]}).");
                     $validation_flag = false;
+                    break;
                 default:
                 	//Check for mapped (merged) course.
                 	if (array_key_exists($course, self::$course_mappings)) {
