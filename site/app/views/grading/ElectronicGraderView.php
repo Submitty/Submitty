@@ -1191,7 +1191,7 @@ HTML;
                     <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
                         <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                     {$dir}</a>
-                </div><br/>
+                </div>
                 <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
 HTML;
                     $count++;
@@ -1459,6 +1459,7 @@ HTML;
             })
             .catch(function(err) {
                 alert("Could not render gradeable: " + err.message);
+                console.error(err);
             });
     </script>
 HTML;
@@ -1526,7 +1527,7 @@ HTML;
 
         total = Math.max(parseFloat(total + {$gradeable->getGradedAutograderPoints()}), 0);
 
-        $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
+        $("#score_total").html(({$gradeable->getGradedTAPoints()} + {$gradeable->getGradedAutograderPoints()})+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});     
     }
     function openFile(html_file, url_file) {
         var directory = "";

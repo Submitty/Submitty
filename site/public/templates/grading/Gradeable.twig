@@ -12,14 +12,14 @@
 
     {# General Comment #}
         <div class="box" style="background-color:#E9EFEF;">
-            <div class="box-title">
-                <div id="title-general" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
+            <div class="box-title" style="cursor: pointer" onclick="{{ break_onclick }}; toggleGeneralMessage(true);">
+                <span id="title-general" style="cursor: pointer" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
                     <b>General Comment</b>
                     <span style="float: right;">
                         <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
                     </span>
-                </div>
-                <span id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
+                </span>
+                <span id="title-cancel-general" style="cursor: pointer; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
                     <span id="cancel-mark-general" onclick="{{ break_onclick }}; closeGeneralMessage(false);" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                 </span>
             </div>
@@ -51,7 +51,7 @@
         <div class="box">
             <div class="box-title">
                 <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></span>
-                <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> 0 / {{ gradeable.total_points }}&emsp;&emsp;&emsp;
+                <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> ? / {{ gradeable.total_points }}&emsp;&emsp;&emsp;
 AUTO-GRADING {{ gradeable.graded_autograder_points }} / {{ gradeable.total_autograder_non_extra_credit_points }}</strong></span>
                 <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></span>
             </div>

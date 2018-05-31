@@ -438,16 +438,31 @@ function calculateMarksPoints(question_num) {
     }
 
     var custom_points = component.score;
-    if (isNaN(custom_points)) {
-        current_points += 0;
-    } else {
-        if(custom_points!=0){
+    var custom_message = component.comment;
+    if(custom_message == ""){
+        $('#mark_points_custom-' + question_num)[0].disabled=true;
+        $('#mark_points_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_points_custom-' + question_num)[0].value="";
+    }
+    else{
+        $('#mark_points_custom-' + question_num)[0].disabled=false;
+        $('#mark_points_custom-' + question_num)[0].style.cursor="default";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor="pointer";
+        if($('#mark_points_custom-' + question_num)[0].value==""){
+            $('#mark_points_custom-' + question_num)[0].value="0";
+        }
+        if (isNaN(custom_points)) {
+            current_points += 0;
+        }
+        else {
             current_points += custom_points;
             any_selected = true;
         }
     }
 
     if(any_selected == false){
+        $('#grade-' + question_num)[0].innerHTML = "";
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
@@ -706,7 +721,8 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
     }
 
     var current_row = $('#mark_custom_id-'+num);
-    
+
+    var current_title = $('#title-' + num);
     var custom_points  = current_row.find('input[name=mark_points_custom_'+num+']').val();
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
 
@@ -761,15 +777,15 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
         all_false = false;
     }
 
+    var new_background="#F9F9F9";
     if (all_false) {
         new_text = "Click me to grade!";
+        new_background="#E9EFEF";
     }
 
     // Clamp points
     current_points = Math.min(Math.max(current_points, lower_clamp), upper_clamp);
     
-    current_question_num[0].innerHTML = (all_false === false) ? (current_points) : ("");
-
     current_question_text.html(new_text);
 
     calculatePercentageTotal();
@@ -794,8 +810,6 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
             gradedByElement.text("Graded by " + your_user_id + "!");
             var question_points = parseFloat(current_question_num[0].innerHTML);
             var max_points = parseFloat(component.max_value);
-            $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
-            $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
         }
 
         gradedByElement.show();
