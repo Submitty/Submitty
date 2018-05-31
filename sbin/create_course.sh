@@ -12,21 +12,21 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-# these variables will be replaced by INSTALL.sh
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 
-SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
-SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
-SUBMISSION_URL=__INSTALL__FILLIN__SUBMISSION_URL__
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
+SUBMISSION_URL=$(jq -r '.submission_url' ${CONF_DIR}/submitty.json)
 
-HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
-HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
-HWCGI_USER=__INSTALL__FILLIN__HWCGI_USER__
+HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
+HWCRON_USER=$(jq -r '.hwcron_user' ${CONF_DIR}/submitty_users.json)
+HWCGI_USER=$(jq -r '.hwcgi_user' ${CONF_DIR}/submitty_users.json)
 
-COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 
-DATABASE_HOST=__INSTALL__FILLIN__DATABASE_HOST__
-DATABASE_USER=__INSTALL__FILLIN__DATABASE_USER__
-DATABASE_PASS='__INSTALL__FILLIN__DATABASE_PASSWORD__'
+DATABASE_HOST=$(jq -r '.database_host' ${CONF_DIR}/database.json)
+DATABASE_USER=$(jq -r '.database_user' ${CONF_DIR}/database.json)
+DATABASE_PASS=$(jq -r '.database_password' ${CONF_DIR}/database.json)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -242,7 +242,7 @@ create_and_set  u=rwx,g=rwxs,o=   $HWPHP_USER   $ta_www_group   $course_dir/repo
 ########################################################################################################################
 
 # copy the build_course.sh script
-cp $SUBMITTY_INSTALL_DIR/bin/build_course.sh $course_dir/BUILD_${course}.sh
+cp $SUBMITTY_INSTALL_DIR/sbin/build_course.sh $course_dir/BUILD_${course}.sh
 chown $instructor:$ta_www_group $course_dir/BUILD_${course}.sh
 chmod 770 $course_dir/BUILD_${course}.sh
 replace_fillin_variables $course_dir/BUILD_${course}.sh

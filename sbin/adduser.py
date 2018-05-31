@@ -6,13 +6,18 @@ will be an instructor.
 """
 
 import argparse
+import json
+from os import path
 import subprocess
 from sqlalchemy import create_engine, MetaData, Table, bindparam, and_
 
-DATABASE_HOST = '__INSTALL__FILLIN__DATABASE_HOST__'
-DATABASE_USER = '__INSTALL__FILLIN__DATABASE_USER__'
-DATABASE_PASS = '__INSTALL__FILLIN__DATABASE_PASSWORD__'
-AUTHENTICATION_METHOD = '__INSTALL__FILLIN__AUTHENTICATION_METHOD__'
+CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
+with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
+    DATABASE_DETAILS = json.load(open_file)
+DATABASE_HOST = DATABASE_DETAILS['database_host']
+DATABASE_USER = DATABASE_DETAILS['database_user']
+DATABASE_PASS = DATABASE_DETAILS['database_password']
+AUTHENTICATION_METHOD = DATABASE_DETAILS['authentication_method']
 
 
 def get_php_db_password(password):

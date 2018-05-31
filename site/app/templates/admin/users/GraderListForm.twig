@@ -1,0 +1,32 @@
+<div class="popup-form" id="grader-list-form">
+    <h2>Upload Grader List</h2>
+    <p>&emsp;</p>
+    <p>
+        Format your grader data as an .xlsx or .csv file with {{ use_database ? 7 : 6 }} columns:<br>
+        &emsp;username, first name, last name, email, grader group, {{ use_database ? "password, " : "" }}preferred first name<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Where GraderGroup is:<br>
+        &emsp;1=Instructor<br>
+        &emsp;2=Full Access Grader (graduate teaching assistant)<br>
+        &emsp;3=Limited Access Grader (mentor)<br>
+        &emsp;4=Student (no grading access)<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Preferred first name is optional.<br>
+        Do not use a header row.<br>
+    </p>
+    <br />
+    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_grader_list'}) }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <div>
+            <input type="file" name="upload" accept=".xlsx, .csv">
+        </div>
+        <div style="float: right; width: auto">
+            <a onclick="$('#grader-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>
