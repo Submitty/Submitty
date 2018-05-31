@@ -1597,6 +1597,7 @@ HTML;
             }
             $return .= <<<HTML
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
+                            <span id="graded-saving-{$c}" style="display: none; font-style: italic; padding-right: 10px;">Saving...</span>
                          <!--  <span id="save-mark-{$c}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick}; closeMark({$c}, true);">Done</i> </span> -->
                         </span>
                         </span> <span id="ta_note-{$c}" style="display: none;" data-changedisplay1="true"> {$note}</span>
