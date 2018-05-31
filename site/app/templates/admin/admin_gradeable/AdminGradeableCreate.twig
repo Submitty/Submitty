@@ -301,13 +301,13 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         var check3 = $('#radio_numeric').is(':checked');
         
         var all_gradeable_ids = {{js_gradeables_array|raw}};
-        
-        if ('{{action}}' == 'add') {
+
+        {% if action == 'new' %}
             if(all_gradeable_ids.find(element => element == gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;
             }
-        }
+        {% endif %}
         if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
             $( "#alert-message" ).dialog( "open" );
             return false;
@@ -319,13 +319,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         var subdirectory = $('input[name="subdirectory"]').val();
         var vcs_url = $('#vcs_url').text();
-        var config_path = $('input[name=config_path]').val();
 
-
-        if (config_path == "" || config_path === null) {
-            alert("The config path should not be empty");
-            return false;
-        }
         if ($('repository_radio').is(':checked')) {
             var subdirectory_parts = subdirectory.split("{");
             // if this is a vcs path extension, make sure it starts with '/'

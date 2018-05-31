@@ -614,7 +614,7 @@ class AdminGradeableController extends AbstractController {
             'page'      => 'admin_gradeable',
             'action'    => 'edit_gradeable_page',
             'id'        => $_POST['gradeable_id'],
-            'nav_tab'   => '1']);
+            'nav_tab'   => '-1']);
 	    header('Location: '.$url);
     }
 }

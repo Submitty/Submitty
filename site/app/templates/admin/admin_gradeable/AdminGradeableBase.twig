@@ -22,7 +22,7 @@
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <h3 id="myModalLabel" style="float: left;">Gradeable Editor {{ label_message }}</h3>
+            <h3 id="myModalLabel" style="float: left;">Gradeable Editor {{ label_message|raw }}</h3>
             <br />
             <br />
             <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
@@ -65,7 +65,10 @@
         }
         adminGradeableNavTab = tab;
 
-        $('.nav-bar').attr('style','background-color: #999999;');
+        $('.nav-bar').each(function (){
+            if($(this).hasClass('nav-bar-elec')) return;
+            $(this).attr('style','background-color: #999999;');
+        });
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
@@ -82,7 +85,7 @@
                 $(this).attr('style', 'background-color: #F0F0F0; cursor: default;');
             });
         {% else %}
-            onChangeNavTab({{ nav_tab }});
+            onChangeNavTab({{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }});
         {% endif %}
 
         {% if admin_gradeable.getGGradeableType() != 0 or not admin_gradeable.getGId() != ''  %}
