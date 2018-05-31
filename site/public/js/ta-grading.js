@@ -24,7 +24,6 @@ $(function() {
     }
     else{
         readCookies();
-        updateCookies();
         hideIfEmpty(".rubric_panel");
     }
 

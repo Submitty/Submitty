@@ -16,8 +16,23 @@ function getMark(c_index, m_index) {
     return grading_data.gradeable.components[c_index - 1].marks[m_index];
 }
 
-function fixMarkPointValue(me) {
+function updateMarkPoints(me) {
     getMark(me.dataset.component_index, me.dataset.mark_index).points = parseFloat($(me).val());
+    updateProgressPoints(me.dataset.component_index);
+}
+
+function updateMarkText(me) {
+    getMark(me.dataset.component_index, me.dataset.mark_index).name = $(me).val();
+    updateProgressPoints(me.dataset.component_index);
+}
+
+function updateCustomMarkPoints(me) {
+    getComponent(me.dataset.component_index).score = parseFloat($(me).val());
+    updateProgressPoints(me.dataset.component_index);
+}
+
+function updateCustomMarkText(me) {
+    getComponent(me.dataset.component_index).comment = $(me).val();
     updateProgressPoints(me.dataset.component_index);
 }
 
@@ -260,6 +275,9 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
                  (note == "" || note == undefined) && icon[0].classList.contains('fa-square')) {
                      icon.toggleClass("fa-square-o fa-square");
             }
+
+            getComponent(num).score = score;
+            getComponent(num).comment = note;
         }
         
         // Add all marks back
@@ -269,7 +287,12 @@ function updateMarksOnPage(num, background, min, max, precision, gradeable_id, u
             var hasMark    = data['data'][x]['has_mark'];
             var score      = data['data'][x]['score'];
             var note       = data['data'][x]['note'];
-                        
+
+            getMark(num, x).publish = is_publish;
+            getMark(num, x).has = hasMark;
+            getMark(num, x).score = score;
+            getMark(num, x).name = note;
+
             parent.prepend(getMarkView(num, x));
         }
     });
@@ -438,7 +461,7 @@ function calculateMarksPoints(question_num) {
     }
 
     var custom_points = component.score;
-    var custom_message = component.comment;
+    var custom_message = $('textarea[name=mark_text_custom_'+question_num+']').val();
     if(custom_message == ""){
         $('#mark_points_custom-' + question_num)[0].disabled=true;
         $('#mark_points_custom-' + question_num)[0].style.cursor="not-allowed";
@@ -484,8 +507,10 @@ function updateProgressPoints(question_num) {
     question_num = parseInt(question_num);
     var current_progress = $('#progress_points-' + question_num);
     var current_points = calculateMarksPoints(question_num);
+    var current_question_text = $('#rubric-textarea-' + question_num);
     var component = getComponent(question_num);
     var max_points = parseFloat(component.max_value);
+    var summary_text = "Click me to grade!";
     if(current_points=="None Selected"){
         $('#grade-' + question_num)[0].innerHTML = "";     
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
@@ -507,7 +532,30 @@ function updateProgressPoints(question_num) {
         else{
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
         }
+
+        summary_text = "";
+        for (var i = 0; i < component.marks.length; i ++) {
+            var mark = component.marks[i];
+            if (mark.has) {
+                if (summary_text.length > 0) {
+                    summary_text += "<br>";
+                }
+
+                var points = mark.points !== 0 ? "(" + mark.points + ") " : "";
+                summary_text += "* " + points + escapeHTML(mark.name);
+            }
+        }
+        if (component.comment !== "") {
+            var custom_message = escapeHTML(component.comment);
+            if (summary_text.length > 0) {
+                summary_text += "<br>";
+            }
+
+            var points = component.score !== 0 ? "(" + component.score + ") " : "";
+            summary_text += "* " + points + custom_message;
+        }
     }
+    current_question_text.html(summary_text);
 }
 
 function updateAllProgressPoints() {
