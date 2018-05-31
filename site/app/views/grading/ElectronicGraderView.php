@@ -1452,7 +1452,14 @@ HTML;
                     </div>
     <script type="application/javascript">
         var grading_data = {$grading_data};
-        renderGradeable($("#grading-box"), grading_data);
+        renderGradeable(grading_data)
+            .then(function(elements) {
+                $("#grading-box").append(elements);
+                updateAllProgressPoints();
+            })
+            .catch(function(err) {
+                alert("Could not render gradeable: " + err.message);
+            });
     </script>
 HTML;
 

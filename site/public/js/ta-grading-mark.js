@@ -503,6 +503,12 @@ function updateProgressPoints(question_num) {
     }
 }
 
+function updateAllProgressPoints() {
+    for (var i = 1; i <= getGradeable().components.length; i ++) {
+        updateProgressPoints(i);
+    }
+}
+
 function selectMark(me, first_override) {
     var icon = $(me).find("i");
     var skip = true; //if the table is all false initially, skip check marks.
