@@ -13,13 +13,21 @@
  *     (and make sure that constants are properly configured)
  * (2) instantiate this class to process a data feed.
  *
+ * You may specify the term on the command line with "-t".
+ * "-g" can be used to guess the term by the server's calendar month and year.
+ * For example:
+ *
+ * ./submitty_student_auto_feed.php -t s18
+ *
+ * Will run the auto feed for the Spring 2018 semester.
+ *
  * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
  * EXAMPLE FOR YOUR UNIVERSITY'S SYSTEMS PROGRAMMER TO PROVIDE AN
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
  * WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
  *
- * Requires minimum PHP version 5.4 with pgsql, iconv, and ssh2 extensions.
+ * Requires minimum PHP version 5.6 with pgsql, iconv, and ssh2 extensions.
  *
  * @author Peter Bailie, Systems Programmer (RPI dept of computer science)
  */
@@ -50,13 +58,11 @@ class submitty_student_auto_feed {
         //Make sure log msg queue string is empty on start.
         self::$log_msg_queue = "";
 
-        //Determine current semester
-        $month = intval(date("m", time()));
-        $year  = date("y", time());
-
-        //(s)pring is month <= 5, (f)all is month >= 8, su(m)mer are months 6 and 7.
-        //if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-        self::$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
+		//Check for semester among CLI arguments.
+		self::$semester = cli_args::parse_args();
+		if (self::$semester === false) {
+		    exit(1);
+		}
 
         //Connect to submitty_db
         $db_host     = DB_HOST;
@@ -238,7 +244,7 @@ class submitty_student_auto_feed {
 
 		/* ---------------------------------------------------------------------
 		 * Individual students can be listed on multiple rows if they are
-		 * enrolled in two mor more courses.  'users' table needs to be
+		 * enrolled in two or more courses.  'users' table needs to be
 		 * deduplicated.  Deduplication will be keyed by 'user_id' since that is
 		 * also the table's primary key.  Note that 'courses_users' should NOT
 		 * be deduplicated.
@@ -356,7 +362,7 @@ SQL;
 	 * @link http://php.net/manual/en/function.ssh2-auth-pubkey-file.php
 	 * @access private
 	 * @param array    $csv_data  empty array used to read CSV data from file
-	 * return boolean  indicates success/failure of loading CSV data
+	 * @return boolean  indicates success/failure of loading CSV data
 	 */
     private function load_csv(&$csv_data) {
 
@@ -532,7 +538,6 @@ WHERE courses_users.user_id IS NULL
 AND courses_users.course IS NULL
 AND courses_users.semester IS NULL
 SQL;
-
 
         //We also need to move students no longer in auto feed to the NULL registered section
         //Make sure this only affects students (AND users.user_group=$1)
@@ -722,6 +727,80 @@ class deduplicate {
 				unset($arr[$i-1]);
 			}
 		}
+	}
+}
+
+/** @static class to parse command line arguments */
+class cli_args {
+
+    /** @var array holds all CLI argument flags and their values */
+	private static $args            = array();
+    /** @var string usage help message */
+	private static $help_usage      = "Usage: submitty_student_auto_feed.php [-h | --help] (-t [term code] | -g)" . PHP_EOL;
+    /** @var string short description help message */
+	private static $help_short_desc = "Read student enrollment CSV and upsert to Submitty database." . PHP_EOL;
+    /** @var string argument list help message */
+	private static $help_args_list  = <<<HELP
+Arguments
+-h --help       Show this help message.
+-t [term code]  Term code associated with student enrollment.
+-g              Guess the term code based on calendar month and year.
+
+NOTE: -t and -g are mutally exclusive.  One is required.
+
+HELP;
+
+	/**
+	 * Parse command line arguments
+	 *
+	 * Called with 'cli_args::parse_args()'
+	 *
+	 * @access public
+	 * @return mixed term code as string or boolean false when no term code is present.
+	 */
+	public static function parse_args() {
+
+		self::$args = getopt('hgt:', array('help'));
+
+		switch(true) {
+		case array_key_exists('h', self::$args):
+		case array_key_exists('help', self::$args):
+			self::print_help();
+			return false;
+		case array_key_exists('g', self::$args):
+			if (array_key_exists('t', self::$args)) {
+				//-t and -g are mutually exclusive
+				print "-g and -t cannot be used together." . PHP_EOL;
+				return false;
+			} else {
+				//Guess current term
+				//(s)pring is month <= 5, (f)all is month >= 8, s(u)mmer are months 6 and 7.
+				//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
+				$month = intval(date("m", time()));
+				$year  = date("y", time());
+				return ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+			}
+		case array_key_exists('t', self::$args):
+			return self::$args['t'];
+		default:
+			print self::$help_usage . PHP_EOL;
+			return false;
+		}
+	}
+
+	/**
+	 * Print extended help to console
+	 *
+	 * @access private
+	 */
+	private static function print_help() {
+
+		//Usage
+		print self::$help_usage . PHP_EOL;
+		//Short description
+		print self::$help_short_desc . PHP_EOL;
+		//Arguments list
+		print self::$help_args_list . PHP_EOL;
 	}
 }
 

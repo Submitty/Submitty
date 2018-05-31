@@ -67,12 +67,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
-# BUILD CLANG SETUP
-#################
-
-#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
-
-#################################################################
 # USERS SETUP
 #################
 
@@ -259,8 +253,9 @@ popd > /dev/null
 #Set up website if not in worker mode
 if [ ${WORKER} == 0 ]; then
     # install composer which is needed for the website
-    curl -sS https://getcomposer.org/installer -o composer-setup.php
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    rm -f /tmp/composer-setup.php
 
     a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
@@ -287,6 +282,21 @@ if [ ${WORKER} == 0 ]; then
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
     	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+
+        # Enable xdebug support for debugging
+        phpenmod xdebug
+
+        # In case you reprovision without wiping the drive, don't paste this twice
+        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/7.0/cli/conf.d/20-xdebug.ini) ]
+        then
+            # Tell it to send requests to our host on port 9000 (PhpStorm default)
+            cat << EOF >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+[xdebug]
+xdebug.remote_enable=1
+xdebug.remote_port=9000
+xdebug.remote_host=10.0.2.2
+EOF
+        fi
     fi
 
     cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
@@ -390,6 +400,13 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
+
+
+#################################################################
+# BUILD CLANG SETUP
+#################
+
+python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
 
 
 #################################################################

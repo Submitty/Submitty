@@ -440,7 +440,7 @@ CREATE TABLE users (
     rotating_section integer,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
-    CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
+    CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 
 
@@ -692,7 +692,6 @@ ALTER TABLE ONLY sessions
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
-
 
 --
 -- Name: gradeable_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -974,7 +973,6 @@ ALTER TABLE ONLY users
 ALTER TABLE ONLY gradeable_teams
     ADD CONSTRAINT gradeable_teams_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
-
 --
 -- Name: teams_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -1012,6 +1010,9 @@ ALTER TABLE ONLY categories_list
 
 ALTER TABLE ONLY thread_categories
     ADD CONSTRAINT thread_and_category_unique UNIQUE (thread_id, category_id);
+
+ALTER TABLE ONLY student_favorites
+    ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
 
 -- End Forum Key relationships
 
