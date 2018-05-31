@@ -598,7 +598,11 @@ function calculatePercentageTotal() {
     for (var i = 1; i <= gradeable.components.length; i ++) {
         var component = getComponent(i);
         total += component.max_value;
-        earned += calculateMarksPoints(i);
+        
+        var points = calculateMarksPoints(i);
+        if (points !== "None Selected") {
+            earned += points;
+        }
     }
 
     total = Math.max(total, 0);
