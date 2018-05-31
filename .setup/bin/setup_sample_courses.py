@@ -737,17 +737,27 @@ class Course(object):
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
+            # if gradeable.id == 'closed_team_homework':
+                # pdb.set_trace()
             #create_teams
             if gradeable.team_assignment is True:
                 ucounter = 0
                 for user in self.users:
                     unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+                    team_in_other_gradeable = select([teams_table]).where(
+                        teams_table.c['team_id'] == unique_team_id)
+                    res = conn.execute(team_in_other_gradeable)
+                    res.close()
+                    if res.rowcount > 0:
+                        ucounter+=1
+                        unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
                     reg_section = user.get_detail(self.code, "registration_section")
                     if reg_section is None:
                         continue
                     print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
                     teams_registration = select([gradeable_teams_table]).where(
-                        gradeable_teams_table.c['registration_section'] == reg_section)
+                        (gradeable_teams_table.c['registration_section'] == reg_section) &
+                        (gradeable_teams_table.c['g_id'] == gradeable.id))
                     res = conn.execute(teams_registration)
                     if res.rowcount == 0:
                         conn.execute(gradeable_teams_table.insert(),
