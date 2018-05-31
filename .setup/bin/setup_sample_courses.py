@@ -873,7 +873,7 @@ class Course(object):
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                                 active_version=active_version)
-                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
+                            json_history["team_history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
