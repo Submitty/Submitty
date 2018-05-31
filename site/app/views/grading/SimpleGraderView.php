@@ -174,6 +174,7 @@ HTML;
         $sums = array_fill(0, $num_numeric, 0);
         $sumsSqrs = array_fill(0, $num_numeric, 0);
         $num_with_grade = 0;
+        $num_users = 0;
 
         if($action == 'numeric'){
             $colspan++;
@@ -263,15 +264,19 @@ HTML;
                     else {
                         if($component->getScore() === 1.0) {
                             $background_color = "background-color: #149bdf";
-                            $sums[$col] += 1.0;
-                            $sumsSqrs[$col] += 1.0;
-                            $has_grade = true;
+                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                                $sums[$col] += 1.0;
+                                $sumsSqrs[$col] += 1.0;
+                                $has_grade = true;
+                            }
                         }
                         else if($component->getScore() === 0.5) {
                             $background_color = "background-color: #88d0f4";
-                            $sums[$col] += 0.5;
-                            $sumsSqrs[$col] += 0.25;
-                            $has_grade = true;
+                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                                $sums[$col] += 0.5;
+                                $sumsSqrs[$col] += 0.25;
+                                $has_grade = true;
+                            }
                         }
                         else {
                             $background_color = "";
@@ -295,8 +300,6 @@ HTML;
                         $time = ($component->getGradeTime() !== null) ? "data-grade-time='{$component->getGradeTime()->format('Y-m-d H:i:s')}'" : '';
                         if (!$component->getIsText()) {
                             $total+=$component->getScore();
-                            $sums[$col] += $component->getScore();
-                            $sumsSqrs[$col] += $component->getScore()**2;
                             if ($component->getScore() == 0){
                                 $return .= <<<HTML
                 <td class="option-small-input"><input class="option-small-box" style="text-align: center; color: #bbbbbb;" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" {$grader} {$time} data-num="true"/></td>
@@ -306,7 +309,13 @@ HTML;
                                 $return .= <<<HTML
                 <td class="option-small-input"><input class="option-small-box" style="text-align: center" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" {$grader} {$time} data-num="true"/></td>
 HTML;
-                                $has_grade = true;
+                            }
+                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                                $sums[$col] += $component->getScore();
+                                $sumsSqrs[$col] += $component->getScore()**2;
+                                if($component->getScore() != 0) {
+                                    $has_grade = true;
+                                }
                             }
                             $gradeable_row++;
                             $col++;
@@ -332,6 +341,10 @@ HTML;
                 $num_with_grade++;
             }
 
+            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                $num_users++;
+            }
+
             $return .= <<<HTML
             </tr>
 HTML;
@@ -346,7 +359,7 @@ HTML;
         $return .= <<<HTML
         <div class="popup-form" id="simple-stats-popup">
 HTML;
-        $num_users = count($rows);
+        
         if($num_users > 0) {
 
             $return .= <<<HTML
