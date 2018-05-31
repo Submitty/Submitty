@@ -298,8 +298,8 @@ HTML;
                 </a>
 HTML;
                         }
-						else if (($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
-							&& $title_save == "CLOSED" && $points_percent >= 50) || ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() == 0 && $g_data->getActiveVersion() >= 1)) {
+						else if ($g_data->beenAutograded() && $g_data->getTotalNonHiddenNonExtraCreditPoints() != 0 && $g_data->getActiveVersion() >= 1
+							&& $title_save == "CLOSED" && $points_percent >= 50) {
 						$gradeable_open_range = <<<HTML
                  <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable}">
                      {$button_text}
