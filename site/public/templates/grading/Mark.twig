@@ -1,9 +1,17 @@
+{% if component.default == 0 %}
+    {% set min = component.lower_clamp %}
+    {% set max = component.upper_clamp %}
+{% else %}
+    {% set min = -component.upper_clamp %}
+    {% set max = -component.lower_clamp %}
+{% endif %}
+
 <tr id="mark_id-{{ c_index }}-{{ m_index }}" name="mark_{{ c_index }}" class="{{ mark.publish ? "is_publish" : "" }}">
     <td colspan="1" style="; width: 90px; text-align: center;">
         <span id="mark_id-{{ c_index }}-{{ m_index }}-check" onclick="selectMark(this);" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}">
                 <i class="fa fa-square{{ mark.has ? "" : "-o" }} mark fa-lg" name="mark_icon_{{ c_index }}_{{ m_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>
             </span>
-        <input name="mark_points_{{ c_index }}_{{ m_index }}" type="number" onchange="fixMarkPointValue(this);" step="{{ gradeable.precision }}" value="{{ mark.points }}" min="{{ component.lower_clamp }}" max="{{ component.upper_clamp }}" style="width: 50%; resize:none; min-width: 50px;">
+        <input name="mark_points_{{ c_index }}_{{ m_index }}" type="number" onchange="fixMarkPointValue(this);" step="{{ gradeable.precision }}" value="{{ mark.points }}" min="{{ min }}" max="{{ max }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}" style="width: 50%; resize:none; min-width: 50px;">
     </td>
     <td colspan="4">
         <textarea name="mark_text_{{ c_index }}_{{ m_index }}" onkeyup="autoResizeComment(event);" rows="1" cols="120" style="width:90%; resize:none;">{{ mark.name }}</textarea>

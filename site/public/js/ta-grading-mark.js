@@ -16,15 +16,36 @@ function getMark(c_index, m_index) {
     return grading_data.gradeable.components[c_index - 1].marks[m_index];
 }
 
-function fixMarkPointValue(me) {
-    var max = parseFloat($(me).attr('max'));
-    var min = parseFloat($(me).attr('min'));
-    var current_value = parseFloat($(me).val());
-    if (current_value > max) {
-        $(me).val(max);
-    } else if (current_value < min) {
-        $(me).val(min);
+function clampComponentValue(c_index, value) {
+    var component = getComponent(c_index);
+    var upper = component.upper_clamp;
+    var lower = component.lower_clamp;
+    if (component.default !== 0) {
+        //Count down, so -component.upper_clamp <= value <= -component.lower_clamp
+        upper = -component.lower_clamp;
+        lower = -component.upper_clamp;
+    } else {
+        //Count up, so component.lower_clamp <= value <= component.upper_clamp
+        //Value already set
     }
+    if (value < lower) {
+        value = lower;
+    }
+    if (value > upper) {
+        value = upper;
+    }
+    return value;
+}
+
+function fixMarkPointValue(me) {
+    var current_value = parseFloat($(me).val());
+    var clamped = clampComponentValue(me.dataset.component_index, current_value);
+    if (clamped !== current_value) {
+        $(me).val(clamped);
+    }
+
+    getMark(me.dataset.component_index, me.dataset.mark_index).points = current_value;
+    updateProgressPoints(me.dataset.component_index);
 }
 
 //if type == 0 number input, type == 1 textarea
@@ -426,26 +447,24 @@ function checkMarks(question_num) {
 function calculateMarksPoints(question_num) {
     question_num = parseInt(question_num);
     var component = getComponent(question_num);
-    var lower_clamp = parseFloat(component.lower_clamp);
-    var current_points = parseFloat(component.default);
-    var upper_clamp = parseFloat(component.upper_clamp);
-    var arr_length = $('tr[name=mark_'+question_num+']').length;
+    var lower_clamp = component.lower_clamp;
+    var current_points = component.default;
+    var upper_clamp = component.upper_clamp;
+    var arr_length = component.marks.length;
     var any_selected=false;
 
     for (var i = 0; i < arr_length; i++) {
-        var current_row = $('#mark_id-'+question_num+'-'+i);
         var is_selected = false;
-        if (current_row.find('i[name=mark_icon_'+question_num+'_'+i+']')[0].classList.contains('fa-square')) {
+        if (component.marks[i].has) {
             is_selected = true;
         }
         if (is_selected === true) {
             any_selected = true;
-            current_points += parseFloat(current_row.find('input[name=mark_points_'+question_num+'_'+i+']').val());
+            current_points += component.marks[i].points;
         }
     }
 
-    current_row = $('#mark_custom_id-'+question_num);
-    var custom_points = parseFloat(current_row.find('input[name=mark_points_custom_'+question_num+']').val());
+    var custom_points = component.score;
     if (isNaN(custom_points)) {
         current_points += 0;
     } else {
