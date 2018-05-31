@@ -26,7 +26,7 @@ Variables
 #}
 {# Get array of section numbers #}
 {% set section_numbers = range(1, admin_gradeable.getNumSections()) %}
-{% set grading_groups = {'0': 'Instructor', '1': 'Full Access Grader', '2': 'Limited Access Grader'} %}
+{% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
 
 {# 
 Form
@@ -168,11 +168,11 @@ Form
         $('.g2').show();
 
         switch ($('#minimum_grading_group').val()) {
-            case '0': // Instructor only?
+            case '1': // Instructor only?
                 $('.g1').hide();
-            case '1': // Instructors and TA's
+            case '2': // Instructors and TA's
                 $('.g2').hide();
-            case '2': // Everyone
+            case '3': // Everyone
                 break;
             default:
                 alert('Error!  Invalid Minimum Grader!');
