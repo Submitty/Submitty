@@ -54,24 +54,17 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
-        $this->renderUserForm('update_student', $use_database);
         $this->renderDownloadForm('user', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
-        $this->renderUserForm('update_grader', $use_database);
-        $this->renderDownloadForm('grader', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
-    }
-
-    private function renderUserForm($action, $use_database) {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
+        $this->renderDownloadForm('grader', $use_database);
     }
 
     private function renderDownloadForm($code, $use_database) {
@@ -210,7 +203,7 @@ class UsersController extends AbstractController {
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $students, $reg_sections,
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
     
