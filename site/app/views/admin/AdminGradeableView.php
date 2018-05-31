@@ -22,15 +22,6 @@ class AdminGradeableView extends AbstractView {
             array_push($gradeables_array, $g_id_title['g_id']);
         }
 
-        // Generate an array by user_group for the graders
-        $graders_by_usertype = $admin_gradeable->getGradersFromUsertypes();
-        $graders = array();
-        for($x = 0; $x < sizeof($graders_by_usertype); $x++) {
-            $graders[$x] = array();
-            foreach($graders_by_usertype[$x] as $grader) {
-                $graders[$x][$grader['user_id']] = $grader;
-            }
-        }
         // For each grader with sections assigned to them, add their
         //  sections to the array generated above
         foreach($admin_gradeable->getGradersAllSection() as $grader) {
@@ -90,7 +81,7 @@ class AdminGradeableView extends AbstractView {
             "marks"           => $marks,
 
             // Graders Page Specific
-            "all_graders"    => $graders
+            "all_graders"    => $admin_gradeable->getGradersFromUsertypes()
         ]);
     }
     
