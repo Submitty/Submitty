@@ -77,6 +77,13 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
+    Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
+    <br />
+    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
+            {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
+            {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
+    <br />
 
     Is this a team assignment?
     <br />
@@ -158,6 +165,19 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         }
     }
 
+    function onManualGradingChange() {
+        if($('#yes_ta_grade').is(':checked')) {
+            // $('.manual_grading').show();
+            disableElementChildren('.manual_grading', false);
+            $('#page_3_nav').show();
+        }
+        else {
+            // $('.manual_grading').hide();
+            disableElementChildren('.manual_grading', true);
+            $('#page_3_nav').hide();
+        }
+    }
+
     $(function () {
         $("#alert-message").dialog({
             modal: true,
@@ -171,6 +191,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     });
 
     $(document).ready(function() {
+
+        $('[name="ta_grading"]').change(onManualGradingChange)
 
         //
         // Template Selector Box Events

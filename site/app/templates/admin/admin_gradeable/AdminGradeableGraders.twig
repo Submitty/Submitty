@@ -32,12 +32,6 @@ Variables
 Form
 #}
 <div class="electronic_file">
-    Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
-    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
-           {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
-            {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
-    <br />
     <div id="manual_grading" class="manual_grading">
         <br />
         What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
@@ -73,7 +67,7 @@ Form
                         {% for row in admin_gradeable.getGradeableSectionHistory() %}
                             {% if row.user_id != last %}
                                 </tr>
-                                <tr class="g_history g{{ row.user_group-1 }}">
+                                <tr class="g_history g{{ row.user_group }}">
                                     <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
                             {% endif %}
                             <td style="padding: 8px; border: 3px solid black; text-align: center;">
@@ -145,17 +139,6 @@ Form
         }
     }
 
-    function onManualGradingChange() {
-        if($('#yes_ta_grade').is(':checked')) {
-            // $('.manual_grading').show();
-            disableElementChildren('.manual_grading', false);
-        }
-        else {
-            // $('.manual_grading').hide();
-            disableElementChildren('.manual_grading', true);
-        }
-    }
-
     function onSectionTypeChange() {
         if($('#rotating-section').is(':checked')) {
             // $('#rotating_data').show();
@@ -190,10 +173,6 @@ Form
     }
 
     $(document).ready(function() {
-
-        // Only show most of the form if manual grading is enabled
-        onManualGradingChange();
-        $('[name="ta_grading"]').change(onManualGradingChange);
 
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();

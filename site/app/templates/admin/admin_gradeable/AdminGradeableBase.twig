@@ -4,6 +4,19 @@
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
+
+<script type="text/javascript">
+    function disableElementChildren(c, dis = true) {
+        dis ? $(c).hide() : $(c).show();
+        // $('input' + c).attr('disabled', dis);
+        // $('textarea' + c).attr('disabled', dis);
+        // $('select' + c).attr('disabled', dis);
+
+        // TODO: this is too powerful.  Our controller can't handle
+        //  missing data yet (https://stackoverflow.com/a/4838229/2972004)
+        // $(c + ' *').attr('disabled', dis);
+    }
+</script>
 <div id="container-rubric" style="display:none;">
     <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
@@ -16,39 +29,30 @@
         </div>
         <br/>
         <div id="nav-bar">
-            <text class="nav-bar-item" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
-            <text class="nav-bar-item" id="page_1_nav" onClick="onChangeNavTab(1);">Rubric</text>
-            <text class="nav-bar-item" id="page_2_nav" onClick="onChangeNavTab(2);">Dates</text>
-            <text class="nav-bar-item" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="nav-bar0" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
+            <text class="nav-bar nav-bar-elec" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
+            <text class="nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</text>
+            <text class="nav-bar nav-bar-elec" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</text>
         </div>
         <br/>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            <div id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
-            <div id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
-            <div id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
-            <div id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+            <div class="page-content" id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
+            <div class="page-content page_content-elec" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
+            <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+            <div class="page-content page_content-elec" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+            <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
         </div>
         <br/>
         <div id="nav-controls">
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{{submit_text}}</button>
-            <button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
+            <!--<button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
+            <button class="btn btn-primary" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
             <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
         </div>
     </form>
 </div>
 <script type="text/javascript">
-
-    function disableElementChildren(c, dis = true) {
-        dis ? $(c).hide() : $(c).show();
-        // $('input' + c).attr('disabled', dis);
-        // $('textarea' + c).attr('disabled', dis);
-        // $('select' + c).attr('disabled', dis);
-
-        // TODO: this is too powerful.  Our controller can't handle
-        //  missing data yet (https://stackoverflow.com/a/4838229/2972004)
-        // $(c + ' *').attr('disabled', dis);
-    }
-
 
     var adminGradeableNavTab = 0;
     function onChangeNavTab(tab) {
@@ -57,48 +61,32 @@
             return;
         }
         adminGradeableNavTab = tab;
-        
-        // TODO: all pages display for a short time before they are hidden
-        $('#page_0_content').hide();
-        $('#page_1_content').hide();
-        $('#page_2_content').hide();
-        $('#page_3_content').hide();
 
+        $('.page-content').hide();
         $('#page_' + tab + '_content').show();
-
-        // Hide "next" button if we're on the last page
-        if(adminGradeableNavTab === 4) {
-            $('#next_button').hide();
-        }
-        else {
-            $('#next_button').show();
-        }
-    }
-
-    function disableNavItem(id) {
-        $(id).attr('style', 'background-color: #999999; cursor: default;');
-        $(id).attr('onClick', '');
     }
 
     $(document).ready(function() {
-        // Create mode, so disable naviation via nav bar
+        // Create mode, so disable navigation via nav bar
         if('{{action}}' === 'new')
         {
             onChangeNavTab(0);
-            
-            [
-                '#page_1_nav',
-                '#page_2_nav',
-                '#page_3_nav'
-            ].forEach(disableNavItem);
-
-            // Hide next button
-            $('#next_button').hide();
+            $('.nav-bar').each(function() {
+                $(this).attr('style', 'background-color: #999999; cursor: default;');
+                $(this).attr('onClick', '');
+            });
         }
         else
         {
             onChangeNavTab({{ nav_tab }});
         }
+
+        {% if admin_gradeable.getGGradeableType() != 0 or not admin_gradeable.getGId() != ''  %}
+
+        $('.nav-bar-elec').hide();
+        $('.page-content-elec').hide();
+
+        {% endif %}
 
         // TODO: below is selectively copied from previous ui
         $( "input" ).change(function() {
@@ -268,6 +256,7 @@
     // Only succeeds if all child forms succeed
     function checkForm() {
         return checkFormCreate() &&
+                checkFormAuto() &&
                 checkFormRubric() &&
                 checkFormDates() &&
                 checkFormGraders();

@@ -1,0 +1,219 @@
+<div class="electronic_file">
+    <h2>Submission</h2>
+
+    <b>Full path to the directory containing the autograding config.json file:</b><br>
+    See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
+    <kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
+    <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
+    <kbd>/var/local/submitty/courses/{$_GET['semester']}/{$_GET['course']}/config_upload/#</kbd> (for an web uploaded configuration)<br>
+
+    <input style='width: 83%' type='text' name='config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" />
+    <br /> <br />
+
+    Should students be able to view submissions?
+    <fieldset>
+        <input type="radio" id="yes_student_view" name="student_view" value="true"
+                {{ admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> Yes
+        <input type="radio" id="no_student_view" name="student_view" value="false"
+                {{ not admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+        (Select 'No' during grading of a bulk upload pdf quiz/exam.)
+
+        <div id="student_submit_download_view">
+
+            <br />
+            Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
+            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                    {{ admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    {{ not admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> No
+            <br /> <br />
+
+            Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+            <input type="radio" id="yes_student_download" name="student_download" value="true"
+                    {{ admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_download" name="student_download" value="false"
+                    {{ not admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> No
+            <br /> <br />
+
+            Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+            <input type="radio" id="yes_student_any_version" name="student_any_version" value="true"
+                    {{ admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Any version
+            <input type="radio" id="no_student_any_version" name="student_any_version" value="false"
+                    {{ not admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Active version only
+
+        </div>
+        <br />
+    </fieldset>
+
+    Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
+    <fieldset>
+
+        <input type="radio" id="upload_file_radio" name="upload_type" value="upload_file"
+                {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
+
+        <input type="radio" id="repository_radio" name="upload_type" value="repository"
+                {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
+
+        <div id="repository">
+            <br />
+            <b>Path for the Version Control System (VCS) repository:</b><br />
+            VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
+            The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
+            You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+            <ul style="list-style-position: inside;">
+                <li>gradeable_id</li>
+                <li>user_id OR team_id OR repo_id (only use one)</li>
+            </ul>
+            ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+            <input style='width: 83%' type='text' id="subdirectory" name='subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
+            VCS URL: <kbd id="vcs_url"></kbd>
+            <br />
+        </div>
+
+        <br />
+    </fieldset>
+</div>
+
+<script type="text/javascript">
+    var blankQuestion =
+        {
+            'id': 'NEW',
+            'title': '',
+            'ta_comment': '',
+            'student_comment': ''
+        };
+
+    function onPdfChange() {
+        if($('#yes_pdf_page').is(':checked')) {
+            // $('#pdf_page').show();
+            // $('.pdf_page_input').show();
+            disableElementChildren('#pdf_page', false);
+            disableElementChildren('.pdf_page_input', $('#yes_pdf_page_student').is(':checked'));
+        }
+        else {
+            // $('#pdf_page').hide();
+            // $('.pdf_page_input').hide();
+            disableElementChildren('#pdf_page', true);
+            disableElementChildren('.pdf_page_input', true);
+        }
+    }
+
+    function onStudentViewChange() {
+        if($('#yes_student_view').is(':checked')) {
+            //$('#student_submit_download_view').show();
+            disableElementChildren('#student_submit_download_view', false);
+        }
+        else {
+            // $('#student_submit_download_view').hide();
+            disableElementChildren('#student_submit_download_view', true);
+        }
+    }
+
+    function onUploadTypeChange() {
+        if($('#upload_file_radio').is(':checked')) {
+            // $('#repository').hide();
+            disableElementChildren('#repository', true);
+        }
+        else {
+            // $('#repository').show();
+            disableElementChildren('#repository', false);
+        }
+    }
+
+    function onVcsSubdirChange() {
+        setVcsUrl($('#subdirectory').val());
+    }
+
+    var vcs_base_url = "{{ admin_gradeable.getVcsBaseUrl() }}";
+    function setVcsUrl(subdirectory) {
+        if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
+            $('#vcs_url').text(subdirectory);
+        }
+        else {
+            $('#vcs_url').text(vcs_base_url.replace(/[\/]+$/g, '') + '/' + subdirectory);
+        }
+    }
+
+    $(function () {
+        $('input[name="subdirectory"]').on('change paste keyup', function() {
+            setVcsUrl(this.value);
+        });
+        setVcsUrl($('input[name="subdirectory"]').val());
+    });
+
+    $(document).ready(function() {
+
+        // Hide PDF settings if not in use
+        onPdfChange();
+        $('[name="pdf_page"]').change(onPdfChange);
+
+        // Hide PDF pages in Rubric if students assign them
+        $('[name="pdf_page_student"]').change(onPdfChange);
+
+        // Only show the settings if the setting is enabled
+        onStudentViewChange();
+        $('[name="student_view"]').change(onStudentViewChange);
+
+        // Only show repo settings if the gradeable is using repo upload
+        onUploadTypeChange();
+        $('[name="upload_type"]').change(onUploadTypeChange);
+
+        // Upload the vcs url in real time
+        onVcsSubdirChange();
+        $('#subdirectory').keypress(onVcsSubdirChange);
+        $('#subdirectory').keyup(onVcsSubdirChange);
+
+
+    });
+
+    function checkFormAuto() {
+        var subdirectory = $('input[name="subdirectory"]').val();
+        var vcs_url = $('#vcs_url').text();
+        var config_path = $('input[name=config_path]').val();
+
+
+        if (config_path == "" || config_path === null) {
+            alert("The config path should not be empty");
+            return false;
+        }
+        if ($('repository_radio').is(':checked')) {
+            var subdirectory_parts = subdirectory.split("{");
+            // if this is a vcs path extension, make sure it starts with '/'
+            console.log(vcs_url);
+            if (vcs_url.indexOf('://') === -1 && vcs_url[0] !== "/") {
+                alert("VCS path needs to either be a URL or start with a /");
+                return false;
+            }
+            // check that path is made up of valid variables
+            var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+            var used_id = false;
+            for (var x = 1; x < subdirectory_parts.length; x++) {
+                var subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
+                if (allowed_variables.indexOf(subdirectory_part) === -1) {
+                    alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                    return false;
+                }
+                if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    used_id = true;
+                    continue;
+                }
+                if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
+                    return false;
+                }
+            }
+
+        }
+
+        // TODO: this may be unnecessary (done on serialization)
+        // if view false while either submit or download true
+        if ($('input:radio[name="student_view"]:checked').attr('value') === 'false' &&
+            ($('input:radio[name="student_submit"]:checked').attr('value') === 'true' ||
+                $('input:radio[name="student_download"]:checked').attr('value') === 'true')) {
+            alert("Student_view cannot be false while student_submit or student_download is true");
+            return false;
+        }
+        return true;
+    }
+
+</script>
