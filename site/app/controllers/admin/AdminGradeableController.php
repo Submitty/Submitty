@@ -583,7 +583,7 @@ class AdminGradeableController extends AbstractController {
             $this->returnToNav();
         }
         if (!$this->core->getUser()->accessAdmin()) {
-            die("Only admins can edit teams");
+            die("Only admins can delete gradeable");
             $this->returnToNav();
         }
         $this->core->getQueries()->deleteGradeable($g_id);

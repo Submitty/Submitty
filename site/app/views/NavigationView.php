@@ -254,19 +254,21 @@ HTML;
                 }
                 else{
                     if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                        $no_teams_flag=1;
+                        # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false. 
+                        $no_teams_flag=true; 
                         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable);
                         if (!empty($all_teams)) {      
-                            $no_teams_flag=0;
+                            $no_teams_flag=false;
                         }
-                        $no_submission_flag=1;
+                        # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+                        $no_submission_flag=true;
                         $semester = $this->core->getConfig()->getSemester();
                         $course = $this->core->getConfig()->getCourse();
                         $submission_path = "/var/local/submitty/courses/".$semester."/".$course."/"."submissions/".$gradeable;
                         if(is_dir($submission_path)) {
-                            $no_submission_flag=0;
+                            $no_submission_flag=false;
                         }
-                        if(($no_submission_flag == 1) && ($no_teams_flag == 1)) {
+                        if(($no_submission_flag == true) && ($no_teams_flag == true)) {
                             $form_action=$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable ));
                             $gradeable_title = <<<HTML
                     <label>{$g_data->getName()}</label>&nbsp;
@@ -277,8 +279,18 @@ HTML;
                             $gradeable_title = '<label>'.$g_data->getName().'</label>';
                         }
                     }
-                    else {
-                        $gradeable_title = '<label>'.$g_data->getName().'</label>';    
+                    else if(($g_data->getType() == GradeableType::NUMERIC_TEXT) || (($g_data->getType() == GradeableType::CHECKPOINTS))) {
+                        if(($this->core->getQueries()->getNumUsersGraded($gradeable)) == 0) {
+                            $form_action=$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable ));
+                            $gradeable_title = <<<HTML
+                    <label>{$g_data->getName()}</label>&nbsp;
+                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$g_data->getName()}");'></i>
+HTML;
+                        }
+                        else {
+                            $gradeable_title = '<label>'.$g_data->getName().'</label>';
+                        }
+                            
                     }
                 }
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
@@ -689,7 +701,7 @@ HTML;
     <div class="popup-form" id="delete-gradeable-form" style="width:550px; margin-left:-250px;">
         <h2>Delete Gradeable</h2> 
         <p>&emsp;</p>
-        <p>Note: A Gradeable can only be deleted if it do not have any team and submission.
+        <p>Note: A gradeable can only be deleted if it has no student teams and if it has no student submissions.
         </p><br />
         <form name="delete-confirmation" method="post" action="">
          <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />

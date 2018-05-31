@@ -756,6 +756,14 @@ AND gd_user_viewed_date IS NOT NULL
         return intval($this->course_db->row()['cnt']);
     }
 
+    public function getNumUsersGraded($g_id) {
+        $this->course_db->query("
+SELECT COUNT(*) as cnt FROM gradeable_data
+WHERE g_id = ?", array($g_id));
+
+        return intval($this->course_db->row()['cnt']);
+    }
+
     //gets ids of students with non null registration section and null rotating section
     public function getRegisteredUsersWithNoRotatingSection(){
        $this->course_db->query("
