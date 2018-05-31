@@ -240,6 +240,7 @@ jobs:
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pip3 install paramiko
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
