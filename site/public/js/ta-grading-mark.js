@@ -329,7 +329,14 @@ function addMark(me, num, background, min, max, precision, gradeable_id, user_id
             
             var parent = $('#marks-parent-'+num);
             var x      = $('tr[name=mark_'+num+']').length;
-            
+
+            getComponent(num).marks.push({
+                name: note,
+                points: points,
+                publish: false,
+                has: false
+            });
+
             parent.append(getMarkView(num, x));
 
             

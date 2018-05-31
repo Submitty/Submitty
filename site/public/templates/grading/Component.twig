@@ -88,27 +88,27 @@
                 </div>
             </span>
         </div>
+    </div>
 
-        {# Marks table #}
+    {# Marks table #}
 
-        <table class="box" id="marks-parent-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-        {#
-            {% for mark in component.marks %}
-                {% set m_index = loop.index0 %}
-                {% include "Mark.twig" %}
-            {% endfor %}
-        #}
-        </table>
+    <table class="box" id="marks-parent-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    {#
+        {% for mark in component.marks %}
+            {% set m_index = loop.index0 %}
+            {% include "Mark.twig" %}
+        {% endfor %}
+    #}
+    </table>
 
-        {# Custom mark #}
+    {# Custom mark #}
 
-        <div id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-            {# todo: peer #}
-            <span colspan="4">
-                <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ min }}, {{ max }}, '{{ gradeable.precision }}', '{{ gradeable.id }}', '{{ gradeable.user_id }}', {{ gradeable.active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                Add New Common Mark</span>
-            </span>
-        </div>
+    <div id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+        {# todo: peer #}
+        <span colspan="4">
+            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this, {{ c_index }}, '', {{ min }}, {{ max }}, '{{ gradeable.precision }}', '{{ gradeable.id }}', '{{ gradeable.user_id }}', {{ gradeable.active_version }}, {{ component.id }}, '{{ your_user_id }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+            Add New Common Mark</span>
+        </span>
     </div>
 </div>
 
