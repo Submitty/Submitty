@@ -27,12 +27,20 @@ function updateMarkText(me) {
 }
 
 function updateCustomMarkPoints(me) {
-    getComponent(me.dataset.component_index).score = parseFloat($(me).val());
+    var component = getComponent(me.dataset.component_index);
+    var val = $(me).val();
+    component.score = parseFloat(val);
     updateProgressPoints(me.dataset.component_index);
 }
 
 function updateCustomMarkText(me) {
-    getComponent(me.dataset.component_index).comment = $(me).val();
+    var component = getComponent(me.dataset.component_index);
+    var val = $(me).val();
+    component.comment = val;
+    if (val === "") {
+        component.score = 0;
+    }
+
     updateProgressPoints(me.dataset.component_index);
 }
 
@@ -468,38 +476,18 @@ function calculateMarksPoints(question_num) {
     }
 
     var custom_points = component.score;
-    var custom_message = $('textarea[name=mark_text_custom_'+question_num+']').val();
-    if(custom_message == ""){
-        $('#mark_points_custom-' + question_num)[0].disabled=true;
-        $('#mark_points_custom-' + question_num)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + question_num)[0].style.cursor="not-allowed";
-        $('#mark_points_custom-' + question_num)[0].value="";
-    }
-    else{
-        $('#mark_points_custom-' + question_num)[0].disabled=false;
-        $('#mark_points_custom-' + question_num)[0].style.cursor="default";
-        $('#mark_icon_custom-' + question_num)[0].style.cursor="pointer";
-        if($('#mark_points_custom-' + question_num)[0].value==""){
-            $('#mark_points_custom-' + question_num)[0].value="0";
-        }
+    if (component.comment !== "") {
         if (isNaN(custom_points)) {
             current_points += 0;
-        }
-        else {
+        } else {
             current_points += custom_points;
             any_selected = true;
         }
     }
 
     if(any_selected == false){
-        $('#grade-' + question_num)[0].innerHTML = "";
-        $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
-        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
-        $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         return "None Selected";
     }
-    $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
-    $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
     if(current_points < lower_clamp) {
         current_points = lower_clamp;
     }
@@ -518,6 +506,8 @@ function updateProgressPoints(question_num) {
     var component = getComponent(question_num);
     var max_points = parseFloat(component.max_value);
     var summary_text = "Click me to grade!";
+
+
     if(current_points=="None Selected"){
         $('#grade-' + question_num)[0].innerHTML = "";     
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
@@ -526,6 +516,8 @@ function updateProgressPoints(question_num) {
     }
     else{
         $('#grade-' + question_num)[0].innerHTML = current_points;
+        $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
+        $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
         //extra credit
         if(current_points > max_points){
             $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
@@ -563,6 +555,23 @@ function updateProgressPoints(question_num) {
         }
     }
     current_question_text.html(summary_text);
+
+    var custom_message = $('textarea[name=mark_text_custom_'+question_num+']').val();
+    if(custom_message == ""){
+        $('#mark_points_custom-' + question_num)[0].disabled=true;
+        $('#mark_points_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor="not-allowed";
+        $('#mark_points_custom-' + question_num)[0].value="";
+    }
+    else {
+        $('#mark_points_custom-' + question_num)[0].disabled = false;
+        $('#mark_points_custom-' + question_num)[0].style.cursor = "default";
+        $('#mark_icon_custom-' + question_num)[0].style.cursor = "pointer";
+        if ($('#mark_points_custom-' + question_num)[0].value == "") {
+            $('#mark_points_custom-' + question_num)[0].value = "0";
+        }
+    }
+
     calculatePercentageTotal();
 }
 
