@@ -72,7 +72,7 @@
                          <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
                  </span> -->
 
-        <div id="summary-{{ c_index }}" style="display:block" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ gradeable.precision }}">
+        <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}" data-min="{{ component.lower_clamp }}" data-max="{{ component.upper_clamp }}" data-precision="{{ gradeable.precision }}">
             <span style="width:98%;" colspan="4">
                 <div id="rubric-{{ c_index }}">
                     <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>

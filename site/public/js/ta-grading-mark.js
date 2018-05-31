@@ -506,7 +506,8 @@ function updateProgressPoints(question_num) {
 function selectMark(me, first_override) {
     var icon = $(me).find("i");
     var skip = true; //if the table is all false initially, skip check marks.
-    var question_num = parseInt(icon.attr('name').split('_')[2]);
+    var question_num = me.dataset.component_index;
+    var mark_num = me.dataset.mark_index;
     var mark_table = $('#marks-parent-'+question_num);
     mark_table.find('.mark').each(function() {
         if($(this)[0].classList.contains('fa-square')) {
@@ -515,8 +516,12 @@ function selectMark(me, first_override) {
         }
     });
 
+    var mark = getMark(question_num, mark_num);
+    mark.has = !mark.has;
+
     //actually checks the mark then checks if the first mark is still valid
-    icon.toggleClass("fa-square-o fa-square");
+    icon.toggleClass("fa-square-o", !mark.has);
+    icon.toggleClass("fa-square", mark.has);
     if (skip === false) {
         checkMarks(question_num);
     }
