@@ -358,8 +358,8 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    var gradeable = getGradeable();
+    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true, function() {
         window.location = $("#prev-student")[0].dataset.href;
     }, function() {
         if (confirm("Could not save last mark, change student anyway?")) {
@@ -369,8 +369,8 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    var gradeable = getGradeable();
+    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true, function() {
         window.location = $("#next-student")[0].dataset.href;
     }, function() {
         if (confirm("Could not save last mark, change student anyway?")) {
@@ -491,7 +491,7 @@ registerKeyHandler("KeyR", function() {
 
 registerKeyHandler('ArrowDown', function() {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
         openMark(1);
     } else if (current === numQuestions) {
@@ -505,7 +505,7 @@ registerKeyHandler('ArrowDown', function() {
 
 registerKeyHandler('ArrowUp', function() {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
         openGeneralMessage();
     } else if (current === 1) {
