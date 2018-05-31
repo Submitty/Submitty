@@ -1174,7 +1174,7 @@ HTML;
                         {$name}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-                    </div><br/>
+                    </div>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
                 </div>
 HTML;
@@ -1197,7 +1197,7 @@ HTML;
                     $count++;
                     display_files($contents, $count, $indent+1, $return, $filename);
                     $return .= <<<HTML
-                </div>
+                </div><br/>
             </div>
 HTML;
                 }
