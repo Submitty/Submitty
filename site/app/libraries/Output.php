@@ -2,6 +2,7 @@
 
 namespace app\libraries;
 use app\exceptions\OutputException;
+use app\models\Breadcrumb;
 
 /**
  * Class Output
@@ -131,7 +132,7 @@ class Output {
      * @param array $context Associative array of variables to pass into the Twig renderer
      * @return string Rendered page content
      */
-    public function renderTwigTemplate($filename, $context) {
+    public function renderTwigTemplate($filename, $context = []) {
         try {
             return $this->twig->render($filename, $context);
         } catch (\Twig_Error $e) {
@@ -146,7 +147,7 @@ class Output {
      * @param string $filename Template file basename, file should be in site/app/templates
      * @param array $context Associative array of variables to pass into the Twig renderer
      */
-    public function renderTwigOutput($filename, $context) {
+    public function renderTwigOutput($filename, $context = []) {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
         } else {
@@ -183,7 +184,7 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css, $this->js);
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
         }
         else {
             return '';
@@ -298,27 +299,6 @@ class Output {
     }
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
-        if ($url !== null && $url !== "") {
-            if(!$icon){
-                if ($top === true) {
-                    $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-                }
-                else {
-                    $string = "<a href='{$url}'>{$string}</a>";
-                }
-            }
-            else {
-                $string = '<a class="external" href="'.$url.'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-            }   
-        }
-        if(empty($url) && empty($string)) {
-            return;
-        }
-        if($icon){
-            $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
-        }
-        else {
-           $this->breadcrumbs[] = $string;
-        }
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
     }
 }
