@@ -70,7 +70,11 @@ select {
 
 .nav-bar {
     cursor: pointer;
-    padding-right: 20px;
+    width: 160px;
+    vertical-align: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    background-color: green;
 }
 
 /* align the radio, buttons and checkboxes with labels */
