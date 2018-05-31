@@ -67,12 +67,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
-# BUILD CLANG SETUP
-#################
-
-#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
-
-#################################################################
 # USERS SETUP
 #################
 
@@ -390,6 +384,13 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
+
+
+#################################################################
+# BUILD CLANG SETUP
+#################
+
+python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
 
 
 #################################################################
