@@ -60,8 +60,8 @@ cmd = "echo 'add_subdirectory(ASTMatcher)' >> /usr/local/submitty/clang-llvm/llv
 cmd2 = "echo 'add_subdirectory(UnionTool)' >> /usr/local/submitty/clang-llvm/llvm/tools/clang/tools/extra/CMakeLists.txt"
 os.system(cmd)
 os.system(cmd2)
-<<<<<<< HEAD
 '''
+<<<<<<< HEAD
 # Just build targets we need
 subprocess.call(["ninja", "install"])
 #subprocess.call(["ninja", "ASTMatcher", "UnionTool"])
