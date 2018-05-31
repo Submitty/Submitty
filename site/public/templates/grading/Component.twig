@@ -1,6 +1,3 @@
-{% set initial_text = "Click me to grade!" %}
-{% set graded_color = component.grader == null ? "" : "background-color: #eac73d;" %}
-
 {# todo: need to check if current user is full access grader #}
 {% set display_verify_user = component.grader != null and component.grader.id != your_user_id %}
 
@@ -11,28 +8,32 @@
 {% endif %}
 
 <div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
+
+    {# Title bar #}
     <div class="box-title">
-        <span id="gradebar-{{ c_index }}" style="{{ graded_color }}; white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1" class="badge">
+
+        <span id="gradebar-{{ c_index }}" style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1" class="badge">
             <strong>
                 <span id="grade-{{ c_index }}" name="grade-{{ c_index }}" class="grades"> ?</span> / {{ component.max_value }}
             </strong>
         </span>
+
         <span colspan="3" data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
             <b>{{ component.name }}</b>
+
             {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' style='color:rgb(200, 0, 0); font-weight: bold; font-size:medium;'>
                     Please edit or ensure that comments from version {{ component.graded_version }} still apply.
                 </span>
             {% endif %}
-            <span style="float: right;">
 
+            <span style="float: right;">
                 {% if display_verify_user %}
                     <span style="display: inline; color: red;">
                         <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}')" value = "Verify Grader"/>
                     </span>
                 {% endif %}
-
                 <span id="graded-by-{{ c_index }}" style="font-style: italic; padding-right: 10px;">
                     {% if component.grader == null %}
                         Ungraded!
@@ -43,6 +44,8 @@
                 <span id="graded-saving-{{ c_index }}" style="display: none; font-style: italic; padding-right: 10px;">Saving...</span>
             </span>
         </span>
+
+        {# Notes to TA/Student #}
         <span id="ta_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
             {% if component.ta_comment != "" %}
                 <br/>
@@ -67,24 +70,30 @@
                 </div>
             {% endif %}
         </span>
+        {# /Notes to TA/Student #}
+
+        {# Todo: reimplement cancel button #}
         {#
         <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
             <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
         </span>
         #}
 
+        {# Summary text #}
         <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
             <span style="width:98%;" colspan="4">
                 <div id="rubric-{{ c_index }}">
-                    <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{{ initial_text }}</span>
+                    <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">...</span>
                 </div>
             </span>
         </div>
+        {# /Summary text #}
     </div>
+    {# /Title bar #}
 
     {# Marks table #}
-
     <table class="box" id="marks-parent-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
     {#
         {% for mark in component.marks %}
             {% set m_index = loop.index0 %}
@@ -92,18 +101,20 @@
         {% endfor %}
     #}
     </table>
+    {# /Marks table #}
 
-    {# Custom mark #}
-
+    {# Add new mark #}
     <div id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-        {# todo: peer #}
+        {# todo: peer grading #}
         <span colspan="4">
             <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
     </div>
+    {# /Add new mark #}
 </div>
 
+{# Custom mark #}
 <div class="box" id="mark_custom_id-{{ c_index }}" name="mark_custom_{{ c_index }}">
     <div class="box-title">
         <span colspan="1" style="text-align: center; white-space: nowrap;">
@@ -117,3 +128,4 @@
         </span>
     </div>
 </div>
+{# /Custom mark #}
