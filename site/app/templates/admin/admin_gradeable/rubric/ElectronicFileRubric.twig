@@ -1,3 +1,5 @@
+<h2>Submission</h2>
+
 <!-- TODO: this may go better in the "grader" page
 Will this assignment have peer grading?
 <fieldset>
@@ -62,10 +64,10 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
 <fieldset>
 
     <input type="radio" id="upload_file_radio" name="upload_type" value="upload_file"
-            {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : '' }}/> Upload File(s)
+            {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
 
     <input type="radio" id="repository_radio" name="upload_type" value="repository"
-            {{ admin_gradeable.getEgIsRepository() ? 'checked ' : '' }}/> Version Control System (VCS) Repository
+            {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
 
     <div id="repository">
         <br />
@@ -87,6 +89,7 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
 </fieldset>
 
 <div class="manual_grading">
+    <h2>Manual Grading</h2>
     What overall instructions should be provided to the TA?:<br />
     <!--NOTE: "textarea" contents (space between <textarea> and </textarea>") should not have any extra characters
                     (that's why the '>' is on the next line)-->
@@ -110,12 +113,11 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
             <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
                     {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
         </div>
-
-        Point precision (for manual grading):
-        <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
-        <br /><br />
-
     </fieldset>
+
+    Point precision:
+    <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+    <br /><br />
 
     <table class="electronic-file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
         <thead style="background: #E1E1E1;">
@@ -141,40 +143,40 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
                                       display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
                     <div id="mark_questions_{{ num }}">
-                        <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
-                            <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
-                            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
-                            <!--
-                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            -->
-                            <br>
-                        </div>
-                        {% if admin_gradeable.getEgUseTaGrading() %}
-                            {% set first = true %}
-                            {% set hide_icons = "" %}
-                            {% for mark in marks[question.getId()] %}
-                                <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
-                                    <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
-                                    <i class="fa fa-circle" aria-hidden="true"></i>
-                                    <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
-                                           value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                                    <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
-                                    {% if not first %}
-                                        <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
-                                    {% endif %}
-
-                                    <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                    <!--
-                                    <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                    <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                    -->
-                                    <br>
-                                </div>
-                                {% set first = false %}
-                            {% endfor %}
+                        {% if marks|length == 0 %}
+                            <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
+                                <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
+                                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                                <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
+                                <!--
+                                <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                                <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                                -->
+                                <br>
+                            </div>
                         {% endif %}
+                        {% set first = true %}
+                        {% set hide_icons = "" %}
+                        {% for mark in marks[question.getId()] %}
+                            <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                                <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
+                                <i class="fa fa-circle" aria-hidden="true"></i>
+                                <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
+                                       value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                                <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
+                                {% if not first %}
+                                    <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
+                                {% endif %}
+
+                                <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                                <!--
+                                <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                                <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                                -->
+                                <br>
+                            </div>
+                            {% set first = false %}
+                        {% endfor %}
                         <div class="btn btn-xs btn-primary" id="rubric_add_mark_{{ num }}" onclick="addMark(this,{{ num }});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
                     </div>
                 </td>
@@ -252,39 +254,49 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
-            $('#pdf_page').show();
-            $('.pdf_page_input').show();
+            // $('#pdf_page').show();
+            // $('.pdf_page_input').show();
+            disableElementChildren('#pdf_page', false);
+            disableElementChildren('.pdf_page_input', false);
         }
         else {
-            $('#pdf_page').hide();
-            $('.pdf_page_input').hide();
+            // $('#pdf_page').hide();
+            // $('.pdf_page_input').hide();
+            disableElementChildren('#pdf_page', true);
+            disableElementChildren('.pdf_page_input', true);
         }
     }
 
     function onPdfStudentChange() {
         if($('#yes_pdf_page_student').is(':checked')) {
-            $('.pdf_page_input').hide();
+            // $('.pdf_page_input').hide();
+            disableElementChildren('.pdf_page_input', true);
         }
         else {
-            $('.pdf_page_input').show();
+            // $('.pdf_page_input').show();
+            disableElementChildren('.pdf_page_input', false);
         }
     }
 
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
-            $('#student_submit_download_view').show();
+            //$('#student_submit_download_view').show();
+            disableElementChildren('#student_submit_download_view', false);
         }
         else {
-            $('#student_submit_download_view').hide();
+            // $('#student_submit_download_view').hide();
+            disableElementChildren('#student_submit_download_view', true);
         }
     }
 
     function onUploadTypeChange() {
         if($('#upload_file_radio').is(':checked')) {
-            $('#repository').hide();
+            // $('#repository').hide();
+            disableElementChildren('#repository', true);
         }
         else {
-            $('#repository').show();
+            // $('#repository').show();
+            disableElementChildren('#repository', false);
         }
     }
 
@@ -1116,47 +1128,5 @@ Are students uploading files or submitting to a Version Control System (VCS) rep
 <br> \
 </div>');
     }
-
-    $('input:radio[name="gradeable_type"]').change(function() {
-        $('#required_type').hide();
-        $('.gradeable_type_options').hide();
-        if ($(this).is(':checked')){
-            if($(this).val() == 'Electronic File'){
-                $('#electronic_file').show();
-                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                    $('#rubric_questions').hide();
-                    $('#grading_questions').hide();
-                }
-
-                $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
-                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                    $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
-                } else {
-                    $('#grades_released_compare_date').html('Manual Grading Open Date');
-                }
-
-                if($('#team_yes_radio').is(':checked')){
-                    $('input[name=eg_max_team_size]').val('{$admin_gradeable->getEgMaxTeamSize()}');
-                    $('input[name=date_team_lock]').val('{$admin_gradeable->getEgTeamLockDate()}');
-                    $('#team_yes').show();
-                }
-                else {
-                    $('#team_yes').hide();
-                }
-            }
-            else if ($(this).val() == 'Checkpoints'){
-                $('#checkpoints').show();
-                $('#grading_questions').show();
-                $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('Manual Grading Open Date');
-            }
-            else if ($(this).val() == 'Numeric'){
-                $('#numeric').show();
-                $('#grading_questions').show();
-                $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                $('#grades_released_compare_date').html('Manual Grading Open Date');
-            }
-        }
-    });
     calculatePercentageTotal();
 </script>

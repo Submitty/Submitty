@@ -63,16 +63,13 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 <!-- Gradeable Type radio buttons (readonly in edit mode) -->
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
     <input type='radio' id="radio_electronic_file" name="gradeable_type" value="Electronic File"
-        {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-        {{ action == "edit" ? disabled : null }}> Electronic File
+        {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Electronic File
 
     <input type='radio' id="radio_checkpoints" name="gradeable_type" value="Checkpoints"
-        {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-        {{ action == "edit" ? disabled : null }}> Checkpoints
+        {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Checkpoints
 
     <input type='radio' id="radio_numeric" name="gradeable_type" value="Numeric"
-        {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : '' }}
-        {{ action == "edit" ? disabled : null }}> Numeric/Text 
+        {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Numeric/Text
 
     <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
@@ -85,12 +82,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     Is this a team assignment? <em style='color:green;'>Team assignments are new as of Fall 2017.  Email questions/bugs/feedback to: submitty@cs.rpi.edu.</em>
     <br />
         <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-            {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-            {{ action == "edit" ? 'disabled' : '' }}> Yes
+            {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Yes
 
         <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-            {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}
-            {{ action == "edit" ? 'disabled' : '' }}> No
+            {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> No
 
     <!-- Team settings (read only in edit mode) -->
     <div id="team_settings">
@@ -136,29 +131,31 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                $('#required_type').hide();
         }
 
-        $('.electronic_file').hide();
-        $('.checkpoints').hide();
-        $('.numeric').hide();
+        disableElementChildren('.electronic-file');
+        disableElementChildren('.checkpoints');
+        disableElementChildren('.numeric');
 
         // Display the correct options for all forms depending
         //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
-            $('.electronic_file').show();
+            disableElementChildren('.electronic-file', false);
         }
         else if ($('#radio_checkpoints').is(':checked')) {
-            $('.checkpoints').show();
+            disableElementChildren('.checkpoints', false);
         }
         else if ($('#radio_numeric').is(':checked')) {
-            $('.numeric').show();
+            disableElementChildren('.numeric', false);
         }
     }
 
     function onTeamAssignmentChange() {
         if($('#team_yes_radio').is(':checked')) {
-            $('.team_yes').show();
+            // $('.team_yes').show();
+            disableElementChildren('.team_yes', false);
         }
         else {
-            $('.team_yes').hide();
+            // $('.team_yes').hide();
+            disableElementChildren('.team_yes', true);
         }
     }
 

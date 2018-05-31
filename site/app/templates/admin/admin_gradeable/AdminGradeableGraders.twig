@@ -147,31 +147,40 @@ Form
 
     function onManualGradingChange() {
         if($('#yes_ta_grade').is(':checked')) {
-            $('.manual_grading').show();
+            // $('.manual_grading').show();
+            disableElementChildren('.manual_grading', false);
         }
         else {
-            $('.manual_grading').hide();
+            // $('.manual_grading').hide();
+            disableElementChildren('.manual_grading', true);
         }
     }
 
     function onSectionTypeChange() {
         if($('#rotating-section').is(':checked')) {
-            $('#rotating_data').show();
+            // $('#rotating_data').show();
+            disableElementChildren('#rotating_data', false);
         }
         else {
-            $('#rotating_data').hide();
+            // $('#rotating_data').hide();
+            disableElementChildren('#rotating_data', true);
         }
     }
 
     function onMinGraderChange() {
-        $('.g1').show();
-        $('.g2').show();
+        // $('.g1').show();
+        // $('.g2').show();
+
+        disableElementChildren('.g1', false);
+        disableElementChildren('.g2', false);
 
         switch ($('#minimum_grading_group').val()) {
             case '1': // Instructor only?
-                $('.g1').hide();
+                // $('.g1').hide();
+                disableElementChildren('.g1', true);
             case '2': // Instructors and TA's
-                $('.g2').hide();
+                // $('.g2').hide();
+                disableElementChildren('.g2', true);
             case '3': // Everyone
                 break;
             default:

@@ -38,6 +38,18 @@
 </div>
 <script type="text/javascript">
 
+    function disableElementChildren(c, dis = true) {
+        dis ? $(c).hide() : $(c).show();
+        // $('input' + c).attr('disabled', dis);
+        // $('textarea' + c).attr('disabled', dis);
+        // $('select' + c).attr('disabled', dis);
+
+        // TODO: this is too powerful.  Our controller can't handle
+        //  missing data yet
+        // $(c + ' *').attr('disabled', dis);
+    }
+
+
     var adminGradeableNavTab = 0;
     function onChangeNavTab(tab) {
         if(tab > 4 || tab < 0) {
@@ -109,21 +121,21 @@
             }
         });
 
-        $('input:radio[name="peer_grading"]').change(function() {
-            $('.peer_input').hide();
-            $('#peer_averaging_scheme').hide();
-            if ($(this).is(':checked')) {
-                if($(this).val() == 'true') {
-                    $('.peer_input').show();
-                    $('#peer_averaging_scheme').show();
-                    if($('#team_yes_radio').is(':checked')) {
-                        $('#team_yes_radio').prop('checked', false);
-                        $('#team_no_radio').prop('checked', true);
-                        $('input:radio[name="team_assignment"]').trigger("change");
-                    }
-                }
-            }
-        });
+        // $('input:radio[name="peer_grading"]').change(function() {
+        //     $('.peer_input').hide();
+        //     $('#peer_averaging_scheme').hide();
+        //     if ($(this).is(':checked')) {
+        //         if($(this).val() == 'true') {
+        //             $('.peer_input').show();
+        //             $('#peer_averaging_scheme').show();
+        //             if($('#team_yes_radio').is(':checked')) {
+        //                 $('#team_yes_radio').prop('checked', false);
+        //                 $('#team_no_radio').prop('checked', true);
+        //                 $('input:radio[name="team_assignment"]').trigger("change");
+        //             }
+        //         }
+        //     }
+        // });
         $('input:radio[name="student_view"]').change(function() {
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
@@ -300,6 +312,7 @@
             });
         }
 
+        // Remove irrelevant information from submission based on gradeable type
         $(':radio').each(function(){
             if(! $(this).is(':checked')){
                 if($(this).attr('class') !== undefined){
