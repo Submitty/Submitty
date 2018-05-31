@@ -357,7 +357,6 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    var gradeable = getGradeable();
     saveLastOpenedMark(true, function () {
         window.location = $("#prev-student")[0].dataset.href;
     }, function () {
@@ -368,7 +367,6 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-    var gradeable = getGradeable();
     saveLastOpenedMark(true, function () {
         window.location = $("#next-student")[0].dataset.href;
     }, function () {
