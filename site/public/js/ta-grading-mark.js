@@ -4,6 +4,18 @@ NO_COMPONENT_ID = -1;
 /// Component ID of the "General Comment" box at the bottom
 GENERAL_MESSAGE_ID = -2;
 
+function getGradeable() {
+    return grading_data.gradeable;
+}
+
+function getComponent(c_index) {
+    return grading_data.gradeable.components[c_index - 1];
+}
+
+function getMark(c_index, m_index) {
+    return grading_data.gradeable.components[c_index - 1].marks[m_index];
+}
+
 function fixMarkPointValue(me) {
     var max = parseFloat($(me).attr('max'));
     var min = parseFloat($(me).attr('min'));
@@ -43,9 +55,11 @@ function checkIfSelected(me) {
 
 function getMarkView(num, x) {
     return Twig.twig({ref: "Mark"}).render({
-        gradeable: grading_data.gradeable,
-        component: grading_data.gradeable.components[num - 1],
-        mark: grading_data.gradeable.components[num - 1].marks[x]
+        gradeable: getGradeable(),
+        component: getComponent(num),
+        mark: getMark(num, x),
+        c_index: num,
+        m_index: x
     });
 }
 
@@ -411,10 +425,10 @@ function checkMarks(question_num) {
 //calculate the number of points a component has with the given selected marks
 function calculateMarksPoints(question_num) {
     question_num = parseInt(question_num);
-    var current_question_num = $('#grade-' + question_num);
-    var lower_clamp = parseFloat(current_question_num[0].dataset.lower_clamp);
-    var current_points = parseFloat(current_question_num[0].dataset.default);
-    var upper_clamp = parseFloat(current_question_num[0].dataset.upper_clamp);
+    var component = getComponent(question_num);
+    var lower_clamp = parseFloat(component.lower_clamp);
+    var current_points = parseFloat(component.default);
+    var upper_clamp = parseFloat(component.upper_clamp);
     var arr_length = $('tr[name=mark_'+question_num+']').length;
     var any_selected=false;
 
@@ -462,9 +476,9 @@ function calculateMarksPoints(question_num) {
 function updateProgressPoints(question_num) {
     question_num = parseInt(question_num);
     var current_progress = $('#progress_points-' + question_num);
-    var current_question_num = $('#grade-' + question_num);
     var current_points = calculateMarksPoints(question_num);
-    var max_points = parseFloat(current_question_num[0].dataset.max_points);
+    var component = getComponent(question_num);
+    var max_points = parseFloat(component.max_value);
     if(current_points=="None Selected"){
         $('#grade-' + question_num)[0].innerHTML = "";     
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
@@ -515,7 +529,7 @@ function selectMark(me, first_override) {
 //openClose toggles alot of listed elements in order to work
 function openClose(row_id) {
     var row_num = parseInt(row_id);
-    var total_num = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var total_num = getGradeable().components.length;
 
     //-2 means general comment, else open the row_id with the number
     var general_comment = $('#extra-general');
@@ -647,7 +661,7 @@ function saveLastOpenedMark(gradeable_id, user_id, active_version, your_user_id,
     while(mark.length > 0) {
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
-            var gradeable_component_id = parseInt(mark[0].dataset.question_id);
+            var gradeable_component_id = getComponent(index).id;
             saveMark(index, gradeable_id, user_id, active_version, gradeable_component_id, your_user_id, sync, successCallback, errorCallback);
             return;
         }
@@ -696,10 +710,11 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
     // Updates the total number of points and text
     var current_question_num  = $('#grade-' + num);
     var current_question_text = $('#rubric-textarea-' + num);
+    var component = getComponent(num);
     
-    var lower_clamp    = parseFloat(current_question_num[0].dataset.lower_clamp);
-    var current_points = parseFloat(current_question_num[0].dataset.default);
-    var upper_clamp    = parseFloat(current_question_num[0].dataset.upper_clamp);
+    var lower_clamp    = parseFloat(component.lower_clamp);
+    var current_points = parseFloat(component.default);
+    var upper_clamp    = parseFloat(component.upper_clamp);
 
     var new_text   = "";
     var first_text = true;
@@ -775,7 +790,7 @@ function saveMark(num, gradeable_id, user_id, active_version, gc_id, your_user_i
             //Just graded it
             gradedByElement.text("Graded by " + your_user_id + "!");
             var question_points = parseFloat(current_question_num[0].innerHTML);
-            var max_points = parseFloat(current_question_num[0].dataset.max_points);
+            var max_points = parseFloat(component.max_value);
             $('#summary-' + num)[0].style.backgroundColor = "#FCFCFC";
             $('#title-' + num)[0].style.backgroundColor = "#FCFCFC";
         }
@@ -854,12 +869,12 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
 
 //Open the given mark (if it's not open already), saving changes on any previous mark
 function openMark(id) {
-    var rubric = $('#rubric-table')[0].dataset;
-    var question = $('#summary-' + id)[0].dataset;
+    var gradeable = getGradeable();
+    var component = getComponent(id);
 
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
-    saveMark(id, rubric.gradeable_id ,rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
-    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
+    saveMark(id, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id, true);
+    updateMarksOnPage(id, '', component.lower_clamp, component.upper_clamp, gradeable.precision, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== id) {
@@ -874,14 +889,14 @@ function closeMark(id, save) {
         return;
     }
 
-    var rubric = $('#rubric-table')[0].dataset;
-    var question = $('#summary-' + id)[0].dataset;
+    var gradeable = getGradeable();
+    var component = getComponent(id);
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
-        saveMark(id, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id, true);
+        saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
+        saveMark(id, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id, true);
     }
-    updateMarksOnPage(id, '', question.min, question.max, question.precision, rubric.gradeable_id, rubric.user_id, rubric.active_version, question.question_id, rubric.your_user_id);
+    updateMarksOnPage(id, '', component.lower_clamp, component.upper_clamp, gradeable.precision, gradeable.id, gradeable.user_id, gradeable.active_version, component.id, grading_data.your_user_id);
     setMarkVisible(id, false);
 }
 
@@ -895,10 +910,10 @@ function toggleMark(id, save) {
 
 //Open the general message input (if it's not open already), saving changes on any previous mark
 function openGeneralMessage() {
-    var rubric = $('#rubric-table')[0].dataset;
+    var gradeable = getGradeable();
 
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, true);
-    saveGeneralComment(rubric.gradeable_id, rubric.user_id, rubric.active_version, true);
+    saveLastOpenedMark(gradeable.id, gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
+    saveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, true);
 
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
@@ -913,13 +928,13 @@ function closeGeneralMessage(save) {
         return;
     }
 
-    var rubric = $('#rubric-table')[0].dataset;
+    var gradeable = getGradeable();
 
     if (save) {
-        saveLastOpenedMark(rubric.gradeable_id ,rubric.user_id, rubric.active_version, rubric.your_user_id, true);
-        saveGeneralComment(rubric.gradeable_id ,rubric.user_id, rubric.active_version, true);
+        saveLastOpenedMark(gradeable.id ,gradeable.user_id, gradeable.active_version, grading_data.your_user_id, true);
+        saveGeneralComment(gradeable.id ,gradeable.user_id, gradeable.active_version, true);
     } else {
-        updateGeneralComment(rubric.gradeable_id, rubric.user_id);
+        updateGeneralComment(gradeable.id, gradeable.user_id);
     }
     setGeneralVisible(false);
 }

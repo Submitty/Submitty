@@ -4,6 +4,7 @@
     {# Components #}
         {% for component in gradeable.components %}
             {% if component.order != -1 %}
+                {% set c_index = loop.index %}
                 {% include "Component.twig" %}
             {% endif %}
         {% endfor %}

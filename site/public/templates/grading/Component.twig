@@ -1,8 +1,6 @@
 {% set initial_text = "Click me to grade!" %}
 {% set graded_color = component.grader == null ? "" : "background-color: #eac73d;" %}
 
-{% set c_index = loop.index %}
-
 {# todo: need to check if current user is full access grader #}
 {% set display_verify_user = component.grader != null and component.grader.id != your_user_id %}
 
@@ -87,9 +85,12 @@
 {# Marks table #}
 
 <table class="box" id="marks-parent-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
-{#    {% for mark in component.marks %}
+{#
+    {% for mark in component.marks %}
+        {% set m_index = loop.index0 %}
         {% include "Mark.twig" %}
-    {% endfor %}#}
+    {% endfor %}
+#}
 </table>
 
 {# Custom mark #}
