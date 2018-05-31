@@ -2,6 +2,7 @@
 
 namespace app\views\admin;
 
+use app\models\GradeableComponent;
 use app\views\AbstractView;
 use app\models\AdminGradeable;
 
@@ -76,8 +77,8 @@ class AdminGradeableView extends AbstractView {
             "submit_text"     => $submit_text,
             "nav_tab"         => $nav_tab,
 
-            // "old_components"  => $old_components_json,
-            // "marks"           => $marks_json,
+            // Be sure to NOT pass old components if we are inheriting from a template
+            "old_components"  => $type_of_action == "add_template" ? array(new GradeableComponent($this->core, array())) : $admin_gradeable->getOldComponents(),
             "marks"           => $marks,
 
             // Graders Page Specific

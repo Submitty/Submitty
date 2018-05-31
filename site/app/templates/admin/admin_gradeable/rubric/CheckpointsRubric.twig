@@ -74,9 +74,10 @@
 
         $('#remove-checkpoint_field').hide();
 
+        {% if not template %}
         // Add the existing checkpoints
         if ($('#radio_checkpoints').is(':checked')){
-            var components = {{ not template ? admin_gradeable.getOldComponentsJson()|raw : '[]' }};
+            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
             // remove the default checkpoint
             removeCheckpoint();
             $.each(components, function(i,elem){
@@ -87,6 +88,7 @@
             $('#checkpoints').show();
             $('#grading_questions').show();
         }
+        {% endif %}
     });
 
 
