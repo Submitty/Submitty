@@ -1,12 +1,6 @@
 {# todo: need to check if current user is full access grader #}
 {% set display_verify_user = component.grader != null and component.grader.id != your_user_id %}
 
-{% if component.page > 0 %}
-    {% set page = component.page %}
-{% elseif component.page == -1 %}
-    {# todo: auto determine page # #}
-{% endif %}
-
 <div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
 
     {# Title bar #}
@@ -56,7 +50,7 @@
         </span>
         <span id="page-{{ c_index }}" style="display: none;">
             {% if component.page != 0 %}
-                <i>Page #: {{ page }}</i>
+                <i>Page #: {{ component.page }}</i>
             {% endif %}
         </span>
         <span style="float: right;">

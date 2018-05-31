@@ -1429,6 +1429,15 @@ HTML;
             <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
 HTML;
         }
+            // if use student components, get the values for pages from the student's submissions
+            $files = $gradeable->getSubmittedFiles();
+            $student_pages = array();
+            foreach ($files as $filename => $content) {
+                if ($filename == "student_pages.json") {
+                    $path = $content["path"];
+                    $student_pages = FileUtils::readJsonFile($content["path"]);
+                }
+            }
 
             if ($peer) {
                 $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
@@ -1442,6 +1451,30 @@ HTML;
                 "disabled" => $disabled === "disabled",
                 "total_points" => $total_points,
             ];
+
+            foreach ($grading_data["gradeable"]["components"] as &$component) {
+                $page = intval($component["page"]);
+                // if the page is determined by the student json
+                if ($page == -1) {
+                    // usually the order matches the json
+                    if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
+                        $page = intval($student_pages[intval($component["order"])]["page #"]);
+                    }
+                    // otherwise, iterate through until the order matches
+                    else {
+                        foreach ($student_pages as $student_page) {
+                            if ($student_page["order"] == intval($component["order"])) {
+                                $page = intval($student_page["page #"]);
+                                $component["page"] = $page;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            //References need to be cleaned up
+            unset($component);
+
 
             $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
