@@ -701,7 +701,7 @@ HTML;
     <div class="popup-form" id="delete-gradeable-form" style="width:550px; margin-left:-250px;">
         <h2>Delete Gradeable</h2> 
         <p>&emsp;</p>
-        <p>Note: A gradeable can only be deleted if it has no student teams and if it has no student submissions.
+        <p>Note: A gradeable can only be deleted if it has no formed student teams and it has no student submission files and it has no TA grading data.
         </p><br />
         <form name="delete-confirmation" method="post" action="">
          <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
