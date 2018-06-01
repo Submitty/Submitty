@@ -763,26 +763,9 @@ class Course(object):
                         (gradeable_teams_table.c['registration_section'] == reg_section) &
                         (gradeable_teams_table.c['g_id'] == gradeable.id))
                     res = conn.execute(teams_registration)
-                    if res.rowcount == 0:
-                        #If the registration section doesn't curretnly have any team, then make a new team.
-                        conn.execute(gradeable_teams_table.insert(),
-                                     team_id=unique_team_id,
-                                     g_id=gradeable.id,
-                                     registration_section=reg_section,
-                                     rotation_section=None)
-                        conn.execute(teams_table.insert(),
-                                        team_id=unique_team_id, 
-                                        user_id=user.get_detail(self.code, "id"),
-                                        state=1)
-                        ucounter+=1
-                        res.close()
-                        json_team_history[unique_team_id] = [{"action": "admin_create",
-                                                               "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                               "admin_user": "instructor",
-                                                               "first_user": user.get_detail(self.code, "id")}]
-                    else:
+                    added = False
+                    if res.rowcount != 0:
                         #If the registration has a team already, join it
-                        added = False
                         for team_in_section in res:  
                             members_in_team = select([teams_table]).where(
                                 teams_table.c['team_id'] == team_in_section['team_id'])
@@ -797,22 +780,37 @@ class Course(object):
                                                                      "admin_user": "instructor",
                                                                      "added_user": user.get_detail(self.code, "id")})
                                 added = True
-                        if not added:
-                            #if the team the user tried to join is full, make a new team
-                            conn.execute(gradeable_teams_table.insert(),
-                                         team_id=unique_team_id,
-                                         g_id=gradeable.id,
-                                         registration_section=reg_section,
-                                         rotation_section=None)
-                            conn.execute(teams_table.insert(),
-                                         team_id=unique_team_id, 
-                                         user_id=user.get_detail(self.code, "id"),
-                                         state=1)
-                            json_team_history[unique_team_id] =  [{"action": "admin_create",
-                                                                 "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                                 "admin_user": "instructor",
-                                                                 "first_user": user.get_detail(self.code, "id")}]
-                            ucounter+=1
+                    if not added:
+                        #if the team the user tried to join is full, make a new team
+                        conn.execute(gradeable_teams_table.insert(),
+                                     team_id=unique_team_id,
+                                     g_id=gradeable.id,
+                                     registration_section=reg_section,
+                                     rotation_section=None)
+                        conn.execute(teams_table.insert(),
+                                     team_id=unique_team_id, 
+                                     user_id=user.get_detail(self.code, "id"),
+                                     state=1)
+                        json_team_history[unique_team_id] =  [{"action": "admin_create",
+                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                             "admin_user": "instructor",
+                                                             "first_user": user.get_detail(self.code, "id")}]
+                        ucounter+=1
+                    #If the registration section doesn't curretnly have any team, then make a new team.
+                    # conn.execute(gradeable_teams_table.insert(),
+                    #              team_id=unique_team_id,
+                    #              g_id=gradeable.id,
+                    #              registration_section=reg_section,
+                    #              rotation_section=None)
+                    # conn.execute(teams_table.insert(),
+                    #                 team_id=unique_team_id, 
+                    #                 user_id=user.get_detail(self.code, "id"),
+                    #                 state=1)
+                    # ucounter+=1
+                    #     json_team_history[unique_team_id] = [{"action": "admin_create",
+                    #                                            "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                    #                                            "admin_user": "instructor",
+                    #                                            "first_user": user.get_detail(self.code, "id")}]
                     res.close()
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
@@ -880,7 +878,7 @@ class Course(object):
                             submission_count += 1
                             current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                             if team_id is not None:
-                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
                                              team_id=team_id, g_version=version, submission_time=current_time_string)
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
