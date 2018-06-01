@@ -112,7 +112,7 @@
     <div class="box-title">
         <span colspan="1" style="text-align: center; white-space: nowrap;">
             <span onclick="event.stopPropagation();">
-                <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" id="mark_icon_custom-{{ c_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp
+                <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" id="mark_icon_custom-{{ c_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;
             </span>
             <input name="mark_points_custom_{{ c_index }}" id="mark_points_custom-{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" value="{{ component.score }}" style="resize:none; width: 50px;">
         </span>
