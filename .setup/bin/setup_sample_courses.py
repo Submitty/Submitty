@@ -796,21 +796,6 @@ class Course(object):
                                                              "admin_user": "instructor",
                                                              "first_user": user.get_detail(self.code, "id")}]
                         ucounter+=1
-                    #If the registration section doesn't curretnly have any team, then make a new team.
-                    # conn.execute(gradeable_teams_table.insert(),
-                    #              team_id=unique_team_id,
-                    #              g_id=gradeable.id,
-                    #              registration_section=reg_section,
-                    #              rotation_section=None)
-                    # conn.execute(teams_table.insert(),
-                    #                 team_id=unique_team_id, 
-                    #                 user_id=user.get_detail(self.code, "id"),
-                    #                 state=1)
-                    # ucounter+=1
-                    #     json_team_history[unique_team_id] = [{"action": "admin_create",
-                    #                                            "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                    #                                            "admin_user": "instructor",
-                    #                                            "first_user": user.get_detail(self.code, "id")}]
                     res.close()
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
