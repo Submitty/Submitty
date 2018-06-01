@@ -185,7 +185,7 @@ class DatabaseQueries {
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -752,6 +752,14 @@ SELECT COUNT(*) as cnt FROM gradeable_data
 WHERE g_id = ?
 AND gd_user_viewed_date IS NOT NULL
         ", array($g_id));
+
+        return intval($this->course_db->row()['cnt']);
+    }
+
+    public function getNumUsersGraded($g_id) {
+        $this->course_db->query("
+SELECT COUNT(*) as cnt FROM gradeable_data
+WHERE g_id = ?", array($g_id));
 
         return intval($this->course_db->row()['cnt']);
     }
@@ -1998,6 +2006,12 @@ AND gc_id IN (
         return $return;
     }
 
+    public function existsThread($thread_id){
+        $this->course_db->query("SELECT 1 FROM threads where deleted = false AND id = ?", array($thread_id));
+        $result = $this->course_db->rows();
+        return count($result) > 0;
+    }
+
     public function existsAnnouncements(){
         $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
         $result = $this->course_db->rows();
@@ -2060,6 +2074,57 @@ AND gc_id IN (
       return $result_rows;
     }
 
+    public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1 and deleted = false", array($thread_id));
+        $result_rows = $this->course_db->rows();
+        if(count($result_rows) == 0) {
+            $message = "Can't find thread";
+            return false;
+        }
+        $title = $result_rows[0]['title'] . "\n";
+        $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($thread_id));
+        $root_post = $this->course_db->rows()[0]['id'];
+        return $root_post;
+    }
+
+    public function mergeThread($parent_thread_id, $child_thread_id, &$message){
+        try{
+            $this->course_db->beginTransaction();
+            $parent_thread_title = null;
+            $child_thread_title = null;
+            if(!($parent_root_post = $this->getRootPostOfNonMergedThread($parent_thread_id, $parent_thread_title, $message))) {
+                $this->course_db->rollback();
+                return false;
+            }
+            if(!($child_root_post = $this->getRootPostOfNonMergedThread($child_thread_id, $child_thread_title, $message))) {
+                $this->course_db->rollback();
+                return false;
+            }
+
+            if($child_root_post <= $parent_root_post) {
+                $message = "Child thread must be newer than parent thread";
+                $this->course_db->rollback();
+                return false;
+            }
+
+            $children = array($child_root_post);
+            $this->findChildren($child_root_post, $child_thread_id, $children);
+
+            // $merged_post_id is PK of linking node and $merged_thread_id is immediate parent thread_id
+            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ?, deleted = true WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
+            foreach($children as $post_id){
+                $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
+            }
+            $this->course_db->query("UPDATE posts SET parent_id = ?, content = ? || content WHERE id = ?", array($parent_root_post, $child_thread_title, $child_root_post));
+
+            $this->course_db->commit();
+            return true;
+        } catch (DatabaseException $dbException){
+             $this->course_db->rollback();
+        }
+        return false;
+    }
+
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : array($user_id);
 
@@ -2112,5 +2177,12 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
         return $this->submitty_db->row()['active'];
 
+    }
+
+    /**
+     * @param string $g_id
+     */
+    public function deleteGradeable($g_id) {
+        $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
     }
 }

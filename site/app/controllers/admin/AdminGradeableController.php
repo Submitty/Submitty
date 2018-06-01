@@ -11,6 +11,7 @@ use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use \DateTime;
+use app\libraries\FileUtils;
 
 class AdminGradeableController extends AbstractController {
 	public function run() {
@@ -33,6 +34,9 @@ class AdminGradeableController extends AbstractController {
             case 'quick_link':
                 $this->quickLink();
                 break;
+            case 'delete_gradeable':
+                $this->deleteGradeable();
+                break;    
             default:
                 $this->viewPage();
                 break;
@@ -567,12 +571,39 @@ class AdminGradeableController extends AbstractController {
                                    "course" => $course,
                                    "gradeable" =>  $_POST['gradeable_id']);
 
+        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+          die("Failed to write file {$config_build_file}");
+        }
 
-        // FIXME/TODO: How to implement delete gradeable...
-        //$config_build_data = array("semester" => $semester,
-        //                           "course" => $course,
-        //                           "no_build" => true);
+        $this->returnToNav();
+    }
 
+    private function deleteGradeable() {
+        $g_id = $_REQUEST['id'];
+
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+            die("Invalid CSRF Token");
+            $this->returnToNav();
+        }
+        if (!$this->core->getUser()->accessAdmin()) {
+            die("Only admins can delete gradeable");
+            $this->returnToNav();
+        }
+        $this->core->getQueries()->deleteGradeable($g_id);
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $semester=$this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        
+        $file = FileUtils::joinPaths($course_path,"config","form","form_".$g_id.".json");
+        if ((file_exists($file)) && (!unlink($file))){
+            die("Cannot delete form_{$g_id}.json");
+        }
+
+        $config_build_file = "/var/local/submitty/to_be_built/".$semester."__".$course."__".$g_id.".json";
+        $config_build_data = array("semester" => $semester,
+                                   "course" => $course,
+                                   "no_build" => true);
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
           die("Failed to write file {$config_build_file}");
