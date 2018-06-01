@@ -622,8 +622,10 @@ HTML;
 
 HTML;
                         if($row->getTeam()=== null) {
+                            $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
+                            $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$display_section}", [], [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$reg_section}", "{$rot_section}", [], [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td></td>
 HTML;
@@ -633,8 +635,10 @@ HTML;
                             $user_assignment_setting = FileUtils::readJsonFile($settings_file);
                             $user_assignment_setting_json = json_encode($user_assignment_setting);
                             $members = json_encode($row->getTeam()->getMembers());
+                            $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL": $row->getTeam()->getRegistrationSection();
+                            $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL": $row->getTeam()->getRotatingSection();
                             $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$display_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$row->getTeam()->getId()}</td>
 HTML;
@@ -869,11 +873,13 @@ HTML;
                 $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
                 $user_assignment_setting = FileUtils::readJsonFile($settings_file);
                 $user_assignment_setting_json=json_encode($user_assignment_setting);
+                $reg_section = ($team->getRegistrationSection() === null) ? "NULL": $team->getRegistrationSection();
+                $rot_section = ($team->getRotatingSection() === null) ? "NULL": $team->getRotatingSection();
                 $return .= <<<HTML
             <tr id="{empty-team-row-{$team->getId()}}" {$style}>
                 <td>{$count}</td>
                 <td>{$display_section}</td>
-                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$display_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
+                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
                     <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 <td>{$team->getId()}</td>
 HTML;
@@ -898,8 +904,7 @@ HTML;
         return $return;
     }
 
-    public function adminTeamForm($gradeable, $sections) {
-        $reg_or_rot = $gradeable->isGradeByRegistration() ? "Registration" : "Rotating";
+    public function adminTeamForm($gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = array();
         foreach ($students as $student) {
@@ -927,10 +932,21 @@ HTML;
     <br />
     <div id="admin-team-members" style="width:50%;"></div>
     <div>
-        {$reg_or_rot} Section:<br />
-        <select name="section">
+        Registration Section:<br />
+        <select name="reg_section">
 HTML;
-        foreach ($sections as $section) {
+        foreach ($all_reg_sections as $section) {
+            $return .= <<<HTML
+            <option value="{$section}">Section {$section}</option>
+HTML;
+        }
+        $return .= <<<HTML
+            <option value="NULL">Section NULL</option>
+        </select><br /><br />
+        Rotating Section:<br />
+        <select name="rot_section">
+HTML;
+        foreach ($all_rot_sections as $section) {
             $return .= <<<HTML
             <option value="{$section}">Section {$section}</option>
 HTML;
@@ -1087,6 +1103,7 @@ HTML;
 
 $return .= <<<HTML
     <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+
     <script type="text/javascript">
         $(document).ready(function(){
             //note the commented out code here along with the code where files are displayed that is commented out
@@ -1100,6 +1117,11 @@ $return .= <<<HTML
                 //     console.log('HELLLO');
                 // });
             })
+
+            var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+            var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+            $('#' + currentCodeStyleRadio).parent().addClass('active');
+            $('#' + currentCodeStyleRadio).prop('checked', true);
         });
     </script>
 HTML;
@@ -1109,6 +1131,15 @@ HTML;
 HTML;
         }
         $return .= <<<HTML
+        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
+            </label>
+        </div>
+
     <br />
     <div class="inner-container" id="file-container">
 HTML;
@@ -1143,7 +1174,7 @@ HTML;
                         {$name}</a> &nbsp;
                         <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
                         <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-                    </div><br/>
+                    </div>
                     <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
                 </div>
 HTML;
@@ -1295,27 +1326,35 @@ HTML;
 HTML;
 
             //Late day calculation
-            $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-            $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
-            $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
-            $status = $late_days_data['status'];
-
+            $status = "Good";
             $color = "green";
-            if($status != "Good" && $status != "Late") {
-                $color = "red";
-                $my_color="'#F62817'"; // fire engine red
-                $my_message="Late Submission";
-                $return .= <<<HTML
-            <script>
-                $('body').css('background', $my_color);
-                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                $('#bar_banner').css('background-color', $my_color);
-                $('#bar_banner').css('color', 'black');
-            </script>
+            if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
+                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                    $team_member = $this->core->getQueries()->getUserById($team_member);
+                    $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
+                }
+                
+            } else {
+                $return .= $this->makeTable($user->getId(), $gradeable, $status);
+                if($status != "Good" && $status != "Late" && $status != "No submission") {
+                    $color = "red";
+                    $my_color="'#F62817'"; // fire engine red
+                    $my_message="Late Submission";
+                    $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
 HTML;
+                }
             }
+            
+            
+
             $return .= <<<HTML
-            <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
         </div>
     </div>
     </div>
@@ -1415,7 +1454,7 @@ HTML;
         }
 
         $return .= <<<HTML
-    <div style="margin:3px;">
+    <div class="inner-container">
         <table class="ta-rubric-table ta-rubric-table-background" id="rubric-table" data-gradeable_id="{$gradeable->getId()}" data-user_id="{$user->getAnonId()}" data-active_version="{$gradeable->getActiveVersion()}" data-num_questions="{$num_questions}" data-your_user_id="{$this->core->getUser()->getId()}">
             <tbody>
 HTML;
@@ -1466,8 +1505,53 @@ HTML;
                 $disabled = 'disabled';
             }
 
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
+                $initial_text = "Click me to grade!";
+                $initial_background_color = "#E9EFEF";
+            }
+            else if($show_graded_info) {
+                $nl = "<br>";
+                $initial_text = $question->getGradedTAComments($nl, false, $gradeable);
+                $initial_background_color ="#F9F9F9";
+            }
+            $question_points = $question->getGradedTAPoints();
+            if((!$question->getHasMarks() && !$question->getHasGrade()) || !$show_graded_info) {
+                $question_points = " ";
+            }
+            $background = "";
+            if ($question_points > $question->getMaxValue()) {
+                $background = "background-color: #D8F2D8;";
+            }
+            else if ($question_points < 0) {
+                $background = "background-color: #FAD5D3;";
+            }
+     $grader_id = "";
+            $displayVerifyUser = false;
+            if($question->getGrader() === null || !$show_graded_info) {
+                $grader_id = "Ungraded!";
+                $graded_color = "";
+            } 
+            else {
+                $grader_id = "Graded by " . $question->getGrader()->getId();
+                if($question->getGradedTAPoints()==$question->getMaxValue()){
+                    $graded_color = " background-color: #006600";
+                }
+                else if($question->getGradedTAPoints()==0){
+                    $graded_color = " background-color: #c00000";
+                }
+                else{
+                    $graded_color = " background-color: #eac73d";
+                }
+                if($this->core->getUser()->getId() !== $question->getGrader()->getId() && $this->core->getUser()->accessFullGrading()){
+                    $displayVerifyUser = true;
+                }
+            }
             $return .= <<<HTML
-                <tr>
+                <div id="title-{$c}" class="box" style="background-color:{$initial_background_color}; cursor: pointer" onclick="{$break_onclick}; toggleMark({$c}, true);">
+                <div class="box-title">
+<span id="gradebar-{$c}" style="{$graded_color}"; "white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1" class="badge{$graded_color}">
+                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
+                    </span>
 HTML;
             $penalty = !(intval($question->getMaxValue()) >= 0);
             $message = htmlentities($question->getTitle());
@@ -1501,25 +1585,11 @@ HTML;
             }
 
             //get the grader's id if it exists
-            $grader_id = "";
-            $graded_color = "";
-            $displayVerifyUser = false;
-            if($question->getGrader() === null || !$show_graded_info) {
-                $grader_id = "Ungraded!";
-                $graded_color = "";
-            } else {
-                $grader_id = "Graded by " . $question->getGrader()->getId();
-                $graded_color = " background-color: #eebb77";
-                if($this->core->getUser()->getId() !== $question->getGrader()->getId() && $this->core->getUser()->accessFullGrading()){
-                    $displayVerifyUser = true;
-                }
-            }
-
             $return .= <<<HTML
-                    <td id="title-{$c}" style="font-size: 12px;" colspan="4" data-changebg="true">
+                    <span colspan="3" data-changebg="true">
                         <b><span id="progress_points-{$c}" style="display: none;" data-changedisplay1="true"></span></b>
                         {$message}
-                        <div style="float: right;">
+                        <span style="float: right;">
 HTML;
             if($displayVerifyUser){
               $return .= <<<HTML
@@ -1530,10 +1600,13 @@ HTML;
             }
             $return .= <<<HTML
                             <span id="graded-by-{$c}" style="font-style: italic; padding-right: 10px;">{$grader_id}</span>
-                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true" onclick="{$break_onclick}; closeMark({$c}, true);">Done</i> </span>
-                        </div>
+                            <span id="graded-saving-{$c}" style="display: none; font-style: italic; padding-right: 10px;">Saving...</span>
+                        </span>
                         </span> <span id="ta_note-{$c}" style="display: none;" data-changedisplay1="true"> {$note}</span>
                         <span id="page-{$c}" style="display: none;">{$page}</span>
+                        <span style="float: right;">
+                            <span id="save-mark-{$c}" style="cursor: pointer;  display: none; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                        </span>
 HTML;
             $student_note = htmlentities($question->getStudentComment());
             if ($student_note != ''){
@@ -1541,13 +1614,9 @@ HTML;
             }
             $return .= <<<HTML
                         <span id="student_note-{$c}" style="display: none;" data-changedisplay1="true">{$student_note}</span>
-                    </td>
-                    <td id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-                        <div>
-                            <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                        </div>
-                    </td>
-                </tr>
+                   <!-- <span id="title-cancel-{$c}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">   
+                            <span id="cancel-mark-{$c}" onclick="{$break_onclick}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>    
+                        </span> -->
 HTML;
 
             //gets the initial point value and text
@@ -1577,20 +1646,17 @@ HTML;
             }
 
             $return .= <<<HTML
-                <tr id="summary-{$c}" style="{$graded_color}" onclick="openMark({$c});" data-changedisplay2="true" data-question_id="{$question->getId()}" data-min="{$min}" data-max="{$max}" data-precision="{$precision}">
-                    <td style="white-space:nowrap; vertical-align:middle; text-align:center; {$background}" colspan="1">
-                        <strong><span id="grade-{$c}" name="grade-{$c}" class="grades" data-lower_clamp="{$question->getLowerClamp()}" data-default="{$question->getDefault()}" data-max_points="{$question->getMaxValue()}" data-upper_clamp="{$question->getUpperClamp()}"> {$question_points}</span> / {$question->getMaxValue()}</strong>
-                    </td>
-                    <td style="width:98%;" colspan="3">
+                <div id="summary-{$c}" style="#FBFCFC" display="none" data-changedisplay2="true" data-question_id="{$question->getId()}" data-min="{$min}" data-max="{$max}" data-precision="{$precision}">
+                    <span style="width:98%;" colspan="4">
                         <div id="rubric-{$c}">
-                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" class="rubric-textarea">{$initial_text}</span>
+                            <span id="rubric-textarea-{$c}" name="comment-{$c}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">{$initial_text}</span>
                         </div>
-                    </td>
-                </tr>
-                <tbody id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
-                </tbody>
-
-                <tbody id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" colspan="4" data-question_id="{$question->getId()}" data-changedisplay1="true">
+                    </span>
+                </div></div>
+                </div>
+                <div class="box" id="marks-parent-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
+                <div class="box-title">
+                <div id="marks-extra-{$c}" style="display: none; background-color: #e6e6e6" data-question_id="{$question->getId()}" data-changedisplay1="true">
 HTML;
 
             $d = 0;
@@ -1606,27 +1672,27 @@ HTML;
             $icon_mark = ($has_custom_mark === true) ? "fa-square" : "fa-square-o";
             if(!$peer) {
                 $return .= <<<HTML
-                    <tr>
-                        <td colspan="4">
+                        <span colspan="4">
                             <span style="cursor: pointer;" onclick="{$break_onclick} addMark(this, {$c}, '', {$min}, {$max}, '{$precision}', '{$gradeable->getId()}', '{$user->getAnonId()}', {$gradeable->getActiveVersion()}, {$question->getId()}, '{$your_user_id}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
                             Add New Common Mark</span>
-                        </td>
-                    </tr>
+                        </span>
+                        </div></div></div>
 HTML;
             }
+            //onkeyup="autoResizeComment(event) removed from textarea
             $return .= <<<HTML
-                    <tr id="mark_custom_id-{$c}" name="mark_custom_{$c}">
-                        <td colspan="1" style="text-align: center; white-space: nowrap;">
-
-                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
-                        <input name="mark_points_custom_{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px;">
-                        </td>
-                        <td colspan="3" style="white-space: nowrap;">
-                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
-                        </td>
-                    </tr>
-                </tbody>
-
+                    <div class="box" id="mark_custom_id-{$c}" name="mark_custom_{$c}">
+                    <div class="box-title">
+                        <span colspan="1" style="text-align: center; white-space: nowrap;">
+                        <span onclick=""> <i class="fa {$icon_mark} mark fa-lg" name="mark_icon_{$c}_custom" id="mark_icon_custom-{$c}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;</span>
+                        <span>
+                        <input name="mark_points_custom_{$c}" id="mark_points_custom-{$c}" type="number" step="{$precision}" onchange="fixMarkPointValue(this); checkIfSelected(this); updateProgressPoints({$c});" value="{$question->getScore()}" min="{$min}" max="{$max}" style="width: 50%; resize:none;  min-width: 50px; max-width: 70px;">
+                        </span>
+                        </span>
+                        <span colspan="3" style="white-space: nowrap;">
+                            Custom: <textarea name="mark_text_custom_{$c}" onkeyup="checkIfSelected(this);" onchange="checkIfSelected(this); updateProgressPoints({$c});" cols="100" rows="1" placeholder="Custom message for student..." style="width:80.4%; resize:none;">{$question->getComment()}</textarea>
+                        </span>
+                    </div></div>
 HTML;
             $c++;
         }
@@ -1635,34 +1701,38 @@ HTML;
             $disabled = 'disabled';
         }
         $overallComment = htmlentities($gradeable->getOverallComment(), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        //onkeyup="autoResizeComment(event) removed from textarea
         $return .= <<<HTML
-                <tr>
-                    <td id="title-general" colspan="4" onclick="{$break_onclick}; closeGeneralMessage(true);" data-changebg="true">
+                <div class="box" style="background-color:#E9EFEF;">
+                <div class="box-title" style="cursor: pointer" onclick="{$break_onclick}; toggleGeneralMessage(true);">
+                    <span id="title-general" style="cursor: pointer" onclick="{$break_onclick}; toggleGeneralMessage(true);" data-changebg="true">
                         <b>General Comment</b>
-                        <div style="float: right;">
+                        <span style="float: right;">
                             <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
-                        </div>
-                    </td>
-                    <td id="title-cancel-general" style="font-size: 12px; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
+                        </span>
+                    </span>
+                    <span id="title-cancel-general" style="cursor: pointer; display: none; width: 5%" colspan="0" data-changebg="true" data-changedisplay1="true">
                         <span id="cancel-mark-general" onclick="{$break_onclick}; closeGeneralMessage(false);" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-                    </td>
-                </tr>
-                <tr id="summary-general" style="" onclick="{$break_onclick}; openGeneralMessage();" data-changedisplay2="true">
-                    <td style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
-                    </td>
-                    <td style="width:98%;" colspan="3">
+                    </span>
+                </div><div>
+                <div class="box" id="summary-general" style="" onclick="{$break_onclick}; openGeneralMessage();" data-changedisplay2="true">
+                <div class"box-title">    
+                    <span style="white-space:nowrap; vertical-align:middle; text-align:center" colspan="1">
+                    </span>
+                    <span style="width:98%;" colspan="3">
                         <div id="rubric-custom">
                             <span id="rubric-textarea-custom" name="comment-custom" rows="4" class="rubric-textarea">{$overallComment}</span>
                         </div>
-                    </td>
-                </tr>
-                <tbody id="extra-general" style="display: none" colspan="4" data-changebg="true" data-changedisplay1="true">
-                    <tr>
-                        <td colspan="4">
-                            <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
-                        </td>
-                    </tr>
-                </tbody>
+                    </span>
+                </div></div>
+                <span id="extra-general" style="display: none" colspan="4" data-changebg="true" data-changedisplay1="true">
+                    <div class="box">
+                    <div class="box-title">
+                        <span colspan="4">
+                            <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="" placeholder="Overall message for student about the gradeable..." comment-position="0" {$disabled}>{$overallComment}</textarea>
+                        </span>
+                    </div></div></div></div>
+                </span>
 HTML;
 
         if ($peer) {
@@ -1671,15 +1741,17 @@ HTML;
         else {
             $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
         }
-
+        $total_score = $gradeable->getGradedTAPoints() + $gradeable->getGradedAutograderPoints();
+        //Values below are placeholders, values are overriden later in the class
         $return .= <<<HTML
-                <tr>
-                    <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
-                    <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total">0 / {$total_points}&emsp;&emsp;&emsp;
+                 <div class="box">
+                <div class="box-title">
+                    <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
+                    <span style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong id="score_total"> {$total_score}/ {$total_points}&emsp;&emsp;&emsp;
                         AUTO-GRADING {$gradeable->getGradedAutograderPoints()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</strong></td>
-                    <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></td>
-                </tr>
-            </tbody>
+                    <span style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="2"></td>
+                </div></div>
+            </span>
         </table>
 HTML;
         $return .= <<<HTML
@@ -1763,7 +1835,7 @@ window.onunload = unloadSave;
         }
         return false;
     }
-
+    //Unsure if this will work for peer grading
     function calculatePercentageTotal() {
         var total=0;
 
@@ -1774,8 +1846,7 @@ window.onunload = unloadSave;
         });
 
         total = Math.max(parseFloat(total + {$gradeable->getGradedAutograderPoints()}), 0);
-
-        $("#score_total").html(total+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});
+        $("#score_total").html(({$gradeable->getGradedTAPoints()} + {$gradeable->getGradedAutograderPoints()})+" / "+parseFloat({$gradeable->getTotalAutograderNonExtraCreditPoints()} + {$gradeable->getTotalTANonExtraCreditPoints()}) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + {$gradeable->getGradedAutograderPoints()} + "/" + {$gradeable->getTotalAutograderNonExtraCreditPoints()});     
     }
     function openFile(html_file, url_file) {
         var directory = "";
@@ -1859,4 +1930,60 @@ HTML;
         return $return;
     }
 
+    private function makeTable($user_id, $gradeable, &$status){
+        $return = <<<HTML
+        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
+                </tr>
+            </thead>
+            <tbody>
+HTML;
+        $total_late_used = 0;
+        $status = "Good";
+        $order_by = [ 
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
+        ];
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
+            $g->calculateLateDays($total_late_used);
+            $class = "";
+            if($g->getId() == $gradeable->getId()){
+                $class = "class='yellow-background'";
+                $status = $g->getLateStatus();
+            }
+            if(!$g->hasSubmitted()){
+                $status = "No submission";
+            }
+            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
+            $return .= <<<HTML
+                <tr>
+                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
+                </tr>
+HTML;
+        }
+        $return .= <<<HTML
+            </tbody>
+        </table>
+HTML;
+        return $return;
+    }
+    
 }
