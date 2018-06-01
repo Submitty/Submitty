@@ -89,7 +89,7 @@ HTML;
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2><p>{$ta_instruct}</p><br>
     <p style="float: left;">$info</p>
-    <a class="btn btn-primary" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
+    <a class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
 HTML;
         
         if($action === 'numeric') {
@@ -171,9 +171,6 @@ HTML;
         $last_section = false;
         $tbody_open = false;
         $colspan = 5 + count($gradeable->getComponents());
-        $sums = array_fill(0, $num_numeric, 0);
-        $sumsSqrs = array_fill(0, $num_numeric, 0);
-        $num_with_grade = 0;
         $num_users = 0;
 
         if($action == 'numeric'){
@@ -250,7 +247,6 @@ HTML;
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
-            $has_grade = false;
             if($action == 'lab'){
                 $col = 0;
                 foreach ($gradeable_row->getComponents() as $component) {
@@ -264,19 +260,9 @@ HTML;
                     else {
                         if($component->getScore() === 1.0) {
                             $background_color = "background-color: #149bdf";
-                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
-                                $sums[$col] += 1.0;
-                                $sumsSqrs[$col] += 1.0;
-                                $has_grade = true;
-                            }
                         }
                         else if($component->getScore() === 0.5) {
                             $background_color = "background-color: #88d0f4";
-                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
-                                $sums[$col] += 0.5;
-                                $sumsSqrs[$col] += 0.25;
-                                $has_grade = true;
-                            }
                         }
                         else {
                             $background_color = "";
@@ -310,13 +296,6 @@ HTML;
                 <td class="option-small-input"><input class="option-small-box" style="text-align: center" type="text" id="cell-{$row}-{$col}" value="{$component->getScore()}" data-id="{$component->getId()}" {$grader} {$time} data-num="true"/></td>
 HTML;
                             }
-                            if($gradeable_row->getUser()->getRegistrationSection() != "") {
-                                $sums[$col] += $component->getScore();
-                                $sumsSqrs[$col] += $component->getScore()**2;
-                                if($component->getScore() != 0) {
-                                    $has_grade = true;
-                                }
-                            }
                             $gradeable_row++;
                             $col++;
                         }
@@ -336,9 +315,6 @@ HTML;
                         $col++;
                     }
                 }
-            }
-            if($has_grade) {
-                $num_with_grade++;
             }
 
             if($gradeable_row->getUser()->getRegistrationSection() != "") {
@@ -374,29 +350,29 @@ HTML;
                     </thead>
 
 HTML;
-
-
-            
             $i = 0;
             foreach($gradeable->getComponents() as $component) {
                 if(!$component->getIsText()) {
-                    $avg = $sums[$i] / $num_users;
-                    $rounded_avg = number_format($avg, 2, ".", "");
-                    $stddev = sqrt( ($sumsSqrs[$i] - $sums[$i]*$sums[$i]/$num_users) / $num_users);
-                    $rounded_stddev = number_format($stddev, 2, ".", "");
                     $return .= <<<HTML
                     <tbody><tr>
                         <td>{$component->getTitle()}</td>
-                        <td id="avg-{$i}" value="{$avg}">{$rounded_avg}</td>
-                        <td id="stddev-{$i}" value="{$stddev}">{$rounded_stddev}</td>
+                        <td id="avg-{$i}"></td>
+                        <td id="stddev-{$i}"></td>
                     </tr></tbody>
 HTML;
+                    $i++;
                 }
-                $i++;
             }
+
             $return .= <<<HTML
+            <tbody><tr>
+                <td>Total</td>
+                <td id="avg-t"></td>
+                <td id="stddev-t"></td>
+            </tr></tbody>
             </table>
-            <div></br><p id="num-graded">{$num_with_grade}/{$num_users} students have a nonzero grade.</p></div>
+            <p></br></p>
+            <p id="num-graded"></p>
 HTML;
         }
         else {
@@ -405,10 +381,6 @@ HTML;
 HTML;
 
         }
-
-        $return .= <<<HTML
-        <a onclick="$('#simple-stats-popup').css('display', 'none');" class="btn btn-danger" style="float: right;">Close</a></div>
-HTML;
 
         return $return;
     }
