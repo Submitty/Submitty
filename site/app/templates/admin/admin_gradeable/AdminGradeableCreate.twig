@@ -170,9 +170,6 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         disableElementChildren('.checkpoints');
         disableElementChildren('.numeric');
 
-        $('#page_1_nav').hide();
-        $('#page_3_nav').hide();
-
         // Display the correct options for all forms depending
         //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
@@ -203,12 +200,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         if($('#yes_ta_grade').is(':checked')) {
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
-            $('#page_3_nav').show();
         }
         else {
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
-            $('#page_3_nav').hide();
         }
     }
 

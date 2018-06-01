@@ -30,18 +30,18 @@
         <br/>
         <div id="nav-bar">
             <text class="badge nav-bar" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
-            <text class="badge nav-bar nav-bar-elec" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
+            <text class="badge nav-bar" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
             <text class="badge nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</text>
-            <text class="badge nav-bar nav-bar-elec" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="badge nav-bar" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
             <text class="badge nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</text>
         </div>
         <br/>
         <br/>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
             <div class="page-content" id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
-            <div class="page-content page_content-elec" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
+            <div class="page-content" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
             <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
-            <div class="page-content page_content-elec" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+            <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
             <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
         </div>
         <br/>
@@ -58,7 +58,9 @@
 <script type="text/javascript">
 
     var adminGradeableNavTab = 0;
+    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
     function onChangeNavTab(tab) {
+
         if(tab > 4 || tab < 0) {
             alert('Invalid Navigation');
             return;
@@ -66,34 +68,53 @@
         adminGradeableNavTab = tab;
 
         $('.nav-bar').each(function (){
-            if($(this).hasClass('nav-bar-elec') && !$('#radio_electronic_file').is(':checked')) return;
-            $(this).attr('style','background-color: #999999;');
+            if(navItemsStatus.get(this.id.split('_')[1]) === false) {
+                $(this).hide();
+            }
+            else {
+                $(this).attr('style', '{{ action == 'new' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+            }
         });
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
         $('#page_' + tab + '_nav').attr('style', 'background-color: green');
+
+    }
+
+    function updateNavItemsStatus() {
+        if($('#radio_electronic_file').is(':checked')) {
+            navItemsStatus.set('1', true);
+            navItemsStatus.set('2', $('#yes_ta_grade').is(':checked'));
+            navItemsStatus.set('3', $('#yes_ta_grade').is(':checked'));
+        }
+        else {
+            navItemsStatus.set('1', false);
+            navItemsStatus.set('2', true);
+            navItemsStatus.set('3', false);
+        }
+        onChangeNavTab(adminGradeableNavTab);
     }
 
     $(document).ready(function() {
-        // Create mode, so disable navigation via nav bar
+
+        updateNavItemsStatus();
+        $('[name="gradeable_type"]').change(updateNavItemsStatus);
+        $('[name="ta_grading"]').change(updateNavItemsStatus)
+
+        // Update navigation on load
+
+        {# Disable navigation on 'new' mode #}
         {% if action == 'new' %}
-            onChangeNavTab(0);
+            adminGradeableNavTab = 0;
             $('.nav-bar').each(function() {
                 $(this).attr('onClick', '');
-                if(this.id === 'page_0_nav') return;
-                $(this).attr('style', 'background-color: #F0F0F0; cursor: default;');
             });
         {% else %}
-            onChangeNavTab({{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }});
+            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
         {% endif %}
 
-        {% if admin_gradeable.getGGradeableType() != 0 or not admin_gradeable.getGId() != ''  %}
-
-        $('.nav-bar-elec').hide();
-        $('.page-content-elec').hide();
-
-        {% endif %}
+        updateNavItemsStatus();
 
         // TODO: below is selectively copied from previous ui.  It updates various
         //      UI element values when other elements change.  This keeps the form
