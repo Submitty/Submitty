@@ -8,12 +8,11 @@ use app\models\AdminGradeable;
 
 class AdminGradeableView extends AbstractView {
     /**
-     * Shows creation part
+     * The one and only...
      */
 	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable, $nav_tab = 0) {
 
         $action           = "new"; //decides how the page's data is displayed
-        $button_string    = "Add";
         $submit_text      = "Submit";
         $label_message    = "";
         $gradeables_array = array();
@@ -37,10 +36,9 @@ class AdminGradeableView extends AbstractView {
 
         $marks = array();
 
-        // //if the user is editing a gradeable instead of adding
+        // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
             $action        = "edit";
-            $button_string = "Save changes to";
             $submit_text   = "Save Changes";
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
 
@@ -52,6 +50,7 @@ class AdminGradeableView extends AbstractView {
                     $my_marks = $this->core->getQueries()->getGradeableComponentsMarks($component_id);
                     $marks[$component_id] = array();
                     foreach($my_marks as $i => $mark) {
+                        // $marks[$component_id][$i] = $mark->toArray(); // this encodes/escapes the data
                         $marks[$component_id][$i] = array(
                             'publish'   => $mark->getPublish(),
                             'order'     => $mark->getOrder(),
@@ -65,16 +64,15 @@ class AdminGradeableView extends AbstractView {
 
         // This could be a lot more elegant, but we need to get into the same state
         //  as a 'new' gradeable for the rubric when in template mode
-        $is_template = $type_of_action === 'add_template';
-        if($is_template) {
+        if($type_of_action === 'add_template') {
             $blank_component = new GradeableComponent($this->core, array());
             $admin_gradeable->setOldComponents(array($blank_component));
 
             // only encode the information we need for checkpoint/numeric
             $admin_gradeable->setOldComponentsJson([
-                'gc_upper_clamp' => $blank_component->getUpperClamp(),
-                'gc_max_value'   => $blank_component->getMaxValue(),
-                'gc_title'       => $blank_component->getTitle()
+                'upper_clamp' => $blank_component->getUpperClamp(),
+                'max_value'   => $blank_component->getMaxValue(),
+                'title'       => $blank_component->getTitle()
             ]);
         }
 
@@ -85,7 +83,6 @@ class AdminGradeableView extends AbstractView {
             "admin_gradeable" => $admin_gradeable,
             "label_message"   => $label_message,
             "action"          => $action,
-            "template"        => $is_template,
             "submit_text"     => $submit_text,
             "nav_tab"         => $nav_tab,
 

@@ -81,8 +81,8 @@
             removeCheckpoint();
             $.each(components, function(i,elem){
                 var extra_credit = false;
-                if (elem.gc_max_value == 0) extra_credit = true;
-                addCheckpoint(elem.gc_title, extra_credit);
+                if (elem.max_value == 0) extra_credit = true;
+                addCheckpoint(elem.title, extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();
