@@ -83,43 +83,47 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
             {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
-    <br />
+    <br /><br />
 
     Is this a team assignment?
-    <br />
+    <fieldset>
         <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
             {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Yes
 
         <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
             {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> No
 
-    <!-- Team settings (read only in edit mode) -->
-    <div id="team_settings">
-        <div class="team_assignment team_yes" id="team_yes">
-            <br />
+        <!-- Team settings (read only in edit mode) -->
+        <div id="team_settings">
+            <div class="team_assignment team_yes" id="team_yes">
 
-            <!-- Inherit teams from another gradeable? -->
-            {#Use teams from a previous gradeable:
+                What is the maximum team size?
+                    <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{{ admin_gradeable.getEgMaxTeamSize() }}"/>
 
-                <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+                <!-- Inherit teams from another gradeable? -->
+                {#Use teams from a previous gradeable:
+                <br />
 
-            {% if action == 'new' %}
-                <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;' 
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
-                    <option value=''>--None--</option>
+                    <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
 
-                    {% for parent in admin_gradeable.getInheritTeamsList() %}
-                        <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
-                            value="{{ parent.g_id }}">{{ parent.g_title }}</option>
-                    {% endfor %}
-                </select>
-            {% else %}
-                <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px' 
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
-            {% endif %}
-            #}
+                {% if action == 'new' %}
+                    <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                        <option value=''>--None--</option>
+
+                        {% for parent in admin_gradeable.getInheritTeamsList() %}
+                            <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                                value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+                {% endif %}
+                #}
+            </div>
         </div>
-    </div>
+    </fieldset>
     <br />
 
     Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
