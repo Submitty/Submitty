@@ -756,6 +756,14 @@ AND gd_user_viewed_date IS NOT NULL
         return intval($this->course_db->row()['cnt']);
     }
 
+    public function getNumUsersGraded($g_id) {
+        $this->course_db->query("
+SELECT COUNT(*) as cnt FROM gradeable_data
+WHERE g_id = ?", array($g_id));
+
+        return intval($this->course_db->row()['cnt']);
+    }
+
     //gets ids of students with non null registration section and null rotating section
     public function getRegisteredUsersWithNoRotatingSection(){
        $this->course_db->query("
@@ -2160,5 +2168,12 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
         return $this->submitty_db->row()['active'];
 
+    }
+
+    /**
+     * @param string $g_id
+     */
+    public function deleteGradeable($g_id) {
+        $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
     }
 }

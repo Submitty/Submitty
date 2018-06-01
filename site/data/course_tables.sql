@@ -924,7 +924,7 @@ ALTER TABLE ONLY late_days
 --
 
 ALTER TABLE ONLY peer_assign 
-    ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

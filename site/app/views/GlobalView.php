@@ -4,190 +4,80 @@ namespace app\views;
 
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $css=array(), $js=array()) {
-        $messages = <<<HTML
-<div id='messages'>
-
-HTML;
-
+        $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
-                $messages .= <<<HTML
-    <div id='{$type}-{$key}' class="inner-message alert alert-{$type}">
-        <a class="fa fa-times message-close" onClick="removeMessagePopup('{$type}-{$key}');"></a>
-        <i class="fa fa-times-circle"></i> {$error}
-    </div>
+                $messages[] = [
+                    "type" => $type,
+                    "key" => $key,
+                    "error" => $error
+                ];
 
-HTML;
                 unset($_SESSION['messages'][$type][$key]);
             }
         }
-        $messages .= <<<HTML
-</div>
-HTML;
 
-        $return = <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
+        $pageTitle = $this->core->getConfig()->isCourseLoaded() ? $this->core->getFullCourseName() : "Submitty";
 
-HTML;
-        if($this->core->getConfig()->isCourseLoaded()) {
-            $return .= <<<HTML
-    <title>{$this->core->getFullCourseName()}</title>
-
-HTML;
-        }
-        else {
-            $return .= <<<HTML
-    <title>Submitty</title>
-
-HTML;
-        }
-
-        $return .= <<<HTML
-    <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
-
-HTML;
-
-        foreach($css as $css_ref) {
-            $return .= "    <link rel='stylesheet' type='text/css' href='{$css_ref}' />\n";
-        }
-
+        //Allow courses to override css
         if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
-            $return .= "    <style type='text/css'>\n".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."\n    </style>\n";
+            $css[] = $this->core->getConfig()->getCoursePath()."/config/override.css";
         }
 
-        foreach ($js as $js_ref) {
-            $return .= "    <script type='text/javascript' src='{$js_ref}'></script>\n";
-        }
-        $return .= <<<HTML
-</head>
-<script>var onAjaxInit;</script>
-<body data-site-url="{$this->core->getConfig()->getSiteUrl()}" data-csrf-token="{$this->core->getCsrfToken()}" onload="if (onAjaxInit) { onAjaxInit(); }">
-{$messages}
-<div id="container">
-
-HTML;
-
+        $navURLs = [];
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
-            if($this->core->getUser()->accessGrading()) {
-                if($this->core->getUser()->accessAdmin()) {
-                    $return .= <<<HTML
-    <div id="nav">
-        <ul>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view'))}">Course Settings</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users'))}">Students</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Sections</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late'))}">Late Days Allowed</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension'))}">Excused Absence Extensions</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage'))}">Grade Summaries / CSV Report</a>
-            </li>
-            <li>
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}">Plagiarism Detection</a>
-            </li>
-
-HTML;
-                    $return .= <<<HTML
-        </ul>
-    </div>
-    
-HTML;
+            if ($this->core->getUser()->accessGrading()) {
+                if ($this->core->getUser()->accessAdmin()) {
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                        "title" => "Course Settings"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
+                        "title" => "Students"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
+                        "title" => "Graders"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                        "title" => "Setup Sections"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
+                        "title" => "Late Days Allowed"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                        "title" => "Excused Absence Extensions"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                        "title" => "Grade Summaries / CSV Report"
+                    ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
+                        "title" => "Plagiarism Detection"
+                    ];
                 }
             }
         }
 
-
-        $return .= <<<HTML
-<div id="header">
-    <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
-    <div id="header-text">
-        <h2>
-HTML;
-        if ($this->core->userLoaded()) {
-            $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $my_preferred_name = $this->core->getUser()->getDisplayedFirstName();
-            $return .= <<<HTML
-            <span id="login">Hello <span id="login-id">{$my_preferred_name}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
-HTML;
-        }
-        else {
-            $return .= <<<HTML
-            <span id="login-guest">Welcome to Submitty</span>
-HTML;
-        }
-        $return .= <<<HTML
-        </h2>
-        <h2>
-        {$breadcrumbs}
-        </h2>
-    </div>
-</div>
-
-
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
+            "messages" => $messages,
+            "css" => $css,
+            "js" => $js,
+            "pageTitle" => $pageTitle,
+            "navURLs" => $navURLs,
+            "breadcrumbs" => $breadcrumbs
+        ]);
      }
 
     public function footer($runtime) {
-        $return = <<<HTML
-    <div id="push"></div>
-</div>
-<div id="footer">
-    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-    <span id="github">
-        <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
-            <i class="fa fa-github fa-lg"></i>
-        </a>
-    </span>
-HTML;
-    if ($this->core->getConfig()->isDebug()) {
-            $return .= <<<HTML
-    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
-HTML;
-    }
-    $return .= <<<HTML
-</div>
-HTML;
-        if ($this->core->getConfig()->isDebug()) {
-            $return .= <<<HTML
-<div id='page-info'>
-    Runtime: {$runtime}<br /><br />
-    <h3>Site Details</h3>
-    Total Submitty Details: {$this->core->getSubmittyDB()->getQueryCount()}<br /><br />
-    Submitty Queries:<br /> {$this->core->getSubmittyDB()->getPrintQueries()}
-HTML;
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $return .= <<<HTML
-    <h3>Course Details</h3>
-    Total Course Queries: {$this->core->getCourseDB()->getQueryCount()}<br /><br />
-    Course Queries: <br /> {$this->core->getCourseDB()->getPrintQueries()}
-HTML;
-            }
-        $return .= <<<HTML
-</div>
-HTML;
-        }
-        $return .= <<<HTML
-</body>
-</html>
-
-HTML;
-
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
+            "runtime" => $runtime
+        ]);
     }
 
     public function invalidPage($page) {
