@@ -918,62 +918,14 @@ HTML;
                                     'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
         }
         $student_full = json_encode($student_full);
-        $return = <<<HTML
-<div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
-    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
-    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-    <input type="hidden" name="new_team" />
-    <input type="hidden" name="new_team_user_id" />
-    <input type="hidden" name="edit_team_team_id" />
-    <input type="hidden" name="num_users" />
-    <input type="hidden" id="student_full_id" value='{$student_full}'/>
-HTML;
-    if (isset($_REQUEST['view'])) {
-        $return .= <<<HTML
-    <input type="hidden" name="view" value="{$_REQUEST['view']}" />
-HTML;
-    }
-    $return .= <<<HTML
-    <h2 id="admin-team-title"></h2>
-    <br />
-    <div id="admin-team-members" style="width:50%;"></div>
-    <div>
-        Registration Section:<br />
-        <select name="reg_section">
-HTML;
-        foreach ($all_reg_sections as $section) {
-            $return .= <<<HTML
-            <option value="{$section}">Section {$section}</option>
-HTML;
-        }
-        $return .= <<<HTML
-            <option value="NULL">Section NULL</option>
-        </select><br /><br />
-        Rotating Section:<br />
-        <select name="rot_section">
-HTML;
-        foreach ($all_rot_sections as $section) {
-            $return .= <<<HTML
-            <option value="{$section}">Section {$section}</option>
-HTML;
-        }
-        $return .= <<<HTML
-            <option value="NULL">Section NULL</option>
-        </select>
-    </div>
-    <br />
-    <br />
-    <h4 id="admin-team-history-title"></h4>
-    <div id="admin-team-history-left" style="width:28%;"></div>
-    <div id="admin-team-history-right" style="width:62%;"></div>
-    <div style="float: right; width: auto; margin-top: 10px">
-        <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-        <input class="btn btn-primary" type="submit" value="Submit" />
-    </div>
-    </form>
-</div>
-HTML;
-        return $return;
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
+            "gradeable" => $gradeable,
+            "student_full" => $student_full,
+            "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
+            "all_reg_sections" => $all_reg_sections,
+            "all_rot_sections" => $all_rot_sections,
+        ]);
     }
 
     public function importTeamForm($gradeable) {
