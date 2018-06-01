@@ -575,7 +575,13 @@ class AdminGradeableController extends AbstractController {
           die("Failed to write file {$config_build_file}");
         }
 
-        $this->returnToNav();
+
+        if($edit_gradeable === 0) {
+            $this->redirectToEdit(); // redirect to next page of the form
+        }
+        else {
+            $this->returnToNav();
+        }
     }
 
     private function deleteGradeable() {
@@ -609,13 +615,7 @@ class AdminGradeableController extends AbstractController {
           die("Failed to write file {$config_build_file}");
         }
 
-
-        if($edit_gradeable === 0) {
-            $this->redirectToEdit(); // redirect to next page of the form
-        }
-        else {
-            $this->returnToNav();
-        }
+        $this->returnToNav();
     }
 
     private function quickLink() {
