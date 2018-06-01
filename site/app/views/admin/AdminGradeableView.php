@@ -12,10 +12,17 @@ class AdminGradeableView extends AbstractView {
      */
 	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable, $nav_tab = 0) {
 
+	    // TODO: all of this should be moved to the controller when it gets overhauled
+
         $action           = "new"; //decides how the page's data is displayed
         $submit_text      = "Submit";
         $label_message    = "";
         $gradeables_array = array();
+
+        // Default autograding config is upload-only
+        if($type_of_action === 'add') {
+            $admin_gradeable->setEgConfigPath('/usr/local/submitty/more_autograding_examples/upload_only/config');
+        }
         
         //makes an array of gradeable ids for javascript
         foreach ($admin_gradeable->getTemplateList() as $g_id_title) {
@@ -85,6 +92,8 @@ class AdminGradeableView extends AbstractView {
             "action"          => $action,
             "submit_text"     => $submit_text,
             "nav_tab"         => $nav_tab,
+            "semester"        => $_GET['semester'],
+            "course"          => $_GET['course'],
 
             "marks"           => $marks,
 
