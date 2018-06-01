@@ -112,8 +112,9 @@ class ForumController extends AbstractController {
     private function isValidCategory($inputCategoryId = -1, $inputCategoryName = ''){
         $rows = $this->core->getQueries()->getCategories();
         foreach($rows as $index => $values){
-            if($values["category_id"] === $inputCategoryId || $values["category_desc"] === $inputCategoryName)
+            if($values["category_id"] === $inputCategoryId || $values["category_desc"] === $inputCategoryName) {
                 return true;
+            }
         }
         return false;
     }
