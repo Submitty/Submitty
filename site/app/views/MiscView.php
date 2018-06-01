@@ -31,7 +31,8 @@ HTML;
 	    else {
 	        editor{$number}.setSize("100%", "auto");
 	    }
-	    editor{$number}.setOption("theme", "eclipse");
+        var theme = localStorage.getItem("codeDisplayStyle");
+	    editor{$number}.setOption("theme", (theme == null || theme == "light") ? "eclipse" : "monokai");
 HTML;
         
         
@@ -59,6 +60,7 @@ HTML;
     <title>{$filename}</title>
     <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
     <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
+    <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/monokai.css" />
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
     <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>

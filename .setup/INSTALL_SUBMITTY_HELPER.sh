@@ -453,15 +453,15 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd
 
-#building clang ASTMatcher.cpp
-if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
-	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
-	ninja
-	popd
-	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
-	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
-fi
 
+# building clang ASTMatcher.cpp
+pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
+cmake .
+ninja ASTMatcher UnionTool
+popd
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
 
 
 # change permissions
