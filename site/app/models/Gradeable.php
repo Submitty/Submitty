@@ -1007,6 +1007,10 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->updateUserViewedDate($this);
     }
 
+    public function resetUserViewedDate() {
+        $this->core->getQueries()->resetUserViewedDate($this);
+    }
+
     public function updateGradeable() {
         $this->core->getQueries()->updateGradeable($this);
     }
