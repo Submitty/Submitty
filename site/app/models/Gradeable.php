@@ -1175,4 +1175,23 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+
+    public function getRepositoryPath(Team $team) {
+        if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
+        $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+        $this->core->getConfig()->getVcsUrl(), $repo);
+        return str_replace('{$team_id}', $team->getId(), $repo);
+    }
 }
