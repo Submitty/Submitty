@@ -68,7 +68,7 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "student_favorites" ("id" serial NOT NULL, "user_id" character varying NOT NULL, "thread_id" int, CONSTRAINT student_favorites_pk PRIMARY KEY ("id"))'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "categories_list" ("category_id" serial NOT NULL,"category_desc" varchar NOT NULL,CONSTRAINT categories_list_pk PRIMARY KEY ("category_id"))'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "thread_categories" ("thread_id" int NOT NULL, "category_id" int NOT NULL)'""".format(*variables))
-        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "threads" ("id" serial NOT NULL,"title" varchar NOT NULL,"created_by" varchar NOT NULL,"pinned" BOOLEAN NOT NULL DEFAULT 'false',"deleted" BOOLEAN NOT NULL DEFAULT 'false',"merged_thread_id" int DEFAULT '-1',"merged_post_id" int DEFAULT '-1',"is_visible" BOOLEAN NOT NULL,CONSTRAINT threads_pk PRIMARY KEY ("id"))'""".format(*variables))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "threads" ("id" serial NOT NULL,"title" varchar NOT NULL,"created_by" varchar NOT NULL,"pinned" BOOLEAN NOT NULL DEFAULT 'false',"deleted" BOOLEAN NOT NULL DEFAULT 'false',"merged_id" int DEFAULT '-1', "is_visible" BOOLEAN NOT NULL,CONSTRAINT threads_pk PRIMARY KEY ("id"))'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "posts" ("id" serial NOT NULL,"thread_id" int NOT NULL,"parent_id" int DEFAULT '-1',"author_user_id" character varying NOT NULL,"content" TEXT NOT NULL,"timestamp" timestamp with time zone NOT NULL,"anonymous" BOOLEAN NOT NULL,"deleted" BOOLEAN NOT NULL DEFAULT 'false',"endorsed_by" varchar,"resolved" BOOLEAN NOT NULL,"type" int NOT NULL, "has_attachment" BOOLEAN NOT NULL, CONSTRAINT posts_pk PRIMARY KEY ("id"))'""".format(*variables))
 
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id")'""".format(*variables))
@@ -116,5 +116,11 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         # Remove developer group
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users DROP CONSTRAINT users_user_group_check'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ADD CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))'""".format(*variables))
+
+        # revision of merge thread for discussion forum
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads DROP COLUMN merged_id'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads ADD COLUMN merged_thread_id int DEFAULT '-1''".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads ADD COLUMN merged_post_id int DEFAULT '-1''".format(*variables))
+        
         # add user/database
         print("\n")
