@@ -74,7 +74,7 @@ class TestForum(BaseTestCase):
         if first_post:
             if upload_attachment:
                 attachment_file = self.upload_attachment("")
-            self.driver.find_element_by_xpath("//input[contains(@value,'Submit reply to all')]").click()
+            self.driver.find_element_by_xpath("//input[contains(@value,'Submit Reply to All')]").click()
         else:
             if upload_attachment:
                 attachment_file = self.upload_attachment("_"+post_id)
