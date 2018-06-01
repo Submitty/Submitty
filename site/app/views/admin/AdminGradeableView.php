@@ -63,8 +63,20 @@ class AdminGradeableView extends AbstractView {
             }
         }
 
-        // $marks_json = json_encode($marks);
-        // $old_components_json = $admin_gradeable->getOldComponentsJson();
+        // This could be a lot more elegant, but we need to get into the same state
+        //  as a 'new' gradeable for the rubric when in template mode
+        $is_template = $type_of_action === 'add_template';
+        if($is_template) {
+            $blank_component = new GradeableComponent($this->core, array());
+            $admin_gradeable->setOldComponents(array($blank_component));
+
+            // only encode the information we need for checkpoint/numeric
+            $admin_gradeable->setOldComponentsJson([
+                'gc_upper_clamp' => $blank_component->getUpperClamp(),
+                'gc_max_value'   => $blank_component->getMaxValue(),
+                'gc_title'       => $blank_component->getTitle()
+            ]);
+        }
 
 
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -73,12 +85,10 @@ class AdminGradeableView extends AbstractView {
             "admin_gradeable" => $admin_gradeable,
             "label_message"   => $label_message,
             "action"          => $action,
-            "template"        => $type_of_action == "add_template",
+            "template"        => $is_template,
             "submit_text"     => $submit_text,
             "nav_tab"         => $nav_tab,
 
-            // Be sure to NOT pass old components if we are inheriting from a template
-            "old_components"  => $type_of_action == "add_template" ? array(new GradeableComponent($this->core, array())) : $admin_gradeable->getOldComponents(),
             "marks"           => $marks,
 
             // Graders Page Specific

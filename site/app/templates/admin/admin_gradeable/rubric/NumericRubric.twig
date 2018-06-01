@@ -144,7 +144,6 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             }
         });
 
-        {% if not template %}
         if ($('#radio_numeric').is(':checked')) {
             var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
             $.each(components, function(i,elem) {
@@ -166,7 +165,6 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             $('#numeric').show();
             $('#grading_questions').show();
         }
-        {% endif %}
     });
 
     function checkFormRubricNum() {
