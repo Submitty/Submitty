@@ -75,4 +75,7 @@ sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
 sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
 # necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
 sudo usermod -a -G travis hwphp
+
+sudo ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+
 sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
