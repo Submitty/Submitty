@@ -1247,7 +1247,6 @@ function addNewCategory(){
                 newCategory: newCategory
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -1263,7 +1262,7 @@ function addNewCategory(){
                 var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
-                $('#cat').append('<option value="' + json['categoryId'] + '">' + escape(newCategory) +'</option>');
+                $('#cat').append('<option value="' + json['new_id'] + '">' + escape(newCategory) +'</option>');
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");

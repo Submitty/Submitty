@@ -59,11 +59,13 @@ class ForumController extends AbstractController {
                 break;
             case 'add_category':
                 $this->addNewCategory();
+                break;
             case 'show_stats':
                 $this->showStats();
                 break;
             case 'merge_thread':
                 $this->mergeThread();
+                break;
             case 'pin_thread':
                 $this->pinThread(1);
                 break;
@@ -107,13 +109,10 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function isValidCategory($inputCategoryId){
-        if($inputCategoryId < 1){
-            return false;
-        }
+    private function isValidCategory($inputCategoryId = -1, $inputCategoryName = ''){
         $rows = $this->core->getQueries()->getCategories();
         foreach($rows as $index => $values){
-            if($values["category_id"] === $inputCategoryId)
+            if($values["category_id"] === $inputCategoryId || $values["category_desc"] === $inputCategoryName)
                 return true;
         }
         return false;
@@ -124,8 +123,12 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
-                $newCategoryId = $this->core->getQueries()->addNewCategory($category);
-                $result["new_id"] = $newCategoryId["category_id"];
+                if($this->isValidCategory(-1, $category)) {
+                    $result["error"] = "That category already exists";
+                } else {
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                    $result["new_id"] = $newCategoryId["category_id"];
+                }
             } else {
                 $result["error"] = "No category data submitted";
             }
