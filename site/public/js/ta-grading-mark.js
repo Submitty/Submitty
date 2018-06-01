@@ -1005,6 +1005,9 @@ function saveMark(num, sync, successCallback, errorCallback) {
 
 //finds what mark is currently open
 function findCurrentOpenedMark() {
+    if ($('#grading_rubric').length === 0 || $('#summary-general').length === 0) {
+        return NO_COMPONENT_ID;
+    }
     if($('#grading_rubric').hasClass('empty')) {
         return -3;
     }
