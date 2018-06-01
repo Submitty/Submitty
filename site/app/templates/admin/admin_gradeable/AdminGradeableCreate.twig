@@ -206,10 +206,12 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         if($('#yes_ta_grade').is(':checked')) {
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
+            disableElementChildren('.no_manual_grading', true);
         }
         else {
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
+            disableElementChildren('.no_manual_grading', false);
         }
     }
 
@@ -248,6 +250,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
     $(document).ready(function() {
 
+        onManualGradingChange();
         $('[name="ta_grading"]').change(onManualGradingChange)
 
         //

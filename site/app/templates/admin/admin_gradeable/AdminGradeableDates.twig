@@ -5,7 +5,6 @@
 
 
 <div class="electronic_file">
-
     <div class="team_yes">
         <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
         <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams)
@@ -18,20 +17,20 @@
     <em style='color: orange;'>must be >= TA Beta Testing Date</em>
 
     <br />
+
+    <input id="date_due" name="date_due" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
+    <em style='color: orange;'><b>Due Date</b></em>?
+    <em style='color: orange;'>must be >= Submission Open Date</em>
+
+    <br />
 </div>
-
-<input id="date_due" name="date_due" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
-<em style='color: orange;'><b>Due Date</b></em>?
-<em style='color: orange;'>must be >= Submission Open Date</em>
-
-<br />
 
 <div class="manual_grading">
     <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
     <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
     <em style='color: orange;'>must be >=
         <span class="electronic_file">Due Date (+ max allowed late days)</span>
-        <span class="checkpoints numeric">Due Date</span>
+        <span class="checkpoints numeric">TA Beta Testing Date</span>
     </em>
 
     <br />
@@ -39,13 +38,19 @@
 
 <input name="date_released" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
 <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
-<em style='color: orange;'>must be >= Manual Grading Open Date</em>
+<em style='color: orange;'>must be >=
+    <span class="electronic_file">
+        <span class="manual_grading">Manual Grading Open Date</span>
+        <span class="no_manual_grading">Due Date (+ max allowed late days)</span>
+    </span>
+    <span class="checkpoints numeric">TA Beta Testing Date</span>
+</em>
 
 <br />
 
 <div class="electronic_file">
     How many late days may students use on this assignment?
-    <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text"/>
+    <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text" value="{{ admin_gradeable.getEgLateDays() }}"/>
 
     <br />
 </div>
