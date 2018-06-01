@@ -262,7 +262,7 @@ if [[ $? -ne "0" ]] ; then
     exit
 fi
 
-${SUBMITTY_REPOSITORY_DIR}/db/migrator.py -e course -c "${CONF_DIR}" migrate --initial
+${SUBMITTY_REPOSITORY_DIR}/db/migrator.py -e course migrate --initial
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit

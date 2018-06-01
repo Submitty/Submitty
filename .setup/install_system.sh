@@ -469,7 +469,7 @@ if [ ${WORKER} == 0 ]; then
     hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
 
     PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    ${SUBMITTY_REPOSITORY}/db/migrator.py -e master -c "${SUBMITTY_INSTALL_DIR}/config" migrate --initial
+    ${SUBMITTY_REPOSITORY}/db/migrator.py -e master -e system migrate --initial
 
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers

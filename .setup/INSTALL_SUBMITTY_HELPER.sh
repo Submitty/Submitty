@@ -124,6 +124,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+    rm -rf ${SUBMITTY_INSTALL_DIR}/migrations
 fi
 
 # set the permissions of the top level directory
@@ -354,6 +355,19 @@ chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
+################################################################################################################
+################################################################################################################
+# Run THE DB MIGRATIONS
+
+echo -e 'Running the DB migrations'
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
+chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
+
+rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+
+${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
 
 ################################################################################################################
 ################################################################################################################
@@ -361,14 +375,6 @@ popd > /dev/null
 if [ ${WORKER} == 0 ]; then
     source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
 fi
-
-################################################################################################################
-################################################################################################################
-# Run THE DB MIGRATIONS
-
-echo -e 'Running the DB migrations'
-
-${SUBMITTY_REPOSITORY}/db/migrator.py -c ${SUBMITTY_CONFIG_DIR} migrate
 
 ################################################################################################################
 ################################################################################################################
