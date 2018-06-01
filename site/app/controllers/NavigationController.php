@@ -60,6 +60,7 @@ class NavigationController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
+        $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
     
     /**
