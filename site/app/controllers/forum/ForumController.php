@@ -62,6 +62,8 @@ class ForumController extends AbstractController {
             case 'show_stats':
                 $this->showStats();
                 break;
+            case 'merge_thread':
+                $this->mergeThread();
             case 'pin_thread':
                 $this->pinThread(1);
                 break;
@@ -196,6 +198,9 @@ class ForumController extends AbstractController {
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        } else if(!$this->core->getQueries()->existsThread($thread_id)) {
+            $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exists.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
@@ -411,6 +416,39 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    public function mergeThread(){
+        $parent_thread_id = $_POST["merge_thread_parent"];
+        $child_thread_id = $_POST["merge_thread_child"];
+        $thread_id = $child_thread_id;
+        if($this->core->getUser()->getGroup() <= 2){
+            if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
+                $message = "";
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
+                    $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
+                    if(is_dir($child_thread_dir)) {
+                        $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
+                        if(!is_dir($parent_thread_dir)) {
+                            FileUtils::createDir($parent_thread_dir);
+                        }
+                        $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
+                        foreach ($child_posts_dirs as $post_id) {
+                            $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
+                            $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
+                            rename($child_post_dir, $parent_post_dir);
+                        }
+                    }
+                    $this->core->addSuccessMessage("Threads merged!");
+                    $thread_id = $parent_thread_id;
+                } else {
+                    $this->core->addErrorMessage("Merging Failed! ".$message);
+                }
+            }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
 }
