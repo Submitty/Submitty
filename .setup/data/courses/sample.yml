@@ -518,26 +518,26 @@ gradeables:
   g_bucket: homework
 
 - components:
- - gc_lower_clamp: 0
-  gc_default: 5
-  gc_max_value: 5
-  gc_upper_clamp: 5
-   gc_title: Question 1
- - gc_is_extra_credit: true
-   gc_lower_clamp: 0
-  gc_default: 5
-  gc_max_value: 5
-  gc_upper_clamp: 5
-   gc_title: Question 2
- eg_submission_due_date: 1972-01-01 23:59:59
- eg_submission_open_date: 1971-01-01 23:59:59
- g_grade_released_date: 1974-01-01 23:59:59
- g_grade_start_date: 1973-01-01 23:59:59
- g_id: grades_released_homework
- g_ta_view_start_date: 1970-01-01 23:59:59
- g_title: Grades Released Homework
- gradeable_config: python_simple_homework
- g_bucket: homework
+  - gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
+    gc_title: Question 1
+  - gc_is_extra_credit: true
+    gc_lower_clamp: 0
+    gc_default: 5
+    gc_max_value: 5
+    gc_upper_clamp: 5
+    gc_title: Question 2
+  eg_submission_due_date: 1972-01-01 23:59:59
+  eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_released_date: 1974-01-01 23:59:59
+  g_grade_start_date: 1973-01-01 23:59:59
+  g_id: grades_released_homework
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grades Released Homework
+  gradeable_config: python_simple_homework
+  g_bucket: homework
 
 - components:
   - gc_title: Question 1
