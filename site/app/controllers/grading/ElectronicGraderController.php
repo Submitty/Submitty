@@ -605,11 +605,12 @@ class ElectronicGraderController extends GradingController {
                 }
             }
 
-            $section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+            $section = $_POST['section'] === "NULL" ? null : $_POST['section'];
             if ($gradeable->isGradeByRegistration()) {
                 $this->core->getQueries()->updateTeamRegistrationSection($team_id, $section);
             }
             else {
+                $section = intval($section);
                 $this->core->getQueries()->updateTeamRotatingSection($team_id, $section);
             }
             foreach($add_user_ids as $id) {
@@ -671,7 +672,7 @@ class ElectronicGraderController extends GradingController {
         //overwrite sections if they are available in the post
         if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
             if ($gradeable->isGradeByRegistration()) {
-                $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+                $registration_section = $_POST['section'] === "NULL" ? null : $_POST['section'];
             }
             else {
                 $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
