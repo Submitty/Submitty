@@ -1439,17 +1439,11 @@ HTML;
                 }
             }
 
-            if ($peer) {
-                $total_points = $gradeable->getTotalNonHiddenNonExtraCreditPoints() + $gradeable->getTotalPeerGradingNonExtraCredit();
-            } else {
-                $total_points = $gradeable->getTotalAutograderNonExtraCreditPoints() + $gradeable->getTotalTANonExtraCreditPoints();
-                }
-
             $grading_data = [
                 "gradeable" => $gradeable->getGradedData(),
                 "your_user_id" => $this->core->getUser()->getId(),
                 "disabled" => $disabled === "disabled",
-                "total_points" => $total_points,
+                "can_verify" => $display_verify_all // If any can be then this is set
             ];
 
             foreach ($grading_data["gradeable"]["components"] as &$component) {
