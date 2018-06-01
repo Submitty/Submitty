@@ -24,11 +24,7 @@ if os.path.isfile(AUTOGRADING_WORKERS_PATH) :
     WORKERS = json.load(open_file)
 else:
   WORKERS = None
-#EXIT CODES:
-# 0 = After performing the specified action, the requested daemon is dead
-# 1 = After performing the specified action, the requested daemon is alive
-# 2 = failure in performing operation
-# 3 = invalid mode, daemon, or target
+
 EXIT_CODES = {
   'inactive'  : 0,
   'active'    : 1,
@@ -135,36 +131,30 @@ if __name__ == "__main__":
   #parse arguments
   parser = argparse.ArgumentParser(description='A wrapper for the various systemctl functions. \
     This script must be run as the submitty supervisor.',
-    epilog='ERROR CODES: 0 = After performing the specified action, the requested daemon is dead, 1 = After performing the \
-    specified action, the requested daemon is alive, 2 = Failure performing operation, 3 = invalid mode, daemon, or target')
-  parser.add_argument("--daemon", metavar="DAEMON", type=str, help="Optional. Valid options are worker and shipper. \
-    If unspecified, worker is assumed.")
+    epilog="""ERROR CODES:
+0 = After performing the specified action, the requested daemon is dead
+1 = After performing the specified action, the requested daemon is alive
+2 = Failure performing operation
+3 = invalid mode, daemon, or target""")
+  parser.add_argument("--daemon", metavar="DAEMON", type=str.lower, help="Optional. Valid options are worker and shipper. \
+    If unspecified, worker is assumed.", choices=['worker', 'shipper'])
   parser.add_argument("--target", metavar="TARGET", type=str, help="Optional. Give the id of a machine in the \
     autograding_workers json and this script will perform the desired function on that machine. If perform_on_all_workers is\
     specified, the command will be processed on all worker machines. If not specified, the status of this machine is checked.")
-  parser.add_argument("mode", metavar="MODE", type=str, help="Valid modes are status, start, restart, and stop")
+  parser.add_argument("mode", metavar="MODE", type=str.lower, help="Valid modes are status, start, restart, and stop", 
+    choices=VALID_MODES)
 
   args = parser.parse_args()
 
-  daemon = 'worker'
+  if args.daemon == None:
+    daemon = 'worker'
+  else:
+    daemon = args.daemon
   target = args.target
-  mode = args.mode.lower()
-
-  # daemon is an optional argument which must be either shipper or worker. If it is anything else, throw an error.
-  if args.daemon != None:
-    if args.daemon.lower() == 'shipper':
-      daemon = 'shipper'
-    elif args.daemon.lower() != 'worker':
-      print("ERROR: Bad daemon. Expected worker or shipper")
-      sys.exit(EXIT_CODES['bad_arguments'])
+  mode = args.mode
 
   # determine whether we are working on a local or foreign machine
   local = False if (target != None and target.lower() != 'primary') else True
-
-  # make sure a valid command is being passed to the daemon.
-  if not mode in VALID_MODES:
-    print("ERROR: Bad mode. Expected status, start, restart, or stop")
-    sys.exit(EXIT_CODES['bad_arguments'])
 
   command = 'sudo systemctl {0} submitty_autograding_{1}'.format(mode, daemon)
   status_command = 'sudo systemctl is-active submitty_autograding_{0}'.format(daemon)

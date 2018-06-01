@@ -359,8 +359,8 @@ if not tmp_autograding_workers_file == "":
     #remove the tmp folder
     os.removedirs(tmp_folder)
     #make sure the permissions are correct.
-    shutil.chown(WORKERS_JSON, HWCRON_USER, 'root')
-    os.chmod(WORKERS_JSON, 0o640)
+    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
@@ -379,8 +379,8 @@ if not args.worker:
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
-    shutil.chown(WORKERS_JSON, HWCRON_USER, 'root')
-    os.chmod(WORKERS_JSON, 0o640)
+    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
 # Write database json

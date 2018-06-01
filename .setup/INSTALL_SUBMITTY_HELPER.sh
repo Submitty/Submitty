@@ -100,8 +100,11 @@ function replace_fillin_variables {
 # if this is not a worker machine, make sure that the submitty checkout belongs to the hwcron group
 if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
+    chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
     chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+    chmod -R g+r ${SUBMITTY_REPOSITORY}
+    chmod -R g-w ${SUBMITTY_REPOSITORY}
 fi
 
 
@@ -211,8 +214,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
-#Add the submitty user to /etc/sudoers if in worker mode.
 if [ "${WORKER}" == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
     if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
@@ -221,9 +224,6 @@ if [ "${WORKER}" == 1 ]; then
         echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
-
-echo "#grant the hwcron user access to the daemon utilities" >> /etc/sudoers
-echo "%${HWCRON_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
 
 
 # tmp folder

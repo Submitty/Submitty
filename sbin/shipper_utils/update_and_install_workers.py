@@ -95,7 +95,9 @@ if __name__ == "__main__":
 
       # rsynch the file
       print("performing rsynch to {0}...".format(worker))
-      command = "rsync -a --no-o --no-g --exclude=.git {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
+      # If this becomes too slow, we can exculde directories using --exclude.
+      # e.g. --exclude=.git --exclude=.setup/data --exclude=site
+      command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
       os.system(command)
 
       success = install_worker(user, host)
