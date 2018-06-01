@@ -847,9 +847,15 @@ HTML;
 HTML;
             }
             if(!$peer) {
-            $return .= <<<HTML
-                <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
+                if($row->getTaGradesReleased()){
+                    $return .= <<<HTML
+                    <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
 HTML;
+                } else {
+                    $return .= <<<HTML
+                    <td title="{$grade_viewed}" style="{$grade_viewed_color}"></td>
+HTML;
+                }
             }
             $return .= <<<HTML
             </tr>
