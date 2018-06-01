@@ -67,12 +67,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
-# BUILD CLANG SETUP
-#################
-
-#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
-
-#################################################################
 # USERS SETUP
 #################
 
@@ -409,6 +403,37 @@ fi
 
 
 #################################################################
+# BUILD CLANG SETUP
+#################
+
+echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
+
+clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm
+ 
+# remove if this is a re-run
+rm -rf ${clangsrc}
+mkdir -p ${clangsrc}
+rm -rf ${clanginstall}
+mkdir -p ${clanginstall}
+
+# checkout the clang sources
+git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
+git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
+git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+
+# initial cmake for llvm tools (might take a bit of time)
+mkdir -p ${clangsrc}/build
+pushd ${clangsrc}/build
+cmake -G Ninja ../llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+popd > /dev/null
+
+# add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
+echo 'add_subdirectory(ASTMatcher)' >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+echo 'add_subdirectory(UnionTool)'  >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+
+echo 'DONE PREPARING CLANG INSTALLATION'
+
+#################################################################
 # SUBMITTY SETUP
 #################
 echo Beginning Submitty Setup
@@ -437,6 +462,19 @@ else
         ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
+
+if [ ${WORKER} == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
+    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+    fi
+fi
+
 
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean

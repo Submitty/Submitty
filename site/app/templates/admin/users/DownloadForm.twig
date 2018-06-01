@@ -1,0 +1,27 @@
+<div class="popup-form" id="download-form">
+    <form>
+        <input type="hidden" value='{{ download_info_json }}' id="download_info_json_id"><br><br>
+        <div style="width:300px">
+            {% for section in reg_sections %}
+            <input type="checkbox" value="{{ section.sections_registration_id }}">Registration Section {{ section.sections_registration_id }}<br>
+            {% endfor %}
+            <input type="checkbox" value="NULL">Registration Section NULL<br>
+        </div>
+        <div style="width:300px">
+            <input type="checkbox" value="instructor">Instructor<br>
+            <input type="checkbox" value="full_access_grader">Full Access Graders<br>
+            <input type="checkbox" value="limited_access_grader">Limited Access Graders<br>
+        </div><br>
+        {% if use_database %}
+        <div style="width: 60%">
+            Password:<br>
+            <input type="password" name="user_password" placeholder="New Password" />
+        </div>
+        {% endif %}
+        <div style="float: right; width: auto; margin-top: 10px">
+            <a onclick="$('#download-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="button" value="Download CSV" onclick="downloadCSV('{{ code }}');" />
+            <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{{ code }}');" />
+        </div>
+    </form>
+</div>

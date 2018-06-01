@@ -82,13 +82,13 @@ class LateDaysCalculation extends AbstractModel {
 
                 $submission_latedays = array();
         
-        //Sort latedays by since_timestamp before calculating late day usage.
+                //Sort latedays by since_timestamp before calculating late day usage.
                 usort($latedays, function($a, $b) { return $a['since_timestamp'] > $b['since_timestamp']; });
 
                 //Find all late day updates before this submission due date.
                 foreach($latedays as $ld){
                     if($ld['since_timestamp'] <= $submissions[$i]['eg_submission_due_date'] &&
-               $curr_allowed_term < $ld['allowed_late_days']){
+                    $curr_allowed_term < $ld['allowed_late_days']){
                         $curr_allowed_term = $ld['allowed_late_days'];
                     }
                 }

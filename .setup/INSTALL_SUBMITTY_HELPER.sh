@@ -15,9 +15,6 @@ if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     exit 1
 fi
 
-SUBMITTY_CONFIG_DIR = ${SUBMITTY_INSTALL_DIR}/config
-
-
 ########################################################################################################################
 ########################################################################################################################
 # this script must be run by root or sudo
@@ -98,6 +95,17 @@ function replace_fillin_variables {
 
 ########################################################################################################################
 ########################################################################################################################
+# if this is not a worker machine, make sure that the submitty checkout belongs to the hwcron group
+if [ "${WORKER}" == 1 ]; then
+    chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
+    chmod -R g+rw ${SUBMITTY_REPOSITORY}
+else
+    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+    chmod -R g+r ${SUBMITTY_REPOSITORY}
+    chmod -R g-w ${SUBMITTY_REPOSITORY}
+fi
+
+
 # if the top level INSTALL directory does not exist, then make it
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 
@@ -204,6 +212,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
+
 
 # tmp folder
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp
@@ -326,8 +335,11 @@ chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
 
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/track_git_version.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
+chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 ########################################################################################################################
@@ -469,15 +481,15 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd
 
-#building clang ASTMatcher.cpp
-if [ -d ${SUBMITTY_INSTALL_DIR}/clang-llvm/build ]; then
-	pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
-	ninja
-	popd
-	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
-	chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
-fi
 
+# building clang ASTMatcher.cpp
+pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
+cmake .
+ninja ASTMatcher UnionTool
+popd
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/ASTMatcher
+chmod o+rx ${SUBMITTY_INSTALL_DIR}/clang-llvm/build/bin/UnionTool
 
 
 # change permissions
@@ -530,6 +542,8 @@ if [[ "$is_active_tmp" == "0" ]]; then
 fi
 
 
+
+
 #############################################################
 # stop the worker daemon (if it's running)
 systemctl is-active --quiet submitty_autograding_worker
@@ -544,8 +558,6 @@ if [[ "$is_active_tmp" == "0" ]]; then
     echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
     exit 1
 fi
-
-
 
 #############################################################
 # NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
@@ -568,6 +580,13 @@ if [[ "$is_active_tmp" == "0" ]]; then
     exit 1
 fi
 # END TO BE DELETED
+
+if [ "${WORKER}" == 0 ]; then
+    # Stop all foreign worker daemons
+    echo -e "\nStopping worker machine daemons"
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+    echo -e "\n"
+fi
 
 
 #############################################################
@@ -627,6 +646,9 @@ do
     chown hwcron:$myuser $mydir
     chmod 770 $mydir
 done
+
+#Obtains the current git hash and tag and stores them in the appropriate jsons.
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 
 # If the submitty_autograding_shipper.service or submitty_autograding_worker.service
 # files have changed, we should reload the units:
@@ -723,5 +745,11 @@ if [ "${WORKER}" == 0 ]; then
         echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
     fi
 fi
+
 ################################################################################################################
 ################################################################################################################
+# Update any foreign worker machines
+if [ "${WORKER}" == 0 ]; then
+    echo -e Updating worker machines
+    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+fi

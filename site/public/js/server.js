@@ -157,6 +157,15 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function newDeleteGradeableForm(form_action, gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-gradeable-form");
+    $('[name="delete-gradeable-message"]', form).html('');
+    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
@@ -1145,8 +1154,7 @@ function editPost(post_id, thread_id) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('.popup-form').css('display', 'block');
-
+                $('#edit-user-post').css('display', 'block');
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
