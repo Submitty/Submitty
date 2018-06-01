@@ -171,12 +171,14 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         disableElementChildren('.numeric');
 
         $('#page_1_nav').hide();
+        $('#page_3_nav').hide();
 
         // Display the correct options for all forms depending
         //  on gradeable type
         if($('#radio_electronic_file').is(':checked')) {
             disableElementChildren('.electronic_file', false);
             $('#page_1_nav').show();
+            onManualGradingChange();
         }
         else if ($('#radio_checkpoints').is(':checked')) {
             disableElementChildren('.checkpoints', false);
@@ -299,10 +301,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         var check1 = $('#radio_electronic_file').is(':checked');
         var check2 = $('#radio_checkpoints').is(':checked');
         var check3 = $('#radio_numeric').is(':checked');
-        
-        var all_gradeable_ids = {{js_gradeables_array|raw}};
+
 
         {% if action == 'new' %}
+            var all_gradeable_ids = {{js_gradeables_array|raw}};
             if(all_gradeable_ids.find(element => element == gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;
@@ -312,6 +314,12 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             $( "#alert-message" ).dialog( "open" );
             return false;
         }
+
+        if (gradeable_title == '' || gradeable_title === null) {
+            alert("A name for the gradeable must be assigned");
+            return false;
+        }
+
         if(!check1 && !check2 && !check3) {
             alert("A type of gradeable must be selected");
             return false;

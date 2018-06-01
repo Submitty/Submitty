@@ -66,7 +66,7 @@
         adminGradeableNavTab = tab;
 
         $('.nav-bar').each(function (){
-            if($(this).hasClass('nav-bar-elec')) return;
+            if($(this).hasClass('nav-bar-elec') && !$('#radio_electronic_file').is(':checked')) return;
             $(this).attr('style','background-color: #999999;');
         });
 
