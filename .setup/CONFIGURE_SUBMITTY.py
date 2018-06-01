@@ -441,6 +441,8 @@ if not args.worker:
     config['hwphp_user'] = HWPHP_USER
     config['hwcgi_user'] = HWCGI_USER
     config['hwcronphp_group'] = HWCRONPHP_GROUP
+else:
+    config['submitty_supervisor'] = SUBMITTY_SUPERVISOR
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)

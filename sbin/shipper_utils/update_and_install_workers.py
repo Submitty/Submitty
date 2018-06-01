@@ -100,6 +100,7 @@ if __name__ == "__main__":
       command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
       os.system(command)
 
+      print("beginning installation...")
       success = install_worker(user, host)
       if success == True:
         print("Installed Submitty on {0}".format(worker))
