@@ -463,6 +463,19 @@ else
     fi
 fi
 
+if [ ${WORKER} == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
+    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+    fi
+fi
+
+
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
