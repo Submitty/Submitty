@@ -111,13 +111,13 @@
 <div class="box" id="mark_custom_id-{{ c_index }}" name="mark_custom_{{ c_index }}">
     <div class="box-title">
         <span colspan="1" style="text-align: center; white-space: nowrap;">
-            <span onclick="">
+            <span onclick="event.stopPropagation();">
                 <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" id="mark_icon_custom-{{ c_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp
             </span>
-            <input name="mark_points_custom_{{ c_index }}" id="mark_points_custom-{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" data-component_index="{{ c_index }}" value="{{ component.score }}" style="resize:none; width: 50px;">
+            <input name="mark_points_custom_{{ c_index }}" id="mark_points_custom-{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" value="{{ component.score }}" style="resize:none; width: 50px;">
         </span>
         <span colspan="3" style="position: relative; white-space: nowrap;">
-            Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" data-component_index="{{ c_index }}" cols="120" rows="1" placeholder="Custom message for student..." style="width: calc(100% - 165px); resize:none;">{{ component.comment }}</textarea>
+            Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="autoResizeComment(event); checkIfSelected(this);" onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" cols="120" rows="1" placeholder="Custom message for student..." style="width: calc(100% - 165px); resize:none;">{{ component.comment }}</textarea>
         </span>
     </div>
 </div>
