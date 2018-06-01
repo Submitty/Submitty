@@ -738,6 +738,7 @@ class Course(object):
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
             #create_teams
+            json_team_history = {}
             if gradeable.team_assignment is True:
                 ucounter = 0
                 for user in self.users:
@@ -757,11 +758,13 @@ class Course(object):
                     #The teams are created based on the order of the users. As soon as the number of teamates
                     #exceeds the max team size, then a new team will be created within the same registration section
                     print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
+                    #adding json data for team history                     
                     teams_registration = select([gradeable_teams_table]).where(
                         (gradeable_teams_table.c['registration_section'] == reg_section) &
                         (gradeable_teams_table.c['g_id'] == gradeable.id))
                     res = conn.execute(teams_registration)
                     if res.rowcount == 0:
+                        #If the registration section doesn't curretnly have any team, then make a new team.
                         conn.execute(gradeable_teams_table.insert(),
                                      team_id=unique_team_id,
                                      g_id=gradeable.id,
@@ -773,8 +776,12 @@ class Course(object):
                                         state=1)
                         ucounter+=1
                         res.close()
-                        continue
+                        json_team_history[unique_team_id] = [{"action": "admin_create",
+                                                               "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                               "admin_user": "instructor",
+                                                               "first_user": user.get_detail(self.code, "id")}]
                     else:
+                        #If the registration has a team already, join it
                         added = False
                         for team_in_section in res:  
                             members_in_team = select([teams_table]).where(
@@ -785,9 +792,13 @@ class Course(object):
                                             team_id=team_in_section['team_id'], 
                                             user_id=user.get_detail(self.code, "id"),
                                             state=1)
+                                json_team_history[team_in_section['team_id']].append({"action": "admin_create",
+                                                                     "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                                     "admin_user": "instructor",
+                                                                     "added_user": user.get_detail(self.code, "id")})
                                 added = True
-                                continue
                         if not added:
+                            #if the team the user tried to join is full, make a new team
                             conn.execute(gradeable_teams_table.insert(),
                                          team_id=unique_team_id,
                                          g_id=gradeable.id,
@@ -797,6 +808,10 @@ class Course(object):
                                          team_id=unique_team_id, 
                                          user_id=user.get_detail(self.code, "id"),
                                          state=1)
+                            json_team_history[unique_team_id] =  [{"action": "admin_create",
+                                                                 "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                                 "admin_user": "instructor",
+                                                                 "first_user": user.get_detail(self.code, "id")}]
                             ucounter+=1
                     res.close()
             if gradeable.type == 0 and \
@@ -807,7 +822,7 @@ class Course(object):
             #creating the folder containing all the submissions
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
 
-            if gradeable.type == 0:
+            if gradeable.type == 0 and not os.path.exists(gradeable_path):
                 os.makedirs(gradeable_path)
                 os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
 
@@ -852,7 +867,10 @@ class Course(object):
                             (random.random() < 0.9) and \
                             (max_submissions is None or submission_count < max_submissions)):
                         active_version = random.choice(range(1, versions_to_submit+1))
-                        json_history = {"active_version": active_version, "team_history": []}
+                        if team_id is not None:
+                            json_history = {"active_version": active_version, "history": [], "team_history": []}
+                        else:
+                            json_history = {"active_version": active_version, "history": []}
                         random_days = 1
                         if random.random() < 0.3:
                             random_days = random.choice(range(-3,2))
@@ -867,13 +885,14 @@ class Course(object):
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
                                                  team_id=team_id, active_version=active_version)
+                                json_history["team_history"] = json_team_history[team_id]
                             else:
                                 conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                             g_version=version, submission_time=current_time_string)
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                                 active_version=active_version)
-                            json_history["team_history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
+                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
