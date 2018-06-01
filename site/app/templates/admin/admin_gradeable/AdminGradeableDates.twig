@@ -26,14 +26,16 @@
 
 <br />
 
-<input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
-<em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
-<em style='color: orange;'>must be >=
-    <span class="electronic_file">Due Date (+ max allowed late days)</span>
-    <span class="checkpoints numeric">Due Date</span>
-</em>
+<div class="manual_grading">
+    <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
+    <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
+    <em style='color: orange;'>must be >=
+        <span class="electronic_file">Due Date (+ max allowed late days)</span>
+        <span class="checkpoints numeric">Due Date</span>
+    </em>
 
-<br />
+    <br />
+</div>
 
 <input name="date_released" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
 <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
