@@ -845,9 +845,10 @@ class Course(object):
                                   created_by=threadData[1],
                                   pinned=True if threadData[2] == "t" else False,
                                   deleted=True if threadData[3] == "t" else False,
-                                  merged_id=threadData[4],
-                                  is_visible=True if threadData[5] == "t" else False)
-                conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[6])
+                                  merged_thread_id=threadData[4],
+                                  merged_post_id=threadData[5],
+                                  is_visible=True if threadData[6] == "t" else False)
+                conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
             counter = 1
             for postData in f_data[0]:
                 if(postData[10] != "f" and postData[10] != ""):

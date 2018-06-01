@@ -185,7 +185,7 @@ class DatabaseQueries {
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_id, is_visible) VALUES (?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -2058,7 +2058,7 @@ AND gc_id IN (
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
-        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_id = -1 and deleted = false", array($thread_id));
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1 and deleted = false", array($thread_id));
         $result_rows = $this->course_db->rows();
         if(count($result_rows) == 0) {
             $message = "Can't find thread";
@@ -2093,8 +2093,8 @@ AND gc_id IN (
             $children = array($child_root_post);
             $this->findChildren($child_root_post, $child_thread_id, $children);
 
-            // $merged_id is PK of linking node
-            $this->course_db->query("UPDATE threads SET merged_id = ?, deleted = true WHERE id = ?", array($child_root_post, $child_thread_id));
+            // $merged_post_id is PK of linking node and $merged_thread_id is immediate parent thread_id
+            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ?, deleted = true WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
             foreach($children as $post_id){
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }
