@@ -493,7 +493,8 @@ CREATE TABLE "threads" (
 	"created_by" varchar NOT NULL,
 	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
 	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"merged_id" int DEFAULT '-1',
+	"merged_thread_id" int DEFAULT '-1',
+	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
