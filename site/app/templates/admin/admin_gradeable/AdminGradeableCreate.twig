@@ -19,13 +19,6 @@
 {# 
     Primary Form
 #}
-<!-- Gradeable ID (readonly in edit mode, required) -->
-What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
-    <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required" 
-        value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
-
-<br />
-
 <!-- Gradeable Title (read/write in all modes) -->
 What is the title of this gradeable?: 
     <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" 
@@ -40,23 +33,10 @@ What is the URL to the assignment instructions? (shown to student)
 
 <br />
 
-<!-- Gradeable bucket (read/write in all modes) -->
-What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
-
-{% set valid_assignment_type = ['homework','assignment','problem-set',
-    'quiz','test','exam',
-    'exercise','lecture-exercise','reading','lab','recitation',
-    'project',
-    'participation','note',
-    'none (for practice only)'] %}
-
-<select name="gradeable_buckets" style="width: 170px;">
-    {% for type in valid_assignment_type %}
-        <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
-            {{ type | title }}
-        </option>
-    {% endfor %}
-</select>
+<!-- Gradeable ID (readonly in edit mode, required) -->
+What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
+<input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required"
+       value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
 
 <br />
 
@@ -154,6 +134,28 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         <br />
     </fieldset>
 </fieldset>
+
+<!-- Gradeable bucket (read/write in all modes) -->
+What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
+
+{% set valid_assignment_type = ['homework','assignment','problem-set',
+    'quiz','test','exam',
+    'exercise','lecture-exercise','reading','lab','recitation',
+    'project',
+    'participation','note',
+    'none (for practice only)'] %}
+
+<select name="gradeable_buckets" style="width: 170px;">
+    {% for type in valid_assignment_type %}
+        <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
+            {{ type | title }}
+        </option>
+    {% endfor %}
+</select>
+
+<br />
+
+
 <div id="alert-message" title="WARNING">
     <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
 </div>

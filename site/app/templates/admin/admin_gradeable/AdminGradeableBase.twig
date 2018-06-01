@@ -120,6 +120,8 @@
         //      UI element values when other elements change.  This keeps the form
         //      state valid/submittible since there is no server-side checking as
         //      of now (summer 2018)
+
+        // Clamp all numeric input to be between their min and max attributes
         $( "input" ).change(function() {
             var max = parseFloat($(this).attr('max'));
             var skip1 = (isNaN(max)) ? true : false;
@@ -135,6 +137,7 @@
             }
         });
 
+        // TODO: this will go somewhere else
         // $('input:radio[name="peer_grading"]').change(function() {
         //     $('.peer_input').hide();
         //     $('#peer_averaging_scheme').hide();
@@ -150,133 +153,6 @@
         //         }
         //     }
         // });
-        $('input:radio[name="student_view"]').change(function() {
-            if ($(this).is(':checked')) {
-                if ($(this).val() == 'true') {
-                    $('#student_submit_download_view').show();
-                } else {
-                    $('#no_student_submit').prop('checked', true);
-                    $('#no_student_download').prop('checked',true);
-                    $('#yes_student_any_version').prop('checked',true);
-                    $('#student_submit_download_view').hide();
-                }
-            }
-        });
-
-        $('input:radio[name="pdf_page"]').change(function() {
-            $("input[name^='page_component']").each(function() {
-                if (this.value < 0) {
-                    this.value = 0;
-                }
-            });
-            $('.pdf_page_input').hide();
-            $('#pdf_page').hide();
-            if ($(this).is(':checked')) {
-                if ($(this).val() == 'true') {
-                    $("input[name^='page_component']").each(function() {
-                        if (this.value < 1) {
-                            this.value = 1;
-                        }
-                    });
-                    $('.pdf_page_input').show();
-                    $('#pdf_page').show();
-                }
-            }
-        });
-
-        $('input:radio[name="pdf_page_student"]').change(function() {
-            $("input[name^='page_component']").each(function() {
-                if (this.value < -1) {
-                    this.value = -1;
-                }
-            });
-            $('.pdf_page_input').hide();
-            if ($(this).is(':checked')) {
-                if ($(this).val() == 'false') {
-                    $("input[name^='page_component']").each(function() {
-                        if (this.value < 1) {
-                            this.value = 1;
-                        }
-                    });
-                    $('.pdf_page_input').show();
-                }
-            }
-        });
-        $('input:radio[name="team_assignment"]').change(
-            function(){
-                if($('#team_yes_radio').is(':checked')){
-                    $('input[name="eg_max_team_size"]').val('{$admin_gradeable->getEgMaxTeamSize()}');
-                    $('input[name="date_team_lock"]').val('{$admin_gradeable->getEgTeamLockDate()}');
-                    $('#team_yes').show();
-                    if($('#peer_yes_radio').is(':checked')) {
-                        $('#peer_yes_radio').prop('checked', false);
-                        $('#peer_no_radio').prop('checked', true);
-                        $('input:radio[name="peer_grading"]').trigger("change");
-                    }
-                }
-                else {
-                    $('#team_yes').hide();
-                }
-            });
-
-        $('input:radio[name="gradeable_type"]').change(
-            function(){
-                $('#required_type').hide();
-                $('.gradeable_type_options').hide();
-                if ($(this).is(':checked')){
-                    if($(this).val() == 'Electronic File'){
-                        $('#electronic_file').show();
-                        $('#ta_instructions_id').hide();
-                        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                            $('#rubric_questions').hide();
-                            $('#grading_questions').hide();
-                        }
-
-                        $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
-                        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
-                            $('#grades_released_compare_date').html('Due Date (+ max allowed late days)');
-                        } else {
-                            $('#grades_released_compare_date').html('Manual Grading Open Date');
-                        }
-
-                        if($('#team_yes_radio').is(':checked')){
-                            $('input[name="eg_max_team_size"]').val('{$admin_gradeable->getEgMaxTeamSize()}');
-                            $('input[name="date_team_lock"]').val('{$admin_gradeable->getEgTeamLockDate()}');
-                            $('#team_yes').show();
-                        }
-                        else {
-                            $('#team_yes').hide();
-                        }
-                    }
-                    else if ($(this).val() == 'Checkpoints'){
-                        $('#ta_instructions_id').show();
-                        $('#checkpoints').show();
-                        $('#grading_questions').show();
-                        $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                        $('#grades_released_compare_date').html('Manual Grading Open Date');
-                    }
-                    else if ($(this).val() == 'Numeric'){
-                        $('#ta_instructions_id').show();
-                        $('#numeric').show();
-                        $('#grading_questions').show();
-                        $('#ta_grading_compare_date').html('TA Beta Testing Date');
-                        $('#grades_released_compare_date').html('Manual Grading Open Date');
-                    }
-                }
-            });
-
-        if($('#rotating-section').is(':checked')){
-            $('#rotating-sections').show();
-        }
-        $('input:radio[name="section_type"]').change(
-            function(){
-                $('#rotating-sections').hide();
-                if ($(this).is(':checked')){
-                    if($(this).val() == 'rotating-section'){
-                        $('#rotating-sections').show();
-                    }
-                }
-            });
 
         // End copied section
 
@@ -303,7 +179,7 @@
         }
     });
 
-    // TODO: this probably isn't necessary anymore.  Look into removing it.
+    // TODO: this isn't necessary, but cuts back some unused data on submission
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();

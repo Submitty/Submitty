@@ -76,6 +76,10 @@
         else {
             // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_download_view', true);
+            $('#no_student_submit').prop('checked', true);
+            $('#no_student_download').prop('checked',true);
+            $('#yes_student_any_version').prop('checked',true);
+            $('#student_submit_download_view').hide();
         }
     }
 
@@ -102,7 +106,6 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
-
     });
 
     function checkFormAuto() {
