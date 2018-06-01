@@ -500,6 +500,7 @@ function checkMarks(question_num) {
     if(all_false === false) {
         if (first_mark[0].classList.contains('fa-square')) {
             first_mark.toggleClass("fa-square-o fa-square");
+            getMark(question_num, 0).has = false;
         }
     } 
 }
@@ -930,10 +931,10 @@ function saveMark(num, sync, successCallback, errorCallback) {
     }
     if (!isNaN(parseFloat(custom_points))) {
         current_points += parseFloat(custom_points);
-    }
-    
-    if (parseFloat(custom_points) != 0) {
-        all_false = false;
+        
+        if (parseFloat(custom_points) != 0) {
+            all_false = false;
+        }
     }
 
     if(custom_message != "") {
