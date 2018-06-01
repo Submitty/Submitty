@@ -125,13 +125,13 @@ class ForumController extends AbstractController {
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
                 if($this->isValidCategory(-1, $category)) {
-                    $result["error"] = "That category already exists";
+                    $result["error"] = "That category already exists.";
                 } else {
                     $newCategoryId = $this->core->getQueries()->addNewCategory($category);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
             } else {
-                $result["error"] = "No category data submitted";
+                $result["error"] = "No category data submitted. Please try again.";
             }
         } else {
             $result["error"] = "You do not have permissions to do that.";
