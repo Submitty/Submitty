@@ -1196,7 +1196,8 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased()) {
+        if ($gradeable->taGradesReleased() && $gradeable->getSubmissionCount() !== 0) {
+            // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
 <div class="content">
 HTML;
@@ -1209,7 +1210,7 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-    <h3 class="label">TA grade not available</h3>
+                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
             $return .= <<<HTML
