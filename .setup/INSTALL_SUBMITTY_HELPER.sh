@@ -453,8 +453,6 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd
 
-clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm
-
 
 # building clang ASTMatcher.cpp
 pushd ${SUBMITTY_INSTALL_DIR}/clang-llvm/build
