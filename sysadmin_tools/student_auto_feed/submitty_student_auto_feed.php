@@ -437,7 +437,7 @@ CREATE TEMPORARY TABLE upsert_courses_users (
     course               VARCHAR,
     user_id              VARCHAR,
     user_group           INTEGER,
-    registration_section INTEGER,
+    registration_section VARCHAR,
     manual_registration  BOOLEAN
 ) ON COMMIT DROP
 SQL;
