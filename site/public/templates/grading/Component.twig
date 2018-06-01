@@ -100,7 +100,7 @@
     <div id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
         {# todo: peer grading #}
         <span colspan="4">
-            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+            <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
     </div>
