@@ -109,7 +109,7 @@ function get_user_list($semester) {
 		return false;
 	}
 
-	$user_list = pg_fetch_all($db_query, PGSQL_ASSOC);
+	$user_list = pg_fetch_all_columns($db_query, 0);
 	pg_close($db_conn);
 	return $user_list;
 }
@@ -123,7 +123,7 @@ function log_it($msg) {
     $msg = date('m/d/y H:i:s : ', time()) . $msg . PHP_EOL;
    	error_log($msg, 3, ERROR_LOG_FILE);
 
-   	if (!is_null(ERROR_EMAIL) {
+   	if (!is_null(ERROR_EMAIL)) {
 	    error_log($msg, 1, ERROR_EMAIL);
 	}
 }
