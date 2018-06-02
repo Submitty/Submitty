@@ -27,7 +27,7 @@ def parse_args():
                         action='append', default=ENVIRONMENTS)
     config_path = Path(DIR_PATH, '..', '..', 'config')
     default_config = config_path.resolve() if config_path.exists() else None
-    parser.add_argument('--config', '-c', dest='config_path', type=str, required=True, default=default_config)
+    parser.add_argument('--config', '-c', dest='config_path', type=str, default=default_config)
     subparsers = parser.add_subparsers(metavar='command', dest='command')
     sub = subparsers.add_parser('create', help='Create migration')
     sub.add_argument('name', help='Name of argument')
