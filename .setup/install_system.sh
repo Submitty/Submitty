@@ -409,6 +409,7 @@ fi
 echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
 
 clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm
+clanginstall=${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/tmp/llvm
  
 # remove if this is a re-run
 rm -rf ${clangsrc}
