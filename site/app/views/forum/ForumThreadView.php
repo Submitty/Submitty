@@ -871,7 +871,8 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
-					New Category: <textarea id="new_category_text" style="resize:none;" rows="1" cols="25" type="text" size="45" name="new_category" id="new_category" ></textarea> <button type="button" title="Add new category" onclick="addNewCategory();" style="margin-right:10px;" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle fa-1x"></i> Add Category </button></span>
+
+					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button></span>
 HTML;
 				}
 				$return .= <<<HTML
