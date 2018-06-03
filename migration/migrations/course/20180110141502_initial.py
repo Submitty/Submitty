@@ -3,7 +3,7 @@ from pathlib import Path
 
 def up(conn):
     with conn.cursor() as cursor:
-        with open(Path(__file__).parent.parent.parent / 'data' / 'course_tables.sql') as open_file:
+        with Path(Path(__file__).parent.parent.parent, 'data', 'course_tables.sql').open() as open_file:
             cursor.execute(open_file.read())
 
 
