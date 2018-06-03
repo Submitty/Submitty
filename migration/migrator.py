@@ -24,11 +24,13 @@ ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
 def parse_args():
     parser = ArgumentParser(description='Migration script for upgrading/downgrading the database')
     parser.add_argument('--environment', '-e', dest='environments', choices=ENVIRONMENTS, action='append')
+    parser.add_argument('--course', nargs=2, metavar=('semester', 'course'), default=None)
     config_path = Path(DIR_PATH, '..', '..', 'config')
     default_config = config_path.resolve() if config_path.exists() else None
     required = False if default_config is not None else True
     parser.add_argument('--config', '-c', dest='config_path', type=str, required=required, default=default_config)
     subparsers = parser.add_subparsers(metavar='command', dest='command')
+    subparsers.required = True
     sub = subparsers.add_parser('create', help='Create migration')
     sub.add_argument('name', help='Name of argument')
     sub = subparsers.add_parser('migrate', help='Run migrations')
@@ -45,6 +47,8 @@ def parse_args():
 
 def main():
     args = parse_args()
+    print(args)
+    raise SystemExit
     getattr(sys.modules[__name__], args.command)(args)
 
 
@@ -101,9 +105,10 @@ def handle_migration(args):
 
             for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
                 for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
-                    params['dbname'] = 'submitty_{}_{}'.format(semester, course)
-                    with psycopg2.connect(**params) as connection:
-                        migrate_environment(connection, environment, args)
+                    if args.course is None or [semester, course] == args.course:
+                        params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                        with psycopg2.connect(**params) as connection:
+                            migrate_environment(connection, environment, args)
 
 
 def migrate_environment(connection, environment, args):
