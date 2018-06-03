@@ -379,13 +379,13 @@ if [ ${WORKER} == 0 ]; then
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         git pull
-        popd
+        popd > /dev/null
     else
         git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         # remember to change this version in .setup/travis/autograder.sh too
         git checkout v0.94
-        popd
+        popd > /dev/null
     fi
 fi
 
@@ -396,7 +396,7 @@ fi
 if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
     git pull
-    popd
+    popd > /dev/null
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
@@ -579,7 +579,7 @@ fi
 
 # pushd /tmp/docker
 # su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
-# popd
+# popd > /dev/null
 
 
 #################################################################

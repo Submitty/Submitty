@@ -97,16 +97,6 @@ function replace_fillin_variables {
 
 ########################################################################################################################
 ########################################################################################################################
-# if this is not a worker machine, make sure that the submitty checkout belongs to the hwcron group
-if [ "${WORKER}" == 1 ]; then
-    chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
-    chmod -R g+rw ${SUBMITTY_REPOSITORY}
-else
-    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
-fi
-
-
 # if the top level INSTALL directory does not exist, then make it
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 
@@ -262,7 +252,7 @@ if [ $? -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
-popd
+popd > /dev/null
 
 # root will be owner & group of these files
 chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
@@ -422,7 +412,7 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
 
     echo ${ST_VERSION} > VERSION
 fi
-popd
+popd > /dev/null
 #fi
 
 # change permissions
@@ -470,7 +460,7 @@ rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/createAl
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
-popd
+popd > /dev/null
 
 mkdir -p ${clanginstall}
 
@@ -479,7 +469,7 @@ pushd ${clangbuild}
 # TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
 cmake .
 ninja ASTMatcher UnionTool
-popd
+popd > /dev/null
 
 cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
 cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
@@ -514,7 +504,7 @@ fi
 sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
 sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
 
-popd
+popd > /dev/null
 
 
 
@@ -742,8 +732,27 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+# confirm permissions on the repository (to allow push updates from primary to worker)
+echo "Preparing to update Submitty installation on worker machines"
+if [ "${WORKER}" == 1 ]; then
+    # the supervisor user/group must have write access on the worker machine
+    chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
+    chmod -R g+rw ${SUBMITTY_REPOSITORY}
+else
+    #FIXME: This takes a bit of time, should skip if there are no workers
+    # the hwcron user/group must have read access on the primary machine
+    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+    chmod -R g+r ${SUBMITTY_REPOSITORY}
+fi
+
 # Update any foreign worker machines
 if [ "${WORKER}" == 0 ]; then
     echo -e Updating worker machines
     sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
 fi
+
+# set filemode to false, so that changes to file permissions in the
+# git repository will be ignored for future diffs/commits
+pushd ${SUBMITTY_REPOSITORY}
+git config --local core.filemode false
+popd > /dev/null
