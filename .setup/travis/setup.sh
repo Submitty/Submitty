@@ -30,7 +30,7 @@ sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
-cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
+sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
 sudo ${DIR}/../bin/create_untrusted_users.py
 
