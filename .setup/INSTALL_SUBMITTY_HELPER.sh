@@ -634,6 +634,7 @@ done
 
 #Obtains the current git hash and tag and stores them in the appropriate jsons.
 python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
 # If the submitty_autograding_shipper.service or submitty_autograding_worker.service
 # files have changed, we should reload the units:
@@ -649,6 +650,7 @@ if [[ "$is_shipper_active_before" == "0" ]]; then
     fi
     echo -e "Restarted Submitty Grading Shipper Daemon\n"
 else
+    is_worker_active_before="1"
     echo -e "NOTE: Submitty Grading Shipper Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
 fi
