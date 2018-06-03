@@ -475,6 +475,12 @@ if [ ${WORKER} == 1 ]; then
     fi
 fi
 
+# Create and setup database for non-workers
+if [ ${WORKER} == 0 ]; then
+    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    ${SUBMITTY_REPOSITORY}/db/migrator.py -e master -e system migrate --initial
+fi
 
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -489,7 +495,6 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
     mkdir -p ${SUBMITTY_DATA_DIR}/bin
     touch ${SUBMITTY_DATA_DIR}/instructors/authlist
@@ -503,11 +508,6 @@ if [ ${WORKER} == 0 ]; then
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
     apache2ctl -t
-
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    ${SUBMITTY_REPOSITORY}/db/migrator.py -e master -e system migrate --initial
 
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers
