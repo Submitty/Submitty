@@ -215,6 +215,7 @@ HTML;
                     }
                 }
                 if($this->core->getConfig()->isRegradeEnabled()){
+                    print_r($regrade_requests);
                 $return .= <<<HTML
              <div>
                 Number of students who have ongoing regrade requests: {$regrade_requests}

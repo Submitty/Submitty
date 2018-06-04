@@ -2209,9 +2209,9 @@ AND gc_id IN (
             return false;
         }
     }
-    public function getNumberRegradeRequests(){
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests");
-        return ($this->course_db->row()['cnt']-1); 
+    public function getNumberRegradeRequests($gradeable_id){
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE gradeable_id = '$gradeable_id'");
+        return ($this->course_db->row()['cnt']); 
     }
     public function getRegradeDiscussion($thread_id){
         $this->course_db->query("SELECT * FROM regrade_discussion WHERE thread_id=? AND deleted=false ORDER BY timestamp ASC", array($thread_id));
