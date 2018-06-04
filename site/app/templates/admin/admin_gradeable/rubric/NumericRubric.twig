@@ -149,15 +149,15 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             $.each(components, function(i,elem) {
                 if(i < {{ admin_gradeable.getNumNumeric() }}) {
                     var extra_credit = false;
-                    if (elem.upper_clamp > elem.max_value){
-                        addNumeric(elem.title,elem.upper_clamp,true);
+                    if (elem.gc_upper_clamp > elem.gc_max_value){
+                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
                     }
                     else{
-                        addNumeric(elem.title,elem.max_value,false);
+                        addNumeric(elem.gc_title,elem.gc_max_value,false);
                     }
                 }
                 else {
-                    addText(elem.title);
+                    addText(elem.gc_title);
                 }
             });
             $('#numeric_num-items').val({{ admin_gradeable.getNumNumeric() }});
