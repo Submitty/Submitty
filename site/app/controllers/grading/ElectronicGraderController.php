@@ -3,6 +3,7 @@
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\models\Team;
 use app\models\User;
 use app\models\HWReport;
 use \app\libraries\GradeableType;
@@ -352,7 +353,7 @@ class ElectronicGraderController extends GradingController {
                 if ($team->getSize() > 0 && (in_array($team_section, $sections) ||
                                             (isset($_GET['view']) && $_GET['view'] === "all") ||
                                             (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
-                    $student_ids[] = $team->getMembers()[0];
+                    $student_ids[] = $team->getLeaderId();
                 }
                 if ($team->getSize() === 0 && $this->core->getUser()->accessAdmin()) {
                     $empty_teams[] = $team;
@@ -754,9 +755,9 @@ class ElectronicGraderController extends GradingController {
             if ($team) {
                 $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
                 //order teams first by registration section, then by leader id.
-                usort($teams_to_grade, function($a, $b) {
+                usort($teams_to_grade, function(Team $a, Team $b) {
                     if($a->getRegistrationSection() == $b->getRegistrationSection())
-                        return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
+                        return $a->getLeaderId() < $b->getLeaderId() ? -1 : 1;
                     return $a->getRegistrationSection() < $b->getRegistrationSection() ? -1 : 1;
                 });
 
