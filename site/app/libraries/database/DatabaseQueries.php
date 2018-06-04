@@ -497,6 +497,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
+        	str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1)",$orderBy);
             $query = implode(",", array_fill(0, count($sections), "?"));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -802,7 +803,7 @@ LEFT JOIN (
   FROM users
 ) AS u ON u.user_id = g.user_id
 {$where}
-ORDER BY g.sections_registration_id, g.user_id", $params);
+ORDER BY SUBSTRING(g.sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(g.sections_registration_id, '[0-9]+')::INT, -1), g.user_id", $params);
         $user_store = array();
         foreach ($this->course_db->rows() as $row) {
             if ($row['sections_registration_id'] === null) {
@@ -883,7 +884,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getRegistrationSections() {
-        $this->course_db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
+        $this->course_db->query("SELECT * FROM sections_registration ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::INT, -1)");
         return $this->course_db->rows();
     }
 
@@ -1686,6 +1687,13 @@ ORDER BY {$section_key}", $params);
             $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
             $params = array_merge($sections, $params);
         }
+        $orderBy="";
+ 		if($section_key == "registration_section") {
+ 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1)";
+ 		}
+ 		else {
+ 			$orderBy = $section_key;
+ 		}
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -1696,7 +1704,7 @@ WHERE {$sections_query} user_id NOT IN (
   ORDER BY user_id
 )
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderBy}", $params);
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
@@ -1716,6 +1724,14 @@ ORDER BY {$section_key}", $params);
             $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
             $params = array_merge($sections, $params);
         }
+        $orderBy="";
+ 		if($section_key == "registration_section") {
+ 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1)";
+ 		}
+ 		else {
+ 			$orderBy = $section_key;
+ 		}
+
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -1726,7 +1742,7 @@ WHERE {$sections_query} user_id IN (
   ORDER BY user_id
 )
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderBy}", $params);
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
@@ -1956,7 +1972,7 @@ AND gc_id IN (
         ) as gd ON gd.gd_user_id = u.user_id
         {$where}
         GROUP BY u.registration_section
-        ORDER BY u.registration_section", $params);
+        ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1)", $params);
 
         $return = array();
         foreach($this->course_db->rows() as $row) {
