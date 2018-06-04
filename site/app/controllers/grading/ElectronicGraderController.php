@@ -140,6 +140,7 @@ class ElectronicGraderController extends GradingController {
         $num_submitted = array();
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
+        $viewed_grade = 0;
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -1076,6 +1077,8 @@ class ElectronicGraderController extends GradingController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
+        $gradeable->resetUserViewedDate();
+
         if($this->core->getUser()->getGroup() == 4) {
             $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
         }
@@ -1151,6 +1154,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable->saveGradeableData();
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
+        $gradeable->resetUserViewedDate();
     }
 
     public function getMarkDetails() {

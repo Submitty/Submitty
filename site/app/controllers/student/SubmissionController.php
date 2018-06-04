@@ -156,7 +156,7 @@ class SubmissionController extends AbstractController {
                     }
                     $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
                     $late_days_use = max(0, $days_late - $extensions);
-                    if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
+                    if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded()) {
                         $gradeable->updateUserViewedDate();
                     }
                     $canViewWholeGradeable = false;

@@ -6,24 +6,10 @@ use app\views\AbstractView;
 
 class RainbowGradesView extends AbstractView {
     public function showGrades($grade_file) {
-        $return = <<<HTML
-<div class="content">
-    <h3 class="label">Grade Summary</h3>
-HTML;
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
-        if ($display_rainbow_grades_summary && $grade_file !== null) {
-            $return .= <<<HTML
-    {$grade_file}
-HTML;
-        }
-        else {
-            $return .= <<<HTML
-    No grades are available...
-HTML;
-        }
-        $return .= <<<HTML
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("submission/RainbowGrades.twig", [
+            "show_summary" => $display_rainbow_grades_summary && $grade_file !== null,
+            "grade_file" => $grade_file
+        ]);
     }
 }

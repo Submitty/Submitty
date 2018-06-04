@@ -292,7 +292,51 @@ HTML;
 		} else {
 
 			if($this->core->getUser()->getGroup() <= 2){
+				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
+				$merge_thread_list = array();
+				for($i = 0; $i < count($threads); $i++){
+					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
+					$date = date_create($first_post['timestamp']);
+					if($current_thead_date>$date) {
+						array_push($merge_thread_list, $threads[$i]);
+					}
+				}
+
 				$return .= <<<HTML
+				<div class="popup-form" id="merge-threads">
+HTML;
+				if(count($merge_thread_list) == 0) {
+					$return .= <<<HTML
+					Nothing to merge.
+					<a onclick="$('#merge-threads').css('display', 'none');" style='float: right;' class="btn btn-danger">Cancel</a>
+HTML;
+				} else {
+					$return .= <<<HTML
+					<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'merge_thread'))}">
+						Merge current thread into
+						<input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{$currentThread}" data-ays-ignore="true">
+						<select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
+HTML;
+						for($i = 0; $i < count($merge_thread_list); $i++){
+							$first_post = $this->core->getQueries()->getFirstPostForThread($merge_thread_list[$i]["id"]);
+							$return.= <<<HTML
+							 <option value='{$merge_thread_list[$i]["id"]}'>{$merge_thread_list[$i]['title']} ({$merge_thread_list[$i]["id"]})</option>
+HTML;
+						}
+						$return .= <<<HTML
+						</select>
+						<br>
+						<div  style="float: right; width: auto; margin-top: 10px;">
+							<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
+							<input class="btn btn-primary" type="submit" value="Submit" />
+						</div>
+					</form>
+HTML;
+				}
+				$return .= <<<HTML
+				</div>
+
 				<div class="popup-form" id="edit-user-post">
 
 				<h3 id="edit_user_prompt"></h3>
@@ -433,6 +477,13 @@ HTML;
 	            		<br/>
 	            		<div style="margin-bottom:10px;" class="form-group row">
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+HTML;
+					if($this->core->getUser()->getGroup() <= 2){
+						$return .= <<<HTML
+						<a class="btn btn-primary" style="position:relative;float:right;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+HTML;
+					}
+					$return .= <<<HTML
             	</div>
 	            		<div class="form-group row">
 	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
@@ -449,7 +500,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to all" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit Reply to All" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 	            	<br/>
@@ -756,7 +807,7 @@ HTML;
 						</span>
 
 	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit reply to {$visible_username}" class="btn btn-primary" />
+	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit Reply to {$visible_username}" class="btn btn-primary" />
 	            		</div>
 	            	</form>
 HTML;
@@ -820,7 +871,8 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
-					New Category: <textarea id="new_category_text" style="resize:none;" rows="1" cols="25" type="text" size="45" name="new_category" id="new_category" ></textarea> <button type="button" title="Add new category" onclick="addNewCategory();" style="margin-right:10px;" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle fa-1x"></i> Add category </button></span>
+
+					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button></span>
 HTML;
 				}
 				$return .= <<<HTML

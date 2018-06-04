@@ -197,7 +197,6 @@ progress::-webkit-progress-value {
 }
 
 .file-viewer{
-    float: left;
     margin-right: 10px;
     cursor: pointer;
 }

@@ -117,10 +117,22 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users DROP CONSTRAINT users_user_group_check'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ADD CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))'""".format(*variables))
 
+<<<<<<< HEAD
         #Regrade Request system
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_requests" ("id" serial NOT NULL, "gradeable_id" VARCHAR(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL, "student_user_id" VARCHAR(255) NOT NULL, "status" INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'CREATE TABLE "regrade_discussion" ("id" serial NOT NULL, "user_id" varchar(255) NOT NULL,"timestamp" TIMESTAMP NOT NULL,"content" TEXT,"regrade_id" VARCHAR(255) NOT NULL,"deleted" BOOLEAN default false NOT NULL,thread_id INTEGER DEFAULT 0 NOT NULL)'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
 
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_regrade_requests_id_fk" FOREIGN KEY ("thread_id") REFERENCES "regrade_requests"("id")'""".format(settings['database_password'], settings['database_host'], settings['database_user'], db))
+=======
+        # revision of merge thread for discussion forum
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads DROP COLUMN merged_id'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads ADD COLUMN merged_thread_id int DEFAULT '-1''".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY threads ADD COLUMN merged_post_id int DEFAULT '-1''".format(*variables))
+        
+        # To allow delete gradeable
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign DROP CONSTRAINT peer_assign_g_id_fkey'""".format(*variables))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(*variables))
+
+>>>>>>> 199ebda02acd1e1d8281ac4ddd423d0785e9a918
         # add user/database
         print("\n")
