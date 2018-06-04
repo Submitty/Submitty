@@ -127,7 +127,6 @@ class ElectronicGraderController extends GradingController {
         /*
          * we need number of students per section
          */
-
         $no_team_users = array();
         $graded_components = array();
         $graders = array();
@@ -141,6 +140,7 @@ class ElectronicGraderController extends GradingController {
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+        $regrade_requests = $this->core->getQueries()->getNumberRegradeRequests();
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -280,7 +280,7 @@ class ElectronicGraderController extends GradingController {
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests);
     }
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];

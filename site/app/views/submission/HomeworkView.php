@@ -1339,6 +1339,7 @@ HTML;
          // if($this->core->getConfig()->isRegradeEnabled() == false){
         //    return;
         //  }
+          $return="";
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
