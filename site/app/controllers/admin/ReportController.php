@@ -11,7 +11,6 @@ use app\models\Gradeable;
 use app\models\GradeSummary;
 
 /*
-use app\report\HWReportView;
 use app\report\CSVReportView;
 use app\report\GradeSummaryView;
 */
