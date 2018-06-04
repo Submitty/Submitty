@@ -6,6 +6,11 @@ input[readonly] {
     background-color: #999999;
 }
 
+.uneditable-text {
+    color: red;
+    font-style: italic;
+}
+
 select {
     margin-top:7px;
     width: 60px;

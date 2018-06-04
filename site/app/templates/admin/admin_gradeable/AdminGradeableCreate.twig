@@ -38,6 +38,8 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 <input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required"
        value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
 
+    <span class="uneditable-text">(ID cannot be changed after initial creation)</span>
+
 <br />
 
 <!-- Gradeable Type radio buttons (readonly in edit mode) -->
@@ -51,7 +53,9 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     <input type='radio' id="radio_numeric" name="gradeable_type" value="Numeric"
         {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Numeric/Text
 
-    <div id="required_type" style="color:red; display:inline;">(Required)</div>
+    <span id="required_type" style="color:red; display:inline;">(Required)</span>
+
+    <span class="uneditable-text">(Type cannot be changed after initial creation)</span>
 
 <br />
 
@@ -72,6 +76,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
             {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> No
+
+        <span class="uneditable-text">(Teamness cannot be changed after initial creation)</span>
 
         <!-- Team settings (read only in edit mode) -->
         <div id="team_settings">
@@ -114,6 +120,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         <input type="radio" id="repository_radio" name="upload_type" value="repository"
                 {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
+
+        <span class="uneditable-text">(Submission type cannot be changed after initial creation)</span>
 
         <div id="repository">
             <br />
@@ -249,6 +257,12 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     });
 
     $(document).ready(function() {
+
+        {% if action == 'edit' %}
+        $('.uneditable-text').show();
+        {% else %}
+        $('.uneditable-text').hide();
+        {% endif %}
 
         onManualGradingChange();
         $('[name="ta_grading"]').change(onManualGradingChange)
