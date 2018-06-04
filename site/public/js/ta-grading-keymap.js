@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Keyboard shortcut handling
 
-var keymap = {};
+var keymap = [];
 
 window.onkeydown = function(e) {
     if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
@@ -22,10 +22,10 @@ window.onkeydown = function(e) {
         codeName = "Alt " + codeName;
     }
 
-    if (keymap.hasOwnProperty(codeName)) {
-        keymap[codeName].fns.forEach(function (fn) {
-            fn(e);
-        });
+    for (var i = 0; i < keymap.length; i++) {
+        if (keymap[i].code === codeName) {
+            keymap[i].fn(e);
+        }
     }
 };
 
@@ -37,13 +37,11 @@ window.onkeydown = function(e) {
  * @param {Function} fn Function / callable
  */
 function registerKeyHandler(name, code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        keymap[code].fns.append(fn);
-    } else {
-        keymap[code] = {
-            fns: [fn]
-        };
-    }
+    keymap.push({
+        name: name,
+        code: code,
+        fn: fn
+    });
 }
 
 /**
@@ -52,12 +50,29 @@ function registerKeyHandler(name, code, fn) {
  * @param fn Function / callable
  */
 function unregisterKeyHandler(code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        if (keymap[code].fns.indexOf(fn) !== -1) {
-            //Delete the function from the list
-            keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
+    for (var i = 0; i < keymap.length; i++) {
+        if (keymap[i].code === code || keymap[i].fn === fn) {
+            //Delete 1 at i
+            keymap.splice(i, 1);
+            i--;
         }
-    } else {
-        //Don't care if this key doesn't exist
     }
+}
+
+function generateHotkeysList() {
+    var parent = $("#hotkeys-list");
+    parent.children().remove();
+
+    for (var i = 0; i < keymap.length; i++) {
+        var hotkey = keymap[i];
+
+        parent.append(
+            "<tr><td>" + hotkey.name + "</td><td>" + hotkey.code  + "</td></tr>"
+        )
+    }
+}
+
+function showSettings() {
+    generateHotkeysList();
+    $("#settings-popup").show();
 }

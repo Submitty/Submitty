@@ -887,8 +887,8 @@ table .instructor .two-options{
 }
 
 .popup-form div {
-    width: 30%;
-    display: inline-block;
+    /*width: 30%;*/
+    /*display: inline-block;*/
     vertical-align: top;
     padding-right: 10px;
     padding-bottom: 10px;

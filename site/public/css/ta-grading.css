@@ -102,6 +102,11 @@
     background-color: rgba(0, 0, 0, 0.4);
 }
 
+.icon-selected.fa-wrench {
+    box-shadow: 0px 0px 3px 3px #bbbbbb;
+    background-color: #bbbbbb;
+}
+
 .icon-refresh{
     background: url('../img/refresh-page-option.png') no-repeat;
     background-size: 100%;
@@ -386,4 +391,27 @@ tr.is_publish {
     margin-bottom: 5px;
     font-size: 17px;
     padding: 16px;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ccc;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:first-child {
+    border-top: none;
+}
+
+#hotkeys-list tr:last-child {
+    border-bottom: none;
+}
+
+#hotkeys-list td {
+    padding: 4px 0;
 }

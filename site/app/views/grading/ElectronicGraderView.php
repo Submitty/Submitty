@@ -994,6 +994,7 @@ HTML;
 HTML;
         }
         $return .= <<<HTML
+    <i title="Show Grading Settings" class="fa fa-wrench icon-header" onclick="showSettings();"></i>
 </div>
 
 <div class="progress_bar">
@@ -1629,4 +1630,7 @@ HTML;
         return $return;
     }
     
+    public function popupSettings() {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsPanel.twig");
+    }
 }
