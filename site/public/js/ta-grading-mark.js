@@ -667,7 +667,29 @@ function calculatePercentageTotal() {
     total = Math.max(total, 0);
     earned = Math.max(earned, 0);
 
-    $("#score_total").html(earned + " / " + parseFloat(autoTotal + total) + "&emsp;&emsp;&emsp;" + " AUTO-GRADING: " + autoEarned + "/" + autoTotal);
+    updateBadge($("#grading_total"), earned, total);
+    updateBadge($("#autograding_total"), autoEarned, autoTotal);
+    updateBadge($("#score_total"), (earned + autoEarned), (total + autoTotal));
+}
+
+function updateBadge(badge, current, total) {
+    if (badge.length === 0) {
+        return;
+    }
+
+    badge.text(current + " / " + total);
+
+    if (current === "" || isNaN(parseFloat(current))) {
+        badge[0].style.backgroundColor = "#999";
+    } else if (current > total) {
+        badge[0].style.backgroundColor = "#006600";
+    } else if (current === total) {
+        badge[0].style.backgroundColor = "#006600";
+    } else if (current > 0) {
+        badge[0].style.backgroundColor = "#eac73d";
+    } else {
+        badge[0].style.backgroundColor = "#c00000";
+    }
 }
 
 /**
