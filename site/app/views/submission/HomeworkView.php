@@ -100,9 +100,9 @@ HTML;
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
-            $info.= " but your instructor specified that no late days may be used for this assignment.";
+            $info.= "<br> but your instructor specified that no late days may be used for this assignment.";
           } else {
-            $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+            $info.= "<br> but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
         }
 
@@ -1234,7 +1234,7 @@ HTML;
       $existsStaffPost = false;
       foreach ($threads as $thread) {
         if($this->core->getQueries()->isStaffPost($thread['user_id'])) $existsStaffPost = true;
-        break;
+      //  break;
       }
       $return = <<<HTML
       <div class = "sub">
@@ -1302,8 +1302,8 @@ HTML;
                 <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
                 placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
                 <br style = "margin-bottom: 10px;">
-                <input type="submit" value="submit" class="btn btn-default" style="margin: 15px;">
-                <input type="button" id = "cancelRegrade" value="cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
+                <input type="submit" value="Submit" class="btn btn-default" style="margin: 15px;">
+                <input type="button" id = "cancelRegrade" value="Cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
               </div>
             </form>
           </div>
@@ -1339,6 +1339,7 @@ HTML;
          // if($this->core->getConfig()->isRegradeEnabled() == false){
         //    return;
         //  }
+          $return = "";
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
@@ -1362,13 +1363,13 @@ HTML;
               $first = false;                                      
             }                                      
             $function_date = 'date_format';                                      
-            $$return = <<<HTML
+            $return .= <<<HTML
             <div style="margin-top: 20px ">                                       
               <div class = '$class' style="padding:20px;">                                       
                 <p>{$content}</p>                                      
                 <hr>                                       
                 <div style="float:right">                                      
-                  <b>{$name}</b> &nbsp                                       
+                  <b>{$name}</b> &nbsp;                                       
                 {$function_date($date,"m/d/Y g:i A")}                                      
                 </div>                                       
             </div>                                       

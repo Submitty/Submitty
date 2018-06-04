@@ -1066,9 +1066,9 @@ HTML;
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
 HTML;
             if($gradeable->getRegradeStatus() !== 0){
-                $class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
+                //$class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
                 $return .= <<<HTML
-                <input type="button" class ="$class" value="!" onclick="showRequestDiscussion()">
+                <i title="Show/Hide Regrade Information (Press X)" class="fa fa-hand-paper-o icon-header" onclick="toggleRegrade(); updateCookies();"></i>
 HTML;
             }
         }
@@ -1787,16 +1787,17 @@ HTML;
 
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-
+        $setRegradeVisible="";
+        if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())!=0){
+            $setRegradeVisible="display: none;";
+        }
         $return .= <<<HTML
 </div>
-
-<div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
+<div id="regrade_info" class = "draggable rubric_panel" style="{$setRegradeVisible} right: 15px; bottom: 40px;width: 48%; height: 30%">
         <div class = "draggable_content">
         <div class = "inner-container" style="padding:20px;">
-                <input type="button" class = "btn btn-default" style="float:right; margin: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
 HTML;
-        //        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
                 $return .= <<<HTML
         </div>

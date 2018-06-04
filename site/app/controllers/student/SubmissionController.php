@@ -102,6 +102,10 @@ class SubmissionController extends AbstractController {
     }
 
     private function deleteRequest(){
+        if($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()){
+            $this->core->addErrorMessage("You do not have permission to delete regrade requests");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
