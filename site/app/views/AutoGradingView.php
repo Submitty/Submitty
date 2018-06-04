@@ -564,7 +564,7 @@ HTML;
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
             </div>
-            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Show my late days information</a>
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late_table'))}">Show my late days information</a>
             <div class = "box">
                 <div class="box-title">
                     <span class="badge {$background}" style="float: left">{$score} / {$maxScore}</span>
