@@ -27,9 +27,15 @@ function eventToKeyCode(e) {
     return codeName;
 }
 
-window.onkeydown = function(e) {
+window.onkeyup = function(e) {
     if (remapping.active) {
         remapFinish(e);
+        return;
+    }
+};
+
+window.onkeydown = function(e) {
+    if (remapping.active) {
         return;
     }
 
@@ -80,6 +86,14 @@ function showSettings() {
     $("#settings-popup").show();
 }
 
+function hideSettings() {
+    if (remapping.active) {
+        return;
+    }
+
+    $('#settings-popup').hide();
+}
+
 Twig.twig({
     id: "HotkeyList",
     href: "/templates/grading/settings/HotkeyList.twig",
@@ -97,10 +111,19 @@ function generateHotkeysList() {
 }
 
 function remapHotkey(i) {
+    if (remapping.active) {
+        return;
+    }
+
     var button = $("#remap-" + i);
     button.text("Enter Key...");
     remapping.active = true;
     remapping.index = i;
+
+    $(".remap-button").attr("disabled", "disabled");
+    $("#settings-close").attr("disabled", "disabled");
+    button.attr("disabled", null);
+    button.addClass("btn-success");
 }
 
 function remapFinish(event) {
@@ -111,4 +134,7 @@ function remapFinish(event) {
     }
     remapping.active = false;
     generateHotkeysList();
+
+    $(".remap-button").attr("disabled", null);
+    $("#settings-close").attr("disabled", null);
 }
