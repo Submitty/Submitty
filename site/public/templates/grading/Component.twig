@@ -5,11 +5,11 @@
     {# Title bar #}
     <div class="box-title">
 
-        <span id="gradebar-{{ c_index }}" style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1" class="badge">
+        <span id="gradebar-{{ c_index }}" style="white-space:nowrap; vertical-align:middle; text-align:center;" class="badge">
             ? / ?
         </span>
 
-        <span colspan="3" data-changebg="true">
+        <span data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
             <b>{{ component.name }}</b>
 
@@ -22,7 +22,7 @@
             <span style="float: right;">
                 {% if display_verify_user %}
                     <span style="display: inline; color: red;">
-                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}')" value = "Verify Grader"/>
+                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}'); event.stopPropagation();" value = "Verify Grader"/>
                     </span>
                 {% endif %}
                 <span id="graded-by-{{ c_index }}" style="font-style: italic; padding-right: 10px;">
@@ -51,7 +51,7 @@
             {% endif %}
         </span>
         <span style="float: right;">
-            <span id="save-mark-{{ c_index }}" style="cursor: pointer;  display: none; display: none; width: 5%;" colspan="0" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+            <span id="save-mark-{{ c_index }}" style="cursor: pointer; display: none; width: 5%;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
         </span>
 
         <span id="student_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
@@ -72,7 +72,7 @@
 
         {# Summary text #}
         <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
-            <span style="width:98%;" colspan="4">
+            <span style="width:98%;">
                 <div id="rubric-{{ c_index }}">
                     <span id="rubric-textarea-{{ c_index }}" name="comment-{{ c_index }}" rows="4" style="width:95%; height:100%; min-height:20px; font-family: Source Sans Pro;  float:left; cursor: pointer;">...</span>
                 </div>
@@ -97,7 +97,7 @@
     {# Add new mark #}
     <div id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
         {# todo: peer grading #}
-        <span colspan="4">
+        <span>
             <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
             Add New Common Mark</span>
         </span>
@@ -107,13 +107,13 @@
     {# Custom mark #}
     <div class="box" id="mark_custom_id-{{ c_index }}" name="mark_custom_{{ c_index }}" style="display: none;" data-changedisplay1="true">
         <div class="box-title">
-            <span colspan="1" style="text-align: center; white-space: nowrap;">
+            <span style="text-align: center; white-space: nowrap;">
                 <span onclick="event.stopPropagation();">
                     <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg" name="mark_icon_{{ c_index }}_custom" id="mark_icon_custom-{{ c_index }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>&nbsp;
                 </span>
                 <input name="mark_points_custom_{{ c_index }}" id="mark_points_custom-{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" value="{{ component.score }}" style="resize:none; width: 50px;">
             </span>
-            <span colspan="3" style="position: relative; white-space: nowrap;">
+            <span style="position: relative; white-space: nowrap;">
                 Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);" onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" cols="120" rows="1" placeholder="Custom message for student..." style="width: calc(100% - 165px); resize:none;">{{ component.comment }}</textarea>
             </span>
         </div>
