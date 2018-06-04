@@ -566,30 +566,15 @@ function updateProgressPoints(question_num) {
     var max_points = parseFloat(component.max_value);
     var summary_text = "Click me to grade!";
 
+    updateBadge($('#gradebar-' + question_num), current_points, max_points);
 
     if(current_points=="None Selected"){
-        $('#grade-' + question_num)[0].innerHTML = "";     
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
-        $('#gradebar-' + question_num)[0].style.backgroundColor = "#999";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
     }
     else{
-        $('#grade-' + question_num)[0].innerHTML = current_points;
         $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
         $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
-        //extra credit
-        if(current_points > max_points){
-            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
-        }
-        else if(current_points == max_points){
-            $('#gradebar-' + question_num)[0].style.backgroundColor = "#006600";
-        }
-        else if(current_points > 0){
-            $('#gradebar-' + question_num)[0].style.backgroundColor = "#eac73d";
-        }
-        else{
-            $('#gradebar-' + question_num)[0].style.backgroundColor = "#c00000";
-        }
 
         summary_text = "";
         for (var i = 0; i < component.marks.length; i ++) {
@@ -678,17 +663,18 @@ function updateBadge(badge, current, total) {
     }
 
     badge.text(current + " / " + total);
+    badge.removeClass("green-background yellow-background red-background");
 
-    if (current === "" || isNaN(parseFloat(current))) {
-        badge[0].style.backgroundColor = "#999";
-    } else if (current > total) {
-        badge[0].style.backgroundColor = "#006600";
-    } else if (current === total) {
-        badge[0].style.backgroundColor = "#006600";
-    } else if (current > 0) {
-        badge[0].style.backgroundColor = "#eac73d";
-    } else {
-        badge[0].style.backgroundColor = "#c00000";
+    if (!isNaN(parseFloat(current))) {
+        if (current > total) {
+            badge.addClass("green-background");
+        } else if (current === total) {
+            badge.addClass("green-background");
+        } else if (current > 0) {
+            badge.addClass("yellow-background");
+        } else {
+            badge.addClass("red-background");
+        }
     }
 }
 
@@ -923,7 +909,6 @@ function saveMark(num, sync, successCallback, errorCallback) {
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+num+']').val();
 
     // Updates the total number of points and text
-    var current_question_num  = $('#grade-' + num);
     var current_question_text = $('#rubric-textarea-' + num);
     var component = getComponent(num);
     
@@ -1004,8 +989,6 @@ function saveMark(num, sync, successCallback, errorCallback) {
         } else if(ungraded || (overwrite === "true")) {
             //Just graded it
             gradedByElement.text("Graded by " + grading_data.your_user_id + "!");
-            var question_points = parseFloat(current_question_num[0].innerHTML);
-            var max_points = parseFloat(component.max_value);
         }
 
         gradedByElement.show();
