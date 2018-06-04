@@ -275,6 +275,7 @@ class ElectronicGraderController extends GradingController {
                         }
                     }
                 }
+                
             }
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());

@@ -1796,7 +1796,7 @@ HTML;
         <div class = "inner-container" style="padding:20px;">
                 <input type="button" class = "btn btn-default" style="float:right; margin: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
 HTML;
-        //        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
                 $return .= <<<HTML
         </div>

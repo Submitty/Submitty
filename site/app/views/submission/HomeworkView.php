@@ -1362,7 +1362,7 @@ HTML;
               $first = false;                                      
             }                                      
             $function_date = 'date_format';                                      
-            $$return = <<<HTML
+            $return = <<<HTML
             <div style="margin-top: 20px ">                                       
               <div class = '$class' style="padding:20px;">                                       
                 <p>{$content}</p>                                      
