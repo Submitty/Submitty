@@ -647,7 +647,7 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            conn.execute(table.insert(), sections_registration_id=str(section))
+            conn.execute(table.insert(), sections_registration_id=section)
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", metadata, autoload=True)
@@ -679,7 +679,7 @@ class Course(object):
                                   course=self.code,
                                   user_id=user.get_detail(self.code, "id"),
                                   user_group=user.get_detail(self.code, "group"),
-                                  registration_section=str(reg_section),
+                                  registration_section=reg_section,
                                   manual_registration=user.get_detail(self.code, "manual"))
             update = users_table.update(values={
                 users_table.c.rotating_section: bindparam('rotating_section'),
@@ -696,7 +696,7 @@ class Course(object):
                 for grading_registration_section in grading_registration_sections:
                     conn.execute(reg_table.insert(),
                                  user_id=user.get_detail(self.code, "id"),
-                                 sections_registration_id=str(grading_registration_section))
+                                 sections_registration_id=grading_registration_section)
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -790,7 +790,7 @@ class Course(object):
                         conn.execute(gradeable_teams_table.insert(),
                                      team_id=unique_team_id,
                                      g_id=gradeable.id,
-                                     registration_section=str(reg_section),
+                                     registration_section=reg_section,
                                      rotation_section=None)
                         conn.execute(teams_table.insert(),
                                      team_id=unique_team_id, 
