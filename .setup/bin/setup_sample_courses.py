@@ -847,6 +847,12 @@ class Course(object):
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+                        # only create these directories if we're actually going to put something in them
+                        if not os.path.exists(gradeable_path):
+                            os.makedirs(gradeable_path)
+                            os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+                        if not os.path.exists(submission_path):
+                            os.makedirs(submission_path)
                         active_version = random.choice(range(1, versions_to_submit+1))
                         if team_id is not None:
                             json_history = {"active_version": active_version, "history": [], "team_history": []}
