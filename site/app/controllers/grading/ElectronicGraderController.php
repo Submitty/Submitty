@@ -821,8 +821,12 @@ class ElectronicGraderController extends GradingController {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
         }
         if(!$peer && $team) {
+            /* @var Team[] $teams_assoc */
+            $teams_assoc = [];
+
             foreach ($teams_to_grade as $team_id) {
-                $user_ids_to_grade[] = $team_id->getMembers()[0];
+                $teams_assoc[$team_id->getId()] = $team_id;
+                $user_ids_to_grade[] = $team_id->getId();
             }
         }
         
@@ -830,6 +834,7 @@ class ElectronicGraderController extends GradingController {
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
+
         if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
             $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
@@ -873,9 +878,12 @@ class ElectronicGraderController extends GradingController {
           }
         }
 
-        
+        if ($team) {
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$who_id]->getLeaderId());
+        } else {
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        }
 
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         if ($gradeable === NULL){
           //This will trigger if a full access grader attempts to specifically access a non-existant student.
           $this->core->addErrorMessage("ERROR: The requested student does not exist.");
