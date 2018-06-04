@@ -996,7 +996,7 @@ function saveMark(num, sync, successCallback, errorCallback) {
             gradedByElement.text("Ungraded!");
             component.grader = null;
         } else {
-            if (data.modified && (ungraded || overwrite === "true")) {
+            if (component.grader === null || (data.modified && (ungraded || overwrite === "true"))) {
                 if (component.grader === null) {
                     component.grader = {
                         id: ""
