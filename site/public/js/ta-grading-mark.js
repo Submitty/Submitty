@@ -657,6 +657,12 @@ function calculatePercentageTotal() {
     updateBadge($("#score_total"), (earned + autoEarned), (total + autoTotal));
 }
 
+/**
+ * Update text and color for a grading badge
+ * @param badge Badge jQuery element
+ * @param current Current point value
+ * @param total Total point value
+ */
 function updateBadge(badge, current, total) {
     if (badge.length === 0) {
         return;
