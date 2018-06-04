@@ -219,7 +219,8 @@ HTML;
 	}
 	if($thread_count > 0) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
-		$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
+		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
+		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
@@ -236,14 +237,14 @@ HTML;
 	$onChange = '';
 	if($thread_count > 0) {
 		$onChange = <<<HTML
-		onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});"
+		onchange="modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}');"
 HTML;
 	}
 	$return .= <<<HTML
 		<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
 		<label for="thread_category">Category:</label>
 	  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
-	  	<option value="" selected>None</option>
+	  	<option value="" selected>All</option>
 HTML;
 	    for($i = 0; $i < count($categories); $i++){
 	    	$return .= <<<HTML
@@ -365,7 +366,7 @@ HTML;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoryId[0]["category_id"]);
+				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 
 					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -540,14 +541,14 @@ HTML;
 		return $return;
 	}
 
-	public function showAlteredDislpayList($threads, $filtering, $thread_id, $category_id){
+	public function showAlteredDislpayList($threads, $filtering, $thread_id, $categories_ids){
 		$tempArray = array();
 		$threadAnnouncement = false;
 		$activeThreadTitle = "";
-		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $category_id);
+		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids);
 	}
 
-	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_category_id){
+	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids){
 					$return = "";
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
@@ -561,7 +562,9 @@ HTML;
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						$date = date_create($first_post['timestamp']);
 						$class = "thread_box";
-						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $current_category_id == $thread["category_id"]) {
+						// $current_categories_ids should be subset of $thread["categories_ids"]
+						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
+						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
 							$class .= " active";
 							$used_active = true;
 							$activeThreadTitle = $thread["title"];
@@ -621,11 +624,20 @@ HTML;
 HTML;
 						}
 
-						$category_desc = htmlentities($thread["category_desc"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$categories_desc = array();
+						foreach ($thread["categories_desc"] as $category_desc) {
+							$categories_desc[] = htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						}
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-						<span class="label_forum label_forum-default">{$thread["category_desc"]}</span>
+HTML;
+						foreach ($categories_desc as $category_desc) {
+							$return .= <<<HTML
+							<span class="label_forum label_forum-default">{$category_desc}</span>
+HTML;
+						}
+						$return .= <<<HTML
 						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
@@ -825,12 +837,15 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.5/chosen.min.css" />
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.5/chosen.jquery.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('thread_content');
 				$("form").areYouSure();
+				$("#cat").chosen({width: "30%"});
 			});
 		 </script>
 
@@ -879,6 +894,19 @@ HTML;
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+HTML;
+					$categories = $this->core->getQueries()->getCategories();
+					$return .= <<<HTML
+					<label for="cat">Categories</label>
+					<select style="margin-right:10px;" id="cat" name="cat[]" data-placeholder="Select Categories" class="form-control" multiple="multiple">
+HTML;
+					for($i = 0; $i < count($categories); $i++){
+						$return .= <<<HTML
+							<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
+HTML;
+					}
+					$return .= <<<HTML
+				    </select>
             	</div>
             	<div class="form-group row">
             		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:40vmin;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
@@ -907,21 +935,8 @@ HTML;
 
 				}
 
-				$categories = $this->core->getQueries()->getCategories();
 				$return .= <<<HTML
-				<label for="cat">Category</label>
-			  	<select style="margin-right:10px;" id="cat" name="cat" class="form-control" required>
-			  	<option value="" selected>None</option>
-HTML;
-			    for($i = 0; $i < count($categories); $i++){
-			    	$return .= <<<HTML
-			    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
-HTML;
-			    }    
-			        
-			    $return .= <<<HTML
-			    </select>
-				<input type="submit" style="display:inline-block;" name="post" value="Submit Post" class="btn btn-primary" />
+			    <input type="submit" style="display:inline-block;" name="post" value="Submit Post" class="btn btn-primary" />
 				</span>
             	</div>
 

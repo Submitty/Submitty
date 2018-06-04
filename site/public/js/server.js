@@ -1206,7 +1206,7 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
-function modifyThreadList(currentThreadId, currentCategoryId){
+function modifyThreadList(currentThreadId, currentCategoriesId){
     var category_value = $( "#thread_category option:selected").val();
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
@@ -1215,7 +1215,7 @@ function modifyThreadList(currentThreadId, currentCategoryId){
             data: {
                 thread_category: category_value,
                 currentThreadId: currentThreadId,
-                currentCategoryId: currentCategoryId
+                currentCategoriesId: currentCategoriesId
             },
             success: function(r){
                var x = JSON.parse(r).html;
