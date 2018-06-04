@@ -76,7 +76,9 @@ class AdminGradeableController extends AbstractController {
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
-        $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
+
+        // Be sure to have this array start at 1 since instructor's permission level is 1
+        $graders_from_usertypes = array(1=>$graders_from_usertype1, 2=>$graders_from_usertype2, 3=>$graders_from_usertype3);
         $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
         $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
         // $admin_gradeable->setInheritTeamsList($this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams());
