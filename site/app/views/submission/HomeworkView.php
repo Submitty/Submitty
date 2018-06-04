@@ -100,9 +100,9 @@ HTML;
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
-            $info.= "<br>but your instructor specified that no late days may be used for this assignment.";
+            $info.= " but your instructor specified that no late days may be used for this assignment.";
           } else {
-            $info.= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+            $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
         }
 
@@ -1196,12 +1196,11 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0) {
-            // If the student does not submit anything, the only message will be "No submissions for this assignment."
+        if ($gradeable->taGradesReleased()) {
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if ($gradeable->beenTAgraded()) {
+            if ($gradeable->hasGradeFile()) {
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;
@@ -1210,9 +1209,10 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
+    <h3 class="label">TA grade not available</h3>
 HTML;
             }
+            if($this->core->getConfig()->isRegradeEnabled() == true){
             $return .= <<<HTML
 </div>
   <div class="content"> 
@@ -1223,6 +1223,7 @@ HTML;
     $return .= <<<HTML
   </div>
 HTML;
+           }
         }
 
         return $return;
@@ -1335,9 +1336,9 @@ HTML;
       return $return;
     }
     public function showRegradeDiscussion($gradeable){
-        $return = <<<HTML
-        <div style="margin-top: 20px ">
-HTML;
+         // if($this->core->getConfig()->isRegradeEnabled() == false){
+        //    return;
+        //  }
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
@@ -1361,14 +1362,15 @@ HTML;
               $first = false;                                      
             }                                      
             $function_date = 'date_format';                                      
-            $return .= <<<HTML                                       
-            <div class = '$class' style="padding:20px;">                                       
-              <p>{$content}</p>                                      
-              <hr>                                       
-              <div style="float:right">                                      
-                <b>{$name}</b> &nbsp                                       
+            $$return = <<<HTML
+            <div style="margin-top: 20px ">                                       
+              <div class = '$class' style="padding:20px;">                                       
+                <p>{$content}</p>                                      
+                <hr>                                       
+                <div style="float:right">                                      
+                  <b>{$name}</b> &nbsp                                       
                 {$function_date($date,"m/d/Y g:i A")}                                      
-              </div>                                       
+                </div>                                       
             </div>                                       
 HTML;
           }

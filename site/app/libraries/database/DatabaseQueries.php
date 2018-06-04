@@ -2234,3 +2234,7 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = '$thread_id'");
         $this->course_db->query("DELETE FROM regrade_requests WHERE id = '$thread_id'");
 }
+    public function deleteGradeable($g_id) {
+        $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
+}
+}
