@@ -564,11 +564,7 @@ HTML;
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
             </div>
-                <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p>
-                <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
-                <p>Remaining number of late days: {$lateDayData['remaining_days']}</p>
-                <p>Submission Status: <i>{$lateDayData['status']}</i></p>
-            </div>
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Show my late days information</a>
             <div class = "box">
                 <div class="box-title">
                     <span class="badge {$background}" style="float: left">{$score} / {$maxScore}</span>
