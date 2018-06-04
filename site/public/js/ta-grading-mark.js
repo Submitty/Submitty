@@ -668,10 +668,10 @@ function updateBadge(badge, current, total) {
         return;
     }
 
-    badge.text(current + " / " + total);
     badge.removeClass("green-background yellow-background red-background");
 
     if (!isNaN(parseFloat(current))) {
+        badge.text(current + " / " + total);
         if (current > total) {
             badge.addClass("green-background");
         } else if (current === total) {
@@ -681,6 +681,8 @@ function updateBadge(badge, current, total) {
         } else {
             badge.addClass("red-background");
         }
+    } else {
+        badge.html("&ndash; / " + total)
     }
 }
 
