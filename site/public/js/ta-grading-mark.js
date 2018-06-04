@@ -994,9 +994,18 @@ function saveMark(num, sync, successCallback, errorCallback) {
         if (all_false === true) {
             //We've reset
             gradedByElement.text("Ungraded!");
-        } else if(ungraded || (overwrite === "true")) {
+            component.grader = null;
+        } else {
+            if (data.modified && (ungraded || overwrite === "true")) {
+                if (component.grader === null) {
+                    component.grader = {
+                        id: ""
+                    };
+                }
+                component.grader.id = grading_data.your_user_id;
+            }
             //Just graded it
-            gradedByElement.text("Graded by " + grading_data.your_user_id + "!");
+            gradedByElement.text("Graded by " + component.grader.id + "!");
         }
 
         gradedByElement.show();

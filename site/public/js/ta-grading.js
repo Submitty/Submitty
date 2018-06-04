@@ -258,9 +258,8 @@ function updateCookies(){
             var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
         }
         var top_pos = current_mark.offsetTop;
-        var rubric_table = document.getElementById('rubric-table');
-        rubric_table = rubric_table.parentElement;
-        top_pos += rubric_table.offsetTop;
+        var rubric_box = document.getElementById('grading-box');
+        top_pos += rubric_box.offsetTop;
         document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";

@@ -83,7 +83,7 @@
     {# /Title bar #}
 
     {# Marks table #}
-    <table class="box" id="marks-parent-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    <table class="ta-rubric-table" id="marks-parent-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
     {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
     {#
         {% for mark in component.marks %}
@@ -95,7 +95,7 @@
     {# /Marks table #}
 
     {# Add new mark #}
-    <div id="marks-extra-{{ c_index }}" style="display: none; background-color: #e6e6e6" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    <div id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
         {# todo: peer grading #}
         <span colspan="4">
             <span style="cursor: pointer;" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
