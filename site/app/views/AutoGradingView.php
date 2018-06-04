@@ -5,7 +5,6 @@ namespace app\views;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\LateDaysCalculation;
 
 class AutogradingView extends AbstractView {
     /**
@@ -547,9 +546,6 @@ HTML;
             $background = "red-background";
         }
         $comment = (!empty($gradeable->getOverallComment())) ? '<hr>'. "Overall note from Grader: <span class='gradeable_comment'>" . htmlentities($gradeable->getOverallComment()) . "</span>" : "";
-        //late day data
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $lateDayData = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $totalTitle = "Total";
@@ -568,9 +564,6 @@ HTML;
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
             </div>
-            <div class = "box half" style="float:right; width: 40%;">
-                <p>Maximum number of late days allowed on this assignment: {$gradeable->getAllowedLateDays()}</p>
-                <p>Number of days late (before extensions): {$gradeable->getDaysLate()}</p>
                 <p>Late Days used in previous assignments: {$lateDayData['late_days_used']}</p>
                 <p>Number of late days used on this assignment: {$lateDayData['late_days_charged']} </p>
                 <p>Remaining number of late days: {$lateDayData['remaining_days']}</p>

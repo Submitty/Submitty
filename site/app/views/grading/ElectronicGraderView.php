@@ -1936,7 +1936,7 @@ HTML;
         return $return;
     }
 
-    private function makeTable($user_id, $gradeable, &$status){
+    private function makeTable($user_id, $gradeable, &$status_for_this_assignment){
         $return = <<<HTML
         <h3>Overall Late Day Usage for {$user_id}</h3><br/>
         <table>
@@ -1956,16 +1956,17 @@ HTML;
             <tbody>
 HTML;
         $total_late_used = 0;
-        $status = "Good";
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
             $g->calculateLateDays($total_late_used);
             $class = "";
+            $status= "good";
             if($g->getId() == $gradeable->getId()){
                 $class = "class='yellow-background'";
                 $status = $g->getLateStatus();
+                $status_for_this_assignment = $g->getLateStatus();
             }
             if(!$g->hasSubmitted()){
                 $status = "No submission";
