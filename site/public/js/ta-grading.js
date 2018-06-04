@@ -281,69 +281,6 @@ function updateCookies(){
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
-//-----------------------------------------------------------------------------
-// Keyboard shortcut handling
-
-var keymap = {};
-
-window.onkeydown = function(e) {
-    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
-
-    var codeName = e.code;
-
-    //Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
-    if (e.shiftKey && (e.code !== "ShiftLeft" && e.code !== "ShiftRight")) {
-        codeName = "Shift " + codeName;
-    }
-    if (e.metaKey && (e.code !== "MetaLeft" && e.code !== "MetaRight")) {
-        codeName = "Meta " + codeName;
-    }
-    if (e.ctrlKey && (e.code !== "ControlLeft" && e.code !== "ControlRight")) {
-        codeName = "Control " + codeName;
-    }
-    if (e.altKey && (e.code !== "AltLeft" && e.code !== "AltRight")) {
-        codeName = "Alt " + codeName;
-    }
-
-    if (keymap.hasOwnProperty(codeName)) {
-        keymap[codeName].fns.forEach(function (fn) {
-            fn(e);
-        });
-    }
-};
-
-/**
- * Register a function to be called when a key is pressed.
- * @param code Keycode, e.g. "KeyA" or "ArrowUp" or "Ctrl KeyR", see KeyboardEvent.code
- *             Note the alphabetical order of modifier keys: Alt Control Meta Shift
- * @param fn Function / callable
- */
-function registerKeyHandler(code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        keymap[code].fns.append(fn);
-    } else {
-        keymap[code] = {
-            fns: [fn]
-        };
-    }
-}
-
-/**
- * Unregister a key handler. Arguments are equivalent to registerKeyHandler()
- * @param code Keycode, see registerKeyHandler()
- * @param fn Function / callable
- */
-function unregisterKeyHandler(code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        if (keymap[code].fns.indexOf(fn) !== -1) {
-            //Delete the function from the list
-            keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
-        }
-    } else {
-        //Don't care if this key doesn't exist
-    }
-}
-
 function changeEditorStyle(newStyle){
     if(newStyle === 'style_light'){
         localStorage.setItem("codeDisplayStyle", "light");
@@ -377,10 +314,10 @@ function gotoNextStudent() {
 }
 
 //Navigate to the prev / next student buttons
-registerKeyHandler("ArrowLeft", function() {
+registerKeyHandler("Previous Student", "ArrowLeft", function() {
     gotoPrevStudent();
 });
-registerKeyHandler("ArrowRight", function() {
+registerKeyHandler("Next Student", "ArrowRight", function() {
     gotoNextStudent();
 });
 
@@ -462,23 +399,23 @@ function resetModules() {
 }
 
 
-registerKeyHandler("KeyA", function() {
+registerKeyHandler("Toggle Autograding Panel", "KeyA", function() {
     toggleAutograding();
     updateCookies();
 });
-registerKeyHandler("KeyG", function() {
+registerKeyHandler("Toggle Rubric Panel", "KeyG", function() {
     toggleRubric();
     updateCookies();
 });
-registerKeyHandler("KeyO", function() {
+registerKeyHandler("Toggle Submissions Panel", "KeyO", function() {
     toggleSubmissions();
     updateCookies();
 });
-registerKeyHandler("KeyS", function() {
+registerKeyHandler("Toggle Student Info Panel", "KeyS", function() {
     toggleInfo();
     updateCookies();
 });
-registerKeyHandler("KeyR", function() {
+registerKeyHandler("Reset Panel Positions", "KeyR", function() {
     resetModules();
     updateCookies();
 });
@@ -486,7 +423,7 @@ registerKeyHandler("KeyR", function() {
 //-----------------------------------------------------------------------------
 // Show/hide components
 
-registerKeyHandler('ArrowDown', function(e) {
+registerKeyHandler("Open Next Component", 'ArrowDown', function(e) {
     var current = findCurrentOpenedMark();
     var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
@@ -504,7 +441,7 @@ registerKeyHandler('ArrowDown', function(e) {
     e.preventDefault();
 });
 
-registerKeyHandler('ArrowUp', function(e) {
+registerKeyHandler("Open Previous Component", 'ArrowUp', function(e) {
     var current = findCurrentOpenedMark();
     var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
@@ -525,31 +462,31 @@ registerKeyHandler('ArrowUp', function(e) {
 //-----------------------------------------------------------------------------
 // Selecting marks
 
-registerKeyHandler('Digit1', function() {
+registerKeyHandler("Select Mark 1", 'Digit1', function() {
     selectCurrentMarkCheck(0);
 });
-registerKeyHandler('Digit2', function() {
+registerKeyHandler("Select Mark 2", 'Digit2', function() {
     selectCurrentMarkCheck(1);
 });
-registerKeyHandler('Digit3', function() {
+registerKeyHandler("Select Mark 3", 'Digit3', function() {
     selectCurrentMarkCheck(2);
 });
-registerKeyHandler('Digit4', function() {
+registerKeyHandler("Select Mark 4", 'Digit4', function() {
     selectCurrentMarkCheck(3);
 });
-registerKeyHandler('Digit5', function() {
+registerKeyHandler("Select Mark 5", 'Digit5', function() {
     selectCurrentMarkCheck(4);
 });
-registerKeyHandler('Digit6', function() {
+registerKeyHandler("Select Mark 6", 'Digit6', function() {
     selectCurrentMarkCheck(5);
 });
-registerKeyHandler('Digit7', function() {
+registerKeyHandler("Select Mark 7", 'Digit7', function() {
     selectCurrentMarkCheck(6);
 });
-registerKeyHandler('Digit8', function() {
+registerKeyHandler("Select Mark 8", 'Digit8', function() {
     selectCurrentMarkCheck(7);
 });
-registerKeyHandler('Digit9', function() {
+registerKeyHandler("Select Mark 9", 'Digit9', function() {
     selectCurrentMarkCheck(8);
 });
 
