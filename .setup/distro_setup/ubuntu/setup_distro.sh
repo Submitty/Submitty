@@ -6,12 +6,12 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-apt-get install software-properties-common
+apt-get install -qqy software-properties-common
 echo "\n" | add-apt-repository ppa:webupd8team/java
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
 
-apt-get update
+apt-get update -qqy
 apt-get install -qqy python python-dev python3 python3-dev libpython3.5
 if [ ! -x "$(command -v pip)" ]; then
     wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
@@ -93,7 +93,7 @@ fi
 # PACKAGE SETUP
 #################
 
-apt-get -qq update
+apt-get update -qqy
 
 ############################
 # NTP: Network Time Protocol
