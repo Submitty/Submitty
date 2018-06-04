@@ -7,13 +7,6 @@
 <script type="text/javascript">
     function disableElementChildren(c, dis = true) {
         dis ? $(c).hide() : $(c).show();
-        // $('input' + c).attr('disabled', dis);
-        // $('textarea' + c).attr('disabled', dis);
-        // $('select' + c).attr('disabled', dis);
-
-        // TODO: this is too powerful.  Our controller can't handle
-        //  missing data yet (https://stackoverflow.com/a/4838229/2972004)
-        // $(c + ' *').attr('disabled', dis);
     }
 </script>
 <div id="container-rubric" style="display:none;">
