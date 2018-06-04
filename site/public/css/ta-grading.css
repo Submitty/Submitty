@@ -415,3 +415,8 @@ tr.is_publish {
 #hotkeys-list td {
     padding: 4px 0;
 }
+
+.remap-button {
+    width: 100%;
+    text-align: center;
+}

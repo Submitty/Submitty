@@ -1,0 +1,11 @@
+<table id="hotkeys-list">
+    {% for hotkey in keymap %}
+        <tr>
+            <td>{{ hotkey.name }}</td>
+            <td>
+                {% set class = (hotkey.code == hotkey.originalCode) ? "btn-default" : "btn-primary" %}
+                <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
+            </td>
+        </tr>
+    {% endfor %}
+</table>

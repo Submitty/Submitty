@@ -2,10 +2,12 @@
 // Keyboard shortcut handling
 
 var keymap = [];
+var remapping = {
+    active: false,
+    index: 0
+};
 
-window.onkeydown = function(e) {
-    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
-
+function eventToKeyCode(e) {
     var codeName = e.code;
 
     //Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
@@ -21,6 +23,19 @@ window.onkeydown = function(e) {
     if (e.altKey && (e.code !== "AltLeft" && e.code !== "AltRight")) {
         codeName = "Alt " + codeName;
     }
+
+    return codeName;
+}
+
+window.onkeydown = function(e) {
+    if (remapping.active) {
+        remapFinish(e);
+        return;
+    }
+
+    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
+
+    var codeName = eventToKeyCode(e);
 
     for (var i = 0; i < keymap.length; i++) {
         if (keymap[i].code === codeName) {
@@ -40,7 +55,8 @@ function registerKeyHandler(name, code, fn) {
     keymap.push({
         name: name,
         code: code,
-        fn: fn
+        fn: fn,
+        originalCode: code
     });
 }
 
@@ -59,20 +75,40 @@ function unregisterKeyHandler(code, fn) {
     }
 }
 
-function generateHotkeysList() {
-    var parent = $("#hotkeys-list");
-    parent.children().remove();
-
-    for (var i = 0; i < keymap.length; i++) {
-        var hotkey = keymap[i];
-
-        parent.append(
-            "<tr><td>" + hotkey.name + "</td><td>" + hotkey.code  + "</td></tr>"
-        )
-    }
-}
-
 function showSettings() {
     generateHotkeysList();
     $("#settings-popup").show();
+}
+
+Twig.twig({
+    id: "HotkeyList",
+    href: "/templates/grading/settings/HotkeyList.twig",
+    async: true
+});
+
+function generateHotkeysList() {
+    var parent = $("#hotkeys-list");
+
+    parent.replaceWith(Twig.twig({
+        ref: "HotkeyList"
+    }).render({
+        keymap: keymap
+    }));
+}
+
+function remapHotkey(i) {
+    var button = $("#remap-" + i);
+    button.text("Enter Key...");
+    remapping.active = true;
+    remapping.index = i;
+}
+
+function remapFinish(event) {
+    if (event.code === "Escape") {
+        keymap[remapping.index].code = keymap[remapping.index].originalCode;
+    } else {
+        keymap[remapping.index].code = eventToKeyCode(event);
+    }
+    remapping.active = false;
+    generateHotkeysList();
 }

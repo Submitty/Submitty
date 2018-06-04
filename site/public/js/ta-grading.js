@@ -399,6 +399,10 @@ function resetModules() {
 }
 
 
+registerKeyHandler("Reset Panel Positions", "KeyR", function() {
+    resetModules();
+    updateCookies();
+});
 registerKeyHandler("Toggle Autograding Panel", "KeyA", function() {
     toggleAutograding();
     updateCookies();
@@ -411,12 +415,8 @@ registerKeyHandler("Toggle Submissions Panel", "KeyO", function() {
     toggleSubmissions();
     updateCookies();
 });
-registerKeyHandler("Toggle Student Info Panel", "KeyS", function() {
+registerKeyHandler("Toggle Student Information Panel", "KeyS", function() {
     toggleInfo();
-    updateCookies();
-});
-registerKeyHandler("Reset Panel Positions", "KeyR", function() {
-    resetModules();
     updateCookies();
 });
 
