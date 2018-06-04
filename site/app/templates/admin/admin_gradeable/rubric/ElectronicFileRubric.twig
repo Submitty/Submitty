@@ -1,167 +1,166 @@
-<div class="manual_grading">
+{% if label_message != '' %}
+<h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
+{% endif %}
 
-    <h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
-
-    <!--
-    Will this assignment have peer grading?
-    <fieldset>
-        <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes" {{ admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> Yes
-        <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no" {{ not admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> No
-        <div class="peer_input" style="display:none;">
-            <br />
-            How many peers should each student grade?
-            <input style='width: 50px' type='text' name="peer_grade_set" value="{{ admin_gradeable.getEgPeerGradeSet() }}" class='int_val' />
-            <br />
-            How many points should be associated with a students completion of their grading?
-            <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
-        </div>
-    </fieldset>
-    <br />-->
-    Is this a PDF with a page assigned to each component?
-    <fieldset>
-        <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
-                {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
-                {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
-
+<!--
+Will this assignment have peer grading?
+<fieldset>
+    <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes" {{ admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> Yes
+    <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no" {{ not admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> No
+    <div class="peer_input" style="display:none;">
         <br />
+        How many peers should each student grade?
+        <input style='width: 50px' type='text' name="peer_grade_set" value="{{ admin_gradeable.getEgPeerGradeSet() }}" class='int_val' />
+        <br />
+        How many points should be associated with a students completion of their grading?
+        <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
+    </div>
+</fieldset>
+<br />-->
+Is this a PDF with a page assigned to each component?
+<fieldset>
+    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+            {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+            {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
 
-        <div id="pdf_page">
-            <br />
-            Who will assign pages to components?
-            <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
-                    {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
-            <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
-                    {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
-        </div>
-    </fieldset>
+    <br />
 
-    Point precision:
-    <input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
-    <br /><br />
+    <div id="pdf_page">
+        <br />
+        Who will assign pages to components?
+        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+                {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
+        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+                {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+    </div>
+</fieldset>
 
-    <table class="electronic_file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th>Manual/TA/Peer Grading Rubric</th>
-            <th style="width:210px;">Points</th>
-        </tr>
-        </thead>
-        <tbody style="background: #f9f9f9;">
+Point precision:
+<input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<br /><br />
 
-        {% set num = 1 %}
-        {% for question in admin_gradeable.getOldComponents() if question.getOrder() != -1 %}
-            <tr class="rubric-row" id="row-{{ num }}">
-                <td style="overflow: hidden;">
-                    <input type="hidden" name="component_id_{{ num }}" value="{{ question.getId() }}">
-                    <input type="hidden" name="component_deleted_marks_{{ num }}" value="">
-                    <textarea name="comment_title_{{ num }}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;"
-                              placeholder="Rubric Item Title">{{ question.getTitle() }}</textarea>
-                    <textarea name="ta_comment_{{ num }}" id="individual_{{ num }}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);"
-                              style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
-                                                       display: block; height: auto;">{{ question.getTaComment() }}</textarea>
-                    <textarea name="student_comment_{{ num }}" id="student_{{ num }}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and graders)" onkeyup="autoResizeComment(event);"
-                              style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
-                                      display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
-                    <div id="mark_questions_{{ num }}">
-                        {% if marks|length == 0 %}
-                            <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
-                                <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
-                                <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                                <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
-                                <!--
-                                <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                -->
-                                <br>
-                            </div>
-                        {% endif %}
-                        {% set first = true %}
-                        {% set hide_icons = "" %}
-                        {% for mark in marks[question.getId()] %}
-                            <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
-                                <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
-                                <i class="fa fa-circle" aria-hidden="true"></i>
-                                <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
-                                       value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                                <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
-                                {% if not first %}
-                                    <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
-                                {% endif %}
+<table class="electronic_file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
+    <thead style="background: #E1E1E1;">
+    <tr>
+        <th>Manual/TA/Peer Grading Rubric</th>
+        <th style="width:210px;">Points</th>
+    </tr>
+    </thead>
+    <tbody style="background: #f9f9f9;">
 
-                                <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                <!--
-                                <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                                -->
-                                <br>
-                            </div>
-                            {% set first = false %}
-                        {% endfor %}
-                        <div class="btn btn-xs btn-primary" id="rubric_add_mark_{{ num }}" onclick="addMark(this,{{ num }});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
-                    </div>
-                </td>
-
-                <td style="background-color:#EEE;">
-                    {% set old_max = question.getMaxValue() %}
-                    {% set old_upper_clamp = question.getUpperClamp() %}
-                    {% set old_lower_clamp = question.getLowerClamp() %}
-                    {% set extra_credit = old_upper_clamp > old_max %}
-                    {% set penalty = old_lower_clamp < 0 %}
-                    {% set grade_up = question.getDefault() == 0 %}
-                    Points: <input type="number" id="grade-{{ num }}" class="points" name="points_{{ num }}" value="{{ old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
-                    <br>
-                    Extra Credit:
-                    <input type="radio" id="rad_id_extra_credit_yes-{{ num }}" name="rad_extra_credit-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openExtra(this);" {{ extra_credit ? 'checked' : '' }}> Yes
-                    <input type="radio" id="rad_id_extra_credit_no-{{ num }}" name="rad_extra_credit-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closeExtra(this);" {{ not extra_credit ? 'checked' : '' }}> No
-                    <div id="extra_credit_{{ num }}" style="{{ not extra_credit ? 'display: none;' : '' }}">
-                        Extra Credit Points: <input type="number" class="points3" name="upper_{{ num }}" value="{{ old_upper_clamp - old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
-                    </div>
-                    Penalty:
-                    <input type="radio" id="rad_id_penalty_yes-{{ num }}" name="rad_penalty-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openPenalty(this);" {{ penalty ? 'checked' : '' }}> Yes
-                    <input type="radio" id="rad_id_penalty_no-{{ num }}" name="rad_penalty-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closePenalty(this);" {{ not penalty ? 'checked' : '' }}> No
-                    <div id="penalty_{{ num }}" style="{{ not penalty ? 'display: none' : '' }}">
-                        Penalty Points: <input type="number" class="points2" name="lower_{{ num }}" value="{{ old_lower_clamp }}" max="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:40px; resize:none;">
-                    </div>
-                    <br>
-                    <input type="radio" id="id_grade_by_up-{{ num }}" name="grade_by-{{ num }}" value="count_up" data-question_num="{{ num }}" onclick="onAddition(this);" {{ grade_up ? 'checked' : '' }}> Grade by count up
-                    <br>
-                    <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
-                    <br>
-
-                    <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
-
-                    <!--
-                    <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
-                    <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
-                    -->
-                    {% if num > 1 %}
-                        <!--
-                        <a id="delete-{{ num }}" class="question-icon" onclick="deleteQuestion({{ num }});">
-                        <i class="fa fa-times" aria-hidden="true"></i></a>
-                        <a id="down-{{ num }}" class="question-icon" onclick="moveQuestionDown({{ num }});">
-                        <i class="fa fa-arrow-down" aria-hidden="true"></i></a>
-                        <a id="up-{{ num }}" class="question-icon" onclick="moveQuestionUp({{ num }});">
-                        <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
-                        -->
+    {% set num = 1 %}
+    {% for question in admin_gradeable.getOldComponents() if question.getOrder() != -1 %}
+        <tr class="rubric-row" id="row-{{ num }}">
+            <td style="overflow: hidden;">
+                <input type="hidden" name="component_id_{{ num }}" value="{{ question.getId() }}">
+                <input type="hidden" name="component_deleted_marks_{{ num }}" value="">
+                <textarea name="comment_title_{{ num }}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;"
+                          placeholder="Rubric Item Title">{{ question.getTitle() }}</textarea>
+                <textarea name="ta_comment_{{ num }}" id="individual_{{ num }}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);"
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
+                                                   display: block; height: auto;">{{ question.getTaComment() }}</textarea>
+                <textarea name="student_comment_{{ num }}" id="student_{{ num }}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and graders)" onkeyup="autoResizeComment(event);"
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
+                                  display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
+                <div id="mark_questions_{{ num }}">
+                    {% if marks|length == 0 %}
+                        <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
+                            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
+                            <!--
+                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            -->
+                            <br>
+                        </div>
                     {% endif %}
+                    {% set first = true %}
+                    {% set hide_icons = "" %}
+                    {% for mark in marks[question.getId()] %}
+                        <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
+                            <i class="fa fa-circle" aria-hidden="true"></i>
+                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
+                                   value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
+                            {% if not first %}
+                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
+                            {% endif %}
 
-                </td>
-            </tr>
-            {% set num = num + 1 %}
-        {% endfor %}
-        <tr id="add-question">
-            <td colspan="2" style="overflow: hidden; text-align: left;">
-                <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Rubric Item</div>
+                            <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <!--
+                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            -->
+                            <br>
+                        </div>
+                        {% set first = false %}
+                    {% endfor %}
+                    <div class="btn btn-xs btn-primary" id="rubric_add_mark_{{ num }}" onclick="addMark(this,{{ num }});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
+                </div>
+            </td>
+
+            <td style="background-color:#EEE;">
+                {% set old_max = question.getMaxValue() %}
+                {% set old_upper_clamp = question.getUpperClamp() %}
+                {% set old_lower_clamp = question.getLowerClamp() %}
+                {% set extra_credit = old_upper_clamp > old_max %}
+                {% set penalty = old_lower_clamp < 0 %}
+                {% set grade_up = question.getDefault() == 0 %}
+                Points: <input type="number" id="grade-{{ num }}" class="points" name="points_{{ num }}" value="{{ old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                <br>
+                Extra Credit:
+                <input type="radio" id="rad_id_extra_credit_yes-{{ num }}" name="rad_extra_credit-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openExtra(this);" {{ extra_credit ? 'checked' : '' }}> Yes
+                <input type="radio" id="rad_id_extra_credit_no-{{ num }}" name="rad_extra_credit-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closeExtra(this);" {{ not extra_credit ? 'checked' : '' }}> No
+                <div id="extra_credit_{{ num }}" style="{{ not extra_credit ? 'display: none;' : '' }}">
+                    Extra Credit Points: <input type="number" class="points3" name="upper_{{ num }}" value="{{ old_upper_clamp - old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                </div>
+                Penalty:
+                <input type="radio" id="rad_id_penalty_yes-{{ num }}" name="rad_penalty-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openPenalty(this);" {{ penalty ? 'checked' : '' }}> Yes
+                <input type="radio" id="rad_id_penalty_no-{{ num }}" name="rad_penalty-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closePenalty(this);" {{ not penalty ? 'checked' : '' }}> No
+                <div id="penalty_{{ num }}" style="{{ not penalty ? 'display: none' : '' }}">
+                    Penalty Points: <input type="number" class="points2" name="lower_{{ num }}" value="{{ old_lower_clamp }}" max="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:40px; resize:none;">
+                </div>
+                <br>
+                <input type="radio" id="id_grade_by_up-{{ num }}" name="grade_by-{{ num }}" value="count_up" data-question_num="{{ num }}" onclick="onAddition(this);" {{ grade_up ? 'checked' : '' }}> Grade by count up
+                <br>
+                <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
+                <br>
+
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+
+                <!--
+                <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
+                -->
+                {% if num > 1 %}
+                    <!--
+                    <a id="delete-{{ num }}" class="question-icon" onclick="deleteQuestion({{ num }});">
+                    <i class="fa fa-times" aria-hidden="true"></i></a>
+                    <a id="down-{{ num }}" class="question-icon" onclick="moveQuestionDown({{ num }});">
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i></a>
+                    <a id="up-{{ num }}" class="question-icon" onclick="moveQuestionUp({{ num }});">
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
+                    -->
+                {% endif %}
+
             </td>
         </tr>
-        <tr>
-            <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>
-            <td style="background-color: #EEE; border-top: 2px solid #CCC;"><strong id="totalCalculation"></strong></td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+        {% set num = num + 1 %}
+    {% endfor %}
+    <tr id="add-question">
+        <td colspan="2" style="overflow: hidden; text-align: left;">
+            <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Rubric Item</div>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>
+        <td style="background-color: #EEE; border-top: 2px solid #CCC;"><strong id="totalCalculation"></strong></td>
+    </tr>
+    </tbody>
+</table>
 
 <script type="text/javascript">
 
