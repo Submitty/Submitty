@@ -117,7 +117,8 @@
                 return false;
             }
             else if(date_grade < date_due + eg_late_ms) {
-                alert("DATE CONSISTENCY:  [Warning] Manual Grading Open Date should be >= Due Date (+ max allowed late days)");
+                if(!confirm("DATE CONSISTENCY:  [Warning] Manual Grading Open Date should be >= Due Date (+ max allowed late days).\n\nContinue anyway?"))
+                    return false;
             }
             if(date_released < date_due) {
                 alert("DATE CONSISTENCY:  Grades Released Date must be >= Manual Grading Open Date");

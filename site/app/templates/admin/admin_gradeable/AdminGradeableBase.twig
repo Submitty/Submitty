@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<link type='text/css' rel='stylesheet' href="http://trentrichardson.com/examples/timepicker/jquery-ui-timepicker-addon.css" />
 <link type="text/css" rel="stylesheet" href="css/admin-gradeable.css"> <!-- Make sure this one is LAST -->
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
@@ -135,7 +134,8 @@
             }
         });
 
-        // TODO: this will go somewhere else
+        // TODO: move this to appropriate file when peer grading
+        //      is supported
         // $('input:radio[name="peer_grading"]').change(function() {
         //     $('.peer_input').hide();
         //     $('#peer_averaging_scheme').hide();
