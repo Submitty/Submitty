@@ -389,9 +389,10 @@ function showMarklist(me, gradeable_id) {
             if (x % 5 == 0)
                 students_html += "<br>";
 
-            var id = data['data'][x]['gd_user_id'];
+            var id = data['data'][x]['gd_user_id'] || data['data'][x]['gd_team_id'];
+
             var href = window.location.href.replace(/&who_id=([a-z0-9]*)/, "&who_id="+id);
-            students_html += 
+            students_html +=
                 "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
                 id + (x != data['data'].length - 1 ? ", " : "") +
                 "</a>";

@@ -1217,15 +1217,15 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $gcm_order = $_POST['order_num'];
-        $return_data;
-        $name_info;
+        $return_data = [];
+        $name_info = [];
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getId() != $_POST['gradeable_component_id']) {
                 continue;
             } else {
                 foreach ($component->getMarks() as $mark) {
                     if ($mark->getOrder() == intval($gcm_order)) {
-                        $return_data = $this->core->getQueries()->getDataFromGCMD($component->getId(), $mark);
+                        $return_data = $this->core->getQueries()->getUsersWhoGotMark($component->getId(), $mark, $gradeable->isTeamAssignment());
                         $name_info['question_name'] = $component->getTitle();
                         $name_info['mark_note'] = $mark->getNote();
                     }
