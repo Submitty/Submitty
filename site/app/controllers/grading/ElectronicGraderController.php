@@ -1077,6 +1077,8 @@ class ElectronicGraderController extends GradingController {
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
 
+        $gradeable->resetUserViewedDate();
+
         if($this->core->getUser()->getGroup() == 4) {
             $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
         }
@@ -1152,6 +1154,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable->saveGradeableData();
         $hwReport = new HWReport($this->core);
         $hwReport->generateSingleReport($user_id, $gradeable_id);
+        $gradeable->resetUserViewedDate();
     }
 
     public function getMarkDetails() {
@@ -1280,7 +1283,7 @@ class ElectronicGraderController extends GradingController {
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $team);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, false);
             }
         }
 
