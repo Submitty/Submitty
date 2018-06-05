@@ -10,12 +10,14 @@ var remapping = {
 window.onkeyup = function(e) {
     if (remapping.active) {
         remapFinish(e);
+        e.preventDefault();
         return;
     }
 };
 
 window.onkeydown = function(e) {
     if (remapping.active) {
+        e.preventDefault();
         return;
     }
 
