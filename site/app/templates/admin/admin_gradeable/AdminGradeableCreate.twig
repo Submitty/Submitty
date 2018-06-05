@@ -28,7 +28,7 @@ What is the title of this gradeable?:
 
 <!-- Instruction URL (read/write in all modes) -->
 What is the URL to the assignment instructions? (shown to student) 
-    <input style='width: 227px' type='text' name='instructions_url' 
+    <input style='width: 227px' type='text' name='g_instructions_url'
         value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
 
 <br />
@@ -44,13 +44,13 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
 <!-- Gradeable Type radio buttons (readonly in edit mode) -->
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
-    <input type='radio' id="radio_electronic_file" name="gradeable_type" value="Electronic File"
+    <input type='radio' id="radio_electronic_file" name="g_gradeable_type" value="Electronic File"
         {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Electronic File
 
-    <input type='radio' id="radio_checkpoints" name="gradeable_type" value="Checkpoints"
+    <input type='radio' id="radio_checkpoints" name="g_gradeable_type" value="Checkpoints"
         {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Checkpoints
 
-    <input type='radio' id="radio_numeric" name="gradeable_type" value="Numeric"
+    <input type='radio' id="radio_numeric" name="g_gradeable_type" value="Numeric"
         {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Numeric/Text
 
     <span id="required_type" style="color:red; display:inline;">(Required)</span>
@@ -63,18 +63,18 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
     Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
     <br />
-    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
+    <input type="radio" id="yes_ta_grade" name="eg_use_ta_grading" value="true" class="bool_val rubric_questions"
             {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val rubric_questions"
+    <input type="radio" id="no_ta_grade" name="eg_use_ta_grading" value="false" class="bool_val rubric_questions"
             {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
     <br /><br />
 
     Is this a team assignment?
     <fieldset>
-        <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+        <input type="radio" id = "team_yes_radio" name="eg_team_assignment" value="true"
             {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Yes
 
-        <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+        <input type="radio" id = "team_no_radio" name="eg_team_assignment" value ="false"
             {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> No
 
         <span class="uneditable-text">(Teamness cannot be changed after initial creation)</span>
@@ -93,7 +93,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                     <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
 
                 {% if action == 'new' %}
-                    <select id='gradeable_teams' name="gradeable_teams" style='width: 170px;'
+                    <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
                         value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                         <option value=''>--None--</option>
 
@@ -115,10 +115,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
     <fieldset>
 
-        <input type="radio" id="upload_file_radio" name="upload_type" value="upload_file"
+        <input type="radio" id="upload_file_radio" name="eg_is_repository" value="upload_file"
                 {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
 
-        <input type="radio" id="repository_radio" name="upload_type" value="repository"
+        <input type="radio" id="repository_radio" name="eg_is_repository" value="repository"
                 {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
 
         <span class="uneditable-text">(Submission type cannot be changed after initial creation)</span>
@@ -134,7 +134,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                 <li>user_id OR team_id OR repo_id (only use one)</li>
             </ul>
             ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
-            <input style='width: 83%' type='text' id="subdirectory" name='subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
+            <input style='width: 83%' type='text' id="subdirectory" name='eg_subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
             VCS URL: <kbd id="vcs_url"></kbd>
             <br />
         </div>
@@ -153,7 +153,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     'participation','note',
     'none (for practice only)'] %}
 
-<select name="gradeable_buckets" style="width: 170px;">
+<select name="g_syllabus_bucket" style="width: 170px;">
     {% for type in valid_assignment_type %}
         <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
             {{ type | title }}
@@ -238,10 +238,10 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     }
 
     $(function () {
-        $('input[name="subdirectory"]').on('change paste keyup', function() {
+        $('#subdirectory').on('change paste keyup', function() {
             setVcsUrl(this.value);
         });
-        setVcsUrl($('input[name="subdirectory"]').val());
+        setVcsUrl($('#subdirectory').val());
     });
 
     $(function () {
@@ -265,7 +265,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         {% endif %}
 
         onManualGradingChange();
-        $('[name="ta_grading"]').change(onManualGradingChange)
+        $('[name="eg_use_ta_grading"]').change(onManualGradingChange)
 
         //
         // Template Selector Box Events
@@ -293,15 +293,15 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
-        $('[name="gradeable_type"]').change(onGradeableTypeChange);
+        $('[name="g_gradeable_type"]').change(onGradeableTypeChange);
 
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
-        $('[name="team_assignment"]').change(onTeamAssignmentChange);
+        $('[name="eg_team_assignment"]').change(onTeamAssignmentChange);
 
         // Only show repo settings if the gradeable is using repo upload
         onUploadTypeChange();
-        $('[name="upload_type"]').change(onUploadTypeChange);
+        $('[name="eg_is_repository"]').change(onUploadTypeChange);
 
         // Upload the vcs url in real time
         onVcsSubdirChange();
@@ -343,7 +343,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
             return false;
         }
 
-        var subdirectory = $('input[name="subdirectory"]').val();
+        var subdirectory = $('#subdirectory').val();
         var vcs_url = $('#vcs_url').text();
 
         if ($('repository_radio').is(':checked')) {

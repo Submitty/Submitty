@@ -3,7 +3,11 @@
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
-<script type="text/javascript" language="javascript" src="js/admin-gradeable.js"></script>
+
+{# Only load the realtime-updates script if we're in edit mode#}
+{% if action == 'edit' %}
+<script type="text/javascript" language="javascript" src="js/admin-gradeable-updates.js"></script>
+{% endif %}
 
 <script type="text/javascript">
     function disableElementChildren(c, dis = true) {
@@ -91,8 +95,8 @@
     $(document).ready(function() {
 
         updateNavItemsStatus();
-        $('[name="gradeable_type"]').change(updateNavItemsStatus);
-        $('[name="ta_grading"]').change(updateNavItemsStatus)
+        $('[name="g_gradeable_type"]').change(updateNavItemsStatus);
+        $('[name="eg_use_ta_grading"]').change(updateNavItemsStatus)
 
         // Update navigation on load
 
@@ -131,7 +135,7 @@
 
         // TODO: move this to appropriate file when peer grading
         //      is supported
-        // $('input:radio[name="peer_grading"]').change(function() {
+        // $('input:radio[name="eg_peer_grading"]').change(function() {
         //     $('.peer_input').hide();
         //     $('#peer_averaging_scheme').hide();
         //     if ($(this).is(':checked')) {
@@ -141,7 +145,7 @@
         //             if($('#team_yes_radio').is(':checked')) {
         //                 $('#team_yes_radio').prop('checked', false);
         //                 $('#team_no_radio').prop('checked', true);
-        //                 $('input:radio[name="team_assignment"]').trigger("change");
+        //                 $('input:radio[name="eg_team_assignment"]').trigger("change");
         //             }
         //         }
         //     }
@@ -167,7 +171,7 @@
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
             .appendTo('#gradeable-form');
-        if ($("input[name='section_type']:checked").val() == 'reg_section'){
+        if ($("input[name='$g_grade_by_registration']:checked").val() == 'reg_section'){
             $('#rotating-sections :input').prop('disabled',true);
         }
     });

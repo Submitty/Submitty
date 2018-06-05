@@ -1,5 +1,5 @@
 <div id="gradeable-dates">
-    <input name="date_ta_view" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
+    <input name="g_ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
     <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs)
 
     <br />
@@ -7,19 +7,19 @@
 
     <div class="electronic_file">
         <div class="team_yes">
-            <input name="date_team_lock" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
+            <input name="eg_team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
             <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams)
 
             <br />
         </div>
 
-        <input id="date_submit" name="date_submit" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
+        <input id="date_submit" name="eg_submission_open_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
         <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students)
         <em style='color: orange;'>must be >= TA Beta Testing Date</em>
 
         <br />
 
-        <input id="date_due" name="date_due" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
+        <input id="date_due" name="eg_submission_due_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
         <em style='color: orange;'><b>Due Date</b></em>?
         <em style='color: orange;'>must be >= Submission Open Date</em>
 
@@ -27,7 +27,7 @@
     </div>
 
     <div class="manual_grading">
-        <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
+        <input name="g_grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
         <em style='color: orange;'><b>TA/Instructor Manual Grading Open Date</b></em>? (graders may begin grading)
         <em style='color: orange;'>must be >=
             <span class="electronic_file">Due Date (+ max allowed late days)</span>
@@ -37,7 +37,7 @@
         <br />
     </div>
 
-    <input name="date_released" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
+    <input name="g_grade_released_date" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
     <em style='color: orange;'><b>Grades Released Date</b></em>? (grades will be visible to students)
     <em style='color: orange;'>must be >=
         <span class="electronic_file">
@@ -113,7 +113,7 @@
         // This value will always be consistent with the 'check' values since
         //  this data will not be changeable by the time the user navigates to this page.
         //      This case will only happen when 'check1' is T
-        if ($('[name="ta_grading"]').attr('value') === 'true') {
+        if ($('[name="eg_use_ta_grading"]').attr('value') === 'true') {
             if(date_grade < date_due) {
                 alert("DATE CONSISTENCY:  TA/Instructor Manual Grading Open Date must be >= Due Date");
                 return false;
@@ -137,7 +137,7 @@
         }
 
         // This can happen when 'check2' or 'check3' are T (ta_grading is already T)
-        if($('[name="ta_grading"]').attr('value') === 'true' || check2 || check3) {
+        if($('[name="eg_use_ta_grading"]').attr('value') === 'true' || check2 || check3) {
             if(date_grade < date_ta_view) {
                 alert("DATE CONSISTENCY:  TA/Instructor Manual Grading Open Date must be >= TA Beta Testing Date");
                 return false;

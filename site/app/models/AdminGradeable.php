@@ -100,13 +100,13 @@ class AdminGradeable extends AbstractModel {
     /** @property @var int How many people should each person grade*/
     public $eg_peer_grade_set = 3;
     /** @property @var int How many points for completing peer grading*/
-    public $peer_grade_complete_score = 0;
+    public $eg_peer_grade_complete_score = 0;
     /** @property @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades of 0, 0.5, 1, 1.5, etc.) */
     public $eg_precision = 0.5;
     /** @property @var bool is there a pdf page*/
-    public $pdf_page = false;
+    public $eg_pdf_page = false;
     /** @property @var bool does the student supply the pdf page*/
-    public $pdf_page_student = false;
+    public $eg_pdf_page_student = false;
 
 // if a gradeable is numeric/text
 
