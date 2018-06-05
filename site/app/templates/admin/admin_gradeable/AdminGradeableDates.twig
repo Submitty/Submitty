@@ -28,7 +28,7 @@
 
     <div class="manual_grading">
         <input name="date_grade" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
-        <em style='color: orange;'><b>Manual Grading Open Date</b></em>? (graders may begin grading)
+        <em style='color: orange;'><b>TA/Instructor Manual Grading Open Date</b></em>? (graders may begin grading)
         <em style='color: orange;'>must be >=
             <span class="electronic_file">Due Date (+ max allowed late days)</span>
             <span class="checkpoints numeric">TA Beta Testing Date</span>
@@ -38,10 +38,10 @@
     </div>
 
     <input name="date_released" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
-    <em style='color: orange;'><b>Grades Released Date</b></em>? (manual grades will be visible to students)
+    <em style='color: orange;'><b>Grades Released Date</b></em>? (grades will be visible to students)
     <em style='color: orange;'>must be >=
         <span class="electronic_file">
-            <span class="manual_grading">Manual Grading Open Date</span>
+            <span class="manual_grading">TA/Instructor Manual Grading Open Date</span>
             <span class="no_manual_grading">Due Date (+ max allowed late days)</span>
         </span>
         <span class="checkpoints numeric">Manual Grading Open Date</span>
@@ -115,15 +115,15 @@
         //      This case will only happen when 'check1' is T
         if ($('[name="ta_grading"]').attr('value') === 'true') {
             if(date_grade < date_due) {
-                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= Due Date");
+                alert("DATE CONSISTENCY:  TA/Instructor Manual Grading Open Date must be >= Due Date");
                 return false;
             }
             else if(date_grade < date_due + eg_late_ms) {
-                if(!confirm("DATE CONSISTENCY:  [Warning] Manual Grading Open Date should be >= Due Date (+ max allowed late days).\n\nContinue anyway?"))
+                if(!confirm("DATE CONSISTENCY:  [Warning] TA/Instructor Manual Grading Open Date should be >= Due Date (+ max allowed late days).\n\nContinue anyway?"))
                     return false;
             }
             if(date_released < date_due) {
-                alert("DATE CONSISTENCY:  Grades Released Date must be >= Manual Grading Open Date");
+                alert("DATE CONSISTENCY:  Grades Released Date must be >= TA/Instructor Manual Grading Open Date");
                 return false;
             }
         }
@@ -139,11 +139,11 @@
         // This can happen when 'check2' or 'check3' are T (ta_grading is already T)
         if($('[name="ta_grading"]').attr('value') === 'true' || check2 || check3) {
             if(date_grade < date_ta_view) {
-                alert("DATE CONSISTENCY:  Manual Grading Open Date must be >= TA Beta Testing Date");
+                alert("DATE CONSISTENCY:  TA/Instructor Manual Grading Open Date must be >= TA Beta Testing Date");
                 return false;
             }
             if(date_released < date_grade) {
-                alert("DATE CONSISTENCY:  Grade Released Date must be >= Manual Grading Open Date");
+                alert("DATE CONSISTENCY:  Grade Released Date must be >= TA/Instructor Manual Grading Open Date");
                 return false;
             }
         }
