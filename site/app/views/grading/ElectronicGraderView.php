@@ -1799,8 +1799,6 @@ HTML;
                 $return .= <<<HTML
         </div>
     </div>
-HTML;
-$return .= <<<HTML
 </div>
 <script type="text/javascript">
 //

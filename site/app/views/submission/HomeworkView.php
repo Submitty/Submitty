@@ -1373,6 +1373,7 @@ HTML;
                   <b>{$name}</b> &nbsp;                                       
                 {$function_date($date,"m/d/Y g:i A")}                                      
                 </div>                                       
+              </div>
             </div>                                       
 HTML;
           }
