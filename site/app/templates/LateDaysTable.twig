@@ -17,16 +17,20 @@
         <tbody id="late_day_table">
         {% set num_status = 0 %}
         {% for gradeable in student_gradeables %}
+            {% if g_id != NULL and gradeable.getId() == g_id %}
+                {% set class = "class=yellow-background" %}
+            {% endif %}
             <tr>
-                <td $class style="padding:5px; border:thin solid black">{{gradeable.getName()}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{gradeable.getDueDate()|date('Y-m-d')}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{gradeable.getLateDays()}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{gradeable.getLateDayExceptions()}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{attribute(status_array, num_status)}}</td>
-                <td $class style="padding:5px; border:thin solid black">{{attribute(late_charged_array, num_status)}}</td>
+                <td {{ class }} style="padding:5px; border:thin solid black">{{gradeable.getName()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getDueDate()|date('m/d')}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getLateDays()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getLateDayExceptions()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{attribute(status_array, num_status)}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{attribute(late_charged_array, num_status)}}</td>
             </tr>
             {% set num_status = num_status + 1 %}
+            {% set class = "" %}
         {% endfor %}
         </tbody>
     </table>
