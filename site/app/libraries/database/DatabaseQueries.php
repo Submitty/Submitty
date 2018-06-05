@@ -2205,6 +2205,10 @@ AND gc_id IN (
             return false;
         }
     }
+    public function getNumberRegradeRequests($gradeable_id){
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE gradeable_id = '$gradeable_id' AND status = -1");
+        return ($this->course_db->row()['cnt']); 
+    }
     public function getRegradeDiscussion($thread_id){
         $this->course_db->query("SELECT * FROM regrade_discussion WHERE thread_id=? AND deleted=false ORDER BY timestamp ASC", array($thread_id));
         $result = array();
@@ -2227,8 +2231,10 @@ AND gc_id IN (
     }
     public function deleteRegradeRequest($gradeable_id, $student_id){
         $thread_id = array($this->getRegradeRequestID($gradeable_id, $student_id));
+        //$this->course_db->query("UPDATE regrade_requests SET status='1'");
         $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = ?", $thread_id);
         $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $thread_id);
+
     }
     public function deleteGradeable($g_id) {
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));

@@ -25,7 +25,8 @@ class ElectronicGraderView extends AbstractView {
         $registered_but_not_rotating,
         $rotating_but_not_registered,
         $viewed_grade,
-        $section_type) {
+        $section_type,
+        $regrade_requests) {
 
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
@@ -213,7 +214,14 @@ HTML;
 HTML;
                     }
                 }
+                if($this->core->getConfig()->isRegradeEnabled()){
                 $return .= <<<HTML
+             <div>
+                Number of students who have ongoing regrade requests: {$regrade_requests}
+            </div>
+HTML;
+            }
+        $return .= <<<HTML
         </div>
 HTML;
             }
@@ -743,12 +751,8 @@ HTML;
                           $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
                           $graded += $row->getGradedTAPoints();
                         }
-                        else if($row->getRegradeStatus() === -1){
-                          $btn_class = "btn-danger";
-                          $contents = "Regrade Requested";
-                        }
                     }
-                    else{
+                    else {
                         $btn_class = "btn-primary";
                         if(!$row->isFullyGraded()){
                             $contents = "Grading Incomplete";
@@ -756,6 +760,10 @@ HTML;
                         else{
                             $contents = "Version Conflict";
                         }
+                    }
+                    if($row->getRegradeStatus() === -1){
+                          $btn_class = "btn-danger";
+                          $contents = "Regrade Requested";
                     }
                 }
                 else {

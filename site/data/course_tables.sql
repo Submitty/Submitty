@@ -464,63 +464,83 @@ CREATE TABLE teams (
     user_id character varying(255) NOT NULL,
     state integer NOT NULL
 );
-
-
+--
+-- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_requests (
+    id serial NOT NULL,
+    gradeable_id VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    student_user_id VARCHAR(255) NOT NULL,
+    status INTEGER DEFAULT 0 NOT NULL
+);
+--
+-- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_discussion (
+    id serial NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    content TEXT
+    regrade_id VARCHAR(255) NOT NULL,
+    deleted BOOLEAN false NOT NULL,
+    thread_id INTEGER DEFAULT 0 NOT NULL
+);
 -- Begins Forum 
 
 --
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"resolved" BOOLEAN NOT NULL,
-	"type" int NOT NULL,
+    "id" serial NOT NULL,
+    "thread_id" int NOT NULL,
+    "parent_id" int DEFAULT '-1',
+    "author_user_id" character varying NOT NULL,
+    "content" TEXT NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL,
+    "anonymous" BOOLEAN NOT NULL,
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "endorsed_by" varchar,
+    "resolved" BOOLEAN NOT NULL,
+    "type" int NOT NULL,
   "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+    CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
-	"id" serial NOT NULL,
-	"title" varchar NOT NULL,
-	"created_by" varchar NOT NULL,
-	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"merged_thread_id" int DEFAULT '-1',
-	"merged_post_id" int DEFAULT '-1',
-	"is_visible" BOOLEAN NOT NULL,
-	CONSTRAINT threads_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "title" varchar NOT NULL,
+    "created_by" varchar NOT NULL,
+    "pinned" BOOLEAN NOT NULL DEFAULT 'false',
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "merged_thread_id" int DEFAULT '-1',
+    "merged_post_id" int DEFAULT '-1',
+    "is_visible" BOOLEAN NOT NULL,
+    CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "thread_categories" (
-	"thread_id" int NOT NULL,
-	"category_id" int NOT NULL
+    "thread_id" int NOT NULL,
+    "category_id" int NOT NULL
 );
 
 CREATE TABLE "categories_list" (
-	"category_id" serial NOT NULL,
-	"category_desc" varchar NOT NULL,
-	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+    "category_id" serial NOT NULL,
+    "category_desc" varchar NOT NULL,
+    CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
 CREATE TABLE "student_favorites" (
-	"id" serial NOT NULL,
-	"user_id" character varying NOT NULL,
-	"thread_id" int,
-	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "user_id" character varying NOT NULL,
+    "thread_id" int,
+    CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "viewed_responses" (
-	"thread_id" int NOT NULL,
-	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+    "thread_id" int NOT NULL,
+    "user_id" character varying NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
 );
 
 
@@ -987,7 +1007,12 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+--
+-- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
+--
 
+ALTER TABLE ONLY regrade_discussion
+    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (thread_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
 
 -- Forum Key relationships
 
