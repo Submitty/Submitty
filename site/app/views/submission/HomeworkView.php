@@ -1214,7 +1214,7 @@ HTML;
     <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
-            if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
+            if($gradeable->isRegradeEnabled()){
             $return .= <<<HTML
 </div>
   <div class="content"> 
