@@ -1210,17 +1210,17 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-
-    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
+                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
-            if($gradeable->isRegradeEnabled()){
             $return .= <<<HTML
 </div>
   <div class="content"> 
 HTML;
-    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    if($this->core->getConfig()->isRegradeEnabled()){
+      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    }
     $return .= <<<HTML
   </div>
 HTML;
@@ -1228,7 +1228,6 @@ HTML;
 
         return $return;
     }
-  }
     public function showRequestForm($gradeable){
       $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
       $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
@@ -1372,9 +1371,8 @@ HTML;
                 <hr>                                       
                 <div style="float:right">                                      
                   <b>{$name}</b> &nbsp;                                       
-                  {$function_date($date,"m/d/Y g:i A")}                                      
-                </div>   
-              </div>                                    
+                {$function_date($date,"m/d/Y g:i A")}                                      
+                </div>                                       
             </div>                                       
 HTML;
           }
