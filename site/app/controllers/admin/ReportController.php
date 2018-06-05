@@ -71,6 +71,7 @@ class ReportController extends AbstractController {
             // if this assignment exceeds the allowed late day policy or
             // if the student has switched versions after the ta graded,
             // then they should receive an automatic zero for this gradeable
+            $gradeable->calculateLateDays();
             if( $is_electronic_gradeable &&
                 ( ($gradeable->getLateStatus() != NULL && substr($gradeable->getLateStatus(), 0, 3) == 'Bad') ||
                   ($use_ta_grading && !$gradeable->validateVersions()))) {
