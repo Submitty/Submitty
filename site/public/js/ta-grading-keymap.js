@@ -127,13 +127,28 @@ function remapHotkey(i) {
  * @param {KeyboardEvent} event Event from onkeydown
  */
 function remapFinish(event) {
+    var code = eventToKeyCode(event);
     if (event.code === "Escape") {
-        keymap[remapping.index].code = keymap[remapping.index].originalCode;
-    } else {
-        keymap[remapping.index].code = eventToKeyCode(event);
+        code = keymap[remapping.index].originalCode;
     }
 
-    remapSetLS(keymap[remapping.index].name, eventToKeyCode(event));
+    //Check if code is already used
+    for (var i = 0; i < keymap.length; i++) {
+        if (remapping.index === i) {
+            continue;
+        }
+        if (keymap[i].code === code) {
+            //Oh no
+            var button = $("#remap-" + remapping.index);
+            button.text("Enter Unique Key");
+            button.addClass("btn-danger");
+            button.removeClass("btn-success");
+            return;
+        }
+    }
+
+    keymap[remapping.index].code = code;
+    remapSetLS(keymap[remapping.index].name, code);
 
     remapping.active = false;
     generateHotkeysList();
