@@ -1413,7 +1413,7 @@ HTML;
                  window.location.reload();
               }
             });
-            event.preventDefault();
+           // event.preventDefault();
           });
         </script>
       </div>
