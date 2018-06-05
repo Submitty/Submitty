@@ -1066,9 +1066,9 @@ HTML;
     <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
 HTML;
             if($gradeable->getRegradeStatus() !== 0){
-                $class = ($gradeable->getRegradeStatus() === -1) ? 'btn btn-danger' : 'btn btn-default';
+                $col = ($gradeable->getRegradeStatus() === -1) ? 'red' : 'black';
                 $return .= <<<HTML
-                <input type="button" class ="$class" value="!" onclick="showRequestDiscussion()">
+               <i title="" onclick="toggleRegradeDiscussion()" class="fa fa-exclamation icon-header fa-fw fa-3x" style="color: {$col};"></i>
 HTML;
             }
         }
@@ -1794,9 +1794,8 @@ HTML;
 <div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
         <div class = "draggable_content">
         <div class = "inner-container" style="padding:20px;">
-                <input type="button" class = "btn btn-default" style="float:right; margin: 10px;" value="Close Panel" onclick="hideRequestDiscussion()">
 HTML;
-        //        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
                 $return .= <<<HTML
         </div>
@@ -1899,14 +1898,6 @@ window.onunload = unloadSave;
           textarea.style.height = "";
           textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
         };
-        function hideRequestDiscussion(){
-            var displayRequests = document.getElementById("regrade_request_box");
-            displayRequests.style.display = "none";
-        }
-        function showRequestDiscussion(){
-            var displayRequests = document.getElementById("regrade_request_box");
-            displayRequests.style.display = "block";
-        }
 </script>
 HTML;
         return $return;

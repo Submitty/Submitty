@@ -406,6 +406,9 @@ function isInfoVisible() {
     return $("#student_info").is(":visible");
 }
 
+function isRegradeDiscussionVisible() {
+    return $("#regrade_request_box").is(":visible");
+}
 
 function setAutogradingVisible(visible) {
     $('.fa-list-alt').toggleClass('icon-selected', visible);
@@ -431,6 +434,9 @@ function setInfoVisible(visible) {
     hideIfEmpty("#student_info");
 }
 
+function setRegradeDiscussion(visible){
+    $("#regrade_request_box").toggle(visible);
+}
 
 function toggleAutograding() {
     setAutogradingVisible(!isAutogradingVisible());
@@ -448,6 +454,9 @@ function toggleInfo() {
     setInfoVisible(!isInfoVisible());
 }
 
+function toggleRegradeDiscussion(){
+    setRegradeDiscussion(!isRegradeDiscussionVisible());
+}
 
 function resetModules() {
     $('.fa-list-alt').addClass('icon-selected');

@@ -1212,7 +1212,6 @@ HTML;
     <h3 class="label">TA grade not available</h3>
 HTML;
             }
-            if($this->core->getConfig()->isRegradeEnabled() == true){
             $return .= <<<HTML
 </div>
   <div class="content"> 
@@ -1223,7 +1222,6 @@ HTML;
     $return .= <<<HTML
   </div>
 HTML;
-           }
         }
 
         return $return;
@@ -1233,8 +1231,10 @@ HTML;
       $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
       $existsStaffPost = false;
       foreach ($threads as $thread) {
-        if($this->core->getQueries()->isStaffPost($thread['user_id'])) $existsStaffPost = true;
-        break;
+        if($this->core->getQueries()->isStaffPost($thread['user_id'])){ 
+          $existsStaffPost = true;
+          break;
+        }
       }
       $return = <<<HTML
       <div class = "sub">
@@ -1302,8 +1302,8 @@ HTML;
                 <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
                 placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
                 <br style = "margin-bottom: 10px;">
-                <input type="submit" value="submit" class="btn btn-default" style="margin: 15px;">
-                <input type="button" id = "cancelRegrade" value="cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
+                <input type="submit" value="Submit" class="btn btn-default" style="margin: 15px;">
+                <input type="button" id = "cancelRegrade" value="Cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
               </div>
             </form>
           </div>
@@ -1336,9 +1336,6 @@ HTML;
       return $return;
     }
     public function showRegradeDiscussion($gradeable){
-         // if($this->core->getConfig()->isRegradeEnabled() == false){
-        //    return;
-        //  }
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
@@ -1352,24 +1349,25 @@ HTML;
             $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
           }
           foreach ($threads as $thread) {
+            if(empty($threads)) break;
             $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
             $id = $thread['id'];
             $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
-            $content = $thread['content'];
+            $content = $thread['content']; 
             if($first){
               $class .= " first_post";
               $first = false;                                      
             }                                      
             $function_date = 'date_format';                                      
-            $$return = <<<HTML
+            $return .= <<<HTML
             <div style="margin-top: 20px ">                                       
               <div class = '$class' style="padding:20px;">                                       
                 <p>{$content}</p>                                      
                 <hr>                                       
                 <div style="float:right">                                      
-                  <b>{$name}</b> &nbsp                                       
-                {$function_date($date,"m/d/Y g:i A")}                                      
+                  <b>{$name}</b> &nbsp;                                       
+                  {$function_date($date,"m/d/Y g:i A")}                                      
                 </div>                                       
             </div>                                       
 HTML;
