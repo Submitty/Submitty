@@ -11,6 +11,10 @@ input[readonly] {
     font-style: italic;
 }
 
+#gradeable-dates input[type="text"] {
+    width: 200px;
+}
+
 select {
     margin-top:7px;
     width: 60px;

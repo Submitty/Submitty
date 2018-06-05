@@ -31,6 +31,7 @@ class AdminGradeableView extends AbstractView {
 
         // For each grader with sections assigned to them, add their
         //  sections to the array generated above
+        $graders = array();
         foreach($admin_gradeable->getGradersAllSection() as $grader) {
             //parses the sections from string "{1, 2, 3, 4}" to a php array [1,2,3,4]
             $sections = $grader['sections'];
@@ -39,6 +40,7 @@ class AdminGradeableView extends AbstractView {
             $sections = explode(',', $sections);
 
             $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
+            $graders[$grader['user_group']][$grader['user_id']]['user_id'] = $grader['user_id'];
         }
 
         $marks = array();
@@ -83,7 +85,6 @@ class AdminGradeableView extends AbstractView {
             ]);
         }
 
-
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
@@ -98,7 +99,7 @@ class AdminGradeableView extends AbstractView {
             "marks"           => $marks,
 
             // Graders Page Specific
-            "all_graders"    => $admin_gradeable->getGradersFromUsertypes()
+            "all_graders"    => $graders
         ]);
     }
     

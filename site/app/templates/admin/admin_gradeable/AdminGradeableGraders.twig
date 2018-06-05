@@ -31,83 +31,78 @@ Variables
 {# 
 Form
 #}
-<div class="electronic_file">
-    <div id="manual_grading" class="manual_grading">
-        What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
-            lowest privileged user group</a> that can grade this?
-        <select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
-            {% for num, role in grading_groups %}
-                <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
-            {% endfor %}
-        </select>
-        <br />
-        <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
-        <br />
-        <fieldset>
-            <input type="radio" name="section_type" value="reg_section" id="registration-section"
-                {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
+    lowest privileged user group</a> that can grade this?
+<select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+    {% for num, role in grading_groups %}
+        <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+    {% endfor %}
+</select>
+<br />
+<a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
+<br />
+<fieldset>
+    <input type="radio" name="section_type" value="reg_section" id="registration-section"
+        {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 
-            <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
-                {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
+    <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
+        {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
-            <div id="rotating_data" style="{{ admin_gradeable.getRotatingGradeables()|length == 0 ? 'display:none;' : '' }}">
-                <br />
-                Rotating Section History By Grader:
-                <br />
-                <table id="grader-history" style="border: 3px solid black;">
-                    <tr>
-                        <th></th>
-                        {% for row in admin_gradeable.getRotatingGradeables() %}
-                            <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        {% set last = '' %}
-                        {% for row in admin_gradeable.getGradeableSectionHistory() %}
-                            {% if row.user_id != last %}
-                                </tr>
-                                <tr class="g_history g{{ row.user_group }}">
-                                    <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
-                            {% endif %}
-                            <td style="padding: 8px; border: 3px solid black; text-align: center;">
-                                {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
-                            </td>
-                            {% set last = row.user_id %}
-                        {% endfor %}
-                </table>
-                <table>
-                    {# Helpful debuging line.  Uncomment to view graders data #}
-                    {# <tr>{{all_graders|json_encode()}}</tr> #}
-                    <tr>
-                        <th />
-                        <th>All</th>
-                        {% for rs in section_numbers %}
-                            <th>{{rs}}</th>
-                        {% endfor %}
-                    </tr>
-                    <tr class="g1">
-                        <th>Instructor Graders</th>
-                    </tr>
-                    <!-- Instructors -->
-                    {{ self.display_graders(all_graders[0], 'g1', section_numbers) }}
-                    <tr class="g2">
-                        <th>Full Access Graders</th>
-                    </tr>
-                    <!-- Full Access Graders -->
-                    {{ self.display_graders(all_graders[1], 'g2', section_numbers) }}
-                    <tr class="g3">
-                        <th>Limited Access Graders</th>
-                    </tr>
-                    <!-- Limited Access Graders -->
-                    {{ self.display_graders(all_graders[2], 'g3', section_numbers) }}
-                </table>
-            </div>
-        </fieldset>
+    <div id="rotating_data">
+        {% if admin_gradeable.getRotatingGradeables()|length != 0 %}
+        <br />
+        Rotating Section History By Grader:
+        <br />
+        <table id="grader-history" style="border: 3px solid black;">
+            <tr>
+                <th></th>
+                {% for row in admin_gradeable.getRotatingGradeables() %}
+                    <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% set last = '' %}
+                {% for row in admin_gradeable.getGradeableSectionHistory() %}
+                    {% if row.user_id != last %}
+                        </tr>
+                        <tr class="g_history g{{ row.user_group }}">
+                            <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
+                    {% endif %}
+                    <td style="padding: 8px; border: 3px solid black; text-align: center;">
+                        {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
+                    </td>
+                    {% set last = row.user_id %}
+                {% endfor %}
+        </table>
+        {% endif %}
+        <table>
+            {# Helpful debuging line.  Uncomment to view graders data #}
+            {# <tr>{{all_graders|json_encode()}}</tr> #}
+            <tr>
+                <th />
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{rs}}</th>
+                {% endfor %}
+            </tr>
+            <tr class="g1">
+                <th>Instructor Graders</th>
+            </tr>
+            <!-- Instructors -->
+            {{ self.display_graders(all_graders[1], 'g1', section_numbers) }}
+            <tr class="g2">
+                <th>Full Access Graders</th>
+            </tr>
+            <!-- Full Access Graders -->
+            {{ self.display_graders(all_graders[2], 'g2', section_numbers) }}
+            <tr class="g3">
+                <th>Limited Access Graders</th>
+            </tr>
+            <!-- Limited Access Graders -->
+            {{ self.display_graders(all_graders[3], 'g3', section_numbers) }}
+        </table>
     </div>
-</div>
-<div class="numeric checkpoints">
-    TODO: helpful message describing why this page is blank (nothing needs to be configured)
-</div>
+</fieldset>
 
 <script type="text/javascript">
 
@@ -182,13 +177,13 @@ Form
         $('[name="minimum_grading_group"]').change(onMinGraderChange);
 
         // update "all" check boxes
-        {% for grader in all_graders[0] %}
+        {% for grader in all_graders[1] %}
         updateCheckBoxes('g1', "{{ grader.user_id }}", 1);
         {% endfor %}
-        {% for grader in all_graders[1] %}
+        {% for grader in all_graders[2] %}
         updateCheckBoxes('g2', "{{ grader.user_id }}", 1);
         {% endfor %}
-        {% for grader in all_graders[2] %}
+        {% for grader in all_graders[3] %}
         updateCheckBoxes('g3', "{{ grader.user_id }}", 1);
         {% endfor %}
 
