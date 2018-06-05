@@ -5,7 +5,6 @@ namespace app\views\submission;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\LateDaysCalculation;
 
 class HomeworkView extends AbstractView {
 
@@ -222,10 +221,14 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
-        $late_days_remaining = $late_days_data['remaining_days'];
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        $total_late_used = 0;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+        }
+        $late_days_remaining = $this->core->getConfig()->getDefaultStudentLateDays()-$total_late_used;
         $active_days_late = $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
