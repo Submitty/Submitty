@@ -50,7 +50,7 @@ def initialize(untrusted_queue):
 # ==================================================================================
 def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
 
-    submitty_config  = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')
+    submitty_config  = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'version.json')
 
     try:
         with open(submitty_config) as infile:
