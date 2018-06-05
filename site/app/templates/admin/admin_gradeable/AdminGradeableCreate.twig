@@ -21,7 +21,7 @@
 #}
 <!-- Gradeable Title (read/write in all modes) -->
 What is the title of this gradeable?: 
-    <input style='width: 227px' type='text' name='gradeable_title' id='g_title' class="required"
+    <input style='width: 227px' type='text' name='g_title' id='g_title' class="required"
         value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
 
 <br />
@@ -323,7 +323,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
     function checkFormCreate() {
         var gradeable_id = $('#g_id').val();
-        var gradeable_title = $('g_title').val();
+        var gradeable_title = $('#g_title').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
 
