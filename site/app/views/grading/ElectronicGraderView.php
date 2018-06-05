@@ -1788,9 +1788,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
         $setRegradeVisible="";
-        if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())!=0){
-            $setRegradeVisible="display: none;";
-        }
+        if($this->core->getConfig()->isRegradeEnabled() == true && $this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
         $return .= <<<HTML
 </div>
 <div id="regrade_info" class = "draggable rubric_panel" style="{$setRegradeVisible} right: 15px; bottom: 40px;width: 48%; height: 30%">
@@ -1802,8 +1800,10 @@ HTML;
                 $return .= <<<HTML
         </div>
         </div>
+HTML;
+}
+$return .= <<<HTML
 </div>
-
 <script type="text/javascript">
 //
 // This is needed to resolve conflicts between Chrome and other browsers

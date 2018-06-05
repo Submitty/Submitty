@@ -1209,17 +1209,16 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-    <h3 class="label">TA grade not available</h3>
+    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
-            if($this->core->getConfig()->isRegradeEnabled() == true){
+            if($this->core->getConfig()->isRegradeEnabled() == true && $this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
             $return .= <<<HTML
 </div>
   <div class="content"> 
 HTML;
     $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-    if($gradeable->getRegradeStatus() !== 0)
-      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
     $return .= <<<HTML
   </div>
 HTML;
@@ -1336,9 +1335,6 @@ HTML;
       return $return;
     }
     public function showRegradeDiscussion($gradeable){
-         // if($this->core->getConfig()->isRegradeEnabled() == false){
-        //    return;
-        //  }
           $return = "";
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
