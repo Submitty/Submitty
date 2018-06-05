@@ -1349,9 +1349,6 @@ HTML;
       return $return;
     }
     public function showRegradeDiscussion($gradeable){
-          if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())!=-1){
-            return;
-          }
           $return = "";
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
