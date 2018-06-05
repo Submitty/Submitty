@@ -564,7 +564,14 @@ HTML;
                 <i>Any regrade requests are due within 7 days of posting</i>
                 <p>{$comment}</p>
             </div>
+HTML;
+        if($gradeable->getLateDays() > 0){
+            $return .= <<<HTML
             <a name="show_late_table" style="float:right" class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table', 'g_id' => $gradeable->getId()))}">Show my late days information</a>
+HTML;
+        }
+
+        $return .= <<<HTML
             <div class = "box">
                 <div class="box-title">
                     <span class="badge {$background}" style="float: left">{$score} / {$maxScore}</span>
