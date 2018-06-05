@@ -211,7 +211,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     }
 
     function onManualGradingChange() {
-        if($('#yes_ta_grade').is(':checked')) {
+        if($('#yes_ta_grade').is(':checked') || !$('#radio_electronic_file').is(':checked')) {
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
             disableElementChildren('.no_manual_grading', true);
