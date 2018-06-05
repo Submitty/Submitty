@@ -393,27 +393,29 @@ tr.is_publish {
     padding: 16px;
 }
 
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
 #hotkeys-list {
     width: 100%;
     border-collapse: collapse;
 }
 
 #hotkeys-list tr {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-left: none;
     border-right: none;
 }
 
-#hotkeys-list tr:first-child {
-    border-top: none;
-}
-
-#hotkeys-list tr:last-child {
-    border-bottom: none;
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
 }
 
 #hotkeys-list td {
-    padding: 4px 0;
+    padding: 4px;
 }
 
 .remap-button {
