@@ -1,3 +1,6 @@
+{% if label_message != '' %}
+    <h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
+{% endif %}
 <div class="electronic_file">
     {{ include('admin/admin_gradeable/rubric/ElectronicFileRubric.twig')   }}
 </div>
