@@ -497,6 +497,7 @@ registerKeyHandler('ArrowDown', function(e) {
         $('#title-' + 1)[0].scrollIntoView();
     } else if (current === numQuestions) {
         openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
     } else if (current === GENERAL_MESSAGE_ID) {
         closeGeneralMessage(true);
     } else {
@@ -511,6 +512,7 @@ registerKeyHandler('ArrowUp', function(e) {
     var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
     if (current === NO_COMPONENT_ID) {
         openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
     } else if (current === 1) {
         closeMark(1);
     } else if (current === GENERAL_MESSAGE_ID) {
