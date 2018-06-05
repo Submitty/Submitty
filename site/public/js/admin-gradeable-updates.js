@@ -1,6 +1,6 @@
 
-function fillAjaxErrorBox(data, textStatus, xhr) {
-    if(xhr.status !== 204) { //NO CONTENT
+function fillAjaxErrorBox(data, statusCode) {
+    if(statusCode !== 204) { //NO CONTENT
         $('#ajax_debug').html(data);
     }
     else {
@@ -31,13 +31,15 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_name, p_val, successCallbac
         }),
         data: data,
         success: function(data, textStatus, xhr) {
+            console.log('Request for "' + p_name + '" with value "' + p_val + '" returned status code ' + xhr.status);
             if (typeof(successCallback) === "function") {
-                successCallback(data, textStatus, xhr);
+                successCallback(data, xhr.status);
             }
         },
-        error: function(data, textStatus, xhr) {
+        error: function(data) {
+            console.log('[Error]: Request for "' + p_name + '" with value "' + p_val + '" returned status code ' + data.status);
             if (typeof(errorCallback) === "function") {
-                errorCallback(data, textStatus, xhr);
+                errorCallback(data.responseText, data.status);
             }
         }
     });
