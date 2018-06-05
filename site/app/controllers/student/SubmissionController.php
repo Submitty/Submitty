@@ -77,14 +77,10 @@ class SubmissionController extends AbstractController {
         $content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($gradeable_id !== null && $student_id !== null) {
-            if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-                $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
-            }else{
-                //handle error
-            }
+        if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
         }else{
-            //handle error
+            $this->core->addErrorMessage("Unable to create new regrade request");
         }
     }
 
@@ -102,8 +98,16 @@ class SubmissionController extends AbstractController {
     }
 
     private function deleteRequest(){
+        if($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()){
+            $this->core->addErrorMessage("You do not have permission to delete regrade requests");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->addErrorMessage("You do not have permission to delete this request");
+            return;
+        }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
     }
 
@@ -156,7 +160,7 @@ class SubmissionController extends AbstractController {
                     }
                     $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
                     $late_days_use = max(0, $days_late - $extensions);
-                    if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
+                    if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded()) {
                         $gradeable->updateUserViewedDate();
                     }
                     $canViewWholeGradeable = false;

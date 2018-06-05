@@ -100,9 +100,9 @@ HTML;
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
-            $info.= " but your instructor specified that no late days may be used for this assignment.";
+            $info.= "<br>but your instructor specified that no late days may be used for this assignment.";
           } else {
-            $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+            $info.= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
         }
 
@@ -1196,11 +1196,12 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased()) {
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0) {
+            // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if ($gradeable->hasGradeFile()) {
+            if ($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;
@@ -1209,32 +1210,34 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-    <h3 class="label">TA grade not available</h3>
+
+    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
-            if($this->core->getConfig()->isRegradeEnabled() == true){
+            if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
             $return .= <<<HTML
 </div>
   <div class="content"> 
 HTML;
     $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-    if($gradeable->getRegradeStatus() !== 0)
-      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
     $return .= <<<HTML
   </div>
 HTML;
-           }
         }
 
         return $return;
     }
+  }
     public function showRequestForm($gradeable){
       $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
       $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
       $existsStaffPost = false;
       foreach ($threads as $thread) {
-        if($this->core->getQueries()->isStaffPost($thread['user_id'])) $existsStaffPost = true;
-        break;
+        if($this->core->getQueries()->isStaffPost($thread['user_id'])){ 
+          $existsStaffPost = true;
+          break;
+        }
       }
       $return = <<<HTML
       <div class = "sub">
@@ -1302,8 +1305,8 @@ HTML;
                 <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
                 placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
                 <br style = "margin-bottom: 10px;">
-                <input type="submit" value="submit" class="btn btn-default" style="margin: 15px;">
-                <input type="button" id = "cancelRegrade" value="cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
+                <input type="submit" value="Submit" class="btn btn-default" style="margin: 15px;">
+                <input type="button" id = "cancelRegrade" value="Cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
               </div>
             </form>
           </div>
@@ -1336,14 +1339,12 @@ HTML;
       return $return;
     }
     public function showRegradeDiscussion($gradeable){
-         // if($this->core->getConfig()->isRegradeEnabled() == false){
-        //    return;
-        //  }
-          $return="";
+          $return = "";
           $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
           $first = true;
+          $return = "";
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
             $replyPlaceHolder = "Enter your reply here";
@@ -1353,25 +1354,27 @@ HTML;
             $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
           }
           foreach ($threads as $thread) {
+            if(empty($threads)) break;
             $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
             $id = $thread['id'];
             $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
-            $content = $thread['content'];
+            $content = $thread['content']; 
             if($first){
               $class .= " first_post";
               $first = false;                                      
             }                                      
             $function_date = 'date_format';                                      
-            $return = <<<HTML
+            $return .= <<<HTML
             <div style="margin-top: 20px ">                                       
               <div class = '$class' style="padding:20px;">                                       
                 <p>{$content}</p>                                      
                 <hr>                                       
                 <div style="float:right">                                      
-                  <b>{$name}</b> &nbsp                                       
-                {$function_date($date,"m/d/Y g:i A")}                                      
-                </div>                                       
+                  <b>{$name}</b> &nbsp;                                       
+                  {$function_date($date,"m/d/Y g:i A")}                                      
+                </div>   
+              </div>                                    
             </div>                                       
 HTML;
           }
@@ -1399,7 +1402,6 @@ HTML;
             event.preventDefault();
           });
         </script>
-      </div>
       </div>
 HTML;
       return $return;
