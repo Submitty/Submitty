@@ -977,20 +977,20 @@ HTML;
     }
     $return .= <<< HTML
 
-    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
-    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
+    <i title="Reset Rubric Panel Positions" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
+    <i title="Show/Hide Auto-Grading Testcases" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
 HTML;
     if ($gradeable->useTAGrading()) {
             $return .= <<<HTML
-    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
+    <i title="Show/Hide Grading Rubric" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
 HTML;
         }
         $return .= <<<HTML
-    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
+    <i title="Show/Hide Submission and Results Browser" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
 HTML;
         if(!$peer) {
             $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
+    <i title="Show/Hide Student Information" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
 HTML;
         }
         $return .= <<<HTML
