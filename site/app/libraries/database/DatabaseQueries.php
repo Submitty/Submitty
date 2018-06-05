@@ -335,6 +335,18 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets whether a gradeable exists already
+     *
+     * @param $g_id the gradeable id to check for
+     *
+     * @return bool
+     */
+    public function existsGradeable($g_id) {
+        $this->course_db->query('SELECT EXISTS (SELECT g_id FROM gradeable WHERE g_id= ?)', array($g_id));
+        return $this->course_db->row()['exists'] ?? false; // This shouldn't happen, but let's assume false
+    }
+
+    /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
      *
      * @param string|string[]|null  $g_ids

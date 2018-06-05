@@ -701,7 +701,30 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    private function createGradeable() {
+        // Make sure the gradeable doesn't already exist
+        if($this->core->getQueries()->existsGradeable($_REQUEST['id']))
+        {
+            // TODO: tell the user in a good way that the gradeable couldn't be created
+            $this->viewPage(); // For now, just kick them back to the 'create' page
+            return;
+        }
+
+        // Create the gradeable with good default information
+        //
+
+        // Assert that the provided first page information and template information is valid
+        //  This is delegated to the 'updateGradeable' method (this should never fail)
+    }
+
     private function updateGradeable() {
+        // Make sure the gradeable already exists
+        if(!$this->core->getQueries()->existsGradeable($_REQUEST['id'])) {
+            http_response_code(404); // NOT FOUND
+            $this->core->getOutput()->renderJson(['errors' => 'Gradeable with given id does not exist!']);
+            return;
+        }
+
 	    // Get existing gradeable
         $admin_gradeable = new AdminGradeable($this->core);
         $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
