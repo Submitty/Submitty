@@ -84,3 +84,31 @@ else
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*
+
+
+#####################################
+# Checkout the NLohmann C++ json library
+
+nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_NLOHMANN_JSON/
+
+if [ ! -d "${nlohmann_dir}" ]; then
+    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
+fi
+
+
+#####################################
+# Build & Install Lichen Modules
+
+lichen_repo_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Lichen
+lichen_installation_dir=${SUBMITTY_INSTALL_DIR}/Lichen
+
+mkdir -p ${lichen_installation_dir}/bin
+
+pushd ${lichen_repo_dir}
+clang++ -I ${nlohmann_dir}/include/ -std=c++11 -Wall tokenizer/plaintext/plaintext_tokenizer.cpp -o ${lichen_installation_dir}/bin/plaintext_tokenizer.out
+popd /dev/null
+
+chown -R root:root ${lichen_installation_dir}
+chmod 755 ${lichen_installation_dir}
+chmod 755 ${lichen_installation_dir}/bin
+chmod 755 ${lichen_installation_dir}/bin/*
