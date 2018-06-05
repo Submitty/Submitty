@@ -3,8 +3,12 @@
         <tr>
             <td>{{ hotkey.name }}</td>
             <td>
-                {% set class = (hotkey.code == hotkey.originalCode) ? "btn-default" : "btn-primary" %}
-                <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
+                {% if hotkey.locked %}
+                    <button id="remap-{{ loop.index0 }}" class="btn btn-default remap-button" disabled="disabled">{{ hotkey.code }}</button>
+                {% else %}
+                    {% set class = (hotkey.code == hotkey.originalCode) ? "btn-default" : "btn-primary" %}
+                    <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button rebindable" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
+                {% endif %}
             </td>
         </tr>
     {% endfor %}

@@ -314,10 +314,10 @@ function gotoNextStudent() {
 }
 
 //Navigate to the prev / next student buttons
-registerKeyHandler("Previous Student", "ArrowLeft", function() {
+registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
     gotoPrevStudent();
 });
-registerKeyHandler("Next Student", "ArrowRight", function() {
+registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
     gotoNextStudent();
 });
 
@@ -399,23 +399,23 @@ function resetModules() {
 }
 
 
-registerKeyHandler("Reset Panel Positions", "KeyR", function() {
+registerKeyHandler({name: "Reset Panel Positions", code: "KeyR"}, function() {
     resetModules();
     updateCookies();
 });
-registerKeyHandler("Toggle Autograding Panel", "KeyA", function() {
+registerKeyHandler({name: "Toggle Autograding Panel", code: "KeyA"}, function() {
     toggleAutograding();
     updateCookies();
 });
-registerKeyHandler("Toggle Rubric Panel", "KeyG", function() {
+registerKeyHandler({name: "Toggle Rubric Panel", code: "KeyG"}, function() {
     toggleRubric();
     updateCookies();
 });
-registerKeyHandler("Toggle Submissions Panel", "KeyO", function() {
+registerKeyHandler({name: "Toggle Submissions Panel", code: "KeyO"}, function() {
     toggleSubmissions();
     updateCookies();
 });
-registerKeyHandler("Toggle Student Information Panel", "KeyS", function() {
+registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, function() {
     toggleInfo();
     updateCookies();
 });
@@ -423,7 +423,7 @@ registerKeyHandler("Toggle Student Information Panel", "KeyS", function() {
 //-----------------------------------------------------------------------------
 // Show/hide components
 
-registerKeyHandler("Open Next Component", 'ArrowDown', function(e) {
+registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
     var current = findCurrentOpenedMark();
     var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
@@ -441,7 +441,7 @@ registerKeyHandler("Open Next Component", 'ArrowDown', function(e) {
     e.preventDefault();
 });
 
-registerKeyHandler("Open Previous Component", 'ArrowUp', function(e) {
+registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
     var current = findCurrentOpenedMark();
     var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
@@ -462,31 +462,31 @@ registerKeyHandler("Open Previous Component", 'ArrowUp', function(e) {
 //-----------------------------------------------------------------------------
 // Selecting marks
 
-registerKeyHandler("Select Mark 1", 'Digit1', function() {
+registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
     selectCurrentMarkCheck(0);
 });
-registerKeyHandler("Select Mark 2", 'Digit2', function() {
+registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
     selectCurrentMarkCheck(1);
 });
-registerKeyHandler("Select Mark 3", 'Digit3', function() {
+registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
     selectCurrentMarkCheck(2);
 });
-registerKeyHandler("Select Mark 4", 'Digit4', function() {
+registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
     selectCurrentMarkCheck(3);
 });
-registerKeyHandler("Select Mark 5", 'Digit5', function() {
+registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
     selectCurrentMarkCheck(4);
 });
-registerKeyHandler("Select Mark 6", 'Digit6', function() {
+registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
     selectCurrentMarkCheck(5);
 });
-registerKeyHandler("Select Mark 7", 'Digit7', function() {
+registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
     selectCurrentMarkCheck(6);
 });
-registerKeyHandler("Select Mark 8", 'Digit8', function() {
+registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
     selectCurrentMarkCheck(7);
 });
-registerKeyHandler("Select Mark 9", 'Digit9', function() {
+registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
     selectCurrentMarkCheck(8);
 });
 

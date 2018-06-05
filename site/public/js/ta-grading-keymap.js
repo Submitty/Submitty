@@ -34,25 +34,21 @@ window.onkeydown = function(e) {
 
 /**
  * Register a function to be called when a key is pressed.
- * @param {string} name Display name of the action
- * @param {string} code Keycode, e.g. "KeyA" or "ArrowUp" or "Ctrl KeyR", see KeyboardEvent.code
- * Note the alphabetical order of modifier keys: Alt Control Meta Shift
+ * @param {object} parameters Parameters object, contains:
+ *     {string} name - Display name of the action
+ *     {string} code Keycode, e.g. "KeyA" or "ArrowUp" or "Ctrl KeyR", see KeyboardEvent.code
+ *     Note the alphabetical order of modifier keys: Alt Control Meta Shift
  * @param {Function} fn Function / callable
  */
-function registerKeyHandler(name, code, fn) {
-    var originalCode = code;
+function registerKeyHandler(parameters, fn) {
+    parameters.originalCode = parameters.code;
 
     //Check local storage
-    if (remapGetLS(name) !== null) {
-        code = remapGetLS(name);
+    if (remapGetLS(parameters.name) !== null) {
+        parameters.code = remapGetLS(parameters.name);
     }
 
-    keymap.push({
-        name: name,
-        code: code,
-        fn: fn,
-        originalCode: originalCode
-    });
+    keymap.push(parameters);
 }
 
 /**
@@ -116,7 +112,7 @@ function remapHotkey(i) {
     remapping.active = true;
     remapping.index = i;
 
-    $(".remap-button").attr("disabled", "disabled");
+    $(".remap-button.rebindable").attr("disabled", "disabled");
     $("#settings-close").attr("disabled", "disabled");
     button.attr("disabled", null);
     button.addClass("btn-success");
@@ -153,7 +149,7 @@ function remapFinish(event) {
     remapping.active = false;
     generateHotkeysList();
 
-    $(".remap-button").attr("disabled", null);
+    $(".remap-button.rebindable").attr("disabled", null);
     $("#settings-close").attr("disabled", null);
 }
 
