@@ -484,9 +484,6 @@ function resetModules() {
     $('.fa-hand-paper-o').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     hideIfEmpty(".rubric_panel");
-    $('.fa-exclamation').removeClass('icon-selected');
-    $("#regrade_request_box").attr("style", "left: 26%; top: 35%; width: 48%; height: 30%;");
-    $("#regrade_request_box").hide();
     deleteCookies();
     updateCookies();
 }

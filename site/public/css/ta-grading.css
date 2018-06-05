@@ -109,10 +109,6 @@
     width: 1em;
 }
 
-.icon-selected.fa-exclamation {
-    box-shadow: 0px 0px 3px 3px #f47a42;
-    background-color: #f47a42;
-}
 .icon-refresh{
     background: url('../img/refresh-page-option.png') no-repeat;
     background-size: 100%;
