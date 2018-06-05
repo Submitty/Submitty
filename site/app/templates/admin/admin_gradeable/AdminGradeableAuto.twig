@@ -83,17 +83,6 @@
         }
     }
 
-    function onUploadTypeChange() {
-        if($('#upload_file_radio').is(':checked')) {
-            // $('#repository').hide();
-            disableElementChildren('#repository', true);
-        }
-        else {
-            // $('#repository').show();
-            disableElementChildren('#repository', false);
-        }
-    }
-
     $(document).ready(function() {
 
         // Hide PDF settings if not in use

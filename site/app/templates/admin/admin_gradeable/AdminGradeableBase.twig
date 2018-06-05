@@ -37,10 +37,14 @@
         <br/>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
             <div class="page-content" id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
-            <div class="page-content" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
-            <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
-            <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
-            <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+
+            {# only load the other pages if we are editing an existing gradeable #}
+            {% if action == 'edit' %}
+                <div class="page-content" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
+                <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+                <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+                <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+            {% endif %}
         </div>
         <br/>
         <div id="nav-controls">

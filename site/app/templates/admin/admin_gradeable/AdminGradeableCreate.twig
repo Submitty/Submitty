@@ -223,6 +223,17 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         }
     }
 
+    function onUploadTypeChange() {
+        if($('#upload_file_radio').is(':checked')) {
+            // $('#repository').hide();
+            disableElementChildren('#repository', true);
+        }
+        else {
+            // $('#repository').show();
+            disableElementChildren('#repository', false);
+        }
+    }
+
     function onVcsSubdirChange() {
         setVcsUrl($('#subdirectory').val());
     }
