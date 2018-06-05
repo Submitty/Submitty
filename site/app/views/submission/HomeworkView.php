@@ -1341,6 +1341,7 @@ HTML;
           $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
           $user = $this->core->getUser()->getId();
           $first = true;
+          $return = "";
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
             $replyPlaceHolder = "Enter your reply here";
