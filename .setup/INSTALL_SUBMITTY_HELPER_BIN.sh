@@ -106,7 +106,7 @@ mkdir -p ${lichen_installation_dir}/bin
 
 pushd ${lichen_repo_dir}
 clang++ -I ${nlohmann_dir}/include/ -std=c++11 -Wall tokenizer/plaintext/plaintext_tokenizer.cpp -o ${lichen_installation_dir}/bin/plaintext_tokenizer.out
-popd /dev/null
+popd > /dev/null
 
 chown -R root:root ${lichen_installation_dir}
 chmod 755 ${lichen_installation_dir}
