@@ -469,6 +469,7 @@ class Gradeable extends AbstractModel {
 
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
+
         if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
             $late_flag = true;
@@ -483,6 +484,11 @@ class Gradeable extends AbstractModel {
         // during the semester and they've already used late days
         if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
             $this->late_status = "Bad too many used this term";
+            $late_flag = false;
+        }
+
+        if (!$this->hasSubmitted()){
+            $this->late_status = "No submission";
             $late_flag = false;
         }
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot

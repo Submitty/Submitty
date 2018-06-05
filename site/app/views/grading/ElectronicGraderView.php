@@ -1968,9 +1968,6 @@ HTML;
                 $status = $g->getLateStatus();
                 $status_for_this_assignment = $g->getLateStatus();
             }
-            if(!$g->hasSubmitted()){
-                $status = "No submission";
-            }
             $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
             $return .= <<<HTML
                 <tr>

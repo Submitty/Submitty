@@ -28,9 +28,6 @@ class LateController extends AbstractController {
             case 'get_extension_details':
                 $this->getExtensions($_REQUEST['g_id']);
                 break;
-            case 'view_late_table':
-                $this->viewLateTable();
-                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
@@ -46,11 +43,6 @@ class LateController extends AbstractController {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
     }
-
-    public function viewLateTable() {
-        $this->core->getOutput()->renderOutput(array('LateDaysTable'), 'showLateTable', $this->core->getUser()->getId());
-    }
-
 
     public function update($type, $delete) {
         if ($delete) {
