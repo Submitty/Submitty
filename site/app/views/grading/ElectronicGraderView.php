@@ -1791,15 +1791,15 @@ HTML;
         $return .= <<<HTML
 </div>
 
-<div id="regrade_request_box" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%;">
-        <div class = "draggable_content">
+<div id="regrade_request_box" class = "draggable rubric_panel" style="left: 26%; top: 35%; width: 48%; height: 30%;">
+    <div class = "draggable_content">
         <div class = "inner-container" style="padding:20px;">
 HTML;
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
                 $return .= <<<HTML
         </div>
-        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

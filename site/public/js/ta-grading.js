@@ -464,6 +464,9 @@ function resetModules() {
     $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
     $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
     hideIfEmpty(".rubric_panel");
+    $('.fa-exclamation').removeClass('icon-selected');
+    $("#regrade_request_box").attr("style", "left: 26%; top: 35%; width: 48%; height: 30%;");
+    $("#regrade_request_box").hide();
     deleteCookies();
     updateCookies();
 }
