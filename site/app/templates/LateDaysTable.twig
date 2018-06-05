@@ -1,7 +1,19 @@
 <div class="content">
     <h3>Overall Late Day Usage for {{ user_id }}</h3><br/>
-    {#Since allowed per term is the same across all gradeables, we can just use the first one as a reference.#}
-    <p>Allowed per term: {{ student_gradeables[0].getStudentAllowedLateDays()}}</p>
+    <p>Initial total late days allowed: {{ student_gradeables[0].getStudentAllowedLateDays() }}</p>
+    <p>Late day history:</p>
+    {% set temp = student_gradeables[0].getStudentAllowedLateDays() %}
+    {% for lateday in late_update %}
+        {% if lateday.allowed_late_days - temp >= 0 %}
+            <p>{{ lateday.since_timestamp|date('m/d')}}: Earned {{ lateday.allowed_late_days - temp}} late day(s)</p>
+        {% else %}
+            <p>{{ lateday.since_timestamp|date('m/d')}}: Lost {{ (lateday.allowed_late_days - temp)|abs}} late day(s)</p>
+        {% endif %}
+        {% set temp = lateday.allowed_late_days %}
+    {% endfor %}
+    {#We use the most recent gradeable for allowed per term because late days are flexible#}
+    {% set curr_late = student_gradeables[student_gradeables|length-1].getStudentAllowedLateDays() %}
+    <strong>Current total late days allowed (including additional late days): {{ curr_late }}</strong>
     <table>
         <thead>
         <tr>
@@ -22,7 +34,7 @@
             {% endif %}
             <tr>
                 <td {{ class }} style="padding:5px; border:thin solid black">{{gradeable.getName()}}</td>
-                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getDueDate()|date('m/d')}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getDueDate()|date('m/d/y')}}</td>
                 <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
                 <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getLateDays()}}</td>
                 <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getLateDayExceptions()}}</td>
@@ -35,5 +47,5 @@
         </tbody>
     </table>
     <p>Total late days used: {{ total_late_used }}</p>
-    <p>Total late days remaining: {{ student_gradeables[0].getStudentAllowedLateDays() - total_late_used}}</p>
+    <p>Total late days remaining: {{ curr_late - total_late_used}}</p>
 </div>

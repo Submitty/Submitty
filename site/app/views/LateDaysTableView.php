@@ -5,7 +5,7 @@ namespace app\views;
 use app\views\AbstractView;
 
 class LateDaysTableView extends AbstractView {
-    public function showLateTable($user_id, $g_id = NULL) {
+    public function showLateTable($user_id, $g_id = NULL, $late_update) {
         $this->core->getOutput()->addBreadcrumb("Late Days Summary", $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')));
         $student_gradeables = array();
         $status_array = array();
@@ -27,7 +27,8 @@ class LateDaysTableView extends AbstractView {
             "status_array" => $status_array,
             "late_charged_array" => $late_charged_array,
             "total_late_used" => $total_late_used,
-            "g_id" => $g_id
+            "g_id" => $g_id,
+            "late_update" => $late_update
         ]);
     }
 }
