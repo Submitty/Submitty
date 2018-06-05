@@ -25,6 +25,9 @@ class AdminGradeableController extends AbstractController {
             case 'edit_gradeable_page':
                 $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
                 break;
+            case 'update_gradeable':
+                $this->updateGradeable();
+                break;
             case 'upload_edit_gradeable':
                 $this->modifyGradeable(1);
                 break;
@@ -85,13 +88,125 @@ class AdminGradeableController extends AbstractController {
         return $admin_gradeable;
     }
 
+    /**
+     * Checks if a gradeable is valid
+     *
+     * @param $admin_gradeable the gradeable to validate
+     *
+     * @return array error messages
+     */
+    private static function validateGradeable($admin_gradeable)
+    {
+        // For now, only check that the dates are valid, but here's a list of checks:
+        //  -Non-blank Name
+        //  -one 'type' checkbox is checked
+        //  -non-blank autograding config (for electronic submission)
+        //  -maybe some warnings about the rubric
+
+        // Messages array that holds warning/error messages for
+        //  any AdminGradeable Properties that have issues
+        $messages = array();
+
+
+        if($admin_gradeable->g_title === '') {
+            $messages['g_title'] = 'Title cannot be blank!';
+        }
+
+        $ta_view = null;
+        $open = null;
+        $due = null;
+        $grade = null;
+        $release = null;
+        $late_interval = null;
+        $max_due = null;
+
+        // Make sure that all of the provided dates are in a valid format
+        try {
+            $ta_view = new \DateTime($admin_gradeable->getGTaViewStartDate());
+        } catch (\Exception $e) {
+            $messages['g_ta_view_start_date'] = 'Invalid Format!';
+        }
+
+        try {
+            $open = new \DateTime($admin_gradeable->getEgSubmissionOpenDate());
+        } catch (\Exception $e) {
+            $messages['eg_submission_open_date'] = 'Invalid Format!';
+        }
+
+        try {
+            $due = new \DateTime($admin_gradeable->getEgSubmissionDueDate());
+        } catch (\Exception $e) {
+            $messages['eg_submission_due_date'] = 'Invalid Format!';
+        }
+
+        try {
+            $grade = new \DateTime($admin_gradeable->getGGradeStartDate());
+        } catch (\Exception $e) {
+            $messages['g_grade_start_date'] = 'Invalid Format!';
+        }
+
+        try {
+            $release = new \DateTime($admin_gradeable->getGGradeReleasedDate());
+        } catch (\Exception $e) {
+            $messages['g_grade_released_date'] = 'Invalid Format!';
+        }
+
+        try {
+            $late_interval = new \DateInterval('P' . strval($admin_gradeable->getEgLateDays()) . 'D');
+        } catch (\Exception $e) {
+            $messages['eg_late_days'] = 'Invalid Format!';
+        }
+
+        if(!($due === null || $late_interval === null)) {
+            $max_due = $due->add($late_interval);
+        }
+
+        // No validation for team lock dates (tbd)
+
+        if($admin_gradeable->getGGradeableType() === GradeableType::ELECTRONIC_FILE) {
+            if(!($ta_view === null || $open === null) && $ta_view > $open) {
+                $messages['g_ta_view_start_date']   = 'TA Beta Testing Date must not be later than Submission Open Date';
+            }
+            if(!($open === null || $due === null) && $open > $due) {
+                $message['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
+            }
+
+            if($admin_gradeable->getEgUseTaGrading()) {
+
+                if(!($due === null || $grade === null) && $due > $grade) {
+                    $message['g_grade_start_date']      = 'Manual Grading Open Date must be no earlier than Due Date';
+                }
+                else if(!($due === null || $grade === null) && $max_due > $grade) {
+                    $message['g_grade_start_date']      = '[Warning] Manual Grading Open Date should be no earlier than Due Date';
+                }
+
+                if(!($grade === null || $release === null) && $grade > $release) {
+                    $message['g_grade_released_date']   = 'Grades Released Date must be later than the Manual Grading Open Date';
+                }
+            }
+            else {
+
+                if(!($max_due === null || $release === null) && $max_due > $release) {
+                    $message['g_grade_released_date']   = 'Grades Released Date must be later than the Due Date + Max Late Days';
+                }
+            }
+        }
+        else {
+            // The only check if its not an electronic gradeable
+            if(!($ta_view === null || $release === null) && $ta_view > $release) {
+                $message['g_grade_released_date']       = 'Grades Released Date must be later than the TA Beta Testing Date';
+            }
+        }
+
+        return $messages;
+    }
+
     // check whether radio button's value is 'true'
     private function isRadioButtonTrue($name) {
         return isset($_POST[$name]) && $_POST[$name] === 'true';
     }
 
-    //if $edit_gradeable === 0 then it uploads the gradeable to the database
-    //if $edit_gradeable === 1 then it updates the gradeable to the database
+    // Maintain previous function while adding new 'update field' feature
     private function modifyGradeable($edit_gradeable) {
         $peer_grading_complete_score = 0;
         if ($edit_gradeable === 0) {
@@ -99,7 +214,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setId($_POST['gradeable_id']);
         } else {
             $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
-        }        
+        }
         $gradeable->setName(filter_input(INPUT_POST, 'gradeable_title', FILTER_SANITIZE_SPECIAL_CHARS));
         $gradeable->setInstructionsUrl(filter_input(INPUT_POST, 'instructions_url', FILTER_SANITIZE_SPECIAL_CHARS));
         $gradeable->setTaInstructions($_POST['ta_instructions']);
@@ -584,6 +699,67 @@ class AdminGradeableController extends AbstractController {
         else {
             $this->returnToNav();
         }
+    }
+
+    private function updateGradeable() {
+	    // Get existing gradeable
+        $admin_gradeable = new AdminGradeable($this->core);
+        $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
+
+        $errors = array();
+        $blacklist = [
+            'g_id' => 'Gradeable Id',
+            'g_gradeable_type' => 'Gradeable Type',
+            'eg_team_assignment' => 'Teamness',
+            'eg_is_repository' => 'Upload Method'
+        ];
+
+        // Apply new values for all properties submitted
+        foreach($_POST as $prop=>$post_val) {
+
+            // small blacklist (values that can't change)
+            if(key_exists($prop, $blacklist)) {
+                $errors[$prop] = 'Cannot Change ' . $blacklist[$prop] . ' once created';
+                continue;
+            }
+
+            // Submitter is trying to set this property
+            try {
+                if(property_exists($admin_gradeable, $prop)){
+                    $admin_gradeable->$prop = $post_val;
+                }
+                else {
+                    $errors[$prop] = 'Not Found!';
+                }
+            } catch(\Exception $e){
+                $errors[$prop] = $e;
+            }
+        }
+
+        // If the post array is 0, that means that the name of the element was blank
+        if(count($_POST) === 0) {
+            $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
+        }
+
+        // TODO: Construct complex values for validation (i.e. rubrics)
+
+        $errors = array_merge($errors, self::validateGradeable($admin_gradeable));
+
+        $response_data = [];
+
+        // Be strict.  Only apply database changes if there were no errors.
+        if(count($errors) === 0) {
+            // TODO: apply to database
+
+            http_response_code(204); // NO CONTENT
+        }
+        else {
+            $response_data['errors'] = $errors;
+            http_response_code(400);
+        }
+
+        // Finally, send the requester back the information
+        $this->core->getOutput()->renderJson($response_data);
     }
 
     private function deleteGradeable() {

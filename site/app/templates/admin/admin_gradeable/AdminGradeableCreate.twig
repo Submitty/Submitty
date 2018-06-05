@@ -21,7 +21,7 @@
 #}
 <!-- Gradeable Title (read/write in all modes) -->
 What is the title of this gradeable?: 
-    <input style='width: 227px' type='text' name='gradeable_title' id='gradeable_title_id' class="required" 
+    <input style='width: 227px' type='text' name='gradeable_title' id='g_title' class="required"
         value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
 
 <br />
@@ -35,7 +35,7 @@ What is the URL to the assignment instructions? (shown to student)
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
 What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
-<input style='width: 200px' type='text' name='gradeable_id' id="gradeable_id" class="required"
+<input style='width: 200px' type='text' name='g_id' id="g_id" class="required"
        value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
 
     <span class="uneditable-text">(ID cannot be changed after initial creation)</span>
@@ -311,8 +311,8 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     });
 
     function checkFormCreate() {
-        var gradeable_id = $('#gradeable_id').val();
-        var gradeable_title = $('gradeable_title_id').val();
+        var gradeable_id = $('#g_id').val();
+        var gradeable_title = $('g_title').val();
         var has_space = gradeable_id.includes(" ");
         var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
 

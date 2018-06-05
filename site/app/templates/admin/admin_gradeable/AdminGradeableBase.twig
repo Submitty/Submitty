@@ -3,6 +3,7 @@
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript" language="javascript" src="js/admin-gradeable.js"></script>
 
 <script type="text/javascript">
     function disableElementChildren(c, dis = true) {
@@ -10,6 +11,7 @@
     }
 </script>
 <div id="container-rubric" style="display:none;">
+    <div id="ajax_debug"></div>
     <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
