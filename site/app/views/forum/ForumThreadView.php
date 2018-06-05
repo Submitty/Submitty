@@ -837,7 +837,6 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.5/chosen.min.css" />
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.5/chosen.jquery.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
@@ -845,7 +844,6 @@ HTML;
 			$( document ).ready(function() {
 			    enableTabsInTextArea('thread_content');
 				$("form").areYouSure();
-				$("#cat").chosen({width: "30%"});
 			});
 		 </script>
 
@@ -894,19 +892,6 @@ HTML;
             	<br/>
             	<div style="margin-bottom:10px;" class="form-group row">
             		<button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-HTML;
-					$categories = $this->core->getQueries()->getCategories();
-					$return .= <<<HTML
-					<label for="cat">Categories</label>
-					<select style="margin-right:10px;" id="cat" name="cat[]" data-placeholder="Select Categories" class="form-control" multiple="multiple">
-HTML;
-					for($i = 0; $i < count($categories); $i++){
-						$return .= <<<HTML
-							<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
-HTML;
-					}
-					$return .= <<<HTML
-				    </select>
             	</div>
             	<div class="form-group row">
             		<textarea name="thread_content" id="thread_content" style="resize:none;min-height:40vmin;overflow:hidden;width:100%;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
@@ -914,8 +899,22 @@ HTML;
 
             	<br/>
 
-            	<div style="margin-bottom:10px;" class="form-group row">
 
+            	<div style="margin-bottom:10px;" class="form-group row">
+HTML;
+					$categories = $this->core->getQueries()->getCategories();
+					$return .= <<<HTML
+					<label for="cat">Categories</label> <br>
+HTML;
+					for($i = 0; $i < count($categories); $i++){
+						$return .= <<<HTML
+							<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</input>
+HTML;
+					}
+					$return .= <<<HTML
+
+            	</div>
+            	<div style="margin-bottom:10px;" class="form-group row">
             	<span style="float:left;display:inline-block;">
             	<label id="file_input_label" class="btn btn-default" for="file_input">
     				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
