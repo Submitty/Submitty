@@ -429,6 +429,7 @@ function setInfoVisible(visible) {
 }
 
 function setRegradeDiscussion(visible){
+    $('.fa-exclamation').toggleClass('icon-selected', visible);
     $("#regrade_request_box").toggle(visible);
 }
 

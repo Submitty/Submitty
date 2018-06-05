@@ -1068,7 +1068,7 @@ HTML;
             if($gradeable->getRegradeStatus() !== 0){
                 $col = ($gradeable->getRegradeStatus() === -1) ? 'red' : 'black';
                 $return .= <<<HTML
-               <i title="" onclick="toggleRegradeDiscussion()" class="fa fa-exclamation icon-header fa-fw fa-3x" style="color: {$col};"></i>
+               <i title="" onclick="toggleRegradeDiscussion()" class="fa fa-exclamation icon-header fa-3x" style="color: {$col};"></i>
 HTML;
             }
         }
