@@ -518,7 +518,7 @@ HTML;
                         else if ($TA_percent == 100 && $title_save=='GRADED'){
                             $gradeable_grade_range = <<<HTML
                             <a class="btn btn-default btn-nav" \\ 
-                            style="background-color:orange" \\
+                            style="background-color:#d9534f" \\
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                             REGRADE REQUESTS</a>
 HTML;

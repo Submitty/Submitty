@@ -2231,8 +2231,10 @@ AND gc_id IN (
     }
     public function deleteRegradeRequest($gradeable_id, $student_id){
         $thread_id = array($this->getRegradeRequestID($gradeable_id, $student_id));
+        //$this->course_db->query("UPDATE regrade_requests SET status='1'");
         $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = ?", $thread_id);
         $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $thread_id);
+
     }
     public function deleteGradeable($g_id) {
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
