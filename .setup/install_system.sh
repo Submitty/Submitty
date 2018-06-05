@@ -377,9 +377,8 @@ if [ ${WORKER} == 0 ]; then
     # assignment configurations
 
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        git pull
-        popd > /dev/null
+        echo 'Submitty/Tutorial git repo already exists'
+        echo 'You may need to manually pull updates to this repo'
     else
         git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
@@ -394,11 +393,22 @@ fi
 #################
 
 if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    git pull
-    popd > /dev/null
+    echo 'Submitty/AnalysisTools git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+fi
+
+
+#################################################################
+# LICHEN SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Lichen ]; then
+    echo 'Submitty/Lichen git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Lichen
 fi
 
 
