@@ -42,6 +42,7 @@ window.onkeydown = function(e) {
  */
 function registerKeyHandler(parameters, fn) {
     parameters.originalCode = parameters.code;
+    parameters.fn = fn;
 
     //Check local storage
     if (remapGetLS(parameters.name) !== null) {
