@@ -1400,7 +1400,6 @@ HTML;
           });
         </script>
       </div>
-      </div>
 HTML;
       return $return;
     }
