@@ -110,8 +110,6 @@ function readCookies(){
 
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var bar_wrapper_width = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var bar_wrapper_height = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -156,8 +154,6 @@ function readCookies(){
 
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
-    (bar_wrapper_width) ? $("#bar_wrapper").css("width", bar_wrapper_width):{};
-    (bar_wrapper_height) ? $("#bar_wrapper").css("height", bar_wrapper_height):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
 
     (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
@@ -250,8 +246,6 @@ function updateCookies(){
 
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
-    document.cookie = "bar_wrapper_width=" + $("#bar_wrapper").css("width") + "; path=/;";
-    document.cookie = "bar_wrapper_height=" + $("#bar_wrapper").css("height") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
 
     var overwrite = "on";
@@ -473,7 +467,6 @@ function toggleSubmissions() {
 function toggleInfo() {
     setInfoVisible(!isInfoVisible());
 }
-
 function toggleRegrade() {
     setRegradeVisible(!isRegradeVisible());
 }
@@ -491,6 +484,9 @@ function resetModules() {
     $('.fa-hand-paper-o').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     hideIfEmpty(".rubric_panel");
+    $('.fa-exclamation').removeClass('icon-selected');
+    $("#regrade_request_box").attr("style", "left: 26%; top: 35%; width: 48%; height: 30%;");
+    $("#regrade_request_box").hide();
     deleteCookies();
     updateCookies();
 }

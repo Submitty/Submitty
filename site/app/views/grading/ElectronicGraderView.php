@@ -1788,7 +1788,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
         $setRegradeVisible="";
-        if($this->core->getConfig()->isRegradeEnabled() == true && $this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
+        if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==-1){
         $return .= <<<HTML
 </div>
 <div id="regrade_info" class = "draggable rubric_panel" style="{$setRegradeVisible} right: 15px; bottom: 40px;width: 48%; height: 30%">
@@ -1799,7 +1799,7 @@ HTML;
                 $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
                 $return .= <<<HTML
         </div>
-        </div>
+    </div>
 HTML;
 }
 $return .= <<<HTML
@@ -1900,14 +1900,6 @@ window.onunload = unloadSave;
           textarea.style.height = "";
           textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
         };
-        function hideRequestDiscussion(){
-            var displayRequests = document.getElementById("regrade_request_box");
-            displayRequests.style.display = "none";
-        }
-        function showRequestDiscussion(){
-            var displayRequests = document.getElementById("regrade_request_box");
-            displayRequests.style.display = "block";
-        }
 </script>
 HTML;
         return $return;

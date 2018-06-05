@@ -1,7 +1,7 @@
 #bar_wrapper {
      position:relative;
      height: 41px;
-     width: 533px;
+     width: 600px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -24,7 +24,6 @@
     position:relative;
     display: block;
     float: left;
-    width: 333px;
     padding-top:3px;
     padding-bottom:3px;
     background-color: #edf6f6;
@@ -104,6 +103,15 @@
 .icon-selected.fa-hand-paper-o {
     box-shadow: 0px 0px 3px 3px #ffa500;
     background-color: #ffa500;
+}
+.icon-header {
+    text-align: center;
+    width: 1em;
+}
+
+.icon-selected.fa-exclamation {
+    box-shadow: 0px 0px 3px 3px #f47a42;
+    background-color: #f47a42;
 }
 .icon-refresh{
     background: url('../img/refresh-page-option.png') no-repeat;

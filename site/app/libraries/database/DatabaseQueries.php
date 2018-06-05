@@ -2189,13 +2189,9 @@ AND gc_id IN (
 
     }
     public function getRegradeRequestStatus($student_id, $gradeable_id){
-        $params = array($student_id, $gradeable_id);
-        $question_marks = implode(",", array_fill(0, count($params), "?"));
-        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE student_user_id = ? AND gradeable_id = ?", array($student_id, $gradeable_id));
-        if( $this->course_db->row() ){
-            return $row['status'];
-        }
-        else return 0;
+        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE student_user_id = ? AND gradeable_id = ? ", array($student_id, $gradeable_id));
+        $result = ($this->course_db->row()) ? $row['status'] : 0;
+        return $result;
     }
     public function insertNewRegradeRequest($gradeable_id, $student_id,$content){
         $params = array($gradeable_id, $student_id, -1);
@@ -2218,24 +2214,23 @@ AND gc_id IN (
         return $result;
     }
     public function getRegradeRequestID($gradeable_id,$student_id){
-        $row = $this->course_db->query("SELECT id FROM regrade_requests WHERE gradeable_id = ? AND student_user_id = ?", array($gradeable_id, $student_id));
-         if( $this->course_db->row() ) return $row['id'];
-         else return -1;
+        $row = $this->course_db->query("SELECT id FROM regrade_requests WHERE gradeable_id = ? AND student_user_id = ?", array($gradeable_id,$student_id));
+        $result = ($this->course_db->row()) ? $row['id'] : -1;
+        return $result;
     }
     public function insertNewRegradePost($thread_id,$gradeable_id, $user_id, $content){
         $params = array($thread_id,$gradeable_id, $user_id, $content);
         $this->course_db->query("INSERT INTO regrade_discussion(thread_id,regrade_id, timestamp, user_id, content) VALUES (?,?, current_timestamp, ?, ?)", $params);
     }
     public function modifyRegradeStatus($thread_id, $status){
-
-        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", array($status, $thread_id));
+        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", array($status,$thread_id) );
     }
     public function deleteRegradeRequest($gradeable_id, $student_id){
-        $thread_id = $this->getRegradeRequestID($gradeable_id, $student_id);
-        $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = ?", array($thread_id));
-        $this->course_db->query("DELETE FROM regrade_requests WHERE thread_id = ?", array($thread_id));
-}
+        $thread_id = array($this->getRegradeRequestID($gradeable_id, $student_id));
+        $this->course_db->query("DELETE FROM regrade_discussion WHERE thread_id = ?", $thread_id);
+        $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $thread_id);
+    }
     public function deleteGradeable($g_id) {
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
-}
+    }
 }
