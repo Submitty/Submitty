@@ -136,7 +136,7 @@ function remapFinish(event) {
         if (keymap[i].code === code) {
             //Oh no
             var button = $("#remap-" + remapping.index);
-            button.text("Enter Unique Key");
+            button.text("Enter Unique Key...");
             button.addClass("btn-danger");
             button.removeClass("btn-success");
             return;
