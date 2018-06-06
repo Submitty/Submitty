@@ -261,6 +261,8 @@
 {% macro render_column_total(self, section, gradeable, index, info, column) %}
     {% set box_background = (gradeable.getActiveDaysLate() > gradeable.getAllowedLateDays()) ? "late-box" : "" %}
 
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
+
     {# Always get autograder points #}
     {% set graded = gradeable.getGradedAutograderPoints() %}
     {# If they have a valid, graded submission then they get points from it #}
@@ -283,6 +285,7 @@
 {# Total Point Summary (peer) #}
 {% macro render_column_total_peer(self, section, gradeable, index, info, column) %}
     {# todo: test this (no way to create peer assignments currently) #}
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
     {% set graded = gradeable.getGradedNonHiddenPoints() %}
     {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
     {% for component in components %}
