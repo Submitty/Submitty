@@ -1214,6 +1214,7 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
+            </div>
 HTML;
     if($this->core->getConfig()->isRegradeEnabled()){
       $return .= <<<HTML
