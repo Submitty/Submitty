@@ -389,6 +389,10 @@ HTML;
         $show_export_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
         $show_auto_grading_points = true;
 
+        //Each table column is represented as an array with the following entries:
+        // width => how wide the column should be on the page, <td width=X>
+        // title => displayed title in the table header
+        // function => maps to a macro in Details.twig:render_student
         $columns = [];
         if($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
@@ -397,12 +401,12 @@ HTML;
             if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
-                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
+                $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             } else {
                 $show_auto_grading_points = false;
                 $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading"];
-                $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total"];
+                $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
         } else {
@@ -446,36 +450,36 @@ HTML;
             }
         }
 
-        //Convert rows into sections
+        //Convert rows into sections and prepare extra row info for things that
+        // are too messy to calculate in the template.
         $sections = [];
         foreach ($rows as $row) {
+            //Extra info for the template
             $info = [
                 "gradeable" => $row
             ];
 
-
             if ($peer) {
-                $title = "PEER STUDENT GRADER";
+                $section_title = "PEER STUDENT GRADER";
             } else if ($row->isGradeByRegistration()) {
-                $title = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
+                $section_title = $row->getTeam() === null ? $row->getUser()->getRegistrationSection() : $row->getTeam()->getRegistrationSection();
             } else {
-                $title = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
+                $section_title = $row->getTeam() === null ? $row->getUser()->getRotatingSection() : $row->getTeam()->getRotatingSection();
             }
-            if ($title === null) {
-                $title = "NULL";
+            if ($section_title === null) {
+                $section_title = "NULL";
             }
 
-            if (isset($graders[$title]) && count($graders[$title]) > 0) {
-                $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$title]));
-            }
-            else {
+            if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
+                $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$section_title]));
+            } else {
                 $section_graders = "Nobody";
             }
             if ($peer) {
                 $section_graders = $this->core->getUser()->getId();
             }
 
-            //Team edit button
+            //Team edit button, specifically the onclick event.
             if ($row->isTeamAssignment()) {
                 if ($row->getTeam() === null) {
                     $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
@@ -493,11 +497,15 @@ HTML;
                 }
             }
 
+            //More complicated info generation should go here
 
-            //Find the section in the array and add this student
+
+            //-----------------------------------------------------------------
+            // Now insert this student into the list of sections
+
             $found = false;
             for ($i = 0; $i < count($sections); $i ++) {
-                if ($sections[$i]["title"] === $title) {
+                if ($sections[$i]["title"] === $section_title) {
                     $found = true;
                     $sections[$i]["rows"][] = $info;
                     break;
@@ -505,7 +513,7 @@ HTML;
             }
             //Not found? Create it
             if (!$found) {
-                $sections[] = ["title" => $title, "rows" => [$info], "graders" => $section_graders];
+                $sections[] = ["title" => $section_title, "rows" => [$info], "graders" => $section_graders];
             }
         }
 
