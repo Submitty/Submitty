@@ -372,17 +372,15 @@ HTML;
         $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+        if ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
-        if($peer) {
+        if ($peer) {
             $grading_count = $gradeable->getPeerGradeSet();
-        }
-        else if($gradeable->isGradeByRegistration()){
+        } else if ($gradeable->isGradeByRegistration()) {
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-        }
-        else{
-            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
+        } else {
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
         }
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
@@ -469,7 +467,9 @@ HTML;
             }
 
             if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
-                $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$section_title]));
+                $section_graders = implode(", ", array_map(function (User $user) {
+                    return $user->getId();
+                }, $graders[$section_title]));
             } else {
                 $section_graders = "Nobody";
             }
@@ -527,7 +527,7 @@ HTML;
             // Now insert this student into the list of sections
 
             $found = false;
-            for ($i = 0; $i < count($sections); $i ++) {
+            for ($i = 0; $i < count($sections); $i++) {
                 if ($sections[$i]["title"] === $section_title) {
                     $found = true;
                     $sections[$i]["rows"][] = $info;
@@ -541,13 +541,13 @@ HTML;
         }
 
         $empty_team_info = [];
-        foreach($empty_teams as $team) {
+        foreach ($empty_teams as $team) {
             /* @var Team $team */
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
             $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-            $user_assignment_setting_json=json_encode($user_assignment_setting);
-            $reg_section = ($team->getRegistrationSection() === null) ? "NULL": $team->getRegistrationSection();
-            $rot_section = ($team->getRotatingSection() === null) ? "NULL": $team->getRotatingSection();
+            $user_assignment_setting_json = json_encode($user_assignment_setting);
+            $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
+            $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
 
             $empty_team_info[] = [
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});"
