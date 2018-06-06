@@ -395,7 +395,7 @@ HTML;
             $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
 
             if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() !== 0) {
-                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_nohidden"];
+                $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
@@ -572,92 +572,9 @@ HTML;
 
             <tr id="user-row-{$row->getUser()->getId()}" {$style}>
 HTML;
-                if($gradeable->isTeamAssignment()) {
-                    if ($this->core->getUser()->accessAdmin()) {
-                        $return .= <<<HTML
-
-HTML;
-                        if($row->getTeam()=== null) {
-                            $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
-                            $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL": $row->getUser()->getRegistrationSection();
-                            $return .= <<<HTML
-                <td><a onclick='adminTeamForm(true, "{$row->getUser()->getId()}", "{$reg_section}", "{$rot_section}", [], [], {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                <td></td>
-HTML;
-                        }
-                        else {
-                            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
-                            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-                            $user_assignment_setting_json = json_encode($user_assignment_setting);
-                            $members = json_encode($row->getTeam()->getMembers());
-                            $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL": $row->getTeam()->getRegistrationSection();
-                            $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL": $row->getTeam()->getRotatingSection();
-                            $return .= <<<HTML
-                <td><a onclick='adminTeamForm(false, "{$row->getTeam()->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                <td>{$row->getTeam()->getId()}</td>
-HTML;
-                        }
-                    }
-                    if($row->getTeam() === null) {
-                        $return .=<<<HTML
-
-                <td>{$row->getUser()->getId()}</td>
-HTML;
-                    }
-                    // Construct a string containing the names of all team members
-                     else {
-                        $member_list = "";
-                        foreach($row->getTeam()->getMembers() as $team_member) {
-                            if ($member_list !== "") {
-                                $member_list = $member_list . ", ";
-                            }
-
-                            $first_name = $this->core->getQueries()->getUserById($team_member)->getDisplayedFirstName();
-                            $last_name = $this->core->getQueries()->getUserById($team_member)->getLastName();
-
-                            $member_list = $member_list . $first_name . " " . $last_name;
-                        }
-                        $return .= <<<HTML
-                <td>{$member_list}</td>
-
-HTML;
-                    }
-                }
-                else {
-                    $return .= <<<HTML
-
-                <td>{$row->getUser()->getId()}</td>
-                <td>{$row->getUser()->getDisplayedFirstName()}</td>
-                <td>{$row->getUser()->getLastName()}</td>
-HTML;
-                }
             }
-            if($show_auto_grading_points) {
-                if ($highest_version != 0) {
-                    if($peer) {
-                        $return .= <<<HTML
-
-                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalNonHiddenNonExtraCreditPoints()}</td>
-HTML;
-                    }
-                    else {
-                        $return .= <<<HTML
-
-                <td>{$autograding_score}&nbsp;/&nbsp;{$row->getTotalAutograderNonExtraCreditPoints()}</td>
-HTML;
-                    }
-                }
-                else {
-                    $return .= <<<HTML
-
-                <td></td>
-HTML;
-                    $btn_class = "btn-primary";
-                    $contents = "Grade";
-                }
-            }
+            // id columns
+            // autograder column
             if($peer) {
                 $box_background = "";
                 $peer_cmpts = $row->getComponentsGradedBy($this->core->getUser()->getId());

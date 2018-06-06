@@ -76,8 +76,8 @@
                 {{ self.render_column_active_version(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "autograding" %}
                 {{ self.render_column_autograding(self, context, section, gradeable, index, info, column) }}
-            {% elseif column.function == "autograding_nohidden" %}
-                {{ self.render_column_autograding_nohidden(self, context, section, gradeable, index, info, column) }}
+            {% elseif column.function == "autograding_peer" %}
+                {{ self.render_column_autograding_peer(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "graded_questions" %}
                 {{ self.render_column_graded_questions(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
@@ -125,13 +125,19 @@
 {# Autograding #}
 {% macro render_column_autograding(self, context, section, gradeable, index, info, column) %}
     <td>
-
+        {% if gradeable.getHighestVersion() != 0 %}
+            {{ gradeable.getGradedAutograderPoints() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }}
+        {% endif %}
     </td>
 {% endmacro %}
 
-{# Autograding, no hidden points (peer) #}
-{% macro render_column_autograding_nohidden(self, context, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{# Autograding (peer) #}
+{% macro render_column_autograding_peer(self, context, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getHighestVersion() != 0 %}
+            {{ gradeable.getGradedNonHiddenPoints() }} / {{ gradeable.getTotalNonHiddenNonExtraCreditPoints() }}
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# Graded Questions #}
@@ -141,7 +147,7 @@
 
 {# Grading Button #}
 {% macro render_column_grading(self, context, section, gradeable, index, info, column) %}
-    <td></td>
+    <td>todo</td>
 {% endmacro %}
 
 {# Index #}
