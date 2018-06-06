@@ -4,6 +4,7 @@ namespace app\views\grading;
 
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\Team;
 use app\models\User;
 use app\models\LateDaysCalculation;
 use app\views\AbstractView;
@@ -539,11 +540,26 @@ HTML;
             }
         }
 
+        $empty_team_info = [];
+        foreach($empty_teams as $team) {
+            /* @var Team $team */
+            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
+            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+            $user_assignment_setting_json=json_encode($user_assignment_setting);
+            $reg_section = ($team->getRegistrationSection() === null) ? "NULL": $team->getRegistrationSection();
+            $rot_section = ($team->getRotatingSection() === null) ? "NULL": $team->getRotatingSection();
+
+            $empty_team_info[] = [
+                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});"
+            ];
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
+            "empty_team_info" => $empty_team_info,
             "view_all" => $view_all,
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
@@ -551,46 +567,6 @@ HTML;
             "columns" => $columns,
             "peer" => $peer
         ]);
-
-        if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
-            $return .= <<<HTML
-            <tr class="info persist-header">
-                <td colspan="{$cols}" style="text-align: center">Empty Teams</td>
-            </tr>
-        <tbody>
-HTML;
-            $count = 1;
-            foreach($empty_teams as $team) {
-                $display_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                if ($display_section == null) $display_section = "NULL";
-                $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
-                $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-                $user_assignment_setting_json=json_encode($user_assignment_setting);
-                $reg_section = ($team->getRegistrationSection() === null) ? "NULL": $team->getRegistrationSection();
-                $rot_section = ($team->getRotatingSection() === null) ? "NULL": $team->getRotatingSection();
-                $return .= <<<HTML
-            <tr id="{empty-team-row-{$team->getId()}}" {$style}>
-                <td>{$count}</td>
-                <td>{$display_section}</td>
-                <td><a onclick='adminTeamForm(false, "{$team->getId()}", "{$reg_section}", "{$rot_section}", {$user_assignment_setting_json}, [], {$gradeable->getMaxTeamSize()});'>
-                    <i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                <td>{$team->getId()}</td>
-HTML;
-                for ($i = 4; $i < $cols; $i++) {
-                    $return .= <<<HTML
-                <td></td>
-HTML;
-                }
-                $return .= <<<HTML
-            </tr>
-HTML;
-                $count++;
-            }
-            $return .= <<<HTML
-        </tbody>
-HTML;
-        }
-        return $return;
     }
 
     public function adminTeamForm($gradeable, $all_reg_sections, $all_rot_sections) {

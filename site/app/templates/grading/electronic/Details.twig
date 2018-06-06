@@ -39,6 +39,7 @@
             </tr>
         </thead>
         {# /Table header #}
+        {# Sections #}
         {% for section in sections %}
             {# Section heading #}
             <tbody>
@@ -64,6 +65,36 @@
             </tbody>
             {# /Student list #}
         {% endfor %}
+        {# /Sections #}
+        {# Empty teams #}
+        {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
+            <tr class="info persist-header">
+                <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+            </tr>
+            <tbody>
+                {% for team in empty_teams %}
+                    {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
+                    {% set rot_section = team.getRotatingSection() ?? "NULL" %}
+                    {% set display_section = gradeable.isGradeByRegistration() ? reg_section : rot_section %}
+                    <tr id="empty-team-row-{{ team.getId()}}">
+                        <td>
+                            {{ loop.index }}
+                        </td>
+                        <td>
+                            {{ display_section }}
+                        </td>
+                        <td>
+                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </a>
+                        </td>
+                        <td>{{ team.getId() }}</td>
+                        <td colspan="{{ columns|length - 4 }}"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+        {# /Empty teams #}
     </table>
 </div>
 
