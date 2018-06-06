@@ -69,8 +69,8 @@
     <tr>
         {% for column in columns %}
             {#
-                This is basically a switch statement, pick which function we need for
-                the current column and it will give us the table cell.
+                This is basically a switch statement. It calls the function we need for
+                the current column and that will give us the table cell.
             #}
             {% if column.function == "active_version" %}
                 {{ self.render_column_active_version(self, section, gradeable, index, info, column) }}
