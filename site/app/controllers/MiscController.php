@@ -191,9 +191,8 @@ class MiscController extends AbstractController {
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
         else {
-            $contents = htmlentities(file_get_contents($corrected_name), ENT_SUBSTITUTE);
+            $contents = file_get_contents($corrected_name);
             if ($_REQUEST['ta_grading'] === "true") {
-                $filename = htmlentities($corrected_name, ENT_SUBSTITUTE);
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $mime_type, $corrected_name, $contents);
             }
             else {
