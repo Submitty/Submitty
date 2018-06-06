@@ -150,7 +150,7 @@ pip3 install tzlocal
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
     sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
@@ -379,13 +379,13 @@ if [ ${WORKER} == 0 ]; then
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         git pull
-        popd
+        popd > /dev/null
     else
         git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
         # remember to change this version in .setup/travis/autograder.sh too
         git checkout v0.94
-        popd
+        popd > /dev/null
     fi
 fi
 
@@ -396,7 +396,7 @@ fi
 if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
     pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
     git pull
-    popd
+    popd > /dev/null
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
@@ -406,33 +406,36 @@ fi
 # BUILD CLANG SETUP
 #################
 
-echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
-
-clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm
+# NOTE: These variables must match the same variables in INSTALL_SUBMITTY_HELPER.sh
+clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
+clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+# note, we are not running 'ninja install', so this path is unused.
+clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
  
-# remove if this is a re-run
-rm -rf ${clangsrc}
-mkdir -p ${clangsrc}
-rm -rf ${clanginstall}
-mkdir -p ${clanginstall}
+# skip if this is a re-run
+if [ ! -d "${clangsrc}" ]; then
+    echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
 
-# checkout the clang sources
-git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
-git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
-git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+    mkdir -p ${clangsrc}
 
-# initial cmake for llvm tools (might take a bit of time)
-mkdir -p ${clangsrc}/build
-pushd ${clangsrc}/build
-cmake -G Ninja ../llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
-popd > /dev/null
+    # checkout the clang sources
+    git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
+    git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
+    git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
 
-# add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
-echo 'add_subdirectory(ASTMatcher)' >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
-echo 'add_subdirectory(UnionTool)'  >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+    # initial cmake for llvm tools (might take a bit of time)
+    mkdir -p ${clangbuild}
+    pushd ${clangbuild}
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    popd > /dev/null
 
-echo 'DONE PREPARING CLANG INSTALLATION'
+    # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
+    echo 'add_subdirectory(ASTMatcher)' >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+    echo 'add_subdirectory(UnionTool)'  >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
 
+    echo 'DONE PREPARING CLANG INSTALLATION'
+fi
+    
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -462,6 +465,19 @@ else
         ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
+
+if [ ${WORKER} == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
+    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+    fi
+fi
+
 
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -563,7 +579,7 @@ fi
 
 # pushd /tmp/docker
 # su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
-# popd
+# popd > /dev/null
 
 
 #################################################################

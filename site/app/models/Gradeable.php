@@ -244,9 +244,6 @@ class Gradeable extends AbstractModel {
 
     protected $result_details;
 
-    /** @property @var string */
-    protected $grade_file = null;
-
     protected $in_interactive_queue = false;
     protected $grading_interactive_queue = false;
     protected $in_batch_queue = false;
@@ -610,12 +607,12 @@ class Gradeable extends AbstractModel {
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
                                           $user_id, $this->current_version));
-        $grade_file = "GRADING_".$queue_file;
+        $grading_queue_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
         $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
-        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grade_file);
-        $this->grading_batch_queue = file_exists($batch_queue."/".$grade_file);
+        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grading_queue_file);
+        $this->grading_batch_queue = file_exists($batch_queue."/".$grading_queue_file);
 
         $queue_count = 0;
         $grading_count = 0;
@@ -821,11 +818,6 @@ class Gradeable extends AbstractModel {
                 }
             }
         }
-
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$user_id.".txt";
-        if (is_file($grade_file)) {
-            $this->grade_file = htmlentities(file_get_contents($grade_file));
-        }
     }
 
     public function isTeamAssignment() {
@@ -961,10 +953,6 @@ class Gradeable extends AbstractModel {
 
     public function beenTAgraded() {
         return $this->been_tagraded;
-    }
-
-    public function hasGradeFile() {
-        return $this->grade_file !== null;
     }
 
     public function useTAGrading() {
