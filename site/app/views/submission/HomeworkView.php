@@ -1196,7 +1196,7 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0) {
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
             // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
 <div class="content">

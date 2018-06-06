@@ -301,8 +301,7 @@ progress::-webkit-progress-value {
 
 .rubric-table {
     border: 1px solid #dddddd;
-    border-collapse: separate;
-    *border-collapse: collapse;
+    border-collapse: collapse;
     -webkit-border-radius: 4px;
         -moz-border-radius: 4px;
             border-radius: 4px;
@@ -351,22 +350,16 @@ progress::-webkit-progress-value {
 }
 
 .ta-rubric-table {
-    border: 1px solid #dddddd;
-    border-collapse: separate;
-    *border-collapse: collapse;
-    -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-            border-radius: 4px;
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 4px;
 }
 
 .ta-rubric-table th, 
 .ta-rubric-table td {
-    padding: 8px;
-    line-height: 20px;
-    text-align: left;
+    padding: 5px;
     vertical-align: top;
-    border-top: 1px solid #dddddd;
-    border-left: 1px solid #dddddd;
+    border: 1px solid #dddddd;
 }
 
 .ta-rubric-table th {
