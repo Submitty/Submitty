@@ -66,7 +66,13 @@
 </div>
 
 {% macro render_student(self, section, gradeable, index, info, columns) %}
-    <tr>
+    {% if gradeable.getUser().accessGrading() %}
+        {% set style = "style='background: #7bd0f7;'" %}
+    {% else %}
+        {% set style = "" %}
+    {% endif %}
+
+    <tr {{ style }}>
         {% for column in columns %}
             {#
                 This is basically a switch statement. It calls the function we need for
@@ -276,7 +282,23 @@
 
 {# Total Point Summary (peer) #}
 {% macro render_column_total_peer(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+    {# todo: test this (no way to create peer assignments currently) #}
+    {% set graded = gradeable.getGradedNonHiddenPoints() %}
+    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
+    {% for component in components %}
+        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
+        {% set graded = graded + component.getScore() %}
+    {% endfor %}
+    {#
+        instead of autograding_score it should be total autograding possible
+        I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
+    #}
+    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingNonExtraCredit() %}
+    <td>
+        {% if gradeable.validateVersions() %}
+            <div>{{ graded }} / {{ total_possible }}</div>
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# User ID #}
