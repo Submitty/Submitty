@@ -837,7 +837,7 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.5/chosen.jquery.min.js"></script>
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
@@ -848,7 +848,47 @@ HTML;
 		 </script>
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$categories = $this->core->getQueries()->getCategories();
+			$return .= <<<HTML
+			<div class="popup-form" id="category-list">
+				<h3>Categories</h3><br>
+				<span id='category-list-no-element' style="margin-left: 1em;display:none;" >
+					No category found
+				</span>
+				<ul id='ui-category-list'>
+HTML;
+				for($i = 0; $i < count($categories); $i++){
+						$return .= <<<HTML
+						<li id="categorylistitem-{$categories[$i]['category_id']}">
+							<i class="fa fa-bars handle" aria-hidden="true"></i>
+							{$categories[$i]['category_desc']}
+						</li>
+HTML;
+				}
+				$return .= <<<HTML
+				</ul>
+				<div  style="float: right; width: auto; margin-top: 10px;">
+					<a onclick="$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
+					<input class="btn btn-primary" type="submit" value="Submit" />
+				</div>
+				<script type="text/javascript">
+					$(function() {
+						$("#ui-category-list").sortable({
+							handle: ".handle",
+							update: function (event, ui) {
+						        reorderCategory();
+						    }
+						});
+					});
+				</script>
 
+			</div>
+
+HTML;
+		}
+		$return .= <<<HTML
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
@@ -884,7 +924,8 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
-					New Category: <textarea id="new_category_text" style="resize:none;" rows="1" cols="25" type="text" size="45" name="new_category" id="new_category" ></textarea> <button type="button" title="Add new category" onclick="addNewCategory();" style="margin-right:10px;" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle fa-1x"></i> Add Category </button></span>
+					<a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
+					</span>
 HTML;
 				}
 				$return .= <<<HTML

@@ -874,6 +874,25 @@ table .instructor .two-options{
     filter: alpha(opacity=80);
 }
 
+#ui-category-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 60%;
+}
+
+#ui-category-list li {
+    border-style: solid;
+    border-width: thin;
+    margin: 0.3em 0.1em 0.3em 0.1em;
+    padding: 0.2em;
+    height: 18px;
+}
+
+#ui-category-list .handle:hover {
+ cursor: move;
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,

@@ -1271,6 +1271,36 @@ function addNewCategory(){
     })
 }
 
+function reorderCategory(){
+    var data = $('#ui-category-list').sortable('serialize');
+    var url = buildUrl({'component': 'forum', 'page': 'reorder_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                console.log(data);
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully reordered categories.</div>';
+                $('#messages').append(message);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to reordering categories. Please try again.");
+            }
+    });
+}
+
 /*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
