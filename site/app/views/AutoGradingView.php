@@ -617,7 +617,7 @@ HTML;
         }
         //add total points if both autograding and instructor grading exist
         $display = "none";
-        $current = $gradeable->getCurrentVersion();
+        $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
         $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
         $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
         $background = "";
