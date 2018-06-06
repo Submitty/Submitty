@@ -58,14 +58,14 @@
             {# /Section heading #}
             {# Student list #}
             {% for info in section.rows %}
-                {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                {{ self.render_student(self, _context, section, info.gradeable, loop.index, info, columns) }}
             {% endfor %}
             {# /Student list #}
         {% endfor %}
     </table>
 </div>
 
-{% macro render_student(self, section, gradeable, index, info, columns) %}
+{% macro render_student(self, context, section, gradeable, index, info, columns) %}
     <tr>
         {% for column in columns %}
             {#
@@ -73,37 +73,37 @@
                 the current column and it will give us the table cell.
             #}
             {% if column.function == "active_version" %}
-                {{ self.render_column_active_version(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_active_version(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "autograding" %}
-                {{ self.render_column_autograding(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_autograding(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "autograding_nohidden" %}
-                {{ self.render_column_autograding_nohidden(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_autograding_nohidden(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "graded_questions" %}
-                {{ self.render_column_graded_questions(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_graded_questions(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
-                {{ self.render_column_grading(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_grading(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
-                {{ self.render_column_index(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_index(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
-                {{ self.render_column_section(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_section(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_edit(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "team_id" %}
-                {{ self.render_column_team_id(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_id(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
-                {{ self.render_column_team_members(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_members(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
-                {{ self.render_column_total(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_total(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "user_first" %}
-                {{ self.render_column_user_first(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_first(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
-                {{ self.render_column_user_id(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_id(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "user_id_anon" %}
-                {{ self.render_column_user_id_anon(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_id_anon(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "user_last" %}
-                {{ self.render_column_user_last(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_last(self, context, section, gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
-                {{ self.render_column_viewed_grade(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_viewed_grade(self, context, section, gradeable, index, info, column) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -112,7 +112,7 @@
 {# Column functions #}
 
 {# Active Version #}
-{% macro render_column_active_version(self, section, gradeable, index, info, column) %}
+{% macro render_column_active_version(self, context, section, gradeable, index, info, column) %}
     {% if gradeable.getHighestVersion() == 0 %}
         <td></td>
     {% elseif gradeable.getActiveVersion() == gradeable.getHighestVersion() %}
@@ -123,77 +123,97 @@
 {% endmacro %}
 
 {# Autograding #}
-{% macro render_column_autograding(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{% macro render_column_autograding(self, context, section, gradeable, index, info, column) %}
+    <td>
+
+    </td>
 {% endmacro %}
 
 {# Autograding, no hidden points (peer) #}
-{% macro render_column_autograding_nohidden(self, section, gradeable, index, info, column) %}
+{% macro render_column_autograding_nohidden(self, context, section, gradeable, index, info, column) %}
     <td>todo</td>
 {% endmacro %}
 
 {# Graded Questions #}
-{% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
+{% macro render_column_graded_questions(self, context, section, gradeable, index, info, column) %}
     <td>todo</td>
 {% endmacro %}
 
 {# Grading Button #}
-{% macro render_column_grading(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{% macro render_column_grading(self, context, section, gradeable, index, info, column) %}
+    <td></td>
 {% endmacro %}
 
 {# Index #}
-{% macro render_column_index(self, section, gradeable, index, info, column) %}
+{% macro render_column_index(self, context, section, gradeable, index, info, column) %}
     <td>{{ index }}</td>
 {% endmacro %}
 
 {# Section Number #}
-{% macro render_column_section(self, section, gradeable, index, info, column) %}
+{% macro render_column_section(self, context, section, gradeable, index, info, column) %}
     <td>{{ section.title }}</td>
 {% endmacro %}
 
 {# Edit Team #}
-{% macro render_column_team_edit(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{% macro render_column_team_edit(self, context, section, gradeable, index, info, column) %}
+    <td>
+        <a onclick="{{ info.team_edit_onclick }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+    </td>
 {% endmacro %}
 
 {# Team ID #}
-{% macro render_column_team_id(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{% macro render_column_team_id(self, context, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getTeam() == null %}
+            <b><i>No Team</i></b>
+        {% else %}
+            {{ gradeable.getTeam().getId() }}
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# Team Members #}
-{% macro render_column_team_members(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+{% macro render_column_team_members(self, context, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getTeam() == null %}
+            {{ gradeable.getUser().getId() }}
+        {% else %}
+            {%- for member in gradeable.getTeam().getMembers() -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
+                {{ core.getQueries().getUserById(member).getLastName() -}}
+            {%- endfor -%}
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# Total Point Summary #}
-{% macro render_column_total(self, section, gradeable, index, info, column) %}
+{% macro render_column_total(self, context, section, gradeable, index, info, column) %}
     <td>todo</td>
 {% endmacro %}
 
 {# User ID #}
-{% macro render_column_user_id(self, section, gradeable, index, info, column) %}
+{% macro render_column_user_id(self, context, section, gradeable, index, info, column) %}
     <td>{{ gradeable.getUser().getId() }}</td>
 {% endmacro %}
 
 {# Anonymous ID #}
-{% macro render_column_user_id_anon(self, section, gradeable, index, info, column) %}
+{% macro render_column_user_id_anon(self, context, section, gradeable, index, info, column) %}
     <td>{{ gradeable.getUser().getAnonId() }}</td>
 {% endmacro %}
 
 {# First Name #}
-{% macro render_column_user_first(self, section, gradeable, index, info, column) %}
+{% macro render_column_user_first(self, context, section, gradeable, index, info, column) %}
     <td>{{ gradeable.getUser().getDisplayedFirstName() }}</td>
 {% endmacro %}
 
 {# Last Name #}
-{% macro render_column_user_last(self, section, gradeable, index, info, column) %}
+{% macro render_column_user_last(self, context, section, gradeable, index, info, column) %}
     <td>{{ gradeable.getUser().getLastName() }}</td>
 {% endmacro %}
 
 {# Viewed Grade #}
-{% macro render_column_viewed_grade(self, section, gradeable, index, info, column) %}
+{% macro render_column_viewed_grade(self, context, section, gradeable, index, info, column) %}
     {% if gradeable.getUserViewedDate() == null or gradeable.getUserViewedDate() == "" %}
         <td title="" style="color: red; font-size: 1.5em;">&#10008;</td>
     {% else %}

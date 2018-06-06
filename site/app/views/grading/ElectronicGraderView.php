@@ -431,20 +431,29 @@ HTML;
                 $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "7%",  "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
-                $columns[]     = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
+                if ($gradeable->taGradesReleased()) {
+                    $columns[] = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
+                }
             } else {
                 $show_auto_grading_points = false;
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
                 $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
-                $columns[]     = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
+                if ($gradeable->taGradesReleased()) {
+                    $columns[] = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
+                }
             }
         }
 
         //Convert rows into sections
         $sections = [];
         foreach ($rows as $row) {
+            $info = [
+                "gradeable" => $row
+            ];
+
+
             if ($peer) {
                 $title = "PEER STUDENT GRADER";
             } else if ($row->isGradeByRegistration()) {
@@ -466,9 +475,24 @@ HTML;
                 $section_graders = $this->core->getUser()->getId();
             }
 
-            $info = [
-                "gradeable" => $row
-            ];
+            //Team edit button
+            if ($row->isTeamAssignment()) {
+                if ($row->getTeam() === null) {
+                    $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
+                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
+                    $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
+                } else {
+                    $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
+                    $user_assignment_setting = FileUtils::readJsonFile($settings_file);
+                    $user_assignment_setting_json = json_encode($user_assignment_setting);
+                    $members = json_encode($row->getTeam()->getMembers());
+                    $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL" : $row->getTeam()->getRegistrationSection();
+                    $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL" : $row->getTeam()->getRotatingSection();
+
+                    $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getTeam()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$gradeable->getMaxTeamSize()});";
+                }
+            }
+
 
             //Find the section in the array and add this student
             $found = false;
@@ -495,7 +519,7 @@ HTML;
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "columns" => $columns,
-            "peer" => $peer
+            "peer" => "peering"
         ]);
 
 
@@ -503,6 +527,7 @@ HTML;
         $last_section = false;
         $tbody_open = false;
         foreach ($rows as $row) {
+            /* @var Gradeable $row */
             $active_version = $row->getActiveVersion();
             $highest_version = $row->getHighestVersion();
             if ($peer) {
