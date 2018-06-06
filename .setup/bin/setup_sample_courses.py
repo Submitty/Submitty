@@ -910,7 +910,7 @@ class Course(object):
                         values = {'g_id': gradeable.id, 'gd_user_id': user.id, 'gd_overall_comment': 'lorem ipsum lodar'}
                         if gradeable.grade_released_date < NOW and random.random() < 0.5:
                             values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
-                            ins = gradeable_data.insert().values(**values)
+                        ins = gradeable_data.insert().values(**values)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
