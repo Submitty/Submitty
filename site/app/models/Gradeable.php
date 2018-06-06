@@ -1164,6 +1164,66 @@ class Gradeable extends AbstractModel {
         return $return;
     }
 
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Does not contain submission-specific data like comments or which marks are selected.
+     * @return array
+     */
+    public function getStaticData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getStaticData();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Contains submission-specific data like comments and which marks are selected.
+     * @return array
+     */
+    public function getGradedData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "user_id" => $this->user->getAnonId(),
+            "overall_comment" => $this->overall_comment,
+            "graded_autograder_points" => $this->getGradedAutograderPoints(),
+            "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
+            "graded_ta_points" => $this->getGradedTAPoints(),
+            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getGradedData();
+        }
+
+        return $data;
+    }
+
     public function getRepositoryPath(Team $team) {
         if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
             $vcs_path = $this->getSubdirectory();
