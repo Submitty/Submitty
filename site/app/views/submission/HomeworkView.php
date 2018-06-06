@@ -1214,10 +1214,11 @@ HTML;
 HTML;
             }
             $return .= <<<HTML
-</div>
-  <div class="content"> 
 HTML;
     if($this->core->getConfig()->isRegradeEnabled()){
+      $return .= <<<HTML
+      <div class="content"> 
+HTML;
       $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
       $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
     }
@@ -1225,7 +1226,6 @@ HTML;
   </div>
 HTML;
         }
-
         return $return;
     }
     public function showRequestForm($gradeable){
