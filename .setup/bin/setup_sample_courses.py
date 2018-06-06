@@ -909,6 +909,10 @@ class Course(object):
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_overall_comment="lorem ipsum lodar")
+                        if gradeable.grade_released_date < NOW and random.random() < 0.5:
+                            ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
+                                                             gd_overall_comment="lorem ipsum lodar",
+                                                             gd_user_viewed_date=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
