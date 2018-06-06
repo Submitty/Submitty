@@ -17,6 +17,8 @@ use app\models\GradeableComponent;
  * @method void setInheritTeamsList();
  */
 class AdminGradeable extends AbstractModel {
+
+    /* All properties that aren't in the 'gradeable' and 'electronic_gradeable' tables */
     /** @property @var */
     protected $rotating_gradeables = array();
     /** @property @var */
@@ -32,9 +34,18 @@ class AdminGradeable extends AbstractModel {
     /** @property @var */
     //protected $inherit_teams_list = array();
 
+    /** @property @var \app\models\GradeableComponent[] */
+    protected $old_components;
+    /** @property @var same info as above but encoded */
+    protected $old_components_json = "{}";
+
+    protected $has_grades = false;
+    protected $default_late_days;
+    protected $vcs_base_url;
+
 
     /** @property @var string Id of the gradeable (must be unique) */
-    protected $g_id = "";
+    public $g_id = "";
     /** @property @var string Title of the gradeable */
     public $g_title = "";
     /** @property @var string instructions url of the gradeable */
@@ -42,7 +53,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var string Instructions to give to TA for grading */
     public $g_overall_ta_instructions = "";
     /** @property @var int 0 is electronic, 1 is checkponts, 2 is numeric/text */
-    protected $g_gradeable_type = 0;
+    public $g_gradeable_type = 0;
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
     public $g_grade_by_registration = -1;
     /** @property @var \DateTime Date for when grading can view */
@@ -56,23 +67,16 @@ class AdminGradeable extends AbstractModel {
     /** @property @var string Iris Bucket to place gradeable */
     public $g_syllabus_bucket = -1;
 
-    /** @property @var \app\models\GradeableComponent[] */
-    protected $old_components;
-    /** @property @var same info as above but encoded */
-    protected $old_components_json = "{}";
-
-    protected $has_grades = false;
-
 // if a gradeable is electronic
 
     /** @property @var string Path to the config.json file used to build the config/build/build_XXX.json file */
     public $eg_config_path = "";
     /** @property @var bool Is the electronic submission via a VCS repository or by upload */
-    protected $eg_is_repository = false;
+    public $eg_is_repository = false;
     /** @property @var string What is the subdirectory for VCS */
     public $eg_subdirectory = "";
     /** @property @var bool Is this a team assignment */
-    protected $eg_team_assignment = false;
+    public $eg_team_assignment = false;
     /** @property @var string The gradeable to inherit teams from */
     //public $eg_inherit_teams_from = "";
     /** @property @var int maximum allowed team size, Minimum must be 2*/
@@ -112,10 +116,6 @@ class AdminGradeable extends AbstractModel {
 
     public $num_numeric = 0;
     public $num_text = 0;
-
-
-    protected $default_late_days;
-    protected $vcs_base_url;
 
     public function __construct(Core $core) {
         parent::__construct($core);

@@ -1234,9 +1234,9 @@ VALUES (?, ?, ?, ?)", $params);
     /**
      * Creates a new gradeable in the database
      *
-     * @param Gradeable $gradeable
+     * @param AdminGradeable $gradeable
      */
-    public function createNewGradeable(Gradeable $gradeable) {
+    public function createNewGradeable(AdminGradeable $gradeable) {
         $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate()->format('Y/m/d H:i:s'), $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
         $this->course_db->query("
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket)
@@ -1254,9 +1254,9 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
     /**
      * Updates the current gradeable with new properties.
      *
-     * @param Gradeable $gradeable
+     * @param AdminGradeable $gradeable
      */
-    public function updateGradeable(Gradeable $gradeable) {
+    public function updateGradeable(AdminGradeable $gradeable) {
         $params = array($gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(),
                         $gradeable->getType(), $this->course_db->convertBoolean($gradeable->getGradeByRegistration()),
                         $gradeable->getTaViewDate()->format('Y/m/d H:i:s'),
