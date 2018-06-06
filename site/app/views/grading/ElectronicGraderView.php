@@ -1796,6 +1796,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
         $setRegradeVisible="";
+        if($gradeable->getRegradeStatus() !== 0){
         $return .= <<<HTML
 </div>
 <div id="regrade_info" class = "draggable rubric_panel" style="{$setRegradeVisible} right: 15px; bottom: 40px;width: 48%; height: 30%">
@@ -1808,6 +1809,9 @@ HTML;
         </div>
     </div>
 </div>
+HTML;
+}
+$return.= <<<HTML
 <script type="text/javascript">
 //
 // This is needed to resolve conflicts between Chrome and other browsers

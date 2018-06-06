@@ -1257,7 +1257,7 @@ HTML;
                                              'student_id' =>$this->core->getUser()->getId()
                                         ));
         }else if($gradeable->getRegradeStatus() === -1){
-          if(!$existsStaffPost || $this->core->getUser()->accessGrading()){
+          if($this->core->getUser()->accessGrading()){
             $message = "Delete Request";
             $class = "btn-danger";
             $is_disabled = "";
@@ -1355,11 +1355,16 @@ HTML;
           $user = $this->core->getUser()->getId();
           $first = true;
           $return = "";
+          $display_further_action=true;
+          //echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
             $replyPlaceHolder = "Enter your reply here";
           }
           else{
+            if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==0){
+              $display_further_action=false;
+            }
             $replyMessage = "Request further TA/Instructor action"; 
             $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
           }
@@ -1388,7 +1393,7 @@ HTML;
             </div>                                       
 HTML;
           }
-
+        if($display_further_action){
         $return .= <<<HTML
         <div style="padding:20px;">
         <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
@@ -1401,6 +1406,9 @@ HTML;
             <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right;">
             <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
         </form>
+HTML;
+        }
+        $return .= <<<HTML
         <script type = "text/javascript">
           $("#replyTextForm").submit(function(event) {
             $.ajax({
@@ -1411,7 +1419,7 @@ HTML;
                  window.location.reload();
               }
             });
-           // event.preventDefault();
+            event.preventDefault();
           });
         </script>
       </div>
