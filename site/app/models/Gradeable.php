@@ -1191,7 +1191,7 @@ class Gradeable extends AbstractModel {
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
         $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
         $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
-        $this->core->getConfig()->getVcsUrl(), $repo);
+            $this->core->getConfig()->getVcsUrl(), $repo);
         return str_replace('{$team_id}', $team->getId(), $repo);
     }
 }
