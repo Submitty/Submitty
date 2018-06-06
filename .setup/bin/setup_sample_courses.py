@@ -215,6 +215,14 @@ def main():
 def generate_random_user_id(length=15):
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
+def generate_random_ta_comment():
+    line = ""
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'TAComment.txt')) as comment:
+        line = next(comment)
+        for num, aline in enumerate(comment):
+            if random.randrange(num + 2): continue
+            line = aline
+    return line
 
 def generate_random_users(total, real_users):
     """
@@ -908,20 +916,29 @@ class Course(object):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_overall_comment="lorem ipsum lodar")
+                                                             gd_overall_comment=generate_random_ta_comment())
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             for component in gradeable.components:
-                                if status == 0 or random.random() < 0.5:
+                                if random.random() < 0.05:
+                                    #This is used to simulate unfinished grading.
+                                    break;
+                                if status == 0 or random.random() < 0.4:
                                     score = 0
-                                elif random.random() < 0.9:
-                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
                                 else:
-                                    score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
+                                    if random.random() < 0.1:
+                                        score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    if random.random() < 0.1:
+                                        #custom mark takes away points
+                                        score = -score
+                                    if random.random() < 0.01: 
+                                        #Just for some weird number example
+                                        score = -99999
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                             gcd_score=score, gcd_component_comment="lorem ipsum",
+                                             gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
                                 first = True
                                 first_set = False
