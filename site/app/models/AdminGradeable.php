@@ -15,6 +15,7 @@ use app\models\GradeableComponent;
  * @method void setGradersFromUserTypes()
  * @method void setTemplateList()
  * @method void setInheritTeamsList();
+ * @method \app\models\GradeableComponent[] getOldComponents();
  */
 class AdminGradeable extends AbstractModel {
 
@@ -55,7 +56,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var int 0 is electronic, 1 is checkponts, 2 is numeric/text */
     public $g_gradeable_type = 0;
     /** @property @var bool Should the gradeable be graded by registration section (or by rotating section) */
-    public $g_grade_by_registration = -1;
+    public $g_grade_by_registration = true;
     /** @property @var \DateTime Date for when grading can view */
     public $g_ta_view_start_date;
     /** @property @var \DateTime Date for when grading can start */
@@ -119,12 +120,15 @@ class AdminGradeable extends AbstractModel {
 
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->g_ta_view_start_date = date('Y-m-d 23:59:59O', strtotime( '-1 days' ));
-        $this->g_grade_start_date = date('Y-m-d 23:59:59O', strtotime( '+10 days' ));
-        $this->g_grade_released_date = date('Y-m-d 23:59:59O', strtotime( '+14 days' ));
-        $this->eg_team_lock_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
-        $this->eg_submission_open_date = date('Y-m-d 23:59:59O', strtotime( '0 days' ));
-        $this->eg_submission_due_date = date('Y-m-d 23:59:59O', strtotime( '+7 days' ));
+        $tonight = new \DateTime();
+        $tonight->setTime(23, 59, 59);
+
+        $this->g_ta_view_start_date = (clone $tonight)->sub(new \DateInterval('P1D'));
+        $this->g_grade_start_date = (clone $tonight)->add(new \DateInterval('P10D'));
+        $this->g_grade_released_date = (clone $tonight)->add(new \DateInterval('P14D'));
+        $this->eg_team_lock_date = (clone $tonight)->add(new \DateInterval('P7D'));
+        $this->eg_submission_open_date = (clone $tonight);
+        $this->eg_submission_due_date = (clone $tonight)->add(new \DateInterval('P7D'));
         $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $this->vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->old_components = array(new GradeableComponent($this->core, array()));

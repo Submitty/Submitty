@@ -22,7 +22,7 @@ class AdminGradeableController extends AbstractController
                 $this->viewPage();
                 break;
             case 'upload_new_gradeable':
-                $this->modifyGradeable(0);
+                $this->modifyGradeable($_REQUEST['g_id'], 0);
                 break;
             case 'edit_gradeable_page':
                 $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
@@ -31,7 +31,7 @@ class AdminGradeableController extends AbstractController
                 $this->updateGradeableRequest();
                 break;
             case 'upload_edit_gradeable':
-                $this->modifyGradeable(1);
+                $this->modifyGradeable($_REQUEST['g_id'], 1);
                 break;
             case 'upload_new_template':
                 $this->uploadNewTemplate();
@@ -110,6 +110,17 @@ class AdminGradeableController extends AbstractController
         return $admin_gradeable;
     }
 
+    private function assertDate(&$date) {
+        if(gettype($date) === 'string') {
+            try {
+                $date = new \DateTime($date, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                $date = null;
+                return 'Invalid Format!';
+            }
+        }
+        return null;
+    }
     /**
      * Checks if a gradeable is valid
      *
@@ -161,71 +172,41 @@ class AdminGradeableController extends AbstractController
             }
         }
 
-        // Some alias' for time comparison
-        $ta_view = null;
-        $open = null;
-        $due = null;
-        $grade = null;
-        $release = null;
-        $late_interval = null;
-        $max_due = null;
-
         // Make sure that all of the provided dates are in a valid format.
         //  At the same time, massage the date-times with a time zone to prep
         //      for database update
-        try {
-            $ta_view = $admin_gradeable->g_ta_view_start_date =
-                new \DateTime($admin_gradeable->g_ta_view_start_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['g_ta_view_start_date'] = 'Invalid Format!';
+        $dates = [
+            'g_ta_view_start_date',
+            'eg_submission_open_date',
+            'eg_submission_due_date',
+            'g_grade_start_date',
+            'g_grade_released_date',
+            'eg_team_lock_date'
+        ];
+        foreach($dates as $date) {
+            $result = $this->assertDate($admin_gradeable->$date);
+            if($result !== null) {
+                $messages[$date] = $result;
+            }
         }
 
-        try {
-            $open = $admin_gradeable->eg_submission_open_date =
-                new \DateTime($admin_gradeable->eg_submission_open_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['eg_submission_open_date'] = 'Invalid Format!';
-        }
-
-        try {
-            $due = $admin_gradeable->eg_submission_due_date =
-                new \DateTime($admin_gradeable->eg_submission_due_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['eg_submission_due_date'] = 'Invalid Format!';
-        }
-
-        try {
-            $grade = $admin_gradeable->g_grade_start_date =
-                new \DateTime($admin_gradeable->g_grade_start_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['g_grade_start_date'] = 'Invalid Format!';
-        }
-
-        try {
-            $release = $admin_gradeable->g_grade_released_date =
-                new \DateTime($admin_gradeable->g_grade_released_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['g_grade_released_date'] = 'Invalid Format!';
-        }
-
-        try {
-            $admin_gradeable->eg_team_lock_date =
-                new \DateTime($admin_gradeable->eg_team_lock_date, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            $messages['eg_team_lock_date'] = 'Invalid Format!';
-        }
-
+        $late_interval = null;
         try {
             $late_interval = new \DateInterval('P' . strval($admin_gradeable->getEgLateDays()) . 'D');
         } catch (\Exception $e) {
             $messages['eg_late_days'] = 'Invalid Format!';
         }
 
+        // Some alias' for easier time comparison
+        $ta_view = $admin_gradeable->g_ta_view_start_date;
+        $open = $admin_gradeable->eg_submission_open_date;
+        $due = $admin_gradeable->eg_submission_due_date;
+        $grade = $admin_gradeable->g_grade_start_date;
+        $release = $admin_gradeable->g_grade_released_date;
+        $max_due = $due;
         if (!($due === null || $late_interval === null)) {
-            $max_due = $due->add($late_interval);
+            $max_due = (clone $due)->add($late_interval);
         }
-
-        // No validation for team lock dates (tbd)
 
         if ($admin_gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             if (!($ta_view === null || $open === null) && $ta_view > $open) {
@@ -269,74 +250,28 @@ class AdminGradeableController extends AbstractController
     }
 
     // Maintain previous function while adding new 'update field' feature
-    private function modifyGradeable($edit_gradeable)
+    private function modifyGradeable($gradeable_id, $edit_gradeable)
     {
+        // Load the basic information using our other methods
         $peer_grading_complete_score = 0;
         if ($edit_gradeable === 0) {
-            $gradeable = new Gradeable($this->core);
-            $gradeable->setId($_POST['gradeable_id']);
+            // Ignore the errors of not-found keys
+            $this->createGradeable($gradeable_id, $_POST);
         } else {
-            $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
-        }
-        $gradeable->setName(filter_input(INPUT_POST, 'gradeable_title', FILTER_SANITIZE_SPECIAL_CHARS));
-        $gradeable->setInstructionsUrl(filter_input(INPUT_POST, 'instructions_url', FILTER_SANITIZE_SPECIAL_CHARS));
-        $gradeable->setTaInstructions($_POST['ta_instructions']);
-        $gradeable_type = $_POST['gradeable_type'];
-        if ($gradeable_type === "Electronic File") {
-            $gradeable_type = GradeableType::ELECTRONIC_FILE;
-        } else if ($gradeable_type === "Checkpoints") {
-            $gradeable_type = GradeableType::CHECKPOINTS;
-        } else if ($gradeable_type === "Numeric") {
-            $gradeable_type = GradeableType::NUMERIC_TEXT;
-        }
-        $gradeable->setType($gradeable_type);
-        $grade_by_registration = (isset($_POST['section_type']) && $_POST['section_type'] == 'reg_section') ? true : false;
-        $gradeable->setGradeByRegistration($grade_by_registration);
-        $gradeable->setTaViewDate(new \DateTime($_POST['date_ta_view'], $this->core->getConfig()->getTimezone()));
-        $gradeable->setGradeStartDate(new \DateTime($_POST['date_grade'], $this->core->getConfig()->getTimezone()));
-        $gradeable->setGradeReleasedDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
-        $gradeable->setMinimumGradingGroup($_POST['minimum_grading_group']);
-        $gradeable->setBucket($_POST['gradeable_buckets']);
-        if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $gradeable->setOpenDate(new \DateTime($_POST['date_submit'], $this->core->getConfig()->getTimezone()));
-            $gradeable->setDueDate(new \DateTime($_POST['date_due'], $this->core->getConfig()->getTimezone()));
-            $gradeable->setLateDays($_POST['eg_late_days']);
-            $is_repository = (isset($_POST['upload_type']) && $_POST['upload_type'] == 'repository') ? true : false;
-            $gradeable->setIsRepository($is_repository);
-            $gradeable->setSubdirectory($_POST['subdirectory']);
-            $gradeable->setPointPrecision(floatval($_POST['point_precision']));
-            $is_ta_grading = (isset($_POST['ta_grading']) && $_POST['ta_grading'] == 'true') ? true : false;
-            $gradeable->setTaGrading($is_ta_grading);
-            if ($is_ta_grading === false) { // sets that in order to not break a database constraint
-                $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
-            }
-            $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
-            // $gradeable->setInheritTeamsFrom($_POST['eg_inherit_teams_from']);
-            $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
-            $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
-            $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));
-            $gradeable->setStudentSubmit($this->isRadioButtonTrue('student_submit'));
-            $gradeable->setStudentDownload($this->isRadioButtonTrue('student_download'));
-            $gradeable->setStudentAnyVersion($this->isRadioButtonTrue('student_any_version'));
-            $gradeable->setConfigPath($_POST['config_path']);
-            $is_peer_grading = $this->isRadioButtonTrue('peer_grading');
-            $gradeable->setPeerGrading($is_peer_grading);
-            if ($is_peer_grading) {
-                $gradeable->setPeerGradeSet($_POST['peer_grade_set']);
-                $peer_grading_complete_score = $_POST['peer_grade_complete_score'];
-            }
+            // Ignore the errors of not-found keys
+            $this->updateGradeableById($gradeable_id, $_POST);
         }
 
-        if ($edit_gradeable === 0) {
-            $this->core->getQueries()->createNewGradeable($gradeable);
-        } else {
-            $this->core->getQueries()->updateGradeable($gradeable);
+        // Add the rubric information using the old method for now.
+
+        // TODO: this method will be deleted once full autosaving is done.  Support this to keep the rubrics updated on save
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        if($gradeable_id === null) {
+            return;
         }
 
         $num_questions = 0;
         $num_checkpoints = -1; // remove 1 for the template
-        $num_numeric = intval($_POST['num_numeric_items']);
-        $num_text = intval($_POST['num_text_items']);
         foreach ($_POST as $k => $v) {
             if (strpos($k, 'comment_title_') !== false) {
                 ++$num_questions;
@@ -354,13 +289,13 @@ class AdminGradeableController extends AbstractController
             $start_index = 0;
         }
 
-        if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $make_peer_assignments = false;
             if ($edit_gradeable === 1 && $gradeable->getPeerGrading()) {
                 $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
                 $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
                 if ($make_peer_assignments) {
-                    $this->core->getQueries()->clearPeerGradingAssignments($_POST['gradeable_id']);
+                    $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
                 }
             }
             if (($edit_gradeable === 0 || $make_peer_assignments) && $gradeable->getPeerGrading()) {
@@ -449,7 +384,7 @@ class AdminGradeableController extends AbstractController
                     $gradeable_component->setUpperClamp($peer_grading_complete_score);
                     $gradeable_component->setOrder($x - 1);
                     $gradeable_component->setTitle("Grading Complete");
-                    $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                    $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
                 }
                 $gradeable_component = new GradeableComponent($this->core);
                 $gradeable_component->setTitle($_POST['comment_title_' . strval($x + 1)]);
@@ -477,12 +412,12 @@ class AdminGradeableController extends AbstractController
                 }
                 $gradeable_component->setPage($page_component);
                 $gradeable_component->setOrder($x);
-                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
 
 
             //remake the gradeable to update all the data
-            $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable->getId());
             $components = $gradeable->getComponents();
             //Adds/Edits/Deletes the Marks
             $index = 1;
@@ -611,6 +546,8 @@ class AdminGradeableController extends AbstractController
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
             }
         } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $num_numeric = intval($_POST['num_numeric_items']);
+            $num_text = intval($_POST['num_text_items']);
             $start_index_numeric = 0;
             $start_index_text = 0;
             if ($edit_gradeable === 1) {
@@ -664,7 +601,7 @@ class AdminGradeableController extends AbstractController
                 $gradeable_component->setIsPeer(false);
                 $gradeable_component->setOrder($x);
                 $gradeable_component->setPage(0);
-                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
             $z = $x;
             $x = 0;
@@ -704,7 +641,7 @@ class AdminGradeableController extends AbstractController
                 $gradeable_component->setIsPeer(false);
                 $gradeable_component->setPage(0);
                 $gradeable_component->setOrder($y + $z);
-                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
         } else {
             throw new \InvalidArgumentException("Error.");
@@ -720,10 +657,10 @@ class AdminGradeableController extends AbstractController
         }
 
         if ($gradeable->getGradeByRegistration() === false) {
-            $this->core->getQueries()->setupRotatingSections($graders, $_POST['gradeable_id']);
+            $this->core->getQueries()->setupRotatingSections($graders, $gradeable->getId());
         }
 
-        $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $_POST['gradeable_id'] . '.json';
+        $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
         if (!$fp) {
             echo "Could not open file";
         }
@@ -735,11 +672,11 @@ class AdminGradeableController extends AbstractController
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $_POST['gradeable_id'] . ".json";
+        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json";
 
         $config_build_data = array("semester" => $semester,
             "course" => $course,
-            "gradeable" => $_POST['gradeable_id']);
+            "gradeable" => $gradeable->getId());
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             die("Failed to write file {$config_build_file}");
@@ -747,7 +684,7 @@ class AdminGradeableController extends AbstractController
 
 
         if ($edit_gradeable === 0) {
-            $this->redirectToEdit(); // redirect to next page of the form
+            $this->redirectToEdit($gradeable->getId()); // redirect to next page of the form
         } else {
             $this->returnToNav();
         }
@@ -771,6 +708,16 @@ class AdminGradeableController extends AbstractController
         'eg_pdf_page_student'
     ];
 
+    // Mutable first-page properties
+    const front_page_property_names = [
+        'g_title',
+        'g_instructions_url',
+        'eg_use_ta_grading',
+        'eg_max_team_size',
+        'eg_subdirectory',
+        'g_syllabus_bucket'
+    ];
+
     private function createGradeableRequest()
     {
         $result = $this->createGradeable($_REQUEST['id'], $_POST, $_POST['gradeable_template']);
@@ -789,8 +736,14 @@ class AdminGradeableController extends AbstractController
         }
     }
 
-    private function createGradeable($gradeable_id, $properties, $template_id)
+    private function createGradeable($gradeable_id, $details)
     {
+        // First assert that the gradeable ID is valid
+        preg_match('/^[a-zA-Z0-9_-]*$/', $gradeable_id, $matches, PREG_OFFSET_CAPTURE);
+        if(count($matches) === 0) {
+            return [1, 'Invalid Gradeable Id!'];
+        }
+
         // Make sure the gradeable doesn't already exist
         if ($this->core->getQueries()->existsGradeable($gradeable_id)) {
             return [1, 'Gradeable Already Exists!'];
@@ -798,8 +751,8 @@ class AdminGradeableController extends AbstractController
 
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if ($properties['gradeable_template'] !== '') {
-            $template_id = $properties['gradeable_template'];
+        if ($details['gradeable_template'] !== '--None--') {
+            $template_id = $details['gradeable_template'];
             $template_gradeable = $this->getAdminGradeable($template_id);
             if ($template_gradeable === null) {
                 return [1, 'Template Id does not exist!'];
@@ -810,9 +763,12 @@ class AdminGradeableController extends AbstractController
         //
         $admin_gradeable = new AdminGradeable($this->core);
         $admin_gradeable->g_id = $gradeable_id;
-        $gradeable_type = $properties['gradeable_type'];
+        $gradeable_type = $details['g_gradeable_type'];
         if ($gradeable_type === "Electronic File") {
             $admin_gradeable->g_gradeable_type = GradeableType::ELECTRONIC_FILE;
+
+            // Setup the default path on create
+            $admin_gradeable->eg_config_path = '/usr/local/submitty/more_autograding_examples/python_simple_homework/config';
         } else if ($gradeable_type === "Checkpoints") {
             $admin_gradeable->g_gradeable_type = GradeableType::CHECKPOINTS;
         } else if ($gradeable_type === "Numeric") {
@@ -820,12 +776,24 @@ class AdminGradeableController extends AbstractController
         } else {
             return [1, 'Invalid gradeable type!'];
         }
-        $admin_gradeable->eg_team_assignment = $properties['eg_team_assignment'];
-        $admin_gradeable->eg_is_repository = $properties['eg_is_repository'];
+        $admin_gradeable->eg_team_assignment = $details['eg_team_assignment'] === 'true';
+        $admin_gradeable->eg_is_repository = $details['eg_is_repository'] === 'true';
         try {
             $this->core->getQueries()->createNewGradeable($admin_gradeable);
         } catch (\Exception $e) {
             return [2, 'Database call failed: ' . $e];
+        }
+
+        // Call updates with the front page properties
+        $front_page_properties = array();
+        foreach(self::front_page_property_names as $prop) {
+            $front_page_properties[$prop] = $details[$prop];
+        }
+        $result = $this->updateGradeable($admin_gradeable, $front_page_properties);
+        if ($result === null) {
+            return [2, 'Gradeable was not created!'];
+        } else if (count($result) !== 0) {
+            return [2, 'Merged template data failed to validate!'];
         }
 
         // Assert that the provided first page information and template information is valid
@@ -834,7 +802,7 @@ class AdminGradeableController extends AbstractController
             $template_properties = array();
 
             //get a subset of the properties we want to copy
-            foreach (template_property_names as $prop) {
+            foreach (self::template_property_names as $prop) {
                 $template_properties[$prop] = $template_gradeable->$prop;
             }
 
@@ -870,49 +838,49 @@ class AdminGradeableController extends AbstractController
         $this->core->getOutput()->renderJson($response_data);
     }
 
-    private function updateGradeableById($gradeable_id, $properties)
+    private function updateGradeableById($gradeable_id, $details)
     {
         $admin_gradeable = $this->getAdminGradeable($gradeable_id);
         if ($admin_gradeable === null) {
             return null;
         }
-        return $this->updateGradeable($admin_gradeable, $properties);
+        return $this->updateGradeable($admin_gradeable, $details);
     }
 
-    private function updateGradeable(AdminGradeable $admin_gradeable, $properties)
+
+    // A few fields that cannot be changed
+    const blacklist = [
+        'g_id' => 'Gradeable Id',
+        'g_gradeable_type' => 'Gradeable Type',
+        'eg_team_assignment' => 'Teamness',
+        'eg_is_repository' => 'Upload Method'
+    ];
+    // A few fields that need sanitation
+    const sanitize = [
+        'g_title', 'g_instructions_url'
+    ];
+    private function updateGradeable(AdminGradeable $admin_gradeable, $details)
     {
         $errors = array();
-
-        // A few fields that cannot be changed
-        $blacklist = [
-            'g_id' => 'Gradeable Id',
-            'g_gradeable_type' => 'Gradeable Type',
-            'eg_team_assignment' => 'Teamness',
-            'eg_is_repository' => 'Upload Method'
-        ];
-        // A few fields that need sanitation
-        $sanitize = [
-            'g_title', 'g_instructions_url'
-        ];
+        $warnings = array(); // allows us to ignore "not found" (THIS IS TEMPORARY FOR OLD RUBRIC)
 
         // Apply new values for all properties submitted
-        foreach ($properties as $prop => $post_val) {
+        foreach ($details as $prop => $post_val) {
 
             // small blacklist (values that can't change)
-            if (key_exists($prop, $blacklist)) {
-                $errors[$prop] = 'Cannot Change ' . $blacklist[$prop] . ' once created';
+            if (key_exists($prop, self::blacklist)) {
+                $errors[$prop] = 'Cannot Change ' . self::blacklist[$prop] . ' once created';
                 continue;
             }
 
             // Try to set the property
             try {
-                if (in_array($prop, $sanitize)) {
+                if (in_array($prop, self::sanitize)) {
                     $admin_gradeable->$prop = filter_var($post_val, FILTER_SANITIZE_SPECIAL_CHARS);
                 } else if (property_exists($admin_gradeable, $prop)) {
-                    // TODO: could this be a sql-injection vulnerability?
                     $admin_gradeable->$prop = $post_val;
                 } else {
-                    $errors[$prop] = 'Not Found!';
+                    $warnings[$prop] = 'Not Found!';
                 }
             } catch (\Exception $e) {
                 $errors[$prop] = $e;
@@ -920,7 +888,7 @@ class AdminGradeableController extends AbstractController
         }
 
         // If the post array is 0, that means that the name of the element was blank
-        if (count($properties) === 0) {
+        if (count($details) === 0) {
             $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
         }
 
@@ -937,7 +905,7 @@ class AdminGradeableController extends AbstractController
                 $errors['db'] = $e;
             }
         }
-        return $errors;
+        return array_merge($errors, $warnings);
     }
 
     private function deleteGradeable()

@@ -1237,12 +1237,39 @@ VALUES (?, ?, ?, ?)", $params);
      * @param AdminGradeable $gradeable
      */
     public function createNewGradeable(AdminGradeable $gradeable) {
-        $params = array($gradeable->getId(), $gradeable->getName(), $gradeable->getInstructionsUrl(), $gradeable->getTaInstructions(), $gradeable->getType(), var_export($gradeable->getGradeByRegistration(), true), $gradeable->getTaViewDate()->format('Y/m/d H:i:s'), $gradeable->getGradeStartDate()->format('Y/m/d H:i:s'), $gradeable->getGradeReleasedDate()->format('Y/m/d H:i:s'), $gradeable->getMinimumGradingGroup(), $gradeable->getBucket());
+        $params = array($gradeable->g_id,
+            $gradeable->g_title,
+            $gradeable->g_instructions_url,
+            $gradeable->g_overall_ta_instructions,
+            $gradeable->g_gradeable_type,
+            var_export($gradeable->g_grade_by_registration, true),
+            $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
+            $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
+            $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
+            $gradeable->g_min_grading_group,
+            $gradeable->g_syllabus_bucket);
         $this->course_db->query("
 INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->getId(), $gradeable->getOpenDate()->format('Y/m/d H:i:s'), $gradeable->getDueDate()->format('Y/m/d H:i:s'), var_export($gradeable->getIsRepository(), true), $gradeable->getSubdirectory(), var_export($gradeable->getTeamAssignment(),true), $gradeable->getMaxTeamSize(), $gradeable->getTeamLockDate()->format('Y/m/d H:i:s'), var_export($gradeable->getTaGrading(), true), var_export($gradeable->getStudentView(), true), var_export($gradeable->getStudentSubmit(), true),  var_export($gradeable->getStudentDownload(), true), var_export($gradeable->getStudentAnyVersion(), true), $gradeable->getConfigPath(), $gradeable->getLateDays(), $gradeable->getPointPrecision(), var_export($gradeable->getPeerGrading(), true), $gradeable->getPeerGradeSet());
+        if ($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
+            $params = array($gradeable->g_id,
+                $gradeable->eg_submission_open_date->format('Y/m/d H:i:s'),
+                $gradeable->eg_submission_due_date->format('Y/m/d H:i:s'),
+                var_export($gradeable->eg_is_repository, true),
+                $gradeable->eg_subdirectory,
+                var_export($gradeable->eg_team_assignment,true),
+                $gradeable->eg_max_team_size,
+                $gradeable->eg_team_lock_date->format('Y/m/d H:i:s'),
+                var_export($gradeable->eg_use_ta_grading, true),
+                var_export($gradeable->eg_student_view, true),
+                var_export($gradeable->eg_student_submit, true),
+                var_export($gradeable->eg_student_download, true),
+                var_export($gradeable->eg_student_any_version, true),
+                $gradeable->eg_config_path,
+                $gradeable->eg_late_days,
+                $gradeable->eg_precision,
+                var_export($gradeable->eg_peer_grading, true),
+                $gradeable->eg_peer_grade_set);
             $this->course_db->query("
 INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository,
 eg_subdirectory, eg_team_assignment, eg_max_team_size, eg_team_lock_date, eg_use_ta_grading, eg_student_view, eg_student_submit, eg_student_download,
@@ -1259,7 +1286,8 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
      */
     public function updateGradeable(AdminGradeable $gradeable) {
         $params = array($gradeable->g_title, $gradeable->g_instructions_url, $gradeable->g_overall_ta_instructions,
-                        $gradeable->g_gradeable_type, var_export($gradeable->g_grade_by_registration, true),
+                        $gradeable->g_gradeable_type,
+                        var_export($gradeable->g_grade_by_registration, true),
                         $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
                         $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
                         $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
@@ -1285,8 +1313,8 @@ eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=
         }
     }
 
-    public function createNewGradeableComponent(GradeableComponent $component, Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $component->getTitle(), $component->getTaComment(),
+    public function createNewGradeableComponent(GradeableComponent $component, $gradeable_id) {
+        $params = array($gradeable_id, $component->getTitle(), $component->getTaComment(),
                         $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(),
                         $component->getMaxValue(), $component->getUpperClamp(),
                         $this->course_db->convertBoolean($component->getIsText()), $component->getOrder(),
