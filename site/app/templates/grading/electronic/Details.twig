@@ -253,7 +253,25 @@
 
 {# Total Point Summary #}
 {% macro render_column_total(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+    {% set box_background = (gradeable.getActiveDaysLate() > gradeable.getAllowedLateDays()) ? "late-box" : "" %}
+
+    {# Always get autograder points #}
+    {% set graded = gradeable.getGradedAutograderPoints() %}
+    {# If they have a valid, graded submission then they get points from it #}
+    {% if gradeable.hasSubmitted() and gradeable.getActiveVersion() != 0 and gradeable.beenTAgraded() and gradeable.validateVersions() %}
+        {% set graded = graded + gradeable.getGradedTAPoints() %}
+    {% endif %}
+    {# Negative grades are not possible #}
+    {% if graded < 0 %}
+        {% set graded = 0 %}
+    {% endif %}
+
+    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTANonExtraCreditPoints() %}
+    <td>
+        {% if gradeable.validateVersions() %}
+            <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# Total Point Summary (peer) #}

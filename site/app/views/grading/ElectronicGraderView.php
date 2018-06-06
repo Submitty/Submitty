@@ -387,7 +387,6 @@ HTML;
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
         $show_import_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
-        $show_auto_grading_points = true;
 
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
@@ -404,7 +403,6 @@ HTML;
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             } else {
-                $show_auto_grading_points = false;
                 $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading"];
                 $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
@@ -439,7 +437,6 @@ HTML;
                     $columns[] = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
                 }
             } else {
-                $show_auto_grading_points = false;
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
                 $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
@@ -497,7 +494,7 @@ HTML;
                 }
             }
 
-            //Get graded questions
+            //List of graded components
             $info["graded_components"] = [];
             foreach ($row->getComponents() as $component) {
                 if (is_array($component)) {
@@ -522,7 +519,7 @@ HTML;
                 }
             }
 
-                //More complicated info generation should go here
+            //More complicated info generation should go here
 
 
             //-----------------------------------------------------------------
@@ -562,7 +559,6 @@ HTML;
         foreach ($rows as $row) {
             /* @var Gradeable $row */
             $active_version = $row->getActiveVersion();
-            $highest_version = $row->getHighestVersion();
             if ($peer) {
                 $autograding_score = $row->getGradedNonHiddenPoints();
                 $graded = $autograding_score;
@@ -583,7 +579,6 @@ HTML;
                     $grade_viewed_color = "";
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
-                $graded = $autograding_score;
             }
 
             if ($graded < 0) $graded = 0;
@@ -630,22 +625,6 @@ HTML;
                 if ($row->getActiveDaysLate() > $row->getAllowedLateDays()) {
                     $box_background = "late-box";
                 }
-                if (!($row->hasSubmitted())) {
-                }
-                else if ($active_version === 0) {
-                }
-                else if ($row->beenTAgraded()) {
-                    if($row->validateVersions()) {
-			            $graded += $row->getGradedTAPoints();
-                    }
-                }
-            }
-            if($row->isTeamAssignment() && $row->getTeam()===null) {
-                $return .= <<<HTML
-                <td><b><i>No Team</i></b></td>
-HTML;
-            }
-            else {
             }
 
             if($row->validateVersions()) {
@@ -659,17 +638,6 @@ HTML;
 
                 <td></td>
 HTML;
-            }
-            if(!$peer) {
-                if($row->getTaGradesReleased()){
-                    $return .= <<<HTML
-                    <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
-HTML;
-                } else {
-                    $return .= <<<HTML
-                    <td title="{$grade_viewed}" style="{$grade_viewed_color}"></td>
-HTML;
-                }
             }
             $return .= <<<HTML
             </tr>
