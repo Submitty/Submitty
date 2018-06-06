@@ -38,12 +38,16 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+    }
 
+    public function loadTwig() {
         $this->twig_loader = new \Twig_Loader_Filesystem(FileUtils::joinPaths(dirname(__DIR__), 'templates'));
         $this->twig = new \Twig_Environment($this->twig_loader, [
-            'cache' => false //TODO: Use cache
+            'cache' => false, //TODO: Use cache
+            'debug' => $this->core->getConfig()->isDebug()
         ]);
-        $this->twig->addGlobal("core", $core);
+        $this->twig->addGlobal("core", $this->core);
+
     }
 
     public function setInternalResources() {

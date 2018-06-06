@@ -89,6 +89,8 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
 $core->loadConfig($semester, $course);
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadAuthentication();
+//Load Twig templating engine after the config is loaded but before any output is shown
+$core->getOutput()->loadTwig();
 
 if($core->getConfig()->getInstitutionName() !== ""){
     $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
