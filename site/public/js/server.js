@@ -157,6 +157,15 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function newDeleteGradeableForm(form_action, gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-gradeable-form");
+    $('[name="delete-gradeable-message"]', form).html('');
+    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
@@ -1211,8 +1220,7 @@ function editPost(post_id, thread_id) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('.popup-form').css('display', 'block');
-
+                $('#edit-user-post').css('display', 'block');
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
@@ -1305,7 +1313,6 @@ function addNewCategory(){
                 newCategory: newCategory
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -1321,7 +1328,7 @@ function addNewCategory(){
                 var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
-                $('#cat').append('<option value="' + json['categoryId'] + '">' + escape(newCategory) +'</option>');
+                $('#cat').append('<option value="' + json['new_id'] + '">' + escape(newCategory) +'</option>');
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");
@@ -1342,7 +1349,7 @@ function addCollapsable(){
     var posts = $(".post_box").toArray();
     for(var i = 1; i < posts.length; i++){
         if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            $(posts[i]).find(".expand")[0].innerHTML = "Hide replies";
+            $(posts[i]).find(".expand")[0].innerHTML = "Hide Replies";
         } else {
             var button = $(posts[i]).find(".expand")[0];
             $(button).hide();
@@ -1354,12 +1361,12 @@ function hidePosts(text, id) {
     var currentLevel = parseInt($(text).parent().parent().attr("reply-level")); //The double parent is here because the button is in a span, which is a child of the main post.
     var selector = $(text).parent().parent().next().next();
     var counter = 0;
-    var parent_status = "Hide replies";``
-    if (text.innerHTML != "Hide replies") {
-        text.innerHTML = "Hide replies";
+    var parent_status = "Hide Replies";``
+    if (text.innerHTML != "Hide Replies") {
+        text.innerHTML = "Hide Replies";
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).show();
-            if($(selector).find(".expand")[0].innerHTML != "Hide replies"){
+            if($(selector).find(".expand")[0].innerHTML != "Hide Replies"){
                 var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
                 while(nextLvl > (currentLevel+1)){
                     selector = $(selector).next().next();
@@ -1376,9 +1383,9 @@ function hidePosts(text, id) {
             counter++;
         }
         if(counter != 0){
-            text.innerHTML = "Show " + ((counter > 1) ? (counter + " replies") : "reply");
+            text.innerHTML = "Show " + ((counter > 1) ? (counter + " Replies") : "Reply");
         } else {
-            text.innerHTML = "Hide replies";
+            text.innerHTML = "Hide Replies";
         }
     }
 

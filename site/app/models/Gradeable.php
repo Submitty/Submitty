@@ -244,9 +244,6 @@ class Gradeable extends AbstractModel {
 
     protected $result_details;
 
-    /** @property @var string */
-    protected $grade_file = null;
-
     protected $in_interactive_queue = false;
     protected $grading_interactive_queue = false;
     protected $in_batch_queue = false;
@@ -309,6 +306,12 @@ class Gradeable extends AbstractModel {
 
     /** @property @var int */
     protected $student_allowed_late_days = 0;
+
+    /** @property @var str */
+    protected $late_status = "Good";    
+
+    /** @property @var int */
+    protected $curr_late_charged = 0;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -461,6 +464,33 @@ class Gradeable extends AbstractModel {
         $this->bucket = $details['g_syllabus_bucket'];
     }
 
+    public function calculateLateDays(&$total_late_days = 0){
+        $late_flag = false;
+        if ($this->late_days - $this->late_day_exceptions > 0) {
+            $this->late_status = "Late";
+            $late_flag = true;
+        }
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
+            $this->late_status = "Bad too many used for this assignment";
+            $late_flag = false;
+        }
+        // If late days used - extensions applied > allowed per term then status is "Bad..."
+        // Do a max(0, ...) to protect against the case where the student's late days goes down
+        // during the semester and they've already used late days
+        if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
+            $this->late_status = "Bad too many used this term";
+            $late_flag = false;
+        }
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $this->curr_late_charged = $this->late_days - $this->late_day_exceptions;
+            $this->curr_late_charged = ($this->curr_late_charged < 0) ? 0 : $this->curr_late_charged;
+            $total_late_days += $this->curr_late_charged;
+        }
+    }
+
     /**
      * Loads the config/build/build_*.json file for a gradeable
      */
@@ -577,12 +607,12 @@ class Gradeable extends AbstractModel {
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
                                           $user_id, $this->current_version));
-        $grade_file = "GRADING_".$queue_file;
+        $grading_queue_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
         $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
-        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grade_file);
-        $this->grading_batch_queue = file_exists($batch_queue."/".$grade_file);
+        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grading_queue_file);
+        $this->grading_batch_queue = file_exists($batch_queue."/".$grading_queue_file);
 
         $queue_count = 0;
         $grading_count = 0;
@@ -788,11 +818,6 @@ class Gradeable extends AbstractModel {
                 }
             }
         }
-
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$user_id.".txt";
-        if (is_file($grade_file)) {
-            $this->grade_file = htmlentities(file_get_contents($grade_file));
-        }
     }
 
     public function isTeamAssignment() {
@@ -930,10 +955,6 @@ class Gradeable extends AbstractModel {
         return $this->been_tagraded;
     }
 
-    public function hasGradeFile() {
-        return $this->grade_file !== null;
-    }
-
     public function useTAGrading() {
         return $this->ta_grading;
     }
@@ -972,6 +993,10 @@ class Gradeable extends AbstractModel {
 
     public function updateUserViewedDate() {
         $this->core->getQueries()->updateUserViewedDate($this);
+    }
+
+    public function resetUserViewedDate() {
+        $this->core->getQueries()->resetUserViewedDate($this);
     }
 
     public function updateGradeable() {
@@ -1137,5 +1162,24 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
+    }
+
+    public function getRepositoryPath(Team $team) {
+        if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
+        $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+            $this->core->getConfig()->getVcsUrl(), $repo);
+        return str_replace('{$team_id}', $team->getId(), $repo);
     }
 }

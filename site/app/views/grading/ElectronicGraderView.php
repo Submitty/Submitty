@@ -847,9 +847,15 @@ HTML;
 HTML;
             }
             if(!$peer) {
-            $return .= <<<HTML
-                <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
+                if($row->getTaGradesReleased()){
+                    $return .= <<<HTML
+                    <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
 HTML;
+                } else {
+                    $return .= <<<HTML
+                    <td title="{$grade_viewed}" style="{$grade_viewed_color}"></td>
+HTML;
+                }
             }
             $return .= <<<HTML
             </tr>
@@ -912,87 +918,20 @@ HTML;
                                     'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
         }
         $student_full = json_encode($student_full);
-        $return = <<<HTML
-<div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
-    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'submit_team_form', 'gradeable_id'=>$gradeable->getId()))}">
-    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-    <input type="hidden" name="new_team" />
-    <input type="hidden" name="new_team_user_id" />
-    <input type="hidden" name="edit_team_team_id" />
-    <input type="hidden" name="num_users" />
-    <input type="hidden" id="student_full_id" value='{$student_full}'/>
-HTML;
-    if (isset($_REQUEST['view'])) {
-        $return .= <<<HTML
-    <input type="hidden" name="view" value="{$_REQUEST['view']}" />
-HTML;
-    }
-    $return .= <<<HTML
-    <h2 id="admin-team-title"></h2>
-    <br />
-    <div id="admin-team-members" style="width:50%;"></div>
-    <div>
-        Registration Section:<br />
-        <select name="reg_section">
-HTML;
-        foreach ($all_reg_sections as $section) {
-            $return .= <<<HTML
-            <option value="{$section}">Section {$section}</option>
-HTML;
-        }
-        $return .= <<<HTML
-            <option value="NULL">Section NULL</option>
-        </select><br /><br />
-        Rotating Section:<br />
-        <select name="rot_section">
-HTML;
-        foreach ($all_rot_sections as $section) {
-            $return .= <<<HTML
-            <option value="{$section}">Section {$section}</option>
-HTML;
-        }
-        $return .= <<<HTML
-            <option value="NULL">Section NULL</option>
-        </select>
-    </div>
-    <br />
-    <br />
-    <h4 id="admin-team-history-title"></h4>
-    <div id="admin-team-history-left" style="width:28%;"></div>
-    <div id="admin-team-history-right" style="width:62%;"></div>
-    <div style="float: right; width: auto; margin-top: 10px">
-        <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-        <input class="btn btn-primary" type="submit" value="Submit" />
-    </div>
-    </form>
-</div>
-HTML;
-        return $return;
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
+            "gradeable" => $gradeable,
+            "student_full" => $student_full,
+            "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
+            "all_reg_sections" => $all_reg_sections,
+            "all_rot_sections" => $all_rot_sections,
+        ]);
     }
 
     public function importTeamForm($gradeable) {
-        $return = <<<HTML
-<div class="popup-form" id="import-team-form" style="width:550px; margin-left:-250px;">
-    <h2>Import Teams Members</h2> 
-    <p>&emsp;</p>
-    <p>Format of the teams should be csv with 6 columns:<br />
-First Name, Last Name, User ID, Team ID, Team Registration Section, Team Rotating Section<br />
-The first row of the csv is assumed to be column headings and is ignored.<br /><br />
-        Note: Imported Teams will be assigned new Team IDs, Team Registration Section, and Team Rotating Section.
-    </p><br />
-    <form method="post" action="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'import_teams', 'gradeable_id'=>$gradeable->getId()))}" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        <div>
-            <input type="file" name="upload_team" accept=".csv">
-        </div>
-        <div style="float:right; width:auto;">
-            <a onclick="$('#import-team-form').css('display', 'none')" class="btn btn-danger">Cancel</a>    
-            <input class="btn btn-primary" type="submit" value="Import">    
-        </div>    
-    </form>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
+            "gradeable" => $gradeable
+        ]);
     }
 
 
@@ -1326,27 +1265,35 @@ HTML;
 HTML;
 
             //Late day calculation
-            $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-            $return .= $ldu->generateTableForUserDate($gradeable->getName(), $user->getId(), $gradeable->getDueDate());
-            $late_days_data = $ldu->getGradeable($user->getId(), $gradeable->getId());
-            $status = $late_days_data['status'];
-
+            $status = "Good";
             $color = "green";
-            if($status != "Good" && $status != "Late") {
-                $color = "red";
-                $my_color="'#F62817'"; // fire engine red
-                $my_message="Late Submission";
-                $return .= <<<HTML
-            <script>
-                $('body').css('background', $my_color);
-                $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                $('#bar_banner').css('background-color', $my_color);
-                $('#bar_banner').css('color', 'black');
-            </script>
+            if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
+                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                    $team_member = $this->core->getQueries()->getUserById($team_member);
+                    $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
+                }
+                
+            } else {
+                $return .= $this->makeTable($user->getId(), $gradeable, $status);
+                if($status != "Good" && $status != "Late" && $status != "No submission") {
+                    $color = "red";
+                    $my_color="'#F62817'"; // fire engine red
+                    $my_message="Late Submission";
+                    $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
 HTML;
+                }
             }
+            
+            
+
             $return .= <<<HTML
-            <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
         </div>
     </div>
     </div>
@@ -1922,4 +1869,60 @@ HTML;
         return $return;
     }
 
+    private function makeTable($user_id, $gradeable, &$status){
+        $return = <<<HTML
+        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
+                </tr>
+            </thead>
+            <tbody>
+HTML;
+        $total_late_used = 0;
+        $status = "Good";
+        $order_by = [ 
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
+        ];
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
+            $g->calculateLateDays($total_late_used);
+            $class = "";
+            if($g->getId() == $gradeable->getId()){
+                $class = "class='yellow-background'";
+                $status = $g->getLateStatus();
+            }
+            if(!$g->hasSubmitted()){
+                $status = "No submission";
+            }
+            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
+            $return .= <<<HTML
+                <tr>
+                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
+                </tr>
+HTML;
+        }
+        $return .= <<<HTML
+            </tbody>
+        </table>
+HTML;
+        return $return;
+    }
+    
 }
