@@ -57,9 +57,11 @@
             </tbody>
             {# /Section heading #}
             {# Student list #}
-            {% for info in section.rows %}
-                {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
-            {% endfor %}
+            <tbody>
+                {% for info in section.rows %}
+                    {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                {% endfor %}
+            </tbody>
             {# /Student list #}
         {% endfor %}
     </table>
@@ -72,7 +74,7 @@
         {% set style = "" %}
     {% endif %}
 
-    <tr {{ style }}>
+    <tr {{ style|raw }}>
         {% for column in columns %}
             {#
                 This is basically a switch statement. It calls the function we need for

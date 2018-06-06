@@ -549,13 +549,9 @@ HTML;
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "columns" => $columns,
-            "peer" => "peering"
+            "peer" => $peer
         ]);
 
-
-        $return .= <<<HTML
-        </tbody>
-HTML;
         if ($gradeable->isTeamAssignment() && count($empty_teams) > 0) {
             $return .= <<<HTML
             <tr class="info persist-header">
