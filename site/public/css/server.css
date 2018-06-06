@@ -95,7 +95,7 @@ select {
     font-size: 16px;
     border: 1px solid #ccc;
     height: 34px;
-    background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
+    background: #FFF;
     background-size: 20px;
 }
 
