@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{ filename }}</title>
+    <link rel="stylesheet" href="{{ core.getConfig().getBaseUrl() }}css/iframe/codemirror.css" />
+    <link rel="stylesheet" href="{{ core.getConfig().getBaseUrl() }}css/iframe/eclipse.css" />
+    <link rel="stylesheet" href="{{ core.getConfig().getBaseUrl() }}css/iframe/monokai.css" />
+    <script type="text/javascript" language="javascript" src="{{ core.getConfig().getBaseUrl() }}js/iframe/jquery-2.0.3.min.map.js"></script>
+    <script type="text/javascript" language="javascript" src="{{ core.getConfig().getBaseUrl() }}js/iframe/codemirror.js"></script>
+    <script type="text/javascript" language="javascript" src="{{ core.getConfig().getBaseUrl() }}js/iframe/clike.js"></script>
+    <script type="text/javascript" language="javascript" src="{{ core.getConfig().getBaseUrl() }}js/iframe/python.js"></script>
+    <script type="text/javascript" language="javascript" src="{{ core.getConfig().getBaseUrl() }}js/iframe/shell.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('body').css("height", ($('.CodeMirror').height()) + "px");
+        });
+    </script>
+</head>
+<body>
+    <textarea id="code0">{{ file_contents }}</textarea>
+    {% include 'misc/SourceSettings.twig' with { type: mime_type, number: 0 } %}
+</body>
+</html>
