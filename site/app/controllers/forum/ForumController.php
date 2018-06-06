@@ -59,11 +59,13 @@ class ForumController extends AbstractController {
                 break;
             case 'add_category':
                 $this->addNewCategory();
+                break;
             case 'show_stats':
                 $this->showStats();
                 break;
             case 'merge_thread':
                 $this->mergeThread();
+                break;
             case 'pin_thread':
                 $this->pinThread(1);
                 break;
@@ -107,24 +109,40 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function isValidCategories($inputCategoryIds){
-        if(count($inputCategoryIds) < 1) {
-            return false;
-        }
-        foreach ($inputCategoryIds as $category_id) {
-            if($category_id < 1){
+    private function isValidCategories($inputCategoryIds = -1, $inputCategoriesName = -1){
+        $rows = $this->core->getQueries()->getCategories();
+        if(is_array($inputCategoryIds)) {
+            if(count($inputCategoryIds) < 1) {
                 return false;
             }
-            $rows = $this->core->getQueries()->getCategories();
-            $match_found = false;
-            foreach($rows as $index => $values){
-                if($values["category_id"] === $category_id) {
-                    $match_found = true;
-                    break;
+            foreach ($inputCategoryIds as $category_id) {
+                $match_found = false;
+                foreach($rows as $index => $values){
+                    if($values["category_id"] === $category_id) {
+                        $match_found = true;
+                        break;
+                    }
+                }
+                if(!$match_found) {
+                    return false;
                 }
             }
-            if(!$match_found) {
+        }
+        if(is_array($inputCategoriesName)) {
+            if(count($inputCategoriesName) < 1) {
                 return false;
+            }
+            foreach ($inputCategoriesName as $category_name) {
+                $match_found = false;
+                foreach($rows as $index => $values){
+                    if($values["category_desc"] === $category_name) {
+                        $match_found = true;
+                        break;
+                    }
+                }
+                if(!$match_found) {
+                    return false;
+                }
             }
         }
         return true;
@@ -135,10 +153,14 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
-                $newCategoryId = $this->core->getQueries()->addNewCategory($category);
-                $result["new_id"] = $newCategoryId["category_id"];
+                if($this->isValidCategories(-1, array($category))) {
+                    $result["error"] = "That category already exists.";
+                } else {
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                    $result["new_id"] = $newCategoryId["category_id"];
+                }
             } else {
-                $result["error"] = "No category data submitted";
+                $result["error"] = "No category data submitted. Please try again.";
             }
         } else {
             $result["error"] = "You do not have permissions to do that.";
@@ -346,7 +368,7 @@ class ForumController extends AbstractController {
         $thread_data = array();
         $current_thread_title = "";
         $activeThread = false;
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDislpayList', $threads, true, $currentThreadId, $currentCategoriesIds);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));
