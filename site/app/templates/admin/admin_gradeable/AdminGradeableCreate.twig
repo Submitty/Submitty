@@ -115,10 +115,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     Are students uploading files or submitting to a Version Control System (VCS) repository?<br />
     <fieldset>
 
-        <input type="radio" id="upload_file_radio" name="eg_is_repository" value="upload_file"
+        <input type="radio" id="upload_file_radio" name="eg_is_repository" value="false"
                 {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
 
-        <input type="radio" id="repository_radio" name="eg_is_repository" value="repository"
+        <input type="radio" id="repository_radio" name="eg_is_repository" value="true"
                 {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
 
         <span class="uneditable-text">(Submission type cannot be changed after initial creation)</span>

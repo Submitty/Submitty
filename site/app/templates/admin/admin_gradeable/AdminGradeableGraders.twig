@@ -42,10 +42,10 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
 <br />
 <fieldset>
-    <input type="radio" name="g_grade_by_registration" value="reg_section" id="registration-section"
+    <input type="radio" name="g_grade_by_registration" value="true" id="registration_section"
         {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 
-    <input type='radio' name="g_grade_by_registration" value="rotating-section" id="rotating-section"
+    <input type='radio' name="g_grade_by_registration" value="false" id="rotating_section"
         {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
     <div id="rotating_data">
@@ -134,7 +134,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     }
 
     function onSectionTypeChange() {
-        if($('#rotating-section').is(':checked')) {
+        if($('#rotating_section').is(':checked')) {
             // $('#rotating_data').show();
             disableElementChildren('#rotating_data', false);
         }
@@ -190,8 +190,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     });
 
     function checkFormGraders() {
-        var checkRegister = $('#registration-section').is(':checked');
-        var checkRotate = $('#rotating-section').is(':checked');
+        var checkRegister = $('#registration_section').is(':checked');
+        var checkRotate = $('#rotating_section').is(':checked');
 
         // This seems pretty unlikely to happen since the input is a boolean
         if($('[name="eg_use_ta_grading"]').is(':checked') || check2 || check3) {

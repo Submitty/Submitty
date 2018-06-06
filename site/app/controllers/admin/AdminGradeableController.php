@@ -110,23 +110,51 @@ class AdminGradeableController extends AbstractController {
      *
      * @return array error messages
      */
-    private function validateGradeable($admin_gradeable)
+    private function validateGradeable(AdminGradeable $admin_gradeable)
     {
         // For now, only check that the dates are valid, but here's a list of checks:
         //  -Non-blank Name
-        //  -one 'type' checkbox is checked
+        //  -force boolean values to be boolean
         //  -non-blank autograding config (for electronic submission)
         //  -maybe some warnings about the rubric
+        //  -Dates
 
         // Messages array that holds warning/error messages for
         //  any AdminGradeable Properties that have issues
         $messages = array();
 
-
         if($admin_gradeable->g_title === '') {
             $messages['g_title'] = 'Title cannot be blank!';
         }
 
+        // Boolean values are false unless 'true'
+        $boolean_properties = [
+            'g_grade_by_registration',
+            'eg_is_repository',
+            'eg_team_assignment',
+            'eg_use_ta_grading',
+            'eg_student_view',
+            'eg_student_submit',
+            'eg_student_download',
+            'eg_student_any_version',
+            'eg_peer_grading',
+            'eg_pdf_page',
+            'eg_pdf_page_student'
+        ];
+        foreach($boolean_properties as $property) {
+            if(gettype($admin_gradeable->$property) !== 'boolean') {
+                $admin_gradeable->$property = $admin_gradeable->$property === 'true';
+            }
+        }
+
+        // Make sure autograding config isn't blank
+        if($admin_gradeable->g_gradeable_type == GradeableType::ELECTRONIC_FILE) {
+            if($admin_gradeable->eg_config_path === '') {
+                $messages['eg_config_path'] = 'Config Path Cannot be Blank!';
+            }
+        }
+
+        // Some alias' for time comparison
         $ta_view = null;
         $open = null;
         $due = null;
@@ -174,6 +202,13 @@ class AdminGradeableController extends AbstractController {
         }
 
         try {
+            $admin_gradeable->eg_team_lock_date =
+                new \DateTime($admin_gradeable->eg_team_lock_date, $this->core->getConfig()->getTimezone());
+        } catch (\Exception $e) {
+            $messages['eg_team_lock_date'] = 'Invalid Format!';
+        }
+
+        try {
             $late_interval = new \DateInterval('P' . strval($admin_gradeable->getEgLateDays()) . 'D');
         } catch (\Exception $e) {
             $messages['eg_late_days'] = 'Invalid Format!';
@@ -185,7 +220,7 @@ class AdminGradeableController extends AbstractController {
 
         // No validation for team lock dates (tbd)
 
-        if($admin_gradeable->getGGradeableType() === GradeableType::ELECTRONIC_FILE) {
+        if($admin_gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             if(!($ta_view === null || $open === null) && $ta_view > $open) {
                 $messages['g_ta_view_start_date']   = 'TA Beta Testing Date must not be later than Submission Open Date';
             }
@@ -193,7 +228,7 @@ class AdminGradeableController extends AbstractController {
                 $message['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
             }
 
-            if($admin_gradeable->getEgUseTaGrading()) {
+            if($admin_gradeable->eg_use_ta_grading) {
 
                 if(!($due === null || $grade === null) && $due > $grade) {
                     $message['g_grade_start_date']      = 'Manual Grading Open Date must be no earlier than Due Date';
