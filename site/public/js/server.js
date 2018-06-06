@@ -1270,9 +1270,9 @@ function addNewCategory(){
     })
 }
 
-function reorderCategory(){
+function reorderCategories(){
     var data = $('#ui-category-list').sortable('serialize');
-    var url = buildUrl({'component': 'forum', 'page': 'reorder_category'});
+    var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
     $.ajax({
             url: url,
             type: "POST",

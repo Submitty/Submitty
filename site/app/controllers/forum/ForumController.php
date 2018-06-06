@@ -60,6 +60,9 @@ class ForumController extends AbstractController {
             case 'add_category':
                 $this->addNewCategory();
                 break;
+            case 'reorder_categories':
+                $this->reorderCategories();
+                break;
             case 'show_stats':
                 $this->showStats();
                 break;
@@ -161,6 +164,33 @@ class ForumController extends AbstractController {
                 }
             } else {
                 $result["error"] = "No category data submitted. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function reorderCategories(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $rows = $this->core->getQueries()->getCategories();
+
+            $current_order = array();
+            foreach ($rows as $row) {
+                $current_order[] = (int)$row['category_id'];
+            }
+            $new_order = array();
+            foreach ($_POST['categorylistitem'] as $item) {
+                $new_order[] = (int)$item;
+            }
+
+            if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
+                $this->core->getQueries()->reorderCategories($new_order);
+                $results["success"] = "ok";
+            } else {
+                $result["error"] = "Different Categories IDs given";
             }
         } else {
             $result["error"] = "You do not have permissions to do that.";

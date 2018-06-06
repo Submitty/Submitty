@@ -854,15 +854,21 @@ HTML;
 			$return .= <<<HTML
 			<div class="popup-form" id="category-list">
 				<h3>Categories</h3><br>
-				<span id='category-list-no-element' style="margin-left: 1em;display:none;" >
-					No category found
-				</span>
+HTML;
+				if(count($categories) == 0) {
+					$return .= <<<HTML
+					<span id='category-list-no-element' style="margin-left: 1em;" >
+						No category found
+					</span>
+HTML;
+				}
+				$return .= <<<HTML
 				<ul id='ui-category-list'>
 HTML;
 				for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
 						<li id="categorylistitem-{$categories[$i]['category_id']}">
-							<i class="fa fa-bars handle" aria-hidden="true"></i>
+							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
 							{$categories[$i]['category_desc']}
 						</li>
 HTML;
@@ -871,14 +877,13 @@ HTML;
 				</ul>
 				<div  style="float: right; width: auto; margin-top: 10px;">
 					<a onclick="$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
-					<input class="btn btn-primary" type="submit" value="Submit" />
 				</div>
 				<script type="text/javascript">
 					$(function() {
 						$("#ui-category-list").sortable({
 							handle: ".handle",
 							update: function (event, ui) {
-						        reorderCategory();
+						        reorderCategories();
 						    }
 						});
 					});
@@ -924,6 +929,8 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
+					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button>
+					&nbsp;
 					<a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
 					</span>
 HTML;

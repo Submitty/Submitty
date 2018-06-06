@@ -507,6 +507,7 @@ CREATE TABLE "thread_categories" (
 CREATE TABLE "categories_list" (
 	"category_id" serial NOT NULL,
 	"category_desc" varchar NOT NULL,
+	"rank" int,
 	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
