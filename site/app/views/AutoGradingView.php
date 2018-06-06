@@ -78,7 +78,7 @@ HTML;
             }
             else {
                 //check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist)
-                $totalTitle = ($gradeable->hasGradeFile()) ? "Autograding Subtotal" : "Total";
+                $totalTitle = ($gradeable->beenTAgraded()) ? "Autograding Subtotal" : "Total";
                 $autoGradingPoints = $current_version->getNonHiddenTotal();
                 $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
                 $display_hidden = "none";

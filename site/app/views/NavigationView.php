@@ -275,7 +275,7 @@ HTML;
                         if(is_dir($submission_path)) {
                             $no_submission_flag=false;
                         }
-                        if(($no_submission_flag == true) && ($no_teams_flag == true)) {
+                        if($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
                             $form_action=$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable ));
                             $gradeable_title = <<<HTML
                     <label>{$g_data->getName()}</label>&nbsp;
@@ -287,7 +287,7 @@ HTML;
                         }
                     }
                     else if(($g_data->getType() == GradeableType::NUMERIC_TEXT) || (($g_data->getType() == GradeableType::CHECKPOINTS))) {
-                        if(($this->core->getQueries()->getNumUsersGraded($gradeable)) == 0) {
+                        if($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable) === 0) {
                             $form_action=$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable ));
                             $gradeable_title = <<<HTML
                     <label>{$g_data->getName()}</label>&nbsp;
