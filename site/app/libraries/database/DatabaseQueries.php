@@ -2206,7 +2206,7 @@ AND gc_id IN (
         }
     }
     public function getNumberRegradeRequests($gradeable_id){
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE gradeable_id = '$gradeable_id' AND status = -1");
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE gradeable_id = ? AND status = -1", array($gradeable_id));
         return ($this->course_db->row()['cnt']); 
     }
     public function getRegradeDiscussion($thread_id){
