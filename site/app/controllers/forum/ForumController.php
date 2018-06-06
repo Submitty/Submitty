@@ -346,7 +346,7 @@ class ForumController extends AbstractController {
         $thread_data = array();
         $current_thread_title = "";
         $activeThread = false;
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDislpayList', $threads, true, $currentThreadId, $currentCategoriesIds);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));

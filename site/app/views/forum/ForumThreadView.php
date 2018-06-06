@@ -541,7 +541,7 @@ HTML;
 		return $return;
 	}
 
-	public function showAlteredDislpayList($threads, $filtering, $thread_id, $categories_ids){
+	public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
 		$tempArray = array();
 		$threadAnnouncement = false;
 		$activeThreadTitle = "";
@@ -900,7 +900,7 @@ HTML;
             	<br/>
 
 
-            	<div style="margin-bottom:10px;" class="form-group row">
+				<div style="margin-bottom:10px;" class="form-group row">
 HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
@@ -910,7 +910,7 @@ HTML;
 						$return .= <<<HTML
 							<a class="btn cat-buttons cat-notselected" style="color: green;border-color: green;">{$categories[$i]['category_desc']}
 								<input type="hidden" name="cat[]" value="{$categories[$i]['category_id']}"/>
-							</a> 
+							</a>
 HTML;
 					}
 					$return .= <<<HTML
@@ -935,7 +935,7 @@ HTML;
 						});
 					});
 					</script>
-            	</div>
+				</div>
             	<div style="margin-bottom:10px;" class="form-group row">
             	<span style="float:left;display:inline-block;">
             	<label id="file_input_label" class="btn btn-default" for="file_input">
