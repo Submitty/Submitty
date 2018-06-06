@@ -8,12 +8,10 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\Gradeable;
-use app\models\HWReport;
 use app\models\GradeSummary;
 use app\models\LateDaysCalculation;
 
 /*
-use app\report\HWReportView;
 use app\report\CSVReportView;
 use app\report\GradeSummaryView;
 */
@@ -25,9 +23,6 @@ class ReportController extends AbstractController {
                 break;
             case 'summary':
                 $this->generateGradeSummaries();
-                break;
-            case 'hwreport':
-                $this->generateHWReports();
                 break;
             case 'reportpage':
             default:
@@ -275,13 +270,6 @@ class ReportController extends AbstractController {
         else {
             $entry['days_late'] = 0;
         }
-    }
-    
-    public function generateHWReports() {
-        $hw_report = new HWReport($this->core);
-        $hw_report->generateAllReports();
-        $this->core->addSuccessMessage("Successfully Generated HWReports");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 }
 
