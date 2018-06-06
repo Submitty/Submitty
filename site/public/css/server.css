@@ -848,6 +848,32 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.cat-buttons {
+    background-color: #FFF;
+}
+
+.cat-selected {
+    opacity: 1.0;
+    filter: alpha(opacity=100);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
+    /*font-weight: bold !important;*/
+}
+
+.cat-selected:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+.cat-notselected {
+    opacity: 0.6;
+    filter: alpha(opacity=60);
+}
+
+.cat-notselected:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,

@@ -904,15 +904,37 @@ HTML;
 HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
-					<label for="cat">Categories</label> <br>
+					<label for="cat" id="cat_label">Categories</label> <br>
 HTML;
 					for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
-							<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</input>
+							<a class="btn cat-buttons cat-notselected" style="color: green;border-color: green;">{$categories[$i]['category_desc']}
+								<input type="hidden" name="cat[]" value="{$categories[$i]['category_id']}"/>
+							</a> 
 HTML;
 					}
 					$return .= <<<HTML
-
+					<script type="text/javascript">
+					$(function() {
+						$(".cat-buttons").click(function() {
+							console.log($(this));
+							if($(this).hasClass("cat-selected")) {
+								$(this).removeClass("cat-selected");
+								$(this).addClass("cat-notselected");
+							} else {
+								$(this).removeClass("cat-notselected");
+								$(this).addClass("cat-selected");
+							}
+						});
+						$("#create_thread_form").submit(function() {
+							if($(this).find('.cat-selected').length == 0) {
+								alert("Atleast one category must be selected");
+								return false;
+							}
+							$(this).find('.cat-notselected *').prop("disabled","true");
+						});
+					});
+					</script>
             	</div>
             	<div style="margin-bottom:10px;" class="form-group row">
             	<span style="float:left;display:inline-block;">

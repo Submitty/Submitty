@@ -108,6 +108,9 @@ class ForumController extends AbstractController {
     }
 
     private function isValidCategories($inputCategoryIds){
+        if(count($inputCategoryIds) < 1) {
+            return false;
+        }
         foreach ($inputCategoryIds as $category_id) {
             if($category_id < 1){
                 return false;
