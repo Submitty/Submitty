@@ -82,6 +82,8 @@
                 {{ self.render_column_graded_questions(self, section, gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
                 {{ self.render_column_grading(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "grading_peer" %}
+                {{ self.render_column_grading_peer(self, section, gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, section, gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
@@ -144,12 +146,66 @@
 
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+    <td>
+        {%- for component in info.graded_components -%}
+            {%- if loop.index0 != 0 %}, {% endif -%}
+            {{- loop.index -}}
+        {%- endfor -%}
+    </td>
 {% endmacro %}
 
 {# Grading Button #}
 {% macro render_column_grading(self, section, gradeable, index, info, column) %}
-    <td>todo</td>
+    {% if not gradeable.hasSubmitted() %}
+        {% set contents = "No Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif gradeable.getActiveVersion() == 0 %}
+        {% set contents = "Cancelled Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif gradeable.beenTAgraded() %}
+        {% if gradeable.validateVersions() %}
+            {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
+            {% set btn_class = "btn-default" %}
+        {% else %}
+            {% set btn_class = "btn-primary" %}
+            {% if not gradeable.isFullyGraded() %}
+                {% set contents = "Grading Incomplete" %}
+            {% else %}
+                {% set contents = "Version Conflict" %}
+            {% endif %}
+        {% endif %}
+    {% else %}
+        {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% endif %}
+    <td>
+        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getId()}) }}">
+            {{ contents }}
+        </a>
+    </td>
+{% endmacro %}
+
+{# Grading Button (peer) #}
+{% macro render_column_grading_peer(self, section, gradeable, index, info, column) %}
+    {# todo: test this (no way to create peer assignments currently) #}
+    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
+    {% if components|length == 0 %}
+        {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% else %}
+        {% set score = 0 %}
+        {% for component in components %}
+            {% set score = score + component.getScore() %}
+        {% endfor %}
+
+        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
+        {% set btn_class = "btn-default" %}
+    {% endif %}
+    <td>
+        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId()}) }}">
+            {{ contents }}
+        </a>
+    </td>
 {% endmacro %}
 
 {# Index #}

@@ -497,7 +497,32 @@ HTML;
                 }
             }
 
-            //More complicated info generation should go here
+            //Get graded questions
+            $info["graded_components"] = [];
+            foreach ($row->getComponents() as $component) {
+                if (is_array($component)) {
+                    foreach ($component as $cmpt) {
+                        if ($cmpt->getGrader() == null) {
+                            $question = $cmpt;
+                            break;
+                        }
+                        if ($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                            $question = $cmpt;
+                            break;
+                        }
+                    }
+                    if ($question === null) {
+                        $question = $component[0];
+                    }
+                } else {
+                    $question = $component;
+                }
+                if ($question->getGrader() !== null && $question !== null) {
+                    $info["graded_components"][] = $question;
+                }
+            }
+
+                //More complicated info generation should go here
 
 
             //-----------------------------------------------------------------
@@ -587,8 +612,6 @@ HTML;
                 $box_background = "";
                 $peer_cmpts = $row->getComponentsGradedBy($this->core->getUser()->getId());
                 if(count($peer_cmpts) == 0) {
-                    $contents = "Grade";
-                    $btn_class = "btn-primary";
                 }
                 else {
                     $score =0;
@@ -600,8 +623,6 @@ HTML;
                     // instead of autograding_score it should be total autograding possible
                     // I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
                     $total_possible = $autograding_score + $row->getTotalPeerGradingNonExtraCredit();
-                    $contents = "{$score}&nbsp;/&nbsp;{$row->getTotalPeerGradingNonExtraCredit()}";
-                    $btn_class = "btn-default";
                 }
             }
             else {
@@ -610,32 +631,13 @@ HTML;
                     $box_background = "late-box";
                 }
                 if (!($row->hasSubmitted())) {
-                    $btn_class = "btn-default";
-                    $contents = "No Submission";
                 }
                 else if ($active_version === 0) {
-                    $btn_class = "btn-default";
-                    $contents = "Cancelled Submission";
                 }
                 else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
-                        $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
 			            $graded += $row->getGradedTAPoints();
                     }
-                    else{
-                        $btn_class = "btn-primary";
-                        if(!$row->isFullyGraded()){
-                            $contents = "Grading Incomplete";
-                        }
-                        else{
-                            $contents = "Version Conflict";
-                        }
-                    }
-                }
-                else {
-                    $btn_class = "btn-primary";
-                    $contents = "Grade";
                 }
             }
             if($row->isTeamAssignment() && $row->getTeam()===null) {
@@ -644,57 +646,6 @@ HTML;
 HTML;
             }
             else {
-                $return .= <<<HTML
-                <td>
-HTML;
-                $temp_counter = 1;
-
-                //prints the graded questions
-                foreach ($row->getComponents() as $component) {
-                	$first = true;
-                    if(is_array($component)) {
-                        foreach($component as $cmpt) {
-                            if($cmpt->getGrader() == null) {
-                                $question = $cmpt;
-                                break;
-                            }
-                            if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
-                                $question = $cmpt;
-                                break;
-                            }
-                        }
-                        if($question === null) {
-                            $question = $component[0];
-                        }
-                    }
-                    else {
-                        $question = $component;
-                    }
-                    if($question->getGrader() === null || $question === null) {
-                    } else {
-                    	if ($first == true) {
-                    		$first = false;
-                    		$return .= <<<HTML
-                            {$temp_counter}
-HTML;
-                    	} else {
-                    		$return .= <<<HTML
-                           , {$temp_counter}
-HTML;
-                    	}
-                    }
-                    $temp_counter++;
-                }
-
-
-                $return .= <<<HTML
-                </td>
-                <td>
-                    <a class="btn {$btn_class}" href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$row->getUser()->getId()))}">
-                        {$contents}
-                    </a>
-                </td>
-HTML;
             }
 
             if($row->validateVersions()) {
