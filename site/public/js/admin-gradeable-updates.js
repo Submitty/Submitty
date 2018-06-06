@@ -1,17 +1,28 @@
-
-function fillAjaxErrorBox(data, statusCode) {
-    if(statusCode !== 204) { //NO CONTENT
-        $('#ajax_debug').html(data);
-    }
-    else {
-        $('#ajax_debug').html('');
+function getCallback(prop) {
+    return function(data, statusCode) {
+        let input = $('#' + prop);
+        if (statusCode !== 204) {
+            let arr = JSON.parse(data);
+            $('#ajax_debug').html(data);
+            input.each(function (i,elem) {
+                elem.title = arr['errors'][prop];
+                elem.style.backgroundColor = '#FDD';
+            });
+        }
+        else {
+            $('#ajax_debug').html('');
+            input.each(function (i,elem) {
+                elem.title = '';
+                elem.style.backgroundColor = '';
+            });
+        }
     }
 }
 
 $(document).ready(function () {
     $('input').change(function () {
         ajaxUpdateGradeableProperty($('#g_id').val(), this.name, $(this).val(),
-            fillAjaxErrorBox, fillAjaxErrorBox);
+            getCallback(this.name), getCallback(this.name));
     });
 });
 
