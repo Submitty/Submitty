@@ -5,7 +5,6 @@ namespace app\controllers\grading;
 use app\controllers\AbstractController;
 use app\models\Team;
 use app\models\User;
-use app\models\HWReport;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
@@ -96,8 +95,6 @@ class ElectronicGraderController extends GradingController {
                 if(!$verifyAll && $component->getId() == $component_id) break;
             }
         }
-        $hwReport = new HWReport($this->core);
-        $hwReport->generateSingleReport($user_id, $gradeable_id);
 
         if($verified){
             return;
@@ -1082,15 +1079,8 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
-        //generates the HW Report each time a mark is saved
-        $hwReport = new HWReport($this->core);
-        $hwReport->generateSingleReport($user_id, $gradeable_id);
 
         $gradeable->resetUserViewedDate();
-
-        if($this->core->getUser()->getGroup() == 4) {
-            $hwReport->generateSingleReport($this->core->getUser()->getId(), $gradeable_id);
-        }
 
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
         $this->core->getOutput()->renderJson($response);
@@ -1161,8 +1151,6 @@ class ElectronicGraderController extends GradingController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $gradeable->setOverallComment($_POST['gradeable_comment']);
         $gradeable->saveGradeableData();
-        $hwReport = new HWReport($this->core);
-        $hwReport->generateSingleReport($user_id, $gradeable_id);
         $gradeable->resetUserViewedDate();
     }
 
@@ -1287,7 +1275,7 @@ class ElectronicGraderController extends GradingController {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key, true);
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
