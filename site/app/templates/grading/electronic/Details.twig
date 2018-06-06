@@ -217,10 +217,15 @@
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
+    {% set visible = true %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getId()}) }}">
-            {{ contents }}
-        </a>
+        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
+            <b><i>No Team</i></b>
+        {% else %}
+            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getId()}) }}">
+                {{ contents }}
+            </a>
+        {% endif %}
     </td>
 {% endmacro %}
 
@@ -240,10 +245,15 @@
         {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
         {% set btn_class = "btn-default" %}
     {% endif %}
+    {% set visible = true %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId()}) }}">
-            {{ contents }}
-        </a>
+        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
+            <b><i>No Team</i></b>
+        {% else %}
+            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId()}) }}">
+                {{ contents }}
+            </a>
+        {% endif %}
     </td>
 {% endmacro %}
 
@@ -268,7 +278,7 @@
 {% macro render_column_team_id(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            <b><i>No Team</i></b>
+            
         {% else %}
             {{ gradeable.getTeam().getId() }}
         {% endif %}
