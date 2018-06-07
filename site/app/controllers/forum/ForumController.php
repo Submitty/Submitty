@@ -176,15 +176,15 @@ class ForumController extends AbstractController {
         $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
-        $category_ids  = array();
+        $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
-            $category_ids[] = (int)$category_id;
+            $categories_ids[] = (int)$category_id;
         }
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!$this->isValidCategories($category_ids)){
-            $this->core->addErrorMessage("You must select a valid categories. Please re-submit your thread.");
+        }else if(!$this->isValidCategories($categories_ids)){
+            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
@@ -192,7 +192,7 @@ class ForumController extends AbstractController {
                 return;
             }
 
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $category_ids);
+            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $categories_ids);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
 

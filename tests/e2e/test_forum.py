@@ -235,8 +235,8 @@ class TestForum(BaseTestCase):
         assert not self.thread_exists(title2)
         self.create_thread(title1, content1, categories_list = [('Question', True), ('Comment', False), ('Tutorials', True)])
         self.create_thread(title2, content2, categories_list = [('Question', False), ('Comment', True), ('Tutorials', False)])
+        # Creation Failed
         self.create_thread(title3, content3, categories_list = [('Question', False), ('Comment', False), ('Tutorials', False)])
-        # # Creationg Failed
 
         info1 = self.view_thread(title1, return_info = True)
         info2 = self.view_thread(title2, return_info = True)

@@ -183,7 +183,7 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $category_ids){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $categories_ids){
 
         $this->course_db->beginTransaction();
 
@@ -199,7 +199,7 @@ class DatabaseQueries {
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
-        foreach ($category_ids as $category_id) {
+        foreach ($categories_ids as $category_id) {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
         }
 
