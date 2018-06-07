@@ -303,40 +303,10 @@ HTML;
 					}
 				}
 
-				$return .= <<<HTML
-				<div class="popup-form" id="merge-threads">
-HTML;
-				if(count($merge_thread_list) == 0) {
-					$return .= <<<HTML
-					Nothing to merge.
-					<a onclick="$('#merge-threads').css('display', 'none');" style='float: right;' class="btn btn-danger">Cancel</a>
-HTML;
-				} else {
-					$return .= <<<HTML
-					<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'merge_thread'))}">
-						Merge current thread into
-						<input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{$currentThread}" data-ays-ignore="true">
-						<select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
-HTML;
-						for($i = 0; $i < count($merge_thread_list); $i++){
-							$first_post = $this->core->getQueries()->getFirstPostForThread($merge_thread_list[$i]["id"]);
-							$return.= <<<HTML
-							 <option value='{$merge_thread_list[$i]["id"]}'>{$merge_thread_list[$i]['title']} ({$merge_thread_list[$i]["id"]})</option>
-HTML;
-						}
-						$return .= <<<HTML
-						</select>
-						<br>
-						<div  style="float: right; width: auto; margin-top: 10px;">
-							<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
-							<input class="btn btn-primary" type="submit" value="Submit" />
-						</div>
-					</form>
-HTML;
-				}
-				$return .= <<<HTML
-				</div>
-HTML;
+				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                    "merge_thread_list" => $merge_thread_list,
+                    "currentThread" => $currentThread
+                ]);
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
 			}
 
