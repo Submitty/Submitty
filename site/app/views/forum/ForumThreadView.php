@@ -922,9 +922,13 @@ HTML;
 							if($(this).hasClass("cat-selected")) {
 								$(this).removeClass("cat-selected");
 								$(this).addClass("cat-notselected");
+								$(this).css("background-color","white");
+								$(this).css("color","green");
 							} else {
 								$(this).removeClass("cat-notselected");
 								$(this).addClass("cat-selected");
+								$(this).css("background-color","green");
+								$(this).css("color","white");
 							}
 						});
 						$("#create_thread_form").submit(function() {
