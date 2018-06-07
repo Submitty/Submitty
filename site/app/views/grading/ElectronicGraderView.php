@@ -1001,34 +1001,9 @@ HTML;
     <div class="progress-value" style="display:inline;"></div>
 </div>
 </div>
-
-
-<div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
-    <div class="draggable_content">
-    <span class="grading_label">Auto-Grading Testcases</span>
-    <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
-    <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
-    <div class="inner-container">
-HTML;
-        if ($gradeable->getActiveVersion() === 0){
-            $return .= <<<HTML
-        <h4>No Submission</h4>
-HTML;
-        }
-        else if (count($gradeable->getTestcases()) === 0) {
-            $return .= <<<HTML
-        <h4>No Autograding For This Assignment</h4>
-HTML;
-        }
-        else{
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
-        }
-        $return .= <<<HTML
-    </div>
-    </div>
-</div>
 HTML;
 
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
 
         $user = $gradeable->getUser();
@@ -1144,7 +1119,7 @@ HTML;
 HTML;
         }
         if($gradeable->useTAGrading()) {
-            $return .= $this->renderRubricPanel($gradeable, $user);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
         }
 
         return $return;
@@ -1258,6 +1233,42 @@ HTML;
         $return .= <<<HTML
             </tbody>
         </table>
+HTML;
+        return $return;
+    }
+
+    /**
+     * Render the Auto-Grading Testcases panel
+     * @param Gradeable $gradeable
+     * @param bool $canViewWholeGradeable
+     * @return string
+     */
+    public function renderAutogradingPanel(Gradeable $gradeable, bool $canViewWholeGradeable) {
+        $return = <<<HTML
+<div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
+    <div class="draggable_content">
+        <span class="grading_label">Auto-Grading Testcases</span>
+        <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
+        <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
+        <div class="inner-container">
+HTML;
+        if ($gradeable->getActiveVersion() === 0){
+            $return .= <<<HTML
+        <h4>No Submission</h4>
+HTML;
+        }
+        else if (count($gradeable->getTestcases()) === 0) {
+            $return .= <<<HTML
+        <h4>No Autograding For This Assignment</h4>
+HTML;
+        }
+        else{
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
+        }
+        $return .= <<<HTML
+        </div>
+    </div>
+</div>
 HTML;
         return $return;
     }
