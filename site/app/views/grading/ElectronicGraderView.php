@@ -1003,120 +1003,12 @@ HTML;
 </div>
 HTML;
 
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
 
         $user = $gradeable->getUser();
         if(!$peer) {
-            $return .= <<<HTML
-
-<div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
-    <div class="draggable_content">
-    <span class="grading_label">Student Information</span>
-    <div class="inner-container">
-        <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
-        <div class="rubric-title">
-HTML;
-            $who = $gradeable->getUser()->getId();
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
-            $formatting = "font-size: 13px;";
-            $return .= <<<HTML
-            <div style="float:right;">
-HTML;
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
-
-            // If viewing the active version, show cancel button, otherwise show button to switch active
-            if ($gradeable->getCurrentVersionNumber() > 0) {
-                if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
-                    $version = 0;
-                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
-                }
-                else {
-                    $version = $gradeable->getCurrentVersionNumber();
-                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
-                }
-                $return .= <<<HTML
-                <br/><br/>
-                <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
-                        action="{$this->core->buildUrl(array('component' => 'student',
-                                                             'action' => 'update',
-                                                             'gradeable_id' => $gradeable->getId(),
-                                                             'new_version' => $version, 'ta' => true, 'who' => $who))}">
-                    <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    {$button}
-                </form>
-HTML;
-            }
-            $return .= <<<HTML
-            </div>
-            <div>
-HTML;
-
-            if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $return .= <<<HTML
-                <b>Team:<br/>
-HTML;
-                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                    $team_member = $this->core->getQueries()->getUserById($team_member);
-                    $return .= <<<HTML
-                &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
-HTML;
-                }
-            }
-            else {
-                $return .= <<<HTML
-                <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
-HTML;
-            }
-
-            $return .= <<<HTML
-                Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-                Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
-            </div>
-HTML;
-            $return .= <<<HTML
-            <form id="rubric_form">
-                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
-                <input type="hidden" name="u_id" value="{$user->getId()}" />
-                <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
-HTML;
-
-            //Late day calculation
-            $status = "Good";
-            $color = "green";
-            if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
-                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                    $team_member = $this->core->getQueries()->getUserById($team_member);
-                    $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
-                }
-                
-            } else {
-                $return .= $this->makeTable($user->getId(), $gradeable, $status);
-                if($status != "Good" && $status != "Late" && $status != "No submission") {
-                    $color = "red";
-                    $my_color="'#F62817'"; // fire engine red
-                    $my_message="Late Submission";
-                    $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
-HTML;
-                }
-            }
-            
-            
-
-            $return .= <<<HTML
-        </div>
-    </div>
-    </div>
-</div>
-HTML;
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
         if($gradeable->useTAGrading()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
@@ -1320,12 +1212,127 @@ HTML;
     }
 
     /**
-     * Render the Grading Rubric panel
      * @param Gradeable $gradeable
-     * @param $user
+     * @param User $user
      * @return string
      */
-    public function renderRubricPanel(Gradeable $gradeable, $user) {
+    public function renderInformationPanel(Gradeable $gradeable, User $user) {
+        $return = <<<HTML
+
+<div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
+    <div class="draggable_content">
+    <span class="grading_label">Student Information</span>
+    <div class="inner-container">
+        <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
+        <div class="rubric-title">
+HTML;
+        $who = $gradeable->getUser()->getId();
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
+        $formatting = "font-size: 13px;";
+        $return .= <<<HTML
+            <div style="float:right;">
+HTML;
+        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+
+        // If viewing the active version, show cancel button, otherwise show button to switch active
+        if ($gradeable->getCurrentVersionNumber() > 0) {
+            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
+                $version = 0;
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
+            } else {
+                $version = $gradeable->getCurrentVersionNumber();
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
+            }
+            $return .= <<<HTML
+                <br/><br/>
+                <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                        action="{$this->core->buildUrl(array('component' => 'student',
+                'action' => 'update',
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => $version, 'ta' => true, 'who' => $who))}">
+                    <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                    {$button}
+                </form>
+HTML;
+        }
+        $return .= <<<HTML
+            </div>
+            <div>
+HTML;
+
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            $return .= <<<HTML
+                <b>Team:<br/>
+HTML;
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $return .= <<<HTML
+                &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
+HTML;
+            }
+        } else {
+            $return .= <<<HTML
+                <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
+HTML;
+        }
+
+        $return .= <<<HTML
+                Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
+                Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
+            </div>
+HTML;
+        $return .= <<<HTML
+            <form id="rubric_form">
+                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+                <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
+                <input type="hidden" name="u_id" value="{$user->getId()}" />
+                <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
+HTML;
+
+        //Late day calculation
+        $status = "Good";
+        $color = "green";
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
+            }
+
+        } else {
+            $return .= $this->makeTable($user->getId(), $gradeable, $status);
+            if ($status != "Good" && $status != "Late" && $status != "No submission") {
+                $color = "red";
+                $my_color = "'#F62817'"; // fire engine red
+                $my_message = "Late Submission";
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
+HTML;
+            }
+        }
+
+
+        $return .= <<<HTML
+        </div>
+    </div>
+    </div>
+</div>
+HTML;
+        return $return;
+    }
+
+    /**
+     * Render the Grading Rubric panel
+     * @param Gradeable $gradeable
+     * @param User $user
+     * @return string
+     */
+    public function renderRubricPanel(Gradeable $gradeable, User $user) {
         $return = "";
 
         $display_verify_all = false;
@@ -1423,5 +1430,4 @@ HTML;
         ]);
         return $return;
     }
-
 }
