@@ -1029,7 +1029,7 @@ HTML;
 </div>
 HTML;
 
-        function add_files(&$files, &$count, $new_files, $start_dir_name) {
+        function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             foreach($new_files as $file) {
                 $path = explode('/', $file['relative_name']);
@@ -1042,23 +1042,8 @@ HTML;
                     $working_dir = &$working_dir[$dir];
                 }
                 $working_dir[$file['name']] = $file['path'];
-                $count ++;
             }
         }
-        function display_files($files, &$count, $indent, &$return, $filename) {
-            foreach ($files as $dir => $path) {
-                if (!is_array($path)) {
-                    $count++;
-                }
-            }
-            foreach ($files as $dir => $contents) {
-                if (is_array($contents)) {
-                    $count++;
-                    display_files($contents, $count, $indent+1, $return, $filename);
-                }
-            }
-        }
-        $files = array();
         $submissions = array();
         $results = array();
         $checkout = array();
@@ -1067,15 +1052,14 @@ HTML;
         // if you change here, then change there as well
         // order of these statements matter I believe
 
-        $count = 0;
-        add_files($submissions, $count, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
+        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
 
         $vcsFiles = $gradeable->getVcsFiles();
         if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout, $count,  $vcsFiles, 'checkout');
+            add_files($checkout, $vcsFiles, 'checkout');
         }
 
-        add_files($results, $count, $gradeable->getResultsFiles(), 'results');
+        add_files($results, $gradeable->getResultsFiles(), 'results');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable" => $gradeable,
@@ -1295,64 +1279,11 @@ HTML;
         $return .= <<<HTML
 </div>
 <script type="text/javascript">
-    function openFrame(html_file, url_file, num) {
-        var iframe = $('#file_viewer_' + num);
-        if (!iframe.hasClass('open')) {
-            var iframeId = "file_viewer_" + num + "_iframe";
-            var directory = "";
-            if (url_file.includes("submissions")) {
-                directory = "submissions";
-            }
-            else if (url_file.includes("results")) {
-                directory = "results";
-            }
-            else if (url_file.includes("checkout")) {
-                directory = "checkout";
-            }
-            // handle pdf
-            if (url_file.substring(url_file.length - 3) === "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
-            }
-            else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
-            }
-            iframe.addClass('open');
-        }
-
-        if (!iframe.hasClass('shown')) {
-            iframe.show();
-            iframe.addClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
-        }
-        else {
-            iframe.hide();
-            iframe.removeClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
-        }
-        return false;
+    function adjustSize(name) {
+        var textarea = document.getElementById(name);
+        textarea.style.height = "";
+        textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
     }
-
-    function openFile(html_file, url_file) {
-        var directory = "";
-        if (url_file.includes("submissions")) {
-            directory = "submissions";
-        }
-        else if (url_file.includes("results")) {
-            directory = "results";
-        }
-        else if (url_file.includes("checkout")) {
-            directory = "checkout";
-        }
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-        return false;
-    }
-</script>
-<script type="text/javascript">
-        function adjustSize(name) {
-          var textarea = document.getElementById(name);
-          textarea.style.height = "";
-          textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
-        };
 </script>
 HTML;
         return $return;

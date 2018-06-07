@@ -72,6 +72,60 @@
     </div>
 </div>
 
+<script type="text/javascript">
+    function openFrame(html_file, url_file, num) {
+        var iframe = $('#file_viewer_' + num);
+        if (!iframe.hasClass('open')) {
+            var iframeId = "file_viewer_" + num + "_iframe";
+            var directory = "";
+            if (url_file.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (url_file.includes("results")) {
+                directory = "results";
+            }
+            else if (url_file.includes("checkout")) {
+                directory = "checkout";
+            }
+            // handle pdf
+            if (url_file.substring(url_file.length - 3) === "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
+            }
+            else {
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+            }
+            iframe.addClass('open');
+        }
+
+        if (!iframe.hasClass('shown')) {
+            iframe.show();
+            iframe.addClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
+        }
+        else {
+            iframe.hide();
+            iframe.removeClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+        }
+        return false;
+    }
+
+    function openFile(html_file, url_file) {
+        var directory = "";
+        if (url_file.includes("submissions")) {
+            directory = "submissions";
+        }
+        else if (url_file.includes("results")) {
+            directory = "results";
+        }
+        else if (url_file.includes("checkout")) {
+            directory = "checkout";
+        }
+        window.open("{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        return false;
+    }
+</script>
+
 {% macro display_files(self, files, id, indent, title) %}
     {# Files on top #}
     {% for dir, path in files %}
