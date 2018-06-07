@@ -1437,6 +1437,15 @@ WHERE gcm_id=?", $params);
         $this->course_db->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
         return $this->course_db->rows();
     }
+    
+    /**
+     * Gets id's and titles of the electronic gradeables that have non-inherited teams
+     * @return string
+     */
+    // public function getAllElectronicGradeablesWithBaseTeams() {
+    //     $this->course_db->query('SELECT g_id, g_title FROM gradeable WHERE g_id=ANY(SELECT g_id FROM electronic_gradeable WHERE eg_team_assignment IS TRUE AND (eg_inherit_teams_from=\'\') IS NOT FALSE) ORDER BY g_title ASC');
+    //     return $this->course_db->rows();
+    // }
 
     /**
      * Create a new team id and team in gradeable_teams for given gradeable, add $user_id as a member
@@ -1479,6 +1488,13 @@ WHERE gcm_id=?", $params);
     public function leaveTeam($team_id, $user_id) {
         $this->course_db->query("DELETE FROM teams AS t
           WHERE team_id=? AND user_id=? AND state=1", array($team_id, $user_id));
+        $this->course_db->query("SELECT * FROM teams WHERE team_id=? AND state=1", array($team_id));
+        if(count($this->course_db->rows()) == 0){
+           //If this happens, then remove all invitations
+            $this->course_db->query("DELETE FROM teams AS t
+              WHERE team_id=?", array($team_id));
+        }
+
     }
 
     /**
