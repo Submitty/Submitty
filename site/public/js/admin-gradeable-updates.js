@@ -1,51 +1,74 @@
-function resetStyle(name) {
+
+
+let errors = {};
+function updateErrors() {
+    $('#ajax_debug').html(errors);
+    if(Object.keys(errors).length !== 0) {
+        $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+    }
+    else {
+        $('#save_status').html('All Changes Saved');
+    }
+}
+
+function setError(name, err) {
+    $('input[name="' + name + '"]').each(function (i, elem) {
+        elem.title = err;
+        elem.style.backgroundColor = '#FDD';
+    });
+    errors[name] = err;
+}
+function clearError(name) {
     $('input[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.style.backgroundColor = '';
     });
+    // remove the error for this property
+    delete errors[name];
 }
 function getErrorCallback(props) {
     return function(data) {
         let arr = JSON.parse(data);
-        $('#ajax_debug').html(data);
         props.forEach(function (name) {
             if(name in arr['errors']) {
-                $('input[name="' + name + '"]').each(function (i, elem) {
-                    elem.title = arr['errors'][name];
-                    elem.style.backgroundColor = '#FDD';
-                });
+                setError(name, arr['errors'][name]);
             }
             else {
-                resetStyle(name);
+                clearError(name);
             }
-        })
+        });
+        updateErrors();
     }
 }
 function getSuccessCallback(props) {
     return function() {
-        $('#ajax_debug').html('');
-        props.forEach(resetStyle);
+        props.forEach(clearError);
+        updateErrors();
     }
 }
 
 $(document).ready(function () {
-    $('textarea').change(function () {
-        var data = {};
+    updateErrors();
+    let onSimpleChange = function () {
+        let data = {};
         data[this.name] = $(this).val();
 
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
-    });
+    };
+    $('textarea').change(onSimpleChange);
+    $('select').change(onSimpleChange);
     $('input').change(function () {
-        var data = {};
+        let data = {};
         data[this.name] = $(this).val();
+        let addDataToRequest = function (i, val) {
+            data[val.name] = $(val).val();
+        };
 
         // If its date-related, then submit all date data
         if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0) {
-            $('#gradeable-dates :input').each(function (i, val) {
-                data[val.name] = $(val).val();
-            });
-        };
+            $('#gradeable-dates :input').each(addDataToRequest);
+        }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
     });
@@ -53,6 +76,7 @@ $(document).ready(function () {
 
 // TODO: move all js from the twig files to this file when moving to dynamic interface
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
+    $('#save_status').html('Saving...');
     $.ajax({
         type: "POST",
         url: buildUrl({
