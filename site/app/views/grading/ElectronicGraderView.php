@@ -1029,44 +1029,7 @@ HTML;
 </div>
 HTML;
 
-        function add_files(&$files, $new_files, $start_dir_name) {
-            $files[$start_dir_name] = array();
-            foreach($new_files as $file) {
-                $path = explode('/', $file['relative_name']);
-                array_pop($path);
-                $working_dir = &$files[$start_dir_name];
-                foreach($path as $dir) {
-                    if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
-                    }
-                    $working_dir = &$working_dir[$dir];
-                }
-                $working_dir[$file['name']] = $file['path'];
-            }
-        }
-        $submissions = array();
-        $results = array();
-        $checkout = array();
-
-        // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
-        // if you change here, then change there as well
-        // order of these statements matter I believe
-
-        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
-
-        $vcsFiles = $gradeable->getVcsFiles();
-        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout, $vcsFiles, 'checkout');
-        }
-
-        add_files($results, $gradeable->getResultsFiles(), 'results');
-
-        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
-            "gradeable" => $gradeable,
-            "submissions" => $submissions,
-            "checkout" => $checkout,
-            "results" => $results
-        ]);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
 
         $user = $gradeable->getUser();
         if(!$peer) {
@@ -1180,100 +1143,8 @@ HTML;
 </div>
 HTML;
         }
-        $display_verify_all = false;
-        //check if verify all button should be shown or not
-        foreach ($gradeable->getComponents() as $component) {
-            if(!$component->getGrader()){
-              continue;
-            }
-            if($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()){
-                $display_verify_all = true;
-                break;
-            }
-        }
         if($gradeable->useTAGrading()) {
-            $disabled = '';
-            //TODO: Move this to somewhere more central
-            if ($gradeable->getActiveVersion() == 0) {
-                $disabled = 'disabled';
-                $my_color = "'#FF8040'"; // mango orange
-                $my_message = "Cancelled Submission";
-                if ($gradeable->hasSubmitted()) {
-                    $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-HTML;
-                } else {
-                    $my_color = "'#C38189'";  // lipstick pink (purple)
-                    $my_message = "No Submission";
-                    $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-HTML;
-                }
-            } else if ($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()) {
-                $disabled = 'disabled';
-            }
-            // if use student components, get the values for pages from the student's submissions
-            $files = $gradeable->getSubmittedFiles();
-            $student_pages = array();
-            foreach ($files as $filename => $content) {
-                if ($filename == "student_pages.json") {
-                    $path = $content["path"];
-                    $student_pages = FileUtils::readJsonFile($content["path"]);
-                }
-            }
-
-            $grading_data = [
-                "gradeable" => $gradeable->getGradedData(),
-                "your_user_id" => $this->core->getUser()->getId(),
-                "disabled" => $disabled === "disabled",
-                "can_verify" => $display_verify_all // If any can be then this is set
-            ];
-
-            foreach ($grading_data["gradeable"]["components"] as &$component) {
-                $page = intval($component["page"]);
-                // if the page is determined by the student json
-                if ($page == -1) {
-                    // usually the order matches the json
-                    if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
-                        $page = intval($student_pages[intval($component["order"])]["page #"]);
-                    } // otherwise, iterate through until the order matches
-                    else {
-                        foreach ($student_pages as $student_page) {
-                            if ($student_page["order"] == intval($component["order"])) {
-                                $page = intval($student_page["page #"]);
-                                $component["page"] = $page;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            //References need to be cleaned up
-            unset($component);
-
-            $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
-
-            $this->core->getOutput()->addInternalJs('ta-grading.js');
-            $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-            $this->core->getOutput()->addInternalJs('twig.min.js');
-            $this->core->getOutput()->addInternalJs('gradeable.js');
-
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
-                "gradeable" => $gradeable,
-                "display_verify_all" => $display_verify_all,
-                "user" => $user,
-                "grading_data" => $grading_data
-            ]);
+            $return .= $this->renderRubricPanel($gradeable, $user);
         }
 
         return $return;
@@ -1390,5 +1261,156 @@ HTML;
 HTML;
         return $return;
     }
-    
+
+    /**
+     * Render the Submissions and Results Browser panel
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function renderSubmissionPanel(Gradeable $gradeable) {
+        function add_files(&$files, $new_files, $start_dir_name) {
+            $files[$start_dir_name] = array();
+            foreach($new_files as $file) {
+                $path = explode('/', $file['relative_name']);
+                array_pop($path);
+                $working_dir = &$files[$start_dir_name];
+                foreach($path as $dir) {
+                    if (!isset($working_dir[$dir])) {
+                        $working_dir[$dir] = array();
+                    }
+                    $working_dir = &$working_dir[$dir];
+                }
+                $working_dir[$file['name']] = $file['path'];
+            }
+        }
+        $submissions = array();
+        $results = array();
+        $checkout = array();
+
+        // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
+        // if you change here, then change there as well
+        // order of these statements matter I believe
+
+        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
+
+        $vcsFiles = $gradeable->getVcsFiles();
+        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
+            add_files($checkout, $vcsFiles, 'checkout');
+        }
+
+        add_files($results, $gradeable->getResultsFiles(), 'results');
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
+            "gradeable" => $gradeable,
+            "submissions" => $submissions,
+            "checkout" => $checkout,
+            "results" => $results
+        ]);
+    }
+
+    /**
+     * Render the Grading Rubric panel
+     * @param Gradeable $gradeable
+     * @param $user
+     * @return string
+     */
+    public function renderRubricPanel(Gradeable $gradeable, $user) {
+        $return = "";
+
+        $display_verify_all = false;
+        //check if verify all button should be shown or not
+        foreach ($gradeable->getComponents() as $component) {
+            if (!$component->getGrader()) {
+                continue;
+            }
+            if ($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()) {
+                $display_verify_all = true;
+                break;
+            }
+        }
+        $disabled = '';
+        //TODO: Move this to somewhere more central
+        if ($gradeable->getActiveVersion() == 0) {
+            $disabled = 'disabled';
+            $my_color = "'#FF8040'"; // mango orange
+            $my_message = "Cancelled Submission";
+            if ($gradeable->hasSubmitted()) {
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+HTML;
+            } else {
+                $my_color = "'#C38189'";  // lipstick pink (purple)
+                $my_message = "No Submission";
+                $return .= <<<HTML
+                <script>
+                    $('body').css('background', $my_color);
+                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
+                    $('#bar_banner').css('background-color', $my_color);
+                    $('#bar_banner').css('color', 'black');
+                </script>
+HTML;
+            }
+        } else if ($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()) {
+            $disabled = 'disabled';
+        }
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
+        $grading_data = [
+            "gradeable" => $gradeable->getGradedData(),
+            "your_user_id" => $this->core->getUser()->getId(),
+            "disabled" => $disabled === "disabled",
+            "can_verify" => $display_verify_all // If any can be then this is set
+        ];
+
+        foreach ($grading_data["gradeable"]["components"] as &$component) {
+            $page = intval($component["page"]);
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
+                    $page = intval($student_pages[intval($component["order"])]["page #"]);
+                } // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($component["order"])) {
+                            $page = intval($student_page["page #"]);
+                            $component["page"] = $page;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        //References need to be cleaned up
+        unset($component);
+
+        $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
+
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
+            "gradeable" => $gradeable,
+            "display_verify_all" => $display_verify_all,
+            "user" => $user,
+            "grading_data" => $grading_data
+        ]);
+        return $return;
+    }
+
 }
