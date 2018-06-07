@@ -79,7 +79,7 @@ HTML;
             }
             else {
                 //check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist)
-                $totalTitle = ($gradeable->hasGradeFile()) ? "Autograding Subtotal" : "Total";
+                $totalTitle = ($gradeable->beenTAgraded()) ? "Autograding Subtotal" : "Total";
                 $autoGradingPoints = $current_version->getNonHiddenTotal();
                 $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
                 $display_hidden = "none";
@@ -617,7 +617,7 @@ HTML;
         }
         //add total points if both autograding and instructor grading exist
         $display = "none";
-        $current = $gradeable->getCurrentVersion();
+        $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
         $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
         $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
         $background = "";

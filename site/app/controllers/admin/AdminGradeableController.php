@@ -23,7 +23,7 @@ class AdminGradeableController extends AbstractController {
                 $this->modifyGradeable(0);
                 break;
             case 'edit_gradeable_page':
-                $this->editPage();
+                $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
                 break;
             case 'upload_edit_gradeable':
                 $this->modifyGradeable(1);
@@ -64,10 +64,10 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with pulled data from the gradeable to be edited
-    private function editPage() {
+    private function editPage($nav_tab = 0) {
         $admin_gradeable = $this->getAdminGradeable($_REQUEST['id']);
         $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable, $nav_tab);
     }
 
     private function getAdminGradeable($gradeable_id) {
@@ -79,9 +79,12 @@ class AdminGradeableController extends AbstractController {
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
-        $graders_from_usertypes = array($graders_from_usertype1, $graders_from_usertype2, $graders_from_usertype3);
+
+        // Be sure to have this array start at 1 since instructor's permission level is 1
+        $graders_from_usertypes = array(1=>$graders_from_usertype1, 2=>$graders_from_usertype2, 3=>$graders_from_usertype3);
         $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
         $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
+        // $admin_gradeable->setInheritTeamsList($this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams());
         return $admin_gradeable;
     }
 
@@ -133,6 +136,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable->setGradeStartDate(new \DateTime($_POST['date_released'], $this->core->getConfig()->getTimezone()));
             }
             $gradeable->setTeamAssignment($this->isRadioButtonTrue('team_assignment'));
+            // $gradeable->setInheritTeamsFrom($_POST['eg_inherit_teams_from']);
             $gradeable->setMaxTeamSize($_POST['eg_max_team_size']);
             $gradeable->setTeamLockDate(new \DateTime($_POST['date_team_lock'], $this->core->getConfig()->getTimezone()));
             $gradeable->setStudentView($this->isRadioButtonTrue('student_view'));
@@ -541,11 +545,12 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException("Error.");
         }
 
-        //set up roating sections
+        //set up rotating sections
         $graders = array();
         foreach ($_POST as $k => $v ) {
             if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
-                $graders[explode('_', $k)[1]]=explode(',',trim($v));
+                $sections = explode('_', $k);
+                $graders[$sections[3]][] = $sections[2];
             }
         }
 
@@ -575,7 +580,13 @@ class AdminGradeableController extends AbstractController {
           die("Failed to write file {$config_build_file}");
         }
 
-        $this->returnToNav();
+
+        if($edit_gradeable === 0) {
+            $this->redirectToEdit(); // redirect to next page of the form
+        }
+        else {
+            $this->returnToNav();
+        }
     }
 
     private function deleteGradeable() {
@@ -652,5 +663,14 @@ class AdminGradeableController extends AbstractController {
     private function returnToNav() {
         $url = $this->core->buildUrl(array());
         header('Location: '. $url);
+    }
+    private function redirectToEdit() {
+	    $url = $this->core->buildUrl([
+	        'component' => 'admin',
+            'page'      => 'admin_gradeable',
+            'action'    => 'edit_gradeable_page',
+            'id'        => $_POST['gradeable_id'],
+            'nav_tab'   => '-1']);
+	    header('Location: '.$url);
     }
 }

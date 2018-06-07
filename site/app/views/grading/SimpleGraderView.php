@@ -89,6 +89,7 @@ HTML;
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2><p>{$ta_instruct}</p><br>
     <p style="float: left;">$info</p>
+    <a class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
 HTML;
         
         if($action === 'numeric') {
@@ -118,7 +119,7 @@ HTML;
                 <td width="91" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => $action, 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
         $num_text = 0;
-        $num_numeric = 0;
+        $num_numeric = count($gradeable->getComponents());
         $comp_ids = array();
         if($action == 'lab'){
             foreach ($gradeable->getComponents() as $component) {
@@ -128,7 +129,6 @@ HTML;
             }
         }
         else{
-            $num_text = 0;
             $num_numeric = 0;
             foreach ($gradeable->getComponents() as $component) {
                 if($component->getIsText()){
@@ -171,6 +171,8 @@ HTML;
         $last_section = false;
         $tbody_open = false;
         $colspan = 5 + count($gradeable->getComponents());
+        $num_users = 0;
+
         if($action == 'numeric'){
             $colspan++;
         }
@@ -181,6 +183,7 @@ HTML;
             </tr>
 HTML;
         }
+        // Iterate through every row
         foreach ($rows as $gradeable_row) {
             if ($gradeable->isGradeByRegistration()) {
                 $section = $gradeable_row->getUser()->getRegistrationSection();
@@ -244,7 +247,6 @@ HTML;
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
-
             if($action == 'lab'){
                 $col = 0;
                 foreach ($gradeable_row->getComponents() as $component) {
@@ -301,6 +303,7 @@ HTML;
                     $return .= <<<HTML
                 <td class="option-small-output"><input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{$row}" value=$total data-total="true" readonly></td>
 HTML;
+
                 }
 
                 foreach ($gradeable_row->getComponents() as $component) {
@@ -313,18 +316,71 @@ HTML;
                     }
                 }
             }
+
+            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                $num_users++;
+            }
+
             $return .= <<<HTML
             </tr>
 HTML;
             $row++;
             $count++;
         }
+        
+        $return .= <<<HTML
+        </tbody></table></div>
+HTML;
 
         $return .= <<<HTML
-        </tbody>
-    </table>
-</div>
+        <div class="popup-form" id="simple-stats-popup">
 HTML;
+        
+        if($num_users > 0) {
+
+            $return .= <<<HTML
+            
+                <table class="table table-striped table-bordered persist-area">
+                    <thead class="persist-thead">
+                        <tr>
+                            <td width="33%">Component</td>
+                            <td width="33%">Average</td>
+                            <td width="33%">Std. Deviation</td>
+                        </tr>
+                    </thead>
+
+HTML;
+            $i = 0;
+            foreach($gradeable->getComponents() as $component) {
+                if(!$component->getIsText()) {
+                    $return .= <<<HTML
+                    <tbody><tr>
+                        <td>{$component->getTitle()}</td>
+                        <td id="avg-{$i}"></td>
+                        <td id="stddev-{$i}"></td>
+                    </tr></tbody>
+HTML;
+                    $i++;
+                }
+            }
+
+            $return .= <<<HTML
+            <tbody><tr>
+                <td>Total</td>
+                <td id="avg-t"></td>
+                <td id="stddev-t"></td>
+            </tr></tbody>
+            </table>
+            <p></br></p>
+            <p id="num-graded"></p>
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+            <p style="text-align: center">No Statistics To View.</p>
+HTML;
+
+        }
 
         return $return;
     }
