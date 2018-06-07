@@ -363,10 +363,10 @@ if [ ${WORKER} == 0 ]; then
     echo -e 'Running the DB migrations'
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
-    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
-    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
     rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
+    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
     ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
 fi
