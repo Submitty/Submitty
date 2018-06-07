@@ -225,11 +225,13 @@ HTML;
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
         ];
         $total_late_used = 0;
+        $curr_late = 0;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
+            $curr_late = $g->getStudentAllowedLateDays();
         }
-        $late_days_remaining = $this->core->getConfig()->getDefaultStudentLateDays()-$total_late_used;
-        $active_days_late = $gradeable->getActiveDaysLate();
+        $late_days_remaining = $curr_late-$total_late_used;
+        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
 
