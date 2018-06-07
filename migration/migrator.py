@@ -97,6 +97,7 @@ def handle_migration(args):
                 'password': database['database_password']
             }
 
+            print("Running {} migrations for {}...".format(args.direction, environment))
             with psycopg2.connect(**params) as connection:
                 migrate_environment(connection, environment, args)
 
@@ -110,6 +111,7 @@ def handle_migration(args):
             for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
                 for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
                     if args.course is None or [semester, course] == args.course:
+                        print("Running {} migrations for {}.{}...".format(args.direction, semester, course))
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
                         with psycopg2.connect(**params) as connection:
                             migrate_environment(connection, environment, args)
@@ -146,7 +148,6 @@ def migrate_environment(connection, environment, args):
             remove_migration(connection, missing_migrations[key], environment, args)
         print()
 
-    print("Running {} migrations for {}:".format(args.direction, environment))
     args.fake = args.set_fake
     if args.direction == 'up':
         keys = list(migrations.keys())
@@ -164,6 +165,7 @@ def migrate_environment(connection, environment, args):
                 break
     print()
     print("DONE")
+    print()
 
 
 def remove_migration(connection, migration, environment, args):
