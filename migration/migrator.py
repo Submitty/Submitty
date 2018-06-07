@@ -7,15 +7,16 @@ Basic migration script to handle the database
 from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
-import importlib.util
+from importlib.machinery import SourceFileLoader
 import json
 import os
 from pathlib import Path
+import re
 import sys
 
 import psycopg2
 
-
+VERSION = "1.0.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
 ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
@@ -23,12 +24,14 @@ ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
 
 def parse_args():
     parser = ArgumentParser(description='Migration script for upgrading/downgrading the database')
-    parser.add_argument('--environment', '-e', dest='environments', choices=ENVIRONMENTS, action='append')
-    parser.add_argument('--course', nargs=2, metavar=('semester', 'course'), default=None)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s {}'.format(VERSION))
     config_path = Path(DIR_PATH, '..', '..', 'config')
     default_config = config_path.resolve() if config_path.exists() else None
     required = False if default_config is not None else True
-    parser.add_argument('--config', '-c', dest='config_path', type=str, required=required, default=default_config)
+    parser.add_argument('-c', '--config', dest='config_path', type=str, required=required, default=default_config)
+    parser.add_argument('-e', '--environment', dest='environments', choices=ENVIRONMENTS, action='append')
+    parser.add_argument('--course', nargs=2, metavar=('semester', 'course'), default=None)
+
     subparsers = parser.add_subparsers(metavar='command', dest='command')
     subparsers.required = True
     sub = subparsers.add_parser('create', help='Create migration')
@@ -52,8 +55,11 @@ def main():
 
 def create(args):
     now = datetime.now()
-    ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(now.year, now.month, now.day, now.hour, now.min, now.second)
+    ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     filename = "{}_{}.py".format(ver, args.name)
+    check = re.search(r'[^A-Za-z0-9_\-]', filename)
+    if check is not None:
+        raise ValueError("Name '{}' contains invalid character '{}'".format(filename, check.group(0)))
     for environment in args.environments:
         with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file:
             open_file.write("""def up({0}):
@@ -144,8 +150,9 @@ def migrate_environment(connection, environment, args):
 
     if len(missing_migrations) > 0:
         print('Removing {} missing migrations:'.format(len(missing_migrations)))
-        for migration in missing_migrations:
-            remove_migration(connection, migration, environment, args)
+        for key in missing_migrations:
+            remove_migration(connection, missing_migrations[key], environment, args)
+        print()
 
     print("Running {} migrations for {}:".format(args.direction, environment))
     args.fake = args.set_fake
@@ -163,15 +170,17 @@ def migrate_environment(connection, environment, args):
             if migrations[key]['status'] == 1:
                 run_migration(connection, migrations[key], environment, args)
                 break
+    print()
+    print("DONE")
 
 
 def remove_migration(connection, migration, environment, args):
     print("  {}".format(migration['id']))
-    file_name = migration['id'] + '_' + migration['name'] + '.py'
-    file_path = Path(args.install_dir, 'migrations', environment, file_name)
+    file_path = Path(args.install_dir, 'migrations', environment, migration['id'] + '.py')
     if file_path.exists():
-        module = load_migration_module(migration['name'], file_path)
+        module = load_migration_module(migration['id'], file_path)
         call_func(getattr(module, 'down', noop), connection, environment)
+        file_path.unlink()
     with connection.cursor() as cursor:
         cursor.execute('DELETE FROM migrations_{} WHERE id=%s'.format(environment), (migration['id'],))
     connection.commit()
@@ -202,9 +211,9 @@ def run_migration(connection, migration, environment, args):
 
 
 def load_migration_module(name, path):
-    spec = importlib.util.spec_from_file_location('module.{}'.format(name), str(path))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # TODO: change this to not use depreciated loader.load_module after dropping Python 3.4 support
+    loader = SourceFileLoader(name, str(path))
+    module = loader.load_module(name)
     return module
 
 

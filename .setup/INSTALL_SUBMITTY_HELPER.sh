@@ -121,7 +121,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf ${SUBMITTY_INSTALL_DIR}/sbin
     rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
     rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-    rm -rf ${SUBMITTY_INSTALL_DIR}/migrations
 fi
 
 # set the permissions of the top level directory
