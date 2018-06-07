@@ -1300,18 +1300,6 @@ HTML;
 </div>
 HTML;
         }
-        if($peer) {
-            $span_style = 'style="display:none;"';
-            $checked = 'disabled';
-        }
-        else {
-            $span_style = '';
-            $checked = 'checked';
-        }
-        $empty = "";
-        if(!$gradeable->useTAGrading()) {
-            $empty = "empty";
-        }
         $display_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
@@ -1323,59 +1311,37 @@ HTML;
                 break;
             }
         }
-        $return .= <<<HTML
-<div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
-    <div class="draggable_content">
-    <span class="grading_label">Grading Rubric</span>
-HTML;
         if($gradeable->useTAGrading()) {
-          $return .= <<<HTML
-    <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
-HTML;
-          if($display_verify_all){
-            $return .= <<<HTML
-        <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true);'/>
-HTML;
-          }
-          $return .= <<<HTML
-        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
-        <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
-    </div>
-HTML;
-        $disabled = '';
-        if($gradeable->getActiveVersion() == 0){
-            $disabled='disabled';
-            $my_color="'#FF8040'"; // mango orange
-            $my_message="Cancelled Submission";
-            if($gradeable->hasSubmitted()){
-                $return .= <<<HTML
+            $disabled = '';
+            //TODO: Move this to somewhere more central
+            if ($gradeable->getActiveVersion() == 0) {
+                $disabled = 'disabled';
+                $my_color = "'#FF8040'"; // mango orange
+                $my_message = "Cancelled Submission";
+                if ($gradeable->hasSubmitted()) {
+                    $return .= <<<HTML
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
                     $('#bar_banner').css('background-color', $my_color);
                     $('#bar_banner').css('color', 'black');
                 </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
 HTML;
-            } else {
-                $my_color="'#C38189'";  // lipstick pink (purple)
-                $my_message="No Submission";
-                $return .= <<<HTML
+                } else {
+                    $my_color = "'#C38189'";  // lipstick pink (purple)
+                    $my_message = "No Submission";
+                    $return .= <<<HTML
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
                     $('#bar_banner').css('background-color', $my_color);
                     $('#bar_banner').css('color', 'black');
                 </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
 HTML;
+                }
+            } else if ($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()) {
+                $disabled = 'disabled';
             }
-        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
-            $disabled='disabled';
-            $return .= <<<HTML
-            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
-HTML;
-        }
             // if use student components, get the values for pages from the student's submissions
             $files = $gradeable->getSubmittedFiles();
             $student_pages = array();
@@ -1400,8 +1366,7 @@ HTML;
                     // usually the order matches the json
                     if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
                         $page = intval($student_pages[intval($component["order"])]["page #"]);
-                    }
-                    // otherwise, iterate through until the order matches
+                    } // otherwise, iterate through until the order matches
                     else {
                         foreach ($student_pages as $student_page) {
                             if ($student_page["order"] == intval($component["order"])) {
@@ -1416,38 +1381,19 @@ HTML;
             //References need to be cleaned up
             unset($component);
 
-
             $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
-
-
-            $return .= <<<HTML
-    <div class="inner-container" id="grading-box">
-
-                    </div>
-    <script type="application/javascript">
-        var grading_data = {$grading_data};
-        renderGradeable(grading_data)
-            .then(function(elements) {
-                $("#grading-box").append(elements);
-                updateAllProgressPoints();
-            })
-            .catch(function(err) {
-                alert("Could not render gradeable: " + err.message);
-                console.error(err);
-            });
-    </script>
-HTML;
 
             $this->core->getOutput()->addInternalJs('ta-grading.js');
             $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
             $this->core->getOutput()->addInternalJs('twig.min.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
 
-        $return .= <<<HTML
-        </div>
-        </div>
-    </div>
-HTML;
+            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
+                "gradeable" => $gradeable,
+                "display_verify_all" => $display_verify_all,
+                "user" => $user,
+                "grading_data" => $grading_data
+            ]);
         }
 
         $return .= <<<HTML
