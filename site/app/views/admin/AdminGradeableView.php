@@ -7,6 +7,12 @@ use app\views\AbstractView;
 use app\models\AdminGradeable;
 
 class AdminGradeableView extends AbstractView {
+
+    // Converts \DateTime objects to strings in the format we want
+    private static function DateTimeToString(&$date) {
+        if(gettype($date) === 'string') return;
+        $date = $date->format('Y-m-d H:i:s');
+    }
     /**
      * The one and only...
      */
@@ -18,6 +24,14 @@ class AdminGradeableView extends AbstractView {
         $submit_text      = "Submit";
         $label_message    = "";
         $gradeables_array = array();
+
+        // Make sure the dates are strings
+        self::DateTimeToString($admin_gradeable->g_ta_view_start_date);
+        self::DateTimeToString($admin_gradeable->eg_submission_open_date);
+        self::DateTimeToString($admin_gradeable->eg_submission_due_date);
+        self::DateTimeToString($admin_gradeable->g_grade_start_date);
+        self::DateTimeToString($admin_gradeable->g_grade_released_date);
+        self::DateTimeToString($admin_gradeable->eg_team_lock_date);
 
         // Default autograding config is upload-only
         if($type_of_action === 'add') {
