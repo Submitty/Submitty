@@ -211,7 +211,7 @@ def run_migration(connection, migration, environment, args):
 
 
 def load_migration_module(name, path):
-    # TODO: change this to not use depreciated loader.load_module after dropping Python 3.4 support
+    # TODO: change this to not use deprecated loader.load_module after dropping Python 3.4 support
     loader = SourceFileLoader(name, str(path))
     module = loader.load_module(name)
     return module

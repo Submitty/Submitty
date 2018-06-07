@@ -96,8 +96,9 @@ in `${SUBMITTY_INSTALL_DIR}/migrations` and if so, will run the `down` function
 on each missing migration, and then delete the record of it from the DB as well as
 remove that migration file from `${SUBMITTY_INSTALL_DIR}/migrations`.
  
-`migrate` accepts two flags: `--fake` and `--initial`. `--fake` will mark all down migrations
+`migrate` accepts two flags: `--fake` and `--initial`. `--fake` will mark all up migrations
 as being run, without actually running them. `--initial` will only run the first migration 
-(if down), and then force the `--fake` flag for all other down migrations. This is useful for
-first spinning up a fresh instance of Submitty as the initial migration for all categories
-contains the full up-to-date schema dump and does not require any transformations.
+(if it's down), and then force the `--fake` flag for all other up migrations. This is 
+useful for first spinning up a fresh instance of Submitty as the initial migration for 
+all categories contains the full up-to-date schema dump and does not require any 
+transformations.
