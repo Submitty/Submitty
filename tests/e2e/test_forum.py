@@ -19,33 +19,69 @@ class TestForum(BaseTestCase):
         self.driver.find_element_by_xpath("//a[contains(text(),'Discussion Forum')]").click()
         self.forum_page_url = self.driver.current_url
 
+    def switch_to_page_create_thread(self):
+        if 'page=create_thread' in self.driver.current_url:
+            pass
+        elif 'page=view_thread' in self.driver.current_url:
+            self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
+        else:
+            assert False
+        assert 'page=create_thread' in self.driver.current_url
+
+    def switch_to_page_view_thread(self):
+        if 'page=view_thread' in self.driver.current_url:
+            pass
+        elif 'page=create_thread' in self.driver.current_url:
+            self.driver.find_element_by_xpath("//a[contains(text(),'Back to Threads')]").click()
+        else:
+            assert False
+        assert 'page=view_thread' in self.driver.current_url
+
     def upload_attachment(self, suffix):
         tfname = self.create_dummy_file()
         self.driver.find_element_by_id("file_input{}".format(suffix)).send_keys(tfname)
         return os.path.basename(tfname)
 
-    def create_thread(self, title, first_post, ignore_if_exists = False, upload_attachment = False):
+    def select_categories(self, categories_list):
+        assert 'page=create_thread' in self.driver.current_url
+        for category, set_it in categories_list:
+            category_button = self.driver.find_element_by_xpath("//a[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
+            if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
+                category_button.click()
+
+    def create_thread(self, title, first_post, ignore_if_exists = False, upload_attachment = False, categories_list = [("Question",True)]):
         assert 'page=view_thread' in self.driver.current_url
         if ignore_if_exists and self.thread_exists(title):
             return
         attachment_file = None
-        self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
+        self.switch_to_page_create_thread()
         self.driver.find_element_by_id("title").send_keys(title)
         self.driver.find_element_by_id("thread_content").send_keys(first_post)
-        categories = Select(self.driver.find_element_by_id('cat'))
-        categories.select_by_value("1")
+        self.select_categories(categories_list)
         if upload_attachment:
             attachment_file = self.upload_attachment("")
         self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
+        if len([cat for cat in categories_list if cat[1]]) == 0:
+            # Test thread should not be created
+            self.driver.switch_to.alert.accept();
+            self.switch_to_page_view_thread()
+            assert not self.thread_exists(title)
+            return None
         return attachment_file
 
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
         return len(self.driver.find_elements_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))) > 0
 
-    def view_thread(self, title):
+    def view_thread(self, title, return_info = False):
         assert 'page=view_thread' in self.driver.current_url
-        self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)).click()
+        div = self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
+        if return_info:
+            categories = []
+            for element in div.find_elements(By.XPATH, ".//span[contains(@class, 'label_forum')]"):
+                categories.append(element.text.strip())
+            return {'categories': categories}
+        div.click()
 
     def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
         if move_to_thread is not None:
@@ -183,6 +219,32 @@ class TestForum(BaseTestCase):
         # Cleanup
         self.delete_thread(title3)
         self.delete_thread(title1)
+
+    def test_categories(self):
+        title1 = "E2E Sample Title 1"
+        content1 = "E2E Sample Content 1"
+        title2 = "E2E Sample Title 2"
+        content2 = "E2E Sample Content 2"
+        title3 = "E2E Sample Title 3"
+        content3 = "E2E Sample Content 3"
+
+        self.init_and_enable_discussion()
+
+        # Check multiple categories
+        assert not self.thread_exists(title1)
+        assert not self.thread_exists(title2)
+        self.create_thread(title1, content1, categories_list = [('Question', True), ('Comment', False), ('Tutorials', True)])
+        self.create_thread(title2, content2, categories_list = [('Question', False), ('Comment', True), ('Tutorials', False)])
+        self.create_thread(title3, content3, categories_list = [('Question', False), ('Comment', False), ('Tutorials', False)])
+        # # Creationg Failed
+
+        info1 = self.view_thread(title1, return_info = True)
+        info2 = self.view_thread(title2, return_info = True)
+        assert set(info1['categories']) == set(["Question", "Tutorials"])
+        assert set(info2['categories']) == set(["Comment"])
+        self.delete_thread(title1)
+        self.delete_thread(title2)
+        assert not self.thread_exists(title3)
 
 if __name__ == "__main__":
     import unittest
