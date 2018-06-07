@@ -30,7 +30,7 @@ class AdminGradeableController extends AbstractController
             case 'update_gradeable':
                 $this->updateGradeableRequest();
                 break;
-            case 'upload_edit_gradeable':
+            case 'update_gradeable_rubric':
                 // Other updates are happening real time,
                 //  but the rubric and the grader assignment need
                 //  to be update manually
@@ -270,19 +270,31 @@ class AdminGradeableController extends AbstractController
     }
 
     private function saveAggChangesRequest() {
-        $this->saveAggChanges($_REQUEST['id']);
+        $gradeable = $this->core->getQueries()->getGradeable($_POST['g_id']);
+        if($gradeable === null) {
+            http_response_code(404);
+            return;
+        }
+        $result = $this->saveAggChanges($gradeable);
+
+        $response_data = [];
+
+        if (count($result) === 0) {
+            http_response_code(204); // NO CONTENT
+        } else {
+            $response_data['errors'] = $result;
+            http_response_code(400);
+        }
+
+        // Finally, send the requester back the information
+        $this->core->getOutput()->renderJson($response_data);
     }
 
-    private function saveAggChanges($gradeable_id)
+    private function saveAggChanges(Gradeable $gradeable)
     {
         // Add the rubric information using the old method for now.
         $edit_gradeable = 1;
         $peer_grading_complete_score = 0;
-
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        if($gradeable_id === null) {
-            return;
-        }
 
         $num_questions = 0;
         $num_checkpoints = -1; // remove 1 for the template
@@ -674,12 +686,7 @@ class AdminGradeableController extends AbstractController
             $this->core->getQueries()->setupRotatingSections($graders, $gradeable->getId());
         }
 
-        // Create the configuration file with the submitted form data
-        $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
-        if (!$fp) {
-            die("Could not open file: {$fp}");
-        }
-        file_put_contents($fp, json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        return [];
     }
 
     private function createGradeableRequest()
@@ -805,21 +812,6 @@ class AdminGradeableController extends AbstractController
                 return [2, 'Merged template data failed to validate!'];
             }
         }
-
-        // --------------------------------------------------------------
-        // Write queue file to build this assignment...
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $admin_gradeable->g_id . ".json";
-
-        $config_build_data = array("semester" => $semester,
-            "course" => $course,
-            "gradeable" => $admin_gradeable->g_id);
-
-        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
-            return [2, "Failed to write file {$config_build_file}"];
-        }
     }
 
     private function updateGradeableRequest()
@@ -891,6 +883,15 @@ class AdminGradeableController extends AbstractController
             }
         }
 
+        // Trigger a rebuild if the config changes
+        if(key_exists('eg_config_path', $details)) {
+            $result = $this->enqueueBuild($admin_gradeable);
+            if($result !== null) {
+                // TODO: what key should this get?
+                $errors['server'] = $result;
+            }
+        }
+
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
             $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
@@ -945,6 +946,43 @@ class AdminGradeableController extends AbstractController
         }
 
         $this->returnToNav();
+    }
+
+    private function enqueueBuild(AdminGradeable $gradeable)
+    {
+        if ($gradeable->g_gradeable_type !== GradeableType::ELECTRONIC_FILE)
+            return null;
+
+        // Refresh the configuration file with updated information
+        $jsonProperties = [
+            'g_id' => null,
+            'eg_submission_due_date' => null,
+            'eg_is_repository' => null
+        ];
+        $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->g_id . '.json';
+        foreach ($jsonProperties as $key => $value) {
+            $jsonProperties[$key] = $gradeable->$key;
+        }
+        if (file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+            return "Failed to write to file {$fp}";
+        }
+
+        // --------------------------------------------------------------
+        // Write queue file to build this assignment...
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $gradeable->g_id . ".json";
+
+        $config_build_data = [
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable->g_id
+        ];
+
+        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+            return "Failed to write to file {$config_build_file}";
+        }
     }
 
     private function quickLink()
