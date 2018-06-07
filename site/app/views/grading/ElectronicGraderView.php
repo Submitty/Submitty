@@ -1276,16 +1276,6 @@ HTML;
             ]);
         }
 
-        $return .= <<<HTML
-</div>
-<script type="text/javascript">
-    function adjustSize(name) {
-        var textarea = document.getElementById(name);
-        textarea.style.height = "";
-        textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
-    }
-</script>
-HTML;
         return $return;
     }
 
