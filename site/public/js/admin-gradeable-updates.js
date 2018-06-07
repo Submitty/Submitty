@@ -29,6 +29,13 @@ function getSuccessCallback(props) {
 }
 
 $(document).ready(function () {
+    $('textarea').change(function () {
+        var data = {};
+        data[this.name] = $(this).val();
+
+        ajaxUpdateGradeableProperty($('#g_id').val(), data,
+            getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
+    });
     $('input').change(function () {
         var data = {};
         data[this.name] = $(this).val();
