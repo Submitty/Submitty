@@ -21,6 +21,11 @@ window.onkeydown = function(e) {
         return;
     }
 
+    //Disable hotkeys in the menu so we don't accidentally press anything
+    if (isSettingsVisible()) {
+        return;
+    }
+
     if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
 
     var codeName = eventToKeyCode(e);
@@ -65,6 +70,10 @@ function unregisterKeyHandler(code, fn) {
             i--;
         }
     }
+}
+
+function isSettingsVisible() {
+    return $("#settings-popup").is(":visible");
 }
 
 function showSettings() {
