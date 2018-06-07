@@ -1027,62 +1027,9 @@ HTML;
     </div>
     </div>
 </div>
-
-<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
-    <div class="draggable_content">
-    <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 HTML;
 
-    if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
-        $return .= <<<HTML
-        <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
-HTML;
-    }
-
-$return .= <<<HTML
-    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
-
-    <script type="text/javascript">
-        $(document).ready(function(){
-            //note the commented out code here along with the code where files are displayed that is commented out
-            //is intended to allow open and close to change dynamically on click
-            //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-            $(".expand-button").on('click', function(){
-                // $(this).attr('clicked-state', "clicked");
-                // updateValue($(this), "Open", "Close");
-                openAll( 'openable-element-', $(this).data('linked-type'))
-                // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                //     console.log('HELLLO');
-                // });
-            })
-
-            var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
-            var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-            $('#' + currentCodeStyleRadio).parent().addClass('active');
-            $('#' + currentCodeStyleRadio).prop('checked', true);
-        });
-    </script>
-HTML;
-        if(!$peer) {
-        $return .= <<<HTML
-    <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
-HTML;
-        }
-        $return .= <<<HTML
-        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
-            </label>
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
-            </label>
-        </div>
-
-    <br />
-    <div class="inner-container" id="file-container">
-HTML;
-        function add_files(&$files, $new_files, $start_dir_name) {
+        function add_files(&$files, &$count, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             foreach($new_files as $file) {
                 $path = explode('/', $file['relative_name']);
@@ -1095,50 +1042,19 @@ HTML;
                     $working_dir = &$working_dir[$dir];
                 }
                 $working_dir[$file['name']] = $file['path'];
+                $count ++;
             }
         }
         function display_files($files, &$count, $indent, &$return, $filename) {
-            $name = "a" . $filename;
             foreach ($files as $dir => $path) {
                 if (!is_array($path)) {
-                    $name = htmlentities($dir);
-                    $dir = rawurlencode(htmlspecialchars($dir));
-                    $path = rawurlencode(htmlspecialchars($path));
-                    $indent_offset = $indent * -15;
-                    $return .= <<<HTML
-                <div>
-                    <div class="file-viewer">
-                        <a class='openAllFile{$filename} openable-element-{$filename}' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
-                            <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                        {$name}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-                        <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-                    </div>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
-                </div>
-HTML;
                     $count++;
                 }
             }
             foreach ($files as $dir => $contents) {
                 if (is_array($contents)) {
-                    $dir = htmlentities($dir);
-                    $url = reset($contents);
-                    $return .= <<<HTML
-            <div>
-                <div class="div-viewer">
-                    <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
-                        <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
-                    {$dir}</a>
-                </div><br/>
-                <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
-HTML;
                     $count++;
                     display_files($contents, $count, $indent+1, $return, $filename);
-                    $return .= <<<HTML
-                </div>
-            </div>
-HTML;
                 }
             }
         }
@@ -1151,42 +1067,22 @@ HTML;
         // if you change here, then change there as well
         // order of these statements matter I believe
 
-        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
+        $count = 0;
+        add_files($submissions, $count, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
 
         $vcsFiles = $gradeable->getVcsFiles();
         if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout,  $vcsFiles, 'checkout');
+            add_files($checkout, $count,  $vcsFiles, 'checkout');
         }
 
-        add_files($results, $gradeable->getResultsFiles(), 'results');
+        add_files($results, $count, $gradeable->getResultsFiles(), 'results');
 
-        $count = 1;
-        display_files($submissions,$count,1,$return, "submissions"); //modifies the count var here within display_files
-
-        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            display_files($checkout,$count,1,$return, "checkout");
-        }
-
-        display_files($results,$count,1,$return, "results"); //uses the modified count variable b/c old code did this not sure if needed
-        $files = array_merge($submissions, $checkout, $results );
-
-        $return .= <<<HTML
-        <script type="text/javascript">
-            // $(document).ready(function(){
-            //     $(".openAllDiv").on('click', function(){
-            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
-            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
-            //             if(elem.data('clicked-state') == "wasntClicked"){
-            //                 updateValue(elem, "Open", "Close");
-            //             }
-            //         }
-            //     });
-            // });
-        </script>
-    </div>
-    </div>
-</div>
-HTML;
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
+            "gradeable" => $gradeable,
+            "submissions" => $submissions,
+            "checkout" => $checkout,
+            "results" => $results
+        ]);
 
         $user = $gradeable->getUser();
         if(!$peer) {

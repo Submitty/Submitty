@@ -1,0 +1,120 @@
+{% import _self as self %}
+{% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
+
+<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
+    <div class="draggable_content">
+        <span class="grading_label">Submissions and Results Browser</span>
+        <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+
+        {# check if there are vcs files, if yes display the toggle button, else don't display it #}
+        {% if has_vcs_files %}
+            <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
+        {% endif %}
+
+        <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+
+        <script type="text/javascript">
+            $(document).ready(function(){
+                //note the commented out code here along with the code where files are displayed that is commented out
+                //is intended to allow open and close to change dynamically on click
+                //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
+                $(".expand-button").on('click', function(){
+                    // $(this).attr('clicked-state', "clicked");
+                    // updateValue($(this), "Open", "Close");
+                    openAll( 'openable-element-', $(this).data('linked-type'))
+                    // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                    //     console.log('HELLLO');
+                    // });
+                })
+
+                var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+                var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+                $('#' + currentCodeStyleRadio).parent().addClass('active');
+                $('#' + currentCodeStyleRadio).prop('checked', true);
+            });
+        </script>
+
+        {% if not peer %}
+            <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+        {% endif %}
+
+        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
+            </label>
+        </div>
+
+        <br />
+        {# Files #}
+        <div class="inner-container" id="file-container">
+            {{ self.display_files(self, submissions, "s", 0, "submissions") }}
+            {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
+                {{ self.display_files(self, checkout, "c", 0, "checkout") }}
+            {% endif %}
+            {{ self.display_files(self, results, "r", 0, "results") }}
+        </div>
+        {# /Files #}
+        <script type="text/javascript">
+            // $(document).ready(function(){
+            //     $(".openAllDiv").on('click', function(){
+            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
+            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
+            //             if(elem.data('clicked-state') == "wasntClicked"){
+            //                 updateValue(elem, "Open", "Close");
+            //             }
+            //         }
+            //     });
+            // });
+        </script>
+    </div>
+</div>
+
+{% macro display_files(self, files, id, indent, title) %}
+    {# Files on top #}
+    {% for dir, path in files %}
+        {% if path is not iterable %}
+            {{ self.display_file(self, dir, path, id ~ "f" ~ loop.index, indent, title) }}
+        {% endif %}
+    {% endfor %}
+    {# /Files on top #}
+
+    {% for dir, contents in files %}
+        {% if contents is iterable %}
+            {{ self.display_dir(self, dir, contents, id ~ "d" ~ loop.index, indent, title) }}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{% macro display_file(self, dir, path, id, indent, title) %}
+    <div>
+        <div class="file-viewer">
+            <a class='openAllFile{{ title }} openable-element-{{ title }}' onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+                <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                {{ dir }}</a> &nbsp;
+            <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+            <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+        </div>
+        <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
+    </div>
+{% endmacro %}
+
+{% macro display_dir(self, dir, contents, id, indent, title) %}
+    <div>
+        <div class="div-viewer">
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();'>
+                <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
+                {{ dir }}
+            </a>
+        </div>
+        <br/>
+        <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
+
+            {# Recurse #}
+            {{ self.display_files(self, contents, id, indent + 1, title) }}
+
+        </div>
+    </div>
+{% endmacro %}
