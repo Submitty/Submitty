@@ -1,0 +1,42 @@
+{% if label_message != '' %}
+    <h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
+{% endif %}
+<div class="electronic_file">
+    {{ include('admin/admin_gradeable/rubric/ElectronicFileRubric.twig')   }}
+</div>
+<div class="checkpoints numeric">
+    What overall instructions should be provided to the TA?:<br />
+    <!--NOTE: "textarea" contents (space between <textarea> and </textarea>") should not have any extra characters
+                    (that's why the '>' is on the next line)-->
+    <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;"
+    >{{ admin_gradeable.getGOverallTaInstructions() }}</textarea>
+    <br /><br />
+</div>
+<div class="checkpoints">
+    {{ include('admin/admin_gradeable/rubric/CheckpointsRubric.twig')   }}
+</div>
+<div class="numeric">
+    {{ include('admin/admin_gradeable/rubric/NumericRubric.twig')   }}
+</div>
+
+<script type="text/javascript">
+    function checkFormRubric() {
+        var elec  = $('#radio_electronic_file').is(':checked');
+        var check = $('#radio_checkpoints').is(':checked');
+        var num   = $('#radio_numeric').is(':checked');
+
+        if(elec) {
+            return checkFormRubricElec();
+        }
+        else if (check) {
+            return checkFormRubricCheck();
+        }
+        else if(num) {
+            return checkFormRubricNum();
+        }
+
+        // This condition will be caught by a previous check function
+        alert('No Gradeable Type Selected!');
+        return false;
+    }
+</script>

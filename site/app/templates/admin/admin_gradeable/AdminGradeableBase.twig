@@ -1,0 +1,357 @@
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="css/admin-gradeable.css"> <!-- Make sure this one is LAST -->
+<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
+
+<script type="text/javascript">
+    function disableElementChildren(c, dis = true) {
+        dis ? $(c).hide() : $(c).show();
+    }
+</script>
+<div id="container-rubric" style="display:none;">
+    <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
+        method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
+
+        <div class="modal-header" style="overflow: auto;">
+            <h2 id="myModalLabel" style="float: left;">Gradeable Editor</h2>
+            <br />
+            <br />
+            <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
+        </div>
+        <br/>
+        <div id="nav-bar">
+            <text class="badge nav-bar" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
+            <text class="badge nav-bar" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
+            <text class="badge nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</text>
+            <text class="badge nav-bar" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="badge nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</text>
+        </div>
+        <br/>
+        <br/>
+        <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
+            <div class="page-content" id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
+            <div class="page-content" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
+            <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+            <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+            <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+        </div>
+        <br/>
+        <div id="nav-controls">
+            <button class="btn btn-primary" type="submit" style="margin-left:10px;">{{submit_text}}</button>
+            <!--<button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
+            <button class="btn btn-primary" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
+            <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    var adminGradeableNavTab = 0;
+    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
+    function onChangeNavTab(tab) {
+
+        if(tab > 4 || tab < 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+        adminGradeableNavTab = tab;
+
+        $('.nav-bar').each(function (){
+            if(navItemsStatus.get(this.id.split('_')[1]) === false) {
+                $(this).hide();
+            }
+            else {
+                $(this).attr('style', '{{ action == 'new' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+            }
+        });
+
+        $('.page-content').hide();
+        $('#page_' + tab + '_content').show();
+        $('#page_' + tab + '_nav').attr('style', 'background-color: green');
+
+    }
+
+    function updateNavItemsStatus() {
+        if($('#radio_electronic_file').is(':checked')) {
+            navItemsStatus.set('1', true);
+            navItemsStatus.set('2', $('#yes_ta_grade').is(':checked'));
+            navItemsStatus.set('3', $('#yes_ta_grade').is(':checked'));
+        }
+        else {
+            navItemsStatus.set('1', false);
+            navItemsStatus.set('2', true);
+            navItemsStatus.set('3', true);
+        }
+        onChangeNavTab(adminGradeableNavTab);
+    }
+
+    $(document).ready(function() {
+
+        updateNavItemsStatus();
+        $('[name="gradeable_type"]').change(updateNavItemsStatus);
+        $('[name="ta_grading"]').change(updateNavItemsStatus)
+
+        // Update navigation on load
+
+        {# Disable navigation on 'new' mode #}
+        {% if action == 'new' %}
+            adminGradeableNavTab = 0;
+            $('.nav-bar').each(function() {
+                $(this).attr('onClick', '');
+            });
+        {% else %}
+            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
+        {% endif %}
+
+        updateNavItemsStatus();
+
+        // TODO: below is selectively copied from previous ui.  It updates various
+        //      UI element values when other elements change.  This keeps the form
+        //      state valid/submittible since there is no server-side checking as
+        //      of now (summer 2018)
+
+        // Clamp all numeric input to be between their min and max attributes
+        $( "input" ).change(function() {
+            var max = parseFloat($(this).attr('max'));
+            var skip1 = (isNaN(max)) ? true : false;
+            var min = parseFloat($(this).attr('min'));
+            var skip2 = (isNaN(min)) ? true : false;
+            if (!skip1 && $(this).val() > max)
+            {
+                $(this).val(max);
+            }
+            else if (!skip2 && $(this).val() < min)
+            {
+                $(this).val(min);
+            }
+        });
+
+        // TODO: move this to appropriate file when peer grading
+        //      is supported
+        // $('input:radio[name="peer_grading"]').change(function() {
+        //     $('.peer_input').hide();
+        //     $('#peer_averaging_scheme').hide();
+        //     if ($(this).is(':checked')) {
+        //         if($(this).val() == 'true') {
+        //             $('.peer_input').show();
+        //             $('#peer_averaging_scheme').show();
+        //             if($('#team_yes_radio').is(':checked')) {
+        //                 $('#team_yes_radio').prop('checked', false);
+        //                 $('#team_no_radio').prop('checked', true);
+        //                 $('input:radio[name="team_assignment"]').trigger("change");
+        //             }
+        //         }
+        //     }
+        // });
+
+        // End copied section
+
+        // Don't show page until all settings loaded
+        $("#container-rubric").show();
+    });
+
+    // Only succeeds if all child forms succeed
+    function checkForm() {
+        return checkFormCreate() &&
+                checkFormAuto() &&
+                checkFormRubric() &&
+                checkFormDates() &&
+                checkFormGraders();
+    }
+
+    $('#gradeable-form').on('submit', function(e){
+        $('<input />').attr('type', 'hidden')
+            .attr('name', 'gradeableJSON')
+            .attr('value', JSON.stringify($('form').serializeObject()))
+            .appendTo('#gradeable-form');
+        if ($("input[name='section_type']:checked").val() == 'reg_section'){
+            $('#rotating-sections :input').prop('disabled',true);
+        }
+    });
+
+    // TODO: this isn't necessary, but cuts back some unused data on submission
+    $.fn.serializeObject = function(){
+        var o = {};
+        var a = this.serializeArray();
+        var ignore = ["numeric_label_0", "max_score_0", "numeric_extra_0", "numeric_extra_0",
+            "text_label_0", "checkpoint_label_0", "num_numeric_items", "num_text_items"];
+
+        $('.ignore').each(function(){
+            ignore.push($(this).attr('name'));
+        });
+
+        // export appropriate users
+        if ($('[name="minimum_grading_group"]').prop('value') == 1){
+            $('#full-access-graders').find('.grader').each(function(){
+                ignore.push($(this).attr('name'));
+            });
+        }
+
+        if ($('[name="minimum_grading_group"]').prop('value') <= 2){
+            $('#limited-access-graders').find('.grader').each(function(){
+                ignore.push($(this).attr('name'));
+            });
+        }
+
+        // Remove irrelevant information from submission based on gradeable type
+        $(':radio').each(function(){
+            if(! $(this).is(':checked')){
+                if($(this).attr('class') !== undefined){
+                    // now remove all of the child elements names for the radio button
+                    $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
+                        ignore.push($(this).attr('name'));
+                    });
+                }
+            }
+        });
+
+        //parse checkpoints
+
+        $('.checkpoints-table').find('.multi-field').each(function(){
+            var label = '';
+            var extra_credit = false;
+            var skip = false;
+
+            $(this).find('.checkpoint_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            $(this).find('.checkpoint_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['checkpoints'] === undefined){
+                o['checkpoints'] = [];
+            }
+            o['checkpoints'].push({"label": label, "extra_credit": extra_credit});
+        });
+
+
+        // parse text items
+
+        $('.text-table').find('.multi-field').each(function(){
+            var label = '';
+            var skip = false;
+
+            $(this).find('.text_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            if (o['text_questions'] === undefined){
+                o['text_questions'] = [];
+            }
+            o['text_questions'].push({'label' : label});
+        });
+
+        // parse numeric items
+
+        $('.numerics-table').find('.multi-field').each(function(){
+            var label = '';
+            var max_score = 0;
+            var extra_credit = false;
+            var skip = false;
+
+            $(this).find('.numeric_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                    skip = true;
+                }
+                ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+
+            $(this).find('.max_score').each(function(){
+                max_score = parseFloat($(this).val());
+                ignore.push($(this).attr('name'));
+            });
+
+            $(this).find('.numeric_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['numeric_questions'] === undefined){
+                o['numeric_questions'] = [];
+            }
+            o['numeric_questions'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
+
+        });
+
+
+        $.each(a, function() {
+            if($.inArray(this.name,ignore) !== -1) {
+                return;
+            }
+            var val = this.value;
+            if($("[name="+this.name+"]").hasClass('int_val')){
+                val = parseInt(val);
+            }
+            else if($("[name="+this.name+"]").hasClass('float_val')){
+                val = parseFloat(val);
+            }
+
+            else if($("[name="+this.name+"]").hasClass('bool_val')){
+                val = (this.value === 'true');
+            }
+
+            if($("[name="+this.name+"]").hasClass('grader')){
+                var tmp = this.name.split('_');
+                var grader = tmp[1];
+                if (o['grader'] === undefined){
+                    o['grader'] = [];
+                }
+                var arr = {};
+                arr[grader] = this.value.trim();
+                o['grader'].push(arr);
+            }
+            else if ($("[name="+this.name+"]").hasClass('points')){
+                if (o['points'] === undefined){
+                    o['points'] = [];
+                }
+                o['points'].push(parseFloat(this.value));
+            }
+            else if($("[name="+this.name+"]").hasClass('complex_type')){
+                var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
+                classes.splice( classes.indexOf('complex_type'), 1);
+                var complex_type = classes[0];
+
+                if (o[complex_type] === undefined){
+                    o[complex_type] = [];
+                }
+                o[complex_type].push(val);
+            }
+            else if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(val || '');
+            } else {
+                o[this.name] = val || '';
+            }
+        });
+        return o;
+    };
+
+
+</script>
