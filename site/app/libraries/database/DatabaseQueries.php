@@ -108,7 +108,7 @@ class DatabaseQueries {
     }
 
     public function loadAnnouncements($category_id){
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC", array($category_id));
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? IN (SELECT category_id FROM thread_categories tc WHERE tc.thread_id = t.id) ORDER BY t.id DESC", array($category_id));
         return $this->course_db->rows();
     }
 
@@ -123,7 +123,7 @@ class DatabaseQueries {
     }
 
     public function loadThreads($category_id) {
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC", array($category_id));
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? IN (SELECT category_id FROM thread_categories tc WHERE tc.thread_id = t.id) ORDER BY t.id DESC", array($category_id));
         return $this->course_db->rows();
     }
 
