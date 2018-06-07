@@ -106,6 +106,9 @@ class Gradeable extends AbstractModel {
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
 
+    /** @property @var string Which gradeable to inherit teams from */
+    // protected $inherit_teams_from = "";
+
     /** @property @var int maximum allowed team size */
     protected $max_team_size = 0;
 
@@ -350,6 +353,7 @@ class Gradeable extends AbstractModel {
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
+            //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
             if ($this->team_assignment) {
@@ -1168,6 +1172,66 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Does not contain submission-specific data like comments or which marks are selected.
+     * @return array
+     */
+    public function getStaticData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getStaticData();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Contains submission-specific data like comments and which marks are selected.
+     * @return array
+     */
+    public function getGradedData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "user_id" => $this->user->getAnonId(),
+            "overall_comment" => $this->overall_comment,
+            "graded_autograder_points" => $this->getGradedAutograderPoints(),
+            "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
+            "graded_ta_points" => $this->getGradedTAPoints(),
+            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getGradedData();
+        }
+
+        return $data;
     }
 
     public function getRepositoryPath(Team $team) {

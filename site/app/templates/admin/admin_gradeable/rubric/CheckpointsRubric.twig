@@ -1,0 +1,96 @@
+<div class="multi-field-wrapper-checkpoints">
+    <table class="checkpoints-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+        <!-- Headings -->
+        <thead style="background: #E1E1E1;">
+        <tr>
+            <th> Label </th>
+            <th> Extra Credit? </th>
+        </tr>
+        </thead>
+        <tbody style="background: #f9f9f9;">
+
+        <!-- This is a bit of a hack, but it works (^_^) -->
+        <tr class="multi-field" id="mult-field-0" style="display:none;">
+            <td>
+                <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
+            </td>
+            <td>
+                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
+            </td>
+        </tr>
+
+        <tr class="multi-field" id="mult-field-1">
+            <td>
+                <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label" value="Checkpoint 1"/>
+            </td>
+            <td>
+                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
+            </td>
+        </tr>
+    </table>
+    <button type="button" id="add-checkpoint_field">Add Checkpoint</button>
+    <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="visibilty:hidden;">Remove Last Checkpoint</button>
+</div>
+<br />
+<!--Do you want a box for an (optional) message from the TA to the student?
+<input type="radio" name="checkpoint_opt_ta_messg" value="yes" /> Yes
+<input type="radio" name="checkpoint_opt_ta_messg" value="no" /> No-->
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        var numCheckpoints = 1;
+
+        function addCheckpoint(label, extra_credit) {
+            var wrapper = $('.checkpoints-table');
+            ++numCheckpoints;
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints);
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints);
+            if (extra_credit) {
+                $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('checked', true);
+            }
+            $('#remove-checkpoint_field').show();
+            $('#mult-field-' + numCheckpoints, wrapper).show();
+        }
+
+        function removeCheckpoint() {
+            if (numCheckpoints > 0) {
+                $('#mult-field-' + numCheckpoints, '.checkpoints-table').remove();
+                if (--numCheckpoints === 1) {
+                    $('#remove-checkpoint_field').hide();
+                }
+            }
+        }
+
+        $('.multi-field-wrapper-checkpoints').each(function () {
+            $("#add-checkpoint_field", $(this)).click(function (e) {
+                addCheckpoint('Checkpoint ' + (numCheckpoints + 1), false);
+            });
+            $('#remove-checkpoint_field').click(function () {
+                removeCheckpoint();
+            });
+        });
+
+        $('#remove-checkpoint_field').hide();
+
+        // Add the existing checkpoints
+        if ($('#radio_checkpoints').is(':checked')){
+            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
+            // remove the default checkpoint
+            removeCheckpoint();
+            $.each(components, function(i,elem){
+                var extra_credit = false;
+                if (elem.gc_max_value == 0) extra_credit = true;
+                addCheckpoint(elem.gc_title, extra_credit);
+            });
+            $('#checkpoints').show();
+            $('#grading_questions').show();
+        }
+    });
+
+
+    function checkFormRubricCheck() {
+        return true;
+    }
+</script>
