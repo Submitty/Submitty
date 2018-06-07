@@ -37,6 +37,15 @@ os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TA
 # Remove developer group
 os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ADD CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))'""".format(*variables))
 
+# Allow alphanumeric sections PR #2069
+# temporarily drop the constraints
+# edit the columns
+os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY mapped_courses ALTER COLUMN registration_section SET DATA TYPE character varying(255) USING registration_section::varchar(255)\"".format(*variables))
+os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY mapped_courses ALTER COLUMN mapped_section SET DATA TYPE character varying(255) USING mapped_section::varchar(255)\"".format(*variables))
+os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY courses_users ALTER COLUMN registration_section SET DATA TYPE character varying(255) USING registration_section::varchar(255)\"".format(*variables))
+# re-add the constraints
+
+
 # ==============================
 # edits to each course database
 for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
