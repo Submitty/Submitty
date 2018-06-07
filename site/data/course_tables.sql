@@ -492,55 +492,55 @@ CREATE TABLE regrade_discussion (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-    "id" serial NOT NULL,
-    "thread_id" int NOT NULL,
-    "parent_id" int DEFAULT '-1',
-    "author_user_id" character varying NOT NULL,
-    "content" TEXT NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    "anonymous" BOOLEAN NOT NULL,
-    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
-    "endorsed_by" varchar,
-    "resolved" BOOLEAN NOT NULL,
-    "type" int NOT NULL,
+	"id" serial NOT NULL,
+	"thread_id" int NOT NULL,
+	"parent_id" int DEFAULT '-1',
+	"author_user_id" character varying NOT NULL,
+	"content" TEXT NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL,
+	"anonymous" BOOLEAN NOT NULL,
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"endorsed_by" varchar,
+	"resolved" BOOLEAN NOT NULL,
+	"type" int NOT NULL,
   "has_attachment" BOOLEAN NOT NULL,
-    CONSTRAINT posts_pk PRIMARY KEY ("id")
+	CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
-    "id" serial NOT NULL,
-    "title" varchar NOT NULL,
-    "created_by" varchar NOT NULL,
-    "pinned" BOOLEAN NOT NULL DEFAULT 'false',
-    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
-    "merged_thread_id" int DEFAULT '-1',
-    "merged_post_id" int DEFAULT '-1',
-    "is_visible" BOOLEAN NOT NULL,
-    CONSTRAINT threads_pk PRIMARY KEY ("id")
+	"id" serial NOT NULL,
+	"title" varchar NOT NULL,
+	"created_by" varchar NOT NULL,
+	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"merged_thread_id" int DEFAULT '-1',
+	"merged_post_id" int DEFAULT '-1',
+	"is_visible" BOOLEAN NOT NULL,
+	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "thread_categories" (
-    "thread_id" int NOT NULL,
-    "category_id" int NOT NULL
+	"thread_id" int NOT NULL,
+	"category_id" int NOT NULL
 );
 
 CREATE TABLE "categories_list" (
-    "category_id" serial NOT NULL,
-    "category_desc" varchar NOT NULL,
-    CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+	"category_id" serial NOT NULL,
+	"category_desc" varchar NOT NULL,
+	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
 CREATE TABLE "student_favorites" (
-    "id" serial NOT NULL,
-    "user_id" character varying NOT NULL,
-    "thread_id" int,
-    CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+	"id" serial NOT NULL,
+	"user_id" character varying NOT NULL,
+	"thread_id" int,
+	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "viewed_responses" (
-    "thread_id" int NOT NULL,
-    "user_id" character varying NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+	"thread_id" int NOT NULL,
+	"user_id" character varying NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL
 );
 
 

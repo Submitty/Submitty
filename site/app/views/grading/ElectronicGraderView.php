@@ -747,10 +747,10 @@ HTML;
                 else if ($row->beenTAgraded()) {
                     if($row->validateVersions()) {
                         if($row->getRegradeStatus() === 0){
-                        $btn_class = "btn-default";
-                        $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
-			            $graded += $row->getGradedTAPoints();
-                    }
+                            $btn_class = "btn-default";
+                            $contents = "{$row->getGradedTAPoints()}&nbsp;/&nbsp;{$row->getTotalTANonExtraCreditPoints()}";
+                            $graded += $row->getGradedTAPoints();
+                        }
                     }
                     else{
                         $btn_class = "btn-primary";
@@ -762,9 +762,9 @@ HTML;
                         }
                     }
                     if($row->getRegradeStatus() === -1){
-                          $btn_class = "btn-danger";
-                          $contents = "Regrade Requested";
-                }
+                        $btn_class = "btn-danger";
+                        $contents = "Regrade Requested";
+                    }
                 }
                 else {
                     $btn_class = "btn-primary";
