@@ -957,118 +957,6 @@ HTML;
         return $return;
     }
 
-    public function popupStudents() {
-        $return = <<<HTML
-<div class="popup-form" id="student-marklist-popup" style="display: none; width: 500px; margin-left: -250px;">
-    <div style="width: auto; height: 450px; overflow-y: auto;" id="student-marklist-popup-content">
-        <h3>Students who received
-            <br><br>
-            <span id="student-marklist-popup-question-name">Name:</span>
-            <br>
-            <em id="student-marklist-popup-mark-note">"Title"</em>
-        </h3>
-        <br>
-        # of students with mark: <span id="student-marklist-popup-student-amount">0</span>
-        <br>
-        # of graded components: <span id="student-marklist-popup-graded-components">0</span>
-        <br>
-        # of total components: <span id="student-marklist-popup-total-components">0</span>
-        <br>
-        <span id="student-marklist-popup-student-names">
-            <br>Name1
-        </span>
-    </div>
-    <div style="float: right; width: auto">
-        <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>
-</div>
-</div>
-HTML;
-        return $return;
-    }
-
-    public function popupNewMark() {
-        $return = <<<HTML
-<div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">
-    <div style="width: auto; height: 450px; overflow-y: auto;" id="mark-creation-popup-content">
-        Amount of points:<br>
-        <input id="mark-creation-popup-points" type="number" value="0"><br>
-        <br>
-        Note:
-        <input id="mark-creation-popup-note" type="text" oninput="$('#mark-creation-popup-error').css('display', 'none');" value="">
-        <br>
-        <span id="mark-creation-popup-error" class="alert-error" style="display: none;">
-            Note cannot be blank!
-        </span>
-    </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-cancel" onclick="$('#mark-creation-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-confirm" class="btn btn-primary">Create</a>
-    </div>
-</div>
-</div>
-HTML;
-        return $return;
-    }
-
-    private function makeTable($user_id, $gradeable, &$status){
-        $return = <<<HTML
-        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                </tr>
-            </thead>
-            <tbody>
-HTML;
-        $total_late_used = 0;
-        $status = "Good";
-        $order_by = [ 
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
-        ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
-            $g->calculateLateDays($total_late_used);
-            $class = "";
-            if($g->getId() == $gradeable->getId()){
-                $class = "class='yellow-background'";
-                $status = $g->getLateStatus();
-            }
-            if(!$g->hasSubmitted()){
-                $status = "No submission";
-            }
-            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
-            $return .= <<<HTML
-                <tr>
-                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
-                </tr>
-HTML;
-        }
-        $return .= <<<HTML
-            </tbody>
-        </table>
-HTML;
-        return $return;
-    }
-
     /**
      * @param Gradeable $gradeable
      * @param float $progress
@@ -1388,6 +1276,118 @@ HTML;
             "user" => $user,
             "grading_data" => $grading_data
         ]);
+        return $return;
+    }
+
+    public function popupStudents() {
+        $return = <<<HTML
+<div class="popup-form" id="student-marklist-popup" style="display: none; width: 500px; margin-left: -250px;">
+    <div style="width: auto; height: 450px; overflow-y: auto;" id="student-marklist-popup-content">
+        <h3>Students who received
+            <br><br>
+            <span id="student-marklist-popup-question-name">Name:</span>
+            <br>
+            <em id="student-marklist-popup-mark-note">"Title"</em>
+        </h3>
+        <br>
+        # of students with mark: <span id="student-marklist-popup-student-amount">0</span>
+        <br>
+        # of graded components: <span id="student-marklist-popup-graded-components">0</span>
+        <br>
+        # of total components: <span id="student-marklist-popup-total-components">0</span>
+        <br>
+        <span id="student-marklist-popup-student-names">
+            <br>Name1
+        </span>
+    </div>
+    <div style="float: right; width: auto">
+        <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+    </div>
+</div>
+</div>
+HTML;
+        return $return;
+    }
+
+    public function popupNewMark() {
+        $return = <<<HTML
+<div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">
+    <div style="width: auto; height: 450px; overflow-y: auto;" id="mark-creation-popup-content">
+        Amount of points:<br>
+        <input id="mark-creation-popup-points" type="number" value="0"><br>
+        <br>
+        Note:
+        <input id="mark-creation-popup-note" type="text" oninput="$('#mark-creation-popup-error').css('display', 'none');" value="">
+        <br>
+        <span id="mark-creation-popup-error" class="alert-error" style="display: none;">
+            Note cannot be blank!
+        </span>
+    </div>
+    <div style="float: right; width: auto">
+        <a id="mark-creation-popup-cancel" onclick="$('#mark-creation-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+    </div>
+    <div style="float: right; width: auto">
+        <a id="mark-creation-popup-confirm" class="btn btn-primary">Create</a>
+    </div>
+</div>
+</div>
+HTML;
+        return $return;
+    }
+
+    private function makeTable($user_id, $gradeable, &$status){
+        $return = <<<HTML
+        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
+                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
+                </tr>
+            </thead>
+            <tbody>
+HTML;
+        $total_late_used = 0;
+        $status = "Good";
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+            $class = "";
+            if($g->getId() == $gradeable->getId()){
+                $class = "class='yellow-background'";
+                $status = $g->getLateStatus();
+            }
+            if(!$g->hasSubmitted()){
+                $status = "No submission";
+            }
+            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
+            $return .= <<<HTML
+                <tr>
+                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
+                </tr>
+HTML;
+        }
+        $return .= <<<HTML
+            </tbody>
+        </table>
+HTML;
         return $return;
     }
 }
