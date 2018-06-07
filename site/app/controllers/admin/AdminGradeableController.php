@@ -34,7 +34,10 @@ class AdminGradeableController extends AbstractController
                 // Other updates are happening real time,
                 //  but the rubric and the grader assignment need
                 //  to be update manually
-                $this->saveAggChangesRequest();
+                $this->updateRubricRequest();
+                break;
+            case 'update_graders':
+                $this->updateGradersRequest();
                 break;
             case 'upload_new_template':
                 $this->uploadNewTemplate();
@@ -111,6 +114,42 @@ class AdminGradeableController extends AbstractController
         $admin_gradeable = new AdminGradeable($this->core);
         $this->core->getQueries()->getGradeableInfo($gradeable_id, $admin_gradeable, false);
         return $admin_gradeable;
+    }
+
+    // Generates a blank first component for a gradeable
+    private function genBlankComponent(AdminGradeable $gradeable)
+    {
+        // Make a new gradeable component with good default values
+        $gradeable_component = new GradeableComponent($this->core);
+        if ($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
+            // Not required
+        } else if ($gradeable->g_gradeable_type === GradeableType::CHECKPOINTS) {
+            $gradeable_component->setTitle('Checkpoint 1');
+            $gradeable_component->setMaxValue(1);
+            $gradeable_component->setUpperClamp(1);
+        } else if ($gradeable->g_gradeable_type === GradeableType::NUMERIC_TEXT) {
+            // Not required
+        } else {
+            return false;
+        }
+
+        // Add it to the database
+        $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->g_id);
+
+        // Add a new mark to the db if its electronic
+        if($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
+            $this->core->getQueries()->getGradeableInfo($gradeable->g_id, $gradeable);
+            $components = $gradeable->getOldComponents();
+
+            // Get the first (and only) component
+            $comp = $components[0];
+
+            $mark = new GradeableComponentMark($this->core);
+            $mark->setGcId($comp->getId());
+            $mark->setOrder(0); // must set order since it defaults to 1
+            $this->core->getQueries()->createGradeableComponentMark($mark);
+        }
+        return true;
     }
 
     /**
@@ -269,13 +308,13 @@ class AdminGradeableController extends AbstractController
         return isset($_POST[$name]) && $_POST[$name] === 'true';
     }
 
-    private function saveAggChangesRequest() {
+    private function updateRubricRequest() {
         $gradeable = $this->core->getQueries()->getGradeable($_POST['g_id']);
         if($gradeable === null) {
             http_response_code(404);
             return;
         }
-        $result = $this->saveAggChanges($gradeable);
+        $result = $this->updateRubric($gradeable);
 
         $response_data = [];
 
@@ -290,7 +329,7 @@ class AdminGradeableController extends AbstractController
         $this->core->getOutput()->renderJson($response_data);
     }
 
-    private function saveAggChanges(Gradeable $gradeable)
+    private function updateRubric(Gradeable $gradeable)
     {
         // Add the rubric information using the old method for now.
         $edit_gradeable = 1;
@@ -673,29 +712,57 @@ class AdminGradeableController extends AbstractController
             throw new \InvalidArgumentException("Error.");
         }
 
-        //set up rotating sections
-        $graders = array();
-        foreach ($_POST as $k => $v) {
-            if (substr($k, 0, 7) === 'grader_' && !empty(trim($v))) {
-                $sections = explode('_', $k);
-                $graders[$sections[3]][] = $sections[2];
+        return [];
+    }
+
+    private function updateGradersRequest()
+    {
+        $gradeable = $this->core->getQueries()->getGradeable($_POST['g_id']);
+        if($gradeable === null) {
+            http_response_code(404);
+            return;
+        }
+        $result = $this->updateGraders($gradeable);
+
+        $response_data = [];
+
+        if (count($result) === 0) {
+            http_response_code(204); // NO CONTENT
+        } else {
+            $response_data['errors'] = $result;
+            http_response_code(400);
+        }
+
+        // Finally, send the requester back the information
+        $this->core->getOutput()->renderJson($response_data);
+    }
+
+    private function updateGraders(AdminGradeable $gradeable)
+    {
+        if ($gradeable->g_grade_by_registration === false) {
+            //set up rotating sections
+            $graders = array();
+            foreach ($_POST as $k => $v) {
+                if (substr($k, 0, 7) === 'grader_' && !empty(trim($v))) {
+                    $sections = explode('_', $k);
+                    $graders[$sections[3]][] = $sections[2];
+                }
             }
-        }
 
-        if ($gradeable->getGradeByRegistration() === false) {
-            $this->core->getQueries()->setupRotatingSections($graders, $gradeable->getId());
+            $this->core->getQueries()->setupRotatingSections($graders, $gradeable->g_id);
         }
-
+        // no errors yet
         return [];
     }
 
     private function createGradeableRequest()
     {
-        $result = $this->createGradeable($_REQUEST['id'], $_POST, $_POST['gradeable_template']);
+        $gradeable_id = $_POST['g_id'];
+        $result = $this->createGradeable($gradeable_id, $_POST, $_POST['gradeable_template']);
 
         if ($result === null) {
             // Finally, redirect to the edit page
-            $this->redirectToEdit($_REQUEST['id']);
+            $this->redirectToEdit($gradeable_id);
         } else {
             if ($result[0] == 1) { // Request Error
                 http_response_code(400);
@@ -751,6 +818,9 @@ class AdminGradeableController extends AbstractController
         $admin_gradeable->eg_is_repository = $details['eg_is_repository'] === 'true';
         try {
             $this->core->getQueries()->createNewGradeable($admin_gradeable);
+
+            // Generate a blank component to make the rubric UI work properly
+            $this->genBlankComponent($admin_gradeable);
         } catch (\Exception $e) {
             return [2, 'Database call failed: ' . $e];
         }
