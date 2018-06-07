@@ -22,7 +22,7 @@ class AdminGradeableController extends AbstractController
                 $this->viewPage();
                 break;
             case 'upload_new_gradeable':
-                $this->modifyGradeable($_REQUEST['g_id'], 0);
+                $this->createGradeableRequest();
                 break;
             case 'edit_gradeable_page':
                 $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
@@ -31,7 +31,10 @@ class AdminGradeableController extends AbstractController
                 $this->updateGradeableRequest();
                 break;
             case 'upload_edit_gradeable':
-                $this->modifyGradeable($_REQUEST['g_id'], 1);
+                // Other updates are happening real time,
+                //  but the rubric and the grader assignment need
+                //  to be update manually
+                $this->saveAggChangesRequest();
                 break;
             case 'upload_new_template':
                 $this->uploadNewTemplate();
@@ -110,6 +113,13 @@ class AdminGradeableController extends AbstractController
         return $admin_gradeable;
     }
 
+    /**
+     * Asserts that the provided date is a \DateTime object and converts it to one
+     *  if its a string, returning any error in parsing.
+     *
+     * @param $date DateTime|string A reference to the date object to assert.  Set to null if failed.
+     * @return null|string The error message or null
+     */
     private function assertDate(&$date) {
         if(gettype($date) === 'string') {
             try {
@@ -259,22 +269,16 @@ class AdminGradeableController extends AbstractController
         return isset($_POST[$name]) && $_POST[$name] === 'true';
     }
 
-    // Maintain previous function while adding new 'update field' feature
-    private function modifyGradeable($gradeable_id, $edit_gradeable)
+    private function saveAggChangesRequest() {
+        $this->saveAggChanges($_REQUEST['id']);
+    }
+
+    private function saveAggChanges($gradeable_id)
     {
-        // Load the basic information using our other methods
-        $peer_grading_complete_score = 0;
-        if ($edit_gradeable === 0) {
-            // Ignore the errors of not-found keys
-            $this->createGradeable($gradeable_id, $_POST);
-        } else {
-            // Ignore the errors of not-found keys
-            $this->updateGradeableById($gradeable_id, $_POST);
-        }
-
         // Add the rubric information using the old method for now.
+        $edit_gradeable = 1;
+        $peer_grading_complete_score = 0;
 
-        // TODO: this method will be deleted once full autosaving is done.  Support this to keep the rubrics updated on save
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         if($gradeable_id === null) {
             return;
@@ -670,63 +674,13 @@ class AdminGradeableController extends AbstractController
             $this->core->getQueries()->setupRotatingSections($graders, $gradeable->getId());
         }
 
+        // Create the configuration file with the submitted form data
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
         if (!$fp) {
-            echo "Could not open file";
+            die("Could not open file: {$fp}");
         }
         file_put_contents($fp, json_encode(json_decode(urldecode($_POST['gradeableJSON'])), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
-
-        // --------------------------------------------------------------
-        // Write queue file to build this assignment...
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $gradeable->getId() . ".json";
-
-        $config_build_data = array("semester" => $semester,
-            "course" => $course,
-            "gradeable" => $gradeable->getId());
-
-        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
-            die("Failed to write file {$config_build_file}");
-        }
-
-
-        if ($edit_gradeable === 0) {
-            $this->redirectToEdit($gradeable->getId()); // redirect to next page of the form
-        } else {
-            $this->returnToNav();
-        }
     }
-
-    /** The Gradeable properties that should be copied from the template on creation
-     *
-     */
-    const template_property_names = [
-        'g_min_grading_group',
-        'g_grade_by_registration',
-        'g_overall_ta_instructions',
-        'eg_config_path',
-        'eg_student_view',
-        'eg_student_submit',
-        'eg_student_download',
-        'eg_student_any_version',
-        'eg_late_days',
-        'eg_precision',
-        'eg_pdf_page',
-        'eg_pdf_page_student'
-    ];
-
-    // Mutable first-page properties
-    const front_page_property_names = [
-        'g_title',
-        'g_instructions_url',
-        'eg_use_ta_grading',
-        'eg_max_team_size',
-        'eg_subdirectory',
-        'g_syllabus_bucket'
-    ];
 
     private function createGradeableRequest()
     {
@@ -742,7 +696,7 @@ class AdminGradeableController extends AbstractController
                 http_response_code(500);
             }
             // TODO: good way to handle these errors
-            $this->core->getOutput()->renderString($result[1]);
+            die($result[1]);
         }
     }
 
@@ -794,9 +748,19 @@ class AdminGradeableController extends AbstractController
             return [2, 'Database call failed: ' . $e];
         }
 
+        // Mutable first-page properties
+        $front_page_property_names = [
+            'g_title',
+            'g_instructions_url',
+            'eg_use_ta_grading',
+            'eg_max_team_size',
+            'eg_subdirectory',
+            'g_syllabus_bucket'
+        ];
+
         // Call updates with the front page properties
         $front_page_properties = array();
-        foreach(self::front_page_property_names as $prop) {
+        foreach($front_page_property_names as $prop) {
             $front_page_properties[$prop] = $details[$prop];
         }
         $result = $this->updateGradeable($admin_gradeable, $front_page_properties);
@@ -811,8 +775,24 @@ class AdminGradeableController extends AbstractController
         if ($template_gradeable !== null) {
             $template_properties = array();
 
+            // The Gradeable properties that should be copied from the template on creation
+            $template_property_names = [
+                'g_min_grading_group',
+                'g_grade_by_registration',
+                'g_overall_ta_instructions',
+                'eg_config_path',
+                'eg_student_view',
+                'eg_student_submit',
+                'eg_student_download',
+                'eg_student_any_version',
+                'eg_late_days',
+                'eg_precision',
+                'eg_pdf_page',
+                'eg_pdf_page_student'
+            ];
+
             //get a subset of the properties we want to copy
-            foreach (self::template_property_names as $prop) {
+            foreach ($template_property_names as $prop) {
                 $template_properties[$prop] = $template_gradeable->$prop;
             }
 
@@ -824,6 +804,21 @@ class AdminGradeableController extends AbstractController
             } else if (count($result) !== 0) {
                 return [2, 'Merged template data failed to validate!'];
             }
+        }
+
+        // --------------------------------------------------------------
+        // Write queue file to build this assignment...
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $admin_gradeable->g_id . ".json";
+
+        $config_build_data = array("semester" => $semester,
+            "course" => $course,
+            "gradeable" => $admin_gradeable->g_id);
+
+        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+            return [2, "Failed to write file {$config_build_file}"];
         }
     }
 
@@ -857,20 +852,19 @@ class AdminGradeableController extends AbstractController
         return $this->updateGradeable($admin_gradeable, $details);
     }
 
-
-    // A few fields that cannot be changed
-    const blacklist = [
-        'g_id' => 'Gradeable Id',
-        'g_gradeable_type' => 'Gradeable Type',
-        'eg_team_assignment' => 'Teamness',
-        'eg_is_repository' => 'Upload Method'
-    ];
-    // A few fields that need sanitation
-    const sanitize = [
-        'g_title', 'g_instructions_url'
-    ];
     private function updateGradeable(AdminGradeable $admin_gradeable, $details)
     {
+        // A few fields that cannot be changed
+        $blacklist = [
+            'g_id' => 'Gradeable Id',
+            'g_gradeable_type' => 'Gradeable Type',
+            'eg_team_assignment' => 'Teamness',
+            'eg_is_repository' => 'Upload Method'
+        ];
+        // A few fields that need sanitation
+        $sanitize = [
+            'g_title', 'g_instructions_url'
+        ];
         $errors = array();
         $warnings = array(); // allows us to ignore "not found" (THIS IS TEMPORARY FOR OLD RUBRIC)
 
@@ -878,14 +872,14 @@ class AdminGradeableController extends AbstractController
         foreach ($details as $prop => $post_val) {
 
             // small blacklist (values that can't change)
-            if (key_exists($prop, self::blacklist)) {
-                $errors[$prop] = 'Cannot Change ' . self::blacklist[$prop] . ' once created';
+            if (key_exists($prop, $blacklist)) {
+                $errors[$prop] = 'Cannot Change ' . $blacklist[$prop] . ' once created';
                 continue;
             }
 
             // Try to set the property
             try {
-                if (in_array($prop, self::sanitize)) {
+                if (in_array($prop, $sanitize)) {
                     $admin_gradeable->$prop = filter_var($post_val, FILTER_SANITIZE_SPECIAL_CHARS);
                 } else if (property_exists($admin_gradeable, $prop)) {
                     $admin_gradeable->$prop = $post_val;
