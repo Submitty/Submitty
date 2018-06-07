@@ -8,9 +8,12 @@ use app\views\AbstractView;
 class UsersView extends AbstractView {
     /**
      * @param User[] $students
+     * @param array  $reg_sections associative array representing registration sections in the system
+     * @param array  $rot_sections associative array representing rotating sections in the system
+     * @param bool   $use_database
      * @return string
      */
-    public function listStudents($students) {
+    public function listStudents($students, $reg_sections, $rot_sections, $use_database=false) {
         //Assemble students into sections
         $sections = [];
         foreach ($students as $student) {
@@ -19,7 +22,10 @@ class UsersView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
-            "sections" => $sections
+            "sections" => $sections,
+            "reg_sections" => $reg_sections,
+            "rot_sections" => $rot_sections,
+            "use_database" => $use_database
         ]);
     }
 
