@@ -80,7 +80,7 @@ HTML;
       if ($active_version >= 1 && $active_days_late > 0) {
 
         // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-        if ($active_days_charged > $late_days_remaining) {
+        if ($active_days_charged > $active_days_late) {
           $error = true;
           if ($info != "") { $info .= "<br><br>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
