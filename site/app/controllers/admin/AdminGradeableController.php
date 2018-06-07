@@ -124,7 +124,7 @@ class AdminGradeableController extends AbstractController
     /**
      * Checks if a gradeable is valid
      *
-     * @param $gradeable the gradeable to validate
+     * @param $admin_gradeable AdminGradeable the gradeable to validate
      *
      * @return array error messages
      */
@@ -136,13 +136,14 @@ class AdminGradeableController extends AbstractController
         //  -non-blank autograding config (for electronic submission)
         //  -maybe some warnings about the rubric
         //  -Dates
+        //  -Late days must be >= 0
 
         // Messages array that holds warning/error messages for
         //  any AdminGradeable Properties that have issues
-        $messages = array();
+        $errors = array();
 
         if ($admin_gradeable->g_title === '') {
-            $messages['g_title'] = 'Title cannot be blank!';
+            $errors['g_title'] = 'Title cannot be blank!';
         }
 
         // Boolean values are false unless 'true'
@@ -168,7 +169,7 @@ class AdminGradeableController extends AbstractController
         // Make sure autograding config isn't blank
         if ($admin_gradeable->g_gradeable_type == GradeableType::ELECTRONIC_FILE) {
             if ($admin_gradeable->eg_config_path === '') {
-                $messages['eg_config_path'] = 'Config Path Cannot be Blank!';
+                $errors['eg_config_path'] = 'Config Path Cannot be Blank!';
             }
         }
 
@@ -186,15 +187,20 @@ class AdminGradeableController extends AbstractController
         foreach($dates as $date) {
             $result = $this->assertDate($admin_gradeable->$date);
             if($result !== null) {
-                $messages[$date] = $result;
+                $errors[$date] = $result;
             }
         }
 
         $late_interval = null;
         try {
-            $late_interval = new \DateInterval('P' . strval($admin_gradeable->getEgLateDays()) . 'D');
+            $admin_gradeable->eg_late_days = (int)$admin_gradeable->eg_late_days;
+            if ($admin_gradeable->eg_late_days < 0) {
+                $errors['eg_late_days'] = 'Late day count must be >= 0!';
+            } else {
+                $late_interval = new \DateInterval('P' . strval($admin_gradeable->eg_late_days) . 'D');
+            }
         } catch (\Exception $e) {
-            $messages['eg_late_days'] = 'Invalid Format!';
+            $errors['eg_late_days'] = 'Invalid Format!';
         }
 
         // Some alias' for easier time comparison
@@ -210,37 +216,37 @@ class AdminGradeableController extends AbstractController
 
         if ($admin_gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             if (!($ta_view === null || $open === null) && $ta_view > $open) {
-                $messages['g_ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
+                $errors['g_ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
             }
             if (!($open === null || $due === null) && $open > $due) {
-                $message['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
+                $errors['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
             }
 
             if ($admin_gradeable->eg_use_ta_grading) {
 
                 if (!($due === null || $grade === null) && $due > $grade) {
-                    $message['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
+                    $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 } else if (!($due === null || $grade === null) && $max_due > $grade) {
-                    $message['g_grade_start_date'] = '[Warning] Manual Grading Open Date should be no earlier than Due Date';
+                    $errors['g_grade_start_date'] = '[Warning] Manual Grading Open Date should be no earlier than Due Date';
                 }
 
                 if (!($grade === null || $release === null) && $grade > $release) {
-                    $message['g_grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
                 }
             } else {
 
                 if (!($max_due === null || $release === null) && $max_due > $release) {
-                    $message['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
+                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
             }
         } else {
             // The only check if its not an electronic gradeable
             if (!($ta_view === null || $release === null) && $ta_view > $release) {
-                $message['g_grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
+                $errors['g_grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
             }
         }
 
-        return $messages;
+        return $errors;
     }
 
     // check whether radio button's value is 'true'
