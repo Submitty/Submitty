@@ -942,67 +942,7 @@ HTML;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
-        $user = $gradeable->getUser();
-        $your_user_id = $this->core->getUser()->getId();
-        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id));
-        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id));
-        $return = <<<HTML
-<div id="bar_wrapper" class="draggable">
-<div class="grading_toolbar">
-HTML;
-    //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
-    if(!$studentNotInSection){
-    $return .= <<< HTML
-        <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{$prev_href}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
-HTML;
-    }
-    else{
-        $return .= <<< HTML
-        <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
-HTML;
-    }
-    $return .= <<< HTML
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
-HTML;
-    //If the student is in our section, add a clickable next arrow, else add a grayed out one.
-    if(!$studentNotInSection){
-    $return .= <<<HTML
-    <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{$next_href}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
-HTML;
-    }
-    else{
-        $return .= <<< HTML
-        <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
-HTML;
-    }
-    $return .= <<< HTML
-
-    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
-    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
-HTML;
-    if ($gradeable->useTAGrading()) {
-            $return .= <<<HTML
-    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
-HTML;
-        }
-        $return .= <<<HTML
-    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
-HTML;
-        if(!$peer) {
-            $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
-HTML;
-        }
-        $return .= <<<HTML
-</div>
-
-<div class="progress_bar">
-    <progress class="progressbar" max="100" value="{$progress}" style="width:70%; height: 100%;"></progress>
-    <div class="progress-value" style="display:inline;"></div>
-</div>
-</div>
-HTML;
-
+        $return = $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
 
@@ -1125,6 +1065,75 @@ HTML;
         $return .= <<<HTML
             </tbody>
         </table>
+HTML;
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param float $progress
+     * @param string $prev_id
+     * @param string $next_id
+     * @param bool $studentNotInSection
+     * @param bool $peer
+     * @return string
+     */
+    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $studentNotInSection, bool $peer) {
+        $prev_href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $prev_id));
+        $next_href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $next_id));
+        $return = <<<HTML
+<div id="bar_wrapper" class="draggable">
+<div class="grading_toolbar">
+HTML;
+        //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
+        if (!$studentNotInSection) {
+            $return .= <<< HTML
+        <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{$prev_href}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+HTML;
+        } else {
+            $return .= <<< HTML
+        <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
+HTML;
+        }
+        $return .= <<< HTML
+    <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+HTML;
+        //If the student is in our section, add a clickable next arrow, else add a grayed out one.
+        if (!$studentNotInSection) {
+            $return .= <<<HTML
+    <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{$next_href}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+HTML;
+        } else {
+            $return .= <<< HTML
+        <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
+HTML;
+        }
+        $return .= <<< HTML
+
+    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
+    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
+HTML;
+        if ($gradeable->useTAGrading()) {
+            $return .= <<<HTML
+    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
+HTML;
+        }
+        $return .= <<<HTML
+    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
+HTML;
+        if (!$peer) {
+            $return .= <<<HTML
+    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
+HTML;
+        }
+        $return .= <<<HTML
+</div>
+
+<div class="progress_bar">
+    <progress class="progressbar" max="100" value="{$progress}" style="width:70%; height: 100%;"></progress>
+    <div class="progress-value" style="display:inline;"></div>
+</div>
+</div>
 HTML;
         return $return;
     }
