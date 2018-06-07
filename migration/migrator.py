@@ -122,31 +122,23 @@ def migrate_environment(connection, environment, args):
                        "table_name='migrations_{}')".format(environment))
         exists = cursor.fetchone()[0]
 
-    if not exists:
-        with connection.cursor() as cursor:
-            cursor.execute("""CREATE TABLE migrations_{} (
-      id VARCHAR(100) PRIMARY KEY NOT NULL,
-      commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      status NUMERIC(1) DEFAULT 0 NOT NULL
-    );""".format(environment))
-        connection.commit()
-
     missing_migrations = OrderedDict()
     migrations = load_migrations(MIGRATIONS_PATH / environment)
 
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT id, commit_time, status FROM migrations_{} ORDER BY id'.format(environment))
-        for migration in cursor.fetchall():
-            # fetchall returns things as a tuple which is a bit unwieldy
-            migration = {'id': migration[0], 'commit_time': migration[1], 'status': migration[2]}
-            if migration['id'] in migrations:
-                migrations[migration['id']].update({
-                    'commit_time': migration['commit_time'],
-                    'status': migration['status'],
-                    'db': True
-                })
-            else:
-                missing_migrations[migration['id']] = migration
+    if exists:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT id, commit_time, status FROM migrations_{} ORDER BY id'.format(environment))
+            for migration in cursor.fetchall():
+                # fetchall returns things as a tuple which is a bit unwieldy
+                migration = {'id': migration[0], 'commit_time': migration[1], 'status': migration[2]}
+                if migration['id'] in migrations:
+                    migrations[migration['id']].update({
+                        'commit_time': migration['commit_time'],
+                        'status': migration['status'],
+                        'db': True
+                    })
+                else:
+                    missing_migrations[migration['id']] = migration
 
     if len(missing_migrations) > 0:
         print('Removing {} missing migrations:'.format(len(missing_migrations)))
