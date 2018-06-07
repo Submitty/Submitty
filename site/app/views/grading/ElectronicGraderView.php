@@ -1547,29 +1547,7 @@ HTML;
     }
 
     public function popupNewMark() {
-        $return = <<<HTML
-<div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">
-    <div style="width: auto; height: 450px; overflow-y: auto;" id="mark-creation-popup-content">
-        Amount of points:<br>
-        <input id="mark-creation-popup-points" type="number" value="0"><br>
-        <br>
-        Note:
-        <input id="mark-creation-popup-note" type="text" oninput="$('#mark-creation-popup-error').css('display', 'none');" value="">
-        <br>
-        <span id="mark-creation-popup-error" class="alert-error" style="display: none;">
-            Note cannot be blank!
-        </span>
-    </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-cancel" onclick="$('#mark-creation-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-confirm" class="btn btn-primary">Create</a>
-    </div>
-</div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NewMarkForm.twig");
     }
 
     private function makeTable($user_id, $gradeable, &$status){
