@@ -37,8 +37,8 @@ class AdminGradeableController extends AbstractController {
             case 'delete_gradeable':
                 $this->deleteGradeable();
                 break; 
-            case 'rebuild_assignements':
-                $this->rebuildAssignments();
+            case 'rebuild_assignement':
+                $this->rebuildAssignment();
                 break;           
             default:
                 $this->viewPage();
@@ -610,7 +610,7 @@ class AdminGradeableController extends AbstractController {
         $this->returnToNav();
     }
 
-    private function rebuildAssignments(){
+    private function rebuildAssignment(){
         if (!$this->core->getUser()->accessAdmin()) {
             die("Only admins can rebuild assignements");
         }
@@ -618,10 +618,12 @@ class AdminGradeableController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $course = $this->core->getConfig()->getCourse();
         $semester=$this->core->getConfig()->getSemester();
-    
-        $config_build_file = "/var/local/submitty/to_be_built/".$semester."__".$course.".json";
+        $g_id = $_REQUEST['gradeable_id'];
+        $config_build_file = "/var/local/submitty/to_be_built/".$semester."__".$course."__".$g_id.".json";
         $config_build_data = array("semester" => $semester,
-                                   "course" => $course);
+                                   "course" => $course ,
+                                   "gradeable" => $g_id
+                                    );
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
           die("Failed to write file {$config_build_file}");
