@@ -949,7 +949,7 @@ class Course(object):
             forum_thread_cat = Table("thread_categories", metadata, autoload=True)
 
             for catData in f_data[2]:
-                conn.execute(forum_cat_list.insert(), category_desc=catData[0])
+                conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1])
 
             for thread_id, threadData in enumerate(f_data[1], start = 1):
                 conn.execute(forum_threads.insert(),
