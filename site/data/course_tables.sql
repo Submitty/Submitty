@@ -959,12 +959,20 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
 
 
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
+
+
+
 --
 -- Name: users_rotating_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
+
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
 
 --
 -- Name: gradeable_teams_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

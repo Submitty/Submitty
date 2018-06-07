@@ -19,6 +19,7 @@ from datetime import datetime
 import json
 import os
 import urllib.parse
+import subprocess
 
 usr_path = "/usr/local/submitty"
 
@@ -126,5 +127,32 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign DROP CONSTRAINT peer_assign_g_id_fkey'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(*variables))
 
-        # add user/database
+
+        # add a couple missing foreign keys
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id)'""".format(*variables))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id)'""".format(*variables))
+
+
+
+        # Allow alphanumeric sections PR #2069
+        #s_out = str(subprocess.check_output("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"SELECT data_type FROM information_schema.columns WHERE table_name = 'sections_registration'\"".format(*variables),shell=True))
+        #if False and "(1 row)" in s_out and "character varying" in s_out:
+        #    print ("registration section is already alphanumeric")
+        #else:
+        #    print ("need to update registration section to be alphanumeric")
+        # temporarily drop the constraints
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY grading_registration DROP CONSTRAINT grading_registration_sections_registration_id_fkey'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY users DROP CONSTRAINT users_registration_section_fkey'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams DROP CONSTRAINT gradeable_teams_registration_section_fkey'".format(*variables))
+        # edit the columns
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY sections_registration ALTER COLUMN sections_registration_id SET DATA TYPE character varying(255) USING sections_registration_id::varchar(255)\"".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY grading_registration ALTER COLUMN sections_registration_id SET DATA TYPE character varying(255) USING sections_registration_id::varchar(255)\"".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY users ALTER COLUMN registration_section SET DATA TYPE character varying(255) USING registration_section::varchar(255)\"".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY gradeable_teams ALTER COLUMN registration_section SET DATA TYPE character varying(255) USING registration_section::varchar(255)\"".format(*variables))
+        # re-add the constraints
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY grading_registration ADD CONSTRAINT grading_registration_sections_registration_id_fkey FOREIGN KEY (sections_registration_id) REFERENCES sections_registration(sections_registration_id)'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY users ADD CONSTRAINT users_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id)'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id)'".format(*variables))
+
+
         print("\n")
