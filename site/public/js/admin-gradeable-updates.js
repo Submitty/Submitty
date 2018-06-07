@@ -1,37 +1,51 @@
-function getCallback(prop) {
-    return function(data, statusCode) {
-        let input = $('#' + prop);
-        if (statusCode !== 204) {
-            let arr = JSON.parse(data);
-            $('#ajax_debug').html(data);
-            input.each(function (i,elem) {
-                elem.title = arr['errors'][prop];
-                elem.style.backgroundColor = '#FDD';
-            });
-        }
-        else {
-            $('#ajax_debug').html('');
-            input.each(function (i,elem) {
-                elem.title = '';
-                elem.style.backgroundColor = '';
-            });
-        }
+function resetStyle(name) {
+    $('input[name="' + name + '"]').each(function (i, elem) {
+        elem.title = '';
+        elem.style.backgroundColor = '';
+    });
+}
+function getErrorCallback(props) {
+    return function(data) {
+        let arr = JSON.parse(data);
+        $('#ajax_debug').html(data);
+        props.forEach(function (name) {
+            if(name in arr['errors']) {
+                $('input[name="' + name + '"]').each(function (i, elem) {
+                    elem.title = arr['errors'][name];
+                    elem.style.backgroundColor = '#FDD';
+                });
+            }
+            else {
+                resetStyle(name);
+            }
+        })
+    }
+}
+function getSuccessCallback(props) {
+    return function() {
+        $('#ajax_debug').html('');
+        props.forEach(resetStyle);
     }
 }
 
 $(document).ready(function () {
     $('input').change(function () {
-        ajaxUpdateGradeableProperty($('#g_id').val(), this.name, $(this).val(),
-            getCallback(this.name), getCallback(this.name));
+        var data = {};
+        data[this.name] = $(this).val();
+
+        // If its date-related, then submit all date data
+        if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0) {
+            $('#gradeable-dates :input').each(function (i, val) {
+                data[val.name] = $(val).val();
+            });
+        };
+        ajaxUpdateGradeableProperty($('#g_id').val(), data,
+            getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
     });
 });
 
 // TODO: move all js from the twig files to this file when moving to dynamic interface
-function ajaxUpdateGradeableProperty(gradeable_id, p_name, p_val, successCallback, errorCallback) {
-    // Workaround since you can't use 'p_name' as a key in the body of anonymous objects
-    var data = {};
-    data[p_name] = p_val;
-
+function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({
@@ -40,17 +54,17 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_name, p_val, successCallbac
             'action': 'update_gradeable',
             'id': gradeable_id
         }),
-        data: data,
+        data: p_values,
         success: function(data, textStatus, xhr) {
-            console.log('Request for "' + p_name + '" with value "' + p_val + '" returned status code ' + xhr.status);
+            console.log('Request returned status code ' + xhr.status);
             if (typeof(successCallback) === "function") {
-                successCallback(data, xhr.status);
+                successCallback();
             }
         },
         error: function(data) {
-            console.log('[Error]: Request for "' + p_name + '" with value "' + p_val + '" returned status code ' + data.status);
+            console.log('[Error]: Request returned status code ' + data.status);
             if (typeof(errorCallback) === "function") {
-                errorCallback(data.responseText, data.status);
+                errorCallback(data.responseText);
             }
         }
     });

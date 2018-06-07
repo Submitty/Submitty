@@ -235,6 +235,10 @@ class AdminGradeableController extends AbstractController
                 }
             } else {
 
+                // No TA grading, but we must set this start date so the database
+                //  doesn't complain when we update it
+                $admin_gradeable->g_grade_start_date = $release;
+
                 if (!($max_due === null || $release === null) && $max_due > $release) {
                     $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
