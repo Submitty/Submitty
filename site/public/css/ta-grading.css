@@ -1,7 +1,7 @@
 #bar_wrapper {
      position:relative;
      height: 41px;
-     width: 533px;
+     width: 575px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -24,7 +24,7 @@
     position:relative;
     display: block;
     float: left;
-    width: 291px;
+    width: 333px;
     padding-top:3px;
     padding-bottom:3px;
     background-color: #edf6f6;
