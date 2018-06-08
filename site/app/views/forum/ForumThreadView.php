@@ -853,7 +853,8 @@ HTML;
 			$categories = $this->core->getQueries()->getCategories();
 			$return .= <<<HTML
 			<div class="popup-form" id="category-list">
-				<h3>Categories</h3><br>
+				<h3>Categories</h3>
+				<pre>(Drag to re-order)</pre><br>
 HTML;
 				if(count($categories) == 0) {
 					$return .= <<<HTML
@@ -863,8 +864,9 @@ HTML;
 HTML;
 				}
 				$return .= <<<HTML
-				<ul id='ui-category-list'>
+				<ul id='ui-category-list' style="padding-left: 1em;">
 HTML;
+				// TODO: scrollbar
 				for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
 						<li id="categorylistitem-{$categories[$i]['category_id']}">
@@ -953,31 +955,11 @@ HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
-HTML;
-					for($i = 0; $i < count($categories); $i++){
-						$return .= <<<HTML
-							<a class="btn cat-buttons cat-notselected" style="color: green;border-color: green;">{$categories[$i]['category_desc']}
-								<input type="hidden" name="cat[]" value="{$categories[$i]['category_id']}"/>
-							</a>
-HTML;
-					}
-					$return .= <<<HTML
+					<div id='categories-pick-list'>
+					</div>
 					<script type="text/javascript">
 					$(function() {
-						$(".cat-buttons").click(function() {
-							console.log($(this));
-							if($(this).hasClass("cat-selected")) {
-								$(this).removeClass("cat-selected");
-								$(this).addClass("cat-notselected");
-								$(this).css("background-color","white");
-								$(this).css("color","green");
-							} else {
-								$(this).removeClass("cat-notselected");
-								$(this).addClass("cat-selected");
-								$(this).css("background-color","green");
-								$(this).css("color","white");
-							}
-						});
+						refreshCategories();
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
 								alert("Atleast one category must be selected");

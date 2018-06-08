@@ -849,14 +849,18 @@ table .instructor .two-options{
 }
 
 .cat-buttons {
-    background-color: #FFF;
+    border-color: green !important;
+    border-radius: 1em !important;
+    border-width: thin !important;
 }
 
 .cat-selected {
     -webkit-transition:background 1s;
     -moz-transition:background 1s;
     -o-transition:background 1s;
-    transition:background 1s
+    transition:background 1s;
+    color: white !important;
+    background-color: green !important;
 }
 
 .cat-selected:hover {
@@ -868,7 +872,9 @@ table .instructor .two-options{
     -webkit-transition:background 1s;
     -moz-transition:background 1s;
     -o-transition:background 1s;
-    transition:background 1s
+    transition:background 1s;
+    color: green !important;
+    background-color: white !important;
 }
 
 .cat-notselected:hover {
@@ -885,10 +891,16 @@ table .instructor .two-options{
 
 #ui-category-list li {
     border-style: solid;
+    border-color: LightGray;
     border-width: thin;
+    border-radius: 0.3em;
     margin: 0.3em 0.1em 0.3em 0.1em;
     padding: 0.2em;
     height: 18px;
+}
+
+#ui-category-list .handle {
+ color: LightGray;
 }
 
 #ui-category-list .handle:hover {
