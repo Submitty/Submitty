@@ -687,17 +687,24 @@ $(function() {
 */
 
 function calcSimpleGraderStats(action) {
-    var average = 0;        // overall average
-    var stddev = 0;         // overall stddev
-    var averages = [];      // average of each component
-    var stddevs = [];       // stddev of each component
-    var num_graded = 0;     // count how many students have a nonzero grade
-    var c = 0;              // count the current component number
-    var num_users = 0;      // count the number of users
-    var has_graded = [];    // keeps track of whether or not each user already has a nonzero grade
-    var elems;              // the elements of the current component
-    var elem_type;          // the type of element that has the scores
-    var data_attr;          // the data attribute in which the score is stored
+    // start variable declatations
+    var average = 0;                // overall average
+    var stddev = 0;                 // overall stddev
+    var component_averages = [];    // average of each component
+    var component_stddevs = [];     // stddev of each component
+    var section_counts = {};        // counts of the number of users in each section    (used to calc average per section)
+    var section_sums = {};          // sum of scores per section                        (used with ^ to calc average per section)
+    var section_sums_sqrs = {};     // sum of squares of scores per section             (used with ^ and ^^ to calc stddev per section)
+    var num_graded = 0;             // count how many students have a nonzero grade
+    var c = 0;                      // count the current component number
+    var num_users = 0;              // count the number of users
+    var has_graded = [];            // keeps track of whether or not each user already has a nonzero grade
+    var elems;                      // the elements of the current component
+    var elem_type;                  // the type of element that has the scores
+    var data_attr;                  // the data attribute in which the score is stored
+    // end variable declarations
+
+    // start initial setup: use action to assign values to elem_type and data_attr
     if(action == "lab")     {
         elem_type = "td";
         data_attr = "data-score";
@@ -713,24 +720,33 @@ function calcSimpleGraderStats(action) {
     }
     // get all of the elements with the scores for the first component
     elems = $(elem_type + "[id^=cell-][id$=0]");
+    // end initial setup
+
+    // start main loop: iterate by component and calculate stats
     while(elems.length > 0) {
-        if(action == "lab" || elems.data('num') == true) {
+        if(action == "lab" || elems.data('num') == true) { // do all components for lab and ignore text components for numeric
             var sum = 0;                            // sum of the scores
             var sum_sqrs = 0;                       // sum of the squares of the scores
             var user_num = 0;                       // the index for has_graded so that it can be tracked whether or not there is a grade
+            var section;                            // the section of the current user
             elems.each(function() {
-                var has_section;
                 if(action == "lab")     {
-                    has_section = $(this).parent().find("td:nth-child(2)").text() != "";            // second child of parent has registration section as text
+                    section = $(this).parent().find("td:nth-child(2)").text()               // second child of parent has registration section as text            
                 }
                 else if(action == "numeric") {
-                    has_section = $(this).parent().parent().find("td:nth-child(2)").text() != "";   // second child of grandparent has registration section as text
+                    section = $(this).parent().parent().find("td:nth-child(2)").text();     // second child of grandparent has registration section as text
                 }
 
-                if(has_section) {    
-                    if(c == 0) {                                            // on the first iteration of the while loop...
-                        num_users++;                                        // ...sum up the number of users...
-                        has_graded.push(false);                             // ...and populate the has_graded array with false
+                if(section != "") {                 // if section is not null
+                    if(!(section in section_counts)) {
+                        section_counts[section] = 0;
+                        section_sums[section] = 0;
+                        section_sums_sqrs[section] = 0;
+                    }
+                    if(c == 0) {                    // on the first iteration of the while loop...
+                        num_users++;                // ...sum up the number of users...
+                        section_counts[section]++;  // ...sum up the number of users per section...
+                        has_graded.push(false);     // ...and populate the has_graded array with false
                     }
                     var score = parseFloat($(this).attr(data_attr));
                     if(!has_graded[user_num]) {     // if they had no nonzero score previously...
@@ -739,35 +755,52 @@ function calcSimpleGraderStats(action) {
                             num_graded++;
                         }
                     }
+                    // add to the sum and sum_sqrs (and by section)
                     sum += score;
                     sum_sqrs += score**2;
+
+                    section_sums[section] += score;
+                    section_sums_sqrs[section] += score**2;
                 }
                 user_num++;
             });
 
             // calculate average and stddev from sums and sum_sqrs
-            averages.push(sum/num_users);
-            stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum**2 / num_users) / num_users)));
+            component_averages.push(sum/num_users);
+            component_stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum**2 / num_users) / num_users)));
         }
         
         // get the elements for the next component
         elems = $(elem_type + "[id^=cell-][id$=" + (++c).toString() + "]");
     }
+    // end main loop
 
-    // find total stats place all stats into their proper elements 
-    var stats_popup = $("#simple-stats-popup");
-    for(c = 0; c < averages.length; c++) {
-        average += averages[c];
-        stddev += stddevs[c]**2
-        stats_popup.find("#avg-component-" + c.toString()).text(averages[c].toFixed(2));
-        stats_popup.find("#stddev-component-" + c.toString()).text(stddevs[c].toFixed(2));
+    // start finalizing: find total stats place all stats into their proper elements
+    var stats_popup = $("#simple-stats-popup"); // the popup with all the stats in it.
+    for(c = 0; c < component_averages.length; c++) {
+        average += component_averages[c];                                                               // sum up component averages to get the total average
+        stddev += component_stddevs[c]**2;                                                              // sum up squares of component stddevs (sqrt after all summed) to get the total stddev
+        stats_popup.find("#avg-component-" + c.toString()).text(component_averages[c].toFixed(2));      // set the display text of the proper average element 
+        stats_popup.find("#stddev-component-" + c.toString()).text(component_stddevs[c].toFixed(2));    // set the display text of the proper stddev element
     }
-    stddev = Math.sqrt(stddev);
-    stats_popup.find("#avg-total").text(average.toFixed(2));
-    stats_popup.find("#stddev-total").text(stddev.toFixed(2));
 
+    stddev = Math.sqrt(stddev);                                 // take sqrt of sum of squared stddevs to get total stddev
+    stats_popup.find("#avg-total").text(average.toFixed(2));    // set the display text of the proper average element 
+    stats_popup.find("#stddev-total").text(stddev.toFixed(2));  // set the display text of the proper stddev element
+
+    c = 0;
+    var section_average;
+    var section_stddev;
+    for(var section in section_counts) {
+        section_average = section_sums[section] / section_counts[section];
+        section_stddev = Math.sqrt(Math.max(0, (section_sums_sqrs[section] - section_sums[section]**2 / section_counts[section]) / section_counts[section]));
+        stats_popup.find("#avg-section-" + c.toString()).text(section_average.toFixed(2));         // set the display text of the proper average element
+        stats_popup.find("#stddev-section-" + c.toString()).text(section_stddev.toFixed(2));
+        c++;
+    }
     var num_graded_elem = stats_popup.find("#num-graded");
-    $(num_graded_elem).text(num_graded.toString() + "/" + num_users.toString() + " students have a nonzero grade.");
+    $(num_graded_elem).text(num_graded.toString() + "/" + num_users.toString());
+    // end finalizing
 }
 
 
