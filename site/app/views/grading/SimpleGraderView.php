@@ -91,24 +91,30 @@ HTML;
     <p style="float: left;">$info</p>
     <a class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
 HTML;
+        // Get all the names/ids from all the students
+        $student_full = array();
+        foreach($rows as $gradeable_row) {
+            $student_full[] = array('value' => $gradeable_row->getUser()->getId(),
+                                    'label' => $gradeable_row->getUser()->getDisplayedFirstName().' '.$gradeable_row->getUser()->getLastName().' <'.$gradeable_row->getUser()->getId().'>');
+        }
+        $student_full = json_encode($student_full);
+        // render using twig
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/StudentSearch.twig", [
+            "student_full" => $student_full
+        ]);
         
         if($action === 'numeric') {
             if ($this->core->getUser()->accessAdmin()) {
                 $return .= <<<HTML
-    <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label> <br> <br>
-HTML;
-            }            
-        }
-
-        if ($this->core->getUser()->accessAdmin() && $action === 'numeric') {
-            $return .= <<<HTML
+    <br> <br> <br>
     <p style="float: right;">The CSV file should be formated as such: <br />
     user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
+    <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+    <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label> 
 HTML;
+            }
         }
         $return .= <<<HTML
-    <!-- <i class="fa fa-question-circle tooltip" style="float: right;" aria-hidden="true"><span class="tooltiptext">$info</span></i> -->
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
@@ -460,4 +466,5 @@ HTML;
 HTML;
     return $return;
 
-    }}
+    }
+}

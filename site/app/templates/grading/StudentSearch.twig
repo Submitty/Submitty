@@ -1,0 +1,10 @@
+<div id="student-search" style="float: right;">
+	<label for="student-search-input">Search for a student: </label>
+	<input type="text" class="ui-autocomplete-input" autocomplete="off" id="student-search-input">
+</div>
+<script>
+	$("#student-search").children('[type="text"]').autocomplete({
+        source: {{ student_full|raw }},
+        appendTo: "#student-search"
+    });
+</script>

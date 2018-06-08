@@ -910,36 +910,20 @@ $(function() {
         $('.inner-message').fadeOut();
     }, 5000);
 
-    setupCheckboxCells();
-    setupNumericTextCells();
+    var page_url = window.location.href;
+    if(page_url.includes("page=simple")) {
+        if(page_url.includes("action=lab")) {
+            setupCheckboxCells();
+            setupSimpleGrading('lab');
+        }
+        if(page_url.includes("action=numeric")) {
+            setupNumericTextCells();
+            setupSimpleGrading('numeric');
+        }
+    }
 });
 
 function setupNumericTextCells() {
-    $("input[class=option-small-box]").keydown(function(key){
-        var cell=this.id.split('-');
-        // right
-        if(key.keyCode === 39){
-            if(this.selectionEnd == this.value.length){
-                $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
-            }
-        }
-        // left
-        else if(key.keyCode == 37){
-            if(this.selectionStart == 0){
-                $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
-            }
-        }
-        // up
-        else if(key.keyCode == 38){
-            $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
-
-        }
-        // down
-        else if(key.keyCode == 40){
-            $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
-        }
-    });
-
     $("input[class=option-small-box]").change(function() {
         elem = this;
         if(this.value == 0){
@@ -1130,6 +1114,199 @@ function setupNumericTextCells() {
             f.replaceWith(f = f.clone(true));
         }
     });
+}
+
+function setupSimpleGrading(action) {
+
+    // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
+
+    var dont_focus = true;                                          // set to allow toggling of focus on input element
+    var num_rows = $("td.cell-all").length;                         // the number of rows in the table
+    var search_bar_offset = $("#student-search").offset();          // the offset of the search bar: used to lock the searhc bar on scroll
+    var highlight_color = "#337ab7";                                // the color used in the border around the selected element in the table
+    var search_selector = action == 'lab'       ?                   // the selector being used varies depending on the action (lab/numeric are different)
+                         'td[class^=cell-]'     :
+                         'td.option-small-input';
+    var table_row = 0;                                              // the current row
+    var child_idx = 0;                                              // the index of the current element in the row
+    var child_elems = $("tr[data-row=0]").find(search_selector);    // the clickable elements in the current row
+
+    $(document).on("keydown", function(event) {
+        if(!$("#student-search-input").is(":focus")) {
+            // allow refocusing on the input field by pressing enter when it is not the focus
+            if(event.keyCode == 13) {
+                dont_focus = false;
+            }
+            // arrows keys unselect, bounds check/move, and then select new element
+            else if(event.keyCode == 37) { // Left arrow
+                var child = $(child_elems[child_idx]);
+                if(action == 'lab') {
+                    if(child_idx > 0) {
+                        child.css("outline", "");
+                        child_idx--;
+                        child = $(child_elems[child_idx]);
+                        child.css("outline", "3px dashed " + highlight_color);
+                    }
+                }
+                else {
+                    if(child_idx > 0 && child.children("input")[0].selectionStart == 0) {
+                        child.children("input").blur();
+                        child_idx--;
+                        child = $(child_elems[child_idx]);
+                        child.children("input").focus();
+                    }
+                }
+            }
+            else if(event.keyCode == 39) { // Right arrow
+                var child = $(child_elems[child_idx]);
+                if(action == 'lab') {
+                    if(child_idx < child_elems.length - 1) {
+                        child.css("outline", "");
+                        child_idx++;
+                        child = $(child_elems[child_idx]);
+                        child.css("outline", "3px dashed " + highlight_color);
+                    }
+                }
+                else {
+                    if(child_idx < child_elems.length - 1 && child.children("input")[0].selectionEnd == child.children("input")[0].value.length) {
+                        child.children("input").blur();
+                        child_idx++;
+                        child = $(child_elems[child_idx]);
+                        child.children("input").focus();
+                    }
+                }                
+            }
+            else if(event.keyCode == 38) { // Up arrow
+                var child = $(child_elems[child_idx]);
+                if(action == 'lab') {
+                    event.preventDefault(); // prevent scrolling out of sync with grid movement
+                    if(table_row > 0) {
+                        child.css("outline", "");
+                        table_row--;
+                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                        child = $(child_elems[child_idx]);
+                        child.css("outline", "3px dashed " + highlight_color);
+                    }
+                }
+                else {
+                    if(table_row > 0) {
+                        child.children("input").blur();
+                        table_row--;
+                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                        child = $(child_elems[child_idx]);
+                        child.children("input").focus();
+                    }
+                }
+                if(!child.isInViewport()) {
+                    $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+                }
+            }
+            else if(event.keyCode == 40) { // Down arrow
+                var child = $(child_elems[child_idx]);
+                if(action == 'lab') {
+                    event.preventDefault(); // prevent scrolling out of sync with grid movement
+                    if(table_row < num_rows - 1) {
+                        child.css("outline", "");
+                        table_row++;
+                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                        child = $(child_elems[child_idx]);
+                        child.css("outline", "3px dashed " + highlight_color);
+                    }
+                }
+                else {
+                    if(table_row < num_rows - 1) {
+                        child.children("input").blur();
+                        table_row++;
+                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                        child = $(child_elems[child_idx]);
+                        child.children("input").focus();
+                    }
+                }
+                if(!child.isInViewport()) {
+                    $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+                }
+            }
+            else if(event.keyCode == 86) { // V key clicks the current element to update the grades
+                $(child_elems[child_idx]).click();
+            }
+        }
+    });
+
+    $(document).on("keyup", function(event) {
+        // refocus on the input field by pressing enter
+        if(event.keyCode == 13 && !dont_focus) {
+            $("#student-search-input").focus();
+        }
+    });
+
+    $("#student-search-input").on("keyup", function(event) {
+        $("td[class^=cell-]").css("outline", "");
+
+        if(event.keyCode == 13) { // Enter
+            this.blur(); // unfocus
+            dont_focus = true; // dont allow refocusing from other events
+            var value = $(this).val();
+            if(value != "") {
+                var prev_table_row = table_row;
+                try {
+                    // get the row number of the table element with the matching id
+                    table_row = $('table tbody tr[data-user="' + value +'"]').attr("data-row");
+                    child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                    if(action == 'lab') {
+                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color);
+                    }
+                    else {
+                        $(child_elems[child_idx]).children("input").focus();
+                    }
+                    $('html, body').animate( { scrollTop: $(child_elems).parent().offset().top - $(window).height()/2}, 50);
+                }
+                catch(e) {
+                    alert("Invalid user.");
+                    table_row = prev_table_row;     // restore the previous value of table_row, which is lost in the case of an error
+                    $(this).focus();                // refocus on the input field
+                }
+            }
+        }
+    });
+
+    // used to reposition the search field when the window scrolls
+    $(window).on("scroll", function(event) {
+        var search_field = $("#student-search");
+        if(search_bar_offset.top < $(window).scrollTop()) {
+            search_field.css("top", 0);
+            search_field.css("left", search_bar_offset.left);
+            search_field.css("position", "fixed");
+        }
+        else {
+            search_field.css("position", "relative");
+            search_field.css("left", "");
+        }
+    });
+
+    // check if the search field needs to be repositioned when the page is loaded
+    if(search_bar_offset.top < $(window).scrollTop()) {
+        var search_field = $("#student-search");
+        search_field.css("top", 0);
+        search_field.css("left", search_bar_offset.left);
+        search_field.css("position", "fixed");
+    }
+
+    // check if the search field needs to be repositioned when the page is resized
+    $(window).on("resize", function(event) {
+        var stats_btn_offset = $("#simple-stats-btn").offset();
+        search_bar_offset = {   // NOTE: THE SEARCH BAR IS PLACED RELATIVE TO THE STATS BAR
+            top : stats_btn_offset.top,
+            left : stats_btn_offset.left - $("#student-search").width()
+        };
+        if(search_bar_offset.top < $(window).scrollTop()) {
+            var search_field = $("#student-search");
+            search_field.css("top", 0);
+            search_field.css("left", search_bar_offset.left);
+            search_field.css("position", "fixed");
+        }
+    });
+
+    // search bar code ends here
 }
 
 function getFileExtension(filename){
@@ -1655,3 +1832,17 @@ function escapeSpecialChars(text) {
 function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+
+// edited slightly from https://stackoverflow.com/a/40658647
+// returns a boolean value indicating whether or not the element is entirely in the viewport
+// i.e. returns false iff there is some part of the element outside the viewport
+$.fn.isInViewport = function() {                                        // jQuery method: use as $(selector).isInViewPort()
+    var elementTop = $(this).offset().top;                              // get top offset of element
+    var elementBottom = elementTop + $(this).outerHeight();             // add height to top to get bottom
+
+    var viewportTop = $(window).scrollTop();                            // get top of window
+    var viewportBottom = viewportTop + $(window).height();              // add height to get bottom
+
+    return elementTop > viewportTop && elementBottom < viewportBottom;
+};
