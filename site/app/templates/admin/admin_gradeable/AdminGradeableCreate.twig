@@ -22,7 +22,7 @@
 <!-- Gradeable Title (read/write in all modes) -->
 What is the title of this gradeable?: 
     <input style='width: 227px' type='text' name='g_title' id='g_title' class="required"
-        value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" />
+        value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
 
 <br />
 
@@ -162,6 +162,9 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 </select>
 
 <br />
+{% if action == 'new' %}
+    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create Gradeable</button>
+{% endif %}
 
 
 <div id="alert-message" title="WARNING">
@@ -315,7 +318,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
     });
 
-    function checkFormCreate() {
+    function checkForm() {
         var gradeable_id = $('#g_id').val();
         var gradeable_title = $('#g_title').val();
         var has_space = gradeable_id.includes(" ");

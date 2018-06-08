@@ -50,9 +50,6 @@
         </div>
         <br/>
         <div id="nav-controls">
-            {% if action == 'new' %}
-                <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create Gradeable</button>
-            {% endif %}
             <!--<button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
             <button class="btn btn-primary" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
             <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
@@ -164,25 +161,5 @@
         // Don't show page until all settings loaded
         $("#container-rubric").show();
     });
-
-    // Only succeeds if all child forms succeed
-    function checkForm() {
-        return checkFormCreate() &&
-                checkFormAuto() &&
-                checkFormRubric() &&
-                checkFormDates() &&
-                checkFormGraders();
-    }
-
-    $('#gradeable-form').on('submit', function(e){
-        $('<input />').attr('type', 'hidden')
-            .attr('name', 'gradeableJSON')
-            .attr('value', JSON.stringify($('form').serializeObject()))
-            .appendTo('#gradeable-form');
-        if ($("input[name='$g_grade_by_registration']:checked").val() == 'reg_section'){
-            $('#rotating-sections :input').prop('disabled',true);
-        }
-    });
-
 
 </script>

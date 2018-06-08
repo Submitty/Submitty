@@ -96,30 +96,4 @@
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
     });
-
-    function checkFormAuto() {
-
-        if($('#radio_electronic_file').is(':checked')) {
-
-            if ($('#config_path').val() == '') {
-                alert("Must have autograding config on electronic file assignment!");
-                return false;
-            }
-
-            // TODO: this may be unnecessary (done on serialization)
-            // if view false while either submit or download true
-            if ($('input:radio[name="eg_student_view"]:checked').attr('value') === 'false' &&
-                ($('input:radio[name="eg_student_submit"]:checked').attr('value') === 'true' ||
-                    $('input:radio[name="eg_student_download"]:checked').attr('value') === 'true')) {
-                alert("Student_view cannot be false while student_submit or student_download is true");
-                return false;
-            }
-        }
-        else {
-            // not electronic file, so set autograding config to blank
-            $('#config_path').val('');
-        }
-        return true;
-    }
-
 </script>

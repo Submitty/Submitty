@@ -193,19 +193,4 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
     });
 
-    function checkFormGraders() {
-        var checkRegister = $('#registration_section').is(':checked');
-        var checkRotate = $('#rotating_section').is(':checked');
-
-        // This seems pretty unlikely to happen since the input is a boolean
-        if($('[name="eg_use_ta_grading"]').is(':checked') || check2 || check3) {
-            if(!checkRegister && !checkRotate) {
-                alert("A type of way for TAs to grade must be selected");
-                return false;
-            }
-        }
-        return true;
-    }
-
-
 </script>
