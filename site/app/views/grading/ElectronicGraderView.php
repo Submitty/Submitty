@@ -28,6 +28,7 @@ class ElectronicGraderView extends AbstractView {
         $viewed_grade,
         $section_type) {
 
+        $return = "";
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
@@ -38,6 +39,9 @@ class ElectronicGraderView extends AbstractView {
         $total = 0;
         $no_team_total = 0;
         $team_total=0;
+        $peer_total = 0;
+        $peer_graded = 0;
+        $peer_percentage = 0;
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -50,44 +54,30 @@ class ElectronicGraderView extends AbstractView {
             }
         }
         if ($total === 0 && $no_team_total === 0){
-            $percentage = -1;
+            $graded_percentage = -1;
+        } else if ($total === 0 && $no_team_total > 0){
+            $graded_percentage = 0;
+        } else{
+            $graded_percentage = number_format(($graded / $total) * 100, 1);
         }
-        else if ($total === 0 && $no_team_total > 0){
-            $percentage = 0;
-        }
-        else{
-            $percentage = number_format(($graded / $total) * 100, 1);
-        }
-        $return = <<<HTML
-<div class="content">
-    <h2>Status of {$gradeable->getName()}</h2>
-HTML;
-        if($percentage === -1){
-            $view = 'all';
-            $return .= <<<HTML
-    <div class="sub">
-        No Grading To Be Done! :)
-    </div>
-HTML;
-        }
-        else{
-            $view = null;
+
+        if($graded_percentage !== -1){
             if ($gradeable->isTeamAssignment()) {
                 $total_students = $team_total + $no_team_total;
             } else {
                 $total_students = $total_submissions;
             }
-            $change_value = $gradeable->getNumTAComponents();
-            $show_total = $total/$change_value;
-            $show_graded = round($graded/$change_value, 2);
+            $num_components = $gradeable->getNumTAComponents();
+            $submitted_total = $total/$num_components;
+            $graded_total = round($graded/$num_components, 2);
             if($peer) {
-                $change_value = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
-                $show_graded = $graded/$change_value;
-                $show_total = $total/$change_value;
+                $num_components = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
+                $graded_total = $graded/$num_components;
+                $submitted_total = $total/$num_components;
             }
             $submitted_percentage = 0;
             if($total_submissions!=0){
-                $submitted_percentage = round(($show_total / $total_submissions) * 100, 1);
+                $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
@@ -100,87 +90,28 @@ HTML;
                 }
             }
 
-            $return .= <<<HTML
-    <div class="sub">
-        <div class="box half">
-HTML;
-            if(count($warnings) > 0){
-                $return .= <<<HTML
-                <ul>
-HTML;
-                foreach ($warnings as $warning){
-                    $return .= <<<HTML
-                    <li style="color:red; margin-left:1em">{$warning}</li>
-HTML;
-                }
-                $return .= <<<HTML
-                </ul>
-                <br/>
-HTML;
-            }
             if($gradeable->isTeamAssignment()){
-            $team_percentage = round(($team_total/$total_students) * 100, 1);
-            $return .= <<<HTML
-            Students on a team: {$team_total}/{$total_students} ({$team_percentage}%)
-            <br />
-            <br />
-            Number of teams: {$total_submissions}
-            <br />
-            <br />
-            Teams who have submitted: {$show_total} / {$total_submissions} ({$submitted_percentage}%)
-HTML;
+                $team_percentage = round(($team_total/$total_students) * 100, 1);
+            } else {
+                $team_percentage = 0;
             }
-            else{
-            $return .= <<<HTML
-            Students who have submitted: {$show_total} / {$total_submissions} ({$submitted_percentage}%)
-            <br />
-            <br />
-            Current percentage of grading done: {$show_graded}/{$show_total} ({$percentage}%)
-HTML;
-            }
-            $return .= <<<HTML
-            <br />
-            <br />
-HTML;
             if ($peer) {
-                $show_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
-                $show_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
-                $percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
-                $return .= <<<HTML
-            Current percentage of students grading done: {$percentage}% ({$show_graded}/{$show_total})
-        </div>
-            <br />
-HTML;
-            }
-            else {
-                $return .= <<<HTML
-            By Grading Sections:
-            <div style="margin-left: 20px">
-HTML;
-                foreach ($sections as $key => $section) {
-                    if($section['total_components'] == 0) {
-                        $percentage = 0;
+                $peer_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
+                $peer_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
+                $peer_percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
+            } else {
+                foreach ($sections as $key => &$section) {
+                    if ($section['total_components'] == 0) {
+                        $section['percentage'] = 0;
+                    } else {
+                        $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
-                    else {
-                        $percentage = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
-                    }
-                    $show_graded = round($section['graded_components']/$change_value, 1);
-                    $show_total = $section['total_components']/$change_value;
-                    $return .= <<<HTML
-                Section {$key}: {$show_graded} / {$show_total} ({$percentage}%)<br />
-HTML;
-                    if ($gradeable->isTeamAssignment() && $section['no_team'] > 0) {
-                        $return .= <<<HTML
-HTML;
-                    }
+                    $section['graded'] = round($section['graded_components']/$num_components, 1);
+                    $section['total'] = $section['total_components']/$num_components;
                 }
-                $return .= <<<HTML
-            </div>
-            <br />
-            Graders:
-            <div style="margin-left: 20px">
-HTML;
-                foreach ($sections as $key => $section) {
+                unset($section); // Clean up reference
+
+                foreach ($sections as $key => &$section) {
                     if ($key === "NULL") {
                         continue;
                     }
@@ -190,17 +121,15 @@ HTML;
                             $valid_graders[] = $valid_grader->getDisplayedFirstName();
                         }
                     }
+                    $section["valid_graders"] = $valid_graders;
                     $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
-
-                    $return .= <<<HTML
-                Section {$key}: {$graders}<br />
-HTML;
                 }
-                $return .= <<<HTML
-            </div>
-HTML;
+                unset($section); // Clean up reference
+
+
+
                 if ($gradeable->taGradesReleased()) {
-                    $show_total = $total/$change_value;
+                    $show_total = $total/$num_components;
                     $viewed_percent = number_format(($viewed_grade / max($show_total, 1)) * 100, 1);
                     if ($gradeable->isTeamAssignment()) {
                         $return .= <<<HTML
@@ -321,42 +250,23 @@ HTML;
     </div>
 HTML;
         }
-        $return .= <<<HTML
-    <div style="margin-top: 20px; vertical-align:bottom;">
-HTML;
-        if($percentage !== -1 || $this->core->getUser()->accessFullGrading() || $peer){
-            $return .= <<<HTML
-        <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId(), 'view' => $view))}"">
-            Grading Details
-        </a>
-HTML;
-            if(count($this->core->getUser()->getGradingRegistrationSections()) !== 0){
-                $return .= <<<HTML
-        <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId()))}">
-            Grade Next Student
-        </a>
-        <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId()))}">
-            Download Zip of All Assigned Students
-        </a>
-HTML;
-            }
-            if($this->core->getUser()->accessFullGrading()) {
-                $return .= <<<HTML
-        <a class="btn btn-primary"
-            href="{$this->core->buildUrl(array('component'=>'misc', 'page'=>'download_all_assigned', 'dir'=>'submissions', 'gradeable_id'=>$gradeable->getId(), 'type'=>'All'))}">
-            Download Zip of All Students
-        </a>
-HTML;
-            }
-        }
-        $return .= <<<HTML
-    </div>
-</div>
-HTML;
-        return $return;
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
+            "gradeable" => $gradeable,
+            "peer" => $peer,
+            "team_total" => $team_total,
+            "team_percentage" => $team_percentage,
+            "total_students" => $total_students,
+            "total_submissions" => $total_submissions,
+            "submitted_total" => $submitted_total,
+            "submitted_percentage" => $submitted_percentage,
+            "graded_total" => $graded_total,
+            "graded_percentage" => $graded_percentage,
+            "peer_total" => $peer_total,
+            "peer_graded" => $peer_graded,
+            "peer_percentage" => $peer_percentage,
+            "sections" => $sections,
+        ]);
     }
 
     /**

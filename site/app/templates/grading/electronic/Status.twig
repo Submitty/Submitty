@@ -1,0 +1,88 @@
+<div class="content">
+    <h2>Status of {{ gradeable.getName() }}</h2>
+
+    {% if graded_percentage == -1 %}
+        <div class="sub">
+            No Grading To Be Done! :)
+        </div>
+    {% else %}
+        <div class="sub">
+            <div class="box half">
+                {% if warnings|length > 0 %}
+                    <ul>
+                        {% for warning in warnings %}
+                            <li style="color:red; margin-left:1em">{{ warning }}</li>
+                        {% endfor %}
+                    </ul>
+                    <br/>
+                {% endif %}
+
+                {% if gradeable.isTeamAssignment() %}
+                    Students on a team: {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                    <br />
+                    <br />
+                    Number of teams: {{ total_submissions }}
+                    <br />
+                    <br />
+                    Teams who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                {% else %}
+                    Students who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                    <br />
+                    <br />
+                    Current percentage of grading done: {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                {% endif %}
+
+                <br />
+                <br />
+                {% if peer %}
+                    Current percentage of students grading done: {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
+                {% else %}
+                    By Grading Sections:
+                    <div style="margin-left: 20px">
+                        {% for key, section in sections %}
+                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                        {% endfor %}
+                    </div>
+                    <br />
+                    Graders:
+                    <div style="margin-left: 20px">
+                        {% for key, section in sections %}
+                            Section {{ key }}:
+                            {% if section.valid_graders|length == 0 %}
+                                Nobody
+                            {% else %}
+                                {{ section.valid_graders | join(", ") }}
+                            {% endif %}
+                            <br />
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 20px; vertical-align:bottom;">
+        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+            <a class="btn btn-primary"
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : percentage == -1 ? 'all' : null}) }}">
+            Grading Details
+            </a>
+            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                <a class="btn btn-primary"
+                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId()}) }}">
+                    Grade Next Student
+                </a>
+                <a class="btn btn-primary"
+                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable.getId()}) }}">
+                    Download Zip of All Assigned Students
+                </a>
+            {% endif %}
+            {% if core.getUser().accessFullGrading() %}
+                <a class="btn btn-primary"
+                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable.getId(), 'type': 'All'}) }}">
+                    Download Zip of All Students
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
