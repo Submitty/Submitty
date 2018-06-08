@@ -12,10 +12,11 @@ function updateErrors() {
 
 function setError(name, err) {
     $('input[name="' + name + '"]').each(function (i, elem) {
-        elem.title = err;
+        elem.title = (err[0] !== 0 ? '[Warning] ' : '') + err[1];
         elem.style.backgroundColor = '#FDD';
     });
-    errors[name] = err;
+    if(err[0] === 0)
+        errors[name] = err[1];
 }
 function clearError(name) {
     $('input[name="' + name + '"]').each(function (i, elem) {

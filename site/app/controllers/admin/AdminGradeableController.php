@@ -115,9 +115,9 @@ class AdminGradeableController extends AbstractController
         $this->core->getQueries()->getGradeableInfo($gradeable_id, $admin_gradeable, false);
 
         // Generate marks array if we're getting an electronic gradeable with TA grading
-        if($admin_gradeable->g_gradeable_type == 0 and $admin_gradeable->eg_use_ta_grading) {
+        if ($admin_gradeable->g_gradeable_type == 0 and $admin_gradeable->eg_use_ta_grading) {
             $old_components = $admin_gradeable->getOldComponents();
-            foreach($old_components as $old_component) {
+            foreach ($old_components as $old_component) {
                 $old_component->setMarks($this->core->getQueries()->getGradeableComponentsMarks($old_component->getId()));
             }
         }
@@ -145,7 +145,7 @@ class AdminGradeableController extends AbstractController
         $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->g_id);
 
         // Add a new mark to the db if its electronic
-        if($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
+        if ($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $this->core->getQueries()->getGradeableInfo($gradeable->g_id, $gradeable);
             $components = $gradeable->getOldComponents();
 
@@ -167,8 +167,9 @@ class AdminGradeableController extends AbstractController
      * @param $date DateTime|string A reference to the date object to assert.  Set to null if failed.
      * @return null|string The error message or null
      */
-    private function assertDate(&$date) {
-        if(gettype($date) === 'string') {
+    private function assertDate(&$date)
+    {
+        if (gettype($date) === 'string') {
             try {
                 $date = new \DateTime($date, $this->core->getConfig()->getTimezone());
             } catch (\Exception $e) {
@@ -178,14 +179,27 @@ class AdminGradeableController extends AbstractController
         }
         return null;
     }
-    private static function anyErrors($errors) {
-        foreach($errors as $prop=>$error) {
-            if(!substr($error, 0, 8) === '[Warning]') {
+
+    private static function anyErrors($errors)
+    {
+        foreach ($errors as $prop => $error) {
+            if ($error[0] === 0) {
                 return true;
             }
         }
         return false;
     }
+
+    private static function error($data)
+    {
+        return [0, $data];
+    }
+
+    private static function warning($data)
+    {
+        return [1, $data];
+    }
+
     /**
      * Checks if a gradeable is valid
      *
@@ -208,7 +222,7 @@ class AdminGradeableController extends AbstractController
         $errors = array();
 
         if ($admin_gradeable->g_title === '') {
-            $errors['g_title'] = 'Title cannot be blank!';
+            $errors['g_title'] = self::error('Title cannot be blank!');
         }
 
         // Boolean values are false unless 'true'
@@ -234,7 +248,7 @@ class AdminGradeableController extends AbstractController
         // Make sure autograding config isn't blank
         if ($admin_gradeable->g_gradeable_type == GradeableType::ELECTRONIC_FILE) {
             if ($admin_gradeable->eg_config_path === '') {
-                $errors['eg_config_path'] = 'Config Path Cannot be Blank!';
+                $errors['eg_config_path'] = self::error('Config Path Cannot be Blank!');
             }
         }
 
@@ -249,10 +263,10 @@ class AdminGradeableController extends AbstractController
             'g_grade_released_date',
             'eg_team_lock_date'
         ];
-        foreach($dates as $date) {
+        foreach ($dates as $date) {
             $result = $this->assertDate($admin_gradeable->$date);
-            if($result !== null) {
-                $errors[$date] = $result;
+            if ($result !== null) {
+                $errors[$date] = self::error($result);
             }
         }
 
@@ -260,12 +274,12 @@ class AdminGradeableController extends AbstractController
         try {
             $admin_gradeable->eg_late_days = (int)$admin_gradeable->eg_late_days;
             if ($admin_gradeable->eg_late_days < 0) {
-                $errors['eg_late_days'] = 'Late day count must be >= 0!';
+                $errors['eg_late_days'] = self::error('Late day count must be >= 0!');
             } else {
                 $late_interval = new \DateInterval('P' . strval($admin_gradeable->eg_late_days) . 'D');
             }
         } catch (\Exception $e) {
-            $errors['eg_late_days'] = 'Invalid Format!';
+            $errors['eg_late_days'] = self::error('Invalid Format!');
         }
 
         // Some alias' for easier time comparison
@@ -281,22 +295,22 @@ class AdminGradeableController extends AbstractController
 
         if ($admin_gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             if (!($ta_view === null || $open === null) && $ta_view > $open) {
-                $errors['g_ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
+                $errors['g_ta_view_start_date'] = self::error('TA Beta Testing Date must not be later than Submission Open Date');
             }
             if (!($open === null || $due === null) && $open > $due) {
-                $errors['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
+                $errors['eg_submission_open_date'] = self::error('Submission Open Date must not be later than Submission Due Date');
             }
 
             if ($admin_gradeable->eg_use_ta_grading) {
 
                 if (!($due === null || $grade === null) && $due > $grade) {
-                    $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
+                    $errors['g_grade_start_date'] = self::error('Manual Grading Open Date must be no earlier than Due Date');
                 } else if (!($due === null || $grade === null) && $max_due > $grade) {
-                    $errors['g_grade_start_date'] = '[Warning] Manual Grading Open Date should be no earlier than Due Date';
+                    $errors['g_grade_start_date'] = self::warning('Manual Grading Open Date should be no earlier than Due Date');
                 }
 
                 if (!($grade === null || $release === null) && $grade > $release) {
-                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                    $errors['g_grade_released_date'] = self::error('Grades Released Date must be later than the Manual Grading Open Date');
                 }
             } else {
 
@@ -305,13 +319,13 @@ class AdminGradeableController extends AbstractController
                 $admin_gradeable->g_grade_start_date = $release;
 
                 if (!($max_due === null || $release === null) && $max_due > $release) {
-                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
+                    $errors['g_grade_released_date'] = self::error('Grades Released Date must be later than the Due Date + Max Late Days');
                 }
             }
         } else {
             // The only check if its not an electronic gradeable
             if (!($ta_view === null || $release === null) && $ta_view > $release) {
-                $errors['g_grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
+                $errors['g_grade_released_date'] = self::error('Grades Released Date must be later than the TA Beta Testing Date');
             }
         }
 
@@ -324,12 +338,13 @@ class AdminGradeableController extends AbstractController
         return isset($_POST[$name]) && $_POST[$name] === 'true';
     }
 
-    private function updateRubricRequest() {
+    private function updateRubricRequest()
+    {
         // Assume something will go wrong
         http_response_code(500);
 
         $gradeable = $this->getAdminGradeable($_REQUEST['id']);
-        if($gradeable === null) {
+        if ($gradeable === null) {
             http_response_code(404);
             return;
         }
@@ -351,10 +366,10 @@ class AdminGradeableController extends AbstractController
     // Parses the checkpoint details from the user form into a Component.  NOTE: order is not set here
     private static function parseCheckpoint(GradeableComponent $component, $details)
     {
-        if(!isset($details['label'])) {
+        if (!isset($details['label'])) {
             $details['label'] = '';
         }
-        if(!isset($details['extra_credit'])) {
+        if (!isset($details['extra_credit'])) {
             $details['extra_credit'] = 'false';
         }
         $component->setTitle($details['label']);
@@ -369,15 +384,16 @@ class AdminGradeableController extends AbstractController
         $component->setIsPeer(false);
         $component->setPage(0);
     }
+
     private static function parseNumeric(GradeableComponent $component, $details)
     {
-        if(!isset($details['label'])) {
+        if (!isset($details['label'])) {
             $details['label'] = '';
         }
         if (!isset($details['max_score'])) {
             $details['max_score'] = 0;
         }
-        if(!isset($details['extra_credit'])) {
+        if (!isset($details['extra_credit'])) {
             $details['extra_credit'] = 'false';
         }
         $component->setTitle($details['label']);
@@ -391,9 +407,10 @@ class AdminGradeableController extends AbstractController
         $component->setIsPeer(false);
         $component->setPage(0);
     }
+
     private static function parseText(GradeableComponent $component, $details)
     {
-        if(!isset($details['label'])) {
+        if (!isset($details['label'])) {
             $details['label'] = '';
         }
         $component->setTitle($details['label']);
@@ -407,6 +424,7 @@ class AdminGradeableController extends AbstractController
         $component->setIsPeer(false);
         $component->setPage(0);
     }
+
     private static function parseEgComponent(GradeableComponent $component, $details, $x)
     {
         $component->setTitle($details['comment_title_' . strval($x + 1)]);
@@ -434,6 +452,7 @@ class AdminGradeableController extends AbstractController
         }
         $component->setPage($page_component);
     }
+
     private function updateRubric(AdminGradeable $admin_gradeable, $details)
     {
         // Add the rubric information using the old method for now.
@@ -624,7 +643,7 @@ class AdminGradeableController extends AbstractController
                 $index++;
             }
         } else if ($admin_gradeable->g_gradeable_type === GradeableType::CHECKPOINTS) {
-            if(!isset($details['checkpoints'])) {
+            if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
 
@@ -652,10 +671,10 @@ class AdminGradeableController extends AbstractController
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $admin_gradeable->g_id);
             }
         } else if ($admin_gradeable->g_gradeable_type === GradeableType::NUMERIC_TEXT) {
-            if(!isset($details['numeric'])) {
+            if (!isset($details['numeric'])) {
                 $details['numeric'] = [];
             }
-            if(!isset($details['text'])) {
+            if (!isset($details['text'])) {
                 $details['text'] = [];
             }
 
@@ -736,7 +755,7 @@ class AdminGradeableController extends AbstractController
     private function updateGradersRequest()
     {
         $gradeable = $this->getAdminGradeable($_REQUEST['id']);
-        if($gradeable === null) {
+        if ($gradeable === null) {
             http_response_code(404);
             return;
         }
@@ -745,12 +764,12 @@ class AdminGradeableController extends AbstractController
 
         $response_data = [];
 
-        if (count($result) === 0) {
+        if (!self::anyErrors($result)) {
             http_response_code(204); // NO CONTENT
         } else {
-            $response_data['errors'] = $result;
             http_response_code(400);
         }
+        $response_data['errors'] = $result;
 
         // Finally, send the requester back the information
         $this->core->getOutput()->renderJson($response_data);
@@ -760,40 +779,41 @@ class AdminGradeableController extends AbstractController
     {
         // Assert the format/data is correct
         $errors = [];
-        if(!isset($details['graders'])) {
-            return ['graders', 'Blank Submission!'];
+        if (!isset($details['graders'])) {
+            return ['graders', self::error('Blank Submission!')];
         }
-        foreach($details['graders'] as $name=>$sections) {
-            if(!in_array($name, $gradeable->getGradersFromUsertypes())) {
-                $errors[$name] = 'Invalid grader id for this gradeable!';
+        foreach ($details['graders'] as $name => $sections) {
+            if (!in_array($name, $gradeable->getGradersFromUsertypes())) {
+                $errors[$name] = self::error('Invalid grader id for this gradeable!');
                 continue;
             }
-            foreach($sections as $section) {
-                if(!is_int($section)) {
-                    $errors[$name] = 'Sections must be integers!';
+            foreach ($sections as $section) {
+                if (!is_int($section)) {
+                    $errors[$name] = self::error('Sections must be integers!');
                     break;
                 }
                 $i_val = (int)$section;
-                if($i_val < 1) {
-                    $errors[$name] = 'Sections must be 1 or higher!';
+                if ($i_val < 1) {
+                    $errors[$name] = self::error('Sections must be 1 or higher!');
                     break;
                 }
-                if($i_val > $gradeable->getNumSections()) {
-                    $errors[$name] = 'Sections must not exceed section count';
+                if ($i_val > $gradeable->getNumSections()) {
+                    $errors[$name] = self::error('Sections must not exceed section count');
                     break;
                 }
             }
         }
+        if (self::anyErrors($errors))
+            return $errors;
         if ($gradeable->g_grade_by_registration === false) {
             try {
                 $this->core->getQueries()->setupRotatingSections($details['graders'], $gradeable->g_id);
-            } catch(\Exception $e) {
-                return ['db' => "Query Failed: {$e}"];
+            } catch (\Exception $e) {
+                $errors['db'] = self::error("Query Failed: {$e}");
             }
         }
 
-        // Success
-        return [];
+        return $errors;
     }
 
     private function createGradeableRequest()
@@ -819,7 +839,7 @@ class AdminGradeableController extends AbstractController
     {
         // First assert that the gradeable ID is valid
         preg_match('/^[a-zA-Z0-9_-]*$/', $gradeable_id, $matches, PREG_OFFSET_CAPTURE);
-        if(count($matches) === 0) {
+        if (count($matches) === 0) {
             return [1, 'Invalid Gradeable Id!'];
         }
 
@@ -878,13 +898,13 @@ class AdminGradeableController extends AbstractController
 
         // Call updates with the front page properties
         $front_page_properties = array();
-        foreach($front_page_property_names as $prop) {
+        foreach ($front_page_property_names as $prop) {
             $front_page_properties[$prop] = $details[$prop];
         }
         $result = $this->updateGradeable($admin_gradeable, $front_page_properties);
         if ($result === null) {
             return [2, 'Gradeable was not created!'];
-        } else if (count($result) !== 0) {
+        } else if (self::anyErrors($result) !== 0) {
             return [2, 'Merged template data failed to validate!'];
         }
 
@@ -919,8 +939,15 @@ class AdminGradeableController extends AbstractController
             if ($result === null) {
                 // This should almost never happen
                 return [2, 'Gradeable was not created!'];
-            } else if (count($result) !== 0) {
+            } else if (self::anyErrors($result) !== 0) {
                 return [2, 'Merged template data failed to validate!'];
+            }
+        } else {
+            // No template, so just start the build here
+            $result = $this->enqueueBuild($admin_gradeable);
+            if ($result !== null) {
+                // TODO: what key should this get?
+                return [2, 'Build queue entry failed!'];
             }
         }
     }
@@ -935,7 +962,7 @@ class AdminGradeableController extends AbstractController
 
         $response_data = [];
 
-        if (count($result) === 0) {
+        if (self::anyErrors($result) === 0) {
             http_response_code(204); // NO CONTENT
         } else {
             $response_data['errors'] = $result;
@@ -975,7 +1002,7 @@ class AdminGradeableController extends AbstractController
 
             // small blacklist (values that can't change)
             if (key_exists($prop, $blacklist)) {
-                $errors[$prop] = 'Cannot Change ' . $blacklist[$prop] . ' once created';
+                $errors[$prop] = self::error('Cannot Change ' . $blacklist[$prop] . ' once created');
                 continue;
             }
 
@@ -986,35 +1013,35 @@ class AdminGradeableController extends AbstractController
                 } else if (property_exists($admin_gradeable, $prop)) {
                     $admin_gradeable->$prop = $post_val;
                 } else {
-                    $errors[$prop] = 'Not Found!';
+                    $errors[$prop] = self::error('Not Found!');
                 }
             } catch (\Exception $e) {
-                $errors[$prop] = $e;
+                $errors[$prop] = self::error($e);
             }
         }
 
         // Trigger a rebuild if the config changes
-        if(key_exists('eg_config_path', $details)) {
+        if (key_exists('eg_config_path', $details)) {
             $result = $this->enqueueBuild($admin_gradeable);
-            if($result !== null) {
+            if ($result !== null) {
                 // TODO: what key should this get?
-                $errors['server'] = $result;
+                $errors['server'] = self::error($result);
             }
         }
 
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
-            $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
+            $errors['general'] = self::error('Request contained no properties, perhaps the name was blank?');
         }
 
         $errors = array_merge($errors, self::validateGradeable($admin_gradeable));
 
         // Be strict.  Only apply database changes if there were no errors. (allow warnings)
-        if (anyErrors($errors)) {
+        if (!self::anyErrors($errors)) {
             try {
                 $this->core->getQueries()->updateGradeable($admin_gradeable);
             } catch (\Exception $e) {
-                $errors['db'] = $e;
+                $errors['db'] = self::error($e);
             }
         }
         return $errors;
