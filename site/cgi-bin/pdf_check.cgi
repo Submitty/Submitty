@@ -109,6 +109,7 @@ try:
                 pdf_writer.write(out)
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
+    os.system("chown -R instructor:{}_tas_www {}".format(course, split_path))
     message += "=> finished PyPDF2"
     file = open("blabla.txt", "w")
     file.write(testmsg)
