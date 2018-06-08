@@ -8,8 +8,8 @@
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
+            {% set i = 0 %}
             {% for component in gradeable.getComponents() %}
-                {% set i = 0 %}
                 {% if not component.getIsText() %}
                     <tbody>
                         <tr>
