@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ########################################################################################################################
 ########################################################################################################################
@@ -9,8 +9,6 @@
 # variables that are used in the code below.
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
-
-
 
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
@@ -357,6 +355,21 @@ chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
+################################################################################################################
+################################################################################################################
+# Run THE DB MIGRATIONS
+
+if [ ${WORKER} == 0 ]; then
+    echo -e 'Running the DB migrations'
+
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
+    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
+
+    ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+fi
 
 ################################################################################################################
 ################################################################################################################
@@ -698,6 +711,7 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
 if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
