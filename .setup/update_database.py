@@ -37,6 +37,7 @@ os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TA
 # Remove developer group
 os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE users ADD CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))'""".format(*variables))
 
+
 # Allow alphanumeric sections PR #2069
 # temporarily drop the constraints
 # edit the columns
@@ -45,6 +46,15 @@ os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER T
 os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY courses_users ALTER COLUMN registration_section SET DATA TYPE character varying(255) USING registration_section::varchar(255)\"".format(*variables))
 # re-add the constraints
 
+
+# Run migrator tool initial
+create_table = """CREATE TABLE migrations_{} (
+      id VARCHAR(100) PRIMARY KEY NOT NULL,
+      commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      status NUMERIC(1) DEFAULT 0 NOT NULL
+    );"""
+os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('system'), *variables))
+os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('master'), *variables))
 
 # ==============================
 # edits to each course database
@@ -137,6 +147,7 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(*variables))
 
 
+
         # add a couple missing foreign keys
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id)'""".format(*variables))
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id)'""".format(*variables))
@@ -164,4 +175,9 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id)'".format(*variables))
 
 
+        # add migrations table
+        os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('course'), *variables))
+        # add user/database
         print("\n")
+
+os.system('python3 {}/migration/migrator.py migrate --fake'.format(settings['submitty_repository']))

@@ -1,0 +1,379 @@
+{% import _self as self %} {# Required to use macros in same template #}
+
+<div class="content">
+    {#
+        Default is viewing your sections
+        Limited grader does not have "View All" option
+        If nothing to grade, Instructor will see all sections
+    #}
+    {% if show_all_sections_button %}
+        <div style="float: right; margin-bottom: 10px">
+            <a class="btn btn-default"
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'details', 'gradeable_id': gradeable.getId(), 'view': view_all ? null : "all"}) }}">
+                {{ view_all ? "View Your Sections" : "View All" }}
+            </a>
+        </div>
+    {% endif %}
+
+    <h2>Grade Details for {{ gradeable.getName() }}</h2>
+
+    {# Import+Export teams buttons #}
+    {% if show_import_teams_button %}
+        <a style="float: right;" class="btn btn-primary" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'export_teams', 'gradeable_id': gradeable.getId()}) }}">Export Teams Members</a>
+    {% endif %}
+    {% if show_export_teams_button %}
+        <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
+    {% endif %}
+    {# /Import+Export teams buttons #}
+
+    <br />
+    <br />
+    <br />
+    <table class="table table-striped table-bordered persist-area">
+        {# Table header #}
+        <thead class="persist-thead">
+            <tr>
+                {% for column in columns %}
+                    <td width="{{ column.width }}">{{ column.title }}</td>
+                {% endfor %}
+            </tr>
+        </thead>
+        {# /Table header #}
+        {# Sections #}
+        {% for section in sections %}
+            {# Section heading #}
+            <tbody>
+                <tr class="info persist-header">
+                    <td colspan="{{ columns|length }}" style="text-align: center">
+                        {% if gradeable.isGradeByRegistration() %}
+                            Students Enrolled in Registration Section {{ section.title }}
+                        {% else %}
+                            Students Assigned to Rotating Section {{ section.title }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr class="info">
+                    <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                </tr>
+            </tbody>
+            {# /Section heading #}
+            {# Student list #}
+            <tbody>
+                {% for info in section.rows %}
+                    {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                {% endfor %}
+            </tbody>
+            {# /Student list #}
+        {% endfor %}
+        {# /Sections #}
+        {# Empty teams #}
+        {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
+            <tr class="info persist-header">
+                <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+            </tr>
+            <tbody>
+                {% for team in empty_teams %}
+                    {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
+                    {% set rot_section = team.getRotatingSection() ?? "NULL" %}
+                    {% set display_section = gradeable.isGradeByRegistration() ? reg_section : rot_section %}
+                    <tr id="empty-team-row-{{ team.getId()}}">
+                        <td>
+                            {{ loop.index }}
+                        </td>
+                        <td>
+                            {{ display_section }}
+                        </td>
+                        <td>
+                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </a>
+                        </td>
+                        <td>{{ team.getId() }}</td>
+                        <td colspan="{{ columns|length - 4 }}"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+        {# /Empty teams #}
+    </table>
+</div>
+
+{% macro render_student(self, section, gradeable, index, info, columns) %}
+    {% if gradeable.getUser().accessGrading() %}
+        {% set style = "style='background: #7bd0f7;'" %}
+    {% else %}
+        {% set style = "" %}
+    {% endif %}
+
+    <tr {{ style|raw }}>
+        {% for column in columns %}
+            {#
+                This is basically a switch statement. It calls the function we need for
+                the current column and that will give us the table cell.
+            #}
+            {% if column.function == "active_version" %}
+                {{ self.render_column_active_version(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "autograding" %}
+                {{ self.render_column_autograding(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "autograding_peer" %}
+                {{ self.render_column_autograding_peer(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "graded_questions" %}
+                {{ self.render_column_graded_questions(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "grading" %}
+                {{ self.render_column_grading(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "grading_peer" %}
+                {{ self.render_column_grading_peer(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "index" %}
+                {{ self.render_column_index(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "section" %}
+                {{ self.render_column_section(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "team_edit" %}
+                {{ self.render_column_team_edit(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "team_id" %}
+                {{ self.render_column_team_id(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "team_members" %}
+                {{ self.render_column_team_members(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "total" %}
+                {{ self.render_column_total(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "total_peer" %}
+                {{ self.render_column_total_peer(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "user_first" %}
+                {{ self.render_column_user_first(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "user_id" %}
+                {{ self.render_column_user_id(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "user_id_anon" %}
+                {{ self.render_column_user_id_anon(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "user_last" %}
+                {{ self.render_column_user_last(self, section, gradeable, index, info, column) }}
+            {% elseif column.function == "viewed_grade" %}
+                {{ self.render_column_viewed_grade(self, section, gradeable, index, info, column) }}
+            {% endif %}
+        {% endfor %}
+    </tr>
+{% endmacro %}
+
+{# Column functions #}
+
+{# Active Version #}
+{% macro render_column_active_version(self, section, gradeable, index, info, column) %}
+    {% if gradeable.getHighestVersion() == 0 %}
+        <td></td>
+    {% elseif gradeable.getActiveVersion() == gradeable.getHighestVersion() %}
+        <td>{{ gradeable.getActiveVersion() }}</td>
+    {% else %}
+        <td>{{ gradeable.getActiveVersion() }} / {{ gradeable.getHighestVersion() }}</td>
+    {% endif %}
+{% endmacro %}
+
+{# Autograding #}
+{% macro render_column_autograding(self, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getHighestVersion() != 0 %}
+            {{ gradeable.getGradedAutograderPoints() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Autograding (peer) #}
+{% macro render_column_autograding_peer(self, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getHighestVersion() != 0 %}
+            {{ gradeable.getGradedNonHiddenPoints() }} / {{ gradeable.getTotalNonHiddenNonExtraCreditPoints() }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Graded Questions #}
+{% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
+    <td>
+        {%- for component in info.graded_components -%}
+            {%- if loop.index0 != 0 %}, {% endif -%}
+            {{- loop.index -}}
+        {%- endfor -%}
+    </td>
+{% endmacro %}
+
+{# Grading Button #}
+{% macro render_column_grading(self, section, gradeable, index, info, column) %}
+    {% if not gradeable.hasSubmitted() %}
+        {% set contents = "No Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif gradeable.getActiveVersion() == 0 %}
+        {% set contents = "Cancelled Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif gradeable.beenTAgraded() %}
+        {% if gradeable.validateVersions() %}
+            {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
+            {% set btn_class = "btn-default" %}
+        {% else %}
+            {% set btn_class = "btn-primary" %}
+            {% if not gradeable.isFullyGraded() %}
+                {% set contents = "Grading Incomplete" %}
+            {% else %}
+                {% set contents = "Version Conflict" %}
+            {% endif %}
+        {% endif %}
+    {% else %}
+        {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% endif %}
+    {% set visible = true %}
+    <td>
+        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
+            <b><i>No Team</i></b>
+        {% else %}
+            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getId()}) }}">
+                {{ contents }}
+            </a>
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Grading Button (peer) #}
+{% macro render_column_grading_peer(self, section, gradeable, index, info, column) %}
+    {# todo: test this (no way to create peer assignments currently) #}
+    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
+    {% if components|length == 0 %}
+        {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% else %}
+        {% set score = 0 %}
+        {% for component in components %}
+            {% set score = score + component.getScore() %}
+        {% endfor %}
+
+        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
+        {% set btn_class = "btn-default" %}
+    {% endif %}
+    {% set visible = true %}
+    <td>
+        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
+            <b><i>No Team</i></b>
+        {% else %}
+            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId()}) }}">
+                {{ contents }}
+            </a>
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Index #}
+{% macro render_column_index(self, section, gradeable, index, info, column) %}
+    <td>{{ index }}</td>
+{% endmacro %}
+
+{# Section Number #}
+{% macro render_column_section(self, section, gradeable, index, info, column) %}
+    <td>{{ section.title }}</td>
+{% endmacro %}
+
+{# Edit Team #}
+{% macro render_column_team_edit(self, section, gradeable, index, info, column) %}
+    <td>
+        <a onclick="{{ info.team_edit_onclick }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+    </td>
+{% endmacro %}
+
+{# Team ID #}
+{% macro render_column_team_id(self, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getTeam() == null %}
+            
+        {% else %}
+            {{ gradeable.getTeam().getId() }}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Team Members #}
+{% macro render_column_team_members(self, section, gradeable, index, info, column) %}
+    <td>
+        {% if gradeable.getTeam() == null %}
+            {{ gradeable.getUser().getId() }}
+        {% else %}
+            {%- for member in gradeable.getTeam().getMembers() -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
+                {{ core.getQueries().getUserById(member).getLastName() -}}
+            {%- endfor -%}
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Total Point Summary #}
+{% macro render_column_total(self, section, gradeable, index, info, column) %}
+    {% set box_background = (gradeable.getActiveDaysLate() > gradeable.getAllowedLateDays()) ? "late-box" : "" %}
+
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
+
+    {# Always get autograder points #}
+    {% set graded = gradeable.getGradedAutograderPoints() %}
+    {# If they have a valid, graded submission then they get points from it #}
+    {% if gradeable.hasSubmitted() and gradeable.getActiveVersion() != 0 and gradeable.beenTAgraded() and gradeable.validateVersions() %}
+        {% set graded = graded + gradeable.getGradedTAPoints() %}
+    {% endif %}
+    {# Negative grades are not possible #}
+    {% if graded < 0 %}
+        {% set graded = 0 %}
+    {% endif %}
+
+    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTANonExtraCreditPoints() %}
+    <td>
+        {% if gradeable.validateVersions() %}
+            <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# Total Point Summary (peer) #}
+{% macro render_column_total_peer(self, section, gradeable, index, info, column) %}
+    {# todo: test this (no way to create peer assignments currently) #}
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
+    {% set graded = gradeable.getGradedNonHiddenPoints() %}
+    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
+    {% for component in components %}
+        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
+        {% set graded = graded + component.getScore() %}
+    {% endfor %}
+    {#
+        instead of autograding_score it should be total autograding possible
+        I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
+    #}
+    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingNonExtraCredit() %}
+    <td>
+        {% if gradeable.validateVersions() %}
+            <div>{{ graded }} / {{ total_possible }}</div>
+        {% endif %}
+    </td>
+{% endmacro %}
+
+{# User ID #}
+{% macro render_column_user_id(self, section, gradeable, index, info, column) %}
+    <td>{{ gradeable.getUser().getId() }}</td>
+{% endmacro %}
+
+{# Anonymous ID #}
+{% macro render_column_user_id_anon(self, section, gradeable, index, info, column) %}
+    <td>{{ gradeable.getUser().getAnonId() }}</td>
+{% endmacro %}
+
+{# First Name #}
+{% macro render_column_user_first(self, section, gradeable, index, info, column) %}
+    <td>{{ gradeable.getUser().getDisplayedFirstName() }}</td>
+{% endmacro %}
+
+{# Last Name #}
+{% macro render_column_user_last(self, section, gradeable, index, info, column) %}
+    <td>{{ gradeable.getUser().getLastName() }}</td>
+{% endmacro %}
+
+{# Viewed Grade #}
+{% macro render_column_viewed_grade(self, section, gradeable, index, info, column) %}
+    {% if gradeable.getUserViewedDate() == null or gradeable.getUserViewedDate() == "" %}
+        <td title="" style="color: red; font-size: 1.5em;">&#10008;</td>
+    {% else %}
+        <td title="Last Viewed: {{ gradeable.getUserViewedDate() }}" style="color: #5cb85c; font-size: 1.5em;">&#x2714;</td>
+    {% endif %}
+{% endmacro %}
+
+{# /Column functions #}
