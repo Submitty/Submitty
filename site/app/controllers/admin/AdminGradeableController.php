@@ -36,7 +36,7 @@ class AdminGradeableController extends AbstractController
                 //  to be update manually
                 $this->updateRubricRequest();
                 break;
-            case 'update_graders':
+            case 'update_gradeable_graders':
                 $this->updateGradersRequest();
                 break;
             case 'upload_new_template':
@@ -61,7 +61,8 @@ class AdminGradeableController extends AbstractController
             $this->viewPage();
             return;
         }
-        $admin_gradeable = $this->loadAdminGradeable($_REQUEST['template_id']);
+        $admin_gradeable = new AdminGradeable($this->core);
+        $this->loadAdminGradeable($admin_gradeable);
         $this->core->getQueries()->getGradeableInfo($_REQUEST['template_id'], $admin_gradeable, true);
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add_template", $admin_gradeable);
     }
@@ -69,26 +70,26 @@ class AdminGradeableController extends AbstractController
     //view the page with no data from previous gradeables
     private function viewPage()
     {
-        $admin_gradeable = $this->loadAdminGradeable("");
+        $admin_gradeable = new AdminGradeable($this->core);
+        $this->loadAdminGradeable($admin_gradeable);
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "add", $admin_gradeable);
     }
 
     //view the page with pulled data from the gradeable to be edited
     private function editPage($nav_tab = 0)
     {
-        $admin_gradeable = $this->loadAdminGradeable($_REQUEST['id']);
-        $this->core->getQueries()->getGradeableInfo($_REQUEST['id'], $admin_gradeable, false);
+        $admin_gradeable = $this->getAdminGradeable($_REQUEST['id']);
+        $this->loadAdminGradeable($admin_gradeable);
         $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable', "edit", $admin_gradeable, $nav_tab);
     }
 
     // Constructs the non-model data for the gradeable
-    private function loadAdminGradeable($gradeable_id)
+    private function loadAdminGradeable(AdminGradeable $admin_gradeable)
     {
-        $admin_gradeable = new AdminGradeable($this->core);
         $admin_gradeable->setRotatingGradeables($this->core->getQueries()->getRotatingSectionsGradeableIDS());
         $admin_gradeable->setGradeableSectionHistory($this->core->getQueries()->getGradeablesPastAndSection());
         $admin_gradeable->setNumSections($this->core->getQueries()->getNumberRotatingSections());
-        $admin_gradeable->setGradersAllSection($this->core->getQueries()->getGradersForAllRotatingSections($gradeable_id));
+        $admin_gradeable->setGradersAllSection($this->core->getQueries()->getGradersForAllRotatingSections($admin_gradeable->g_id));
         $graders_from_usertype1 = $this->core->getQueries()->getGradersFromUserType(1);
         $graders_from_usertype2 = $this->core->getQueries()->getGradersFromUserType(2);
         $graders_from_usertype3 = $this->core->getQueries()->getGradersFromUserType(3);
@@ -98,7 +99,6 @@ class AdminGradeableController extends AbstractController
         $admin_gradeable->setGradersFromUsertypes($graders_from_usertypes);
         $admin_gradeable->setTemplateList($this->core->getQueries()->getAllGradeablesIdsAndTitles());
         // $admin_gradeable->setInheritTeamsList($this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams());
-        return $admin_gradeable;
     }
 
     private function getAdminGradeable($gradeable_id)
@@ -719,12 +719,13 @@ class AdminGradeableController extends AbstractController
 
     private function updateGradersRequest()
     {
-        $gradeable = $this->core->getQueries()->getGradeable($_POST['g_id']);
+        $gradeable = $this->getAdminGradeable($_REQUEST['id']);
         if($gradeable === null) {
             http_response_code(404);
             return;
         }
-        $result = $this->updateGraders($gradeable);
+        $this->loadAdminGradeable($gradeable);
+        $result = $this->updateGraders($gradeable, $_POST);
 
         $response_data = [];
 
@@ -739,21 +740,43 @@ class AdminGradeableController extends AbstractController
         $this->core->getOutput()->renderJson($response_data);
     }
 
-    private function updateGraders(AdminGradeable $gradeable)
+    private function updateGraders(AdminGradeable $gradeable, $details)
     {
-        if ($gradeable->g_grade_by_registration === false) {
-            //set up rotating sections
-            $graders = array();
-            foreach ($_POST as $k => $v) {
-                if (substr($k, 0, 7) === 'grader_' && !empty(trim($v))) {
-                    $sections = explode('_', $k);
-                    $graders[$sections[3]][] = $sections[2];
+        // Assert the format/data is correct
+        $errors = [];
+        if(!isset($details['graders'])) {
+            return ['graders', 'Blank Submission!'];
+        }
+        foreach($details['graders'] as $name=>$sections) {
+            if(!in_array($name, $gradeable->getGradersFromUsertypes())) {
+                $errors[$name] = 'Invalid grader id for this gradeable!';
+                continue;
+            }
+            foreach($sections as $section) {
+                if(!is_int($section)) {
+                    $errors[$name] = 'Sections must be integers!';
+                    break;
+                }
+                $i_val = (int)$section;
+                if($i_val < 1) {
+                    $errors[$name] = 'Sections must be 1 or higher!';
+                    break;
+                }
+                if($i_val > $gradeable->getNumSections()) {
+                    $errors[$name] = 'Sections must not exceed section count';
+                    break;
                 }
             }
-
-            $this->core->getQueries()->setupRotatingSections($graders, $gradeable->g_id);
         }
-        // no errors yet
+        if ($gradeable->g_grade_by_registration === false) {
+            try {
+                $this->core->getQueries()->setupRotatingSections($details['graders'], $gradeable->g_id);
+            } catch(\Exception $e) {
+                return ['db' => "Query Failed: {$e}"];
+            }
+        }
+
+        // Success
         return [];
     }
 

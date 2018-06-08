@@ -1,5 +1,4 @@
 
-let awaitingChanges = false;
 let errors = {};
 function updateErrors() {
     $('#ajax_debug').html(errors);
@@ -62,6 +61,10 @@ $(document).ready(function () {
             //saveRubric();
             return;
         }
+        if($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
+            saveGraders();
+            return;
+        }
 
         let data = {};
         data[this.name] = $(this).val();
@@ -80,7 +83,6 @@ $(document).ready(function () {
 
 // TODO: move all js from the twig files to this file when moving to dynamic interface
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
-    while(awaitingChanges);
     $('#save_status').html('Saving...');
     $.ajax({
         type: "POST",
@@ -91,13 +93,13 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             'id': gradeable_id
         }),
         data: p_values,
-        success: function(data, textStatus, xhr) {
+        success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
             if (typeof(successCallback) === "function") {
                 successCallback();
             }
         },
-        error: function(data) {
+        error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
             if (typeof(errorCallback) === "function") {
                 errorCallback(data.responseText);
@@ -231,12 +233,7 @@ function serializeRubric() {
 function saveRubric() {
     let values = serializeRubric();
 
-    // Dont't swarm the server with updates if its getting
-    //  backed up
-    while(awaitingChanges);
-
     $('#save_status').html('Saving Rubric...');
-    awaitingChanges = true;
     $.ajax({
         type: "POST",
         url: buildUrl({
@@ -246,37 +243,67 @@ function saveRubric() {
             'id': $('#g_id').val()
         }),
         data: values,
-        success: function(data, textStatus, xhr) {
+        success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
             updateErrors();
-            awaitingChanges = false;
         },
-        error: function(data) {
+        error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
             errors['rubric'] = 'Rubric failed to update!';
             updateErrors();
-            awaitingChanges = false;
         }
     });
 }
 
 function serializeGraders() {
+    // Setup graders with an array for each privilege level
+    let graders = {};
+    let minLevel = parseInt($('#minimum_grading_group').val());
 
+    $('#grader_assignment').find('input').each(function () {
+        let parts = this.name.split('_');
 
-    // export appropriate users
-    if ($('[name="minimum_grading_group"]').prop('value') == 1) {
-        $('#full-access-graders').find('.grader').each(function () {
-            ignore.push($(this).attr('name'));
-        });
-    }
+        // Ignore everything but checkboxes ('grader' prefix)
+        if (parts[0] !== 'grader') return;
 
-    if ($('[name="minimum_grading_group"]').prop('value') <= 2) {
-        $('#limited-access-graders').find('.grader').each(function () {
-            ignore.push($(this).attr('name'));
-        });
-    }
+        // Ignore if we aren't at the right access level
+        let level = parts[1].substr(1);
+        if (level > minLevel) return;
+
+        if ($(this).is(':checked')) {
+            if (!(parts[3] in graders)) {
+                graders[parts[3]] = [];
+            }
+            graders[parts[3]].push(parts[2]);
+        }
+    });
+
+    return graders;
 }
 
 function saveGraders() {
+    let values = serializeGraders();
 
+    $('#save_status').html('Saving Graders...');
+    $.ajax({
+        type: "POST",
+        url: buildUrl({
+            'component': 'admin',
+            'page': 'admin_gradeable',
+            'action': 'update_gradeable_graders',
+            'id': $('#g_id').val()
+        }),
+        data: {
+            graders: values
+        },
+        success: function (data, textStatus, xhr) {
+            console.log('Request returned status code ' + xhr.status);
+            updateErrors();
+        },
+        error: function (data) {
+            console.log('[Error]: Request returned status code ' + data.status);
+            errors['rubric'] = 'Rubric failed to update!';
+            updateErrors();
+        }
+    });
 }
