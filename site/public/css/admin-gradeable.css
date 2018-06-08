@@ -3,12 +3,8 @@ body {
 }
 
 input[readonly] {
-    background-color: #999999;
-}
-
-.uneditable-text {
-    color: red;
-    font-style: italic;
+    background:rgba(0,0,0,0);
+    border:none;
 }
 
 #gradeable-dates input[type="text"] {
