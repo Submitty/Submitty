@@ -174,10 +174,10 @@ function serializeRubric() {
                 return;
             }
 
-            if (o['text_questions'] === undefined) {
-                o['text_questions'] = [];
+            if (o['text'] === undefined) {
+                o['text'] = [];
             }
-            o['text_questions'].push({'label': label});
+            o['text'].push({'label': label});
         });
 
         // parse numeric items
@@ -206,14 +206,14 @@ function serializeRubric() {
             });
 
             $(this).find('.numeric_extra').each(function () {
-                extra_credit = $(this).attr('checked') === 'checked';
+                extra_credit = $(this).is(':checked');
                 ignore.push($(this).attr('name'));
             });
 
-            if (o['numeric_questions'] === undefined) {
-                o['numeric_questions'] = [];
+            if (o['numeric'] === undefined) {
+                o['numeric'] = [];
             }
-            o['numeric_questions'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
+            o['numeric'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
 
         });
 

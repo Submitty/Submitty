@@ -314,7 +314,7 @@ class AdminGradeableController extends AbstractController
             http_response_code(404);
             return;
         }
-        $result = $this->updateRubric($gradeable);
+        $result = $this->updateRubric($gradeable, $_POST);
 
         $response_data = [];
 
@@ -350,7 +350,45 @@ class AdminGradeableController extends AbstractController
         $component->setIsPeer(false);
         $component->setPage(0);
     }
-    private function updateRubric(Gradeable $gradeable)
+    private static function parseNumeric(GradeableComponent $component, $details)
+    {
+        if(!isset($details['label'])) {
+            $details['label'] = '';
+        }
+        if (!isset($details['max_score'])) {
+            $details['max_score'] = 0;
+        }
+        if(!isset($details['extra_credit'])) {
+            $details['extra_credit'] = 'false';
+        }
+        $component->setTitle($details['label']);
+        $component->setTaComment("");
+        $component->setStudentComment("");
+        $component->setLowerClamp(0);
+        $component->setDefault(0);
+        $component->setMaxValue($details['extra_credit'] === 'true' ? 0 : $details['max_score']);
+        $component->setUpperClamp($details['max_score']);
+        $component->setIsText(false);
+        $component->setIsPeer(false);
+        $component->setPage(0);
+    }
+    private static function parseText(GradeableComponent $component, $details)
+    {
+        if(!isset($details['label'])) {
+            $details['label'] = '';
+        }
+        $component->setTitle($details['label']);
+        $component->setTaComment("");
+        $component->setStudentComment("");
+        $component->setLowerClamp(0);
+        $component->setDefault(0);
+        $component->setMaxValue(0);
+        $component->setUpperClamp(0);
+        $component->setIsText(true);
+        $component->setIsPeer(false);
+        $component->setPage(0);
+    }
+    private function updateRubric(Gradeable $gradeable, $details)
     {
         // Add the rubric information using the old method for now.
         $edit_gradeable = 1;
@@ -586,18 +624,18 @@ class AdminGradeableController extends AbstractController
                 $index++;
             }
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            if(!isset($_POST['checkpoints'])) {
-                $_POST['checkpoints'] = [];
+            if(!isset($details['checkpoints'])) {
+                $details['checkpoints'] = [];
             }
 
-            $num_checkpoints = count($_POST['checkpoints']);
+            $num_checkpoints = count($details['checkpoints']);
 
             // Iterate through each existing component and update them in the database,
             //  removing any extras
             $x = 0;
             foreach ($old_components as $old_component) {
                 if ($x < $num_checkpoints && $x < $num_old_components) {
-                    self::parseCheckpoint($old_component, $_POST['checkpoints'][$x]);
+                    self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
                     $old_component->setOrder($x);
                     $this->core->getQueries()->updateGradeableComponent($old_component);
                 } else if ($num_old_components > $num_checkpoints) {
@@ -609,83 +647,69 @@ class AdminGradeableController extends AbstractController
             // iterate through each new checkpoint, adding them to the database
             for ($x = $start_index; $x < $num_checkpoints; $x++) {
                 $gradeable_component = new GradeableComponent($this->core);
-                self::parseCheckpoint($gradeable_component, $_POST['checkpoints'][$x]);
+                self::parseCheckpoint($gradeable_component, $details['checkpoints'][$x]);
                 $gradeable_component->setOrder($x);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
         } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            $num_numeric = intval($_POST['num_numeric_items']);
-            $num_text = intval($_POST['num_text_items']);
+            if(!isset($details['numeric'])) {
+                $details['numeric'] = [];
+            }
+            if(!isset($details['text'])) {
+                $details['text'] = [];
+            }
+
+            $num_numeric = count($details['numeric']);
+            $num_text = count($details['text']);
+
             $start_index_numeric = 0;
             $start_index_text = 0;
-            if ($edit_gradeable === 1) {
-                $old_numerics = array();
-                $num_old_numerics = 0;
-                $old_texts = array();
-                $num_old_texts = 0;
-                foreach ($old_components as $old_component) {
-                    if ($old_component->getIsText() === true) {
-                        $old_texts[] = $old_component;
-                        $num_old_texts++;
-                    } else {
-                        $old_numerics[] = $old_component;
-                        $num_old_numerics++;
-                    }
-                }
-                $x = 0;
-                foreach ($old_numerics as $old_numeric) {
-                    if ($x < $num_numeric && $x < $num_old_numerics) {
-                        $old_numeric->setTitle($_POST['numeric_label_' . strval($x + 1)]);
-                        $old_numeric->setTaComment("");
-                        $old_numeric->setStudentComment("");
-                        $old_numeric->setLowerClamp(0);
-                        $old_numeric->setDefault(0);
-                        $max_value = (isset($_POST['numeric_extra_' . strval($x + 1)])) ? 0 : $_POST['max_score_' . strval($x + 1)];
-                        $old_numeric->setMaxValue($max_value);
-                        $old_numeric->setUpperClamp($_POST['max_score_' . strval($x + 1)]);
-                        $old_numeric->setIsText(false);
-                        $old_numeric->setIsPeer(false);
-                        $old_numeric->setOrder($x);
-                        $old_numeric->setPage(0);
-                        $this->core->getQueries()->updateGradeableComponent($old_numeric);
-                        $start_index_numeric++;
-                    } else if ($num_old_numerics > $num_numeric) {
-                        $this->core->getQueries()->deleteGradeableComponent($old_numeric);
-                    }
-                    $x++;
+
+            // Load all of the old numeric/text elements into two arrays
+            $old_numerics = array();
+            $num_old_numerics = 0;
+            $old_texts = array();
+            $num_old_texts = 0;
+            foreach ($old_components as $old_component) {
+                if ($old_component->getIsText() === true) {
+                    $old_texts[] = $old_component;
+                    $num_old_texts++;
+                } else {
+                    $old_numerics[] = $old_component;
+                    $num_old_numerics++;
                 }
             }
+
+            $x = 0;
+            // Iterate through each existing numeric component and update them in the database,
+            //  removing any extras
+            foreach ($old_numerics as $old_numeric) {
+                if ($x < $num_numeric && $x < $num_old_numerics) {
+                    self::parseNumeric($old_numeric, $details['numeric'][$x]);
+                    $old_numeric->setOrder($x);
+                    $this->core->getQueries()->updateGradeableComponent($old_numeric);
+                    $start_index_numeric++;
+                } else if ($num_old_numerics > $num_numeric) {
+                    $this->core->getQueries()->deleteGradeableComponent($old_numeric);
+                }
+                $x++;
+            }
+
             for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
                 $gradeable_component = new GradeableComponent($this->core);
-                $gradeable_component->setTitle($_POST['numeric_label_' . strval($x + 1)]);
-                $gradeable_component->setTaComment("");
-                $gradeable_component->setStudentComment("");
-                $gradeable_component->setLowerClamp(0);
-                $gradeable_component->setDefault(0);
-                $max_value = (isset($_POST['numeric_extra_' . strval($x + 1)])) ? 0 : $_POST['max_score_' . strval($x + 1)];
-                $gradeable_component->setMaxValue($max_value);
-                $gradeable_component->setUpperClamp($_POST['max_score_' . strval($x + 1)]);
-                $gradeable_component->setIsText(false);
-                $gradeable_component->setIsPeer(false);
+                self::parseNumeric($gradeable_component, $details['numeric'][$x]);
                 $gradeable_component->setOrder($x);
-                $gradeable_component->setPage(0);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
+
             $z = $x;
             $x = 0;
+            // Iterate through each existing text component and update them in the database,
+            //  removing any extras
             if ($edit_gradeable === 1) {
                 foreach ($old_texts as $old_text) {
                     if ($x < $num_text && $x < $num_old_texts) {
-                        $old_text->setTitle($_POST['text_label_' . strval($x + 1)]);
-                        $old_text->setTaComment("");
-                        $old_text->setStudentComment("");
-                        $old_text->setLowerClamp(0);
-                        $old_text->setDefault(0);
-                        $old_text->setMaxValue(0);
-                        $old_text->setUpperClamp(0);
-                        $old_text->setIsText(true);
-                        $old_text->setIsPeer(false);
-                        $old_text->setPage(0);
+                        self::parseText($old_text, $details['text'][$x]);
                         $old_text->setOrder($z + $x);
                         $this->core->getQueries()->updateGradeableComponent($old_text);
                         $start_index_text++;
@@ -698,16 +722,7 @@ class AdminGradeableController extends AbstractController
 
             for ($y = $start_index_text; $y < $num_text; $y++) {
                 $gradeable_component = new GradeableComponent($this->core);
-                $gradeable_component->setTitle($_POST['text_label_' . strval($y + 1)]);
-                $gradeable_component->setTaComment("");
-                $gradeable_component->setStudentComment("");
-                $gradeable_component->setLowerClamp(0);
-                $gradeable_component->setDefault(0);
-                $gradeable_component->setMaxValue(0);
-                $gradeable_component->setUpperClamp(0);
-                $gradeable_component->setIsText(true);
-                $gradeable_component->setIsPeer(false);
-                $gradeable_component->setPage(0);
+                self::parseText($gradeable_component, $details['text'][$x]);
                 $gradeable_component->setOrder($y + $z);
                 $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
