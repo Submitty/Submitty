@@ -94,7 +94,7 @@
                             {% if autograded_average.getCount() == 0 %}
                                 There are no submitted assignments yet.
                             {% else %}
-                                Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ auto_percentage }}%)<br/>
+                                Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ autograded_percentage }}%)<br/>
                                 Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
                                 Count: {{ autograded_average.getCount() }} <br/>
                             {% endif %}

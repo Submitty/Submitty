@@ -48,7 +48,7 @@ class ElectronicGraderView extends AbstractView {
         $viewed_percent = 0;
         $overall_total = 0;
         $overall_percentage = 0;
-        $auto_percentage = 0;
+        $autograded_percentage = 0;
         $component_percentages = [];
         $component_overall_score = 0;
         $component_overall_max = 0;
@@ -150,7 +150,7 @@ class ElectronicGraderView extends AbstractView {
                     }
                 }
                 if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
-                    $auto_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                    $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
                 }
                 if (count($component_averages) !== 0) {
                     foreach ($component_averages as $comp) {
@@ -193,7 +193,7 @@ class ElectronicGraderView extends AbstractView {
             "overall_average" => $overall_average,
             "overall_total" => $overall_total,
             "overall_percentage" => $overall_percentage,
-            "auto_percentage" => $auto_percentage,
+            "autograded_percentage" => $autograded_percentage,
             "autograded_average" => $autograded_average,
             "component_averages" => $component_averages,
             "component_percentages" => $component_percentages,
