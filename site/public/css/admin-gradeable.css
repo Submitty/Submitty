@@ -11,6 +11,18 @@ input[readonly] {
     width: 200px;
 }
 
+.table-wrapper {
+    position: relative;
+}
+.table-scroll {
+    width: 1150px;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.table-wrapper table {
+    width:100%;
+}
+
 select {
     margin-top:7px;
     width: 60px;
@@ -95,6 +107,7 @@ fieldset {
     border: 1px solid silver;
     padding: 8px;
     border-radius: 4px;
+    display: block;
 }
 
 legend{

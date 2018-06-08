@@ -50,30 +50,34 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
     <div id="rotating_data">
         {% if admin_gradeable.getRotatingGradeables()|length != 0 %}
-        <br />
-        Rotating Section History By Grader:
-        <br />
-        <table id="grader-history" style="border: 3px solid black;">
-            <tr>
-                <th></th>
-                {% for row in admin_gradeable.getRotatingGradeables() %}
-                    <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
-                {% endfor %}
-            </tr>
-            <tr>
-                {% set last = '' %}
-                {% for row in admin_gradeable.getGradeableSectionHistory() %}
-                    {% if row.user_id != last %}
+            <br />
+            Rotating Section History By Grader:
+            <br />
+            <div class="table-wrapper">
+                <div class="table-scroll">
+                    <table id="grader-history">
+                        <tr>
+                            <th></th>
+                            {% for row in admin_gradeable.getRotatingGradeables() %}
+                                <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                            {% endfor %}
                         </tr>
-                        <tr class="g_history g{{ row.user_group }}">
-                            <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
-                    {% endif %}
-                    <td style="padding: 8px; border: 3px solid black; text-align: center;">
-                        {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
-                    </td>
-                    {% set last = row.user_id %}
-                {% endfor %}
-        </table>
+                        <tr>
+                            {% set last = '' %}
+                            {% for row in admin_gradeable.getGradeableSectionHistory() %}
+                                {% if row.user_id != last %}
+                                    </tr>
+                                    <tr class="g_history g{{ row.user_group }}">
+                                        <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
+                                {% endif %}
+                                <td style="padding: 8px; border: 3px solid black; text-align: center;">
+                                    {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
+                                </td>
+                                {% set last = row.user_id %}
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
         {% endif %}
         <table id="grader_assignment">
             {# Helpful debuging line.  Uncomment to view graders data #}
