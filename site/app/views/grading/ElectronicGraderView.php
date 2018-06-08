@@ -601,7 +601,10 @@ HTML;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
-        $return = $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
+
+        $return = "";
+
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
 
@@ -611,6 +614,20 @@ HTML;
         }
         if($gradeable->useTAGrading()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
+        }
+        
+        if ($gradeable->getActiveVersion() == 0) {
+            if ($gradeable->hasSubmitted()) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#FF8040", // mango orange
+                    "message" => "Cancelled Submission"
+                ]);
+            } else {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#C38189", // lipstick pink (purple)
+                    "message" => "No Submission"
+                ]);
+            }
         }
 
         return $return;
@@ -853,36 +870,8 @@ HTML;
                 break;
             }
         }
-        $disabled = '';
-        //TODO: Move this to somewhere more central
-        if ($gradeable->getActiveVersion() == 0) {
-            $disabled = 'disabled';
-            $my_color = "'#FF8040'"; // mango orange
-            $my_message = "Cancelled Submission";
-            if ($gradeable->hasSubmitted()) {
-                $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-HTML;
-            } else {
-                $my_color = "'#C38189'";  // lipstick pink (purple)
-                $my_message = "No Submission";
-                $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-HTML;
-            }
-        } else if ($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()) {
-            $disabled = 'disabled';
-        }
+        $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
+
         // if use student components, get the values for pages from the student's submissions
         $files = $gradeable->getSubmittedFiles();
         $student_pages = array();
@@ -896,7 +885,7 @@ HTML;
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "your_user_id" => $this->core->getUser()->getId(),
-            "disabled" => $disabled === "disabled",
+            "disabled" => $disabled,
             "can_verify" => $display_verify_all // If any can be then this is set
         ];
 
