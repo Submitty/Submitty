@@ -108,22 +108,22 @@ class DatabaseQueries {
     }
 
     public function loadAnnouncements($category_id){
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC", array($category_id));
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? IN (SELECT category_id FROM thread_categories tc WHERE tc.thread_id = t.id) ORDER BY t.id DESC", array($category_id));
         return $this->course_db->rows();
     }
 
     public function loadAnnouncementsWithoutCategory(){
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
             return $this->course_db->rows();
     }
 
     public function loadThreadsWithoutCategory(){
-         $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
+         $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
          return $this->course_db->rows();
     }
 
     public function loadThreads($category_id) {
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),',')  as categories_ids, array_to_string(array_agg(w.category_desc),',') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC", array($category_id));
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? IN (SELECT category_id FROM thread_categories tc WHERE tc.thread_id = t.id) ORDER BY t.id DESC", array($category_id));
         return $this->course_db->rows();
     }
 
@@ -183,7 +183,7 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $category_ids){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $categories_ids){
 
         $this->course_db->beginTransaction();
 
@@ -199,7 +199,7 @@ class DatabaseQueries {
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
-        foreach ($category_ids as $category_id) {
+        foreach ($categories_ids as $category_id) {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
         }
 
@@ -2053,9 +2053,13 @@ AND gc_id IN (
       return $ar;
     }
 
+    public function filterCategoryDesc($category_desc) {
+        return str_replace("|", " ", $category_desc);
+    }
+
     public function addNewCategory($category) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($category));
+        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($this->filterCategoryDesc($category)));
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }

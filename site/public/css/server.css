@@ -853,10 +853,10 @@ table .instructor .two-options{
 }
 
 .cat-selected {
-    opacity: 1.0;
-    filter: alpha(opacity=100);
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
-    /*font-weight: bold !important;*/
+    -webkit-transition:background 1s;
+    -moz-transition:background 1s;
+    -o-transition:background 1s;
+    transition:background 1s
 }
 
 .cat-selected:hover {
@@ -865,8 +865,10 @@ table .instructor .two-options{
 }
 
 .cat-notselected {
-    opacity: 0.6;
-    filter: alpha(opacity=60);
+    -webkit-transition:background 1s;
+    -moz-transition:background 1s;
+    -o-transition:background 1s;
+    transition:background 1s
 }
 
 .cat-notselected:hover {

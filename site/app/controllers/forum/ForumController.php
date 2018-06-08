@@ -112,13 +112,13 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function isValidCategories($inputCategoryIds = -1, $inputCategoriesName = -1){
+    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
         $rows = $this->core->getQueries()->getCategories();
-        if(is_array($inputCategoryIds)) {
-            if(count($inputCategoryIds) < 1) {
+        if(is_array($inputCategoriesIds)) {
+            if(count($inputCategoriesIds) < 1) {
                 return false;
             }
-            foreach ($inputCategoryIds as $category_id) {
+            foreach ($inputCategoriesIds as $category_id) {
                 $match_found = false;
                 foreach($rows as $index => $values){
                     if($values["category_id"] === $category_id) {
@@ -206,15 +206,15 @@ class ForumController extends AbstractController {
         $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
-        $category_ids  = array();
+        $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
-            $category_ids[] = (int)$category_id;
+            $categories_ids[] = (int)$category_id;
         }
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!$this->isValidCategories($category_ids)){
-            $this->core->addErrorMessage("You must select a valid categories. Please re-submit your thread.");
+        }else if(!$this->isValidCategories($categories_ids)){
+            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
@@ -222,7 +222,7 @@ class ForumController extends AbstractController {
                 return;
             }
 
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $category_ids);
+            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $categories_ids);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
 
@@ -377,11 +377,11 @@ class ForumController extends AbstractController {
 
         foreach ($ordered_threads as &$thread) {
             $list = array();
-            foreach(explode(",", $thread['categories_ids']) as $id ) {
+            foreach(explode("|", $thread['categories_ids']) as $id ) {
                 $list[] = (int)$id;
             }
             $thread['categories_ids'] = $list;
-            $thread['categories_desc'] = explode(",", $thread['categories_desc']);
+            $thread['categories_desc'] = explode("|", $thread['categories_desc']);
         }
         return $ordered_threads;
     }
