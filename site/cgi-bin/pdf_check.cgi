@@ -98,17 +98,20 @@ try:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(counter)) 
             cover_filename = '{}_{}_cover.pdf'.format(filename, int(i/2))
-            for j in range(counter, counter+num):
-                pdf_writer = PdfFileWriter()
+            pdf_writer = PdfFileWriter()
+            start = counter
+            for j in range(start, start+num):
                 pdf_writer.addPage(pdfReader.getPage(j)) 
                 output_filename = '{}_{}.pdf'.format(filename, int(i/2))
                 counter+=1
+            testmsg += str(pdf_writer.getNumPages()) + "\n"
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
     message += "=> finished PyPDF2"
-
+    file = open("blabla.txt", "w")
+    file.write(testmsg)
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):
         os.remove(filename)
