@@ -125,7 +125,7 @@ apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-externa
 apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
-    apt-get install -qqy php-xdebug
+    apt-get install -qqy php7.0-sqlite3 php-xdebug
 fi
 
 # Add additional packages for compiling, authentication, and security,
