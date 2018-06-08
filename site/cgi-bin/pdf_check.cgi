@@ -11,7 +11,7 @@ is returned.
 """
 import cgi
 # If things are not working, then this should be enabled for better troubleshooting
-import cgitb; cgitb.enable()
+# import cgitb; cgitb.enable()
 import json
 import os
 import subprocess
@@ -70,8 +70,6 @@ try:
 
     # check that all pages are divisible
     for filename in os.listdir(bulk_path):
-
-        # dump pdf info from pdftk, then parse for the total # of pages
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
         total_pages = pdfReader.numPages
@@ -93,26 +91,21 @@ try:
         
         # pdf = PdfFileReader(path)
         counter = 0
-        testmsg = ""
         for i in range(0, total_pages, num):
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(counter)) 
-            cover_filename = '{}_{}_cover.pdf'.format(filename, int(i/2))
+            cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], int(i/2))
             pdf_writer = PdfFileWriter()
             start = counter
             for j in range(start, start+num):
                 pdf_writer.addPage(pdfReader.getPage(j)) 
-                output_filename = '{}_{}.pdf'.format(filename, int(i/2))
+                output_filename = '{}_{}.pdf'.format(filename[:-4], int(i/2))
                 counter+=1
-            testmsg += str(pdf_writer.getNumPages()) + "\n"
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
-    os.system("chown -R instructor:{}_tas_www {}".format(course, split_path))
     message += "=> finished PyPDF2"
-    file = open("blabla.txt", "w")
-    file.write(testmsg)
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):
         os.remove(filename)
