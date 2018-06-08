@@ -59,7 +59,7 @@ $(document).ready(function () {
     $('input,select,textarea').change(function () {
         // If its rubric-related, then make different request
         if($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
-            saveRubric();
+            //saveRubric();
             return;
         }
         if($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {

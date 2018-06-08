@@ -13,9 +13,7 @@ Will this assignment have peer grading?
     </div>
 </fieldset>
 <br />-->
-<span style="color:red; size: 20px">Warning! Electronic Rubric information does not save automatically!  Press 'Save' Button to save</span>
-<br/>
-<br/>
+
 Is this a PDF with a page assigned to each component?
 <fieldset>
     <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
@@ -37,6 +35,8 @@ Is this a PDF with a page assigned to each component?
 
 Point precision:
 <input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<br/>
+<span style="color:red; size: 20px">Warning! Electronic Rubric information does not save automatically!  Press 'Save' Button to save</span>
 <div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br /><br />
 
