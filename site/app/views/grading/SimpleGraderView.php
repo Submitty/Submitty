@@ -99,7 +99,7 @@ HTML;
         }
         $student_full = json_encode($student_full);
         // render using twig
-        $return .= $this->core->getOutput()->renderTwigTemplate("grading/StudentSearch.twig", [
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StudentSearch.twig", [
             "student_full" => $student_full
         ]);
         
