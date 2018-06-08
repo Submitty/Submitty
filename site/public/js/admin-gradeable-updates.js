@@ -257,7 +257,7 @@ function saveRubric() {
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
-            errors['rubric'] = 'Rubric failed to update!';
+            errors['rubric'] = data.responseText;
             updateErrors();
         }
     });
@@ -306,11 +306,12 @@ function saveGraders() {
         },
         success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
+            delete errors['graders'];
             updateErrors();
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
-            errors['rubric'] = 'Rubric failed to update!';
+            errors['graders'] = data.responseText;
             updateErrors();
         }
     });

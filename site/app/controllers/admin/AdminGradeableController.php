@@ -782,13 +782,21 @@ class AdminGradeableController extends AbstractController
         if (!isset($details['graders'])) {
             return ['graders', self::error('Blank Submission!')];
         }
+        $valid_graders = [];
+        foreach($gradeable->getGradersFromUsertypes() as $level=>$graders) {
+            foreach($graders as $grader) {
+                $valid_graders[] = $grader['user_id'];
+            }
+        }
+
         foreach ($details['graders'] as $name => $sections) {
-            if (!in_array($name, $gradeable->getGradersFromUsertypes())) {
+
+            if (!in_array($name, $valid_graders)) {
                 $errors[$name] = self::error('Invalid grader id for this gradeable!');
                 continue;
             }
             foreach ($sections as $section) {
-                if (!is_int($section)) {
+                if (!is_numeric($section)) {
                     $errors[$name] = self::error('Sections must be integers!');
                     break;
                 }
