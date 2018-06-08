@@ -118,7 +118,7 @@ apt-get install -qy php7.0 php7.0-cli libapache2-mod-fastcgi php7.0-fpm php7.0-c
 apt-get install -qqy php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
-    apt-get install -qqy php7.0-xdebug
+    apt-get install -qqy php7.0-sqlite3 php7.0-xdebug
 fi
 
 # TODO: removed packages:
