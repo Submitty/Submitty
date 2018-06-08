@@ -1,0 +1,46 @@
+<div class="popup-form" id="upload-images-form">
+    <h2>Upload Images</h2>
+    <p>&emsp;</p>
+    <p>
+        Follow the instructions to download images of students on:<br>
+        <a href="http://submitty.org/instructor/image_scraper">SIS Image Scraper</a><br><br>
+        Zip up the each folder containing the images and upload the file(s).<br>
+    </p>
+
+    <br/>
+    <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+      <div id="upload" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
+        <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
+        <input type="file" name="files" id="input_file" style="display: none" onchange="addFilesFromInput(1)" multiple />
+      </div>
+    </div>
+    <script type="text/javascript">
+        var dropzone = document.getElementById("upload"+1);
+        dropzone.addEventListener("click", clicked_on_box, false);
+        dropzone.addEventListener("dragenter", draghandle, false);
+        dropzone.addEventListener("dragover", draghandle, false);
+        dropzone.addEventListener("dragleave", draghandle, false);
+        dropzone.addEventListener("drop", drop, false);
+
+        $("#startnew").click(function(e){ // Clear all the selected files in the buckets
+            deleteFiles(i);
+            e.stopPropagation();
+        });
+
+        // GET FILES OF THE HIGHEST VERSION
+        if (assignment_version == highest_version && highest_version > 0) {
+            $("#getprev").click(function(e){
+                $("#startnew").click();
+                {$old_files}
+                setUsePrevious();
+                setButtonStatus();
+                e.stopPropagation();
+            });
+        }
+    </script>
+    <div style="float: right; width: auto">
+        <a onclick="$('#upload-images-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+        <input class="btn btn-primary" type="submit" value="Submit" />
+    </div>
+    </form>
+</div>
