@@ -46,10 +46,13 @@ try:
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
     message = "Something went wrong:  just defined variables"
+    with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
+        data = json.loads(data_file.read())
+
     current_path = os.path.dirname(os.path.realpath(__file__))
-    uploads_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads")
-    bulk_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/bulk_pdf",g_id,ver)
-    split_path = os.path.join("/var/local/submitty/courses",sem,course,"uploads/split_pdf",g_id,ver)
+    uploads_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads")
+    bulk_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/bulk_pdf",g_id,ver)
+    split_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/split_pdf",g_id,ver)
     message = "Something went wrong:  just defined more paths"
 
     # copy folder
