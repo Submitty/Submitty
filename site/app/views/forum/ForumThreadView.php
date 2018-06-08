@@ -248,7 +248,7 @@ HTML;
 HTML;
 	    for($i = 0; $i < count($categories); $i++){
 	    	$return .= <<<HTML
-	    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
+	    		<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
 HTML;
 	    } 
 
@@ -624,17 +624,20 @@ HTML;
 HTML;
 						}
 
-						$categories_desc = array();
+						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
-							$categories_desc[] = htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+						}
+						for ($i = 0; $i < count($thread["categories_color"]); $i+=1) {
+							$categories_content[$i][] = $thread["categories_color"][$i];
 						}
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
 HTML;
-						foreach ($categories_desc as $category_desc) {
+						foreach ($categories_content as $category_content) {
 							$return .= <<<HTML
-							<span class="label_forum label_forum-default">{$category_desc}</span>
+							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
 HTML;
 						}
 						$return .= <<<HTML
@@ -827,7 +830,7 @@ HTML;
 		return $return;
 	}
 
-	public function createThread() {
+	public function createThread($category_colors) {
 
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
@@ -837,7 +840,6 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
@@ -869,9 +871,23 @@ HTML;
 				// TODO: scrollbar
 				for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
-						<li id="categorylistitem-{$categories[$i]['category_id']}">
+						<li id="categorylistitem-{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">
 							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
 							{$categories[$i]['category_desc']}
+							<select class='category-color-picker' style="float: right;font-size: 16px;height: 18px;padding: 0px;">
+HTML;
+							foreach ($category_colors as $color) {
+								$selected = "";
+								if($color == $categories[$i]['color']) {
+									$selected = 'selected="selected"';
+								}
+								$return .= <<<HTML
+	  							<option value="{$color}" style="color: {$color};" {$selected}>{$color}</option>
+HTML;
+							}
+							$return .= <<<HTML
+	  						</select>
+
 						</li>
 HTML;
 				}
@@ -887,6 +903,11 @@ HTML;
 							update: function (event, ui) {
 						        reorderCategories();
 						    }
+						});
+						$(".category-color-picker").change(function(color) {
+					    	var category_id = parseInt($(this).parent().attr('id').split("-")[1]);
+					    	var category_color = $(this).val();
+					    	editCategory(category_id, null, category_color);
 						});
 					});
 				</script>

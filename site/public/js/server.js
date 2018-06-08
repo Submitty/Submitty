@@ -1270,13 +1270,58 @@ function addNewCategory(){
     })
 }
 
+function editCategory(category_id, category_desc, category_color) {
+    if(category_desc === null && category_color === null) {
+        return;
+    }
+    var data = {category_id: category_id};
+    if(category_desc !== null) {
+        data['category_desc'] = category_desc;
+    }
+    if(category_color !== null) {
+        data['category_color'] = category_color;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'edit_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully updated!</div>';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                refreshCategories();
+                if(category_color !== null) {
+                    $("#categorylistitem-"+category_id).css("color",category_color);
+                }
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    });
+}
+
 function refreshCategories() {
     var data = $('#ui-category-list').sortable('serialize');
     data = data.split("&");
     var order = [];
     for(var i = 0; i<data.length; i+=1) {
         var category_id = parseInt(data[i].split('=')[1]);
-        order.push([category_id, $("#categorylistitem-"+category_id).text().trim()]);
+        var category_desc = $("#categorylistitem-"+category_id).contents().get(2).nodeValue.trim();
+        var category_color = $("#categorylistitem-"+category_id+" select").val();
+        order.push([category_id, category_desc, category_color]);
     }
 
     // Obtain current selected category
@@ -1290,31 +1335,19 @@ function refreshCategories() {
         }
     }
 
-    // Refresh reorder categories list
-    $('#ui-category-list').empty();
-    order.forEach(function(category) {
-        var category_id = category[0];
-        var category_desc = category[1];
-        var li = '  <li id="categorylistitem-'+category_id+'">\
-                            <i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>\
-                            '+category_desc+' \
-                    </li>';
-        $('#ui-category-list').append(li);
-    });
-
-
     // Refresh selected categories
     $('#categories-pick-list').empty();
     order.forEach(function(category) {
         var category_id = category[0];
         var category_desc = category[1];
+        var category_color = category[2];
         var selection_class;
         if(selected_button.has(category_id)) {
             selection_class = "cat-selected";
         } else {
             selection_class = "cat-notselected";
         }
-        var element = ' <a class="btn cat-buttons '+selection_class+'">'+category_desc+'\
+        var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
                                 <input type="hidden" name="cat[]" value="'+category_id+'"/>\
                         </a>';
         $('#categories-pick-list').append(element);
@@ -1325,12 +1358,26 @@ function refreshCategories() {
         if($(this).hasClass("cat-selected")) {
             $(this).removeClass("cat-selected");
             $(this).addClass("cat-notselected");
+            $(this).trigger("eventChangeCatClass");
         } else {
             $(this).removeClass("cat-notselected");
             $(this).addClass("cat-selected");
+            $(this).trigger("eventChangeCatClass");
         }
     });
 
+    $(".cat-buttons").bind("eventChangeCatClass", function(){
+        var cat_color = $(this).attr('cat-color');
+        $(this).css("border-color",cat_color);
+        if($(this).hasClass("cat-selected")) {
+            $(this).css("background-color",cat_color);
+            $(this).css("color","white");
+        } else {
+            $(this).css("background-color","white");
+            $(this).css("color",cat_color);
+        }
+    });
+    $(".cat-buttons").trigger("eventChangeCatClass");
 }
 
 function reorderCategories(){
