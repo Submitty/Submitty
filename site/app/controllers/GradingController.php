@@ -5,11 +5,12 @@ namespace app\controllers;
 use app\controllers\grading\ElectronicGraderController;
 use app\controllers\grading\SimpleGraderController;
 use app\controllers\grading\TeamListController;
+use app\controllers\grading\ImagesController;
 use app\libraries\DateUtils;
 
 
 class GradingController extends AbstractController {
-    
+
     public function run() {
         $controller = null;
         switch ($_REQUEST['page']) {
@@ -18,6 +19,9 @@ class GradingController extends AbstractController {
                 break;
             case 'electronic':
                 $controller = new ElectronicGraderController($this->core);
+                break;
+            case 'images':
+                $controller = new ImagesController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
@@ -29,11 +33,11 @@ class GradingController extends AbstractController {
     /**
     * Returns true only if a user is authorized to view the ENTIRETY of a gradeable.
     *
-    * Given a gradeable, determine whether or not the current user can view it. 
+    * Given a gradeable, determine whether or not the current user can view it.
     * If hidden is true, a regular users cannot view their own files.
     */
     protected function canIViewThis($req_gradeable, $who_id, $hidden=False){
-        
+
 
         //admins and full access graders can see everything.
         if($this->core->getUser()->accessAdmin() || $this->core->getUser()->accessFullGrading()){

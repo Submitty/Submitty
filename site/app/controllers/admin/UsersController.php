@@ -32,7 +32,7 @@ class UsersController extends AbstractController {
                 break;
             case 'update_registration_sections':
                 $this->updateRegistrationSections();
-                break;    
+                break;
             case 'update_rotating_sections':
                 $this->updateRotatingSections();
                 break;
@@ -41,6 +41,9 @@ class UsersController extends AbstractController {
                 break;
             case 'upload_class_list':
                 $this->uploadClassList();
+                break;
+            case 'upload_images':
+                $this->uploadImages();
                 break;
             case 'students':
             default:
@@ -206,7 +209,7 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
-    
+
     public function updateRegistrationSections() {
         $return_url = $this->core->buildUrl(
             array('component' => 'admin',
@@ -234,7 +237,7 @@ class UsersController extends AbstractController {
             if ($flag == 1) {
                 $this->core->addErrorMessage("Registration Section already present");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url);       
+                $this->core->redirect($return_url);
             }
             else {
                 $this->core->getQueries()->insertNewRegistrationSection(intval($_POST['add_reg_section']));
@@ -253,7 +256,7 @@ class UsersController extends AbstractController {
             if ($valid_reg_section_flag == 0) {
                 $this->core->addErrorMessage("Not a valid Registration Section");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url); 
+                $this->core->redirect($return_url);
             }
             else {
                 $no_user_flag=1;
@@ -263,7 +266,7 @@ class UsersController extends AbstractController {
                     if ($registration == intval($_POST['delete_reg_section'])) {
                         $no_user_flag=0;
                         break;
-                    }    
+                    }
                 }
 
                 foreach ($graders as $grader) {
@@ -273,22 +276,22 @@ class UsersController extends AbstractController {
                             break;
                         }
                     }
-                }    
+                }
                 if (($no_user_flag != 1) || ($no_grader_flag != 1)) {
                     $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
                     $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);      
+                    $this->core->redirect($return_url);
                 }
                 else {
                     $this->core->getQueries()->deleteRegistrationSection(intval($_POST['delete_reg_section']));
-                }    
+                }
             }
         }
 
         $this->core->addSuccessMessage("Registration sections setup");
         $this->core->redirect($return_url);
 
-    }        
+    }
 
     public function updateRotatingSections() {
         $return_url = $this->core->buildUrl(
@@ -709,6 +712,27 @@ class UsersController extends AbstractController {
                 }
             }
         }
+
+        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
+        $this->core->redirect($return_url);
+    }
+
+    public function uploadImages() {
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        //$contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);

@@ -20,14 +20,14 @@ class GradeableView extends AbstractView {
     <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
     <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
     </p>
-    
+
     <br><br>
     <p>
     Prepare your assignment configuration as a single <code>config.json</code> file.<br>
           Or as a zip of the <code>config.json</code>, and the directories <code>provided_code</code>,
           <code>test_input</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
     </p>
-    
+
     <br><br>
 
     <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'process_upload_config'))}" method="POST" enctype="multipart/form-data">
@@ -103,7 +103,7 @@ HTML;
     <div>
         <div class="file-viewer"><a onclick='openFrame("{$url}", "{$id}", "{$v['name']}")'>
             <span class='icon-plus'></span>{$html_file}</a> <a onclick='openUrl("{$url}")'>(Popout)</a>
-        </div> 
+        </div>
 
         <div id="file_viewer_{$id}" style='margin-left: {$neg_margin_left}px'></div>
     </div>
