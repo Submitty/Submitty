@@ -11,13 +11,14 @@ is returned.
 """
 import cgi
 # If things are not working, then this should be enabled for better troubleshooting
-# import cgitb; cgitb.enable()
+import cgitb; cgitb.enable()
 import json
 import os
 import subprocess
 import shutil
 import stat
-
+import PyPDF2
+from PyPDF2 import PdfFileReader, PdfFileWriter
 # from grade_item.py
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
@@ -71,12 +72,9 @@ try:
     for filename in os.listdir(bulk_path):
 
         # dump pdf info from pdftk, then parse for the total # of pages
-        total_pages = subprocess.check_output(["pdftk", filename, "dump_data"])
-        total_pages = total_pages.decode('utf-8').rstrip()
-        left_index = total_pages.find("NumberOfPages") + 15
-        right_index = total_pages.find("PageMediaBegin") - 1
-        total_pages = int(total_pages[left_index: right_index])
-        
+        pdfFileObj = open(filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        total_pages = pdfReader.numPages
         if (total_pages % num != 0):
             valid = False
             message = "For file '{f}' the total # of pages: {t} is not divisible by the # of page(s) per exam: {n}".format(f=filename,t=total_pages,n=num)
@@ -87,22 +85,29 @@ try:
     for filename in os.listdir(bulk_path):
 
         # recalculate the total # of pages for each file
-        total_pages = subprocess.check_output(["pdftk", filename, "dump_data"])
-        total_pages = total_pages.decode('utf-8').rstrip()
-        left_index = total_pages.find("NumberOfPages") + 15
-        right_index = total_pages.find("PageMediaBegin") - 1
-        total_pages = int(total_pages[left_index: right_index])
+        pdfFileObj = open(filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        total_pages = pdfReader.numPages
 
         div = total_pages // num
         
-        for j in range(0,div):
-            out_pdf = filename[:-4] + "_" + str(j) + ".pdf"
-            out_cover_pdf = filename[:-4] + "_" + str(j) + "_cover.pdf"
-            start = j*num+1
-            stop = (j+1)*num
-            subprocess.call(["pdftk", filename, "cat", str(start) + "-" + str(stop), "output", out_pdf])
-            subprocess.call(['pdftk', filename, 'cat', str(start), 'output', out_cover_pdf])
-    message += "=> finished pdftk"
+        # pdf = PdfFileReader(path)
+        counter = 0
+        testmsg = ""
+        for i in range(0, total_pages, num):
+            cover_writer = PdfFileWriter()
+            cover_writer.addPage(pdfReader.getPage(counter)) 
+            cover_filename = '{}_{}_cover.pdf'.format(filename, int(i/2))
+            for j in range(counter, counter+num):
+                pdf_writer = PdfFileWriter()
+                pdf_writer.addPage(pdfReader.getPage(j)) 
+                output_filename = '{}_{}.pdf'.format(filename, int(i/2))
+                counter+=1
+            with open(output_filename, 'wb') as out:
+                pdf_writer.write(out)
+            with open(cover_filename, 'wb') as out:
+                cover_writer.write(out)
+    message += "=> finished PyPDF2"
 
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):
