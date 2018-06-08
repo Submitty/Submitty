@@ -1,12 +1,14 @@
 
 let errors = {};
-function updateErrors() {
-    $('#ajax_debug').html(errors);
+function updateErrors(data) {
+    $('#ajax_raw').html(data);
     if(Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        $('#ajax_debug').html(errors);
     }
     else {
         $('#save_status').html('All Changes Saved');
+        $('#ajax_debug').html('');
     }
 }
 
@@ -37,8 +39,7 @@ function getErrorCallback(props) {
                 clearError(name);
             }
         });
-        updateErrors();
-        $('#ajax_raw').html(data);
+        updateErrors(data);
     }
 }
 function getSuccessCallback(props) {
@@ -257,8 +258,7 @@ function saveRubric() {
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
-            errors['rubric'] = data.responseText;
-            updateErrors();
+            updateErrors(data.responseText);
         }
     });
 }
@@ -306,13 +306,11 @@ function saveGraders() {
         },
         success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
-            delete errors['graders'];
             updateErrors();
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
-            errors['graders'] = data.responseText;
-            updateErrors();
+            updateErrors(data.responseText);
         }
     });
 }

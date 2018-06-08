@@ -947,7 +947,7 @@ class AdminGradeableController extends AbstractController
             if ($result === null) {
                 // This should almost never happen
                 return [2, 'Gradeable was not created!'];
-            } else if (self::anyErrors($result) !== 0) {
+            } else if (self::anyErrors($result)) {
                 return [2, 'Merged template data failed to validate!'];
             }
         } else {
@@ -970,12 +970,12 @@ class AdminGradeableController extends AbstractController
 
         $response_data = [];
 
-        if (self::anyErrors($result) === 0) {
+        if (!self::anyErrors($result)) {
             http_response_code(204); // NO CONTENT
         } else {
-            $response_data['errors'] = $result;
             http_response_code(400);
         }
+        $response_data['errors'] = $result;
 
         // Finally, send the requester back the information
         $this->core->getOutput()->renderJson($response_data);
