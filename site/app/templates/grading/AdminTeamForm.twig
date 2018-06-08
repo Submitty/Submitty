@@ -1,0 +1,41 @@
+<div class="popup-form" id="admin-team-form" style="width:550px; margin-left:-250px;">
+    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'submit_team_form', 'gradeable_id': gradeable.getId()}) }}">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="new_team" />
+        <input type="hidden" name="new_team_user_id" />
+        <input type="hidden" name="edit_team_team_id" />
+        <input type="hidden" name="num_users" />
+        <input type="hidden" id="student_full_id" value='{{ student_full }}'/>
+        {% if view %}
+            <input type="hidden" name="view" value="{{ view }}" />
+        {% endif %}
+        <h2 id="admin-team-title"></h2>
+        <br />
+        <div id="admin-team-members" style="width:50%;"></div>
+        <div>
+            Registration Section:<br />
+            <select name="reg_section">
+                {% for section in all_reg_sections %}
+                    <option value="{{ section }}">Section {{ section }}</option>
+                {% endfor %}
+                <option value="NULL">Section NULL</option>
+            </select><br /><br />
+            Rotating Section:<br />
+            <select name="rot_section">
+                {% for section in all_rot_sections %}
+                    <option value="{{ section }}">Section {{ section }}</option>
+                {% endfor %}
+                <option value="NULL">Section NULL</option>
+            </select>
+        </div>
+        <br />
+        <br />
+        <h4 id="admin-team-history-title"></h4>
+        <div id="admin-team-history-left" style="width:28%;"></div>
+        <div id="admin-team-history-right" style="width:62%;"></div>
+        <div style="float: right; width: auto; margin-top: 10px">
+            <a onclick="$('#admin-team-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>

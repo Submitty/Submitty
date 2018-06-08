@@ -1536,6 +1536,13 @@ WHERE gcm_id=?", $params);
     public function leaveTeam($team_id, $user_id) {
         $this->course_db->query("DELETE FROM teams AS t
           WHERE team_id=? AND user_id=? AND state=1", array($team_id, $user_id));
+        $this->course_db->query("SELECT * FROM teams WHERE team_id=? AND state=1", array($team_id));
+        if(count($this->course_db->rows()) == 0){
+           //If this happens, then remove all invitations
+            $this->course_db->query("DELETE FROM teams AS t
+              WHERE team_id=?", array($team_id));
+        }
+
     }
 
     /**
