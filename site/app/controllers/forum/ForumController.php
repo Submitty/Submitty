@@ -109,13 +109,13 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function isValidCategories($inputCategoryIds = -1, $inputCategoriesName = -1){
+    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
         $rows = $this->core->getQueries()->getCategories();
-        if(is_array($inputCategoryIds)) {
-            if(count($inputCategoryIds) < 1) {
+        if(is_array($inputCategoriesIds)) {
+            if(count($inputCategoriesIds) < 1) {
                 return false;
             }
-            foreach ($inputCategoryIds as $category_id) {
+            foreach ($inputCategoriesIds as $category_id) {
                 $match_found = false;
                 foreach($rows as $index => $values){
                     if($values["category_id"] === $category_id) {
@@ -347,11 +347,11 @@ class ForumController extends AbstractController {
 
         foreach ($ordered_threads as &$thread) {
             $list = array();
-            foreach(explode(",", $thread['categories_ids']) as $id ) {
+            foreach(explode("|", $thread['categories_ids']) as $id ) {
                 $list[] = (int)$id;
             }
             $thread['categories_ids'] = $list;
-            $thread['categories_desc'] = explode(",", $thread['categories_desc']);
+            $thread['categories_desc'] = explode("|", $thread['categories_desc']);
         }
         return $ordered_threads;
     }
