@@ -759,12 +759,12 @@ function calcSimpleGraderStats(action) {
     for(c = 0; c < averages.length; c++) {
         average += averages[c];
         stddev += stddevs[c]**2
-        stats_popup.find("#avg-" + c.toString()).text(averages[c].toFixed(2));
-        stats_popup.find("#stddev-" + c.toString()).text(stddevs[c].toFixed(2));
+        stats_popup.find("#avg-component-" + c.toString()).text(averages[c].toFixed(2));
+        stats_popup.find("#stddev-component-" + c.toString()).text(stddevs[c].toFixed(2));
     }
     stddev = Math.sqrt(stddev);
-    stats_popup.find("#avg-t").text(average.toFixed(2));
-    stats_popup.find("#stddev-t").text(stddev.toFixed(2));
+    stats_popup.find("#avg-total").text(average.toFixed(2));
+    stats_popup.find("#stddev-total").text(stddev.toFixed(2));
 
     var num_graded_elem = stats_popup.find("#num-graded");
     $(num_graded_elem).text(num_graded.toString() + "/" + num_users.toString() + " students have a nonzero grade.");

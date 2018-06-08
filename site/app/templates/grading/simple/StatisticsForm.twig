@@ -14,8 +14,8 @@
                     <tbody>
                         <tr>
                             <td>{{ component.getTitle() }}</td>
-                            <td id="avg-{{ i }}"></td>
-                            <td id="stddev-{{ i }}"></td>
+                            <td id="avg-component-{{ i }}"></td>
+                            <td id="stddev-component-{{ i }}"></td>
                         </tr>
                     </tbody>
                     {% set i = i + 1 %}
@@ -23,8 +23,8 @@
             {% endfor %}
             <tbody><tr>
                 <td>Total</td>
-                <td id="avg-t"></td>
-                <td id="stddev-t"></td>
+                <td id="avg-total"></td>
+                <td id="stddev-total"></td>
             </tr></tbody>
         </table>
         <p><br></p>
