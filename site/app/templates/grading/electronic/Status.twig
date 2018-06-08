@@ -77,8 +77,8 @@
                     <b>Statistics for Completely Graded Assignments: </b>
                     <br/>
                     <div style="margin-left: 20px">
-                        {% if overall_average == null %}
-                            There are no students completely graded yet.
+                        {% if overall_average.getCount() == 0 %}
+                            No assignments have been completely graded yet.
                         {% else %}
                             Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
                             Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
@@ -92,7 +92,7 @@
                         <br/>
                         <div style="margin-left: 20px">
                             {% if autograded_average.getCount() == 0 %}
-                                There are no submitted assignments yet.
+                                No assignments have been submitted yet.
                             {% else %}
                                 Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ autograded_percentage }}%)<br/>
                                 Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
