@@ -1,6 +1,6 @@
 <div id="gradeable-dates">
     <input name="g_ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
-    <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs)
+    TA Beta Testing Date (gradeable visible to TAs)
 
     <br />
 
@@ -8,44 +8,31 @@
     <div class="electronic_file">
         <div class="team_yes">
             <input name="eg_team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
-            <em style='color: orange;'><b>Team Lock Date</b></em>? (Instructors can still manually manage teams)
+            Team Lock Date (Instructors can still manually manage teams)
 
             <br />
         </div>
 
         <input id="date_submit" name="eg_submission_open_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
-        <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students)
-        <em style='color: orange;'>must be >= TA Beta Testing Date</em>
+        Submission Open Date (submission available to students)
 
         <br />
 
         <input id="date_due" name="eg_submission_due_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
-        <em style='color: orange;'><b>Due Date</b></em>?
-        <em style='color: orange;'>must be >= Submission Open Date</em>
+        Due Date
 
         <br />
     </div>
 
     <div class="manual_grading">
         <input name="g_grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
-        <em style='color: orange;'><b>TA/Instructor Manual Grading Open Date</b></em>? (graders may begin grading)
-        <em style='color: orange;'>must be >=
-            <span class="electronic_file">Due Date (+ max allowed late days)</span>
-            <span class="checkpoints numeric">TA Beta Testing Date</span>
-        </em>
+        TA/Instructor Manual Grading Open Date (graders may begin grading)
 
         <br />
     </div>
 
     <input name="g_grade_released_date" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
-    <em style='color: orange;'><b>Grades Released Date</b></em>? (grades will be visible to students)
-    <em style='color: orange;'>must be >=
-        <span class="electronic_file">
-            <span class="manual_grading">TA/Instructor Manual Grading Open Date</span>
-            <span class="no_manual_grading">Due Date (+ max allowed late days)</span>
-        </span>
-        <span class="checkpoints numeric">Manual Grading Open Date</span>
-    </em>
+    Grades Released Date (grades will be visible to students)
 
     <br />
 
