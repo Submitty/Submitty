@@ -1,59 +1,60 @@
-<br />
-How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val" onchange="calculateTotalScore();"/>
-&emsp;&emsp;
+<div id="gradeable_rubric">
+    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    &emsp;&emsp;
 
-How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
-<br /> <br />
+    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <br /> <br />
 
-<div class="multi-field-wrapper-numeric" id="gradeable_rubric">
-    <h5>Numeric Items</h5>
-    <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
-        <!-- Headings -->
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th> Label </th>
-            <th> Max Score </th>
-            <th> Extra Credit?</th>
-        </tr>
-        </thead>
-        <!-- Footers -->
-        <tfoot style="background: #E1E1E1;">
-        <tr>
-            <td><strong> Total </strong></td>
-            <td><strong id="totalScore"></strong></td>
-            <td><strong id="totalEC"></strong></td>
-        </tr>
-        </tfoot>
-        <tbody style="background: #f9f9f9;">
-        <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="multi-field" id="mult-field-0" style="display:none;">
-            <td>
-                <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" />
-            </td>
-            <td>
-                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/>
-            </td>
-            <td>
-                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
-            </td>
-        </tr>
-    </table>
+    <div class="multi-field-wrapper-numeric">
+        <h5>Numeric Items</h5>
+        <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+            <!-- Headings -->
+            <thead style="background: #E1E1E1;">
+            <tr>
+                <th> Label </th>
+                <th> Max Score </th>
+                <th> Extra Credit?</th>
+            </tr>
+            </thead>
+            <!-- Footers -->
+            <tfoot style="background: #E1E1E1;">
+            <tr>
+                <td><strong> Total </strong></td>
+                <td><strong id="totalScore"></strong></td>
+                <td><strong id="totalEC"></strong></td>
+            </tr>
+            </tfoot>
+            <tbody style="background: #f9f9f9;">
+            <!-- This is a bit of a hack, but it works (^_^) -->
+            <tr class="multi-field" id="mult-field-0" style="display:none;">
+                <td>
+                    <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" />
+                </td>
+                <td>
+                    <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/>
+                </td>
+                <td>
+                    <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
+                </td>
+            </tr>
+        </table>
 
-    <h5>Text Items</h5>
-    <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th> Label </th>
-        </tr>
-        </thead>
-        <tbody style="background: #f9f9f9;">
-        <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="multi-field" id="mult-field-0" style="display:none;">
-            <td>
-                <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/>
-            </td>
-        </tr>
-    </table>
+        <h5>Text Items</h5>
+        <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
+            <thead style="background: #E1E1E1;">
+            <tr>
+                <th> Label </th>
+            </tr>
+            </thead>
+            <tbody style="background: #f9f9f9;">
+            <!-- This is a bit of a hack, but it works (^_^) -->
+            <tr class="multi-field" id="mult-field-0" style="display:none;">
+                <td>
+                    <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 <br />
 <!--Do you want a box for an (optional) message from the TA to the student?

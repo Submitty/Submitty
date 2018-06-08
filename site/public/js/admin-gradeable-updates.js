@@ -222,52 +222,7 @@ function serializeRubric() {
             if ($.inArray(this.name, ignore) !== -1) {
                 return;
             }
-            var val = this.value;
-            if ($("[name=" + this.name + "]").hasClass('int_val')) {
-                val = parseInt(val);
-            }
-            else if ($("[name=" + this.name + "]").hasClass('float_val')) {
-                val = parseFloat(val);
-            }
-
-            else if ($("[name=" + this.name + "]").hasClass('bool_val')) {
-                val = (this.value === 'true');
-            }
-
-            if ($("[name=" + this.name + "]").hasClass('grader')) {
-                var tmp = this.name.split('_');
-                var grader = tmp[1];
-                if (o['grader'] === undefined) {
-                    o['grader'] = [];
-                }
-                var arr = {};
-                arr[grader] = this.value.trim();
-                o['grader'].push(arr);
-            }
-            else if ($("[name=" + this.name + "]").hasClass('points')) {
-                if (o['points'] === undefined) {
-                    o['points'] = [];
-                }
-                o['points'].push(parseFloat(this.value));
-            }
-            else if ($("[name=" + this.name + "]").hasClass('complex_type')) {
-                var classes = $("[name=" + this.name + "]").closest('.complex_type').prop('class').split(" ");
-                classes.splice(classes.indexOf('complex_type'), 1);
-                var complex_type = classes[0];
-
-                if (o[complex_type] === undefined) {
-                    o[complex_type] = [];
-                }
-                o[complex_type].push(val);
-            }
-            else if (o[this.name] !== undefined) {
-                if (!o[this.name].push) {
-                    o[this.name] = [o[this.name]];
-                }
-                o[this.name].push(val || '');
-            } else {
-                o[this.name] = val || '';
-            }
+            o[this.name] = this.value || '';
         });
         return o;
     }.call($('form'));
