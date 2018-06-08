@@ -14,28 +14,33 @@ use app\libraries\FileUtils;
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
-     * @param array     $sections
+     * @param array[] $sections
+     * @param SimpleStat[] $component_averages
+     * @param SimpleStat $autograded_average
+     * @param SimpleStat $overall_average
+     * @param int $total_submissions
+     * @param int $registered_but_not_rotating
+     * @param int $rotating_but_not_registered
+     * @param int $viewed_grade
+     * @param string $section_type
      * @return string
      */
     public function statusPage(
-        $gradeable,
-        $sections,
-        $component_averages,
-        $autograded_average,
-        $overall_average,
-        $total_submissions,
-        $registered_but_not_rotating,
-        $rotating_but_not_registered,
-        $viewed_grade,
-        $section_type) {
+        Gradeable $gradeable,
+        array $sections,
+        array $component_averages,
+        SimpleStat $autograded_average,
+        SimpleStat $overall_average,
+        int $total_submissions,
+        int $registered_but_not_rotating,
+        int $rotating_but_not_registered,
+        int $viewed_grade,
+        string $section_type) {
 
-        $return = "";
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
-        $course = $this->core->getConfig()->getCourse();
-        $semester = $this->core->getConfig()->getSemester();
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
