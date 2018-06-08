@@ -904,7 +904,7 @@ class AdminGradeableController extends AbstractController
         $result = $this->updateGradeable($admin_gradeable, $front_page_properties);
         if ($result === null) {
             return [2, 'Gradeable was not created!'];
-        } else if (self::anyErrors($result) !== 0) {
+        } else if (self::anyErrors($result)) {
             return [2, 'Merged template data failed to validate!'];
         }
 
