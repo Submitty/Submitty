@@ -57,6 +57,20 @@ CREATE TABLE mapped_courses (
 );
 
 
+CREATE TABLE migrations_master (
+  id VARCHAR(100) PRIMARY KEY NOT NULL,
+  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status NUMERIC(1) DEFAULT 0 NOT NULL
+);
+
+
+CREATE TABLE migrations_system (
+  id VARCHAR(100) PRIMARY KEY NOT NULL,
+  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status NUMERIC(1) DEFAULT 0 NOT NULL
+);
+
+
 --
 -- TOC entry 184 (class 1259 OID 19651)
 -- Name: courses_users; Type: TABLE; Schema: public; Owner: -
