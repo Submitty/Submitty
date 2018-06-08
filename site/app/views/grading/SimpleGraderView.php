@@ -89,6 +89,7 @@ HTML;
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2><p>{$ta_instruct}</p><br>
     <p style="float: left;">$info</p>
+    <a class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
 HTML;
         
         if($action === 'numeric') {
@@ -118,7 +119,7 @@ HTML;
                 <td width="91" style="text-align: left"> <a href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => $action, 'g_id' => $gradeable->getId(), 'sort' => 'last', 'view' => $view))}"><span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i></a></td>
 HTML;
         $num_text = 0;
-        $num_numeric = 0;
+        $num_numeric = count($gradeable->getComponents());
         $comp_ids = array();
         if($action == 'lab'){
             foreach ($gradeable->getComponents() as $component) {
@@ -128,7 +129,6 @@ HTML;
             }
         }
         else{
-            $num_text = 0;
             $num_numeric = 0;
             foreach ($gradeable->getComponents() as $component) {
                 if($component->getIsText()){
@@ -171,6 +171,8 @@ HTML;
         $last_section = false;
         $tbody_open = false;
         $colspan = 5 + count($gradeable->getComponents());
+        $num_users = 0;
+
         if($action == 'numeric'){
             $colspan++;
         }
@@ -181,6 +183,7 @@ HTML;
             </tr>
 HTML;
         }
+        // Iterate through every row
         foreach ($rows as $gradeable_row) {
             if ($gradeable->isGradeByRegistration()) {
                 $section = $gradeable_row->getUser()->getRegistrationSection();
@@ -244,7 +247,6 @@ HTML;
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
                 <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
-
             if($action == 'lab'){
                 $col = 0;
                 foreach ($gradeable_row->getComponents() as $component) {
@@ -301,6 +303,7 @@ HTML;
                     $return .= <<<HTML
                 <td class="option-small-output"><input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{$row}" value=$total data-total="true" readonly></td>
 HTML;
+
                 }
 
                 foreach ($gradeable_row->getComponents() as $component) {
@@ -313,18 +316,26 @@ HTML;
                     }
                 }
             }
+
+            if($gradeable_row->getUser()->getRegistrationSection() != "") {
+                $num_users++;
+            }
+
             $return .= <<<HTML
             </tr>
 HTML;
             $row++;
             $count++;
         }
-
+        
         $return .= <<<HTML
-        </tbody>
-    </table>
-</div>
+        </tbody></table></div>
 HTML;
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
+            "gradeable" => $gradeable,
+            "num_users" => $num_users
+        ]);
 
         return $return;
     }

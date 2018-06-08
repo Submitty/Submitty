@@ -722,10 +722,7 @@ Point precision:
 
     function addQuestion(){
         //get the last question number
-        var num = 0;
-        try {
-            num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
-        } catch (e) {}
+        var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
         var newQ = num+1;
         var sBox = selectBox(newQ);
         var display = "";
