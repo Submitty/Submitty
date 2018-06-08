@@ -36,7 +36,7 @@ Point precision:
 <input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
 <br /><br />
 
-<table class="electronic_file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
+<table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
     <thead style="background: #E1E1E1;">
     <tr>
         <th>Manual/TA/Peer Grading Rubric</th>
@@ -728,7 +728,10 @@ Point precision:
 
     function addQuestion(){
         //get the last question number
-        var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        var num = 0;
+        try {
+            num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        } catch (e) {}
         var newQ = num+1;
         var sBox = selectBox(newQ);
         var display = "";

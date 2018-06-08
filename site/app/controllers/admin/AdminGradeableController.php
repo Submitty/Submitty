@@ -309,7 +309,7 @@ class AdminGradeableController extends AbstractController
     }
 
     private function updateRubricRequest() {
-        $gradeable = $this->core->getQueries()->getGradeable($_POST['g_id']);
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['id']);
         if($gradeable === null) {
             http_response_code(404);
             return;
@@ -329,30 +329,47 @@ class AdminGradeableController extends AbstractController
         $this->core->getOutput()->renderJson($response_data);
     }
 
+    // Parses the checkpoint details from the user form into a Component.  NOTE: order is not set here
+    private static function parseCheckpoint(GradeableComponent $component, $details)
+    {
+        if(!isset($details['label'])) {
+            $details['label'] = '';
+        }
+        if(!isset($details['extra_credit'])) {
+            $details['extra_credit'] = 'false';
+        }
+        $component->setTitle($details['label']);
+        $component->setTaComment("");
+        $component->setStudentComment("");
+        $component->setLowerClamp(0);
+        $component->setDefault(0);
+        // if it is extra credit then it would be out of 0 points otherwise 1
+        $component->setMaxValue($details['extra_credit'] === 'true' ? 0 : 1);
+        $component->setUpperClamp(1);
+        $component->setIsText(false);
+        $component->setIsPeer(false);
+        $component->setPage(0);
+    }
     private function updateRubric(Gradeable $gradeable)
     {
         // Add the rubric information using the old method for now.
         $edit_gradeable = 1;
         $peer_grading_complete_score = 0;
 
+        $admin_gradeable = $this->loadAdminGradeable($gradeable->getId());
+        $old_components = $admin_gradeable->getOldComponents();
+        $num_old_components = count($old_components);
+
         $num_questions = 0;
-        $num_checkpoints = -1; // remove 1 for the template
         foreach ($_POST as $k => $v) {
             if (strpos($k, 'comment_title_') !== false) {
                 ++$num_questions;
             }
-            if (strpos($k, 'checkpoint_label_') !== false) {
-                ++$num_checkpoints;
-            }
         }
 
-        if ($edit_gradeable === 1) {
-            $old_components = $gradeable->getComponents();
-            $num_old_components = count($old_components);
-            $start_index = $num_old_components;
-        } else {
-            $start_index = 0;
-        }
+        $old_components = $gradeable->getComponents();
+        $num_old_components = count($old_components);
+        $start_index = $num_old_components;
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $make_peer_assignments = false;
@@ -569,46 +586,32 @@ class AdminGradeableController extends AbstractController
                 $index++;
             }
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            if ($edit_gradeable === 1) {
-                $x = 0;
-                foreach ($old_components as $old_component) {
-                    if ($x < $num_checkpoints && $x < $num_old_components) {
-                        $old_component->setTitle($_POST['checkpoint_label_' . strval($x + 1)]);
-                        $old_component->setTaComment("");
-                        $old_component->setStudentComment("");
-                        $old_component->setLowerClamp(0);
-                        $old_component->setDefault(0);
-                        // if it is extra credit then it woull be out of 0 points otherwise 1
-                        $max_value = (isset($_POST['checkpoint_extra_' . strval($x + 1)])) ? 0 : 1;
-                        $old_component->setMaxValue($max_value);
-                        $old_component->setUpperClamp(1);
-                        $old_component->setIsText(false);
-                        $old_component->setIsPeer(false);
-                        $old_component->setOrder($x);
-                        $old_component->setPage(0);
-                        $this->core->getQueries()->updateGradeableComponent($old_component);
-                    } else if ($num_old_components > $num_checkpoints) {
-                        $this->core->getQueries()->deleteGradeableComponent($old_component);
-                    }
-                    $x++;
-                }
+            if(!isset($_POST['checkpoints'])) {
+                $_POST['checkpoints'] = [];
             }
+
+            $num_checkpoints = count($_POST['checkpoints']);
+
+            // Iterate through each existing component and update them in the database,
+            //  removing any extras
+            $x = 0;
+            foreach ($old_components as $old_component) {
+                if ($x < $num_checkpoints && $x < $num_old_components) {
+                    self::parseCheckpoint($old_component, $_POST['checkpoints'][$x]);
+                    $old_component->setOrder($x);
+                    $this->core->getQueries()->updateGradeableComponent($old_component);
+                } else if ($num_old_components > $num_checkpoints) {
+                    $this->core->getQueries()->deleteGradeableComponent($old_component);
+                }
+                $x++;
+            }
+
+            // iterate through each new checkpoint, adding them to the database
             for ($x = $start_index; $x < $num_checkpoints; $x++) {
                 $gradeable_component = new GradeableComponent($this->core);
-                $gradeable_component->setTitle($_POST['checkpoint_label_' . strval($x + 1)]);
-                $gradeable_component->setTaComment("");
-                $gradeable_component->setStudentComment("");
-                $gradeable_component->setLowerClamp(0);
-                $gradeable_component->setDefault(0);
-                // if it is extra credit then it woull be out of 0 points otherwise 1
-                $max_value = (isset($_POST['checkpoint_extra_' . strval($x + 1)])) ? 0 : 1;
-                $gradeable_component->setMaxValue($max_value);
-                $gradeable_component->setUpperClamp(1);
-                $gradeable_component->setIsText(false);
-                $gradeable_component->setIsPeer(false);
+                self::parseCheckpoint($gradeable_component, $_POST['checkpoints'][$x]);
                 $gradeable_component->setOrder($x);
-                $gradeable_component->setPage(0);
-                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable);
+                $this->core->getQueries()->createNewGradeableComponent($gradeable_component, $gradeable->getId());
             }
         } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             $num_numeric = intval($_POST['num_numeric_items']);
