@@ -455,48 +455,11 @@ HTML;
 
 
     public function showVersionChoice($gradeable, $onChange, $formatting = "") {
-        $return = <<<HTML
-    <select style="margin: 0 10px;{$formatting} " name="submission_version"
-    onChange="{$onChange}">
-
-HTML;
-        if ($gradeable->getActiveVersion() == 0) {
-            $selected = ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) ? "selected" : "";
-            $return .= <<<HTML
-        <option value="0" {$selected}>Do Not Grade Assignment</option>
-HTML;
-
-        }
-        foreach ($gradeable->getVersions() as $version) {
-            $selected = "";
-            $select_text = array("Version #{$version->getVersion()}");
-            if ($gradeable->getNormalPoints() > 0) {
-                $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-            }
-
-            if ($version->getDaysLate() > 0) {
-                $select_text[] = "Days Late: ".$version->getDaysLate();
-            }
-
-            if ($version->isActive()) {
-                $select_text[] = "GRADE THIS VERSION";
-            }
-
-            if ($version->getVersion() == $gradeable->getCurrentVersionNumber()) {
-                $selected = "selected";
-            }
-
-            $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
-            $return .= <<<HTML
-        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
-
-HTML;
-        }
-
-        $return .= <<<HTML
-    </select>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/VersionChoice.twig", [
+            "gradeable" => $gradeable,
+            "onChange" => $onChange,
+            "formatting" => $formatting,
+        ]);
     }
 
     public function showTAResults(Gradeable $gradeable){
