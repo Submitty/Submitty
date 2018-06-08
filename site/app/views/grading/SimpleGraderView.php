@@ -332,55 +332,10 @@ HTML;
         </tbody></table></div>
 HTML;
 
-        $return .= <<<HTML
-        <div class="popup-form" id="simple-stats-popup">
-HTML;
-        
-        if($num_users > 0) {
-
-            $return .= <<<HTML
-            
-                <table class="table table-striped table-bordered persist-area">
-                    <thead class="persist-thead">
-                        <tr>
-                            <td width="33%">Component</td>
-                            <td width="33%">Average</td>
-                            <td width="33%">Std. Deviation</td>
-                        </tr>
-                    </thead>
-
-HTML;
-            $i = 0;
-            foreach($gradeable->getComponents() as $component) {
-                if(!$component->getIsText()) {
-                    $return .= <<<HTML
-                    <tbody><tr>
-                        <td>{$component->getTitle()}</td>
-                        <td id="avg-{$i}"></td>
-                        <td id="stddev-{$i}"></td>
-                    </tr></tbody>
-HTML;
-                    $i++;
-                }
-            }
-
-            $return .= <<<HTML
-            <tbody><tr>
-                <td>Total</td>
-                <td id="avg-t"></td>
-                <td id="stddev-t"></td>
-            </tr></tbody>
-            </table>
-            <p></br></p>
-            <p id="num-graded"></p>
-HTML;
-        }
-        else {
-            $return .= <<<HTML
-            <p style="text-align: center">No Statistics To View.</p>
-HTML;
-
-        }
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
+            "gradeable" => $gradeable,
+            "num_users" => $num_users
+        ]);
 
         return $return;
     }
