@@ -113,6 +113,14 @@ class AdminGradeableController extends AbstractController
         // Get existing gradeable
         $admin_gradeable = new AdminGradeable($this->core);
         $this->core->getQueries()->getGradeableInfo($gradeable_id, $admin_gradeable, false);
+
+        // Generate marks array if we're getting an electronic gradeable with TA grading
+        if($admin_gradeable->g_gradeable_type == 0 and $admin_gradeable->eg_use_ta_grading) {
+            $old_components = $admin_gradeable->getOldComponents();
+            foreach($old_components as $old_component) {
+                $old_component->setMarks($this->core->getQueries()->getGradeableComponentsMarks($old_component->getId()));
+            }
+        }
         return $admin_gradeable;
     }
 
@@ -169,6 +177,14 @@ class AdminGradeableController extends AbstractController
             }
         }
         return null;
+    }
+    private static function anyErrors($errors) {
+        foreach($errors as $prop=>$error) {
+            if(!substr($error, 0, 8) === '[Warning]') {
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * Checks if a gradeable is valid
@@ -953,7 +969,6 @@ class AdminGradeableController extends AbstractController
             'g_title', 'g_instructions_url'
         ];
         $errors = array();
-        $warnings = array(); // allows us to ignore "not found" (THIS IS TEMPORARY FOR OLD RUBRIC)
 
         // Apply new values for all properties submitted
         foreach ($details as $prop => $post_val) {
@@ -971,7 +986,7 @@ class AdminGradeableController extends AbstractController
                 } else if (property_exists($admin_gradeable, $prop)) {
                     $admin_gradeable->$prop = $post_val;
                 } else {
-                    $warnings[$prop] = 'Not Found!';
+                    $errors[$prop] = 'Not Found!';
                 }
             } catch (\Exception $e) {
                 $errors[$prop] = $e;
@@ -992,20 +1007,17 @@ class AdminGradeableController extends AbstractController
             $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
         }
 
-        // TODO: make this checkpoint/numeric rubrics first, then switch to twig.js electronic rubric.
-        // TODO:    in the process, separate out the calls to change the rubric and the grades assigned.
-
         $errors = array_merge($errors, self::validateGradeable($admin_gradeable));
 
-        // Be strict.  Only apply database changes if there were no errors.
-        if (count($errors) === 0) {
+        // Be strict.  Only apply database changes if there were no errors. (allow warnings)
+        if (anyErrors($errors)) {
             try {
                 $this->core->getQueries()->updateGradeable($admin_gradeable);
             } catch (\Exception $e) {
                 $errors['db'] = $e;
             }
         }
-        return array_merge($errors, $warnings);
+        return $errors;
     }
 
     private function deleteGradeable()

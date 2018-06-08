@@ -65,32 +65,11 @@ class AdminGradeableView extends AbstractView {
             $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
         }
 
-        $marks = array();
-
         // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
             $action        = "edit";
             $submit_text   = "Save Changes";
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
-
-            // Generate marks array if we're editing an electronic gradeable with TA grading
-            if($admin_gradeable->getGGradeableType() == 0 and $admin_gradeable->getEgUseTaGrading()) {
-                $old_components = $admin_gradeable->getOldComponents();
-                for($x = 0; $x < sizeof($old_components); $x++) {
-                    $component_id = $old_components[$x]->getId();
-                    $my_marks = $this->core->getQueries()->getGradeableComponentsMarks($component_id);
-                    $marks[$component_id] = array();
-                    foreach($my_marks as $i => $mark) {
-                        // $marks[$component_id][$i] = $mark->toArray(); // this encodes/escapes the data
-                        $marks[$component_id][$i] = array(
-                            'publish'   => $mark->getPublish(),
-                            'order'     => $mark->getOrder(),
-                            'id'        => $mark->getId(),
-                            'points'    => $mark->getPoints(),
-                            'note'      => $mark->getNote());
-                    }
-                }
-            }
         }
 
         // This could be a lot more elegant, but we need to get into the same state
@@ -117,8 +96,6 @@ class AdminGradeableView extends AbstractView {
             "nav_tab"         => $nav_tab,
             "semester"        => $_GET['semester'],
             "course"          => $_GET['course'],
-
-            "marks"           => $marks,
 
             // Graders Page Specific
             "all_graders"    => $graders

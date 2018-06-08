@@ -13,6 +13,9 @@ Will this assignment have peer grading?
     </div>
 </fieldset>
 <br />-->
+<span style="color:red; size: 20px">Warning! Electronic Rubric information does not save automatically!  Press 'Save' Button to save</span>
+<br/>
+<br/>
 Is this a PDF with a page assigned to each component?
 <fieldset>
     <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
@@ -34,6 +37,7 @@ Is this a PDF with a page assigned to each component?
 
 Point precision:
 <input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br /><br />
 
 <table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
@@ -60,29 +64,17 @@ Point precision:
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
                                   display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
                 <div id="mark_questions_{{ num }}">
-                    {% if marks|length == 0 %}
-                        <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
-                            <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
-                            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
-                            <!--
-                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            -->
-                            <br>
-                        </div>
-                    {% endif %}
                     {% set first = true %}
                     {% set hide_icons = "" %}
-                    {% for mark in marks[question.getId()] %}
-                        <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
-                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
+                    {% for mark in question.getMarks() %}
+                        <div id="mark_id-{{ num }}-{{ mark.getOrder() }}" name="mark_{{ num }}" data-gcm_id="{{ mark.getId() }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.getOrder() }}" value="{{ mark.getId() }}">
                             <i class="fa fa-circle" aria-hidden="true"></i>
-                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
-                                   value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
+                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.getOrder() }}"
+                                   value="{{ mark.getPoints() }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getNote() }}</textarea>
                             {% if not first %}
-                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
+                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.getOrder() }}" {{ mark.getPublish() ? 'checked' : '' }}> Publish
                             {% endif %}
 
                             <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -157,6 +149,8 @@ Point precision:
     </tr>
     </tbody>
 </table>
+<div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
+<br/>
 
 <script type="text/javascript">
 

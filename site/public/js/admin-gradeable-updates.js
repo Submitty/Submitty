@@ -58,7 +58,7 @@ $(document).ready(function () {
     $('input,select,textarea').change(function () {
         // If its rubric-related, then make different request
         if($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
-            //saveRubric();
+            saveRubric();
             return;
         }
         if($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
@@ -246,6 +246,13 @@ function saveRubric() {
         success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
             updateErrors();
+            window.location.replace(buildUrl({
+                'component': 'admin',
+                'page': 'admin_gradeable',
+                'action': 'edit_gradeable_page',
+                'id': $('#g_id').val(),
+                'nav_tab': '2'
+            }));
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
