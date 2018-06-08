@@ -4,6 +4,7 @@ namespace app\views\grading;
 
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\models\LateDaysCalculation;
@@ -38,10 +39,21 @@ class ElectronicGraderView extends AbstractView {
         $graded = 0;
         $total = 0;
         $no_team_total = 0;
-        $team_total=0;
+        $team_total = 0;
+        $team_percentage = 0;
         $peer_total = 0;
         $peer_graded = 0;
         $peer_percentage = 0;
+        $viewed_total = 0;
+        $viewed_percent = 0;
+        $overall_total = 0;
+        $overall_percentage = 0;
+        $auto_percentage = 0;
+        $component_percentages = [];
+        $component_overall_score = 0;
+        $component_overall_max = 0;
+        $component_overall_percentage = 0;
+
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
@@ -92,8 +104,6 @@ class ElectronicGraderView extends AbstractView {
 
             if($gradeable->isTeamAssignment()){
                 $team_percentage = round(($team_total/$total_students) * 100, 1);
-            } else {
-                $team_percentage = 0;
             }
             if ($peer) {
                 $peer_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
@@ -108,147 +118,58 @@ class ElectronicGraderView extends AbstractView {
                     }
                     $section['graded'] = round($section['graded_components']/$num_components, 1);
                     $section['total'] = $section['total_components']/$num_components;
-                }
-                unset($section); // Clean up reference
 
-                foreach ($sections as $key => &$section) {
                     if ($key === "NULL") {
                         continue;
                     }
                     $valid_graders = array();
                     foreach($section['graders'] as $valid_grader){
+                        /* @var User $valid_grader */
                         if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
                             $valid_graders[] = $valid_grader->getDisplayedFirstName();
                         }
                     }
                     $section["valid_graders"] = $valid_graders;
-                    $graders = (count($valid_graders) > 0) ? implode(', ', $valid_graders) : 'Nobody';
                 }
                 unset($section); // Clean up reference
 
-
-
                 if ($gradeable->taGradesReleased()) {
-                    $show_total = $total/$num_components;
-                    $viewed_percent = number_format(($viewed_grade / max($show_total, 1)) * 100, 1);
-                    if ($gradeable->isTeamAssignment()) {
-                        $return .= <<<HTML
-            <br />
-            Number of teams who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
-HTML;
-                    } else {
-                        $return .= <<<HTML
-            <br />
-            Number of students who have viewed their grade: {$viewed_grade} / {$show_total} ({$viewed_percent}%)
-HTML;
-                    }
+                    $viewed_total = $total/$num_components;
+                    $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
                 }
-                $return .= <<<HTML
-        </div>
-HTML;
             }
             if(!$peer) {
-                    $return .= <<<HTML
-        <div class="box half">
-            <b>Statistics for Completely Graded Assignments: </b><br/>
-            <div style="margin-left: 20px">
-HTML;
-                    if($overall_average == null) {
-                        $return .= <<<HTML
-                There are no students completely graded yet.
-            </div>
-HTML;
-                    }
-                    else {
-                        if($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
-                            $total = $overall_average->getMaxValue();
-                        }
-                        else {
-                            $total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();
-                        }
-                        $percentage = 0;
-                        if ($total != 0) {
-                            $percentage = round($overall_average->getAverageScore()/$total*100);
-                        }
-                        $return .= <<< HTML
-                Average: {$overall_average->getAverageScore()} / {$total} ({$percentage}%)<br/>
-                Standard Deviation: {$overall_average->getStandardDeviation()} <br/>
-                Count: {$overall_average->getCount()} <br/>
-            </div>
-HTML;
-                    }
-                    if($gradeable->getTotalAutograderNonExtraCreditPoints() == 0) {
-                        // Don't display any autograding statistics since this gradeable has none
+                if ($overall_average !== null) {
+                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
+                        $overall_total = $overall_average->getMaxValue();
                     } else {
-                        $return .= <<<HTML
-            <br/><b>Statistics for Auto-Grading: </b><br/>
-            <div style="margin-left: 20px">
-HTML;
-                        if($autograded_average->getCount() == 0) {
-                            $return .= <<<HTML
-                There are no submitted assignments yet.
-            </div>
-HTML;
-                        }
-                        else {
-			    $percentage = 0;
-                            if($gradeable->getTotalAutograderNonExtraCreditPoints() != 0) {
-                                $percentage = round($autograded_average->getAverageScore()/$gradeable->getTotalAutograderNonExtraCreditPoints()*100);
-			    }
-                            $return .= <<<HTML
-                Average: {$autograded_average->getAverageScore()} / {$gradeable->getTotalAutograderNonExtraCreditPoints()} ({$percentage}%)<br/>
-                Standard Deviation: {$autograded_average->getStandardDeviation()} <br/>
-                Count: {$autograded_average->getCount()} <br/>
-            </div>
-HTML;
-                        }
+                        $overall_total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();
                     }
-                    $return .= <<<HTML
-            <br/><b>Statistics for Manually Graded Components: </b><br/>
-            <div style="margin-left: 20px">
-HTML;
-                    if(count($component_averages) == 0) {
-                        $return .= <<<HTML
-            No components have been graded yet.
-HTML;
+                    if ($overall_total != 0) {
+                        $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                     }
-                    else {
-                        $overall_score = 0;
-                        $overall_max = 0;
-                        foreach($component_averages as $comp) {
-                            $overall_score += $comp->getAverageScore();
-                            $overall_max += $comp->getMaxValue();
-                            $percentage = 0;
-			                if ($comp->getMaxValue() != 0) {
-			                    $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
-                            }
-                            $average_string = ($comp->getMaxValue() > 0 ? "{$comp->getAverageScore()} / {$comp->getMaxValue()} ({$percentage}%)" : "{$comp->getAverageScore()}");
-                            $return .= <<<HTML
-                {$comp->getTitle()}:<br/>
-                <div style="margin-left: 40px">
-                    Average: {$average_string}<br/>
-                    Standard Deviation: {$comp->getStandardDeviation()} <br/>
-                    Count: {$comp->getCount()} <br/>
-                </div>
-HTML;
+                }
+                if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
+                    $auto_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                }
+                if (count($component_averages) !== 0) {
+                    foreach ($component_averages as $comp) {
+                        /* @var SimpleStat $comp */
+                        $component_overall_score += $comp->getAverageScore();
+                        $component_overall_max += $comp->getMaxValue();
+                        $percentage = 0;
+                        if ($comp->getMaxValue() != 0) {
+                            $percentage = round($comp->getAverageScore() / $comp->getMaxValue() * 100);
                         }
-                        if($overall_max !=0){
-                            $percentage = round($overall_score / $overall_max *100);
-                            $return .= <<<HTML
-                <br/>Overall Average:  {$overall_score} / {$overall_max} ({$percentage}%)
-HTML;
-                        }
+                        $component_percentages[] = $percentage;
                     }
+                    if ($component_overall_max != 0) {
+                        $component_overall_percentage = round($component_overall_score / $component_overall_max * 100);
+                    }
+                }
                 //This else encompasses the above calculations for Teamss
                 //END OF ELSE
-                $return .= <<<HTML
-            </div>
-        </div>
-HTML;
             }
-            $return .= <<<HTML
-    </div>
-HTML;
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
@@ -266,6 +187,19 @@ HTML;
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,
             "sections" => $sections,
+            "viewed_grade" => $viewed_grade,
+            "viewed_total" => $viewed_total,
+            "viewed_percent" => $viewed_percent,
+            "overall_average" => $overall_average,
+            "overall_total" => $overall_total,
+            "overall_percentage" => $overall_percentage,
+            "auto_percentage" => $auto_percentage,
+            "autograded_average" => $autograded_average,
+            "component_averages" => $component_averages,
+            "component_percentages" => $component_percentages,
+            "component_overall_score" => $component_overall_score,
+            "component_overall_max" => $component_overall_max,
+            "component_overall_percentage" => $component_overall_percentage
         ]);
     }
 

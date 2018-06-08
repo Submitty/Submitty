@@ -7,6 +7,7 @@
         </div>
     {% else %}
         <div class="sub">
+            {# Left panel #}
             <div class="box half">
                 {% if warnings|length > 0 %}
                     <ul>
@@ -57,10 +58,80 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+
+                {% if gradeable.taGradesReleased() %}
+                    {% if gradeable.isTeamAssignment() %}
+                        <br />
+                        Number of teams who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                    {% else %}
+                        <br />
+                        Number of students who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                    {% endif %}
+                {% endif %}
             </div>
+            {# /Left panel #}
+
+            {# Right panel #}
+            {% if not peer %}
+                <div class="box half">
+                    <b>Statistics for Completely Graded Assignments: </b>
+                    <br/>
+                    <div style="margin-left: 20px">
+                        {% if overall_average == null %}
+                            There are no students completely graded yet.
+                        {% else %}
+                            Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
+                            Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
+                            Count: {{ overall_average.getCount() }} <br/>
+                        {% endif %}
+                    </div>
+                    {% if gradeable.getTotalAutograderNonExtraCreditPoints() != 0 %}
+                        {# Only show autograder if we have autograding points #}
+                        <br/>
+                        <b>Statistics for Auto-Grading: </b>
+                        <br/>
+                        <div style="margin-left: 20px">
+                            {% if autograded_average.getCount() == 0 %}
+                                There are no submitted assignments yet.
+                            {% else %}
+                                Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ auto_percentage }}%)<br/>
+                                Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
+                                Count: {{ autograded_average.getCount() }} <br/>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    <br/>
+                    <b>Statistics for Manually Graded Components: </b>
+                    <br/>
+                    <div style="margin-left: 20px">
+                        {% if component_averages|length == 0 %}
+                            No components have been graded yet.
+                        {% else %}
+                            {% for component in component_averages %}
+                                {{ component.getTitle() }}:<br/>
+                                <div style="margin-left: 40px">
+                                    Average:
+                                    {% if component.getMaxValue() > 0 %}
+                                        {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
+                                    {% else %}
+                                        {{ component.getAverageScore() }}
+                                    {% endif %}
+                                    <br/>
+                                    Standard Deviation: {{ component.getStandardDeviation() }} <br/>
+                                    Count: {{ component.getCount() }} <br/>
+                                </div>
+                            {% endfor %}
+                            <br/>
+                            Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {# /Right panel #}
         </div>
     {% endif %}
 
+    {# Bottom buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary"
@@ -85,4 +156,5 @@
             {% endif %}
         {% endif %}
     </div>
+    {# /Bottom buttons #}
 </div>
