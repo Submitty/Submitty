@@ -67,6 +67,16 @@ Vagrant.configure(2) do |config|
     config.vm.synced_folder "../Lichen","/usr/local/submitty/GIT_CHECKOUT/Lichen", mount_options: ["dmode=775", "fmode=774"]
   end
 
+  if File.directory?(File.expand_path("../GIT_ANALYSIS_TOOLS"))
+    config.vm.synced_folder "../GIT_ANALYSIS_TOOLS","/usr/local/submitty/GIT_CHECKOUT_AnalysisTools", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../GIT_TUTORIAL"))
+    config.vm.synced_folder "../GIT_TUTORIAL","/usr/local/submitty/GIT_CHECKOUT_Tutorial", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../GIT_LICHEN"))
+    config.vm.synced_folder "../GIT_LICHEN","/usr/local/submitty/GIT_CHECKOUT_Lichen", mount_options: ["dmode=775", "fmode=774"]
+  end
+
   config.vm.provision 'shell', inline: $script
 
   if ARGV.include?('ssh')

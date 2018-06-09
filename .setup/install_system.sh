@@ -376,7 +376,7 @@ if [ ${WORKER} == 0 ]; then
     # grab the tutorial repo, which includes a number of curated example
     # assignment configurations
 
-    if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial ]; then
+    if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
         echo 'Submitty/Tutorial git repo already exists'
         echo 'You may need to manually pull updates to this repo'
     else
