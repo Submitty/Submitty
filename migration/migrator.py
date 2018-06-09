@@ -25,7 +25,7 @@ ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
 def parse_args():
     parser = ArgumentParser(description='Migration script for upgrading/downgrading the database')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {}'.format(VERSION))
-    config_path = Path(DIR_PATH, '..', '..', 'config')
+    config_path = Path(DIR_PATH, '..', '..', '..', 'config')
     default_config = config_path.resolve() if config_path.exists() else None
     required = False if default_config is not None else True
     parser.add_argument('-c', '--config', dest='config_path', type=str, required=required, default=default_config)
