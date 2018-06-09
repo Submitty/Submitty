@@ -39,8 +39,8 @@
 #         for this gradeable.   this should be omitted if this is not an electronic gradeable.
 #
 #     sample_path [optional]: path for where to get submissions for a given gradeable. If no path is given, then
-#         just use /usr/local/submitty/GIT_CHECKOUT_Submitty/more_autograding_examples/<gradeable_id>/submissions or
-#         just use /usr/local/submitty/GIT_CHECKOUT_Tutorial/examples/<gradeable_id>/submissions
+#         just use /usr/local/submitty/GIT_CHECKOUT/Submitty/more_autograding_examples/<gradeable_id>/submissions or
+#         just use /usr/local/submitty/GIT_CHECKOUT/Tutorial/examples/<gradeable_id>/submissions
 #
 #     g_type: integer between 0-2 inclusive, where 0 is for electronic gradeable, 1 is for Checkpoint and 2 is for
 #         Numeric-Text. This can be omitted if it's an electronic gradeable (as anything with gradeable_config defined
