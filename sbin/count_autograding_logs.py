@@ -3,7 +3,7 @@
 This script will summarize count, wait, & grading times per hour
 
 usage example:
-python3 /usr/local/submitty/GIT_CHECKOUT_Submitty/sbin/count_autograding_logs.py /var/local/submitty/logs/autograding/
+python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/sbin/count_autograding_logs.py /var/local/submitty/logs/autograding/
 """
 
 import sys
