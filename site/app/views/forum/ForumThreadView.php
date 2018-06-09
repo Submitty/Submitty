@@ -908,19 +908,16 @@ HTML;
 HTML;
 					for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
-							<noscript>
-								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
-							</noscript>
 							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
-								<input type="hidden" value="{$categories[$i]['category_id']}"/>
+								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
 							</a>
 HTML;
 					}
 					$return .= <<<HTML
 					<script type="text/javascript">
 					$(function() {
-						// Enabling cat-buttons if JS enabled
-						$("a.cat-buttons input").attr("name","cat[]");
+						// If JS enabled hide checkbox
+						$("a.cat-buttons input").hide();
 
 						$(".cat-buttons").click(function() {
 							if($(this).hasClass("cat-selected")) {
@@ -928,11 +925,13 @@ HTML;
 								$(this).addClass("cat-notselected");
 								$(this).addClass("btn-default");
 								$(this).removeClass("btn-primary");
+								$(this).find("input[type='checkbox']").prop("checked", false);
 							} else {
 								$(this).removeClass("cat-notselected");
 								$(this).addClass("cat-selected");
 								$(this).removeClass("btn-default");
 								$(this).addClass("btn-primary");
+								$(this).find("input[type='checkbox']").prop("checked", true);
 							}
 						});
 						$("#create_thread_form").submit(function() {
@@ -940,7 +939,6 @@ HTML;
 								alert("At least one category must be selected.");
 								return false;
 							}
-							$(this).find('.cat-notselected *').prop("disabled","true");
 						});
 					});
 					</script>
