@@ -217,12 +217,12 @@
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
-    {% set visible = true %}
+    {% set who_id = (gradeable.isTeamAssignment() ? gradeable.getTeam().getId() : gradeable.getUser().getId()) %}
     <td>
         {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
             <b><i>No Team</i></b>
         {% else %}
-            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getId()}) }}">
+            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': who_id}) }}">
                 {{ contents }}
             </a>
         {% endif %}
@@ -245,7 +245,6 @@
         {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
         {% set btn_class = "btn-default" %}
     {% endif %}
-    {% set visible = true %}
     <td>
         {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
             <b><i>No Team</i></b>

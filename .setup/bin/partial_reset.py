@@ -20,7 +20,7 @@ import yaml
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
+SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 
@@ -115,7 +115,7 @@ def main():
         os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
         os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
-        os.system('psql -d submitty -U hsdbu -f {}/site/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
+        os.system('psql -d submitty -U hsdbu -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
