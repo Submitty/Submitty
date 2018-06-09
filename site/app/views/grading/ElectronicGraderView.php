@@ -602,10 +602,10 @@ HTML;
         <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
         <div class="rubric-title">
 HTML;
-        $who = $gradeable->getUser()->getId();
-        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
-        $formatting = "font-size: 13px;";
-        $return .= <<<HTML
+            $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
+            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
+            $formatting = "font-size: 13px;";
+            $return .= <<<HTML
             <div style="float:right;">
 HTML;
         $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
@@ -780,33 +780,7 @@ HTML;
     }
 
     public function popupStudents() {
-        $return = <<<HTML
-<div class="popup-form" id="student-marklist-popup" style="display: none; width: 500px; margin-left: -250px;">
-    <div style="width: auto; height: 450px; overflow-y: auto;" id="student-marklist-popup-content">
-        <h3>Students who received
-            <br><br>
-            <span id="student-marklist-popup-question-name">Name:</span>
-            <br>
-            <em id="student-marklist-popup-mark-note">"Title"</em>
-        </h3>
-        <br>
-        # of students with mark: <span id="student-marklist-popup-student-amount">0</span>
-        <br>
-        # of graded components: <span id="student-marklist-popup-graded-components">0</span>
-        <br>
-        # of total components: <span id="student-marklist-popup-total-components">0</span>
-        <br>
-        <span id="student-marklist-popup-student-names">
-            <br>Name1
-        </span>
-    </div>
-    <div style="float: right; width: auto">
-        <a onclick="$('#student-marklist-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>
-</div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
 
     public function popupNewMark() {
