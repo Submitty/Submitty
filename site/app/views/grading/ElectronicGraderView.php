@@ -453,73 +453,72 @@ class ElectronicGraderView extends AbstractView {
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
         }
+
+        $return = "";
+
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
+
         $user = $gradeable->getUser();
-        $your_user_id = $this->core->getUser()->getId();
-        $prev_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$prev_id));
-        $next_href = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'grade', 'gradeable_id'=>$gradeable->getId(), 'who_id'=>$next_id));
-        $return = <<<HTML
-<div id="bar_wrapper" class="draggable">
-<div class="grading_toolbar">
-HTML;
-    //If the student is in our section, add a clickable previous arrow, else add a grayed out one.
-    if(!$studentNotInSection){
-    $return .= <<< HTML
-        <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{$prev_href}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
-HTML;
-    }
-    else{
-        $return .= <<< HTML
-        <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
-HTML;
-    }
-    $return .= <<< HTML
-    <a href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 'gradeable_id'=>$gradeable->getId()))}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
-HTML;
-    //If the student is in our section, add a clickable next arrow, else add a grayed out one.
-    if(!$studentNotInSection){
-    $return .= <<<HTML
-    <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{$next_href}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
-HTML;
-    }
-    else{
-        $return .= <<< HTML
-        <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
-HTML;
-    }
-    $return .= <<< HTML
-
-    <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
-    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
-HTML;
-    if ($gradeable->useTAGrading()) {
-            $return .= <<<HTML
-    <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
-HTML;
-        }
-        $return .= <<<HTML
-    <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
-HTML;
         if(!$peer) {
-            $return .= <<<HTML
-    <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
-HTML;
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
-        $return .= <<<HTML
-</div>
+        if($gradeable->useTAGrading()) {
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
+        }
+        
+        if ($gradeable->getActiveVersion() == 0) {
+            if ($gradeable->hasSubmitted()) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#FF8040", // mango orange
+                    "message" => "Cancelled Submission"
+                ]);
+            } else {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#C38189", // lipstick pink (purple)
+                    "message" => "No Submission"
+                ]);
+            }
+        }
 
-<div class="progress_bar">
-    <progress class="progressbar" max="100" value="{$progress}" style="width:70%; height: 100%;"></progress>
-    <div class="progress-value" style="display:inline;"></div>
-</div>
-</div>
+        return $return;
+    }
 
+    /**
+     * @param Gradeable $gradeable
+     * @param float $progress
+     * @param string $prev_id
+     * @param string $next_id
+     * @param bool $studentNotInSection
+     * @param bool $peer
+     * @return string
+     */
+    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $studentNotInSection, bool $peer) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
+            "studentNotInSection" => $studentNotInSection,
+            "prev_id" => $prev_id,
+            "next_id" => $next_id,
+            "progress" => $progress,
+            "gradeable" => $gradeable,
+            "peer" => $peer
+        ]);
+    }
 
+    /**
+     * Render the Auto-Grading Testcases panel
+     * @param Gradeable $gradeable
+     * @param bool $canViewWholeGradeable
+     * @return string
+     */
+    public function renderAutogradingPanel(Gradeable $gradeable, bool $canViewWholeGradeable) {
+        $return = <<<HTML
 <div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
     <div class="draggable_content">
-    <span class="grading_label">Auto-Grading Testcases</span>
-    <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
-    <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
-    <div class="inner-container">
+        <span class="grading_label">Auto-Grading Testcases</span>
+        <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
+        <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
+        <div class="inner-container">
 HTML;
         if ($gradeable->getActiveVersion() === 0){
             $return .= <<<HTML
@@ -535,64 +534,19 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
         }
         $return .= <<<HTML
-    </div>
+        </div>
     </div>
 </div>
-
-<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
-    <div class="draggable_content">
-    <span class="grading_label">Submissions and Results Browser</span>
-    <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 HTML;
-
-    if(count($gradeable->getVcsFiles()) != 0) { //check if there are vcs files, if yes display the toggle button, else don't display it
-        $return .= <<<HTML
-        <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
-HTML;
+        return $return;
     }
 
-$return .= <<<HTML
-    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
-
-    <script type="text/javascript">
-        $(document).ready(function(){
-            //note the commented out code here along with the code where files are displayed that is commented out
-            //is intended to allow open and close to change dynamically on click
-            //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-            $(".expand-button").on('click', function(){
-                // $(this).attr('clicked-state', "clicked");
-                // updateValue($(this), "Open", "Close");
-                openAll( 'openable-element-', $(this).data('linked-type'))
-                // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                //     console.log('HELLLO');
-                // });
-            })
-
-            var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
-            var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-            $('#' + currentCodeStyleRadio).parent().addClass('active');
-            $('#' + currentCodeStyleRadio).prop('checked', true);
-        });
-    </script>
-HTML;
-        if(!$peer) {
-        $return .= <<<HTML
-    <button class="btn btn-default" onclick="downloadZip('{$gradeable->getId()}','{$gradeable->getUser()->getId()}')">Download Zip File</button>
-HTML;
-        }
-        $return .= <<<HTML
-        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
-            </label>
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
-            </label>
-        </div>
-
-    <br />
-    <div class="inner-container" id="file-container">
-HTML;
+    /**
+     * Render the Submissions and Results Browser panel
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function renderSubmissionPanel(Gradeable $gradeable) {
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             foreach($new_files as $file) {
@@ -608,52 +562,6 @@ HTML;
                 $working_dir[$file['name']] = $file['path'];
             }
         }
-        function display_files($files, &$count, $indent, &$return, $filename) {
-            $name = "a" . $filename;
-            foreach ($files as $dir => $path) {
-                if (!is_array($path)) {
-                    $name = htmlentities($dir);
-                    $dir = rawurlencode(htmlspecialchars($dir));
-                    $path = rawurlencode(htmlspecialchars($path));
-                    $indent_offset = $indent * -15;
-                    $return .= <<<HTML
-                <div>
-                    <div class="file-viewer">
-                        <a class='openAllFile{$filename} openable-element-{$filename}' onclick='openFrame("{$dir}", "{$path}", {$count}); updateCookies();'>
-                            <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
-                        {$name}</a> &nbsp;
-                        <a onclick='openFile("{$dir}", "{$path}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-                        <a onclick='downloadFile("{$dir}", "{$path}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-                    </div>
-                    <div id="file_viewer_{$count}" style="margin-left:{$indent_offset}px" data-file_name="{$dir}" data-file_url="{$path}"></div>
-                </div>
-HTML;
-                    $count++;
-                }
-            }
-            foreach ($files as $dir => $contents) {
-                if (is_array($contents)) {
-                    $dir = htmlentities($dir);
-                    $url = reset($contents);
-                    $return .= <<<HTML
-            <div>
-                <div class="div-viewer">
-                    <a class='openAllDiv openAllDiv{$filename} openable-element-{$filename}' id={$dir} onclick='openDiv({$count}); updateCookies();'>
-                        <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
-                    {$dir}</a>
-                </div><br/>
-                <div id='div_viewer_{$count}' style='margin-left:15px; display: none' data-file_name="{$dir}">
-HTML;
-                    $count++;
-                    display_files($contents, $count, $indent+1, $return, $filename);
-                    $return .= <<<HTML
-                </div>
-            </div>
-HTML;
-                }
-            }
-        }
-        $files = array();
         $submissions = array();
         $results = array();
         $checkout = array();
@@ -666,42 +574,26 @@ HTML;
 
         $vcsFiles = $gradeable->getVcsFiles();
         if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout,  $vcsFiles, 'checkout');
+            add_files($checkout, $vcsFiles, 'checkout');
         }
 
         add_files($results, $gradeable->getResultsFiles(), 'results');
 
-        $count = 1;
-        display_files($submissions,$count,1,$return, "submissions"); //modifies the count var here within display_files
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
+            "gradeable" => $gradeable,
+            "submissions" => $submissions,
+            "checkout" => $checkout,
+            "results" => $results
+        ]);
+    }
 
-        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            display_files($checkout,$count,1,$return, "checkout");
-        }
-
-        display_files($results,$count,1,$return, "results"); //uses the modified count variable b/c old code did this not sure if needed
-        $files = array_merge($submissions, $checkout, $results );
-
-        $return .= <<<HTML
-        <script type="text/javascript">
-            // $(document).ready(function(){
-            //     $(".openAllDiv").on('click', function(){
-            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
-            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
-            //             if(elem.data('clicked-state') == "wasntClicked"){
-            //                 updateValue(elem, "Open", "Close");
-            //             }
-            //         }
-            //     });
-            // });
-        </script>
-    </div>
-    </div>
-</div>
-HTML;
-
-        $user = $gradeable->getUser();
-        if(!$peer) {
-            $return .= <<<HTML
+    /**
+     * @param Gradeable $gradeable
+     * @param User $user
+     * @return string
+     */
+    public function renderInformationPanel(Gradeable $gradeable, User $user) {
+        $return = <<<HTML
 
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <div class="draggable_content">
@@ -710,64 +602,62 @@ HTML;
         <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
         <div class="rubric-title">
 HTML;
-            $who = $gradeable->getUser()->getId();
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
-            $formatting = "font-size: 13px;";
-            $return .= <<<HTML
+        $who = $gradeable->getUser()->getId();
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
+        $formatting = "font-size: 13px;";
+        $return .= <<<HTML
             <div style="float:right;">
 HTML;
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
+        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
 
-            // If viewing the active version, show cancel button, otherwise show button to switch active
-            if ($gradeable->getCurrentVersionNumber() > 0) {
-                if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
-                    $version = 0;
-                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
-                }
-                else {
-                    $version = $gradeable->getCurrentVersionNumber();
-                    $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
-                }
-                $return .= <<<HTML
+        // If viewing the active version, show cancel button, otherwise show button to switch active
+        if ($gradeable->getCurrentVersionNumber() > 0) {
+            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
+                $version = 0;
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
+            } else {
+                $version = $gradeable->getCurrentVersionNumber();
+                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
+            }
+            $return .= <<<HTML
                 <br/><br/>
                 <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
                         action="{$this->core->buildUrl(array('component' => 'student',
-                                                             'action' => 'update',
-                                                             'gradeable_id' => $gradeable->getId(),
-                                                             'new_version' => $version, 'ta' => true, 'who' => $who))}">
+                'action' => 'update',
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => $version, 'ta' => true, 'who' => $who))}">
                     <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
                     {$button}
                 </form>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
             </div>
             <div>
 HTML;
 
-            if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             $return .= <<<HTML
                 <b>Team:<br/>
 HTML;
-                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                    $team_member = $this->core->getQueries()->getUserById($team_member);
-                    $return .= <<<HTML
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $return .= <<<HTML
                 &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
 HTML;
-                }
             }
-            else {
-                $return .= <<<HTML
+        } else {
+            $return .= <<<HTML
                 <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
 HTML;
-            }
+        }
 
-            $return .= <<<HTML
+        $return .= <<<HTML
                 Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
                 Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
             </div>
 HTML;
-            $return .= <<<HTML
+        $return .= <<<HTML
             <form id="rubric_form">
                 <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                 <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
@@ -775,22 +665,22 @@ HTML;
                 <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
-            //Late day calculation
-            $status = "Good";
-            $color = "green";
-            if($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null){
-                foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                    $team_member = $this->core->getQueries()->getUserById($team_member);
-                    $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
-                }
-                
-            } else {
-                $return .= $this->makeTable($user->getId(), $gradeable, $status);
-                if($status != "Good" && $status != "Late" && $status != "No submission") {
-                    $color = "red";
-                    $my_color="'#F62817'"; // fire engine red
-                    $my_message="Late Submission";
-                    $return .= <<<HTML
+        //Late day calculation
+        $status = "Good";
+        $color = "green";
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+                $team_member = $this->core->getQueries()->getUserById($team_member);
+                $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
+            }
+
+        } else {
+            $return .= $this->makeTable($user->getId(), $gradeable, $status);
+            if ($status != "Good" && $status != "Late" && $status != "No submission") {
+                $color = "red";
+                $my_color = "'#F62817'"; // fire engine red
+                $my_message = "Late Submission";
+                $return .= <<<HTML
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
@@ -799,231 +689,93 @@ HTML;
                 </script>
                 <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
 HTML;
-                }
             }
-            
-            
+        }
 
-            $return .= <<<HTML
+
+        $return .= <<<HTML
         </div>
     </div>
     </div>
 </div>
 HTML;
-        }
-        if($peer) {
-            $span_style = 'style="display:none;"';
-            $checked = 'disabled';
-        }
-        else {
-            $span_style = '';
-            $checked = 'checked';
-        }
-        $empty = "";
-        if(!$gradeable->useTAGrading()) {
-            $empty = "empty";
-        }
+        return $return;
+    }
+
+    /**
+     * Render the Grading Rubric panel
+     * @param Gradeable $gradeable
+     * @param User $user
+     * @return string
+     */
+    public function renderRubricPanel(Gradeable $gradeable, User $user) {
+        $return = "";
+
         $display_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
-            if(!$component->getGrader()){
-              continue;
+            if (!$component->getGrader()) {
+                continue;
             }
-            if($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()){
+            if ($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()) {
                 $display_verify_all = true;
                 break;
             }
         }
-        $return .= <<<HTML
-<div id="grading_rubric" class="draggable rubric_panel {$empty}" style="right:15px; top:140px; width:48%; height:42%;">
-    <div class="draggable_content">
-    <span class="grading_label">Grading Rubric</span>
-HTML;
-        if($gradeable->useTAGrading()) {
-          $return .= <<<HTML
-    <div style="float: right; float: right; position: relative; top: 10px; right: 1%;">
-HTML;
-          if($display_verify_all){
-            $return .= <<<HTML
-        <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{$gradeable->getId()}",-1,"{$user->getAnonId()}",true);'/>
-HTML;
-          }
-          $return .= <<<HTML
-        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
-        <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
-    </div>
-HTML;
-        $disabled = '';
-        if($gradeable->getActiveVersion() == 0){
-            $disabled='disabled';
-            $my_color="'#FF8040'"; // mango orange
-            $my_message="Cancelled Submission";
-            if($gradeable->hasSubmitted()){
-                $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
-HTML;
-            } else {
-                $my_color="'#C38189'";  // lipstick pink (purple)
-                $my_message="No Submission";
-                $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <div class="red-message" style="text-align: center">$my_message</div>
-HTML;
+        $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
+
+        // if use student components, get the values for pages from the student's submissions
+        $files = $gradeable->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $path = $content["path"];
+                $student_pages = FileUtils::readJsonFile($content["path"]);
             }
-        } else if($gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion()){
-            $disabled='disabled';
-            $return .= <<<HTML
-            <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
-HTML;
         }
-            // if use student components, get the values for pages from the student's submissions
-            $files = $gradeable->getSubmittedFiles();
-            $student_pages = array();
-            foreach ($files as $filename => $content) {
-                if ($filename == "student_pages.json") {
-                    $path = $content["path"];
-                    $student_pages = FileUtils::readJsonFile($content["path"]);
-                }
-            }
 
-            $grading_data = [
-                "gradeable" => $gradeable->getGradedData(),
-                "your_user_id" => $this->core->getUser()->getId(),
-                "disabled" => $disabled === "disabled",
-                "can_verify" => $display_verify_all // If any can be then this is set
-            ];
+        $grading_data = [
+            "gradeable" => $gradeable->getGradedData(),
+            "your_user_id" => $this->core->getUser()->getId(),
+            "disabled" => $disabled,
+            "can_verify" => $display_verify_all // If any can be then this is set
+        ];
 
-            foreach ($grading_data["gradeable"]["components"] as &$component) {
-                $page = intval($component["page"]);
-                // if the page is determined by the student json
-                if ($page == -1) {
-                    // usually the order matches the json
-                    if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
-                        $page = intval($student_pages[intval($component["order"])]["page #"]);
-                    }
-                    // otherwise, iterate through until the order matches
-                    else {
-                        foreach ($student_pages as $student_page) {
-                            if ($student_page["order"] == intval($component["order"])) {
-                                $page = intval($student_page["page #"]);
-                                $component["page"] = $page;
-                                break;
-                            }
+        foreach ($grading_data["gradeable"]["components"] as &$component) {
+            $page = intval($component["page"]);
+            // if the page is determined by the student json
+            if ($page == -1) {
+                // usually the order matches the json
+                if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
+                    $page = intval($student_pages[intval($component["order"])]["page #"]);
+                } // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($component["order"])) {
+                            $page = intval($student_page["page #"]);
+                            $component["page"] = $page;
+                            break;
                         }
                     }
                 }
             }
-            //References need to be cleaned up
-            unset($component);
-
-
-            $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
-
-
-            $return .= <<<HTML
-    <div class="inner-container" id="grading-box">
-
-                    </div>
-    <script type="application/javascript">
-        var grading_data = {$grading_data};
-        renderGradeable(grading_data)
-            .then(function(elements) {
-                $("#grading-box").append(elements);
-                updateAllProgressPoints();
-            })
-            .catch(function(err) {
-                alert("Could not render gradeable: " + err.message);
-                console.error(err);
-            });
-    </script>
-HTML;
-
-            $this->core->getOutput()->addInternalJs('ta-grading.js');
-            $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-            $this->core->getOutput()->addInternalJs('twig.min.js');
-            $this->core->getOutput()->addInternalJs('gradeable.js');
-
-        $return .= <<<HTML
-        </div>
-        </div>
-    </div>
-HTML;
         }
+        //References need to be cleaned up
+        unset($component);
 
-        $return .= <<<HTML
-</div>
-<script type="text/javascript">
-    function openFrame(html_file, url_file, num) {
-        var iframe = $('#file_viewer_' + num);
-        if (!iframe.hasClass('open')) {
-            var iframeId = "file_viewer_" + num + "_iframe";
-            var directory = "";
-            if (url_file.includes("submissions")) {
-                directory = "submissions";
-            }
-            else if (url_file.includes("results")) {
-                directory = "results";
-            }
-            else if (url_file.includes("checkout")) {
-                directory = "checkout";
-            }
-            // handle pdf
-            if (url_file.substring(url_file.length - 3) === "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
-            }
-            else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
-            }
-            iframe.addClass('open');
-        }
+        $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
-        if (!iframe.hasClass('shown')) {
-            iframe.show();
-            iframe.addClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
-        }
-        else {
-            iframe.hide();
-            iframe.removeClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
-        }
-        return false;
-    }
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
 
-    function openFile(html_file, url_file) {
-        var directory = "";
-        if (url_file.includes("submissions")) {
-            directory = "submissions";
-        }
-        else if (url_file.includes("results")) {
-            directory = "results";
-        }
-        else if (url_file.includes("checkout")) {
-            directory = "checkout";
-        }
-        window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-        return false;
-    }
-</script>
-<script type="text/javascript">
-        function adjustSize(name) {
-          var textarea = document.getElementById(name);
-          textarea.style.height = "";
-          textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
-        };
-</script>
-HTML;
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
+            "gradeable" => $gradeable,
+            "display_verify_all" => $display_verify_all,
+            "user" => $user,
+            "grading_data" => $grading_data
+        ]);
         return $return;
     }
 
@@ -1082,10 +834,10 @@ HTML;
 HTML;
         $total_late_used = 0;
         $status = "Good";
-        $order_by = [ 
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
         ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) { 
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
             $class = "";
             if($g->getId() == $gradeable->getId()){
@@ -1116,5 +868,4 @@ HTML;
 HTML;
         return $return;
     }
-    
 }

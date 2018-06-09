@@ -722,3 +722,9 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
 
     return stored_paths;
 }
+
+function adjustSize(name) {
+    var textarea = document.getElementById(name);
+    textarea.style.height = "";
+    textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
+}
