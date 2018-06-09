@@ -790,16 +790,18 @@ if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    #FIXME: This takes a bit of time, should skip if there are no workers
-    # the hwcron user/group must have read access on the primary machine
-    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
-fi
+    # This takes a bit of time, let's skip if there are no workers
+    num_machines=(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
+    if [ "${num_machines}" != 1 ]; then
+        # in order to update the submitty source files on the worker machines
+        # the hwcron user/group must have read access to the repo on the primary machine
+        chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
 
-# Update any foreign worker machines
-if [ "${WORKER}" == 0 ]; then
-    echo -e Updating worker machines
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+        # Update any foreign worker machines
+        echo -e Updating worker machines
+        sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    fi
 fi
 
 # set filemode to false, so that changes to file permissions in the
