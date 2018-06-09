@@ -16,7 +16,7 @@ fi
 # PATHS
 SOURCE="${BASH_SOURCE[0]}"
 CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -377,12 +377,11 @@ if [ ${WORKER} == 0 ]; then
     # assignment configurations
 
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        git pull
-        popd > /dev/null
+        echo 'Submitty/Tutorial git repo already exists'
+        echo 'You may need to manually pull updates to this repo'
     else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
+        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
         # remember to change this version in .setup/travis/autograder.sh too
         git checkout v0.94
         popd > /dev/null
@@ -393,12 +392,23 @@ fi
 # ANALYSIS TOOLS SETUP
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    git pull
-    popd > /dev/null
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools ]; then
+    echo 'Submitty/AnalysisTools git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
 else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
+fi
+
+
+#################################################################
+# LICHEN SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
+    echo 'Submitty/Lichen git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
 fi
 
 
@@ -478,6 +488,12 @@ if [ ${WORKER} == 1 ]; then
     fi
 fi
 
+# Create and setup database for non-workers
+if [ ${WORKER} == 0 ]; then
+    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+fi
 
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
@@ -492,7 +508,6 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
     mkdir -p ${SUBMITTY_DATA_DIR}/bin
     touch ${SUBMITTY_DATA_DIR}/instructors/authlist
@@ -506,11 +521,6 @@ if [ ${WORKER} == 0 ]; then
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
     apache2ctl -t
-
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
 
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers

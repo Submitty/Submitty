@@ -55,8 +55,11 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('user', $use_database);
     }
 

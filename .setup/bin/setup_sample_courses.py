@@ -46,11 +46,11 @@ import yaml
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
+SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
-TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "examples")
+TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
@@ -810,10 +810,6 @@ class Course(object):
             #creating the folder containing all the submissions
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
 
-            if gradeable.type == 0 and not os.path.exists(gradeable_path):
-                os.makedirs(gradeable_path)
-                os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
-
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             #This for loop adds submissions for users and teams(if applicable)
@@ -838,22 +834,25 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    if not os.path.exists(submission_path):
-                        os.makedirs(submission_path)
                     versions_to_submit = 0
                     #The chance of a student submitting 3 versions is 20%, submitting 2 versions is 30%, and submitting 1 version is 50%.
-                    random_num = random.choice(range(0,100))
+                    random_num = random.choice(range(0, 100))
                     #TODO: make this configureable
-                    if(random_num) < 20:
+                    if random_num < 20:
                         versions_to_submit = 3
                     elif random_num < 50:
                         versions_to_submit = 2
                     else:
                         versions_to_submit = 1
-                    if (gradeable.gradeable_config is not None and \
-                            (gradeable.submission_due_date < NOW or random.random() < 0.5) and \
-                            (random.random() < 0.9) and \
-                            (max_submissions is None or submission_count < max_submissions)):
+                    if (gradeable.gradeable_config is not None and
+                       (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                       and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+                        # only create these directories if we're actually going to put something in them
+                        if not os.path.exists(gradeable_path):
+                            os.makedirs(gradeable_path)
+                            os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+                        if not os.path.exists(submission_path):
+                            os.makedirs(submission_path)
                         active_version = random.choice(range(1, versions_to_submit+1))
                         if team_id is not None:
                             json_history = {"active_version": active_version, "history": [], "team_history": []}
@@ -908,8 +907,10 @@ class Course(object):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
-                        ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
-                                                             gd_overall_comment="lorem ipsum lodar")
+                        values = {'g_id': gradeable.id, 'gd_user_id': user.id, 'gd_overall_comment': 'lorem ipsum lodar'}
+                        if gradeable.grade_released_date < NOW and random.random() < 0.5:
+                            values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
+                        ins = gradeable_data.insert().values(**values)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:

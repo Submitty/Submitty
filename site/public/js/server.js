@@ -693,6 +693,110 @@ $(function() {
 });
 */
 
+function calcSimpleGraderStats(action) {
+    var average = 0;        // overall average
+    var stddev = 0;         // overall stddev
+    var averages = [];      // average of each component
+    var stddevs = [];       // stddev of each component
+    var num_graded = 0;     // count how many students have a nonzero grade
+    var c = 0;              // count the current component number
+    var num_users = 0;      // count the number of users
+    var has_graded = [];    // keeps track of whether or not each user already has a nonzero grade
+    var elems;              // the elements of the current component
+    var elem_type;          // the type of element that has the scores
+    var data_attr;          // the data attribute in which the score is stored
+    if(action == "lab")     {
+        elem_type = "td";
+        data_attr = "data-score";
+    }
+    else if(action == "numeric") {
+        elem_type = "input";
+        data_attr = "value";
+    }
+    else {
+        console.log("Invalid grading type:");
+        console.log(action);
+        return;
+    }
+    // get all of the elements with the scores for the first component
+    elems = $(elem_type + "[id^=cell-][id$=0]");
+    while(elems.length > 0) {
+        if(action == "lab" || elems.data('num') == true) {
+            var sum = 0;                            // sum of the scores
+            var sum_sqrs = 0;                       // sum of the squares of the scores
+            var user_num = 0;                       // the index for has_graded so that it can be tracked whether or not there is a grade
+            elems.each(function() {
+                var has_section;
+                if(action == "lab")     {
+                    has_section = $(this).parent().find("td:nth-child(2)").text() != "";            // second child of parent has registration section as text
+                }
+                else if(action == "numeric") {
+                    has_section = $(this).parent().parent().find("td:nth-child(2)").text() != "";   // second child of grandparent has registration section as text
+                }
+
+                if(has_section) {    
+                    if(c == 0) {                                            // on the first iteration of the while loop...
+                        num_users++;                                        // ...sum up the number of users...
+                        has_graded.push(false);                             // ...and populate the has_graded array with false
+                    }
+                    var score = parseFloat($(this).attr(data_attr));
+                    if(!has_graded[user_num]) {     // if they had no nonzero score previously...
+                        has_graded[user_num] = score != 0;
+                        if(has_graded[user_num]) {  // ...but they have one now
+                            num_graded++;
+                        }
+                    }
+                    sum += score;
+                    sum_sqrs += score**2;
+                }
+                user_num++;
+            });
+
+            // calculate average and stddev from sums and sum_sqrs
+            averages.push(sum/num_users);
+            stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum**2 / num_users) / num_users)));
+        }
+        
+        // get the elements for the next component
+        elems = $(elem_type + "[id^=cell-][id$=" + (++c).toString() + "]");
+    }
+
+    // find total stats place all stats into their proper elements 
+    var stats_popup = $("#simple-stats-popup");
+    for(c = 0; c < averages.length; c++) {
+        average += averages[c];
+        stddev += stddevs[c]**2
+        stats_popup.find("#avg-" + c.toString()).text(averages[c].toFixed(2));
+        stats_popup.find("#stddev-" + c.toString()).text(stddevs[c].toFixed(2));
+    }
+    stddev = Math.sqrt(stddev);
+    stats_popup.find("#avg-t").text(average.toFixed(2));
+    stats_popup.find("#stddev-t").text(stddev.toFixed(2));
+
+    var num_graded_elem = stats_popup.find("#num-graded");
+    $(num_graded_elem).text(num_graded.toString() + "/" + num_users.toString() + " students have a nonzero grade.");
+}
+
+
+function showSimpleGraderStats(action) {
+    if($("#simple-stats-popup").css("display") == "none") {
+        calcSimpleGraderStats(action);
+        $('.popup').css('display', 'none');
+        $("#simple-stats-popup").css("display", "block");
+        $(document).on("click", function(e) {                                           // event handler: when clicking on the document...
+            if($(e.target).attr("id") != "simple-stats-btn"                             // ...if neither the stats button..
+               && $(e.target).closest('div').attr('id') != "simple-stats-popup") {      // ...nor the stats popup are being clicked...
+                $("#simple-stats-popup").css("display", "none");                        // ...hide the stats popup...
+                $(document).off("click");                                               // ...and remove this event handler
+            }
+        });
+    }
+    else {
+        $("#simple-stats-popup").css("display", "none");
+        $(document).off("click");
+    }
+}
+
 function updateCheckpointCell(elem, setFull) {
     elem = $(elem);
     if (!setFull && elem.data("score") === 1.0) {
@@ -743,10 +847,12 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
 }
 
 function setupCheckboxCells() {
+    // Query for the <td> elements whose class attribute starts with "cell-"
     $("td[class^=cell-]").click(function() {
         var parent = $(this).parent();
         var elems = [];
         var scores = {};
+        // If an entry in the User ID column is clicked, click all the checkpoint cells in that row
         if ($(this).hasClass('cell-all')) {
             var lastScore = null;
             var setFull = false;
@@ -764,12 +870,15 @@ function setupCheckboxCells() {
                 scores[$(this).data('id')] = $(this).data('score');
             });
         }
+        // Otherwise, a single checkpoint cell was clicked
         else {
             updateCheckpointCell(this);
             elems.push(this);
             scores[$(this).data('id')] = $(this).data('score');
         }
 
+
+        // Update the buttons to reflect that they were clicked
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
             {
@@ -780,7 +889,9 @@ function setupCheckboxCells() {
             },
             function() {
                 elems.forEach(function(elem) {
-                    $(elem).animate({"border-right-width": "0px"}, 400);
+                    elem = $(elem);
+                    elem.animate({"border-right-width": "0px"}, 400);                                   // animate the box
+                    elem.attr("data-score", elem.data("score"));                                        // update the score
                 });
             },
             function() {
@@ -792,74 +903,6 @@ function setupCheckboxCells() {
             }
         );
     });
-}
-
-function setupNumericTextCells() {
-  $("input[class=option-small-box]").keydown(function(key){
-    var cell=this.id.split('-');
-    // right
-    if(key.keyCode === 39){
-      if(this.selectionEnd == this.value.length){
-        $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
-      }
-    }
-    // left
-    else if(key.keyCode == 37){
-      if(this.selectionStart == 0){
-        $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
-      }
-    }
-    // up
-    else if(key.keyCode == 38){
-      $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
-
-    }
-    // down
-    else if(key.keyCode == 40){
-      $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
-    }
-  });
-
-  $("input[class=option-small-box]").change(function() {
-    var elem = this;
-    if(this.value == 0){
-      $(this).css("color", "#bbbbbb");
-    }
-    else{
-      $(this).css("color", "");
-    }
-    var scores = {};
-    var total = 0;
-    var parent = $(this).parent().parent();
-    scores[$(this).data('id')] = this.value;
-
-    $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
-      $(this).children(".option-small-box").each(function(){
-        if($(this).data('num') === true){
-          total += parseFloat(this.value);
-        }
-        if($(this).data('total') === true){
-          this.value = total;
-        }
-      });
-    });
-
-    submitAJAX(
-      buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-      {
-        'csrf_token': csrfToken,
-        'user_id': parent.data('user'),
-        'g_id': parent.data('gradeable'),
-        scores: scores
-      },
-      function() {
-        $(elem).css("background-color", "#ffffff");
-      },
-      function() {
-        $(elem).css("background-color", "#ff7777");
-      }
-    );
-  });
 }
 
 $(function() {
@@ -928,11 +971,34 @@ function setupNumericTextCells() {
             });
         });
 
+        // find number of users (num of input elements whose id starts with "cell-" and ends with 0)
+        var num_users = 0;
+        $("input[id^=cell-][id$=0]").each(function() {
+            // increment only if great-grandparent id ends with a digit (indicates section is not NULL)
+            if($(this).parent().parent().parent().attr("id").match(/\d+$/)) {
+                num_users++;
+            }
+        });
+        // find stats popup to access later
+        var stats_popup = $("#simple-stats-popup");
+        var num_graded_elem = stats_popup.find("#num-graded");
+
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
+            {
+                'csrf_token': csrfToken,
+                'user_id': $(this).parent().parent().data("user"),
+                'g_id': $(this).parent().parent().data('gradeable'),
+                'scores': scores
+            },
             function() {
-                $(elem).css("background-color", "#ffffff");
+                $(elem).css("background-color", "#ffffff");                                     // change the color
+                $(elem).attr("value", elem.value);                                              // Stores the new input value
+                $(elem).parent().parent().children("td.option-small-output").each(function() {  
+                    $(this).children(".option-small-box").each(function() {
+                        $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
+                    });
+                });
             },
             function() {
                 $(elem).css("background-color", "#ff7777");
