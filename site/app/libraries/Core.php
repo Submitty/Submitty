@@ -97,7 +97,10 @@ class Core {
                 $this->config->loadCourseIni($course_ini_path);
             }
             else{
-                $message = "Unable to access configuration file for " . $semester . " " . $course . " please contact your instructor." . $conf_path . " " . $course_ini_path;
+              $a = file_exists($course_ini_path) ? 'y' : 'n';
+              $b = is_readable ($course_ini_path) ? 'Y' : 'N';
+
+              $message = "Unable to access configuration file " . $course_ini_path . " for " . $semester . " " . $course . " please contact your system administrator." . $a . "--" . $b;
                 $this->addErrorMessage($message);
             }
         }

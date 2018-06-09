@@ -791,8 +791,8 @@ if [ "${WORKER}" == 1 ]; then
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
     # This takes a bit of time, let's skip if there are no workers
-    num_machines=(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
-    if [ "${num_machines}" != 1 ]; then
+    num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
+    if [ "${num_machines}" != "1" ]; then
         # in order to update the submitty source files on the worker machines
         # the hwcron user/group must have read access to the repo on the primary machine
         chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
