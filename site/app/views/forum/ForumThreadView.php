@@ -908,31 +908,36 @@ HTML;
 HTML;
 					for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
-							<a class="btn cat-buttons cat-notselected" style="color: green;border-color: green;">{$categories[$i]['category_desc']}
-								<input type="hidden" name="cat[]" value="{$categories[$i]['category_id']}"/>
+							<noscript>
+								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
+							</noscript>
+							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
+								<input type="hidden" value="{$categories[$i]['category_id']}"/>
 							</a>
 HTML;
 					}
 					$return .= <<<HTML
 					<script type="text/javascript">
 					$(function() {
+						// Enabling cat-buttons if JS enabled
+						$("a.cat-buttons input").attr("name","cat[]");
+
 						$(".cat-buttons").click(function() {
-							console.log($(this));
 							if($(this).hasClass("cat-selected")) {
 								$(this).removeClass("cat-selected");
 								$(this).addClass("cat-notselected");
-								$(this).css("background-color","white");
-								$(this).css("color","green");
+								$(this).addClass("btn-default");
+								$(this).removeClass("btn-primary");
 							} else {
 								$(this).removeClass("cat-notselected");
 								$(this).addClass("cat-selected");
-								$(this).css("background-color","green");
-								$(this).css("color","white");
+								$(this).removeClass("btn-default");
+								$(this).addClass("btn-primary");
 							}
 						});
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
-								alert("Atleast one category must be selected");
+								alert("At least one category must be selected.");
 								return false;
 							}
 							$(this).find('.cat-notselected *').prop("disabled","true");
