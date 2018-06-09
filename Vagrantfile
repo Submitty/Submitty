@@ -9,7 +9,7 @@
 # EXTRA=rpi,matlab vagrant up
 
 $script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
+GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g" | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/logs
 ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
@@ -55,7 +55,27 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+
+  if File.directory?(File.expand_path("../AnalysisTools"))
+    config.vm.synced_folder "../AnalysisTools","/usr/local/submitty/GIT_CHECKOUT/AnalysisTools", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../Tutorial"))
+    config.vm.synced_folder "../Tutorial","/usr/local/submitty/GIT_CHECKOUT/Tutorial", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../Lichen"))
+    config.vm.synced_folder "../Lichen","/usr/local/submitty/GIT_CHECKOUT/Lichen", mount_options: ["dmode=775", "fmode=774"]
+  end
+
+  if File.directory?(File.expand_path("../GIT_ANALYSIS_TOOLS"))
+    config.vm.synced_folder "../GIT_ANALYSIS_TOOLS","/usr/local/submitty/GIT_CHECKOUT_AnalysisTools", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../GIT_TUTORIAL"))
+    config.vm.synced_folder "../GIT_TUTORIAL","/usr/local/submitty/GIT_CHECKOUT_Tutorial", mount_options: ["dmode=775", "fmode=774"]
+  end
+  if File.directory?(File.expand_path("../GIT_LICHEN"))
+    config.vm.synced_folder "../GIT_LICHEN","/usr/local/submitty/GIT_CHECKOUT_Lichen", mount_options: ["dmode=775", "fmode=774"]
+  end
 
   config.vm.provision 'shell', inline: $script
 

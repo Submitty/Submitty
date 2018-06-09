@@ -78,12 +78,12 @@ popd
 
 # --------------------------------------
 echo -e "Download analysis tools"
-git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
-git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
 # remember to change this version in .setup/install_system.sh too
 git checkout v0.94
 popd
