@@ -348,6 +348,13 @@ function updateMarksOnPage(num) {
             getMark(num, x).name = note;
 
             parent.prepend(getMarkView(num, x));
+            if(editModeEnabled==null || editModeEnabled==false){
+                var current_mark = $('#mark_id-'+num+'-'+x);
+                current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('disabled', true);
+                current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('disabled', true);
+                current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:35%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+            }
         }
     });
 }
