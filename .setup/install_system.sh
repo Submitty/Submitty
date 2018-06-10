@@ -191,13 +191,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/raw/master/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
