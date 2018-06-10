@@ -413,6 +413,19 @@ fi
 
 
 #################################################################
+# RainbowGrades SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
+    echo 'Submitty/RainbowGrades git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+fi
+
+
+
+#################################################################
 # BUILD CLANG SETUP
 #################
 
