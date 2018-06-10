@@ -880,7 +880,7 @@ HTML;
 				if(count($categories) == 0) {
 					$return .= <<<HTML
 					<span id='category-list-no-element' style="margin-left: 1em;" >
-						No category found
+						No categories exists please create one.
 					</span>
 HTML;
 				}

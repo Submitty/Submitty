@@ -1273,6 +1273,9 @@ function addNewCategory(){
 
 function refreshCategories() {
     var data = $('#ui-category-list').sortable('serialize');
+    if(!data.trim()) {
+        return;
+    }
     data = data.split("&");
     var order = [];
     for(var i = 0; i<data.length; i+=1) {
