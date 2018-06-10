@@ -1207,13 +1207,14 @@ function saveScrollLocationOnRefresh(id){
 }
 
 function modifyThreadList(currentThreadId, currentCategoriesId){
-    var category_value = $( "#thread_category option:selected").val();
+    var categories_value = $("#thread_category").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                thread_category: category_value,
+                thread_categories: categories_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId
             },
@@ -1283,9 +1284,9 @@ function refreshCategories() {
     var selected_button = new Set();
     var category_pick_buttons = $('.cat-buttons');
     for(var i = 0; i<category_pick_buttons.length; i+=1) {
-        var cat_button = $(category_pick_buttons[i]);
-        var category_id = parseInt(cat_button.find("input").val());
-        if(cat_button.hasClass("cat-selected")) {
+        var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
+        var category_id = parseInt(cat_button_checkbox.val());
+        if(cat_button_checkbox.prop("checked")) {
             selected_button.add(category_id);
         }
     }
@@ -1310,24 +1311,39 @@ function refreshCategories() {
         var category_desc = category[1];
         var selection_class;
         if(selected_button.has(category_id)) {
-            selection_class = "cat-selected";
+            selection_class = "cat-selected btn-primary";
         } else {
-            selection_class = "cat-notselected";
+            selection_class = "cat-notselected btn-default";
         }
-        var element = ' <a class="btn cat-buttons '+selection_class+'">'+category_desc+'\
-                                <input type="hidden" name="cat[]" value="'+category_id+'"/>\
+        var element = ' <a class="btn cat-buttons '+selection_class+' btn-default">'+category_desc+'\
+                            <input type="checkbox" name="cat[]" value="'+category_id+'">\
                         </a>';
         $('#categories-pick-list').append(element);
     });
 
+    $(".cat-buttons input[type='checkbox']").each(function() {
+        if($(this).parent().hasClass("cat-selected")) {
+            $(this).prop("checked",true);
+        }
+    });
+
     // Selectors for categories pick up
+    // If JS enabled hide checkbox
+    $("a.cat-buttons input").hide();
+
     $(".cat-buttons").click(function() {
         if($(this).hasClass("cat-selected")) {
             $(this).removeClass("cat-selected");
             $(this).addClass("cat-notselected");
+            $(this).addClass("btn-default");
+            $(this).removeClass("btn-primary");
+            $(this).find("input[type='checkbox']").prop("checked", false);
         } else {
             $(this).removeClass("cat-notselected");
             $(this).addClass("cat-selected");
+            $(this).removeClass("btn-default");
+            $(this).addClass("btn-primary");
+            $(this).find("input[type='checkbox']").prop("checked", true);
         }
     });
 

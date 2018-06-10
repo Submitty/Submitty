@@ -849,9 +849,7 @@ table .instructor .two-options{
 }
 
 .cat-buttons {
-    border-color: green !important;
-    border-radius: 1em !important;
-    border-width: thin !important;
+    background-color: #FFF;
 }
 
 .cat-selected {
@@ -859,8 +857,6 @@ table .instructor .two-options{
     -moz-transition:background 1s;
     -o-transition:background 1s;
     transition:background 1s;
-    color: white !important;
-    background-color: green !important;
 }
 
 .cat-selected:hover {
@@ -873,8 +869,6 @@ table .instructor .two-options{
     -moz-transition:background 1s;
     -o-transition:background 1s;
     transition:background 1s;
-    color: green !important;
-    background-color: white !important;
 }
 
 .cat-notselected:hover {
