@@ -1360,7 +1360,6 @@ function reorderCategories(){
             type: "POST",
             data: data,
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
