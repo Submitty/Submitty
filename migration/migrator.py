@@ -56,10 +56,11 @@ def main():
 def create(args):
     now = datetime.now()
     ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(now.year, now.month, now.day, now.hour, now.minute, now.second)
-    filename = "{}_{}.py".format(ver, args.name)
+    filename = "{}_{}".format(ver, args.name)
     check = re.search(r'[^A-Za-z0-9_\-]', filename)
     if check is not None:
         raise ValueError("Name '{}' contains invalid character '{}'".format(filename, check.group(0)))
+    filename += '.py'
     for environment in args.environments:
         with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file:
             open_file.write("""def up({0}):
