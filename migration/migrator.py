@@ -16,7 +16,7 @@ import sys
 
 import psycopg2
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
 ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
@@ -45,6 +45,9 @@ def parse_args():
     args = parser.parse_args()
     if args.environments is None:
         args.environments = ENVIRONMENTS
+    # make sure the order is of 'system', 'master', 'course' (which is reverse alphabetical)
+    args.environments.sort()
+    args.environments.reverse()
     return args
 
 
@@ -149,7 +152,7 @@ def migrate_environment(connection, environment, args):
             remove_migration(connection, missing_migrations[key], environment, args)
         print()
 
-    args.fake = args.set_fake
+    args.fake = args.set_fake if 'set_fake' in args else False
     if args.direction == 'up':
         keys = list(migrations.keys())
         if args.initial is True:
