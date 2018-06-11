@@ -57,24 +57,12 @@ Vagrant.configure(2) do |config|
 
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
 
-  if File.directory?(File.expand_path("../AnalysisTools"))
-    config.vm.synced_folder "../AnalysisTools","/usr/local/submitty/GIT_CHECKOUT/AnalysisTools", mount_options: ["dmode=775", "fmode=774"]
-  end
-  if File.directory?(File.expand_path("../Tutorial"))
-    config.vm.synced_folder "../Tutorial","/usr/local/submitty/GIT_CHECKOUT/Tutorial", mount_options: ["dmode=775", "fmode=774"]
-  end
-  if File.directory?(File.expand_path("../Lichen"))
-    config.vm.synced_folder "../Lichen","/usr/local/submitty/GIT_CHECKOUT/Lichen", mount_options: ["dmode=775", "fmode=774"]
-  end
+  optional_repos = ["AnalysisTools","Lichen","RainbowGrades","Tutorial"]
 
-  if File.directory?(File.expand_path("../GIT_ANALYSIS_TOOLS"))
-    config.vm.synced_folder "../GIT_ANALYSIS_TOOLS","/usr/local/submitty/GIT_CHECKOUT_AnalysisTools", mount_options: ["dmode=775", "fmode=774"]
-  end
-  if File.directory?(File.expand_path("../GIT_TUTORIAL"))
-    config.vm.synced_folder "../GIT_TUTORIAL","/usr/local/submitty/GIT_CHECKOUT_Tutorial", mount_options: ["dmode=775", "fmode=774"]
-  end
-  if File.directory?(File.expand_path("../GIT_LICHEN"))
-    config.vm.synced_folder "../GIT_LICHEN","/usr/local/submitty/GIT_CHECKOUT_Lichen", mount_options: ["dmode=775", "fmode=774"]
+  for repo in optional_repos do
+    if File.directory?(File.expand_path("../"+repo))
+      config.vm.synced_folder "../"+repo,"/usr/local/submitty/GIT_CHECKOUT/"+repo, mount_options: ["dmode=775", "fmode=774"]
+    end
   end
 
   config.vm.provision 'shell', inline: $script
