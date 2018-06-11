@@ -7,7 +7,7 @@ hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils PyPDF2
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils
 RUN apt-get install -qqy imagemagick
 
 RUN mkdir -p /usr/local/submitty

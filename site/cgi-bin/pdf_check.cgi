@@ -98,11 +98,11 @@ try:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(counter)) 
             cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], int(i/2))
+            output_filename = '{}_{}.pdf'.format(filename[:-4], int(i/2))
             pdf_writer = PdfFileWriter()
             start = counter
             for j in range(start, start+num):
                 pdf_writer.addPage(pdfReader.getPage(j)) 
-                output_filename = '{}_{}.pdf'.format(filename[:-4], int(i/2))
                 counter+=1
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
