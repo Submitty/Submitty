@@ -8,7 +8,7 @@ fi
 
 DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g" | tr '[:upper:]' '[:lower:]')
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 
 apt-get update
 apt-get install -qqy python python-dev python3 python3-dev

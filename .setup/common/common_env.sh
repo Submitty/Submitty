@@ -15,6 +15,6 @@ SELENIUM_DOWNLOAD_URL=http://selenium-release.storage.googleapis.com/${SELENIUM_
 #SELENIUM_DOWNLOAD_URL=http://selenium-release.storage.googleapis.com/3.0-beta2/selenium-server-standalone-3.0.0-beta2.jar
 PHP_VERSION=$(php -v)
 
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
