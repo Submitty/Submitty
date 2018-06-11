@@ -9,7 +9,7 @@
 # EXTRA=rpi,matlab vagrant up
 
 $script = <<SCRIPT
-GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
+GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
@@ -56,7 +56,15 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT_Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+
+  optional_repos = ["AnalysisTools","Lichen","RainbowGrades","Tutorial"]
+
+  for repo in optional_repos do
+    if File.directory?(File.expand_path("../"+repo))
+      config.vm.synced_folder "../"+repo,"/usr/local/submitty/GIT_CHECKOUT/"+repo, mount_options: ["dmode=775", "fmode=774"]
+    end
+  end
 
   config.vm.provision 'shell', inline: $script
 
