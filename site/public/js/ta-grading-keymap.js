@@ -9,7 +9,7 @@ var remapping = {
 
 window.onkeyup = function(e) {
     if (remapping.active) {
-        remapFinish(e);
+        remapFinish(remapping.index, eventToKeyCode(e));
         e.preventDefault();
         return;
     }
@@ -130,22 +130,18 @@ function remapHotkey(i) {
 
 /**
  * Called when remapping has finished and should save (or discard) a pressed key
- * @param {KeyboardEvent} event Event from onkeydown
+ * @param {int} index Index of the hotkey
+ * @param {string} code New keycode for the hotkey
  */
-function remapFinish(event) {
-    var code = eventToKeyCode(event);
-    if (event.code === "Escape") {
-        code = keymap[remapping.index].originalCode;
-    }
-
+function remapFinish(index, code) {
     //Check if code is already used
     for (var i = 0; i < keymap.length; i++) {
-        if (remapping.index === i) {
+        if (index === i) {
             continue;
         }
         if (keymap[i].code === code) {
             //Oh no
-            var button = $("#remap-" + remapping.index);
+            var button = $("#remap-" + index);
             button.text("Enter Unique Key...");
             button.addClass("btn-danger");
             button.removeClass("btn-success");
@@ -153,14 +149,22 @@ function remapFinish(event) {
         }
     }
 
-    keymap[remapping.index].code = code;
-    remapSetLS(keymap[remapping.index].name, code);
+    keymap[index].code = code;
+    remapSetLS(keymap[index].name, code);
 
     remapping.active = false;
     generateHotkeysList();
 
     $(".remap-button.rebindable").attr("disabled", null);
     $("#settings-close").attr("disabled", null);
+}
+
+/**
+ * Revert a hotkey to its original code
+ * @param {int} i Index of hotkey
+ */
+function remapUnset(i) {
+    remapFinish(i, keymap[i].originalCode);
 }
 
 /**

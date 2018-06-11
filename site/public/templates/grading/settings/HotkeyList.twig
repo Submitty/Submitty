@@ -10,6 +10,11 @@
                     <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button rebindable" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
                 {% endif %}
             </td>
+            <td>
+                {% if hotkey.code != hotkey.originalCode %}
+                    <button id="remap-unset-{{ loop.index0 }}" class="btn btn-danger" onclick="remapUnset({{ loop.index0 }});">&times;</button>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
 </table>
