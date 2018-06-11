@@ -64,7 +64,7 @@ class AdminGradeable extends AbstractModel {
     /** @property @var \DateTime Date for when the grade will be released to students */
     public $g_grade_released_date;
     /** @property @var int Minimum group that's allowed to submit grades for this gradeable */
-    public $g_min_grading_group = 0;
+    public $g_min_grading_group = 1;
     /** @property @var string Iris Bucket to place gradeable */
     public $g_syllabus_bucket = -1;
 
