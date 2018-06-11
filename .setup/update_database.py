@@ -124,7 +124,7 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         
         # categories ordering for discussion forum
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY categories_list ADD COLUMN rank int'".format(*variables))
-        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY categories_list ADD COLUMN color varchar NOT NULL'".format(*variables))
+        os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY categories_list ADD COLUMN color varchar DEFAULT '#000080'".format(*variables))
 
         # To allow delete gradeable
         os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign DROP CONSTRAINT peer_assign_g_id_fkey'""".format(*variables))

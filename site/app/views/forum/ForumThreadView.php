@@ -903,7 +903,8 @@ HTML;
 								<a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
 								<a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
 							</span>
-							<select class='category-color-picker' style="color: white;float: right;font-size: 14px;height: 18px;padding: 0px;">
+							<div style="float: right;">
+							<select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
 HTML;
 							foreach ($category_colors as $color_name => $color_code) {
 								$selected = "";
@@ -916,7 +917,9 @@ HTML;
 							}
 							$return .= <<<HTML
 	  						</select>
-
+	  						&nbsp;
+							<a class="post_button" title="Delete Category"><i class="fa fa-trash" aria-hidden="true"></i></a>
+							</div>
 						</li>
 HTML;
 				}
@@ -932,6 +935,11 @@ HTML;
 							update: function (event, ui) {
 						        reorderCategories();
 						    }
+						});
+						$("#ui-category-list").find(".fa-trash").click(function() {
+							var item = $(this).parent().parent().parent();
+							var category_id = parseInt(item.attr('id').split("-")[1]);
+							deleteCategory(category_id);
 						});
 						$("#ui-category-list").find(".fa-edit").click(function() {
 							var item = $(this).parent().parent().parent();
@@ -962,7 +970,7 @@ HTML;
 							$(element).css("background-color",$(element).val());
 						}
 						$(".category-color-picker").change(function(color) {
-							var category_id = parseInt($(this).parent().attr('id').split("-")[1]);
+							var category_id = parseInt($(this).parent().parent().attr('id').split("-")[1]);
 							var category_color = $(this).val();
 							editCategory(category_id, null, category_color);
 							refresh_color_select($(this));

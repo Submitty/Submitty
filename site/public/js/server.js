@@ -1271,6 +1271,38 @@ function addNewCategory(){
     })
 }
 
+function deleteCategory(category_id){
+    var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                deleteCategory: category_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully deleted category.</div>';
+                $('#messages').append(message);
+                $('#categorylistitem-'+category_id).remove();
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    })
+}
+
 function editCategory(category_id, category_desc, category_color) {
     if(category_desc === null && category_color === null) {
         return;

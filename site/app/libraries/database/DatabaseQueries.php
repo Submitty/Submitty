@@ -2072,13 +2072,24 @@ AND gc_id IN (
         return $this->course_db->rows()[0];
     }
 
-    public function editCategory($categories_id, $category_desc, $category_color) {
+    public function deleteCategory($category_id) {
+        // TODO, check if no thread is using current category
+        $this->course_db->query("SELECT 1 FROM thread_categories WHERE category_id = ?", array($category_id));
+        if(count($this->course_db->rows()) == 0) {
+            $this->course_db->query("DELETE FROM categories_list WHERE category_id = ?", array($category_id));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function editCategory($category_id, $category_desc, $category_color) {
         $this->course_db->beginTransaction();
         if(!is_null($category_desc)) {
-            $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", array($category_desc, $categories_id));
+            $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", array($category_desc, $category_id));
         }
         if(!is_null($category_color)) {
-            $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", array($category_color, $categories_id));
+            $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", array($category_color, $category_id));
         }
         $this->course_db->commit();
     }

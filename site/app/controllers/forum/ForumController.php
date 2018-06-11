@@ -60,6 +60,9 @@ class ForumController extends AbstractController {
             case 'add_category':
                 $this->addNewCategory();
                 break;
+            case 'delete_category':
+                $this->deleteCategory();
+                break;
             case 'edit_category':
                 $this->editCategory();
                 break;
@@ -154,6 +157,17 @@ class ForumController extends AbstractController {
         return true;
     }
 
+    private function isCategoryDeletionGood($category_id){
+        // Check if not the last category which exists
+        $rows = $this->core->getQueries()->getCategories();
+        foreach($rows as $index => $values){
+            if(((int)$values["category_id"]) !== $category_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function addNewCategory(){
         $result = array();
         if($this->core->getUser()->getGroup() <= 2){
@@ -164,6 +178,32 @@ class ForumController extends AbstractController {
                 } else {
                     $newCategoryId = $this->core->getQueries()->addNewCategory($category);
                     $result["new_id"] = $newCategoryId["category_id"];
+                }
+            } else {
+                $result["error"] = "No category data submitted. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function deleteCategory(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            if(!empty($_REQUEST["deleteCategory"])) {
+                $category = (int)$_REQUEST["deleteCategory"];
+                if(!$this->isValidCategories(array($category))) {
+                    $result["error"] = "That category doesn't exists.";
+                } else if(!$this->isCategoryDeletionGood($category)) {
+                    $result["error"] = "Last category can't be deleted.";
+                } else {
+                    if($this->core->getQueries()->deleteCategory($category)) {
+                        $result["success"] = "OK";
+                    } else {
+                        $result["error"] = "Category is in use.";
+                    }
                 }
             } else {
                 $result["error"] = "No category data submitted. Please try again.";
@@ -477,7 +517,7 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
     }
 
-    public function getAllowedCategoryColor() {
+    private function getAllowedCategoryColor() {
         $colors = array();
         $colors["MAROON"]   = "#800000";
         $colors["OLIVE"]    = "#808000";
