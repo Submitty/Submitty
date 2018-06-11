@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ########################################################################################################################
 ########################################################################################################################
@@ -9,8 +9,6 @@
 # variables that are used in the code below.
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
-
-
 
 if [ -z ${SUBMITTY_REPOSITORY+x} ]; then
     echo "ERROR! Configuration variables not initialized"
@@ -357,6 +355,21 @@ chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
+################################################################################################################
+################################################################################################################
+# Run THE DB MIGRATIONS
+
+if [ ${WORKER} == 0 ]; then
+    echo -e 'Running the DB migrations'
+
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
+    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
+
+    ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+fi
 
 ################################################################################################################
 ################################################################################################################
@@ -425,39 +438,41 @@ clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 # note, we are not running 'ninja install', so this path is unused.
 clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
 
+ANALYSIS_TOOLS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
+
 #copying commonAST scripts 
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/unionTool.cpp ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeLists.txt ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/ASTMatcher.cpp ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/CMakeListsUnion.txt ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/unionToolRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionToolRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying tree visualization scrips
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying jsonDiff files
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiff.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/utils.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/refMaps.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/match.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/eqTag.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/context.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiff.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/utils.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/refMaps.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/match.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/eqTag.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/context.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying runners for jsonDiffs
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffSubmittyRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffSubmittyRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #building commonAST excecutable
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+pushd ${ANALYSIS_TOOLS_REPO}
 g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd > /dev/null
@@ -481,7 +496,34 @@ chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
 chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-echo -e "\nCompleted installation of the Submitty homework submission server\n"
+
+#####################################
+# Checkout the NLohmann C++ json library
+
+nlohmann_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json
+
+if [ ! -d "${nlohmann_dir}" ]; then
+    git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
+fi
+
+
+#####################################
+# Build & Install Lichen Modules
+
+lichen_repo_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+lichen_installation_dir=${SUBMITTY_INSTALL_DIR}/Lichen
+
+mkdir -p ${lichen_installation_dir}/bin
+
+pushd ${lichen_repo_dir}
+clang++ -I ${nlohmann_dir}/include/ -std=c++11 -Wall tokenizer/plaintext/plaintext_tokenizer.cpp -o ${lichen_installation_dir}/bin/plaintext_tokenizer.out
+popd > /dev/null
+
+chown -R root:root ${lichen_installation_dir}
+chmod 755 ${lichen_installation_dir}
+chmod 755 ${lichen_installation_dir}/bin
+chmod 755 ${lichen_installation_dir}/bin/*
+
 
 ################################################################################################################
 ################################################################################################################
@@ -506,6 +548,12 @@ sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
 
 popd > /dev/null
 
+
+################################################################################################################
+################################################################################################################
+
+
+echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 
 ################################################################################################################
@@ -698,6 +746,7 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
 if [ "${WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
@@ -741,16 +790,18 @@ if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    #FIXME: This takes a bit of time, should skip if there are no workers
-    # the hwcron user/group must have read access on the primary machine
-    chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
-fi
+    # This takes a bit of time, let's skip if there are no workers
+    num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
+    if [ "${num_machines}" != "1" ]; then
+        # in order to update the submitty source files on the worker machines
+        # the hwcron user/group must have read access to the repo on the primary machine
+        chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
 
-# Update any foreign worker machines
-if [ "${WORKER}" == 0 ]; then
-    echo -e Updating worker machines
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+        # Update any foreign worker machines
+        echo -e Updating worker machines
+        sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    fi
 fi
 
 # set filemode to false, so that changes to file permissions in the

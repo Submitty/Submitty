@@ -664,6 +664,11 @@ table tr.table-header {
     background-color: #c00000;
 }
 
+.badge-container {
+    padding: 6px 0;
+    display: block;
+}
+
 .italics {
     font-style: italic;
     text-decoration: none;

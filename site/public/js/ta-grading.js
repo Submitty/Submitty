@@ -251,16 +251,15 @@ function updateCookies(){
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() == -2) {
-        if (findCurrentOpenedMark() == -2) {
+    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
+        if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
         } else {
             var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
         }
         var top_pos = current_mark.offsetTop;
-        var rubric_table = document.getElementById('rubric-table');
-        rubric_table = rubric_table.parentElement;
-        top_pos += rubric_table.offsetTop;
+        var rubric_box = document.getElementById('grading-box');
+        top_pos += rubric_box.offsetTop;
         document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";
@@ -358,10 +357,9 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#prev-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#prev-student")[0].dataset.href;
         }
@@ -369,10 +367,9 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#next-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#next-student")[0].dataset.href;
         }
@@ -489,32 +486,40 @@ registerKeyHandler("KeyR", function() {
 //-----------------------------------------------------------------------------
 // Show/hide components
 
-registerKeyHandler('ArrowDown', function() {
+registerKeyHandler('ArrowDown', function(e) {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
         openMark(1);
+        $('#title-' + 1)[0].scrollIntoView();
     } else if (current === numQuestions) {
         openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
     } else if (current === GENERAL_MESSAGE_ID) {
         closeGeneralMessage(true);
     } else {
         openMark(current + 1);
+        $('#title-' + (current + 1))[0].scrollIntoView();
     }
+    e.preventDefault();
 });
 
-registerKeyHandler('ArrowUp', function() {
+registerKeyHandler('ArrowUp', function(e) {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
+    var numQuestions = getGradeable().components.length;
     if (current === NO_COMPONENT_ID) {
         openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
     } else if (current === 1) {
-        openMark(current);
+        closeMark(1);
     } else if (current === GENERAL_MESSAGE_ID) {
         openMark(numQuestions);
+        $('#title-' + numQuestions)[0].scrollIntoView();
     } else {
         openMark(current - 1);
+        $('#title-' + (current - 1))[0].scrollIntoView();
     }
+    e.preventDefault();
 });
 
 //-----------------------------------------------------------------------------
@@ -551,7 +556,7 @@ registerKeyHandler('Digit9', function() {
 function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
     if (opened > 0) {
-        selectMark($("#mark_id-" + opened + "-" + index + "-check"));
+        selectMark($("#mark_id-" + opened + "-" + index + "-check")[0]);
     }
 }
 
@@ -716,4 +721,10 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
     });
 
     return stored_paths;
+}
+
+function adjustSize(name) {
+    var textarea = document.getElementById(name);
+    textarea.style.height = "";
+    textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
