@@ -87,9 +87,9 @@
             var wrapper = $('.numerics-table');
             numNumeric++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numNumeric).find('.numeric_label').val(label).focus();
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric);
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric);
-            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).val(max_score);
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).val(max_score).change(() => saveRubric(false));
             if (extra_credit) {
                 $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('checked', true);
             }
@@ -108,7 +108,8 @@
             var wrapper = $('.text-table');
             numText++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
-            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText);
+            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).change(() => saveRubric(false));
+
             $('#mult-field-' + numText, wrapper).show();
         }
 
@@ -130,6 +131,9 @@
             while (numText > requestedText) {
                 removeText();
             }
+
+            // When changing text item count, save the rubric
+            saveRubric(false);
         });
 
         $('#numeric_num-items').on('input', function (e) {
@@ -143,6 +147,9 @@
             while (numNumeric > requestedNumeric) {
                 removeNumeric();
             }
+
+            // When numeric item count, save the rubric
+            saveRubric(false);
         });
 
         if ($('#radio_numeric').is(':checked')) {
