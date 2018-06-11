@@ -1,6 +1,7 @@
 //Used to reset users cookies
 var cookie_version = 1;
 
+var editModeEnabled = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
@@ -728,3 +729,29 @@ function adjustSize(name) {
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
+//-----------------------------------------------------------------------------
+// Edit Mode
+function toggleEditMode(){
+    if(editModeEnabled==null){
+        editModeEnabled=false;
+    }
+    editModeEnabled=!editModeEnabled;
+    if(editModeEnabled==false){
+        $("#EditModeButton")[0].value = "Enable Editing Mode";
+    }
+    else{
+        $("#EditModeButton")[0].value = "Disable Editing Mode";
+    }
+    //window.location.reload();
+    /*if(getGradeable()->isEditModeEnabled==true){
+        var numQuestions = getGradeable().components.length;
+        for (var qNum = 1; qNum < numQuestions; qNum++) {
+            var marks = $('[name=mark_'+qNum+']');
+            for (var mNum = 0; mNum < marks.length; mNum++) {
+                var current_mark = $('#mark_id-'+qNum+'-'+mNum);
+                current_mark.find('textarea[name=mark_text_'+qNum+'_'+mNum+']').attr('disabled', 'true');
+            }
+        }
+    }*/
+}
+

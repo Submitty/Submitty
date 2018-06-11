@@ -91,6 +91,26 @@
             {% include "Mark.twig" %}
         {% endfor %}
     #}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        var $sortableMarks=$("#marks-parent-{{ c_index }}");
+        var sortEvent = function (event, ui){
+            console.log("New sort order!");
+        };
+        $sortableMarks.sortable( { 
+            {# items: 'tr:not(:first)' #}
+            stop: sortEvent 
+        });
+        $sortableMarks.disableSelection();
+        $sortableMarks.on("sortchange", sortEvent);
+        var marks=$sortableList.children();
+        var counter=1;
+        foreach($marks as $mark){
+            mark->order=counter;
+            counter++;
+        }
+    </script>
     </table>
     {# /Marks table #}
 
