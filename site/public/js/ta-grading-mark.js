@@ -300,8 +300,49 @@ function haveMarksChanged(num, data) {
 function updateMarksOnPage(num) {
     var gradeable = getGradeable();
     var component = getComponent(num);
-
     var parent = $('#marks-parent-'+num);
+   // <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+   // <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   // <script>
+        if(editModeEnabled==true){
+            var sortableMarks=$('#marks-parent-'+num);
+            var sortEvent = function (event, ui){
+                console.log("New sort order!");
+                sortableMarks.on("sortchange", sortEvent);
+                var rows=sortableMarks.children(); 
+                var listValues = [];
+                for(var i=0; i<rows.length; i++){
+                    var row=rows[i];
+                    //var check=row.cells.length;
+                    var id=row.id;
+                    var num1=parseInt(id.substring(id.indexOf("-")+1, id.indexOf("-", id.indexOf("-")+1)));
+                    var num2=parseInt(id.substring(id.indexOf("-", id.indexOf("-")+1)+1));
+                    console.log(id);
+                    //console.log(mark.tagName.toLowerCase());
+                    getMark(num1, num2).order=i;
+                 //   updateProgressPoints(num1);
+                }
+                saveMark(num1, true);
+                console.log("DONE");
+            };
+            sortableMarks.sortable( { 
+                items: '> tr:not(:first)',
+                stop: sortEvent,
+                disabled: false
+            });
+            sortableMarks.disableSelection();
+        }
+        else{
+            var sortableMarks=$('#marks-parent-'+num);
+            var sortEvent = function (event, ui){
+            };
+            sortableMarks.sortable( { 
+                items: '> tr:not(:first)',
+                stop: sortEvent,
+                disabled: true 
+            });
+        }
+    //</script>
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
@@ -890,6 +931,7 @@ function saveMark(num, sync, successCallback, errorCallback) {
 
     if ($('#marks-parent-' + num)[0].style.display === "none") {
         //Nothing to save so we are fine
+        console.log("NOTHING CHANGED");
         if (typeof(successCallback) === "function") {
             successCallback();
         }
@@ -902,11 +944,14 @@ function saveMark(num, sync, successCallback, errorCallback) {
     var existing_marks_num = 0;
     
     // Gathers all the mark's data (ex. points, note, etc.)
-    for (var i = 0; i < arr_length; i++) {
+    for(var i1=0; i1 < arr_length; i1++){
+    for (var i = 0; i < arr_length; i++){
+        if(getMark(num, i1).order==i){
         var current_row = $('#mark_id-'       +num+'-'+i);
         var info_mark   = $('#mark_info_id-'  +num+'-'+i);
         var success     = true;
-
+        console.log(current_row.find('textarea[name=mark_text_'+num+'_'+i+']').val());
+        console.log(getMark(num, i).order);
         mark_data[i] = {
             points  : current_row.find('input[name=mark_points_'+num+'_'+i+']').val(),
             note    : current_row.find('textarea[name=mark_text_'+num+'_'+i+']').val(),
@@ -917,7 +962,8 @@ function saveMark(num, sync, successCallback, errorCallback) {
         info_mark[0].style.display = '';
         existing_marks_num++;
     }
-
+    }
+}
     var current_row = $('#mark_custom_id-'+num);
 
     var current_title = $('#title-' + num);
@@ -1031,6 +1077,16 @@ function saveMark(num, sync, successCallback, errorCallback) {
         console.error("Something went wront with saving marks...");
         alert("There was an error with saving the grade. Please refresh the page and try agian.");
     });
+    console.log("ENTER FOR LOOP");
+    for (var i = 1; i <= gradeable.components.length; i ++) {
+        var component = getComponent(i);
+       // console.log(component.marks.length);
+        for(var j=0; j<component.marks.length; j++){
+            console.log(component.marks[j].name);
+            console.log(component.marks[j].order);
+        }
+    }
+    console.log("EXIT FOR LOOP");
 }
 
 //finds what mark is currently open
