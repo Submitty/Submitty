@@ -709,24 +709,6 @@ HTML;
     }
 
     public function deleteGradeableForm() {
-        $return = <<<HTML
-    <div class="popup-form" id="delete-gradeable-form" style="width:550px; margin-left:-250px;">
-        <h2>Delete Gradeable</h2> 
-        <p>&emsp;</p>
-        <p>Note: A gradeable can only be deleted if it has no formed student teams and it has no student submission files and it has no TA grading data.
-        </p><br />
-        <form name="delete-confirmation" method="post" action="">
-         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-         Are you sure you want to delete 
-         <div name="delete-gradeable-message">
-         </div><br />
-         <div style="float:right; width:auto;">
-            <a onclick="$('#delete-gradeable-form').css('display', 'none')" class="btn btn-danger">Cancel</a>    
-             <input class="btn btn-primary" type="submit" value="Delete">    
-         </div>    
-     </form>
- </div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
     }
 }

@@ -125,6 +125,7 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_team_assignment boolean NOT NULL,
+    --eg_inherit_teams_from character varying(255) NOT NULL,
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
@@ -390,6 +391,13 @@ CREATE TABLE late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
     since_timestamp timestamp(6) with time zone NOT NULL
+);
+
+
+CREATE TABLE migrations_course (
+  id VARCHAR(100) PRIMARY KEY NOT NULL,
+  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status NUMERIC(1) DEFAULT 0 NOT NULL
 );
 
 
