@@ -313,7 +313,7 @@ function moveNextInput(count) {
     var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
-        $(next_input).select(); 
+        $(next_input).select();
 
         var inputOffset = $(next_input).offset().top;
         var inputHeight = $(next_input).height();
@@ -382,24 +382,42 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                 if (data['success']) {
                     if(data['previous_submission']){
                         $(function() {
-                            var dialog = $('<p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p>').dialog({
+                            var dialog = $('<div><p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p><br>\
+                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">New Submission</label><br>\
+                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">Merge (Don\'t File Clobber)</label><br>\
+                                '//      <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">Merge (File Clobber)</label>\
+                                +'</div>').dialog({
                                 open: function(event, ui) {
                                     $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+                                    var radio_idx = $("#toggle-merge-default").is(":checked") ? 1 : 0;
+                                    $(this).find('input:radio')[radio_idx].checked = true;
+                                    $(this).parent().find(".btn-success").focus();
                                 },
-                                buttons: {
-                                    "Yes": function() {
-                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                                        dialog.dialog('destroy');
-
+                                buttons: [
+                                    {
+                                        text: "Submit",
+                                        class: "btn btn-success",
+                                        click: function() {
+                                            if($("#instructor-submit-option-new").is(":checked")) {
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                                            }
+                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
+                                            }
+                                            // else {
+                                            //     makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
+                                            // }
+                                            dialog.dialog('destroy');
+                                        }
                                     },
-                                    "No":  function() {
-                                        dialog.dialog('destroy');
-                                    },
-                                    "Merge":  function() {
-                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                        dialog.dialog('destroy');
+                                    {
+                                        text: "Cancel",
+                                        class: "btn btn-danger",
+                                        click: function() {
+                                            dialog.dialog('destroy');
+                                        }
                                     }
-                                }
+                                ]
                             });
                         });
                     }

@@ -568,6 +568,14 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
                 }
+                if($this->core->getUser()->accessAdmin()) {
+                    $return .= <<<HTML
+                    <div style="float: right;">
+                        <input type="checkbox" id="toggle-merge-default">
+                        <label for="toggle-merge-default">Merge By Default</label>
+                    </div>
+HTML;
+                }
 
                 $old_files = "";
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
