@@ -812,7 +812,6 @@ HTML;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
             $class = "";
-            $status= "good";
             if($g->getId() == $gradeable->getId()){
                 $class = "class='yellow-background'";
                 $status = $g->getLateStatus();
@@ -826,7 +825,7 @@ HTML;
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$status}</td>
+                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
                     <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
