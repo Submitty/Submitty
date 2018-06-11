@@ -70,15 +70,14 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     {% else %}
         {{ admin_gradeable.getEgTeamAssignment() ? 'Team Settings:' : '' }}
     {% endif %}
-
-    {% if action == 'new' %}
+    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
         <input type="radio" id = "team_yes_radio" name="eg_team_assignment" value="true"
-            {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Yes
+                {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}> Yes
 
         <input type="radio" id = "team_no_radio" name="eg_team_assignment" value ="false"
-            {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' : (action == "edit" ? 'disabled' : '') }}> No
-        <br/>
-    {% endif %}
+                {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' :  '' }}> No
+    </div>
+    <br />
 
     <!-- Team settings (read only in edit mode) -->
     <div class="team_assignment team_yes" id="team_yes">
@@ -107,7 +106,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                 value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
         {% endif %}
         #}
-        <br /> <br/>
+        <br /> <br />
     </div>
 
     {% if action == 'new' %}
@@ -116,16 +115,16 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         Student Submission Format: {{ admin_gradeable.getEgIsRepository() ? 'VCS Repository' : 'Upload File(s)' }}
     {% endif %}
 
-    {% if action == 'new' %}
+    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
         <input type="radio" id="upload_file_radio" name="eg_is_repository" value="false"
                 {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
 
         <input type="radio" id="repository_radio" name="eg_is_repository" value="true"
                 {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
-    {% endif %}
+    </div>
+    <br />
 
     <div id="repository">
-        <br />
         <b>Path for the Version Control System (VCS) repository:</b><br />
         VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
         The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
