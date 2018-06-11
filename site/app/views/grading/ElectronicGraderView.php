@@ -785,6 +785,11 @@ HTML;
         return $return;
     }
 
+    /**
+     * Render the Regrade Requests panel
+     * @param Gradeable $gradeable
+     * @return string
+     */
     public function renderRegradePanel(Gradeable $gradeable) {
         $return = <<<HTML
 <div id="regrade_info" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%">
