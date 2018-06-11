@@ -7,12 +7,12 @@
                     <button id="remap-{{ loop.index0 }}" class="btn btn-default remap-button" disabled="disabled">{{ hotkey.code }}</button>
                 {% else %}
                     {% set class = (hotkey.code == hotkey.originalCode) ? "btn-default" : "btn-primary" %}
-                    <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button rebindable" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
+                    <button id="remap-{{ loop.index0 }}" class="btn {{ class }} remap-button remap-disable" onclick="remapHotkey({{ loop.index0 }});">{{ hotkey.code }}</button>
                 {% endif %}
             </td>
             <td>
                 {% if hotkey.code != hotkey.originalCode %}
-                    <button id="remap-unset-{{ loop.index0 }}" class="btn btn-danger" onclick="remapUnset({{ loop.index0 }});">&times;</button>
+                    <button id="remap-unset-{{ loop.index0 }}" class="btn btn-danger remap-disable" onclick="remapUnset({{ loop.index0 }});">&times;</button>
                 {% endif %}
             </td>
         </tr>

@@ -122,7 +122,7 @@ function remapHotkey(i) {
     remapping.active = true;
     remapping.index = i;
 
-    $(".remap-button.rebindable").attr("disabled", "disabled");
+    $(".remap-disable").attr("disabled", "disabled");
     $("#settings-close").attr("disabled", "disabled");
     button.attr("disabled", null);
     button.addClass("btn-success");
@@ -155,7 +155,7 @@ function remapFinish(index, code) {
     remapping.active = false;
     generateHotkeysList();
 
-    $(".remap-button.rebindable").attr("disabled", null);
+    $(".remap-disable").attr("disabled", null);
     $("#settings-close").attr("disabled", null);
 }
 
