@@ -472,6 +472,8 @@ CREATE TABLE teams (
     user_id character varying(255) NOT NULL,
     state integer NOT NULL
 );
+
+
 --
 -- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
 --
@@ -482,6 +484,8 @@ CREATE TABLE regrade_requests (
     student_user_id VARCHAR(255) NOT NULL,
     status INTEGER DEFAULT 0 NOT NULL
 );
+
+
 --
 -- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
 --
@@ -489,11 +493,13 @@ CREATE TABLE regrade_discussion (
     id serial NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    content TEXT
+    content TEXT,
     regrade_id VARCHAR(255) NOT NULL,
-    deleted BOOLEAN false NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
     thread_id INTEGER DEFAULT 0 NOT NULL
 );
+
+
 -- Begins Forum 
 
 --
