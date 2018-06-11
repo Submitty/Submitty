@@ -62,14 +62,24 @@
     var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
     function onChangeNavTab(tab) {
 
-        if(tab > 4 || tab < 0) {
+        if (tab > 4 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
+
+        // change the url so if the user refreshes the page, they stay on the same tab
+        window.history.replaceState("", "", buildUrl({
+            'component': 'admin',
+            'page': 'admin_gradeable',
+            'action': 'edit_gradeable_page',
+            'id': $('#g_id').val(),
+            'nav_tab': tab
+        }));
+
         adminGradeableNavTab = tab;
 
-        $('.nav-bar').each(function (){
-            if(navItemsStatus.get(this.id.split('_')[1]) === false) {
+        $('.nav-bar').each(function () {
+            if (navItemsStatus.get(this.id.split('_')[1]) === false) {
                 $(this).hide();
             }
             else {
@@ -80,7 +90,6 @@
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
         $('#page_' + tab + '_nav').attr('style', 'background-color: green');
-
     }
 
     function updateNavItemsStatus() {
