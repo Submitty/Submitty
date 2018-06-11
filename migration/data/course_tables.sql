@@ -394,6 +394,13 @@ CREATE TABLE late_days (
 );
 
 
+CREATE TABLE migrations_course (
+  id VARCHAR(100) PRIMARY KEY NOT NULL,
+  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status NUMERIC(1) DEFAULT 0 NOT NULL
+);
+
+
 --
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -
 --

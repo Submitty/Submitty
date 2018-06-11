@@ -46,11 +46,11 @@ import yaml
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
+SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
-TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial", "examples")
+TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
