@@ -1136,12 +1136,7 @@ class ElectronicGraderController extends GradingController {
             $mark->setPoints($points);
             $mark->setNote($note);
             $mark->setOrder($order_counter);
-            $mark_id = $mark->save();
-            $mark->setId($mark_id);
-            $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-            if($all_false === false) {
-                $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-            }
+            $mark->save();
         }
     }
 
