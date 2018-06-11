@@ -49,7 +49,8 @@ class GradeSummary extends AbstractModel {
                 $student_output_json[$student_id][ucwords($gradeable->getSyllabusBucket())] = array();
             }
             $student = $student_output_json[$student_id];
-            $student_output_json[$student_id] = $this->generateSummary($gradeable, $student);
+            $total_late_used = 0;
+            $student_output_json[$student_id] = $this->generateSummary($gradeable, $student, $total_late_used);
         }
     }
 
@@ -59,7 +60,7 @@ class GradeSummary extends AbstractModel {
      *
      * @return mixed
      */
-    private function generateSummary($gradeable, $student) {
+    private function generateSummary($gradeable, $student, &$total_late_used) {
         $this_g = array();
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
@@ -104,8 +105,7 @@ class GradeSummary extends AbstractModel {
      * @param $this_g
      * @param Gradeable $gradeable
      */
-    private function addLateDays(&$this_g, $gradeable) {
-        $total_late_used = 0;
+    private function addLateDays(&$this_g, $gradeable, &$total_late_used) {
         $gradeable->calculateLateDays($total_late_used);
 
         if(substr($gradeable->getLateStatus(), 0, 3) == 'Bad') {
