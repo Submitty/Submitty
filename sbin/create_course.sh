@@ -14,6 +14,7 @@ fi
 
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 
+SUBMITTY_REPOSITORY_DIR=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
 SUBMISSION_URL=$(jq -r '.submission_url' ${CONF_DIR}/submitty.json)
@@ -260,7 +261,8 @@ if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create database ${DATABASE_NAME}"
     exit
 fi
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d ${DATABASE_NAME} -f ${SUBMITTY_INSTALL_DIR}/site/data/course_tables.sql
+
+${SUBMITTY_REPOSITORY_DIR}/migration/migrator.py -e course --course ${semester} ${course} migrate --initial
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit

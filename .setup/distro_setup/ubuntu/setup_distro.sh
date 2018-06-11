@@ -125,7 +125,7 @@ apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-externa
 apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
-    apt-get install -qqy php-xdebug
+    apt-get install -qqy php7.0-sqlite3 php-xdebug
 fi
 
 # Add additional packages for compiling, authentication, and security,
@@ -139,7 +139,7 @@ hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils pdftk
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils
 
 apt-get install -qqy ninja-build
 
@@ -157,8 +157,8 @@ apt-get install -qqy imagemagick
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get update
-apt-get install -y docker-ce
+apt-get update -qqy
+apt-get install -qqy -y docker-ce
 systemctl status docker
 
 

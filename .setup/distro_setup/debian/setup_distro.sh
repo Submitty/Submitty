@@ -118,7 +118,7 @@ apt-get install -qy php7.0 php7.0-cli libapache2-mod-fastcgi php7.0-fpm php7.0-c
 apt-get install -qqy php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
-    apt-get install -qqy php7.0-xdebug
+    apt-get install -qqy php7.0-sqlite3 php7.0-xdebug
 fi
 
 # TODO: removed packages:
@@ -128,7 +128,7 @@ hardening-includes p7zip-full patchutils \
 libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq flex bison spim poppler-utils pdftk
+g++-multilib jq flex bison spim poppler-utils PyPDF2
 
 apt-get -t jessie-backports install libseccomp-dev libseccomp2 seccomp
 
