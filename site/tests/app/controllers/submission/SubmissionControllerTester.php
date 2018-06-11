@@ -1090,9 +1090,9 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
         $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
-
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
+        $core->method('loadModel')->willReturnOnConsecutiveCalls($g_list);
         $return = $this->runController($core);
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
