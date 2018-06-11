@@ -67,14 +67,16 @@
             return;
         }
 
-        // change the url so if the user refreshes the page, they stay on the same tab
-        window.history.replaceState("", "", buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'edit_gradeable_page',
-            'id': $('#g_id').val(),
-            'nav_tab': tab
-        }));
+        {% if action == 'edit' %}
+            // change the url so if the user refreshes the page, they stay on the same tab
+            window.history.replaceState("", "", buildUrl({
+                'component': 'admin',
+                'page': 'admin_gradeable',
+                'action': 'edit_gradeable_page',
+                'id': $('#g_id').val(),
+                'nav_tab': tab
+            }));
+        {% endif %}
 
         adminGradeableNavTab = tab;
 
