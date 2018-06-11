@@ -45,13 +45,20 @@
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints);
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints);
+            let labelBox = $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label');
+            labelBox.attr('name', 'checkpoint_label_' + numCheckpoints);
+            labelBox.change(() => saveRubric(false));
+            let ecBox = $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra');
+            ecBox.attr('name', 'checkpoint_extra_' + numCheckpoints);
+            ecBox.change(() => saveRubric(false));
             if (extra_credit) {
-                $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('checked', true);
+               ecBox.attr('checked', true);
             }
             $('#remove-checkpoint_field').show();
             $('#mult-field-' + numCheckpoints, wrapper).show();
+
+            // When adding a checkpoint, save the rubric
+            saveRubric(false);
         }
 
         function removeCheckpoint() {
@@ -60,6 +67,9 @@
                 if (--numCheckpoints === 1) {
                     $('#remove-checkpoint_field').hide();
                 }
+
+                // When removing a checkpoint, save the rubric
+                saveRubric(false);
             }
         }
 
