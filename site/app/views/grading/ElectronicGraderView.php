@@ -806,14 +806,8 @@ HTML;
             <tbody>
 HTML;
         $total_late_used = 0;
-<<<<<<< HEAD
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
-=======
-        $status = "Good";
-        $order_by = [
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
->>>>>>> master
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
