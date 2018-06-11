@@ -389,15 +389,15 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                                 buttons: {
                                     "Yes": function() {
                                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                                        dialog.dialog('close');
+                                        dialog.dialog('destroy');
 
                                     },
                                     "No":  function() {
-                                        dialog.dialog('close');
+                                        dialog.dialog('destroy');
                                     },
                                     "Merge":  function() {
                                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                        dialog.dialog('close');
+                                        dialog.dialog('destroy');
                                     }
                                 }
                             });
