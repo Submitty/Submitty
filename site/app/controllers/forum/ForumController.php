@@ -377,11 +377,11 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function getSortedThreads($category_id){
+    private function getSortedThreads($categories_ids){
         $current_user = $this->core->getUser()->getId();
-        if($this->isValidCategories(array($category_id))) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($category_id);
-            $reg_threads = $this->core->getQueries()->loadThreads($category_id);
+        if($this->isValidCategories($categories_ids)) {
+            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids);
+            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids);
         } else {
             $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
             $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
@@ -427,10 +427,12 @@ class ForumController extends AbstractController {
 
     public function getThreads(){
 
-        $category_id = array_key_exists('thread_category', $_POST) && !empty($_POST["thread_category"]) ? (int)$_POST['thread_category'] : -1;
-
+        $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
+        foreach ($categories_ids as &$id) {
+            $id = (int)$id;
+        }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread);
 
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
@@ -449,7 +451,7 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread);
+        $threads = $this->getSortedThreads(array($category_id), $max_thread);
 
         $current_user = $this->core->getUser()->getId();
 

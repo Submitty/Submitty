@@ -237,23 +237,44 @@ HTML;
 	$onChange = '';
 	if($thread_count > 0) {
 		$onChange = <<<HTML
-		onchange="modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}');"
+		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}');
 HTML;
 	}
 	$return .= <<<HTML
-		<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
-		<label for="thread_category">Category:</label>
-	  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
-	  	<option value="" selected>All</option>
+		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+
+		<div id="category_wrapper" class="popup-form" style="width: 50%;">
+			<label for="thread_category"><h3>Categories</h3></label><br/>
+			<i>For no filter, unselect all categories</i><br/>
+			<center>
+			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;">
 HTML;
-	    for($i = 0; $i < count($categories); $i++){
-	    	$return .= <<<HTML
-	    		<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
+			for($i = 0; $i < count($categories); $i++){
+				$return .= <<<HTML
+					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
 HTML;
-	    } 
+			}
 
 	$return .= <<<HTML
-			</select>
+				</select>
+				</center>
+				<br/>
+				<div  style="float: right; width: auto; margin-top: 10px;">
+					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
+					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
+				</div>
+
+				<script type="text/javascript">
+					$( document ).ready(function() {
+						$('#thread_category option').mousedown(function(e) {
+							e.preventDefault();
+							var current_selection = $(this).prop('selected');
+							$(this).prop('selected', !current_selection);
+							{$onChange}
+							return true;
+						});
+					});
+				</script>
 			</div>
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
@@ -861,7 +882,7 @@ HTML;
 				if(count($categories) == 0) {
 					$return .= <<<HTML
 					<span id='category-list-no-element' style="margin-left: 1em;" >
-						No category found
+						No categories exists please create one.
 					</span>
 HTML;
 				}
@@ -977,16 +998,26 @@ HTML;
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
 					<div id='categories-pick-list'>
+					<noscript>
+HTML;
+						for($i = 0; $i < count($categories); $i++){
+							$return .= <<<HTML
+							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
+								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
+							</a>
+HTML;
+						}
+						$return .= <<<HTML
+					</noscript>
 					</div>
 					<script type="text/javascript">
 					$(function() {
 						refreshCategories();
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
-								alert("Atleast one category must be selected");
+								alert("At least one category must be selected.");
 								return false;
 							}
-							$(this).find('.cat-notselected *').prop("disabled","true");
 						});
 					});
 					</script>
