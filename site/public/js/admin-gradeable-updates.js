@@ -86,7 +86,6 @@ $(document).ready(function () {
     });
 });
 
-// TODO: move all js from the twig files to this file when moving to dynamic interface
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     $('#save_status').html('Saving...');
     $.ajax({
