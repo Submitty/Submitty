@@ -895,15 +895,15 @@ HTML;
 						<li id="categorylistitem-{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">
 							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
 							{$categories[$i]['category_desc']}
-							<select class='category-color-picker' style="float: right;font-size: 16px;height: 18px;padding: 0px;">
+							<select class='category-color-picker' style="color: white;float: right;font-size: 14px;height: 18px;padding: 0px;">
 HTML;
-							foreach ($category_colors as $color) {
+							foreach ($category_colors as $color_name => $color_code) {
 								$selected = "";
-								if($color == $categories[$i]['color']) {
+								if($color_code == $categories[$i]['color']) {
 									$selected = 'selected="selected"';
 								}
 								$return .= <<<HTML
-	  							<option value="{$color}" style="color: {$color};" {$selected}>{$color}</option>
+	  							<option value="{$color_code}" style="color: white;background-color: {$color_code};" {$selected}>{$color_name}</option>
 HTML;
 							}
 							$return .= <<<HTML
@@ -925,10 +925,17 @@ HTML;
 						        reorderCategories();
 						    }
 						});
+						var refresh_color_select = function(element) {
+							$(element).css("background-color",$(element).val());
+						}
 						$(".category-color-picker").change(function(color) {
-					    	var category_id = parseInt($(this).parent().attr('id').split("-")[1]);
-					    	var category_color = $(this).val();
-					    	editCategory(category_id, null, category_color);
+							var category_id = parseInt($(this).parent().attr('id').split("-")[1]);
+							var category_color = $(this).val();
+							editCategory(category_id, null, category_color);
+							refresh_color_select($(this));
+						});
+						$(".category-color-picker").each(function(){
+							refresh_color_select($(this));
 						});
 					});
 				</script>
@@ -1002,7 +1009,7 @@ HTML;
 HTML;
 						for($i = 0; $i < count($categories); $i++){
 							$return .= <<<HTML
-							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
+							<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
 								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
 							</a>
 HTML;

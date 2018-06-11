@@ -192,7 +192,7 @@ class ForumController extends AbstractController {
             }
             if(isset($_REQUEST["category_color"])) {
                 $category_color = $_REQUEST["category_color"];
-                if(!in_array($category_color, $this->getAllowedCategoryColor())) {
+                if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
                     $result["error"] = "Given category color is not allowed.";
                     $should_update = false;
                 }
@@ -479,9 +479,14 @@ class ForumController extends AbstractController {
 
     public function getAllowedCategoryColor() {
         $colors = array();
-        $colors[] = "#FF0000";
-        $colors[] = "#00FF00";
-        $colors[] = "#0000FF";
+        $colors["MAROON"]   = "#800000";
+        $colors["OLIVE"]    = "#808000";
+        $colors["GREEN"]    = "#008000";
+        $colors["TEAL"]     = "#008080";
+        $colors["NAVY"]     = "#000080";
+        $colors["PURPLE"]   = "#800080";
+        $colors["GRAY"]     = "#808080";
+        $colors["BLACK"]    = "#000000";
         return $colors;
     }
 
