@@ -894,7 +894,15 @@ HTML;
 						$return .= <<<HTML
 						<li id="categorylistitem-{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">
 							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
-							{$categories[$i]['category_desc']}
+							<span class="categorylistitem-desc">
+								<span>{$categories[$i]['category_desc']}</span>
+								<a class="post_button" title="Edit Category Description"><i class="fa fa-edit" aria-hidden="true"></i></a>
+							</span>
+							<span class="categorylistitem-editdesc" style="display: none;">
+								<input type="text" placeholder="New Description of Category" style="padding: 0;">
+								<a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
+								<a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
+							</span>
 							<select class='category-color-picker' style="color: white;float: right;font-size: 14px;height: 18px;padding: 0px;">
 HTML;
 							foreach ($category_colors as $color_name => $color_code) {
@@ -915,7 +923,7 @@ HTML;
 				$return .= <<<HTML
 				</ul>
 				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a onclick="$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
+					<a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
 				</div>
 				<script type="text/javascript">
 					$(function() {
@@ -924,6 +932,31 @@ HTML;
 							update: function (event, ui) {
 						        reorderCategories();
 						    }
+						});
+						$("#ui-category-list").find(".fa-edit").click(function() {
+							var item = $(this).parent().parent().parent();
+							var category_desc = item.find(".categorylistitem-desc span").text().trim();
+							item.find(".categorylistitem-editdesc input").val(category_desc);
+							item.find(".categorylistitem-desc").hide();
+							item.find(".categorylistitem-editdesc").show();
+
+						});
+						$("#ui-category-list").find(".fa-times").click(function() {
+							var item = $(this).parent().parent().parent();
+							item.find(".categorylistitem-editdesc").hide();
+							item.find(".categorylistitem-desc").show();
+						});
+
+						$("#ui-category-list").find(".fa-check").click(function() {
+							var item = $(this).parent().parent().parent();
+							var category_id = parseInt(item.attr('id').split("-")[1]);
+							var category_desc_original = item.find(".categorylistitem-desc span").text().trim();
+							var category_desc = item.find("input").val().trim();
+							if(category_desc != category_desc_original) {
+								editCategory(category_id, category_desc, null);
+							}
+							item.find(".categorylistitem-editdesc").hide();
+							item.find(".categorylistitem-desc").show();
 						});
 						var refresh_color_select = function(element) {
 							$(element).css("background-color",$(element).val());

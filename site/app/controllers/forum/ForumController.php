@@ -179,8 +179,8 @@ class ForumController extends AbstractController {
         $result = array();
         if($this->core->getUser()->getGroup() <= 2){
             $category_id = $_REQUEST["category_id"];
-            $toupdate_category_desc = null;
-            $toupdate_category_color = null;
+            $category_desc = null;
+            $category_color = null;
             $should_update = true;
 
             if((!empty($_REQUEST["category_desc"])) && isset($_REQUEST["category_desc"])) {
@@ -198,7 +198,7 @@ class ForumController extends AbstractController {
                 }
             }
             if($should_update) {
-                $this->core->getQueries()->editCategory($category_id, null, $category_color);
+                $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
                 $result["success"] = "OK";
             } else if(!isset($result["error"])) {
                 $result["error"] = "No category data updated. Please try again.";

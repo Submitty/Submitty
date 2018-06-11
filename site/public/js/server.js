@@ -1303,10 +1303,13 @@ function editCategory(category_id, category_desc, category_color) {
                 var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully updated!</div>';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
-                refreshCategories();
                 if(category_color !== null) {
                     $("#categorylistitem-"+category_id).css("color",category_color);
                 }
+                if(category_desc !== null) {
+                    $("#categorylistitem-"+category_id).find(".categorylistitem-desc span").text(category_desc);
+                }
+                refreshCategories();
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");
@@ -1323,7 +1326,7 @@ function refreshCategories() {
     var order = [];
     for(var i = 0; i<data.length; i+=1) {
         var category_id = parseInt(data[i].split('=')[1]);
-        var category_desc = $("#categorylistitem-"+category_id).contents().get(2).nodeValue.trim();
+        var category_desc = $("#categorylistitem-"+category_id+" .categorylistitem-desc span").text().trim();
         var category_color = $("#categorylistitem-"+category_id+" select").val();
         order.push([category_id, category_desc, category_color]);
     }
