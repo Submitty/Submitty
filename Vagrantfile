@@ -10,9 +10,10 @@
 
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
-DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g" | tr '[:upper:]' '[:lower:]')
-mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/logs
-${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/logs/vagrant.log
+DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
+mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
+${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
