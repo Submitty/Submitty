@@ -256,3 +256,7 @@ jobs:
 
 notifications:
   email: false
+  slack:
+    on_failure: change
+    on_success: change
+    secure: A/rJsHlznzryxJEvULY9C8kCB9x+9IrRSnIIOutEoptAOyxb44FP5Lenact0ipeJxJIbSL667C/5F2J+e78METDhQD1xlCTcUG3FoonSmnqTvj73edeR8YoMuRchLRsxw2bcdKA+bv0fKzS9bPzrXOJTykunprmKSDkDlNjFHaY=
