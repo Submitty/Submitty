@@ -20,8 +20,10 @@ class ImagesController extends AbstractController {
 		public function view_images_page() {
 				$target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
 				$all_files = FileUtils::getAllFiles($target_dir);
-				$this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $target_dir, $all_files);
-		}
+				//$sections = $this->core->getUser()->getGradingRegistrationSections();
+				//$students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+				$students = $this->core->getQueries()->getAllUsers();
+				$this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $students, $target_dir, $all_files);			}
 
 		public function process_images_upload() {
 				if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {

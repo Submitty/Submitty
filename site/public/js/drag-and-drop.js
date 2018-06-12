@@ -24,6 +24,8 @@ var student_without_ids = [];   // student ids for those w/o submissions
 
 // initializing file_array and prevous_files
 function createArray(num_parts){
+    console.log();
+    console.log(num_parts);
     if(file_array.length == 0){
         for(var i=0; i<num_parts; i++){
             file_array.push([]);
@@ -82,10 +84,12 @@ function get_part_number(e){
 // copy files selected from the file browser
 function addFilesFromInput(part){
     var filestream = document.getElementById("input_file" + part).files;
+    console.log(filestream);
     for(var i=0; i<filestream.length; i++){
+        console.log(filestream[i]);
         addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
     }
-    $('#input_file' + part).val("");
+    //$('#input_file' + part).val("");
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -95,15 +99,20 @@ function addFilesFromInput(part){
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(file, part){
-    for(var i = 0; i < previous_files[part-1].length; i++){
-        if(previous_files[part-1][i] == file.name){
-            return [1, i];
+    console.log(file_array);
+    if (previous_files != []) {
+        for(var i = 0; i < previous_files[part-1].length; i++){
+            if(previous_files[part-1][i] == file.name){
+                return [1, i];
+            }
         }
     }
 
-    for(var j = 0; j < file_array[part-1].length; j++){
-        if(file_array[part-1][j].name == file.name){
-            return [0, j];
+    if (file_array != []) {
+        for (var j = 0; j < file_array[part - 1].length; j++) {
+            if (file_array[part - 1][j].name == file.name) {
+                return [0, j];
+            }
         }
     }
     return [-1];
@@ -135,6 +144,8 @@ function isFolder(file){
 
 function addFile(file, part){
     var i = fileExists(file, part);
+    console.log(file);
+    console.log(part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
         if(file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
@@ -313,7 +324,7 @@ function moveNextInput(count) {
     var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
-        $(next_input).select(); 
+        $(next_input).select();
 
         var inputOffset = $(next_input).offset().top;
         var inputHeight = $(next_input).height();
@@ -327,7 +338,7 @@ function moveNextInput(count) {
             offset = inputOffset;
         }
         var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed); 
+        $('html, body').animate({scrollTop:offset}, speed);
     }
 }
 
@@ -639,6 +650,149 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
 
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+
+    var message = "";
+    // check versions used
+    if(versions_used >= versions_allowed) {
+        message = "You have already made " + versions_used + " submissions.  You are allowed " + versions_allowed + " submissions before a small point penalty will be applied. Are you sure you want to continue?";
+        if (!confirm(message)) {
+            return;
+        }
+    }
+    // check due date
+    if (days_late > 0 && days_late <= late_days_allowed) {
+        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
+        if (!confirm(message)) {
+            return;
+        }
+    }
+    else if (days_late > 0) {
+        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
+        if (!confirm(message)) {
+            return;
+        }
+    }
+
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('vcs_checkout', vcs_checkout);
+    formData.append('user_id', user_id);
+    formData.append('repo_id', repo_id);
+    formData.append('student_page', student_page)
+
+    if (!vcs_checkout) {
+        // Check if new submission
+        if (!isValidSubmission() && empty_textboxes) {
+            alert("Not a new submission.");
+            window.location.reload();
+            return;
+        }
+
+        // Files selected
+        for (var i = 0; i < file_array.length; i++) {
+            for (var j = 0; j < file_array[i].length; j++) {
+                if (file_array[i][j].name.indexOf("'") != -1 ||
+                    file_array[i][j].name.indexOf("\"") != -1) {
+                    alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                    return;
+                }
+                else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                    file_array[i][j].name.indexOf("/") != -1) {
+                    alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                    return;
+                }
+                else if (file_array[i][j].name.indexOf("<") != -1 ||
+                    file_array[i][j].name.indexOf(">") != -1) {
+                    alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                    return;
+                }
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            }
+        }
+        // Files from previous submission
+        formData.append('previous_files', JSON.stringify(previous_files));
+    }
+
+    var textbox_answers = [];
+    for (var i = 0; i < num_textboxes; i++) {
+        textbox_answers[i] = $("#textbox_"+i).val();
+    }
+    formData.append('textbox_answers', JSON.stringify(textbox_answers));
+
+    if (student_page) {
+        var pages = [];
+        for (var i = 0; i < num_components; i++) {
+            pages[i] = $("#page_"+i).val();
+            if (pages[i] == "") {
+                alert("You cannot leave a page textbox empty.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+            if (parseInt(pages[i]) < 1) {
+                alert("Page numbers cannot be less than 1.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+        }
+        formData.append('pages', JSON.stringify(pages));
+    }
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            $("#submit").prop("disabled", false);
+            try {
+                data = JSON.parse(data);
+                if (data['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
+            }
+        },
+        error: function(error) {
+            $("#submit").prop("disabled", false);
+            alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
+ * @param days_late
+ * @param late_days_allowed
+ * @param versions_used
+ * @param versions_allowed
+ * @param csrf_token
+ * @param vcs_checkout
+ * @param num_textboxes
+ * @param user_id
+ * @param repo_id
+ * @param student_page
+ * @param num_components
+ */
+function handleDownloadImages(/*days_late, late_days_allowed, versions_used, versions_allowed,*/ csrf_token/*, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components*/) {
+    $("#submit").prop("disabled", true);
+
+    //var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
+    var submit_url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_images'});
+    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+    //var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var message = "";
     // check versions used

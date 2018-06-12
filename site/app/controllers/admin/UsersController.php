@@ -721,7 +721,7 @@ class UsersController extends AbstractController {
     }
 
     public function uploadImages() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
+        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'images', 'action'=>'view_images_page'));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
@@ -729,8 +729,18 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        // var dropzone = document.getElementById("upload" + part);
+        // var labels = dropzone.getElementsByClassName("mylabel");
+        // while(labels[0]){
+        //     dropzone.removeChild(labels[0]);
+        // }
+        //$myFile = document.getElementById("mylabel");
+
+        var_dump($_FILES);
+        die();
         if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
+        //if ($myFile == "") {
+            $this->core->addErrorMessage("No input file specified ".$_FILES);
             $this->core->redirect($return_url);
         }
 
@@ -738,6 +748,7 @@ class UsersController extends AbstractController {
 
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
+        //$this->core->addSuccessMessage("Uploaded {$myFile}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
     }
 }
