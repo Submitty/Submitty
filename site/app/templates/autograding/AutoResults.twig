@@ -1,4 +1,5 @@
 {% import 'functions/Component.twig' as Component %}
+{% import _self as self %}
 
 {% if num_visible_testcases > 1 %}
     <script type="text/javascript">
@@ -40,6 +41,103 @@
                 </div>
             </div>
         {% endif %}
-
     {% endif %}
 {% endif %}
+
+{% for testcase in gradeable.getTestcases() %}
+    {% set can_view = (not testcase.isHidden() or show_hidden) %}
+    {% if testcase.viewTestcase() %}
+        <div class="box" {{ testcase.isHidden() and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
+            <div class="box-title" {{ testcase.hasDetails() and can_view ? "style='cursor: pointer;'" : "" }} onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '{{ loop.index0 }}');">
+
+                {# Details button #}
+                {% if testcase.hasDetails() and can_view %}
+                    <div style="float:right; color: #0000EE; text-decoration: underline">
+                        Details
+                    </div>
+                {% endif %}
+                {# /Details button #}
+
+                {# Badge #}
+                {% if testcase.hasPoints() %}
+                    {% if can_view %}
+                        {% if self.testcase_should_show_badge(testcase)|trim() == "true" %}
+                            <div class="badge {{ self.testcase_badge_class(testcase) }}">{{ self.testcase_format_value(testcase) }}</div>
+                        {% else %}
+                            <div class="no-badge"></div>
+                        {% endif %}
+                    {% else %}
+                        <div class="badge">
+                            Hidden
+                            {% if gradeable.taGradesReleased() %}
+                                <br>
+                                {{ self.testcase_format_value(testcase) }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% elseif has_badges %}
+                    <div class="no-badge"></div>
+                {% endif %}
+                {# /Badge #}
+
+                <h4>
+                    {% if testcase.isHidden() and show_hidden %}
+                        HIDDEN:
+                    {% endif %}
+                    {{ testcase.getName() }}
+                    &nbsp;&nbsp;&nbsp;
+                    <code>{{ testcase.getDetails() }}</code>
+                    &nbsp;&nbsp;
+                    {% if testcase.isExtraCredit() %}
+                        <span class='italics' style="color: #0a6495;">Extra Credit</span>
+                    {% endif %}
+                    &nbsp;&nbsp;
+                    {% if can_view and testcase.viewTestcaseMessage() %}
+                        <span class='italics' style="color: #af0000;">{{ testcase.getTestcaseMessage() }}</span>
+                    {% endif %}
+                </h4>
+            </div>
+
+            {% if testcase.hasDetails() and can_view %}
+                <div id="testcase_{{ loop.index0 }}" style="display:{{ num_visible_testcases == 0 ? "block" : "none" }};"></div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% macro testcase_should_show_badge(testcase) %}
+    {% if testcase.isExtraCredit() %}
+        {# EC only shows the badge if you earned it #}
+        {{ testcase.getPointsAwarded() > 0 }}
+    {% elseif testcase.getPoints() > 0 %}
+        {# Normal case always shows #}
+        true
+    {% elseif testcase.getPoints() < 0 %}
+        {# Negaitve points only show if you got it #}
+        {{ testcase.getPointsAwarded() < 0 }}
+    {% else %}
+        {# Otherwise it's worth zero points, don't show #}
+        false
+    {% endif %}
+{% endmacro %}
+
+{% macro testcase_badge_class(testcase) %}
+    {% import 'functions/Component.twig' as Component %}
+
+    {% if testcase.isExtraCredit() %}
+        {# Just pretend we're 100% #}
+        {{ Component.get_badge_style(1, 1) }}
+    {% else %}
+        {{ Component.get_badge_style(testcase.getPointsAwarded(), testcase.getPoints())  }}
+    {% endif %}
+{% endmacro %}
+
+{% macro testcase_format_value(testcase) %}
+    {% if testcase.isExtraCredit() %}
+        &nbsp; +{{ testcase.getPointsAwarded() }} &nbsp;
+    {% elseif testcase.getPointsAwarded() >= 0 %}
+        {{ testcase.getPointsAwarded() }} / {{ testcase.getPoints() }}
+    {% else %}
+        &nbsp; {{ testcase.getPointsAwarded() }} &nbsp;
+    {% endif %}
+{% endmacro %}

@@ -23,12 +23,18 @@ class AutogradingView extends AbstractView {
         $gradeable_name = $gradeable->getId();
         $who_id = $gradeable->getUser()->getId();
 
+        $nonhidden_earned = 0;
+        $nonhidden_max = 0;
+        $hidden_earned = 0;
+        $hidden_max = 0;
+        $show_hidden_breakdown = false;
+        $display_hidden = false;
+
         foreach ($gradeable->getTestcases() as $testcase) {
             if ($testcase->viewTestcase()) {
                 $num_visible_testcases++;
             }
         }
-        $display_total = ($num_visible_testcases > 1) ? "block" : "none";
 
         if ($current_version->getNonHiddenTotal() >= 0) {
             $has_badges = true;
@@ -52,125 +58,17 @@ class AutogradingView extends AbstractView {
             }
         }
 
-        $count = 0;
-        $display_box = ($num_visible_testcases == 0) ? "block" : "none";
-        foreach ($gradeable->getTestcases() as $testcase) {
-            if (!$testcase->viewTestcase()) {
-                continue;
-            }
-            $background = "";
-            $hidden_title = "";
-            if ($testcase->isHidden() && $show_hidden) {
-                $background = "style=\"background-color:#D3D3D3;\"";
-                $hidden_title = "HIDDEN: ";
-            }
-            $div_click = "";
-            if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
-                $div_click = "style=\"cursor: pointer;\"";
-            }
-            $div_to_populate = "testcase_" . $count;
-
-            $return .= <<<HTML
-<div class="box" {$background}>
-    <div class="box-title" {$div_click} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
-HTML;
-            if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
-                $return .= <<<HTML
-        <div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
-HTML;
-            }
-            if ($testcase->hasPoints()) {
-                if ($testcase->isHidden() && !$show_hidden) {
-                    if ($gradeable->taGradesReleased()) {
-                        $hiddenPoints = ($testcase->isExtraCredit()) ? '<br/>+' . $testcase->getPointsAwarded() : '<br>' . $testcase->getPointsAwarded() . " / " . $testcase->getPoints();
-                    } else {
-                        $hiddenPoints = "";
-                    }
-
-                    $return .= <<<HTML
-        <div class="badge">Hidden {$hiddenPoints} </div>
-HTML;
-                } else {
-                    $showed_badge = false;
-                    $background = "";
-                    if ($testcase->isExtraCredit()) {
-                        if ($testcase->getPointsAwarded() > 0) {
-                            $showed_badge = true;
-                            $background = "green-background";
-                            $return .= <<<HTML
-        <div class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp;</div>
-HTML;
-                        }
-                    } else if ($testcase->getPoints() > 0) {
-                        if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                            $background = "green-background";
-                        } else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                            $background = "red-background";
-                        } else {
-                            $background = "yellow-background";
-                        }
-                        $showed_badge = true;
-                        $return .= <<<HTML
-        <div class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</div>
-HTML;
-                    } else if ($testcase->getPoints() < 0) {
-                        if ($testcase->getPointsAwarded() < 0) {
-                            if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                $background = "red-background";
-                            } else if ($testcase->getPointsAwarded() < 0) {
-                                $background = "yellow-background";
-                            }
-                            $showed_badge = true;
-                            $return .= <<<HTML
-        <div class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </div>
-HTML;
-                        }
-                    }
-                    if (!$showed_badge) {
-                        $return .= <<<HTML
-        <div class="no-badge"></div>
-HTML;
-                    }
-                }
-            } else if ($has_badges) {
-                $return .= <<<HTML
-        <div class="no-badge"></div>
-HTML;
-            }
-            $name = htmlentities($testcase->getName());
-            $extra_credit = "";
-            if ($testcase->isExtraCredit()) {
-                $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
-            }
-            $command = htmlentities($testcase->getDetails());
-            $testcase_message = "";
-            if ((!$testcase->isHidden() || $show_hidden) && $testcase->viewTestcaseMessage()) {
-                $testcase_message = <<<HTML
-        <span class='italics'><font color="#af0000">{$testcase->getTestcaseMessage()}</font></span>
-HTML;
-            }
-            $return .= <<<HTML
-            <h4>
-                {$hidden_title}{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}&nbsp;&nbsp;{$testcase_message}
-            </h4>
-    </div>
-HTML;
-            if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
-                //This is the div which will house the test output (filled by script above.)
-                $return .= <<<HTML
-    <div id="{$div_to_populate}" style="display:{$display_box};">
-HTML;
-                $return .= <<<HTML
-    </div>
-
-HTML;
-            }
-            $return .= <<<HTML
-</div>
-HTML;
-            $count++;
-        }
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
+            "gradeable" => $gradeable,
+            "num_visible_testcases" => $num_visible_testcases,
+            "show_hidden_breakdown" => $show_hidden_breakdown,
+            "display_hidden" => $display_hidden,
+            "nonhidden_earned" => $nonhidden_earned,
+            "nonhidden_max" => $nonhidden_max,
+            "hidden_earned" => $hidden_earned,
+            "hidden_max" => $hidden_max,
+            "has_badges" => $has_badges,
+        ]);
     }
 
 
