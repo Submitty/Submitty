@@ -1,0 +1,9 @@
+{% if gradeable_id == null %}
+    <div class="content">
+        No gradeable id specified. Contact your instructor if you think this is an error.
+    </div>
+{% else %}
+    <div class="content">
+        {{ gradeable_id }} is not a valid electronic submission gradeable. Contact your instructor if you think this is an error.
+    </div>
+{% endif %}
