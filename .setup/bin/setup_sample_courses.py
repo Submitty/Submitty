@@ -222,7 +222,7 @@ def generate_random_ta_comment():
         for num, aline in enumerate(comment):
             if random.randrange(num + 2): continue
             line = aline
-    return line
+    return line.strip()
 
 def generate_random_users(total, real_users):
     """
