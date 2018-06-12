@@ -894,6 +894,12 @@ table .instructor .two-options{
     padding-bottom: 10px;
 }
 
+.popup-form.decent div {
+    width: initial;
+    display: block;
+    padding-right: initial;
+}
+
 .popup-form > div > input[type="text"] {
     width: 95%;
 }

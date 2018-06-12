@@ -771,9 +771,10 @@ HTML;
 
         $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
+        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-        $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
@@ -812,6 +813,10 @@ HTML;
 
     public function popupNewMark() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NewMarkForm.twig");
+    }
+
+    public function popupSettings() {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
     }
 
     private function makeTable($user_id, $gradeable, &$status){

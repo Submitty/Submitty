@@ -109,6 +109,11 @@
     width: 1em;
 }
 
+.icon-selected.fa-wrench {
+    box-shadow: 0px 0px 3px 3px #bbbbbb;
+    background-color: #bbbbbb;
+}
+
 .icon-refresh{
     background: url('../img/refresh-page-option.png') no-repeat;
     background-size: 100%;
@@ -399,4 +404,34 @@ tr.is_publish {
 
 #regrade_request_box.rubric_panel{
     border:5px solid #f47a42 ;
+}
+
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#hotkeys-list td {
+    padding: 4px;
+}
+
+.remap-button {
+    width: 100%;
+    text-align: center;
 }
