@@ -29,10 +29,10 @@
         <div class="box half" style="float:right; width: 40%;">
             <p>Maximum number of late days allowed on this assignment: {{ gradeable.getAllowedLateDays() }}</p>
             <p>Number of days late (before extensions): {{ gradeable.getDaysLate() }}</p>
-            <p>Late Days used in previous assignments: {{ lateDayData.late_days_used }}</p>
-            <p>Number of late days used on this assignment: {{ lateDayData.late_days_charged }} </p>
-            <p>Remaining number of late days: {{ lateDayData.remaining_days }}</p>
-            <p>Submission Status: <i>{{ lateDayData.status }}</i></p>
+            <p>Late Days used in previous assignments: {{ late_day_data.late_days_used }}</p>
+            <p>Number of late days used on this assignment: {{ late_day_data.late_days_charged }} </p>
+            <p>Remaining number of late days: {{ late_day_data.remaining_days }}</p>
+            <p>Submission Status: <i>{{ late_day_data.status }}</i></p>
         </div>
         {# /Late day info #}
 
