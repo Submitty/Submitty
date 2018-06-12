@@ -153,8 +153,8 @@ function runPlagiarismForm() {
     $('#active_version_id').prop('checked', false);
     $('[name="threshold"]', form).val('5');
     $('[name="sequence_length"]', form).val('10');
-    $('select#gradeable_id').prop('selectedIndex', -1);
-    $('select#language').prop('selectedIndex', -1);
+    $('[name=language]', form).prop("selectedIndex", 0);
+    $('[name=gradeable_id]', form).prop("selectedIndex", 0);
 }
 
 function newGraderListForm() {

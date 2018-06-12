@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\Output;
+use app\libraries\FileUtils;
 
 class PlagiarismController extends AbstractController {
     public function run() {
@@ -47,8 +48,14 @@ class PlagiarismController extends AbstractController {
         }
 
         $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
-        $gradeables= $this->core->getQueries()->getGradeables($gradeable_ids);
+        $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
+            if(!in_array($gradeable_id_title['g_id'], $gradeable_ids)) {
+                unset($gradeable_ids_titles[$i]);
+            }
+        }
+        $all_sem_gradeables = FileUtils::getAllSemesterGradeables();
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'runPlagiarismForm', $gradeables);  
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'runPlagiarismForm', $gradeable_ids_titles, $all_sem_gradeables);  
     }
 }

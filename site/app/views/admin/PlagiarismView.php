@@ -44,18 +44,12 @@ HTML;
 <div class="content">
 <h1 style="text-align: center">Plagiarism Detection</h1>
 <br>
-HTML;   
-        // ======================================================================================
-        // Buttons for Navigation Bar
-        // ======================================================================================
+HTML;
         $return .= <<<HTML
         <div class="nav-buttons">
             <button style="float: right;" class="btn btn-primary" onclick="runPlagiarismForm();">Run Lichen Plagiarism Detector</button>
-        </div>        
+        </div><br /><br />        
 HTML;
-        // ======================================================================================
-        // Assignments whose plagiarism results can be seen
-        // ======================================================================================
         if ($assignments) {
             $return .= '<ul>';
                 foreach ($assignments as $assignment) {
@@ -74,47 +68,50 @@ HTML;
         return $return;
     }
 
-    public function runPlagiarismForm($gradeables) {
+    public function runPlagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {
+        $all_sem_gradeables_json = json_encode($all_sem_gradeables);
         $return = <<<HTML
 <div class="popup-form" id="run-plagiarism-form">
     <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        <div>
+        <br /><div style="width:100%;">
             Select Gradeable: 
             <select name="gradeable_id">
 HTML;
-        foreach ($gradeables as $gradeable) {
+        foreach ($gradeable_ids_titles as $gradeable_id_title) {
+            $title = $gradeable_id_title['g_title'];
+            $id = $gradeable_id_title['g_id'];
             $return .= <<<HTML
-                <option value="{$gradeable->getId()}">$gradeable->getName()</option>
+                <option value="{$id}">$title</option>
 HTML;
         }         
         $return .= <<<HTML
             </select>
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Instructor Provided Code: 
-            <input type="checkbox" id="no_code_provided_id" name="provided_code_option[]" >
+            <input type="radio" id="no_code_provided_id" name="provided_code_option" >
             <label for="no_code_provided_id">No</label>
-            <input type="checkbox" id="code_provided_id" name="provided_code_option[]" >
+            <input type="radio" id="code_provided_id" name="provided_code_option" >
             <label for="code_provided_id">Yes</label><br />
             <input type="file" name="provided_code_file">
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Version: 
-            <input type="checkbox" id="all_version_id" name="version_option[]" >
+            <input type="radio" id="all_version_id" name="version_option" >
             <label for="all_version_id">All Version</label>
-            <input type="checkbox" id="active_version_id" name="version_option[]" >
+            <input type="radio" id="active_version_id" name="version_option" >
             <label for="active_version_id">Only Active Version</label><br />
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Files to be Compared: 
-            <input type="checkbox" id="all_files_id" name="file_option[]" >
+            <input type="radio" id="all_files_id" name="file_option[]" >
             <label for="all_files_id">All Files</label>
-            <input type="checkbox" id="regrex_matching_files_id" name="file_option[]" >
-            <label for="regrex_matching_files_id">Regrex matching files</label><br />
+            <input type="radio" id="regrex_matching_files_id" name="file_option[]" >
+            <label for="regrex_matching_files_id">Regrex matching files</label><br /><br />
             <input type="text" name="regrex_to_select_files" />
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Language: 
             <select name="language">
                 <option value="python">Python</option>
@@ -122,15 +119,34 @@ HTML;
                 <option value="java">Java</option>
                 <option value="plaintext">Plain Text</option>
             </select>
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Threshold to be considered as Plagiarism: 
             <input type="text" name="threshold"/>
-        </div><br />
-        <div>
+        </div><br /><br />
+        <div style="width:100%;">
             Sequence Length: 
             <input type="text" name="sequence_length"/>
-        </div><br />
+        </div><br /><br />
+        <div style="width:100%;">
+            Previous Terms Gradeables:<br /> 
+            <select name="prev_sem">
+                <option value="">None</option>
+HTML;
+        foreach ($all_sem_gradeables as $sem => $sem_gradeables) {
+            $return .= <<<HTML
+                <option value="{$sem}">$sem</option>
+HTML;
+        }         
+        $return .= <<<HTML
+            </select>
+            <select name="prev_course">
+                <option value="">None</option>           
+            </select>
+            <select name="prev_gradeable">
+                <option value="">None</option>
+            </select>
+        </div><br /><br />
         <div style="float: right; width: auto; margin-top: 10px">
             <a onclick="$('#run-plagiarism-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Run" />
@@ -139,6 +155,7 @@ HTML;
 </div>
 <script>
     var form = $("#run-plagiarism-form");
+    var all_sem_gradeables = JSON.parse('{$all_sem_gradeables_json}');
     $('[name="language"]',form).change(function() {
         if ($(this).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
@@ -153,6 +170,43 @@ HTML;
             $('[name="sequence_length"]', form).val('4');
         }
     });
+    $('[name="prev_sem"]',form).change(function() {
+        var selected_sem = $(this).val(); 
+        $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="prev_course"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_sem != '') {
+            var append_options = '';
+            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        append_options += '<option value="'+ course +'">'+ course +'</option>';
+                    });     
+                }
+            });
+            $('[name="prev_course"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        }
+    });
+    $('[name="prev_course"]',form).change(function() {
+        var selected_course = $(this).val();
+        var selected_sem = $('[name="prev_sem"]',form).val();
+        $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_course != '') {
+            var append_options = '';
+            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        if(selected_course == course) {
+                            $.each(gradeables, function (index, gradeable) {
+                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
+                            });    
+                        }
+                    });     
+                }
+            });
+            $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        }
+    });
+
 </script>
 HTML;
 

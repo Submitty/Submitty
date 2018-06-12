@@ -395,8 +395,46 @@ class FileUtils {
                 break;
             default:
                 $content_type = 'text/x-sh';
-                break;
+                break;$gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         }
         return $content_type;
     }
+
+    /**
+     * This function returns a array consisting of all semesters, and within each semester, there will be courses for that semester, and
+     * within each course , there will be list of all gradeable ids for that course
+     * @return array $return
+     */
+    public static function getAllSemesterGradeables(){
+        $return = array();
+        $semesters = array_diff(scandir("/var/local/submitty/courses/"), array('.', '..'));
+        
+        foreach ($semesters as $semester) {
+            $courses = array_diff(scandir("/var/local/submitty/courses/$semester/"), array('.', '..'));
+            foreach($courses as $course) {
+                $gradeables = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));  
+                if (!array_key_exists($semester, $return)) {
+                    $return[$semester] = array($course=>$gradeables);
+                }
+                else {
+                    $return[$semester][$course] = $gradeables;   
+                }
+            }
+        }
+
+        uksort($return, function($semester_a, $semester_b) {
+            $year_a = (int)substr($semester_a, 1);
+            $year_b = (int)substr($semester_b, 1);
+            if($year_a > $year_b) 
+                return 0;
+            else if ($year_a < $year_b)
+                return 1;
+            else {
+                return ($semester_a[0] == 'f')? 0 : 1 ;
+            }                       
+        });
+        return $return;
+    }
 }
+
+
