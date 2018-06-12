@@ -666,25 +666,26 @@ HTML;
 
         //Late day calculation
         $color = "green";
+        $status = "Good";
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $team_status = "Bad for all team members"
+            $team_status = "Bad for all team members";
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
                 $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
                 if($status == "Good"){
                     // As long as one person on the team has a good status, then the assignment should be graded.
-                    $team_status = $status;
+                    $team_status = "Good";
                 }
             }
-
+            $status = $team_status;
         } else {
-            $status = "Good";
             $return .= $this->makeTable($user->getId(), $gradeable, $status);
-            if ($status != "Good" && $status != "Late" && $status != "No submission") {
-                $color = "red";
-                $my_color = "'#F62817'"; // fire engine red
-                $my_message = "Late Submission";
-                $return .= <<<HTML
+        }
+        if ($status != "Good" && $status != "Late" && $status != "No submission") {
+            $color = "red";
+            $my_color = "'#F62817'"; // fire engine red
+            $my_message = "Late Submission";
+            $return .= <<<HTML
                 <script>
                     $('body').css('background', $my_color);
                     $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
@@ -693,9 +694,7 @@ HTML;
                 </script>
                 <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
 HTML;
-            }
         }
-
 
         $return .= <<<HTML
         </div>
