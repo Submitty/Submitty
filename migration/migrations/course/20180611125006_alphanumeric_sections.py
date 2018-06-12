@@ -29,7 +29,7 @@ def down(conn):
         cursor.execute("ALTER TABLE ONLY grading_registration DROP CONSTRAINT grading_registration_sections_registration_id_fkey")
         cursor.execute("ALTER TABLE ONLY users DROP CONSTRAINT users_registration_section_fkey")
 
-        # typecast from integer to character varying
+        # typecast from character varying to integer
         cursor.execute("ALTER TABLE ONLY sections_registration ALTER COLUMN sections_registration_id SET DATA TYPE integer USING sections_registration_id::integer")
         cursor.execute("ALTER TABLE ONLY grading_registration ALTER COLUMN sections_registration_id SET DATA TYPE integer USING sections_registration_id::integer")
         cursor.execute("ALTER TABLE ONLY users ALTER COLUMN registration_section SET DATA TYPE integer USING registration_section::integer")
