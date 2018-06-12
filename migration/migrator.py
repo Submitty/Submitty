@@ -19,7 +19,7 @@ import psycopg2
 VERSION = "1.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
-ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
+ENVIRONMENTS = ['master', 'system', 'course']
 
 
 def parse_args():
@@ -48,7 +48,7 @@ def parse_args():
     # make sure the order is of 'master', 'system', 'course' depending on what environments have been selected
     # system must be run after master initially as system relies on master DB being setup for migration table
     environments = []
-    for env in ['master', 'system', 'course']:
+    for env in ENVIRONMENTS:
         if env in args.environments:
             environments.append(env)
     args.environments = environments
@@ -97,7 +97,7 @@ def handle_migration(args):
         database = json.load(open_file)
 
     for environment in args.environments:
-        if environment in ['system', 'master']:
+        if environment in ['master', 'system']:
             params = {
                 'dbname': 'submitty',
                 'host': database['database_host'],
