@@ -665,15 +665,20 @@ HTML;
 HTML;
 
         //Late day calculation
-        $status = "Good";
         $color = "green";
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
+            $team_status = "Bad for all team members"
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
                 $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
+                if($status == "Good"){
+                    // As long as one person on the team has a good status, then the assignment should be graded.
+                    $team_status = $status;
+                }
             }
 
         } else {
+            $status = "Good";
             $return .= $this->makeTable($user->getId(), $gradeable, $status);
             if ($status != "Good" && $status != "Late" && $status != "No submission") {
                 $color = "red";
@@ -764,9 +769,10 @@ HTML;
 
         $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
+        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-        $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
@@ -786,7 +792,11 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NewMarkForm.twig");
     }
 
-    private function makeTable($user_id, $gradeable, &$status_for_this_assignment){
+    public function popupSettings() {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
+    }
+
+    private function makeTable($user_id, $gradeable, &$status){
         $return = <<<HTML
         <h3>Overall Late Day Usage for {$user_id}</h3><br/>
         <table>
