@@ -16,12 +16,9 @@ class AutogradingView extends AbstractView {
      * @throws \Exception
      */
     public function showResults(Gradeable $gradeable, $show_hidden=false) {
-        $return = "";
         $current_version = $gradeable->getCurrentVersion();
         $has_badges = false;
         $num_visible_testcases = 0;
-        $gradeable_name = $gradeable->getId();
-        $who_id = $gradeable->getUser()->getId();
 
         $nonhidden_earned = 0;
         $nonhidden_max = 0;
