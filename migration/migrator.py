@@ -45,9 +45,13 @@ def parse_args():
     args = parser.parse_args()
     if args.environments is None:
         args.environments = ENVIRONMENTS
-    # make sure the order is of 'system', 'master', 'course' (which is reverse alphabetical)
-    args.environments.sort()
-    args.environments.reverse()
+    # make sure the order is of 'master', 'system', 'course' depending on what environments have been selected
+    # system must be run after master initially as system relies on master DB being setup for migration table
+    environments = []
+    for env in ['master', 'system', 'course']:
+        if env in args.environments:
+            environments.append(env)
+    args.envrionments = environments
     return args
 
 
