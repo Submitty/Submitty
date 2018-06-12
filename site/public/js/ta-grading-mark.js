@@ -305,6 +305,15 @@ function haveMarksChanged(num, data) {
  * Reload marks for a component and render them in the list
  * @param num 1-indexed component index
  */
+function compareOrder(mark1, mark2){
+    if(mark1.order>mark2.order){
+        return 1;
+    }
+    if(mark1.order<mark2.order){
+        return -1;
+    }
+    return 0;
+}
 function updateMarksOnPage(num) {
     var gradeable = getGradeable();
     var component = getComponent(num);
@@ -325,13 +334,14 @@ function updateMarksOnPage(num) {
                     var id=row.id;
                     var num1=parseInt(id.substring(id.indexOf("-")+1, id.indexOf("-", id.indexOf("-")+1)));
                     var num2=parseInt(id.substring(id.indexOf("-", id.indexOf("-")+1)+1));
+                    getMark(num1, num2).order=i;
                    // console.log(id);
                     //console.log(mark.tagName.toLowerCase());
-                    getMark(num1, num2).order=i;
                  //   updateProgressPoints(num1);
                 }
+                getComponent(num).marks.sort(compareOrder);
                 saveMark(num1, true);
-                window.location.reload();
+               // window.location.reload();
                // console.log("DONE");
             };
             sortableMarks.sortable( { 
@@ -956,23 +966,23 @@ function saveMark(num, sync, successCallback, errorCallback) {
     // Gathers all the mark's data (ex. points, note, etc.)
     console.log("In saveMark");
     for(var i1=0; i1 < arr_length; i1++){
-    for (var i = 0; i < arr_length; i++){
-        if(getMark(num, i1).order==i){
+    //for (var i = 0; i < arr_length; i++){
+      //  if(getMark(num, i1).order==i){
         var current_row = $('#mark_id-'       +num+'-'+i1);
         var info_mark   = $('#mark_info_id-'  +num+'-'+i1);
         var success     = true;
+        console.log(current_row.find('textarea[name=mark_text_'+num+'_'+i1+']').val());
+        console.log(getMark(num, i1));
         mark_data[i1] = {
             points  : current_row.find('input[name=mark_points_'+num+'_'+i1+']').val(),
             note    : current_row.find('textarea[name=mark_text_'+num+'_'+i1+']').val(),
             selected: current_row.find('i[name=mark_icon_'+num+'_'+i1+']')[0].classList.contains('fa-square'),
-            order   : i
+            order   : i1
         };
-        console.log(current_row.find('textarea[name=mark_text_'+num+'_'+i1+']').val());
-        console.log(i);
         info_mark[0].style.display = '';
         existing_marks_num++;
-        }
-    }
+      //  }
+   // }
 }
     console.log("Out of SaveMark");
     var current_row = $('#mark_custom_id-'+num);
