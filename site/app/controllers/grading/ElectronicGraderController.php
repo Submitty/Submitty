@@ -910,6 +910,7 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
     }
 
     public function saveSingleComponent() {
