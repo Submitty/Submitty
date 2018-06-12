@@ -233,7 +233,6 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
 }
 
 function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
-    console.log("TRYING TO SAVE MARKS2");
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
@@ -257,13 +256,6 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
         },
         error: errorCallback
     })
-    console.log("After Ajax Save Mark");
-       // console.log(component.marks.length);
-    for(var j=0; j<num_existing_marks; j++){
-        console.log(marks[j].note);
-        console.log(marks[j].order);
-    }
-    console.log("DONE");
 }
 
 function haveMarksChanged(num, data) {
@@ -318,50 +310,38 @@ function updateMarksOnPage(num) {
     var gradeable = getGradeable();
     var component = getComponent(num);
     var parent = $('#marks-parent-'+num);
-   // <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-   // <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-   // <script>
-        if(editModeEnabled==true){
-            var sortableMarks=$('#marks-parent-'+num);
-            var sortEvent = function (event, ui){
-                console.log("New sort order!");
-                sortableMarks.on("sortchange", sortEvent);
-                var rows=sortableMarks.children(); 
-                var listValues = [];
-                for(var i=0; i<rows.length; i++){
-                    var row=rows[i];
-                    //var check=row.cells.length;
-                    var id=row.id;
-                    var num1=parseInt(id.substring(id.indexOf("-")+1, id.indexOf("-", id.indexOf("-")+1)));
-                    var num2=parseInt(id.substring(id.indexOf("-", id.indexOf("-")+1)+1));
-                    getMark(num1, num2).order=i;
-                   // console.log(id);
-                    //console.log(mark.tagName.toLowerCase());
-                 //   updateProgressPoints(num1);
+    if(editModeEnabled==true){
+        var sortableMarks=$('#marks-parent-'+num);
+        var sortEvent = function (event, ui){
+            sortableMarks.on("sortchange", sortEvent);
+            var rows=sortableMarks.children(); 
+            var listValues = [];
+            for(var i=0; i<rows.length; i++){
+                var row=rows[i];
+                var id=row.id;
+                if(row.dataset.mark_index!=undefined){
+                    getMark(num, row.dataset.mark_index).order=i;
                 }
-                getComponent(num).marks.sort(compareOrder);
-                saveMark(num1, true);
-               // window.location.reload();
-               // console.log("DONE");
-            };
-            sortableMarks.sortable( { 
-                items: '> tr:not(:first)',
-                stop: sortEvent,
-                disabled: false
-            });
-            sortableMarks.disableSelection();
-        }
-        else{
-            var sortableMarks=$('#marks-parent-'+num);
-            var sortEvent = function (event, ui){
-            };
-            sortableMarks.sortable( { 
-                items: '> tr:not(:first)',
-                stop: sortEvent,
-                disabled: true 
-            });
-        }
-    //</script>
+            }
+            getComponent(num).marks.sort(compareOrder);
+        };
+        sortableMarks.sortable( { 
+            items: '> tr:not(:first)',
+            stop: sortEvent,
+            disabled: false
+        });
+        sortableMarks.disableSelection();
+    }
+    else{
+        var sortableMarks=$('#marks-parent-'+num);
+        var sortEvent = function (event, ui){
+        };
+        sortableMarks.sortable( { 
+            items: '> tr:not(:first)',
+            stop: sortEvent,
+            disabled: true 
+        });
+    }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
@@ -369,7 +349,6 @@ function updateMarksOnPage(num) {
 
         // If nothing has changed, then don't update
         if (!haveMarksChanged(num, data)){
-            console.log("NOTHING CHANGED");
             return;
         }
         // Clear away all marks
@@ -402,19 +381,17 @@ function updateMarksOnPage(num) {
             var hasMark    = data['data'][x]['has_mark'];
             var score      = data['data'][x]['score'];
             var note       = data['data'][x]['note'];
-         //   var order      = data['data'][x]['order'];
             getMark(num, x).publish = is_publish;
             getMark(num, x).has = hasMark;
             getMark(num, x).score = score;
             getMark(num, x).name = note;
-       //     getMark(num, x).order = order;
             parent.prepend(getMarkView(num, x));
-            if(editModeEnabled==null || editModeEnabled==false){
+            if((editModeEnabled==null || editModeEnabled==false)){
                 var current_mark = $('#mark_id-'+num+'-'+x);
                 current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('disabled', true);
                 current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('disabled', true);
-                current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
-                current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:35%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
             }
         }
     });
@@ -951,7 +928,6 @@ function saveMark(num, sync, successCallback, errorCallback) {
 
     if ($('#marks-parent-' + num)[0].style.display === "none") {
         //Nothing to save so we are fine
-        console.log("NOTHING CHANGED");
         if (typeof(successCallback) === "function") {
             successCallback();
         }
@@ -962,29 +938,21 @@ function saveMark(num, sync, successCallback, errorCallback) {
     
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
-    
     // Gathers all the mark's data (ex. points, note, etc.)
-    console.log("In saveMark");
+    getComponent(num).marks.sort(compareOrder);
     for(var i1=0; i1 < arr_length; i1++){
-    //for (var i = 0; i < arr_length; i++){
-      //  if(getMark(num, i1).order==i){
         var current_row = $('#mark_id-'       +num+'-'+i1);
         var info_mark   = $('#mark_info_id-'  +num+'-'+i1);
         var success     = true;
-        console.log(current_row.find('textarea[name=mark_text_'+num+'_'+i1+']').val());
-        console.log(getMark(num, i1));
         mark_data[i1] = {
             points  : current_row.find('input[name=mark_points_'+num+'_'+i1+']').val(),
-            note    : current_row.find('textarea[name=mark_text_'+num+'_'+i1+']').val(),
+            note    : getMark(num, i1).name,
             selected: current_row.find('i[name=mark_icon_'+num+'_'+i1+']')[0].classList.contains('fa-square'),
-            order   : i1
+            order   : getMark(num, i1).order
         };
         info_mark[0].style.display = '';
         existing_marks_num++;
-      //  }
-   // }
-}
-    console.log("Out of SaveMark");
+    }
     var current_row = $('#mark_custom_id-'+num);
 
     var current_title = $('#title-' + num);
@@ -1062,15 +1030,8 @@ function saveMark(num, sync, successCallback, errorCallback) {
     savingElement.show();
 
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    console.log("FINAL CHECK");
-    for(var m=0; m<existing_marks_num; m++){
-        console.log(mark_data[m].note);
-        console.log(mark_data[m].order);
-    }
-    console.log("END FINAL CHECK");
     ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
-        console.log("TRYING TO SAVE MARKS");
         if (all_false === true) {
             //We've reset
             gradedByElement.text("Ungraded!");
