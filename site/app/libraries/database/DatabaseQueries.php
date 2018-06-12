@@ -2094,9 +2094,17 @@ AND gc_id IN (
         return $this->course_db->rows()[0];
     }
 
+    public function reorderCategories($categories_in_order) {
+        $this->course_db->beginTransaction();
+        foreach ($categories_in_order as $rank => $id) {
+            $this->course_db->query("UPDATE categories_list SET rank = ? WHERE category_id = ?", array($rank, $id));
+        }
+        $this->course_db->commit();
+    }
+
     public function getCategories(){
-    	$this->course_db->query("SELECT * from categories_list ORDER BY category_id DESC");
-    	return $this->course_db->rows();
+        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST");
+        return $this->course_db->rows();
     }
 
     public function getPostsForThread($current_user, $thread_id, $option = "tree"){

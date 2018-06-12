@@ -811,6 +811,7 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
@@ -821,7 +822,54 @@ HTML;
 		 </script>
 
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
+HTML;
+		if($this->core->getUser()->getGroup() <= 2){
+			$categories = $this->core->getQueries()->getCategories();
+			$return .= <<<HTML
+			<div class="popup-form" id="category-list">
+				<h3>Categories</h3>
+				<pre>(Drag to re-order)</pre><br>
+HTML;
+				if(count($categories) == 0) {
+					$return .= <<<HTML
+					<span id='category-list-no-element' style="margin-left: 1em;" >
+						No categories exists please create one.
+					</span>
+HTML;
+				}
+				$return .= <<<HTML
+				<ul id='ui-category-list' style="padding-left: 1em;">
+HTML;
+				// TODO: scrollbar
+				for($i = 0; $i < count($categories); $i++){
+						$return .= <<<HTML
+						<li id="categorylistitem-{$categories[$i]['category_id']}">
+							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
+							{$categories[$i]['category_desc']}
+						</li>
+HTML;
+				}
+				$return .= <<<HTML
+				</ul>
+				<div  style="float: right; width: auto; margin-top: 10px;">
+					<a onclick="$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
+				</div>
+				<script type="text/javascript">
+					$(function() {
+						$("#ui-category-list").sortable({
+							handle: ".handle",
+							update: function (event, ui) {
+						        reorderCategories();
+						    }
+						});
+					});
+				</script>
 
+			</div>
+
+HTML;
+		}
+		$return .= <<<HTML
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
@@ -857,8 +905,10 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
-
-					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button></span>
+					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button>
+					&nbsp;
+					<a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
+					</span>
 HTML;
 				}
 				$return .= <<<HTML
@@ -879,35 +929,22 @@ HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
+					<div id='categories-pick-list'>
+					<noscript>
 HTML;
-					for($i = 0; $i < count($categories); $i++){
-						$return .= <<<HTML
+						for($i = 0; $i < count($categories); $i++){
+							$return .= <<<HTML
 							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
 								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
 							</a>
 HTML;
-					}
-					$return .= <<<HTML
+						}
+						$return .= <<<HTML
+					</noscript>
+					</div>
 					<script type="text/javascript">
 					$(function() {
-						// If JS enabled hide checkbox
-						$("a.cat-buttons input").hide();
-
-						$(".cat-buttons").click(function() {
-							if($(this).hasClass("cat-selected")) {
-								$(this).removeClass("cat-selected");
-								$(this).addClass("cat-notselected");
-								$(this).addClass("btn-default");
-								$(this).removeClass("btn-primary");
-								$(this).find("input[type='checkbox']").prop("checked", false);
-							} else {
-								$(this).removeClass("cat-notselected");
-								$(this).addClass("cat-selected");
-								$(this).removeClass("btn-default");
-								$(this).addClass("btn-primary");
-								$(this).find("input[type='checkbox']").prop("checked", true);
-							}
-						});
+						refreshCategories();
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
 								alert("At least one category must be selected.");

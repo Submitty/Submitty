@@ -1337,6 +1337,118 @@ function addNewCategory(){
     })
 }
 
+function refreshCategories() {
+    var data = $('#ui-category-list').sortable('serialize');
+    if(!data.trim()) {
+        return;
+    }
+    data = data.split("&");
+    var order = [];
+    for(var i = 0; i<data.length; i+=1) {
+        var category_id = parseInt(data[i].split('=')[1]);
+        order.push([category_id, $("#categorylistitem-"+category_id).text().trim()]);
+    }
+
+    // Obtain current selected category
+    var selected_button = new Set();
+    var category_pick_buttons = $('.cat-buttons');
+    for(var i = 0; i<category_pick_buttons.length; i+=1) {
+        var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
+        var category_id = parseInt(cat_button_checkbox.val());
+        if(cat_button_checkbox.prop("checked")) {
+            selected_button.add(category_id);
+        }
+    }
+
+    // Refresh reorder categories list
+    $('#ui-category-list').empty();
+    order.forEach(function(category) {
+        var category_id = category[0];
+        var category_desc = category[1];
+        var li = '  <li id="categorylistitem-'+category_id+'">\
+                            <i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>\
+                            '+category_desc+' \
+                    </li>';
+        $('#ui-category-list').append(li);
+    });
+
+
+    // Refresh selected categories
+    $('#categories-pick-list').empty();
+    order.forEach(function(category) {
+        var category_id = category[0];
+        var category_desc = category[1];
+        var selection_class;
+        if(selected_button.has(category_id)) {
+            selection_class = "cat-selected btn-primary";
+        } else {
+            selection_class = "cat-notselected btn-default";
+        }
+        var element = ' <a class="btn cat-buttons '+selection_class+' btn-default">'+category_desc+'\
+                            <input type="checkbox" name="cat[]" value="'+category_id+'">\
+                        </a>';
+        $('#categories-pick-list').append(element);
+    });
+
+    $(".cat-buttons input[type='checkbox']").each(function() {
+        if($(this).parent().hasClass("cat-selected")) {
+            $(this).prop("checked",true);
+        }
+    });
+
+    // Selectors for categories pick up
+    // If JS enabled hide checkbox
+    $("a.cat-buttons input").hide();
+
+    $(".cat-buttons").click(function() {
+        if($(this).hasClass("cat-selected")) {
+            $(this).removeClass("cat-selected");
+            $(this).addClass("cat-notselected");
+            $(this).addClass("btn-default");
+            $(this).removeClass("btn-primary");
+            $(this).find("input[type='checkbox']").prop("checked", false);
+        } else {
+            $(this).removeClass("cat-notselected");
+            $(this).addClass("cat-selected");
+            $(this).removeClass("btn-default");
+            $(this).addClass("btn-primary");
+            $(this).find("input[type='checkbox']").prop("checked", true);
+        }
+    });
+
+}
+
+function reorderCategories(){
+    var data = $('#ui-category-list').sortable('serialize');
+    var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully reordered categories.';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to reordering categories. Please try again.");
+            }
+    });
+}
+
 /*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
