@@ -931,7 +931,7 @@ class Course(object):
                                 if random.random() < 0.05 and skip_grading < 0.3:
                                     #This is used to simulate unfinished grading.
                                     # pdb.set_trace()
-                                    break;
+                                    break
                                 if status == 0 or random.random() < 0.4:
                                     score = 0
                                 else:
