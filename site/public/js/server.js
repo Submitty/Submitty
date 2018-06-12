@@ -1274,9 +1274,11 @@ function addNewCategory(){
                 newelement.find(".category-color-picker").val(category_color_code);
                 newelement.show();
                 newelement.addClass("category-sortable");
-                newelement.css("background-color",$(newelement).val());
+                newcatcolorpicker = newelement.find(".category-color-picker");
+                newcatcolorpicker.css("background-color",newcatcolorpicker.val());
                 $('#ui-category-list').append(newelement);
                 $(".category-list-no-element").hide();
+                refreshCategories();
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");
