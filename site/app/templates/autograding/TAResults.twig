@@ -1,0 +1,105 @@
+{% import _self as self %}
+
+{% if not gradeable.beenTAgraded() %}
+    <br>
+    <h3>This assignment has not been graded yet</h3>
+{% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+    <br>
+    <h3>The version you have selected above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+{% elseif not grading_complete %}
+    <br>
+    <h3>Grading not complete, please contact an instructor/grader</h3>
+{% else %}
+    <div class="sub">
+        {# Overview #}
+        <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
+            <p>Graded by: {{ grader_names|join(", ") }}</p>
+            <i>Any regrade requests are due within 7 days of posting</i>
+            <p>
+                {% if gradeable.getOverallComment()|length != 0 %}
+                    <hr>
+                    Overall note from Grader:
+                    <span class='gradeable_comment'>{{ gradeable.getOverallComment() }}</span>
+                {% endif %}
+            </p>
+        </div>
+        {# /Overview #}
+
+        {# Late day info #}
+        <div class="box half" style="float:right; width: 40%;">
+            <p>Maximum number of late days allowed on this assignment: {{ gradeable.getAllowedLateDays() }}</p>
+            <p>Number of days late (before extensions): {{ gradeable.getDaysLate() }}</p>
+            <p>Late Days used in previous assignments: {{ lateDayData.late_days_used }}</p>
+            <p>Number of late days used on this assignment: {{ lateDayData.late_days_charged }} </p>
+            <p>Remaining number of late days: {{ lateDayData.remaining_days }}</p>
+            <p>Submission Status: <i>{{ lateDayData.status }}</i></p>
+        </div>
+        {# /Late day info #}
+
+        {# Manual total #}
+        <div class="box">
+            <div class="box-title">
+                <span class="badge {{ self.get_badge_style(graded_score, graded_max) }}" style="float: left">{{ graded_score }} / {{ graded_max }}</span>
+                <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
+            </div>
+        </div>
+        {# /Manual total #}
+
+        {# Component boxes #}
+        {% for component in gradeable.getComponents() %}
+            {% if component is not iterable %}
+                {% set score = component.getGradedTAPoints() %}
+                {# Check if extra credit #}
+                {% if component.getTitle()|lower|trim == "extra credit" %}
+                    {% set background = score == 0 ? "hidden" : "green-background" %}
+                    {% set score = "+" ~ score %}
+                {% else %}
+                    {% set background = self.get_badge_style(score, component.getMaxValue()) %}
+                    {% set score = score ~ " / " ~ component.getMaxValue() %}
+                {% endif %}
+
+                <div class="box">
+                    <div class="box-title">
+                        <span class="badge {{ background }}">{{ score }}</span>
+                        <h4>{{ component.getTitle() }}
+                            {# Grader only shows up if they are not peer and full access #}
+                            {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
+                                <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                            {% endif %}
+                        </h4>
+                        <div style="float:left; word-break: break-word;">
+                            <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
+                            <p>
+                                {# Todo: move this out of the model #}
+                                <span class="gradeable_comment">{{ component.getGradedTAComments('<br>', true, gradeable, false)|raw }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        {# /Component boxes #}
+
+        {# Total auto + manual #}
+        {% if has_autograding %}
+            <div class="box">
+                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                    <span class="badge {{ self.get_badge_style(total_score, total_max) }}"> {{ total_score }} / {{ total_max }}</span>
+                    <h4>Total</h4>
+                </div>
+            </div>
+        {% endif %}
+        {# /Total auto + manual #}
+    </div>
+{% endif %}
+
+{# Get badge css class based on points earned vs max possible #}
+{% macro get_badge_style(earned, max) %}
+    {% if earned >= max %}
+        green-background
+    {% elseif earned > max * 0.5 %}
+        yellow-background
+    {% else %}
+        red-background
+    {% endif %}
+{% endmacro %}
