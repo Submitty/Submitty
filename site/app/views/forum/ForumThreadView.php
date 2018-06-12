@@ -877,22 +877,39 @@ HTML;
 			$return .= <<<HTML
 			<div class="popup-form" id="category-list">
 				<h3>Categories</h3>
+				<div  style="float: right;">
+					<input style="float: right;" id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
+					<button style="float: right;" type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
+						<i class="fa fa-plus-circle fa-1x"></i> Add category
+					</button>
+				</div>
 				<pre>(Drag to re-order)</pre><br>
 HTML;
 				if(count($categories) == 0) {
 					$return .= <<<HTML
-					<span id='category-list-no-element' style="margin-left: 1em;" >
+					<span class='category-list-no-element' style="margin-left: 1em;" >
 						No categories exists please create one.
 					</span>
 HTML;
 				}
+
+				$dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+				array_unshift($categories, $dummy_category);
+
 				$return .= <<<HTML
 				<ul id='ui-category-list' style="padding-left: 1em;">
 HTML;
 				// TODO: scrollbar
 				for($i = 0; $i < count($categories); $i++){
+						$additional_display = "";
+						$additional_class = "category-sortable";
+						if($i==0) {
+							// Dummy Category: On new category creation copy of dummy element will be append.
+							$additional_display = "display: none;";
+							$additional_class = "";
+						}
 						$return .= <<<HTML
-						<li id="categorylistitem-{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">
+						<li id="categorylistitem-{$categories[$i]['category_id']}" class="{$additional_class}" style="color: {$categories[$i]['color']};{$additional_display}">
 							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
 							<span class="categorylistitem-desc">
 								<span>{$categories[$i]['category_desc']}</span>
@@ -925,17 +942,19 @@ HTML;
 				}
 				$return .= <<<HTML
 				</ul>
-				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-danger">Cancel</a>
+				<div  style="width: 100%; margin-top: 10px;">
+					<a style="float: right;" onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-danger">Close</a>
 				</div>
 				<script type="text/javascript">
 					$(function() {
 						$("#ui-category-list").sortable({
+							items : '.category-sortable',
 							handle: ".handle",
 							update: function (event, ui) {
 						        reorderCategories();
 						    }
 						});
+						refreshCategories();
 						$("#ui-category-list").find(".fa-trash").click(function() {
 							var item = $(this).parent().parent().parent();
 							var category_id = parseInt(item.attr('id').split("-")[1]);
@@ -1021,8 +1040,6 @@ HTML;
 				if($this->core->getUser()->getGroup() <= 2){
 					$return .= <<<HTML
 					<span style="float:right;display:inline-block;">
-					New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button>
-					&nbsp;
 					<a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
 					</span>
 HTML;
@@ -1045,6 +1062,15 @@ HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
+HTML;
+					if(count($categories) == 0) {
+						$return .= <<<HTML
+						<span class='category-list-no-element' style="margin-left: 1em;" >
+							No categories exists please create one.
+						</span>
+HTML;
+					}
+					$return .= <<<HTML
 					<div id='categories-pick-list'>
 					<noscript>
 HTML;
@@ -1060,7 +1086,6 @@ HTML;
 					</div>
 					<script type="text/javascript">
 					$(function() {
-						refreshCategories();
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
 								alert("At least one category must be selected.");

@@ -1263,7 +1263,19 @@ function addNewCategory(){
                 var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
-                $('#cat').append('<option value="' + json['new_id'] + '">' + escape(newCategory) +'</option>');
+                // Create new item in #ui-category-list using dummy category
+                var category_id = json['new_id'];
+                var category_color_code = "#000080";
+                var category_desc = escape(newCategory);
+                newelement = $($('#ui-category-list li')[0]).clone(true);
+                newelement.attr('id',"categorylistitem-"+category_id);
+                newelement.css('color',category_color_code);
+                newelement.find(".categorylistitem-desc span").text(category_desc);
+                newelement.find(".category-color-picker").val(category_color_code).change();
+                newelement.show();
+                newelement.addClass("category-sortable");
+                $('#ui-category-list').append(newelement);
+                $(".category-list-no-element").hide();
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");
