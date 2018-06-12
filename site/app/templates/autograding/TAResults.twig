@@ -50,6 +50,7 @@
             {% if component is not iterable %}
                 {% set score = component.getGradedTAPoints() %}
                 {# Check if extra credit #}
+                {# Todo: This is heinous #}
                 {% if component.getTitle()|lower|trim == "extra credit" %}
                     {% set background = score == 0 ? "hidden" : "green-background" %}
                     {% set score = "+" ~ score %}
