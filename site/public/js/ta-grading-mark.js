@@ -392,12 +392,12 @@ function updateMarksOnPage(num) {
             var hasMark    = data['data'][x]['has_mark'];
             var score      = data['data'][x]['score'];
             var note       = data['data'][x]['note'];
-            var order      = data['data'][x]['order'];
+         //   var order      = data['data'][x]['order'];
             getMark(num, x).publish = is_publish;
             getMark(num, x).has = hasMark;
             getMark(num, x).score = score;
             getMark(num, x).name = note;
-            getMark(num, x).order = order;
+       //     getMark(num, x).order = order;
             parent.prepend(getMarkView(num, x));
             if(editModeEnabled==null || editModeEnabled==false){
                 var current_mark = $('#mark_id-'+num+'-'+x);
