@@ -1,0 +1,45 @@
+{% import 'functions/Component.twig' as Component %}
+
+{% if num_visible_testcases > 1 %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
+        });
+    </script>
+{% endif %}
+
+{% if num_visible_testcases > 1 %}
+    {% if show_hidden_breakdown %}
+        <div class="box">
+            <div class="box-title">
+                <span class="badge {{ Component.get_badge_style(nonhidden_earned, nonhidden_max) }}">{{ nonhidden_earned }} / {{ nonhidden_max }}</span>
+                <h4>Total (No Hidden Points)</h4>
+            </div>
+        </div>
+
+        <div class="box" style="background-color:#D3D3D3;">
+            <div class="box-title">
+                <span class="badge {{ Component.get_badge_style(hidden_earned, hidden_max) }}">{{ hidden_earned }} / {{ hidden_max }}</span>
+                <h4>Total (With Hidden Points)</h4>
+            </div>
+        </div>
+    {% else %}
+        {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
+
+        <div class="box">
+            <div class="box-title">
+                <span class="badge {{ Component.get_badge_style(nonhidden_earned, nonhidden_max) }}">{{ nonhidden_earned }} / {{ nonhidden_max }}</span>
+                <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }}</h4>
+            </div>
+        </div>
+        {% if display_hidden %}
+            <div class="box">
+                <div class="box-title">
+                    <span class="badge {{ Component.get_badge_style(hidden_earned, hidden_max) }}">{{ hidden_earned }} / {{ hidden_max }}</span>
+                    <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
+                </div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+{% endif %}

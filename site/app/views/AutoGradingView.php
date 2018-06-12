@@ -29,97 +29,29 @@ class AutogradingView extends AbstractView {
             }
         }
         $display_total = ($num_visible_testcases > 1) ? "block" : "none";
-        if ($num_visible_testcases == 1) {
-            $return.= <<<HTML
-<script type="text/javascript">
-    $(document).ready(function() {
-        loadTestcaseOutput('testcase_0', '$gradeable_name', '$who_id', '0');
-    });
-</script>
-HTML;
-        }
+
         if ($current_version->getNonHiddenTotal() >= 0) {
             $has_badges = true;
-            if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
-                $background = "green-background";
-            }
-            else if ($current_version->getNonHiddenTotal() > 0) {
-                $background = "yellow-background";
-            }
-            else {
-                $background = "red-background";
-            }
-            if (($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden) {
-                $return .= <<<HTML
-<div class="box" style="display: {$display_total};">
-    <div class="box-title">
-        <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
-        <h4>Total (No Hidden Points)</h4>
-    </div>
-</div>
-HTML;
-                $all_autograder_points = $current_version->getNonHiddenTotal() + $current_version->getHiddenTotal();
-                if ($all_autograder_points >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
-                    $background = "green-background";
-                }
-                else if ($all_autograder_points > 0) {
-                    $background = "yellow-background";
-                }
-                else {
-                    $background = "red-background";
-                }
-                $return .= <<<HTML
-<div class="box" style="background-color:#D3D3D3;" style="display: {$display_total};">
-    <div class="box-title">
-        <span class="badge {$background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
-        <h4>Total (With Hidden Points)</h4>
-    </div>
-</div>
-HTML;
-            }
-            else {
-                //check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist)
-                $totalTitle = ($gradeable->beenTAgraded()) ? "Autograding Subtotal" : "Total";
-                $autoGradingPoints = $current_version->getNonHiddenTotal();
-                $all_autograder_points = $autoGradingPoints + $current_version->getHiddenTotal();
-                $display_hidden = "none";
-                $hidden_background = '';
-                if($gradeable->taGradesReleased()){
-                    foreach ($gradeable->getTestcases() as $testcase) {
-                        if(!$testcase->viewTestcase()) continue;
-                        if($testcase->isHidden()){
-                            $display_hidden = "block";
-                            break;
-                        }
-                    }
-                    if($display_hidden === "block"){
-                        if ($all_autograder_points >= $gradeable->getTotalAutograderNonExtraCreditPoints()) {
-                            $hidden_background = "green-background";
-                        }
-                        else if ($all_autograder_points > 0) {
-                            $hidden_background = "yellow-background";
-                        }
-                        else {
-                            $hidden_background = "red-background";
-                        }
+
+            $nonhidden_earned = $current_version->getNonHiddenTotal();
+            $nonhidden_max = $gradeable->getNormalPoints();
+            $hidden_earned = $current_version->getNonHiddenTotal() + $current_version->getHiddenTotal();
+            $hidden_max = $gradeable->getTotalAutograderNonExtraCreditPoints();
+
+            $show_hidden_breakdown = ($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden;
+
+            $display_hidden = false;
+            if ($gradeable->taGradesReleased()) {
+                foreach ($gradeable->getTestcases() as $testcase) {
+                    if (!$testcase->viewTestcase()) continue;
+                    if ($testcase->isHidden()) {
+                        $display_hidden = true;
+                        break;
                     }
                 }
-                $return .= <<<HTML
-<div class="box" style="display: {$display_total};">
-    <div class="box-title">
-        <span class="badge {$background}">{$autoGradingPoints} / {$gradeable->getNormalPoints()}</span>
-        <h4>{$totalTitle}</h4>
-    </div>
-</div>
-<div class="box" style="display: {$display_hidden}">
-    <div class="box-title">
-        <span class="badge {$hidden_background}">{$all_autograder_points} / {$gradeable->getTotalAutograderNonExtraCreditPoints()}</span>
-        <h4>{$totalTitle} <i>(With Hidden Points)</i></h4>
-    </div>
-</div>
-HTML;
             }
         }
+
         $count = 0;
         $display_box = ($num_visible_testcases == 0) ? "block" : "none";
         foreach ($gradeable->getTestcases() as $testcase) {
@@ -136,7 +68,7 @@ HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $div_click = "style=\"cursor: pointer;\"";
             }
-            $div_to_populate = "testcase_".$count;
+            $div_to_populate = "testcase_" . $count;
 
             $return .= <<<HTML
 <div class="box" {$background}>
@@ -149,17 +81,16 @@ HTML;
             }
             if ($testcase->hasPoints()) {
                 if ($testcase->isHidden() && !$show_hidden) {
-                    if($gradeable->taGradesReleased()){
-                        $hiddenPoints = ($testcase->isExtraCredit()) ? '<br/>+'. $testcase->getPointsAwarded() : '<br>'.$testcase->getPointsAwarded() . " / " . $testcase->getPoints();
-                    }else{
+                    if ($gradeable->taGradesReleased()) {
+                        $hiddenPoints = ($testcase->isExtraCredit()) ? '<br/>+' . $testcase->getPointsAwarded() : '<br>' . $testcase->getPointsAwarded() . " / " . $testcase->getPoints();
+                    } else {
                         $hiddenPoints = "";
                     }
 
                     $return .= <<<HTML
         <div class="badge">Hidden {$hiddenPoints} </div>
 HTML;
-                }
-                else {
+                } else {
                     $showed_badge = false;
                     $background = "";
                     if ($testcase->isExtraCredit()) {
@@ -170,28 +101,23 @@ HTML;
         <div class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp;</div>
 HTML;
                         }
-                    }
-                    else if ($testcase->getPoints() > 0) {
+                    } else if ($testcase->getPoints() > 0) {
                         if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
                             $background = "green-background";
-                        }
-                        else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                        } else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
                             $background = "red-background";
-                        }
-                        else {
+                        } else {
                             $background = "yellow-background";
                         }
                         $showed_badge = true;
                         $return .= <<<HTML
         <div class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</div>
 HTML;
-                    }
-                    else if ($testcase->getPoints() < 0) {
+                    } else if ($testcase->getPoints() < 0) {
                         if ($testcase->getPointsAwarded() < 0) {
                             if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
                                 $background = "red-background";
-                            }
-                            else if ($testcase->getPointsAwarded() < 0) {
+                            } else if ($testcase->getPointsAwarded() < 0) {
                                 $background = "yellow-background";
                             }
                             $showed_badge = true;
@@ -206,15 +132,14 @@ HTML;
 HTML;
                     }
                 }
-            }
-            else if ($has_badges) {
+            } else if ($has_badges) {
                 $return .= <<<HTML
         <div class="no-badge"></div>
 HTML;
             }
             $name = htmlentities($testcase->getName());
             $extra_credit = "";
-            if($testcase->isExtraCredit()) {
+            if ($testcase->isExtraCredit()) {
                 $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
             }
             $command = htmlentities($testcase->getDetails());
@@ -232,7 +157,7 @@ HTML;
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 //This is the div which will house the test output (filled by script above.)
-               $return .= <<<HTML
+                $return .= <<<HTML
     <div id="{$div_to_populate}" style="display:{$display_box};">
 HTML;
                 $return .= <<<HTML
