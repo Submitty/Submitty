@@ -16,7 +16,7 @@ fi
 # PATHS
 SOURCE="${BASH_SOURCE[0]}"
 CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -147,6 +147,7 @@ pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
+pip3 install PyPDF2
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
@@ -191,13 +192,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -377,12 +377,11 @@ if [ ${WORKER} == 0 ]; then
     # assignment configurations
 
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        git pull
-        popd > /dev/null
+        echo 'Submitty/Tutorial git repo already exists'
+        echo 'You may need to manually pull updates to this repo'
     else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
+        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
         # remember to change this version in .setup/travis/autograder.sh too
         git checkout v0.94
         popd > /dev/null
@@ -393,13 +392,37 @@ fi
 # ANALYSIS TOOLS SETUP
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    git pull
-    popd > /dev/null
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools ]; then
+    echo 'Submitty/AnalysisTools git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
 else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 fi
+
+
+#################################################################
+# LICHEN SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
+    echo 'Submitty/Lichen git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+fi
+
+
+#################################################################
+# RainbowGrades SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
+    echo 'Submitty/RainbowGrades git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+fi
+
 
 
 #################################################################
