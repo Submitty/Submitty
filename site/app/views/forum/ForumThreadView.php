@@ -980,7 +980,8 @@ HTML;
 						$("#ui-category-list").find(".fa-trash").click(function() {
 							var item = $(this).parent().parent().parent();
 							var category_id = parseInt(item.attr('id').split("-")[1]);
-							deleteCategory(category_id);
+							var category_desc = item.find(".categorylistitem-desc span").text().trim();
+							deleteCategory(category_id, category_desc);
 						});
 						$("#ui-category-list").find(".fa-edit").click(function() {
 							var item = $(this).parent().parent().parent();
