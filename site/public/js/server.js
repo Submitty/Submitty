@@ -1226,7 +1226,7 @@ function setupSimpleGrading(action) {
                     $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
                 }
             }
-            else if(event.keyCode == 86) { // V key clicks the current element to update the grades
+            else if(event.keyCode == 86 || event.keyCode == 32) { // V key/spacebar clicks the current element to update the grades
                 $(child_elems[child_idx]).click();
             }
         }
