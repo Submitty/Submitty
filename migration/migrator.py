@@ -51,7 +51,7 @@ def parse_args():
     for env in ['master', 'system', 'course']:
         if env in args.environments:
             environments.append(env)
-    args.envrionments = environments
+    args.environments = environments
     return args
 
 
