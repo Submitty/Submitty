@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'edit_thread':
+                $this->editThread();
+                break;
             case 'search_threads':
                 $this->search();
                 break;
@@ -415,6 +418,23 @@ class ForumController extends AbstractController {
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
+    }
+
+    public function editThread(){
+        $thread_id = $_POST["edit_thread_id"];
+        if($this->core->getUser()->getGroup() <= 2){
+            if(isset($_POST["edit_thread_title"])) {
+                $thread_title = $_POST["edit_thread_title"];
+                if(empty($thread_title)) {
+                    $this->core->addErrorMessage("Thread title can't be empty.");
+                } else {
+                    $this->core->getQueries()->editThreadTitle($thread_id, $thread_title);
+                }
+            }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
     private function getSortedThreads($categories_ids){

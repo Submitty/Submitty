@@ -376,6 +376,21 @@ HTML;
 	    			</div>	
 	    			</form>
 				</div>
+				<div class="popup-form" id="edit-thread">
+
+				<h3 id="edit_thread_prompt"></h3>
+
+				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_thread'))}">
+					<input type="hidden" id="edit_thread_tid" name="edit_thread_id" value="" data-ays-ignore="true"/>
+					Enter new thread title <br/>
+					<input name="edit_thread_title" id="edit_thread_title" placeholder="Enter Here" style="margin-right:10px;width:98%;" data-ays-ignore="true" required>
+
+					<div style="float: right; width: auto; margin-top: 10px">
+						<a onclick="$('#edit-thread').css('display', 'none');" class="btn btn-danger">Cancel</a>
+						<input class="btn btn-primary" type="submit" value="Submit" />
+					</div>
+				</form>
+				</div>
 HTML;
 			}
 
@@ -430,6 +445,13 @@ HTML;
                     $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
 HTML;
+					if($this->core->getUser()->getGroup() <= 2){
+						$title_html .= <<<HTML
+						&nbsp;
+						<a style="position:relative; display:inline-block;" class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="
+$('#edit-thread').css('display', 'block');$('#edit_thread_tid').val({$activeThread['id']});$('#edit_thread_title').val('{$activeThreadTitle}');" title="Edit Thread"><i class="fa fa-cog" aria-hidden="true"></i></a>
+HTML;
+					}
 					$first = true;
 					$first_post_id = 1;
 					if($display_option == "tree"){
