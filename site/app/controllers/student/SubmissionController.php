@@ -300,9 +300,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-	if ($max_size < 10000000) {
-	    $max_size = 10000000;
-	}
+    	if ($max_size < 10000000) {
+    	    $max_size = 10000000;
+    	}
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -736,6 +736,7 @@ class SubmissionController extends AbstractController {
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'];
+        // the user id of the submitter ($user_id is the one being submitted for)
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
