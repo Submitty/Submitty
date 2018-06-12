@@ -1,4 +1,4 @@
-{% import _self as self %}
+{% import 'functions/Component.twig' as Component %}
 
 {% if not gradeable.beenTAgraded() %}
     <br>
@@ -39,7 +39,7 @@
         {# Manual total #}
         <div class="box">
             <div class="box-title">
-                <span class="badge {{ self.get_badge_style(graded_score, graded_max) }}" style="float: left">{{ graded_score }} / {{ graded_max }}</span>
+                <span class="badge {{ Component.get_badge_style(graded_score, graded_max) }}" style="float: left">{{ graded_score }} / {{ graded_max }}</span>
                 <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
             </div>
         </div>
@@ -55,7 +55,7 @@
                     {% set background = score == 0 ? "hidden" : "green-background" %}
                     {% set score = "+" ~ score %}
                 {% else %}
-                    {% set background = self.get_badge_style(score, component.getMaxValue()) %}
+                    {% set background = Component.get_badge_style(score, component.getMaxValue()) %}
                     {% set score = score ~ " / " ~ component.getMaxValue() %}
                 {% endif %}
 
@@ -85,7 +85,7 @@
         {% if has_autograding %}
             <div class="box">
                 <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
-                    <span class="badge {{ self.get_badge_style(total_score, total_max) }}"> {{ total_score }} / {{ total_max }}</span>
+                    <span class="badge {{ Component.get_badge_style(total_score, total_max) }}"> {{ total_score }} / {{ total_max }}</span>
                     <h4>Total</h4>
                 </div>
             </div>
@@ -93,14 +93,3 @@
         {# /Total auto + manual #}
     </div>
 {% endif %}
-
-{# Get badge css class based on points earned vs max possible #}
-{% macro get_badge_style(earned, max) %}
-    {% if earned >= max %}
-        green-background
-    {% elseif earned > max * 0.5 %}
-        yellow-background
-    {% else %}
-        red-background
-    {% endif %}
-{% endmacro %}
