@@ -9,9 +9,7 @@
                     <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
                 {% endif %}
                 {# /Verify all button #}
-                <span> <input id='EditModeButton' type='checkbox' style="display: inline;" class="btn btn-default" value='Enable Editing Mode' onclick='toggleEditMode();'/> Enable Editing Mode</span>
-                <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
-                <span {$span_style}> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" {$checked}/> Overwrite Grader </span>
+                <span> <input id='EditModeButton' type='checkbox' value='Enable Editing Mode' onclick='toggleEditMode(); updateCookies()'/> Enable Editing Mode</span>
                 {# Checkboxes #}
                 <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
                 {% if peer %}
