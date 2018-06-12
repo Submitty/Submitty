@@ -825,7 +825,6 @@ HTML;
             if($g->getId() == $gradeable->getId()){
                 $class = "class='yellow-background'";
                 $status = $g->getLateStatus();
-                $status_for_this_assignment = $g->getLateStatus();
             }
             $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
             $return .= <<<HTML
