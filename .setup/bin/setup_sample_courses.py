@@ -34,6 +34,7 @@ import sys
 import configparser
 import csv
 import pdb
+import _pickle as cPickle #TODO: Remove this when done debugging, Buster
 
 from submitty_utils import dateutils
 
@@ -115,6 +116,8 @@ def main():
             for key in courses.keys():
                 courses[key].users.append(user)
 
+    dbg_log_suffix = "_{:%m%d%Y_%H%M%S}.pck".format(datetime.now())
+    cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/preset_users_dump'+dbg_log_suffix,'wb'))
     # To make Rainbow Grades testing possible, need to seed random to have the same users each time
     random.seed(10090542)
 
@@ -128,12 +131,15 @@ def main():
               course.no_registration_students
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
+    #cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/extra_students_users_dump'+dbg_log_suffix,'wb'))
 
     submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
-    for user_id, user in users.items():
+    #for user_id, user in users.items():
+    for user_id in sorted(users.keys()):
+        user = users[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
                               user_password=get_php_db_password(user.password),
