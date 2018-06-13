@@ -400,6 +400,18 @@ function updateMarksOnPage(num) {
                     current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
                 }
             }
+            /*
+            else{
+                if(points == "None Selected"){
+                    current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; border:none; outline: none; background-color: #E9EFEF");
+                    current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; border:none; outline: none; background-color: #E9EFEF");
+                }
+                else{
+                    current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; border:none; outline: none; background-color: #f9f9f9");
+                    current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; border:none; outline: none; background-color: #f9f9f9");
+                }
+            }
+            */
         }
     });
 }
