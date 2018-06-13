@@ -325,58 +325,11 @@ HTML;
 					}
 				}
 
-				$return .= <<<HTML
-				<div class="popup-form" id="merge-threads">
-HTML;
-				if(count($merge_thread_list) == 0) {
-					$return .= <<<HTML
-					Nothing to merge.
-					<a onclick="$('#merge-threads').css('display', 'none');" style='float: right;' class="btn btn-danger">Cancel</a>
-HTML;
-				} else {
-					$return .= <<<HTML
-					<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'merge_thread'))}">
-						Merge current thread into
-						<input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{$currentThread}" data-ays-ignore="true">
-						<select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
-HTML;
-						for($i = 0; $i < count($merge_thread_list); $i++){
-							$first_post = $this->core->getQueries()->getFirstPostForThread($merge_thread_list[$i]["id"]);
-							$return.= <<<HTML
-							 <option value='{$merge_thread_list[$i]["id"]}'>{$merge_thread_list[$i]['title']} ({$merge_thread_list[$i]["id"]})</option>
-HTML;
-						}
-						$return .= <<<HTML
-						</select>
-						<br>
-						<div  style="float: right; width: auto; margin-top: 10px;">
-							<a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
-							<input class="btn btn-primary" type="submit" value="Submit" />
-						</div>
-					</form>
-HTML;
-				}
-				$return .= <<<HTML
-				</div>
-
-				<div class="popup-form" id="edit-user-post">
-
-				<h3 id="edit_user_prompt"></h3>
-
-				<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-    					<input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-						<input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-
-	            		<textarea name="edit_post_content" id="edit_post_content" style="margin-right:10px;resize:none;min-height:200px;width:98%;" placeholder="Enter your reply here..." required></textarea>
-	            	
-					<div style="float: right; width: auto; margin-top: 10px">
-	        			<a onclick="$('#edit-user-post').css('display', 'none');$('#edit_post_content').val('');
-	        						$('#edit_post_content').trigger('checkform.areYouSure');" class="btn btn-danger">Cancel</a>
-	       			 	<input class="btn btn-primary" type="submit" value="Submit" />
-	    			</div>	
-	    			</form>
-				</div>
-HTML;
+				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                    "merge_thread_list" => $merge_thread_list,
+                    "currentThread" => $currentThread
+                ]);
+				$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
 			}
 
 			$return .= <<<HTML
@@ -861,6 +814,7 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
+		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 
 		<script> 
@@ -1063,6 +1017,8 @@ HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
+					<div id='categories-pick-list'>
+					<noscript>
 HTML;
 					if(count($categories) == 0) {
 						$return .= <<<HTML

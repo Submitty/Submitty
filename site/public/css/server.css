@@ -664,6 +664,11 @@ table tr.table-header {
     background-color: #c00000;
 }
 
+.badge-container {
+    padding: 6px 0;
+    display: block;
+}
+
 .italics {
     font-style: italic;
     text-decoration: none;
@@ -923,6 +928,12 @@ table .instructor .two-options{
     vertical-align: top;
     padding-right: 10px;
     padding-bottom: 10px;
+}
+
+.popup-form.decent div {
+    width: initial;
+    display: block;
+    padding-right: initial;
 }
 
 .popup-form > div > input[type="text"] {

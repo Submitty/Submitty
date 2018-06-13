@@ -65,7 +65,7 @@ run_experiment () {
     #/usr/local/submitty/bin/regrade.py --replay "${start}" "${end}"
     #/usr/local/submitty/bin/regrade.py --replay "${start}" "${end}"    
     sleep $((stime*60))
-    python3 /usr/local/submitty/GIT_CHECKOUT_Submitty/bin/anonymize_autograding_logs.py file /var/local/submitty/logs/autograding/20180220.txt /home/$(test_user)/PAPER_DATA/${exp_name}_DOCKER_autograding_log.txt XX
+    python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/bin/anonymize_autograding_logs.py file /var/local/submitty/logs/autograding/20180220.txt /home/$(test_user)/PAPER_DATA/${exp_name}_DOCKER_autograding_log.txt XX
 
     sudo chown $(test_user):$(test_user) /home/$(test_user)/PAPER_DATA/*
 
@@ -87,7 +87,7 @@ run_experiment () {
     #/usr/local/submitty/bin/regrade.py --replay "${start}" "${end}"
     #/usr/local/submitty/bin/regrade.py --replay "${start}" "${end}"
     sleep $((stime*60))
-    python3 /usr/local/submitty/GIT_CHECKOUT_Submitty/bin/anonymize_autograding_logs.py file /var/local/submitty/logs/autograding/20180220.txt /home/$(test_user)/PAPER_DATA/${exp_name}_nodocker_autograding_log.txt XX
+    python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/bin/anonymize_autograding_logs.py file /var/local/submitty/logs/autograding/20180220.txt /home/$(test_user)/PAPER_DATA/${exp_name}_nodocker_autograding_log.txt XX
 
     sudo chown $(test_user):$(test_user) /home/$(test_user)/PAPER_DATA/*
 

@@ -1,0 +1,941 @@
+<!--
+Will this assignment have peer grading?
+<fieldset>
+    <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes" {{ admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> Yes
+    <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no" {{ not admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> No
+    <div class="peer_input" style="display:none;">
+        <br />
+        How many peers should each student grade?
+        <input style='width: 50px' type='text' name="peer_grade_set" value="{{ admin_gradeable.getEgPeerGradeSet() }}" class='int_val' />
+        <br />
+        How many points should be associated with a students completion of their grading?
+        <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
+    </div>
+</fieldset>
+<br />-->
+Is this a PDF with a page assigned to each component?
+<fieldset>
+    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+            {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+            {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
+
+    <br />
+
+    <div id="pdf_page">
+        <br />
+        Who will assign pages to components?
+        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+                {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
+        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+                {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+    </div>
+</fieldset>
+
+Point precision:
+<input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<br /><br />
+
+<table class="electronic_file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
+    <thead style="background: #E1E1E1;">
+    <tr>
+        <th>Manual/TA/Peer Grading Rubric</th>
+        <th style="width:210px;">Points</th>
+    </tr>
+    </thead>
+    <tbody style="background: #f9f9f9;">
+
+    {% set num = 1 %}
+    {% for question in admin_gradeable.getOldComponents() if question.getOrder() != -1 %}
+        <tr class="rubric-row" id="row-{{ num }}">
+            <td style="overflow: hidden;">
+                <input type="hidden" name="component_id_{{ num }}" value="{{ question.getId() }}">
+                <input type="hidden" name="component_deleted_marks_{{ num }}" value="">
+                <textarea name="comment_title_{{ num }}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;"
+                          placeholder="Rubric Item Title">{{ question.getTitle() }}</textarea>
+                <textarea name="ta_comment_{{ num }}" id="individual_{{ num }}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);"
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
+                                                   display: block; height: auto;">{{ question.getTaComment() }}</textarea>
+                <textarea name="student_comment_{{ num }}" id="student_{{ num }}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and graders)" onkeyup="autoResizeComment(event);"
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
+                                  display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
+                <div id="mark_questions_{{ num }}">
+                    {% if marks|length == 0 %}
+                        <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
+                            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
+                            <!--
+                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            -->
+                            <br>
+                        </div>
+                    {% endif %}
+                    {% set first = true %}
+                    {% set hide_icons = "" %}
+                    {% for mark in marks[question.getId()] %}
+                        <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
+                            <i class="fa fa-circle" aria-hidden="true"></i>
+                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
+                                   value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
+                            {% if not first %}
+                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
+                            {% endif %}
+
+                            <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <!--
+                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                            -->
+                            <br>
+                        </div>
+                        {% set first = false %}
+                    {% endfor %}
+                    <div class="btn btn-xs btn-primary" id="rubric_add_mark_{{ num }}" onclick="addMark(this,{{ num }});" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div>
+                </div>
+            </td>
+
+            <td style="background-color:#EEE;">
+                {% set old_max = question.getMaxValue() %}
+                {% set old_upper_clamp = question.getUpperClamp() %}
+                {% set old_lower_clamp = question.getLowerClamp() %}
+                {% set extra_credit = old_upper_clamp > old_max %}
+                {% set penalty = old_lower_clamp < 0 %}
+                {% set grade_up = question.getDefault() == 0 %}
+                Points: <input type="number" id="grade-{{ num }}" class="points" name="points_{{ num }}" value="{{ old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                <br>
+                Extra Credit:
+                <input type="radio" id="rad_id_extra_credit_yes-{{ num }}" name="rad_extra_credit-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openExtra(this);" {{ extra_credit ? 'checked' : '' }}> Yes
+                <input type="radio" id="rad_id_extra_credit_no-{{ num }}" name="rad_extra_credit-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closeExtra(this);" {{ not extra_credit ? 'checked' : '' }}> No
+                <div id="extra_credit_{{ num }}" style="{{ not extra_credit ? 'display: none;' : '' }}">
+                    Extra Credit Points: <input type="number" class="points3" name="upper_{{ num }}" value="{{ old_upper_clamp - old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                </div>
+                Penalty:
+                <input type="radio" id="rad_id_penalty_yes-{{ num }}" name="rad_penalty-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openPenalty(this);" {{ penalty ? 'checked' : '' }}> Yes
+                <input type="radio" id="rad_id_penalty_no-{{ num }}" name="rad_penalty-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closePenalty(this);" {{ not penalty ? 'checked' : '' }}> No
+                <div id="penalty_{{ num }}" style="{{ not penalty ? 'display: none' : '' }}">
+                    Penalty Points: <input type="number" class="points2" name="lower_{{ num }}" value="{{ old_lower_clamp }}" max="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:40px; resize:none;">
+                </div>
+                <br>
+                <input type="radio" id="id_grade_by_up-{{ num }}" name="grade_by-{{ num }}" value="count_up" data-question_num="{{ num }}" onclick="onAddition(this);" {{ grade_up ? 'checked' : '' }}> Grade by count up
+                <br>
+                <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
+                <br>
+
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+
+                <!--
+                <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
+                -->
+                {% if num > 1 %}
+                    <!--
+                    <a id="delete-{{ num }}" class="question-icon" onclick="deleteQuestion({{ num }});">
+                    <i class="fa fa-times" aria-hidden="true"></i></a>
+                    <a id="down-{{ num }}" class="question-icon" onclick="moveQuestionDown({{ num }});">
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i></a>
+                    <a id="up-{{ num }}" class="question-icon" onclick="moveQuestionUp({{ num }});">
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
+                    -->
+                {% endif %}
+
+            </td>
+        </tr>
+        {% set num = num + 1 %}
+    {% endfor %}
+    <tr id="add-question">
+        <td colspan="2" style="overflow: hidden; text-align: left;">
+            <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Rubric Item</div>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>
+        <td style="background-color: #EEE; border-top: 2px solid #CCC;"><strong id="totalCalculation"></strong></td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function() {
+        $('input:radio[name="pdf_page"]').change(function () {
+            $("input[name^='page_component']").each(function () {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+            $('.pdf_page_input').hide();
+            $('#pdf_page').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'true') {
+                    $("input[name^='page_component']").each(function () {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                    $('#pdf_page').show();
+                }
+            }
+        });
+
+        $('input:radio[name="pdf_page_student"]').change(function () {
+            $("input[name^='page_component']").each(function () {
+                if (this.value < -1) {
+                    this.value = -1;
+                }
+            });
+            $('.pdf_page_input').hide();
+            if ($(this).is(':checked')) {
+                if ($(this).val() == 'false') {
+                    $("input[name^='page_component']").each(function () {
+                        if (this.value < 1) {
+                            this.value = 1;
+                        }
+                    });
+                    $('.pdf_page_input').show();
+                }
+            }
+        });
+    });
+
+    function checkFormRubricElec() {
+        // Check rubric
+        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
+            var index = 1;
+            var exists = true;
+            var error = false;
+            var error_message = ``;
+            while(exists){ //goes through questions
+                if($("#grade-"+index).length) {
+                    var type = 0;
+                    if ($('input[name=grade_by-'+index+']:radio:checked').val() === 'count_up') {
+                        type = 1;
+                    } else {
+                        type = 0;
+                    }
+                    var points = parseFloat($("#grade-"+index).val());
+                    var temp_points = 0;
+                    var temp_num = -1;
+                    var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
+                    var index2 = 0;
+                    while (exists2) { //goes through marks
+                        temp_num = parseFloat($('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').val());
+                        if (type === 1) {
+                            if (temp_num > 0) {
+                                temp_points += temp_num;
+                            }
+                        } else {
+                            if (temp_num < 0) {
+                                temp_points += (temp_num * -1);
+                            }
+                        }
+                        index2++;
+                        exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
+                    }
+
+                    //fun fact between caution and warning: http://www.stevensstrategic.com/technical-writing-the-difference-between-warnings-and-cautions/
+                    if (temp_points < points && index2 > 1) { //display caution message if points are not enough and more than 1 mark
+                        if (error === false) {
+                            error_message = error_message + `Caution! \n`;
+                        } else {
+                            error_message = error_message + `\n`;
+                        }
+                        error = true;
+                        var temp_error_message = ``;
+                        if (type === 1) {
+                            temp_error_message = `Component ` + index + ` is count up but the marks' values are not enough to reach the point value.`;
+                        } else {
+                            temp_error_message = `Component ` + index + ` is count down but the marks' values are not enough to drop to the point value.`;
+                        }
+                        error_message = error_message + temp_error_message;
+                    }
+                }
+                else {
+                    exists = false;
+                }
+                index++;
+            }
+            if (error === true) {
+                error_message = error_message + `\n` + `Do you still wish to submit this gradeable?`;
+                return confirm(error_message);
+            }
+        }
+
+        return true;
+    }
+
+
+    function toggleQuestion(question, role) {
+        if(document.getElementById(role +"_" + question ).style.display == "block") {
+            $("#" + role + "_" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById(role + "_"+ question ).style.display = "none";}, 175);
+        }
+        else {
+            $("#" + role + "_" + question ).animate({marginBottom:"5px"});
+            setTimeout(function(){document.getElementById(role+"_" + question ).style.display = "block";}, 175);
+        }
+        calculatePercentageTotal();
+    }
+
+    // autoresize the comment
+    function autoResizeComment(e){
+        e.target.style.height ="";
+        e.target.style.height = e.target.scrollHeight + "px";
+    }
+
+    function selectBox(question){
+        var step = $('#point_precision_id').val();
+        // should be the increment value
+        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" max="1000" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
+    }
+
+    function openExtra(me) {
+        $('#extra_credit_' + me.dataset.question_num)[0].style.display = '';
+        calculatePercentageTotal();
+    }
+
+    function closeExtra(me) {
+        $('#extra_credit_' + me.dataset.question_num)[0].style.display = 'none';
+        calculatePercentageTotal();
+    }
+
+    function openPenalty(me) {
+        $('#penalty_' + me.dataset.question_num)[0].style.display = '';
+    }
+
+    function closePenalty(me) {
+        $('#penalty_' + me.dataset.question_num)[0].style.display = 'none';
+    }
+
+    function fixPointPrecision(me) {
+        var step = $(me).val();
+        var index = 1;
+        var exists = true;
+        while(exists){
+            if($("#grade-"+index).length) {
+                $("#grade-"+index).attr('step', step);
+                $("#extra_credit_"+index).find('input[name=upper_'+index+']').attr('step', step);
+                $("#penalty_"+index).find('input[name=lower_'+index+']').attr('step', step);
+                var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
+                var index2 = 0;
+                while (exists2) {
+                    $('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').attr('step', step);
+                    index2++;
+                    exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
+                }
+            }
+            else {
+                exists = false;
+            }
+            index++;
+        }
+    }
+
+    function fixMarkPointValue(me) {
+        var max = parseFloat($(me).attr('max'));
+        var min = parseFloat($(me).attr('min'));
+        var current_value = parseFloat($(me).val());
+        if (current_value > max) {
+            $(me).val(max);
+        } else if (current_value < min) {
+            $(me).val(min);
+        }
+    }
+
+    function calculatePercentageTotal() {
+        var total = 0;
+        var ec = 0;
+        $('input.points').each(function(){
+            if ($(this).val() > 0){
+                total += +($(this).val());
+            }
+        });
+        $('input.points3').each(function() {
+            var num = ($(this).attr('name').split('_')[1]);
+            if ($('input[name=rad_extra_credit-'+num+']:radio:checked').val() === 'yes') {
+                if ($(this).val() > 0) {
+                    ec += +($(this).val());
+                }
+            }
+        });
+        document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
+    }
+
+    function updateMarkIds(elem, old_id, new_id) {
+        elem.find('div[name=mark_'+old_id+']').each(function () {
+            var mark_id = $(this).attr('id');
+            var question_id = mark_id.split('-')[1];
+            var current_id = mark_id.split('-')[2];
+            $(this).attr('name', 'mark_' + new_id);
+            $(this).attr('id', 'mark_id-'+new_id+'-'+current_id+'');
+            $(this).find('input[name=mark_points_'+old_id+'_'+current_id+']').attr('name', 'mark_points_'+new_id+'_'+current_id);
+            $(this).find('textarea[name=mark_text_'+old_id+'_'+current_id+']').attr('name', 'mark_text_'+new_id+'_'+current_id);
+        });
+    }
+
+    function deleteQuestion(question) {
+        if (question <= 0) {
+            return;
+        }
+        var row = $('tr#row-'+ question);
+        row.remove();
+        var totalQ = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        for(var i=question+1; i<= totalQ; ++i){
+            updateRow(i,i-1);
+        }
+        calculatePercentageTotal();
+    }
+
+    function updateRow(oldNum, newNum) {
+        var row = $('tr#row-'+ oldNum);
+        row.attr('id', 'row-' + newNum);
+        row.find('textarea[name=comment_title_' + oldNum + ']').attr('name', 'comment_title_' + newNum);
+        row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
+        row.find('textarea[name=ta_comment_' + oldNum + ']').attr('name', 'ta_comment_' + newNum).attr('id', 'individual_' + newNum);
+        row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
+        row.find('input[name=points_' + oldNum + ']').attr({
+            name: 'points_' + newNum,
+            id: 'grade-' + newNum
+        });
+        row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
+        row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
+        row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
+        row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
+        row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
+        row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
+        row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
+        row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
+        row.find('input[id=rad_id_extra_credit_yes-' + oldNum + ']').attr({
+            id: 'rad_id_extra_credit_yes-' + newNum,
+            name: 'rad_extra_credit-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('input[id=rad_id_extra_credit_no-' + oldNum + ']').attr({
+            id: 'rad_id_extra_credit_no-' + newNum,
+            name: 'rad_extra_credit-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('div[id=extra_credit_' + oldNum + ']').attr('id','extra_credit_' + newNum);
+        row.find('input[name=upper_' + oldNum + ']').attr('name', 'upper_' + newNum);
+        row.find('input[id=rad_id_penalty_yes-' + oldNum + ']').attr({
+            id: 'rad_id_penalty_yes-' + newNum,
+            name: 'rad_penalty-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('input[id=rad_id_penalty_no-' + oldNum + ']').attr({
+            id: 'rad_id_penalty_no-' + newNum,
+            name: 'rad_penalty-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('div[id=penalty_' + oldNum + ']').attr('id', 'penalty_'+ newNum);
+        row.find('input[name=lower_' + oldNum + ']').attr('name', 'lower_' + newNum);
+        row.find('input[id=id_grade_by_up-' + oldNum + ']').attr({
+            id: 'id_grade_by_up-' + newNum,
+            name: 'grade_by-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('input[id=id_grade_by_down-' + oldNum + ']').attr({
+            id: 'id_grade_by_down-' + newNum,
+            name: 'grade_by-' + newNum,
+            'data-question_num': newNum
+        });
+        row.find('div[id=mark_questions_'+oldNum+']').attr('id', 'mark_questions_'+newNum);
+        row.find('div[id=rubric_add_mark_' + oldNum + ']').attr('id','rubric_add_mark_' + newNum).attr('onclick', 'addMark(this,' + newNum + ')');
+        updateMarkIds(row,oldNum,newNum);
+    }
+
+    function moveQuestionDown(question) {
+        if (question < 1) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question+1));
+        var child = 0;
+        if (question == 1) {
+            child = 1;
+        }
+        var new_question = parseInt(question) + 1;
+
+        if(!newRow.length) {
+            return false;
+        }
+
+        //Move Question title
+        var temp = currentRow.children()[child].children[0].value;
+        currentRow.children()[child].children[0].value = newRow.children()[0].children[0].value;
+        newRow.children()[0].children[0].value = temp;
+
+        //Move Ta Comment
+        temp = currentRow.children()[child].children[1].value;
+        currentRow.children()[child].children[1].value = newRow.children()[0].children[1].value;
+        newRow.children()[0].children[1].value = temp;
+
+        //Move Student Comment
+        temp = currentRow.children()[child].children[2].value;
+        currentRow.children()[child].children[2].value = newRow.children()[0].children[2].value;
+        newRow.children()[0].children[2].value = temp;
+
+        child += 1;
+
+        //Move points
+        temp = currentRow.find('input[name=points_' + question +']').val();
+        currentRow.find('input[name=points_' + question +']').val(newRow.find('input[name=points_' + new_question +']').val());
+        newRow.find('input[name=points_' + new_question +']').val(temp);
+
+        //Move extra credit box
+        temp = currentRow.find('input[name=upper_' + question +']').val();
+        currentRow.find('input[name=upper_' + question +']').val(newRow.find('input[name=upper_' + new_question +']').val());
+        newRow.find('input[name=upper_' + new_question +']').val(temp);
+
+        //Move penalty box
+        temp = currentRow.find('input[name=lower_' + question +']').val();
+        currentRow.find('input[name=lower_' + question +']').val(newRow.find('input[name=lower_' + new_question +']').val());
+        newRow.find('input[name=lower_' + new_question +']').val(temp);
+
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + new_question +']')[0].checked;
+        newRow.find('input[name=peer_component_' + new_question +']')[0].checked = temp;
+
+        //Move the radio buttons
+        temp1 = $('#rad_id_extra_credit_yes-' + question)[0].checked;
+        temp2 = $('#rad_id_extra_credit_no-' + question)[0].checked;
+        temp3 = $('#rad_id_penalty_yes-' + question)[0].checked;
+        temp4 = $('#rad_id_penalty_no-' + question)[0].checked;
+        temp5 = $('#id_grade_by_up-' + question)[0].checked;
+        temp6 = $('#id_grade_by_down-' + question)[0].checked;
+        $('#rad_id_extra_credit_yes-' + question)[0].checked = $('#rad_id_extra_credit_yes-' + new_question)[0].checked;
+        $('#rad_id_extra_credit_no-' + question)[0].checked = $('#rad_id_extra_credit_no-' + new_question)[0].checked;
+        $('#rad_id_penalty_yes-' + question)[0].checked = $('#rad_id_penalty_yes-' + new_question)[0].checked;
+        $('#rad_id_penalty_no-' + question)[0].checked = $('#rad_id_penalty_no-' + new_question)[0].checked;
+        $('#id_grade_by_up-' + question)[0].checked = $('#id_grade_by_up-' + new_question)[0].checked;
+        $('#id_grade_by_down-' + question)[0].checked = $('#id_grade_by_down-' + new_question)[0].checked;
+        $('#rad_id_extra_credit_yes-' + new_question)[0].checked = temp1;
+        $('#rad_id_extra_credit_no-' + new_question)[0].checked = temp2;
+        $('#rad_id_penalty_yes-' + new_question)[0].checked = temp3;
+        $('#rad_id_penalty_no-' + new_question)[0].checked = temp4;
+        $('#id_grade_by_up-' + new_question)[0].checked = temp5;
+        $('#id_grade_by_down-' + new_question)[0].checked = temp6;
+
+        //open and closes the right radio button's boxes
+        if($('#rad_id_extra_credit_yes-' + question)[0].checked) {
+            $('#rad_id_extra_credit_yes-' + question).trigger("onclick");
+        } else {
+            $('#rad_id_extra_credit_no-' + question).trigger("onclick");
+        }
+        if ($('#rad_id_penalty_yes-' + question)[0].checked) {
+            $('#rad_id_penalty_yes-' + question).trigger("onclick");
+        } else {
+            $('#rad_id_penalty_no-' + question).trigger("onclick");
+        }
+        if ($('#id_grade_by_up-' + question)[0].checked) {
+            $('#id_grade_by_up-' + question).trigger("onclick");
+        } else {
+            $('#id_grade_by_down-' + question).trigger("onclick");
+        }
+        if($('#rad_id_extra_credit_yes-' + new_question)[0].checked) {
+            $('#rad_id_extra_credit_yes-' + new_question).trigger("onclick");
+        } else {
+            $('#rad_id_extra_credit_no-' + new_question).trigger("onclick");
+        }
+        if ($('#rad_id_penalty_yes-' + new_question)[0].checked) {
+            $('#rad_id_penalty_yes-' + new_question).trigger("onclick");
+        } else {
+            $('#rad_id_penalty_no-' + new_question).trigger("onclick");
+        }
+        if ($('#id_grade_by_up-' + new_question)[0].checked) {
+            $('#id_grade_by_up-' + new_question).trigger("onclick");
+        } else {
+            $('#id_grade_by_down-' + new_question).trigger("onclick");
+        }
+
+        //stores the point and text data so it can readded; the html earses it once moved
+        var current_mark_points = [];
+        var current_mark_texts = [];
+        currentRow.find('div[name=mark_'+question+']').each(function () {
+            current_mark_points.push($(this).find("input").val());
+            current_mark_texts.push($(this).find("textarea").val());
+        });
+        var new_mark_points = [];
+        var new_mark_texts = [];
+        newRow.find('div[name=mark_'+new_question+']').each(function () {
+            new_mark_points.push($(this).find("input").val());
+            new_mark_texts.push($(this).find("textarea").val());
+        });
+
+        //switchs the html between the table rows
+        var temp_html = currentRow.find('div[id=mark_questions_'+question+']').html();
+        currentRow.find('div[id=mark_questions_'+question+']').html(newRow.find('div[id=mark_questions_'+new_question+']').html());
+        newRow.find('div[id=mark_questions_'+new_question+']').html(temp_html);
+
+        //fixes the ids once switched
+        currentRow.find('div[id=rubric_add_mark_' + new_question + ']').attr('id','rubric_add_mark_' + question).attr('onclick', 'addMark(this,' + question + ')');
+        updateMarkIds(currentRow,new_question,question);
+        newRow.find('div[id=rubric_add_mark_' + question + ']').attr('id','rubric_add_mark_' + new_question).attr('onclick', 'addMark(this,' + new_question + ')');
+        updateMarkIds(newRow,question,new_question);
+
+        //readds the data
+        currentRow.find('div[name=mark_'+question+']').each(function (index) {
+            $(this).find("input").val(new_mark_points[index]);
+            $(this).find("textarea").val(new_mark_texts[index]);
+        });
+        newRow.find('div[name=mark_'+new_question+']').each(function (index) {
+            $(this).find("input").val(current_mark_points[index]);
+            $(this).find("textarea").val(current_mark_texts[index]);
+        });
+    }
+
+    function moveQuestionUp(question) {
+        if (question < 1) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question-1));
+        var child = 0;
+        var new_question = parseInt(question) - 1;
+
+        //Move Question title
+        var temp = currentRow.children()[0].children[0].value;
+        currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
+        newRow.children()[child].children[0].value = temp;
+
+        //Move Ta Comment
+        temp = currentRow.children()[0].children[1].value;
+        currentRow.children()[0].children[1].value = newRow.children()[child].children[1].value;
+        newRow.children()[child].children[1].value = temp;
+
+        //Move Student Comment
+        temp = currentRow.children()[0].children[2].value;
+        currentRow.children()[0].children[2].value = newRow.children()[child].children[2].value;
+        newRow.children()[child].children[2].value = temp;
+
+        child += 1;
+
+        //Move points
+        temp = currentRow.find('input[name=points_' + question +']').val();
+        currentRow.find('input[name=points_' + question +']').val(newRow.find('input[name=points_' + new_question +']').val());
+        newRow.find('input[name=points_' + new_question +']').val(temp);
+
+        //Move extra credit box
+        temp = currentRow.find('input[name=upper_' + question +']').val();
+        currentRow.find('input[name=upper_' + question +']').val(newRow.find('input[name=upper_' + new_question +']').val());
+        newRow.find('input[name=upper_' + new_question +']').val(temp);
+
+        //Move penalty box
+        temp = currentRow.find('input[name=lower_' + question +']').val();
+        currentRow.find('input[name=lower_' + question +']').val(newRow.find('input[name=lower_' + new_question +']').val());
+        newRow.find('input[name=lower_' + new_question +']').val(temp);
+
+        //Move peer grading box
+        temp = currentRow.find('input[name=peer_component_' + question +']')[0].checked;
+        currentRow.find('input[name=peer_component_' + question +']')[0].checked = newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked;
+        newRow.find('input[name=peer_component_' + (question-1) +']')[0].checked = temp;
+
+        //Move the radio buttons
+        temp1 = $('#rad_id_extra_credit_yes-' + question)[0].checked;
+        temp2 = $('#rad_id_extra_credit_no-' + question)[0].checked;
+        temp3 = $('#rad_id_penalty_yes-' + question)[0].checked;
+        temp4 = $('#rad_id_penalty_no-' + question)[0].checked;
+        temp5 = $('#id_grade_by_up-' + question)[0].checked;
+        temp6 = $('#id_grade_by_down-' + question)[0].checked;
+        $('#rad_id_extra_credit_yes-' + question)[0].checked = $('#rad_id_extra_credit_yes-' + new_question)[0].checked;
+        $('#rad_id_extra_credit_no-' + question)[0].checked = $('#rad_id_extra_credit_no-' + new_question)[0].checked;
+        $('#rad_id_penalty_yes-' + question)[0].checked = $('#rad_id_penalty_yes-' + new_question)[0].checked;
+        $('#rad_id_penalty_no-' + question)[0].checked = $('#rad_id_penalty_no-' + new_question)[0].checked;
+        $('#id_grade_by_up-' + question)[0].checked = $('#id_grade_by_up-' + new_question)[0].checked;
+        $('#id_grade_by_down-' + question)[0].checked = $('#id_grade_by_down-' + new_question)[0].checked;
+        $('#rad_id_extra_credit_yes-' + new_question)[0].checked = temp1;
+        $('#rad_id_extra_credit_no-' + new_question)[0].checked = temp2;
+        $('#rad_id_penalty_yes-' + new_question)[0].checked = temp3;
+        $('#rad_id_penalty_no-' + new_question)[0].checked = temp4;
+        $('#id_grade_by_up-' + new_question)[0].checked = temp5;
+        $('#id_grade_by_down-' + new_question)[0].checked = temp6;
+
+        //open and closes the right radio button's boxes
+        if($('#rad_id_extra_credit_yes-' + question)[0].checked) {
+            $('#rad_id_extra_credit_yes-' + question).trigger("onclick");
+        } else {
+            $('#rad_id_extra_credit_no-' + question).trigger("onclick");
+        }
+        if ($('#rad_id_penalty_yes-' + question)[0].checked) {
+            $('#rad_id_penalty_yes-' + question).trigger("onclick");
+        } else {
+            $('#rad_id_penalty_no-' + question).trigger("onclick");
+        }
+        if ($('#id_grade_by_up-' + question)[0].checked) {
+            $('#id_grade_by_up-' + question).trigger("onclick");
+        } else {
+            $('#id_grade_by_down-' + question).trigger("onclick");
+        }
+        if($('#rad_id_extra_credit_yes-' + new_question)[0].checked) {
+            $('#rad_id_extra_credit_yes-' + new_question).trigger("onclick");
+        } else {
+            $('#rad_id_extra_credit_no-' + new_question).trigger("onclick");
+        }
+        if ($('#rad_id_penalty_yes-' + new_question)[0].checked) {
+            $('#rad_id_penalty_yes-' + new_question).trigger("onclick");
+        } else {
+            $('#rad_id_penalty_no-' + new_question).trigger("onclick");
+        }
+        if ($('#id_grade_by_up-' + new_question)[0].checked) {
+            $('#id_grade_by_up-' + new_question).trigger("onclick");
+        } else {
+            $('#id_grade_by_down-' + new_question).trigger("onclick");
+        }
+
+        //stores the point and text data so it can readded; the html earses it once moved
+        var current_mark_points = [];
+        var current_mark_texts = [];
+        currentRow.find('div[name=mark_'+question+']').each(function () {
+            current_mark_points.push($(this).find("input").val());
+            current_mark_texts.push($(this).find("textarea").val());
+        });
+        var new_mark_points = [];
+        var new_mark_texts = [];
+        newRow.find('div[name=mark_'+(question-1)+']').each(function () {
+            new_mark_points.push($(this).find("input").val());
+            new_mark_texts.push($(this).find("textarea").val());
+        });
+
+        //switchs the html between the table rows
+        var temp_html = currentRow.find('div[id=mark_questions_'+question+']').html();
+        currentRow.find('div[id=mark_questions_'+question+']').html(newRow.find('div[id=mark_questions_'+(question-1)+']').html());
+        newRow.find('div[id=mark_questions_'+(question-1)+']').html(temp_html);
+
+        //fixes the ids once switched
+        currentRow.find('div[id=rubric_add_mark_' + (question-1) + ']').attr('id','rubric_add_mark_' + question).attr('onclick', 'addMark(this,' + question + ')');
+        updateMarkIds(currentRow,(question-1),question);
+        newRow.find('div[id=rubric_add_mark_' + question + ']').attr('id','rubric_add_mark_' + (question-1)).attr('onclick', 'addMark(this,' + (question-1) + ')');
+        updateMarkIds(newRow,question,(question-1));
+
+        //readds the data
+        currentRow.find('div[name=mark_'+question+']').each(function (index) {
+            $(this).find("input").val(new_mark_points[index]);
+            $(this).find("textarea").val(new_mark_texts[index]);
+        });
+        newRow.find('div[name=mark_'+(question-1)+']').each(function (index) {
+            $(this).find("input").val(current_mark_points[index]);
+            $(this).find("textarea").val(current_mark_texts[index]);
+        });
+    }
+
+    function addQuestion(){
+        //get the last question number
+        var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        var newQ = num+1;
+        var sBox = selectBox(newQ);
+        var display = "";
+        var step = $('#point_precision_id').val();
+        if($('input[id=peer_no_radio]').is(':checked')) {
+            display = 'style="display:none"';
+        }
+        //Please do not add any characters after the \ including spaces!
+        var displayPage = "";
+        if($('input[id=peer_no_radio]').is(':checked')) {
+            display = 'style="display:none"';
+        }
+        if($('input[id=no_pdf_page]').is(':checked') || $('input[id=yes_pdf_page_student]').is(':checked')) {
+            displayPage = 'style="display:none"';
+        }
+        $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
+            <td style="overflow: hidden; border-top: 5px solid #dddddd;"> \
+            <input type="hidden" name="component_id_'+newQ+'" value="NEW"> \
+            <input type="hidden" name="component_deleted_marks_'+newQ+'" value=""> \
+                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px; height: auto;" placeholder="Rubric Item Title"></textarea> \
+                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA/Grader (seen only by TAs/Graders)"  onkeyup="autoResizeComment(event);" \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and graders)"  onkeyup="autoResizeComment(event);" \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; height: auto;"></textarea> \
+                <div id=mark_questions_'+newQ+'> \
+                <div class="btn btn-xs btn-primary" id="rubric_add_mark_'+newQ+'" onclick="addMark(this,'+newQ+')" style="overflow: hidden; text-align: left;float: left;">Add Common Deduction/Addition</div> </div> \
+            </td> \
+            <td style="background-color:#EEE; border-top: 5px solid #dddddd;"> \
+            Points: <input type="number" id="grade-'+newQ+'" class="points" name="points_'+newQ+'" value="0" min="0" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
+            <br> \
+            Extra Credit: \
+            <input type="radio" id="rad_id_extra_credit_yes-'+newQ+'" name="rad_extra_credit-'+newQ+'" value="yes" data-question_num="'+newQ+'" onclick="openExtra(this);"> Yes \
+            <input type="radio" id="rad_id_extra_credit_no-'+newQ+'" name="rad_extra_credit-'+newQ+'" value="no" data-question_num="'+newQ+'" onclick="closeExtra(this);" checked> No \
+            <div id="extra_credit_'+newQ+'" style="display: none;"> \
+                Extra Credit Points: <input type="number" class="points3" name="upper_'+newQ+'" value="0" min="0" step="'+step+'" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;"> \
+            </div> \
+            Penalty:  \
+            <input type="radio" id="rad_id_penalty_yes-'+newQ+'" name="rad_penalty-'+newQ+'" value="yes" data-question_num="'+newQ+'" onclick="openPenalty(this);"> Yes \
+            <input type="radio" id="rad_id_penalty_no-'+newQ+'" name="rad_penalty-'+newQ+'" value="no" data-question_num="'+newQ+'" onclick="closePenalty(this);" checked> No \
+            <div id="penalty_'+newQ+'" style="display: none;"> \
+                Penalty Points: <input type="number" class="points2" name="lower_'+newQ+'" value="0" max="0" step="'+step+'" placeholder="±0.5" style="width:40px; resize:none;"> \
+            </div> \
+            <br> \
+            <input type="radio" id="id_grade_by_up-'+newQ+'" name="grade_by-'+newQ+'" value="count_up" data-question_num="'+newQ+'" onclick="onAddition(this);" checked> Grade by count up \
+            <br> \
+            <input type="radio" id="id_grade_by_down-'+newQ+'" name="grade_by-'+newQ+'" value="count_down" data-question_num="'+newQ+'" onclick="onDeduction(this);"> Grade by count down \
+                <br /> \
+                <!--\
+                <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
+                -->\
+                <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
+                <!--\
+                <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
+                    <i class="fa fa-times" aria-hidden="true"></i></a> \
+                <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i></a> \
+                <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i></a> \
+                -->\
+            </td> \
+        </tr>');
+        $("#rubric_add_mark_" + newQ).before(' \
+            <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" class="gradeable_display" style="background-color:#EBEBE4"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <input type="hidden" name="mark_gcmid_'+newQ+'_0" value="NEW"> \
+            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" class="comment_display">No Credit</textarea> \
+            <a onclick="deleteMark(this)" hidden> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <!--\
+            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+            -->\
+            <br> \
+        </div> \
+            ');
+    }
+
+    function deleteMark(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
+        var gcm_id = $('[name=mark_gcmid_'+question_id+'_'+current_id+']').attr("value");
+        current_row.remove();
+        var last_mark = $('[name=mark_'+question_id+']').last().attr('id');
+        var totalD = -1;
+        if (last_mark == null) {
+            totalD = -1;
+        }
+        else {
+            totalD = parseInt($('[name=mark_'+question_id+']').last().attr('id').split('-')[2]);
+        }
+
+        var deleted_marks = $('[name=component_deleted_marks_'+question_id+']').attr("value");
+        if(deleted_marks == "") {
+            deleted_marks = gcm_id;
+        } else {
+            deleted_marks = deleted_marks + "," + gcm_id;
+        }
+        $('[name=component_deleted_marks_'+question_id+']').attr("value",deleted_marks);
+
+
+        current_id = parseInt(current_id);
+        for(var i=current_id+1; i<= totalD; ++i){
+            updateMark(i,i-1, question_id);
+        }
+    }
+
+    function updateMark(old_num, new_num, question_num) {
+        var current_mark = $('#mark_id-'+question_num+'-'+old_num);
+        current_mark.find('input[name=mark_gcmid_'+question_num+'_'+old_num+']').attr('name', 'mark_gcmid_'+question_num+'_'+new_num);
+        current_mark.find('input[name=mark_points_'+question_num+'_'+old_num+']').attr('name', 'mark_points_'+question_num+'_'+new_num);
+        current_mark.find('textarea[name=mark_text_'+question_num+'_'+old_num+']').attr('name', 'mark_text_'+question_num+'_'+new_num);
+        current_mark.attr('id', 'mark_id-'+question_num+'-'+new_num);
+    }
+
+    function moveMarkDown(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        //checks if the element exists
+        if (!($('#mark_id-'+question_id+'-'+(current_id+1)).length)) {
+            return false;
+        }
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#mark_id-'+question_id+'-'+(current_id+1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function moveMarkUp(me) {
+        var question_id = me.parentElement.id.split('-')[1];
+        var current_id = me.parentElement.id.split('-')[2];
+        current_id = parseInt(current_id);
+        if (current_id == 0 || current_id == 1) {
+            return false;
+        }
+        var current_row = $('#mark_id-'+question_id+'-'+current_id);
+        var current_textarea_value = current_row.find("textarea").val();
+        var current_input_value = current_row.find("input").val();
+
+        var new_row = $('#mark_id-'+question_id+'-'+(current_id-1));
+        var new_textarea_value = new_row.find("textarea").val();
+        var new_input_value = new_row.find("input").val();
+
+        var temp_textarea_value = new_textarea_value;
+        var temp_input_value = new_input_value;
+
+        new_row.find("textarea").val(current_textarea_value);
+        new_row.find("input").val(current_input_value);
+
+        current_row.find("textarea").val(temp_textarea_value);
+        current_row.find("input").val(temp_input_value);
+    }
+
+    function onDeduction(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('textarea[name=mark_text_'+current_question+'_0]').val('Full Credit');
+    }
+
+    function onAddition(me) {
+        var current_row = $(me.parentElement.parentElement);
+        var current_question = parseInt(current_row.attr('id').split('-')[1]);
+        current_row.find('textarea[name=mark_text_'+current_question+'_0]').val('No Credit');
+    }
+
+    function addMark(me, num){
+        var last_num = -10;
+        var current_row = $(me.parentElement.parentElement.parentElement);
+        var lower_clamp = current_row.find('input[name=lower_'+num+']').val();
+        var mydefault = current_row.find('input[name=default_'+num+']').val(); //default is a keyword
+        var upper_clamp = current_row.find('input[name=upper_'+num+']').val();
+
+        var precision = $('#point_precision_id').val();
+
+        var current = $('[name=mark_'+num+']').last().attr('id');
+        if (current == null) {
+            last_num = -1;
+        }
+        else {
+            last_num = parseInt($('[name=mark_'+num+']').last().attr('id').split('-')[2]);
+        }
+        var new_num = last_num + 1;
+        $("#rubric_add_mark_" + num).before('\
+<div id="mark_id-'+num+'-'+new_num+'" name="mark_'+num+'" data-gcm_id="NEW" class="gradeable_display">\
+<input type="hidden" name="mark_gcmid_'+num+'_'+new_num+'" value="NEW"> \
+<i class="fa fa-circle" aria-hidden="true"></i> <input onchange="fixMarkPointValue(this);" type="number" class="points2" name="mark_points_'+num+'_'+new_num+'" value="0" step="'+precision+'" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+<textarea rows="1" placeholder="Comment" name="mark_text_'+num+'_'+new_num+'" class="comment_display"></textarea> \
+<input type="checkbox" name="mark_publish_'+num+'_'+new_num+'"> Publish \
+<a onclick="deleteMark(this)"> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<!--\
+<a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+<a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up"  aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
+-->\
+<br> \
+</div>');
+    }
+    calculatePercentageTotal();
+</script>
