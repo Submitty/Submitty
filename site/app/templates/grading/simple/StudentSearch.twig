@@ -3,7 +3,7 @@
 	<input type="text" class="ui-autocomplete-input" autocomplete="off" id="student-search-input">
 </div>
 <script>
-	$("#student-search").children('[type="text"]').autocomplete({
+	$("#student-search-input").autocomplete({
         source: {{ student_full|raw }},
         appendTo: "#student-search"
     });

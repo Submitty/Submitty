@@ -1120,6 +1120,36 @@ function setupSimpleGrading(action) {
 
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 
+    // updates the checkbox scores of elems:
+    // if is_all, updates all, else, updates only the elem at idx
+    // if !is_all and is the cell-all element, updates all the elements
+    function updateCheckboxScores(num, elems, is_all, idx=0) {
+        if(is_all) {                                // if updating all, update all non .cell-all cells individually
+            elems.each(function() {
+                if(!$(this).hasClass("cell-all")) {
+                    updateCheckboxScores(num, elems, false, idx);
+                }
+                idx++;
+            });
+        }
+        else {                              // if updating one, click until the score matches 
+            elem = $(elems[idx]);
+            if(!elem.hasClass("cell-all")) {
+                for(var i = 0; i < 2; i++) {
+                    if(elem.data("score") == num) {
+                        break;
+                    }
+                    else {
+                        elem.click();
+                    }
+                }
+            }
+            else {      // if it is .cell-all, update all instead
+                updateCheckboxScores(num, elems, true);
+            }
+        } 
+    }
+
     var dont_focus = true;                                          // set to allow toggling of focus on input element
     var num_rows = $("td.cell-all").length;                         // the number of rows in the table
     var search_bar_offset = $("#student-search").offset();          // the offset of the search bar: used to lock the searhc bar on scroll
@@ -1131,128 +1161,113 @@ function setupSimpleGrading(action) {
     var child_idx = 0;                                              // the index of the current element in the row
     var child_elems = $("tr[data-row=0]").find(search_selector);    // the clickable elements in the current row
 
+    // movement/grading keybinds
     $(document).on("keydown", function(event) {
         if(!$("#student-search-input").is(":focus")) {
             // allow refocusing on the input field by pressing enter when it is not the focus
             if(event.keyCode == 13) {
                 dont_focus = false;
             }
-            // arrows keys unselect, bounds check/move, and then select new element
-            else if(event.keyCode == 37) { // Left arrow
+            // movement commands
+            else if([37,38,39,40,9].includes(event.keyCode)) { // Arrow keys/tab unselect, bounds check, then move and reselect
                 var child = $(child_elems[child_idx]);
                 if(action == 'lab') {
-                    if(child_idx > 0) {
-                        child.css("outline", "");
+                    child.css("outline", "");
+                }
+                if(event.keyCode == 37 || (event.keyCode == 9 && event.shiftKey)) { // Left arrow/shift+tab
+                    if(event.keyCode == 9 && event.shiftKey) {
+                        event.preventDefault();
+                    }
+                    if(child_idx > 0 && (action == 'lab' || (event.keyCode == 9 && event.shiftKey) || child.children("input")[0].selectionStart == 0)) {
                         child_idx--;
-                        child = $(child_elems[child_idx]);
-                        child.css("outline", "3px dashed " + highlight_color);
                     }
                 }
-                else {
-                    if(child_idx > 0 && child.children("input")[0].selectionStart == 0) {
-                        child.children("input").blur();
-                        child_idx--;
-                        child = $(child_elems[child_idx]);
-                        child.children("input").focus();
+                else if(event.keyCode == 39 || event.keyCode == 9) {                // Right arrow/tab
+                    if(event.keyCode == 9) {
+                        event.preventDefault();
                     }
-                }
-            }
-            else if(event.keyCode == 39) { // Right arrow
-                var child = $(child_elems[child_idx]);
-                if(action == 'lab') {
-                    if(child_idx < child_elems.length - 1) {
-                        child.css("outline", "");
+                    if(child_idx < child_elems.length - 1 && (action == 'lab' || event.keyCode == 9 || child.children("input")[0].selectionEnd == child.children("input")[0].value.length)) {
                         child_idx++;
-                        child = $(child_elems[child_idx]);
-                        child.css("outline", "3px dashed " + highlight_color);
                     }
                 }
                 else {
-                    if(child_idx < child_elems.length - 1 && child.children("input")[0].selectionEnd == child.children("input")[0].value.length) {
-                        child.children("input").blur();
-                        child_idx++;
-                        child = $(child_elems[child_idx]);
-                        child.children("input").focus();
+                    event.preventDefault();
+                    if(event.keyCode == 38) {               // Up arrow
+                        if(table_row > 0) {
+                            table_row--;
+                        }
                     }
-                }                
-            }
-            else if(event.keyCode == 38) { // Up arrow
-                var child = $(child_elems[child_idx]);
+                    else if(table_row < num_rows - 1) {     // Down arrow
+                        table_row++;
+                    }
+                    child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
+                }
+                child = $(child_elems[child_idx]);
                 if(action == 'lab') {
-                    event.preventDefault(); // prevent scrolling out of sync with grid movement
-                    if(table_row > 0) {
-                        child.css("outline", "");
-                        table_row--;
-                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
-                        child = $(child_elems[child_idx]);
-                        child.css("outline", "3px dashed " + highlight_color);
-                    }
+                    child.css("outline", "3px dashed " + highlight_color);
                 }
                 else {
-                    if(table_row > 0) {
-                        child.children("input").blur();
-                        table_row--;
-                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
-                        child = $(child_elems[child_idx]);
-                        child.children("input").focus();
-                    }
+                    child.children("input").focus();
                 }
-                if(!child.isInViewport()) {
+
+                if((event.keyCode == 38 || event.keyCode == 40) && !child.isInViewport()) {
                     $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
                 }
             }
-            else if(event.keyCode == 40) { // Down arrow
-                var child = $(child_elems[child_idx]);
-                if(action == 'lab') {
-                    event.preventDefault(); // prevent scrolling out of sync with grid movement
-                    if(table_row < num_rows - 1) {
-                        child.css("outline", "");
-                        table_row++;
-                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
-                        child = $(child_elems[child_idx]);
-                        child.css("outline", "3px dashed " + highlight_color);
-                    }
+            // checkpoint grading commands
+            else if(action == 'lab') {
+                if(event.keyCode == 86 || event.keyCode == 32) { // V key/spacebar clicks the current element to update the grades
+                    event.preventDefault();
+                    $(child_elems[child_idx]).click();
                 }
-                else {
-                    if(table_row < num_rows - 1) {
-                        child.children("input").blur();
-                        table_row++;
-                        child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
-                        child = $(child_elems[child_idx]);
-                        child.children("input").focus();
-                    }
+                else if(event.keyCode == 67) {  // C key
+                    updateCheckboxScores(0, child_elems, false, child_idx);
                 }
-                if(!child.isInViewport()) {
-                    $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+                else if(event.keyCode == 88) {  // X key
+                    updateCheckboxScores(0.5, child_elems, false, child_idx);
                 }
-            }
-            else if(event.keyCode == 86 || event.keyCode == 32) { // V key/spacebar clicks the current element to update the grades
-                $(child_elems[child_idx]).click();
+                else if(event.keyCode == 90) {  // Z key
+                    updateCheckboxScores(1, child_elems, false, child_idx);
+                }
+                else if(event.keyCode == 70) {  // F key clicks the first element in the row (which clicks all the others)
+                    $(child_elems[0]).click();
+                }
+                else if(event.keyCode == 68) {  // D key
+                    updateCheckboxScores(0, child_elems, true);
+                }
+                else if(event.keyCode == 83) {  // S key
+                    updateCheckboxScores(0.5, child_elems, true);
+                }
+                else if(event.keyCode == 65) {  // A key
+                    updateCheckboxScores(1, child_elems, true);
+                }
+                
             }
         }
     });
 
+    // refocus on the input field by pressing enter
     $(document).on("keyup", function(event) {
-        // refocus on the input field by pressing enter
         if(event.keyCode == 13 && !dont_focus) {
             $("#student-search-input").focus();
         }
     });
 
+    // when pressing enter in the search bar, go to the corresponding element
     $("#student-search-input").on("keyup", function(event) {
-        $("td[class^=cell-]").css("outline", "");
-
         if(event.keyCode == 13) { // Enter
-            this.blur(); // unfocus
+            this.blur();
             dont_focus = true; // dont allow refocusing from other events
             var value = $(this).val();
             if(value != "") {
-                var prev_table_row = table_row;
-                try {
-                    // get the row number of the table element with the matching id
-                    table_row = $('table tbody tr[data-user="' + value +'"]').attr("data-row");
-                    child_elems = $("tr[data-row=" + table_row.toString() + "]").find(search_selector);
+                var prev_child_elem = $(child_elems[child_idx]);
+                // get the row number of the table element with the matching id
+                var tr_elem = $('table tbody tr[data-user="' + value +'"]');
+                if(tr_elem.length > 0) {
+                    table_row = tr_elem.attr("data-row");
+                    child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
                     if(action == 'lab') {
+                        prev_child_elem.css("outline", "");
                         $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color);
                     }
                     else {
@@ -1260,14 +1275,28 @@ function setupSimpleGrading(action) {
                     }
                     $('html, body').animate( { scrollTop: $(child_elems).parent().offset().top - $(window).height()/2}, 50);
                 }
-                catch(e) {
-                    alert("Invalid user.");
-                    table_row = prev_table_row;     // restore the previous value of table_row, which is lost in the case of an error
-                    $(this).focus();                // refocus on the input field
+                else {
+                    alert("ERROR:\n\nInvalid user.");
+                    this.focus();                       // refocus on the input field
                 }
             }
         }
     });
+
+    // clear the input field when it is focused
+    $("#student-search-input").on("focus", function(event) {
+        $(this).val("");
+    });
+
+    // for numeric gradeables, whenever an input field is focused, update location variables
+    if(action == 'numeric') {
+        $("input[id^=cell-]").on("focus", function(event) {
+            var tr_elem = $(this).parent().parent();
+            table_row = tr_elem.attr("data-row");
+            child_elems = tr_elem.find(search_selector);
+            child_idx = child_elems.index($(this).parent());
+        });
+    }
 
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
