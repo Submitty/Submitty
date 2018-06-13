@@ -140,6 +140,7 @@ HTML;
 
             $return .= <<<HTML
 <div class="box" {$background}>
+    <a class="btn btn-primary" style="float:right">Show hidden chars</a>
     <div class="box-title" {$div_click} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {

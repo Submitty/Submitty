@@ -427,6 +427,7 @@ class DiffViewer {
                     $current = $diff[1]+1;
                 }
                 $html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
+                $html .= "&#9166";
             }
             else {
                 if (isset($lines[$i])) {
