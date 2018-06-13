@@ -2,9 +2,10 @@
 
 namespace app\models\gradeable;
 
-use app\libraries\GradeableType;
 use app\exceptions\AggregateException;
 use app\exceptions\NotImplementedException;
+use app\libraries\Core;
+use app\models\AbstractModel;
 
 
 /**
@@ -33,7 +34,7 @@ use app\exceptions\NotImplementedException;
  * @method getPage();
  * @method setPage($page);
  */
-class Component
+class Component extends AbstractModel
 {
     /** @var int The course-wide unique numeric id of this component */
     protected $id = 0;
@@ -64,8 +65,10 @@ class Component
     protected $marks = array();
 
 
-    public function __construct($details, array $marks)
+    public function __construct(Core $core, $details, array $marks)
     {
+        parent::__construct($core);
+
         $this->setMarks($marks);
         $this->setId($details['id']);
         $this->setTitle($details['title']);

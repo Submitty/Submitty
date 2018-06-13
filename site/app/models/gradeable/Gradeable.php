@@ -5,6 +5,10 @@ namespace app\models\gradeable;
 use app\libraries\GradeableType;
 use app\exceptions\AggregateException;
 use app\exceptions\NotImplementedException;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
+use app\libraries\Core;
+use app\models\AbstractModel;
 
 /**
  * All data describing the configuration of a gradeable
@@ -62,7 +66,7 @@ use app\exceptions\NotImplementedException;
  * @method float getPrecision();
  * @method void setPrecision($grading_precision);
  */
-class Gradeable
+class Gradeable extends AbstractModel
 {
     /* Properties for all types of gradeables */
 
@@ -102,7 +106,7 @@ class Gradeable
     /** @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
     /** @var string[] The object that contains the autograding config data */
-    private $autograding_config = array();
+    private $autograding_config = null;
     /** @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
     /** @var string The subdirectory within the VCS repository for this gradeable */
@@ -140,8 +144,10 @@ class Gradeable
     /** @var float The point precision for manual grading */
     protected $precision = 0.0;
 
-    public function __construct($data, array $components)
+    public function __construct(Core $core, $data, array $components)
     {
+        parent::__construct($core);
+
         $this->setId($data["id"]);
         $this->setTitle($data["title"]);
         $this->setInstructionsUrl($data["instructions_url"]);
@@ -175,8 +181,36 @@ class Gradeable
             $data["grade_locked_date"], $data["late_days"]);
     }
 
+
+    private function loadAutogradingConfig() {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, "config", "build",
+            "build_{$this->id}.json"));
+
+        if (isset($details['max_submission_size'])) {
+            $details['max_submission_size'] = floatval($details['max_submission_size']);
+        }
+
+        if (isset($details['max_submissions'])) {
+            $details['max_submissions'] = intval($details['max_submissions']);
+        }
+
+        if (isset($details['assignment_message'])) {
+            $details['assignment_message'] = Utils::prepareHtmlString($details['assignment_message']);
+        }
+
+        return $details;
+    }
     public function getAutogradingConfig()
     {
+        if($this->type !== GradeableType::ELECTRONIC_FILE) {
+            throw new \BadFunctionCallException("Cannot load autograding config for non-electronic file!");
+        }
+
+        // use JIT loading
+        if ($this->autograding_config === null) {
+            $this->autograding_config = $this->loadAutogradingConfig();
+        }
         return $this->autograding_config;
     }
 
@@ -194,7 +228,13 @@ class Gradeable
         if ($late_days < 0) {
             $errors['late_days'] = 'Late day count must be >= 0!';
         } else {
-            $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
+            try {
+                $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
+            }
+            catch (\Exception $e) {
+                // This is for development debugging. In reality, we should never hit this line
+                $errors['late_days'] = "Error parsing late days: {$e}";
+            }
         }
 
         $max_due = $submission_due_date;
@@ -365,7 +405,6 @@ class Gradeable
             throw new \InvalidArgumentException("Autograding configuration file path cannot be blank");
         }
         $this->autograding_config_path = strval($path);
-        //TODO: recreate the config object
     }
 
     private function setTeamAssignment($use_teams)

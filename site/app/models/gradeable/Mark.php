@@ -2,6 +2,9 @@
 
 namespace app\models\gradeable;
 
+use app\libraries\Core;
+use app\models\AbstractModel;
+
 /**
  * Class Mark
  * @package app\models\gradeable
@@ -16,7 +19,7 @@ namespace app\models\gradeable;
  * @method isPublish();
  * @method setPublish($should_publish);
  */
-class Mark
+class Mark extends AbstractModel
 {
     /** @var int The course-wide unique numeric id of this mark */
     protected $id = -1;
@@ -29,8 +32,10 @@ class Mark
     /** @var bool If the student should be able to see this mark */
     protected $publish = false;
 
-    public function __construct($details)
+    public function __construct(Core $core, $details)
     {
+        parent::__construct($core);
+
         $this->id = $details['id'];
         $this->points = $details['points'];
         $this->note = $details['note'];
