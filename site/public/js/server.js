@@ -181,6 +181,78 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function addMorePrevGradeable(all_sem_gradeables_json) {
+    var form = $("#run-plagiarism-form");
+    var prev_gradeables_number = $('[name="prev_gradeables_number"]', form).val();
+    var to_append = '<br /><select name="prev_sem_'+ prev_gradeables_number +'"><option value="">None</option>';
+    $.each(all_sem_gradeables_json, function(sem,courses_gradeables){
+        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
+    });
+    to_append += '</select><select name="prev_course_'+ prev_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prev_gradeables_number +'"><option value="">None</option></select>'; 
+    $('[name="prev_gradeable_div"]', form).append(to_append);
+    $('[name="prev_gradeables_number"]', form).val(parseInt(prev_gradeables_number)+1);
+    $("select", form).change(function(){
+        var select_element_name = $(this).attr("name");
+        PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name);
+    });
+}
+
+function PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name) {
+    var form = $("#run-plagiarism-form");
+    if(select_element_name == "language") {
+        if ($('[name="language"]', form).val() == "python") {
+            $('[name="sequence_length"]', form).val('1');
+        } 
+        else if ($('[name="language"]', form).val() == "cpp") {
+            $('[name="sequence_length"]', form).val('2');
+        }
+        else if ($('[name="language"]', form).val() == "java") {
+            $('[name="sequence_length"]', form).val('3');
+        }
+        else if ($('[name="language"]', form).val() == "plaintext") {
+            $('[name="sequence_length"]', form).val('4');
+        }
+    }
+    else if(select_element_name.substring(0, 9) == "prev_sem_") {
+        var i = select_element_name.substring(9);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_sem != '') {
+            var append_options = '';
+            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        append_options += '<option value="'+ course +'">'+ course +'</option>';
+                    });     
+                }
+            });
+            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        }
+    }
+    else if(select_element_name.substring(0, 12) == "prev_course_") {
+        var i = select_element_name.substring(12);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_course != '') {
+            var append_options = '';
+            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        if(selected_course == course) {
+                            $.each(gradeables, function (index, gradeable) {
+                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
+                            });    
+                        }
+                    });     
+                }
+            });
+            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        } 
+    }
+}
+
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];

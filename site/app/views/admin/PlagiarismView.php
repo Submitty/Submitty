@@ -74,6 +74,7 @@ HTML;
 <div class="popup-form" id="run-plagiarism-form">
     <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        <input type="hidden" name="prev_gradeables_number" value="1" />
         <br /><div style="width:100%;">
             Select Gradeable: 
             <select name="gradeable_id">
@@ -128,9 +129,9 @@ HTML;
             Sequence Length: 
             <input type="text" name="sequence_length"/>
         </div><br /><br />
-        <div style="width:100%;">
+        <div name= "prev_gradeable_div" style="width:100%;">
             Previous Terms Gradeables:<br /> 
-            <select name="prev_sem">
+            <select name="prev_sem_0">
                 <option value="">None</option>
 HTML;
         foreach ($all_sem_gradeables as $sem => $sem_gradeables) {
@@ -140,13 +141,17 @@ HTML;
         }         
         $return .= <<<HTML
             </select>
-            <select name="prev_course">
+            <select name="prev_course_0">
                 <option value="">None</option>           
             </select>
-            <select name="prev_gradeable">
+            <select name="prev_gradeable_0">
                 <option value="">None</option>
             </select>
-        </div><br /><br />
+        </div>
+        <span style="cursor:pointer;" name="add_more_prev_gradeable">
+            <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+        </span>    
+        <br /><br />
         <div style="float: right; width: auto; margin-top: 10px">
             <a onclick="$('#run-plagiarism-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Run" />
@@ -156,57 +161,13 @@ HTML;
 <script>
     var form = $("#run-plagiarism-form");
     var all_sem_gradeables = JSON.parse('{$all_sem_gradeables_json}');
-    $('[name="language"]',form).change(function() {
-        if ($(this).val() == "python") {
-            $('[name="sequence_length"]', form).val('1');
-        } 
-        else if ($(this).val() == "cpp") {
-            $('[name="sequence_length"]', form).val('2');
-        }
-        else if ($(this).val() == "java") {
-            $('[name="sequence_length"]', form).val('3');
-        }
-        else if ($(this).val() == "plaintext") {
-            $('[name="sequence_length"]', form).val('4');
-        }
+    $("select").change(function(){
+        var select_element_name = $(this).attr("name");
+        PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name);
     });
-    $('[name="prev_sem"]',form).change(function() {
-        var selected_sem = $(this).val(); 
-        $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="prev_course"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_sem != '') {
-            var append_options = '';
-            $.each(all_sem_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });     
-                }
-            });
-            $('[name="prev_course"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
+    $('[name="add_more_prev_gradeable"]', form).on('click', function(){
+        addMorePrevGradeable(all_sem_gradeables);
     });
-    $('[name="prev_course"]',form).change(function() {
-        var selected_course = $(this).val();
-        var selected_sem = $('[name="prev_sem"]',form).val();
-        $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        if(selected_course != '') {
-            var append_options = '';
-            $.each(all_sem_gradeables, function(sem,courses_gradeables){
-                if(selected_sem == sem) {
-                    $.each(courses_gradeables, function(course,gradeables){
-                        if(selected_course == course) {
-                            $.each(gradeables, function (index, gradeable) {
-                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });    
-                        }
-                    });     
-                }
-            });
-            $('[name="prev_gradeable"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        }
-    });
-
 </script>
 HTML;
 
