@@ -224,6 +224,14 @@ def generate_random_ta_comment():
             line = aline
     return line.strip()
 
+def generate_versions_to_submit(num=3, original_value=3):
+    if num == 1:
+        return original_value
+    if random.random() < 0.5:
+        return generate_versions_to_submit(num-1, original_value)
+    else:
+        return original_value-(num-1)
+
 def generate_random_users(total, real_users):
     """
 
@@ -847,16 +855,8 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    versions_to_submit = 0
-                    #The chance of a student submitting 3 versions is 20%, submitting 2 versions is 30%, and submitting 1 version is 50%.
-                    random_num = random.choice(range(0, 100))
-                    #TODO: make this configureable
-                    if random_num < 20:
-                        versions_to_submit = 3
-                    elif random_num < 50:
-                        versions_to_submit = 2
-                    else:
-                        versions_to_submit = 1
+                    versions_to_submit = generate_versions_to_submit(3, 3)
+                    # pdb.set_trace()
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
