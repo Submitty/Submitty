@@ -477,9 +477,9 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd > /dev/null
 
-mkdir -p ${clanginstall}
-
 # building clang ASTMatcher.cpp
+mkdir -p ${clanginstall}
+mkdir -p ${clangbuild}
 pushd ${clangbuild}
 # TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
 cmake .
