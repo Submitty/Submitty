@@ -227,7 +227,7 @@ def generate_random_ta_comment():
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
         return original_value
-    if random.random() < 0.5:
+    if random.random() < 0.3:
         return generate_versions_to_submit(num-1, original_value)
     else:
         return original_value-(num-1)
@@ -830,6 +830,7 @@ class Course(object):
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
+            max_individual_submissions = gradeable.max_individual_submissions
             #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
                 submitted = False
@@ -855,8 +856,7 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    versions_to_submit = generate_versions_to_submit(3, 3)
-                    # pdb.set_trace()
+                    versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
@@ -933,7 +933,7 @@ class Course(object):
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             skip_grading = random.random()
                             for component in gradeable.components:
-                                if random.random() < 0.05 and skip_grading < 0.3:
+                                if random.random() < 0.01 and skip_grading < 0.3:
                                     #This is used to simulate unfinished grading.
                                     # pdb.set_trace()
                                     break
@@ -1213,6 +1213,7 @@ class Gradeable(object):
         self.grading_rotating = []
         self.submissions = []
         self.max_random_submissions = None
+        self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
 
@@ -1227,6 +1228,9 @@ class Gradeable(object):
 
             if 'eg_max_random_submissions' in gradeable:
                 self.max_random_submissions = int(gradeable['eg_max_random_submissions'])
+
+            if 'eg_max_individual_submissions' in gradeable:
+                self.max_individual_submissions = int(gradeable['eg_max_individual_submissions'])
 
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
