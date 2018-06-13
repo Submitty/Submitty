@@ -13,14 +13,14 @@
     {% if show_hidden_breakdown %}
         <div class="box">
             <div class="box-title">
-                <span class="badge {{ Component.get_badge_style(nonhidden_earned, nonhidden_max) }}">{{ nonhidden_earned }} / {{ nonhidden_max }}</span>
+                {{ Component.badge_render(nonhidden_earned, nonhidden_max, false) }}
                 <h4>Total (No Hidden Points)</h4>
             </div>
         </div>
 
         <div class="box" style="background-color:#D3D3D3;">
             <div class="box-title">
-                <span class="badge {{ Component.get_badge_style(hidden_earned, hidden_max) }}">{{ hidden_earned }} / {{ hidden_max }}</span>
+                {{ Component.badge_render(hidden_earned, hidden_max, false) }}
                 <h4>Total (With Hidden Points)</h4>
             </div>
         </div>
@@ -29,14 +29,14 @@
 
         <div class="box">
             <div class="box-title">
-                <span class="badge {{ Component.get_badge_style(nonhidden_earned, nonhidden_max) }}">{{ nonhidden_earned }} / {{ nonhidden_max }}</span>
+                {{ Component.badge_render(nonhidden_earned, nonhidden_max, false) }}
                 <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }}</h4>
             </div>
         </div>
         {% if display_hidden %}
             <div class="box">
                 <div class="box-title">
-                    <span class="badge {{ Component.get_badge_style(hidden_earned, hidden_max) }}">{{ hidden_earned }} / {{ hidden_max }}</span>
+                    {{ Component.badge_render(hidden_earned, hidden_max, false) }}
                     <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
                 </div>
             </div>
@@ -61,17 +61,13 @@
                 {# Badge #}
                 {% if testcase.hasPoints() %}
                     {% if can_view %}
-                        {% if self.testcase_should_show_badge(testcase)|trim() == "true" %}
-                            <div class="badge {{ self.testcase_badge_class(testcase) }}">{{ self.testcase_format_value(testcase) }}</div>
-                        {% else %}
-                            <div class="no-badge"></div>
-                        {% endif %}
+                        {{ Component.badge_render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                     {% else %}
                         <div class="badge">
                             Hidden
                             {% if gradeable.taGradesReleased() %}
                                 <br>
-                                {{ self.testcase_format_value(testcase) }}
+                                {{ Component.badge_format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                             {% endif %}
                         </div>
                     {% endif %}
@@ -104,40 +100,3 @@
         </div>
     {% endif %}
 {% endfor %}
-
-{% macro testcase_should_show_badge(testcase) %}
-    {% if testcase.isExtraCredit() %}
-        {# EC only shows the badge if you earned it #}
-        {{ testcase.getPointsAwarded() > 0 }}
-    {% elseif testcase.getPoints() > 0 %}
-        {# Normal case always shows #}
-        true
-    {% elseif testcase.getPoints() < 0 %}
-        {# Negaitve points only show if you got it #}
-        {{ testcase.getPointsAwarded() < 0 }}
-    {% else %}
-        {# Otherwise it's worth zero points, don't show #}
-        false
-    {% endif %}
-{% endmacro %}
-
-{% macro testcase_badge_class(testcase) %}
-    {% import 'functions/Component.twig' as Component %}
-
-    {% if testcase.isExtraCredit() %}
-        {# Just pretend we're 100% #}
-        {{ Component.get_badge_style(1, 1) }}
-    {% else %}
-        {{ Component.get_badge_style(testcase.getPointsAwarded(), testcase.getPoints())  }}
-    {% endif %}
-{% endmacro %}
-
-{% macro testcase_format_value(testcase) %}
-    {% if testcase.isExtraCredit() %}
-        &nbsp; +{{ testcase.getPointsAwarded() }} &nbsp;
-    {% elseif testcase.getPointsAwarded() >= 0 %}
-        {{ testcase.getPointsAwarded() }} / {{ testcase.getPoints() }}
-    {% else %}
-        &nbsp; {{ testcase.getPointsAwarded() }} &nbsp;
-    {% endif %}
-{% endmacro %}

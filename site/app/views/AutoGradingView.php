@@ -11,9 +11,7 @@ class AutogradingView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param bool      $show_hidden
-     *
      * @return string
-     * @throws \Exception
      */
     public function showResults(Gradeable $gradeable, $show_hidden=false) {
         $current_version = $gradeable->getCurrentVersion();
@@ -319,6 +317,10 @@ HTML;
         return $return;
     }
 
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
     public function showTAResults(Gradeable $gradeable) {
         $grading_complete = true;
         foreach ($gradeable->getComponents() as $component) {

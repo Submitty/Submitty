@@ -39,7 +39,7 @@
         {# Manual total #}
         <div class="box">
             <div class="box-title">
-                <span class="badge {{ Component.get_badge_style(graded_score, graded_max) }}" style="float: left">{{ graded_score }} / {{ graded_max }}</span>
+                {{ Component.badge_render(graded_score, graded_max, false) }}
                 <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
             </div>
         </div>
@@ -48,20 +48,12 @@
         {# Component boxes #}
         {% for component in gradeable.getComponents() %}
             {% if component is not iterable %}
-                {% set score = component.getGradedTAPoints() %}
-                {# Check if extra credit #}
                 {# Todo: This is heinous #}
-                {% if component.getTitle()|lower|trim == "extra credit" %}
-                    {% set background = score == 0 ? "hidden" : "green-background" %}
-                    {% set score = "+" ~ score %}
-                {% else %}
-                    {% set background = Component.get_badge_style(score, component.getMaxValue()) %}
-                    {% set score = score ~ " / " ~ component.getMaxValue() %}
-                {% endif %}
+                {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
 
                 <div class="box">
                     <div class="box-title">
-                        <span class="badge {{ background }}">{{ score }}</span>
+                        {{ Component.badge_render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
                         <h4>{{ component.getTitle() }}
                             {# Grader only shows up if they are not peer and full access #}
                             {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
@@ -85,7 +77,7 @@
         {% if has_autograding %}
             <div class="box">
                 <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
-                    <span class="badge {{ Component.get_badge_style(total_score, total_max) }}"> {{ total_score }} / {{ total_max }}</span>
+                    {{ Component.badge_render(total_score, total_max, false) }}
                     <h4>Total</h4>
                 </div>
             </div>
