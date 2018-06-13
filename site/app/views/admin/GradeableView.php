@@ -10,6 +10,7 @@ class GradeableView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $build_script_output_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/build_script_output.txt";
+        $contents = "";
 
         $has_last_build_output = file_exists($build_script_output_file);
         if ($has_last_build_output) {
