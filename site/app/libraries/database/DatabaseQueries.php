@@ -107,29 +107,41 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadAnnouncements($category_id){
-        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
+    public function loadAnnouncements($categories_ids){
+        assert(count($categories_ids) > 0);
+        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
+
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
         return $this->course_db->rows();
     }
 
     public function loadAnnouncementsWithoutCategory(){
-        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
             return $this->course_db->rows();
     }
 
     public function loadThreadsWithoutCategory(){
-         $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC");
+         $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
          return $this->course_db->rows();
     }
 
-    public function loadThreads($category_id) {
-        $this->course_db->query("SELECT t.*, e.category_id as category_id, w.category_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and w.category_id = ? and t.id = e.thread_id and e.category_id = w.category_id ORDER BY t.id DESC", array($category_id));
+    public function loadThreads($categories_ids) {
+        assert(count($categories_ids) > 0);
+        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
+
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
         return $this->course_db->rows();
     }
 
-    public function getCategoryIdForThread($thread_id) {
+    public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", array($thread_id));
-        return $this->course_db->rows();
+        $categories_list = array();
+        foreach ($this->course_db->rows() as $row) {
+            $categories_list[] = (int)$row["category_id"];
+        }
+        return $categories_list;
     }
 
     public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $parent_post = -1){
@@ -179,7 +191,7 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $category_id){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $categories_ids){
 
         $this->course_db->beginTransaction();
 
@@ -195,8 +207,9 @@ class DatabaseQueries {
 
         //Max id will be the most recent post
         $id = $this->course_db->rows()[0]["max_id"];
-
-        $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
+        foreach ($categories_ids as $category_id) {
+            $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
+        }
 
         $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
 
@@ -509,6 +522,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
+        	$orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
             $query = implode(",", array_fill(0, count($sections), "?"));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -814,7 +828,7 @@ LEFT JOIN (
   FROM users
 ) AS u ON u.user_id = g.user_id
 {$where}
-ORDER BY g.sections_registration_id, g.user_id", $params);
+ORDER BY SUBSTRING(g.sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(g.sections_registration_id, '[0-9]+')::INT, -1), SUBSTRING(g.sections_registration_id, '[^0-9]*$'), g.user_id", $params);
         $user_store = array();
         foreach ($this->course_db->rows() as $row) {
             if ($row['sections_registration_id'] === null) {
@@ -895,7 +909,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getRegistrationSections() {
-        $this->course_db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
+        $this->course_db->query("SELECT * FROM sections_registration ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::INT, -1), SUBSTRING(sections_registration_id, '[^0-9]*$') ");
         return $this->course_db->rows();
     }
 
@@ -1776,6 +1790,13 @@ ORDER BY {$section_key}", $params);
             $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
             $params = array_merge($sections, $params);
         }
+        $orderBy="";
+ 		if($section_key == "registration_section") {
+ 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+ 		}
+ 		else {
+ 			$orderBy = $section_key;
+ 		}
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -1786,7 +1807,7 @@ WHERE {$sections_query} user_id NOT IN (
   ORDER BY user_id
 )
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderBy}", $params);
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
@@ -1806,6 +1827,14 @@ ORDER BY {$section_key}", $params);
             $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
             $params = array_merge($sections, $params);
         }
+        $orderBy="";
+ 		if($section_key == "registration_section") {
+ 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+ 		}
+ 		else {
+ 			$orderBy = $section_key;
+ 		}
+
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -1816,7 +1845,7 @@ WHERE {$sections_query} user_id IN (
   ORDER BY user_id
 )
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderBy}", $params);
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
         }
@@ -2046,7 +2075,7 @@ AND gc_id IN (
         ) as gd ON gd.gd_user_id = u.user_id
         {$where}
         GROUP BY u.registration_section
-        ORDER BY u.registration_section", $params);
+        ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')", $params);
 
         $return = array();
         foreach($this->course_db->rows() as $row) {
@@ -2119,9 +2148,13 @@ AND gc_id IN (
       return $ar;
     }
 
+    public function filterCategoryDesc($category_desc) {
+        return str_replace("|", " ", $category_desc);
+    }
+
     public function addNewCategory($category) {
         //Can't get "RETURNING category_id" syntax to work
-        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($category));
+        $this->course_db->query("INSERT INTO categories_list (category_desc) VALUES (?) RETURNING category_id", array($this->filterCategoryDesc($category)));
         $this->course_db->query("SELECT MAX(category_id) as category_id from categories_list");
         return $this->course_db->rows()[0];
     }

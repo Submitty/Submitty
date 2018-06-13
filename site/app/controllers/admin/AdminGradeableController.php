@@ -47,7 +47,10 @@ class AdminGradeableController extends AbstractController
                 break;
             case 'delete_gradeable':
                 $this->deleteGradeable();
-                break;
+                break; 
+            case 'rebuild_assignement':
+                $this->rebuildAssignmentRequest();
+                break;           
             default:
                 $this->viewPage();
                 break;
@@ -1061,11 +1064,9 @@ class AdminGradeableController extends AbstractController
 
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             die("Invalid CSRF Token");
-            $this->returnToNav();
         }
         if (!$this->core->getUser()->accessAdmin()) {
             die("Only admins can delete gradeable");
-            $this->returnToNav();
         }
         $this->core->getQueries()->deleteGradeable($g_id);
 
@@ -1090,41 +1091,61 @@ class AdminGradeableController extends AbstractController
         $this->returnToNav();
     }
 
-    private function enqueueBuild(AdminGradeable $gradeable)
+    private function writeFormConfig(AdminGradeable $gradeable)
     {
         if ($gradeable->g_gradeable_type !== GradeableType::ELECTRONIC_FILE)
             return null;
 
         // Refresh the configuration file with updated information
         $jsonProperties = [
-            'g_id' => null,
-            'eg_submission_due_date' => null,
-            'eg_is_repository' => null
+            'g_id' => $gradeable->g_id,
+            'eg_submission_due_date' => $gradeable->eg_submission_due_date,
+            'eg_is_repository' => $gradeable->eg_is_repository
         ];
+
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->g_id . '.json';
-        foreach ($jsonProperties as $key => $value) {
-            $jsonProperties[$key] = $gradeable->$key;
-        }
         if (file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
             return "Failed to write to file {$fp}";
         }
+        return null;
+    }
 
-        // --------------------------------------------------------------
-        // Write queue file to build this assignment...
+    private function enqueueBuildFile($g_id)
+    {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $gradeable->g_id . ".json";
+        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
             "semester" => $semester,
             "course" => $course,
-            "gradeable" => $gradeable->g_id
+            "gradeable" => $g_id
         ];
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             return "Failed to write to file {$config_build_file}";
         }
+        return null;
+    }
+
+    private function enqueueBuild(AdminGradeable $gradeable)
+    {
+        // If write form config fails, it will return non-null and end execution, but
+        //  if it does return null, we want to run 'enqueueBuildFile'.  This coalescing can
+        //  be chained so long as 'null' is the success condition.
+        return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable->g_id);
+    }
+
+    private function rebuildAssignmentRequest()
+    {
+        $g_id = $_REQUEST['id'];
+        $result = $this->enqueueBuildFile($g_id);
+        if ($result !== null) {
+            die($result);
+        }
+        $this->returnToNav();
     }
 
     private function quickLink()
