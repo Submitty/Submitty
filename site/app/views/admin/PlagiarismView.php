@@ -47,7 +47,7 @@ HTML;
 HTML;
         $return .= <<<HTML
         <div class="nav-buttons">
-            <button style="float: right;" class="btn btn-primary" onclick="runPlagiarismForm();">Run Lichen Plagiarism Detector</button>
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}">Run Lichen Plagiarism Detector</a>
         </div><br /><br />        
 HTML;
         if ($assignments) {
@@ -70,8 +70,14 @@ HTML;
 
     public function runPlagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {
         $all_sem_gradeables_json = json_encode($all_sem_gradeables);
-        $return = <<<HTML
-<div class="popup-form" id="run-plagiarism-form">
+        $return = "";
+        $return .= <<<HTML
+<div class="content">
+<h1 style="text-align: center">Plagiarism Form</h1>
+<br>
+HTML;
+        $return .= <<<HTML
+<div id="run-plagiarism-form">
     <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         <input type="hidden" name="prev_gradeables_number" value="1" />
@@ -91,7 +97,7 @@ HTML;
         </div><br /><br />
         <div style="width:100%;">
             Instructor Provided Code: 
-            <input type="radio" id="no_code_provided_id" name="provided_code_option" >
+            <input type="radio" id="no_code_provided_id" name="provided_code_option" checked >
             <label for="no_code_provided_id">No</label>
             <input type="radio" id="code_provided_id" name="provided_code_option" >
             <label for="code_provided_id">Yes</label><br />
@@ -99,14 +105,14 @@ HTML;
         </div><br /><br />
         <div style="width:100%;">
             Version: 
-            <input type="radio" id="all_version_id" name="version_option" >
+            <input type="radio" id="all_version_id" name="version_option" checked >
             <label for="all_version_id">All Version</label>
             <input type="radio" id="active_version_id" name="version_option" >
             <label for="active_version_id">Only Active Version</label><br />
         </div><br /><br />
         <div style="width:100%;">
             Files to be Compared: 
-            <input type="radio" id="all_files_id" name="file_option[]" >
+            <input type="radio" id="all_files_id" name="file_option[]" checked>
             <label for="all_files_id">All Files</label>
             <input type="radio" id="regrex_matching_files_id" name="file_option[]" >
             <label for="regrex_matching_files_id">Regrex matching files</label><br /><br />
@@ -123,11 +129,11 @@ HTML;
         </div><br /><br />
         <div style="width:100%;">
             Threshold to be considered as Plagiarism: 
-            <input type="text" name="threshold"/>
+            <input type="text" name="threshold"/ value="5" />
         </div><br /><br />
         <div style="width:100%;">
             Sequence Length: 
-            <input type="text" name="sequence_length"/>
+            <input type="text" name="sequence_length" value="10"/>
         </div><br /><br />
         <div name= "prev_gradeable_div" style="width:100%;">
             Previous Terms Gradeables:<br /> 
@@ -153,8 +159,8 @@ HTML;
         </span>    
         <br /><br />
         <div style="float: right; width: auto; margin-top: 10px">
-            <a onclick="$('#run-plagiarism-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-            <input class="btn btn-primary" type="submit" value="Run" />
+            <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Run Lichen Plagiarism Detector" />
         </div>
     </form>
 </div>

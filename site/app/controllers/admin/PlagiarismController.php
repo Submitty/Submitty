@@ -15,6 +15,9 @@ class PlagiarismController extends AbstractController {
             case 'index':
                 $this->plagiarismIndex();
                 break;
+            case 'run_plagiarism':
+                $this->runPlagiarismForm();
+                break;    
             default:
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismTree();
@@ -46,7 +49,12 @@ class PlagiarismController extends AbstractController {
         } else {
             $assignments = array();
         }
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);  
+    }
 
+    public function runPlagiarismForm() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
         $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
@@ -55,7 +63,7 @@ class PlagiarismController extends AbstractController {
             }
         }
         $all_sem_gradeables = FileUtils::getAllSemesterGradeables();
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'runPlagiarismForm', $gradeable_ids_titles, $all_sem_gradeables);  
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'runPlagiarismForm', $gradeable_ids_titles, $all_sem_gradeables);
     }
 }

@@ -142,21 +142,6 @@ function newDownloadForm() {
     });
 }
 
-function runPlagiarismForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#run-plagiarism-form");
-    form.css("display", "block");
-    $('#no_code_provided_id').prop('checked', true);
-    $('#code_provided_id').prop('checked', false);
-    $('[name="provided_code_file"]', form).val(null);
-    $('#all_version_id').prop('checked', true);
-    $('#active_version_id').prop('checked', false);
-    $('[name="threshold"]', form).val('5');
-    $('[name="sequence_length"]', form).val('10');
-    $('[name=language]', form).prop("selectedIndex", 0);
-    $('[name=gradeable_id]', form).prop("selectedIndex", 0);
-}
-
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
