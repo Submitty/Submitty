@@ -636,11 +636,24 @@ function updateProgressPoints(question_num) {
     if(current_points=="None Selected"){
         $('#summary-' + question_num)[0].style.backgroundColor = "#E9EFEF";
         $('#title-' + question_num)[0].style.backgroundColor = "#E9EFEF";
+        for(var i=0; i<component.marks.length; i++){
+            var current_mark = $('#mark_id-'+question_num+'-'+i);
+            if(editModeEnabled==false || editModeEnabled==null){
+                current_mark.find('textarea[name=mark_text_'+question_num+'_'+i+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                current_mark.find('input[name=mark_points_'+question_num+'_'+i+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+            }
+        }
     }
     else{
         $('#summary-' + question_num)[0].style.backgroundColor = "#F9F9F9";
         $('#title-' + question_num)[0].style.backgroundColor = "#F9F9F9";
-
+        for(var i=0; i<component.marks.length; i++){
+            var current_mark = $('#mark_id-'+question_num+'-'+i);
+            if(editModeEnabled==false || editModeEnabled==null){
+                current_mark.find('textarea[name=mark_text_'+question_num+'_'+i+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #F9F9F9");
+                current_mark.find('input[name=mark_points_'+question_num+'_'+i+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #F9F9F9");
+            }
+        }
         summary_text = "";
         for (var i = 0; i < component.marks.length; i ++) {
             var mark = component.marks[i];
