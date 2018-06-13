@@ -21,15 +21,15 @@ use app\models\AbstractModel;
  */
 class Mark extends AbstractModel
 {
-    /** @var int The course-wide unique numeric id of this mark */
+    /** @property @var int The course-wide unique numeric id of this mark */
     protected $id = -1;
-    /** @var int The number of points this mark will add to the score (negative for deductions) */
+    /** @property @var int The number of points this mark will add to the score (negative for deductions) */
     protected $points = 0;
-    /** @var string The description of this mark (aka why a student would lose/gain these points) */
+    /** @property @var string The description of this mark (aka why a student would lose/gain these points) */
     protected $note = "";
-    /** @var int The order of the mark within the component */
+    /** @property @var int The order of the mark within the component */
     protected $order = 0;
-    /** @var bool If the student should be able to see this mark */
+    /** @property @var bool If the student should be able to see this mark */
     protected $publish = false;
 
     public function __construct(Core $core, $details)

@@ -70,78 +70,78 @@ class Gradeable extends AbstractModel
 {
     /* Properties for all types of gradeables */
 
-    /** @var string The course-wide unique gradeable id */
+    /** @property @var string The course-wide unique gradeable id */
     protected $id = "";
-    /** @var string The gradeable's title */
+    /** @property @var string The gradeable's title */
     protected $title = "";
-    /** @var string The instructions url to give to students */
+    /** @property @var string The instructions url to give to students */
     protected $instructions_url = "";
-    /** @var int The type of gradeable */
+    /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
+    /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
     protected $grade_by_registration = true;
-    /** @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
+    /** @property @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
     protected $ta_view_start_date = null;
-    /** @var \DateTime The date that graders may start grading */
+    /** @property @var \DateTime The date that graders may start grading */
     protected $grade_start_date = null;
-    /** @var \DateTime The date that grades will be released to students */
+    /** @property @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
-    /** @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
+    /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
     protected $grade_locked_date = null;
-    /** @var int The minimum user group that can grade this gradeable (1=instructor) */
+    /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
-    /** @var string The syllabus classification of this gradeable */
+    /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "Homework";
 
-    /** @var Component[] An array of all of this gradeable's components */
+    /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = array();
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
-    /** @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
+    /** @property @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
     protected $ta_instructions = "";
 
     /* Properties exclusive to electronic gradeables */
 
-    /** @var string The location of the autograding configuration file */
+    /** @property @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
-    /** @var string[] The object that contains the autograding config data */
+    /** @property @var string[] The object that contains the autograding config data */
     private $autograding_config = null;
-    /** @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
+    /** @property @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
-    /** @var string The subdirectory within the VCS repository for this gradeable */
+    /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
-    /** @var bool If the gradeable is a team assignment */
+    /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
-    /** @var int The maximum team size (if the gradeable is a team assignment) */
+    /** @property @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
-    /** @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
+    /** @property @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
     protected $team_lock_date = null;
-    /** @var bool If the gradeable is using any manual grading */
+    /** @property @var bool If the gradeable is using any manual grading */
     protected $ta_grading = false;
-    /** @var bool If students can view submissions */
+    /** @property @var bool If students can view submissions */
     protected $student_view = false;
-    /** @var bool If students can make submissions */
+    /** @property @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @var bool If students can download submitted files */
+    /** @property @var bool If students can download submitted files */
     protected $student_download = false;
-    /** @var bool If students can view/download any version of the submitted files, or just the active version */
+    /** @property @var bool If students can view/download any version of the submitted files, or just the active version */
     protected $student_any_version = false;
-    /** @var bool If the gradeable uses peer grading */
+    /** @property @var bool If the gradeable uses peer grading */
     protected $peer_grading = false;
-    /** @var int The number of peers each student will be graded by */
+    /** @property @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
-    /** @var \DateTime The date students can start making submissions */
+    /** @property @var \DateTime The date students can start making submissions */
     protected $submission_open_date = null;
-    /** @var \DateTime The date, before which all students must make a submissions (or be marked late) */
+    /** @property @var \DateTime The date, before which all students must make a submissions (or be marked late) */
     protected $submission_due_date = null;
-    /** @var int The number of late days allowed */
+    /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @var bool If submission after student's max deadline
+    /** @property @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
     protected $late_submission_allowed = true;
-    /** @var float The point precision for manual grading */
+    /** @property @var float The point precision for manual grading */
     protected $precision = 0.0;
 
     public function __construct(Core $core, $data, array $components)

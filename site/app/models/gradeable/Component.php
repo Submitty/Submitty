@@ -36,32 +36,32 @@ use app\models\AbstractModel;
  */
 class Component extends AbstractModel
 {
-    /** @var int The course-wide unique numeric id of this component */
+    /** @property @var int The course-wide unique numeric id of this component */
     protected $id = 0;
-    /** @var string The title of this component */
+    /** @property @var string The title of this component */
     protected $title = "";
-    /** @var string The comment only visible to the TA/manual grader */
+    /** @property @var string The comment only visible to the TA/manual grader */
     protected $ta_comment = "";
-    /** @var string The comment visible to the student */
+    /** @property @var string The comment visible to the student */
     protected $student_comment = "";
-    /** @var int The minimum points this component can contribute to the score (can be negative) */
+    /** @property @var int The minimum points this component can contribute to the score (can be negative) */
     protected $lower_clamp = 0;
-    /** @var int The number of points this component is worth with no marks */
+    /** @property @var int The number of points this component is worth with no marks */
     protected $default = 0;
-    /** @var int The full value of this component without extra credit */
+    /** @property @var int The full value of this component without extra credit */
     protected $max_value = 0;
-    /** @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
+    /** @property @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
     protected $upper_clamp = 0;
-    /** @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
+    /** @property @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
     protected $text = false;
-    /** @var bool If this is a peer grading component */
+    /** @property @var bool If this is a peer grading component */
     protected $peer = false;
-    /** @var int The order of this component in the gradeable */
+    /** @property @var int The order of this component in the gradeable */
     protected $order = -1;
-    /** @var int The pdf page this component will reside in */
+    /** @property @var int The pdf page this component will reside in */
     protected $page = -1;
 
-    /** @var Mark[] All possible common marks that can be assigned to this component */
+    /** @property @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = array();
 
 
