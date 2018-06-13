@@ -672,7 +672,7 @@ HTML;
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
                 $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
-                if($status == "Good"){
+                if($status == "Good" || $status == "Late"){
                     // As long as one person on the team has a good status, then the assignment should be graded.
                     $team_status = "Good";
                 }
