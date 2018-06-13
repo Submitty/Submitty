@@ -117,8 +117,8 @@ class AdminGradeableController extends AbstractController
         $admin_gradeable = new AdminGradeable($this->core);
         $this->core->getQueries()->getGradeableInfo($gradeable_id, $admin_gradeable, false);
 
-        // Generate marks array if we're getting an electronic gradeable with TA grading
-        if ($admin_gradeable->g_gradeable_type == 0 and $admin_gradeable->eg_use_ta_grading) {
+        // Generate marks array if we're getting an electronic gradeable
+        if ($admin_gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $old_components = $admin_gradeable->getOldComponents();
             foreach ($old_components as $old_component) {
                 $old_component->setMarks($this->core->getQueries()->getGradeableComponentsMarks($old_component->getId()));
