@@ -5,7 +5,7 @@
 {% macro badge_render(earned, max, extra_credit) %}
     {% import _self as self %}
 
-    {% set show = self.badge_should_show(earned, max, extra_credit) %}
+    {% set show = self.badge_should_show(earned, max, extra_credit) == "true" %}
     {% if show %}
         {% set background = self.badge_get_style(earned, max, extra_credit) %}
         {% set text = self.badge_format_value(earned, max, extra_credit) %}
