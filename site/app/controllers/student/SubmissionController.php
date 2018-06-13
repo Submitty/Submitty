@@ -85,15 +85,15 @@ class SubmissionController extends AbstractController {
     }
 
     private function makeRequestPost(){
-        $thread_id = $_REQUEST['thread_id'];
+        $regrade_id = $_REQUEST['regrade_id'];
         $content = htmlentities($_POST['replyTextArea'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $this->core->getQueries()->insertNewRegradePost($thread_id,$gradeable_id, $user_id, $content);
+        $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
         if($this->core->getQueries()->isStaffPost($user_id)){
-            $this->core->getQueries()->modifyRegradeStatus($thread_id, 1);
+            $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
         }else{
-            $this->core->getQueries()->modifyRegradeStatus($thread_id, -1);
+            $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
         }
     }
 
