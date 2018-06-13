@@ -82,6 +82,10 @@ echo -e "Download analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 
 # --------------------------------------
+echo -e "Download lichen"
+git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+
+# --------------------------------------
 echo -e "Compile and install the tutorial repository"
 git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
