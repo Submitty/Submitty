@@ -1186,7 +1186,7 @@ function checkNumFilesForumUpload(input, post_id){
 
 }
 
-function editPost(post_id, thread_id) {
+function editPost(post_id, thread_id, shouldEditThread) {
      var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
      $.ajax({
             url: url,
@@ -1221,6 +1221,16 @@ function editPost(post_id, thread_id) {
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
                 $('#edit-user-post').css('display', 'block');
+
+                // If first post of thread
+                if(shouldEditThread) {
+                    var thread_title = json.title;
+                    document.getElementById('edit_thread_tid').value = thread_id;
+                    document.getElementById('edit_thread_title').value = thread_title;
+                    $("#edit_thread_form").show();
+                } else {
+                    $("#edit_thread_form").hide();
+                }
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");

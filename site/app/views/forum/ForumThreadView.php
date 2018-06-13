@@ -744,9 +744,15 @@ HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 2){
 			$wrapped_content = json_encode($post['content']);
+			$shouldEditThread = null;
+			if($first) {
+				$shouldEditThread = "true";
+			} else {
+				$shouldEditThread = "false";
+			}
 			$return .= <<<HTML
 				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
-				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
+				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="Edit post"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
 

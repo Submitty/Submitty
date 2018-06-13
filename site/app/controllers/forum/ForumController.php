@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'edit_thread':
+                $this->editThread();
+                break;
             case 'search_threads':
                 $this->search();
                 break;
@@ -309,6 +312,23 @@ class ForumController extends AbstractController {
         }
     }
 
+    public function editThread(){
+        $thread_id = $_POST["edit_thread_id"];
+        if($this->core->getUser()->getGroup() <= 2){
+            if(isset($_POST["edit_thread_title"])) {
+                $thread_title = $_POST["edit_thread_title"];
+                if(empty($thread_title)) {
+                    $this->core->addErrorMessage("Thread title can't be empty.");
+                } else {
+                    $this->core->getQueries()->editThreadTitle($thread_id, $thread_title);
+                }
+            }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+    }
+
     private function getSortedThreads($categories_ids){
         $current_user = $this->core->getUser()->getId();
         if($this->isValidCategories($categories_ids)) {
@@ -420,6 +440,9 @@ class ForumController extends AbstractController {
             $output['user'] = $result["author_user_id"];
             $output['post'] = $result["content"];
             $output['post_time'] = $result['timestamp'];
+            if(isset($_POST["thread_id"])) {
+                $this->getThreadContent($_POST["thread_id"], $output);
+            }
             $this->core->getOutput()->renderJson($output);
             return $output;
         } else {
@@ -427,6 +450,10 @@ class ForumController extends AbstractController {
         }
     }
 
+    private function getThreadContent($thread_id, &$output){
+        $result = $this->core->getQueries()->getThreadTitle($thread_id);
+        $output['title'] = $result["title"];
+    }
 
     public function showStats(){
         $posts = array();
