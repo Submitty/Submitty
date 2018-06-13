@@ -362,6 +362,9 @@ HTML;
         $total_score = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $graded_score;
         $total_max = $gradeable->getTotalAutograderNonExtraCreditPoints() + $graded_max;
 
+        //Clamp full gradeable score to zero
+        $total_score = max($total_score, 0);
+
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
             "grader_names" => $grader_names,
