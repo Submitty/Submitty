@@ -1097,10 +1097,13 @@ class AdminGradeableController extends AbstractController
             return null;
 
         // Refresh the configuration file with updated information
+        // See 'make_assignments_txt_file.py' and grade_item.py for where these properties are used
+        // Note: These property names must match the 'setup_sample_courses.py' names
         $jsonProperties = [
-            'g_id' => $gradeable->g_id,
-            'eg_submission_due_date' => $gradeable->eg_submission_due_date,
-            'eg_is_repository' => $gradeable->eg_is_repository
+            'gradeable_id' => $gradeable->g_id,
+            'config_path' => $gradeable->eg_config_path,
+            'date_due' => $gradeable->eg_submission_due_date,
+            'upload_type' => $gradeable->eg_is_repository ? "Repository" : "Upload File"
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->g_id . '.json';

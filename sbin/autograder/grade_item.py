@@ -212,14 +212,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     with open(form_json_config, 'r') as infile:
         gradeable_config_obj = json.load(infile)
-    gradeable_deadline_string = gradeable_config_obj["eg_submission_due_date"]
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
     
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
 
-    is_vcs = gradeable_config_obj["eg_is_repository"]
+    is_vcs = gradeable_config_obj["upload_type"] == "Repository"
     checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
 
