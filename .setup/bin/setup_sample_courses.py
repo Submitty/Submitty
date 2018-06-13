@@ -215,6 +215,14 @@ def main():
 def generate_random_user_id(length=15):
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
 
+def generate_random_ta_comment():
+    line = ""
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'TAComment.txt')) as comment:
+        line = next(comment)
+        for num, aline in enumerate(comment):
+            if random.randrange(num + 2): continue
+            line = aline
+    return line.strip()
 
 def generate_random_users(total, real_users):
     """
@@ -647,7 +655,7 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            conn.execute(table.insert(), sections_registration_id=section)
+            conn.execute(table.insert(), sections_registration_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", metadata, autoload=True)
@@ -671,6 +679,8 @@ class Course(object):
             rot_section = user.get_detail(self.code, "rotating_section")
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
+            if reg_section is not None:
+                reg_section=str(reg_section)    
             # We already have a row in submitty.users for this user,
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
@@ -696,7 +706,7 @@ class Course(object):
                 for grading_registration_section in grading_registration_sections:
                     conn.execute(reg_table.insert(),
                                  user_id=user.get_detail(self.code, "id"),
-                                 sections_registration_id=grading_registration_section)
+                                 sections_registration_id=str(grading_registration_section))
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -765,7 +775,7 @@ class Course(object):
                     print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
                     #adding json data for team history                     
                     teams_registration = select([gradeable_teams_table]).where(
-                        (gradeable_teams_table.c['registration_section'] == reg_section) &
+                        (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
                         (gradeable_teams_table.c['g_id'] == gradeable.id))
                     res = conn.execute(teams_registration)
                     added = False
@@ -790,7 +800,7 @@ class Course(object):
                         conn.execute(gradeable_teams_table.insert(),
                                      team_id=unique_team_id,
                                      g_id=gradeable.id,
-                                     registration_section=reg_section,
+                                     registration_section=str(reg_section),
                                      rotation_section=None)
                         conn.execute(teams_table.insert(),
                                      team_id=unique_team_id, 
@@ -907,23 +917,38 @@ class Course(object):
                     if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
-                        values = {'g_id': gradeable.id, 'gd_user_id': user.id, 'gd_overall_comment': 'lorem ipsum lodar'}
+                        values = {'g_id': gradeable.id, 'gd_overall_comment': 'lorem ipsum lodar'}
+                        if gradeable.team_assignment is True:
+                            values['gd_team_id'] = team_id
+                        else:
+                            values['gd_user_id'] = user.id
                         if gradeable.grade_released_date < NOW and random.random() < 0.5:
                             values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                         ins = gradeable_data.insert().values(**values)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
+                            skip_grading = random.random()
                             for component in gradeable.components:
-                                if status == 0 or random.random() < 0.5:
+                                if random.random() < 0.05 and skip_grading < 0.3:
+                                    #This is used to simulate unfinished grading.
+                                    # pdb.set_trace()
+                                    break
+                                if status == 0 or random.random() < 0.4:
                                     score = 0
-                                elif random.random() < 0.9:
-                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
                                 else:
-                                    score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
+                                    if random.random() < 0.1:
+                                        score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    if random.random() < 0.1:
+                                        #custom mark takes away points
+                                        score = -score
+                                    if random.random() < 0.01: 
+                                        #Just for some weird number example
+                                        score = -99999
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                             gcd_score=score, gcd_component_comment="lorem ipsum",
+                                             gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
                                 first = True
                                 first_set = False
