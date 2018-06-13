@@ -830,8 +830,11 @@ class Course(object):
                     res = conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
                     ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                     temp = res.fetchall()
-                    if(temp):
+
+                    if len(temp) != 0:
                         team_id = temp[0][0]
+                    else:
+                        continue
                     res.close()
                 if team_id is not None:
                     previous_submission = select([electronic_gradeable_version]).where(
