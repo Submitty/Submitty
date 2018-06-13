@@ -1174,6 +1174,9 @@ function setupSimpleGrading(action) {
                 if(action == 'lab') {
                     child.css("outline", "");
                 }
+                else {
+                    child.children("input").css("outline", "");
+                }
                 if(event.keyCode == 37 || (event.keyCode == 9 && event.shiftKey)) { // Left arrow/shift+tab
                     if(event.keyCode == 9 && event.shiftKey) {
                         event.preventDefault();
@@ -1207,7 +1210,7 @@ function setupSimpleGrading(action) {
                     child.css("outline", "3px dashed " + highlight_color);
                 }
                 else {
-                    child.children("input").focus();
+                    child.children("input").css("outline", "3px dashed " + highlight_color).focus();
                 }
 
                 if((event.keyCode == 38 || event.keyCode == 40) && !child.isInViewport()) {
@@ -1269,10 +1272,11 @@ function setupSimpleGrading(action) {
                     child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
                     if(action == 'lab') {
                         prev_child_elem.css("outline", "");
-                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color);
+                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color); 
                     }
                     else {
-                        $(child_elems[child_idx]).children("input").focus();
+                        prev_child_elem.children("input").css("outline", "");
+                        $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color).focus();
                     }
                     $('html, body').animate( { scrollTop: $(child_elems).parent().offset().top - $(window).height()/2}, 50);
                 }
@@ -1309,10 +1313,12 @@ function setupSimpleGrading(action) {
     // for numeric gradeables, whenever an input field is focused, update location variables
     if(action == 'numeric') {
         $("input[id^=cell-]").on("focus", function(event) {
+            $(child_elems[child_idx]).children("input").css("outline", "");
             var tr_elem = $(this).parent().parent();
             table_row = tr_elem.attr("data-row");
             child_elems = tr_elem.find(search_selector);
             child_idx = child_elems.index($(this).parent());
+            $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color);
         });
     }
 
