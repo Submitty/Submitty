@@ -310,6 +310,7 @@ function updateMarksOnPage(num) {
     var gradeable = getGradeable();
     var component = getComponent(num);
     var parent = $('#marks-parent-'+num);
+    var points = calculateMarksPoints(num);
     if(editModeEnabled==true){
         var sortableMarks=$('#marks-parent-'+num);
         var sortEvent = function (event, ui){
@@ -390,8 +391,14 @@ function updateMarksOnPage(num) {
                 var current_mark = $('#mark_id-'+num+'-'+x);
                 current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('disabled', true);
                 current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('disabled', true);
-                current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
-                current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                if(points == "None Selected"){
+                    current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                    current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                }
+                else{
+                    current_mark.find('textarea[name=mark_text_'+num+'_'+x+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                    current_mark.find('input[name=mark_points_'+num+'_'+x+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                }
             }
         }
     });
