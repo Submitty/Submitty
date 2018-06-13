@@ -629,7 +629,7 @@ table tr.table-header {
 .badge {
     float: left;
     display: inline-block;
-    width: 70px;
+    min-width: 70px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
