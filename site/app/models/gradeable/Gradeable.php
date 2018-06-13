@@ -217,11 +217,66 @@ class Gradeable extends AbstractModel
 
     /* Overridden setters with validation */
 
-    private function validateDates(\DateTime &$ta_view_start_date, \DateTime &$team_lock_date, \DateTime &$submission_open_date,
-                                   \DateTime &$submission_due_date, \DateTime &$grade_start_date, \DateTime &$grade_released_date,
-                                   \DateTime &$grade_locked_date, &$late_days)
+    /**
+     * Asserts that the provided date is a \DateTime object and converts it to one
+     *  if its a string, returning any error in parsing.
+     *
+     * @param $date \DateTime|string A reference to the date object to assert.  Set to null if failed.
+     * @return null|string The error message or null
+     */
+    private function assertDate(&$date)
+    {
+        if (gettype($date) === 'string') {
+            try {
+                $date = new \DateTime($date, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                $date = null;
+                return 'Invalid Format!';
+            }
+        }
+        return null;
+    }
+    private function validateDates(&$ta_view_start_date, &$team_lock_date, &$submission_open_date,
+                                   &$submission_due_date, &$grade_start_date, &$grade_released_date,
+                                   &$grade_locked_date, &$late_days)
     {
         $errors = [];
+
+        // Try to parse the grade locked date, but it might be null
+        if($grade_locked_date !== null) {
+            $result = $this->assertDate($date);
+            if ($result !== null) {
+                $errors[$date] = $result;
+            }
+        }
+
+        //
+        // Parse all of the dates into DateTime's (no error if null)
+        //
+        $result = $this->assertDate($ta_view_start_date);
+        if ($result !== null) {
+            $errors['ta_view_start_date'] = $result;
+        }
+        $result = $this->assertDate($team_lock_date);
+        if ($result !== null) {
+            $errors['team_lock_date'] = $result;
+        }
+        $result = $this->assertDate($submission_open_date);
+        if ($result !== null) {
+            $errors['submission_open_date'] = $result;
+        }
+        $result = $this->assertDate($submission_due_date);
+        if ($result !== null) {
+            $errors['submission_due_date'] = $result;
+        }
+        $result = $this->assertDate($grade_start_date);
+        if ($result !== null) {
+            $errors['grade_start_date'] = $result;
+        }
+        $result = $this->assertDate($grade_released_date);
+        if ($result !== null) {
+            $errors['grade_released_date'] = $result;
+        }
 
         $late_interval = null;
         $late_days = intval($late_days);
@@ -238,7 +293,7 @@ class Gradeable extends AbstractModel
         }
 
         $max_due = $submission_due_date;
-        if (!($submission_due_date === null || $late_interval === null)) {
+        if ($submission_due_date instanceof \DateTime && $late_interval !== null) {
             $max_due = (clone $submission_due_date)->add($late_interval);
         }
 
@@ -267,9 +322,9 @@ class Gradeable extends AbstractModel
                 if ($grade_start_date === null) {
                     $errors['grade_start_date'] = "Value must not be null!";
                 }
-                if ($grade_locked_date === null) {
-                    $errors['grade_locked_date'] = "Value must not be null!";
-                }
+//                if ($grade_locked_date === null) {
+//                    $errors['grade_locked_date'] = "Value must not be null!";
+//                }
                 if (!($submission_due_date === null || $grade_start_date === null) && $submission_due_date > $grade_start_date) {
                     $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 }
@@ -301,9 +356,9 @@ class Gradeable extends AbstractModel
         return $errors;
     }
 
-    public function setDates(\DateTime $ta_view_start_date, \DateTime $team_lock_date, \DateTime $submission_open_date,
-                             \DateTime $submission_due_date, \DateTime $grade_start_date, \DateTime $grade_released_date,
-                             \DateTime $grade_locked_date, $late_days)
+    public function setDates($ta_view_start_date, $team_lock_date, $submission_open_date,
+                             $submission_due_date, $grade_start_date, $grade_released_date,
+                             $grade_locked_date, $late_days)
     {
         $errors = $this->validateDates($ta_view_start_date, $team_lock_date, $submission_open_date, $submission_due_date,
             $grade_start_date, $grade_released_date, $grade_locked_date, $late_days);
