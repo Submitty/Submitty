@@ -2,13 +2,13 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{% macro badge_render(earned, max, extra_credit) %}
+{% macro render(earned, max, extra_credit) %}
     {% import _self as self %}
 
-    {% set show = self.badge_should_show(earned, max, extra_credit) == "true" %}
+    {% set show = self.should_show(earned, max, extra_credit) == "true" %}
     {% if show %}
-        {% set background = self.badge_get_style(earned, max, extra_credit) %}
-        {% set text = self.badge_format_value(earned, max, extra_credit) %}
+        {% set background = self.get_style(earned, max, extra_credit) %}
+        {% set text = self.format_value(earned, max, extra_credit) %}
 
         <span class="badge {{ background }}">{{ text }}</span>
     {% else %}
@@ -20,7 +20,7 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{%- macro badge_get_style(earned, max, extra_credit) -%}
+{%- macro get_style(earned, max, extra_credit) -%}
     {%- spaceless -%}
         {# Color rules: #}
         {# Green is 100% or higher (for EC) #}
@@ -55,7 +55,7 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{%- macro badge_format_value(earned, max, extra_credit) -%}
+{%- macro format_value(earned, max, extra_credit) -%}
     {%- spaceless -%}
         {# Extra credit: +earned #}
         {# Regular credit: earned / max #}
@@ -73,7 +73,7 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{%- macro badge_should_show(earned, max, extra_credit) -%}
+{%- macro should_show(earned, max, extra_credit) -%}
     {%- spaceless -%}
         {% if extra_credit %}
             {# EC always shows, because even +0 is good information #}

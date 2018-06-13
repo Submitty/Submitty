@@ -1,4 +1,4 @@
-{% import 'functions/Component.twig' as Component %}
+{% import 'functions/Badge.twig' as Badge %}
 
 {% if num_visible_testcases > 1 %}
     <script type="text/javascript">
@@ -12,14 +12,14 @@
     {% if show_hidden_breakdown %}
         <div class="box">
             <div class="box-title">
-                {{ Component.badge_render(nonhidden_earned, nonhidden_max, false) }}
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
                 <h4>Total (No Hidden Points)</h4>
             </div>
         </div>
 
         <div class="box" style="background-color:#D3D3D3;">
             <div class="box-title">
-                {{ Component.badge_render(hidden_earned, hidden_max, false) }}
+                {{ Badge.render(hidden_earned, hidden_max, false) }}
                 <h4>Total (With Hidden Points)</h4>
             </div>
         </div>
@@ -28,14 +28,14 @@
 
         <div class="box">
             <div class="box-title">
-                {{ Component.badge_render(nonhidden_earned, nonhidden_max, false) }}
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
                 <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }}</h4>
             </div>
         </div>
         {% if display_hidden %}
             <div class="box">
                 <div class="box-title">
-                    {{ Component.badge_render(hidden_earned, hidden_max, false) }}
+                    {{ Badge.render(hidden_earned, hidden_max, false) }}
                     <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
                 </div>
             </div>
@@ -60,13 +60,13 @@
                 {# Badge #}
                 {% if testcase.hasPoints() %}
                     {% if can_view %}
-                        {{ Component.badge_render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                        {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                     {% else %}
                         <div class="badge">
                             Hidden
                             {% if gradeable.taGradesReleased() %}
                                 <br>
-                                {{ Component.badge_format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                                {{ Badge.format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                             {% endif %}
                         </div>
                     {% endif %}
