@@ -309,14 +309,14 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function getSortedThreads($categories_ids){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted = false){
         $current_user = $this->core->getUser()->getId();
         if($this->isValidCategories($categories_ids)) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids);
-            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids);
+            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids, $show_deleted);
+            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids, $show_deleted);
         } else {
-            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
-            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
+            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory($show_deleted);
+            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory($show_deleted);
         }
         $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
 
@@ -358,12 +358,16 @@ class ForumController extends AbstractController {
 
     public function getThreads(){
 
+        $show_deleted = false;
+        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_REQUEST["show_deleted"]) == 1) {
+            $show_deleted = true;
+        }
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
 
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
@@ -382,7 +386,11 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        $threads = $this->getSortedThreads(array($category_id), $max_thread);
+        $show_deleted = false;
+        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_REQUEST["show_deleted"]) == 1) {
+            $show_deleted = true;
+        }
+        $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
 
         $current_user = $this->core->getUser()->getId();
 

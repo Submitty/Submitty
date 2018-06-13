@@ -1274,6 +1274,12 @@ function saveScrollLocationOnRefresh(id){
 
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
+    var match_show_deleted = RegExp('[?&]show_deleted=([^&]*)').exec(window.location.search);
+    var show_deleted = 0;
+    if(match_show_deleted && match_show_deleted[1] == 1) {
+        show_deleted = 1;
+    }
+
     categories_value = (categories_value == null)?"":categories_value.join("|");
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
@@ -1282,7 +1288,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
             data: {
                 thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoriesId: currentCategoriesId
+                currentCategoriesId: currentCategoriesId,
+                show_deleted: show_deleted
             },
             success: function(r){
                var x = JSON.parse(r).html;
