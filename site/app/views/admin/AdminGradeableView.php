@@ -72,20 +72,6 @@ class AdminGradeableView extends AbstractView {
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
         }
 
-        // This could be a lot more elegant, but we need to get into the same state
-        //  as a 'new' gradeable for the rubric when in template mode
-        if($type_of_action === 'add_template') {
-            $blank_component = new GradeableComponent($this->core, array());
-            $admin_gradeable->setOldComponents(array($blank_component));
-
-            // only encode the information we need for checkpoint/numeric
-            $admin_gradeable->setOldComponentsJson([
-                'upper_clamp' => $blank_component->getUpperClamp(),
-                'max_value'   => $blank_component->getMaxValue(),
-                'title'       => $blank_component->getTitle()
-            ]);
-        }
-
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
