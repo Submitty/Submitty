@@ -736,22 +736,10 @@ function toggleEditMode(){
         editModeEnabled=false;
     }
     editModeEnabled=!editModeEnabled;
-    if(editModeEnabled==false){
-        $("#EditModeButton")[0].value = "Enable Editing Mode";
+    if(findCurrentOpenedMark()>0){
+        var id=findCurrentOpenedMark();
+        saveMark(id, true);
+        updateMarksOnPage(id);
     }
-    else{
-        $("#EditModeButton")[0].value = "Disable Editing Mode";
-    }
-    //window.location.reload();
-    /*if(getGradeable()->isEditModeEnabled==true){
-        var numQuestions = getGradeable().components.length;
-        for (var qNum = 1; qNum < numQuestions; qNum++) {
-            var marks = $('[name=mark_'+qNum+']');
-            for (var mNum = 0; mNum < marks.length; mNum++) {
-                var current_mark = $('#mark_id-'+qNum+'-'+mNum);
-                current_mark.find('textarea[name=mark_text_'+qNum+'_'+mNum+']').attr('disabled', 'true');
-            }
-        }
-    }*/
 }
 
