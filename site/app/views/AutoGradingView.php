@@ -55,6 +55,7 @@ class AutogradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             "gradeable" => $gradeable,
+            "show_hidden" => $show_hidden,
             "num_visible_testcases" => $num_visible_testcases,
             "show_hidden_breakdown" => $show_hidden_breakdown,
             "display_hidden" => $display_hidden,
