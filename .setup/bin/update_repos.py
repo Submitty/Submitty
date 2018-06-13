@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Pull new code from the 3 auxiliary repos.
+Ensure minimum version/release/tag for the auxiliary repos.
 """
 
 import os
