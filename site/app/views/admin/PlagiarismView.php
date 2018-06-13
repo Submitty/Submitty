@@ -47,7 +47,7 @@ HTML;
 HTML;
         $return .= <<<HTML
         <div class="nav-buttons">
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}">Run Lichen Plagiarism Detector</a>
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Run Lichen Plagiarism Detector</a>
         </div><br /><br />        
 HTML;
         if ($assignments) {
@@ -68,8 +68,10 @@ HTML;
         return $return;
     }
 
-    public function runPlagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {
+    public function plagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {
         $all_sem_gradeables_json = json_encode($all_sem_gradeables);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
         $return = "";
         $return .= <<<HTML
 <div class="content">
@@ -78,9 +80,10 @@ HTML;
 HTML;
         $return .= <<<HTML
 <div id="run-plagiarism-form">
-    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
+    <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         <input type="hidden" name="prev_gradeables_number" value="1" />
+        <input type="hidden" name="ignore_submission_number" value="1" />
         <br /><div style="width:100%;">
             Select Gradeable: 
             <select name="gradeable_id">
@@ -97,24 +100,24 @@ HTML;
         </div><br /><br />
         <div style="width:100%;">
             Instructor Provided Code: 
-            <input type="radio" id="no_code_provided_id" name="provided_code_option" checked >
+            <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" checked >
             <label for="no_code_provided_id">No</label>
-            <input type="radio" id="code_provided_id" name="provided_code_option" >
+            <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" >
             <label for="code_provided_id">Yes</label><br />
             <input type="file" name="provided_code_file">
         </div><br /><br />
         <div style="width:100%;">
             Version: 
-            <input type="radio" id="all_version_id" name="version_option" checked >
+            <input type="radio" id="all_version_id" value="all_version" name="version_option" checked >
             <label for="all_version_id">All Version</label>
-            <input type="radio" id="active_version_id" name="version_option" >
+            <input type="radio" id="active_version_id" value="active_version" name="version_option" >
             <label for="active_version_id">Only Active Version</label><br />
         </div><br /><br />
         <div style="width:100%;">
             Files to be Compared: 
-            <input type="radio" id="all_files_id" name="file_option[]" checked>
+            <input type="radio" id="all_files_id" value="all_files" name="file_option" checked>
             <label for="all_files_id">All Files</label>
-            <input type="radio" id="regrex_matching_files_id" name="file_option[]" >
+            <input type="radio" id="regrex_matching_files_id" value="regrex_matching_files" name="file_option" >
             <label for="regrex_matching_files_id">Regrex matching files</label><br /><br />
             <input type="text" name="regrex_to_select_files" />
         </div><br /><br />
@@ -158,8 +161,20 @@ HTML;
             <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
         </span>    
         <br /><br />
+        <div name="ignore_submission_div" style="width:100%;">
+            Are there any submissions that should be ignored? 
+            <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" checked >
+            <label for="ignore_none_id">No</label>
+            <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" >
+            <label for="ignore_id">Yes</label><br />
+            <input type="text" name="ignore_submission_0" />
+        </div>
+        <span style="cursor:pointer;" name="add_more_ignore">
+            <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+        </span> 
+        <br /><br />
         <div style="float: right; width: auto; margin-top: 10px">
-            <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism'))}" class="btn btn-danger">Cancel</a>
+            <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester))}" class="btn btn-danger">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Run Lichen Plagiarism Detector" />
         </div>
     </form>
@@ -173,6 +188,11 @@ HTML;
     });
     $('[name="add_more_prev_gradeable"]', form).on('click', function(){
         addMorePrevGradeable(all_sem_gradeables);
+    });
+    $('[name="add_more_ignore"]', form).on('click', function(){
+        var ignore_submission_number = $('[name="ignore_submission_number"]', form).val();
+        $('[name="ignore_submission_div"]', form).append('<br /><input type="text" name="ignore_submission_'+ ignore_submission_number +'" />');
+        $('[name="ignore_submission_number"]', form).val(parseInt(ignore_submission_number)+1);
     });
 </script>
 HTML;
