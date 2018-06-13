@@ -285,10 +285,6 @@ class DatabaseQueries {
         } return true;
     }
 
-    public function editThreadTitle($thread_id, $thread_title) {
-        $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
-    }
-
     /**
      * @param User $user
      * @param string $semester
