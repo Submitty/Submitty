@@ -3,8 +3,9 @@
 	<input type="text" class="ui-autocomplete-input" autocomplete="off" id="student-search-input">
 </div>
 <script>
+	var student_full = {{ student_full|raw }};
 	$("#student-search-input").autocomplete({
-        source: {{ student_full|raw }},
+        source: student_full,
         appendTo: "#student-search"
     });
 </script>

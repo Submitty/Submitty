@@ -1257,12 +1257,13 @@ function setupSimpleGrading(action) {
     $("#student-search-input").on("keyup", function(event) {
         if(event.keyCode == 13) { // Enter
             this.blur();
-            dont_focus = true; // dont allow refocusing from other events
+            dont_focus = true; // dont allow refocusing until later
             var value = $(this).val();
             if(value != "") {
                 var prev_child_elem = $(child_elems[child_idx]);
                 // get the row number of the table element with the matching id
                 var tr_elem = $('table tbody tr[data-user="' + value +'"]');
+                // if a match is found, then use it to find the cell
                 if(tr_elem.length > 0) {
                     table_row = tr_elem.attr("data-row");
                     child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
@@ -1276,8 +1277,25 @@ function setupSimpleGrading(action) {
                     $('html, body').animate( { scrollTop: $(child_elems).parent().offset().top - $(window).height()/2}, 50);
                 }
                 else {
-                    alert("ERROR:\n\nInvalid user.");
-                    this.focus();                       // refocus on the input field
+                    // if no match is found and there is at least 1 matching autocomplete label, find its matching value
+                    var first_match = $("#student-search > ul > li:first");
+                    if(first_match.length > 0 && first_match.text().toLowerCase().includes(value)) {
+                        var first_match_label = first_match.text();
+                        var first_match_value = "";
+                        for(var i = 0; i < student_full.length; i++) {      // NOTE: student_full comes from StudentSearch.twig script
+                            if(student_full[i]["label"] == first_match_label) {
+                                first_match_value = student_full[i]["value"];
+                                break;
+                            }
+                        }
+                        this.focus();
+                        $(this).val(first_match_value); // reset the value...
+                        $(this).trigger(event);    // ...and retrigger the event
+                    }
+                    else {
+                        alert("ERROR:\n\nInvalid user.");
+                        this.focus();                       // refocus on the input field
+                    }
                 }
             }
         }
