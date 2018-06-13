@@ -61,6 +61,8 @@
         {# Regular credit: earned / max #}
         {% if extra_credit %}
             +{{ earned }}
+        {% elseif earned < 0 %}
+            &minus;{{ earned|abs }} / {{ max }}
         {% else %}
             {{ earned }} / {{ max }}
         {% endif %}
