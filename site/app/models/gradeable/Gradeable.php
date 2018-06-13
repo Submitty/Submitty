@@ -12,7 +12,7 @@ use app\exceptions\NotImplementedException;
  *
  *  Note: there is no guarantee of the values of properties not relevant to the gradeable type
  *
- *  Missing validation: Date validation, student permissions
+ *  Missing validation: student permissions (i.e. view/submit) - low priority
  *
  * @method string getId();
  * @method string getTitle();
@@ -183,16 +183,82 @@ class Gradeable
 
     /* Overridden setters with validation */
 
-    /**
-     * Validates the state of the gradeable's dates
-     *
-     * @return string[] | null the error message(s)
-     */
-    private function validateDates(\DateTime $ta_view_start_date, \DateTime $team_lock_date, \DateTime $submission_open_date,
-                                   \DateTime $submission_due_date, \DateTime $grade_start_date, \DateTime $grade_released_date,
-                                   \DateTime $grade_locked_date, $late_days)
+    private function validateDates(\DateTime &$ta_view_start_date, \DateTime &$team_lock_date, \DateTime &$submission_open_date,
+                                   \DateTime &$submission_due_date, \DateTime &$grade_start_date, \DateTime &$grade_released_date,
+                                   \DateTime &$grade_locked_date, &$late_days)
     {
-        return null;
+        $errors = [];
+
+        $late_interval = null;
+        $late_days = intval($late_days);
+        if ($late_days < 0) {
+            $errors['late_days'] = 'Late day count must be >= 0!';
+        } else {
+            $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
+        }
+
+        $max_due = $submission_due_date;
+        if (!($submission_due_date === null || $late_interval === null)) {
+            $max_due = (clone $submission_due_date)->add($late_interval);
+        }
+
+        if ($ta_view_start_date === null) {
+            $errors['ta_view_start_date'] = "Value must not be null!";
+        }
+        if ($grade_released_date === null) {
+            $errors['grade_released_date'] = "Value must not be null!";
+        }
+
+        if ($this->type === GradeableType::ELECTRONIC_FILE) {
+            if ($submission_open_date === null) {
+                $errors['submission_open_date'] = "Value must not be null!";
+            }
+            if ($submission_due_date === null) {
+                $errors['submission_due_date'] = "Value must not be null!";
+            }
+
+            if (!($ta_view_start_date === null || $submission_open_date === null) && $ta_view_start_date > $submission_open_date) {
+                $errors['g_ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
+            }
+            if (!($submission_open_date === null || $submission_due_date === null) && $submission_open_date > $submission_due_date) {
+                $errors['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
+            }
+            if ($this->ta_grading) {
+                if ($grade_start_date === null) {
+                    $errors['grade_start_date'] = "Value must not be null!";
+                }
+                if ($grade_locked_date === null) {
+                    $errors['grade_locked_date'] = "Value must not be null!";
+                }
+                if (!($submission_due_date === null || $grade_start_date === null) && $submission_due_date > $grade_start_date) {
+                    $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
+                }
+                if (!($grade_start_date === null || $grade_released_date === null) && $grade_start_date > $grade_released_date) {
+                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                }
+            } else {
+                // No TA grading, but we must set this start date so the database
+                //  doesn't complain when we update it
+                $grade_start_date = $grade_released_date;
+                if (!($max_due === null || $grade_released_date === null) && $max_due > $grade_released_date) {
+                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
+                }
+            }
+            if ($this->team_assignment) {
+                if ($team_lock_date === null) {
+                    $errors['team_lock_date'] = "Value must not be null!";
+                }
+            }
+        } else {
+            // The only check if its not an electronic gradeable
+            if (!($ta_view_start_date === null || $grade_released_date === null) && $ta_view_start_date > $grade_released_date) {
+                $errors['g_grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
+            }
+        }
+
+        if (count($errors) === 0)
+            return null;
+        return $errors;
     }
 
     public function setDates(\DateTime $ta_view_start_date, \DateTime $team_lock_date, \DateTime $submission_open_date,

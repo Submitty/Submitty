@@ -2,15 +2,16 @@
 
 namespace app\models\gradeable;
 
+use app\libraries\GradeableType;
+use app\exceptions\AggregateException;
+use app\exceptions\NotImplementedException;
+
 
 /**
  * Class Component
  * @package app\models\gradeable
  *
  * All data describing the configuration of a Gradeable Component
- *
- * TODO: Missing validation features:
- *  -Lower clamp <= default <= max value <= upper clamp
  *
  * @method getId();
  * @method getTitle();
@@ -70,10 +71,7 @@ class Component
         $this->setTitle($details['title']);
         $this->setTaComment($details['ta_comment']);
         $this->setStudentComment($details['student_comment']);
-        $this->setLowerClamp($details['lower_clamp']);
-        $this->setDefault($details['default']);
-        $this->setMaxValue($details['max_value']);
-        $this->setUpperClamp($details['upper_clamp']);
+        $this->setPoints($details['lower_clamp'], $details['default'], $details['max_value'], $details['upper_clamp']);
         $this->setText($details['text']);
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
@@ -81,6 +79,61 @@ class Component
     }
 
     /* Overridden setters with validation */
+
+    private function validatePoints(&$lower_clamp, &$default, &$max_value, &$upper_clamp)
+    {
+        $errors = array();
+        if (!is_numeric($lower_clamp)) {
+            $lower_clamp = null;
+            $errors['lower_clamp'] = "Value must be a number!";
+        } else {
+            $lower_clamp = floatval($lower_clamp);
+        }
+        if (!is_numeric($default)) {
+            $default = null;
+            $errors['default'] = "Value must be a number!";
+        } else {
+            $default = floatval($default);
+        }
+        if (!is_numeric($max_value)) {
+            $max_value = null;
+            $errors['max_value'] = "Value must be a number!";
+        } else {
+            $max_value = floatval($max_value);
+        }
+        if (!is_numeric($upper_clamp)) {
+            $upper_clamp = null;
+            $errors['upper_clamp'] = "Value must be a number!";
+        } else {
+            $upper_clamp = floatval($upper_clamp);
+        }
+
+        if (!($lower_clamp === null || $default === null) && $lower_clamp > $default) {
+            $errors['lower_clamp'] = "Lower clamp can't be more than default!";
+        }
+        if (!($default === null || $max_value === null) && $default > $max_value) {
+            $errors['max_value'] = "Max value can't be less than default!";
+        }
+        if (!($max_value === null || $upper_clamp === null) && $max_value > $upper_clamp) {
+            $errors['max_value'] = "Max value can't be more than upper clamp!";
+        }
+
+        if (count($errors) === 0)
+            return null;
+        return $errors;
+    }
+    public function setPoints($lower_clamp, $default, $max_value, $upper_clamp)
+    {
+        $messages = $this->validatePoints($lower_clamp, $default, $max_value, $upper_clamp);
+        if ($messages !== null) {
+            throw new AggregateException("Component Points Error!", $messages);
+        }
+
+        $this->lower_clamp = $lower_clamp;
+        $this->default = $default;
+        $this->max_value = $max_value;
+        $this->upper_clamp = $upper_clamp;
+    }
 
     public function setMarks(array $marks)
     {
@@ -102,40 +155,24 @@ class Component
         }
     }
 
-    public function setLowerClamp($lower_clamp)
+    private function setLowerClamp($lower_clamp)
     {
-        if (is_float($lower_clamp) || is_int($lower_clamp)) {
-            $this->lower_clamp = $lower_clamp;
-        } else {
-            throw new \InvalidArgumentException("Lower Clamp must be a number!");
-        }
+        throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    public function setDefault($default)
+    private function setDefault($default)
     {
-        if (is_float($default) || is_int($default)) {
-            $this->default = $default;
-        } else {
-            throw new \InvalidArgumentException("Default Value must be a number!");
-        }
+        throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    public function setMaxValue($max_value)
+    private function setMaxValue($max_value)
     {
-        if (is_float($max_value) || is_int($max_value)) {
-            $this->max_value = $max_value;
-        } else {
-            throw new \InvalidArgumentException("Max Value must be a number!");
-        }
+        throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    public function setUpperClamp($upper_clamp)
+    private function setUpperClamp($upper_clamp)
     {
-        if (is_float($upper_clamp) || is_int($upper_clamp)) {
-            $this->upper_clamp = $upper_clamp;
-        } else {
-            throw new \InvalidArgumentException("Lower Clamp must be a number!");
-        }
+        throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
 
