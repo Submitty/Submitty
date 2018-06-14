@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\exceptions\AggregateException;
 use app\exceptions\NotImplementedException;
@@ -144,43 +145,61 @@ class Gradeable extends AbstractModel
     /** @property @var float The point precision for manual grading */
     protected $precision = 0.0;
 
-    public function __construct(Core $core, $data, array $components)
+    public function __construct(Core $core, $details, array $components)
     {
         parent::__construct($core);
 
-        $this->setId($data["id"]);
-        $this->setTitle($data["title"]);
-        $this->setInstructionsUrl($data["instructions_url"]);
-        $this->setType($data["type"]);
-        $this->setGradeByRegistration($data["grade_by_registration"]);
-        $this->setMinGradingGroup($data["min_grading_group"]);
-        $this->setSyllabusBucket($data["syllabus_bucket"]);
+        $this->setId($details["id"]);
+        $this->setTitle($details["title"]);
+        $this->setInstructionsUrl($details["instructions_url"]);
+        $this->setType($details["type"]);
+        $this->setGradeByRegistration($details["grade_by_registration"]);
+        $this->setMinGradingGroup($details["min_grading_group"]);
+        $this->setSyllabusBucket($details["syllabus_bucket"]);
         $this->setComponents($components);
 
         if($this->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->setTaInstructions($data["ta_instructions"]);
-            $this->setAutogradingConfigPath($data["autograding_config_path"]);
-            $this->setVcs($data["vcs"]);
-            $this->setVcsSubdirectory($data["vcs_subdirectory"]);
-            $this->setTeamAssignment($data["team_assignment"]);
-            $this->setTeamSizeMax($data["team_size_max"]);
-            $this->setTaGrading($data["ta_grading"]);
-            $this->setStudentView($data["student_view"]);
-            $this->setStudentSubmit($data["student_submit"]);
-            $this->setStudentDownload($data["student_download"]);
-            $this->setStudentAnyVersion($data["student_any_version"]);
-            $this->setPeerGrading($data["peer_grading"]);
-            $this->setPeerGradeSet($data["peer_grade_set"]);
-            $this->setLateSubmissionAllowed($data["late_submission_allowed"]);
-            $this->setPrecision($data["precision"]);
+            $this->setTaInstructions($details["ta_instructions"]);
+            $this->setAutogradingConfigPath($details["autograding_config_path"]);
+            $this->setVcs($details["vcs"]);
+            $this->setVcsSubdirectory($details["vcs_subdirectory"]);
+            $this->setTeamAssignment($details["team_assignment"]);
+            $this->setTeamSizeMax($details["team_size_max"]);
+            $this->setTaGrading($details["ta_grading"]);
+            $this->setStudentView($details["student_view"]);
+            $this->setStudentSubmit($details["student_submit"]);
+            $this->setStudentDownload($details["student_download"]);
+            $this->setStudentAnyVersion($details["student_any_version"]);
+            $this->setPeerGrading($details["peer_grading"]);
+            $this->setPeerGradeSet($details["peer_grade_set"]);
+            $this->setLateSubmissionAllowed($details["late_submission_allowed"]);
+            $this->setPrecision($details["precision"]);
         }
 
         // Set dates last
-        $this->setDates($data["ta_view_start_date"], $data["team_lock_date"], $data["submission_open_date"],
-            $data["submission_due_date"], $data["grade_start_date"], $data["grade_released_date"],
-            $data["grade_locked_date"], $data["late_days"]);
+        $this->setDates($details);
     }
 
+    const dates = [
+        'ta_view_start_date',
+        'grade_start_date',
+        'grade_released_date',
+        'team_lock_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_locked_date'
+    ];
+    public function toArray()
+    {
+        // Use the default behavior for the most part, but convert the dates
+        $return = parent::toArray();
+
+        foreach(self::dates as $date) {
+            $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
+        }
+
+        return $return;
+    }
 
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -216,67 +235,28 @@ class Gradeable extends AbstractModel
 
 
     /* Overridden setters with validation */
-
-    /**
-     * Asserts that the provided date is a \DateTime object and converts it to one
-     *  if its a string, returning any error in parsing.
-     *
-     * @param $date \DateTime|string A reference to the date object to assert.  Set to null if failed.
-     * @return null|string The error message or null
-     */
-    private function assertDate(&$date)
-    {
-        if (gettype($date) === 'string') {
-            try {
-                $date = new \DateTime($date, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
-                $date = null;
-                return 'Invalid Format!';
-            }
-        }
-        return null;
-    }
-    private function validateDates(&$ta_view_start_date, &$team_lock_date, &$submission_open_date,
-                                   &$submission_due_date, &$grade_start_date, &$grade_released_date,
-                                   &$grade_locked_date, &$late_days)
+    private function validateDates(array &$dates)
     {
         $errors = [];
-
-        // Try to parse the grade locked date, but it might be null
-        if($grade_locked_date !== null) {
-            $result = $this->assertDate($grade_locked_date);
-            if ($result !== null) {
-                $errors['grade_locked_date'] = $result;
-            }
-        }
 
         //
         // Parse all of the dates into DateTime's (no error if null)
         //
-        $result = $this->assertDate($ta_view_start_date);
-        if ($result !== null) {
-            $errors['ta_view_start_date'] = $result;
+        foreach(self::dates as $date) {
+            if($dates[$date] === null) continue;
+            $result = DateUtils::assertDate($dates[$date], $this->core->getConfig()->getTimezone());
+            if ($result !== null) {
+                $errors[$date] = $result;
+            }
         }
-        $result = $this->assertDate($team_lock_date);
-        if ($result !== null) {
-            $errors['team_lock_date'] = $result;
-        }
-        $result = $this->assertDate($submission_open_date);
-        if ($result !== null) {
-            $errors['submission_open_date'] = $result;
-        }
-        $result = $this->assertDate($submission_due_date);
-        if ($result !== null) {
-            $errors['submission_due_date'] = $result;
-        }
-        $result = $this->assertDate($grade_start_date);
-        if ($result !== null) {
-            $errors['grade_start_date'] = $result;
-        }
-        $result = $this->assertDate($grade_released_date);
-        if ($result !== null) {
-            $errors['grade_released_date'] = $result;
-        }
+
+        $ta_view_start_date = $dates['ta_view_start_date'];
+        $grade_start_date = $dates['grade_start_date'];
+        $grade_released_date = $dates['grade_released_date'];
+        $team_lock_date = $dates['team_lock_date'];
+        $submission_open_date = $dates['submission_open_date'];
+        $submission_due_date = $dates['submission_due_date'];
+        $late_days = $dates['late_days'];
 
         $late_interval = null;
         $late_days = intval($late_days);
@@ -356,29 +336,26 @@ class Gradeable extends AbstractModel
         return $errors;
     }
 
-    public function setDates($ta_view_start_date, $team_lock_date, $submission_open_date,
-                             $submission_due_date, $grade_start_date, $grade_released_date,
-                             $grade_locked_date, $late_days)
+    public function setDates(array $dates)
     {
-        $errors = $this->validateDates($ta_view_start_date, $team_lock_date, $submission_open_date, $submission_due_date,
-            $grade_start_date, $grade_released_date, $grade_locked_date, $late_days);
+        $errors = $this->validateDates($dates);
 
         if ($errors !== null) {
             throw new AggregateException("Date validation failed!", $errors);
         }
 
-        $this->ta_view_start_date = $ta_view_start_date;
-        $this->grade_start_date = $grade_start_date;
-        $this->grade_released_date = $grade_released_date;
-        $this->grade_locked_date = $grade_locked_date;
+        $this->ta_view_start_date = $dates['ta_view_start_date'];
+        $this->grade_start_date = $dates['grade_start_date'];
+        $this->grade_released_date = $dates['grade_released_date'];
+        $this->grade_locked_date = $dates['grade_locked_date'];
 
         if($this->type === GradeableType::ELECTRONIC_FILE) {
             if($this->team_assignment) {
-                $this->team_lock_date = $team_lock_date;
+                $this->team_lock_date = $dates['team_lock_date'];
             }
-            $this->submission_open_date = $submission_open_date;
-            $this->submission_due_date = $submission_due_date;
-            $this->late_days = $late_days;
+            $this->submission_open_date = $dates['submission_open_date'];
+            $this->submission_due_date = $dates['submission_due_date'];
+            $this->late_days = $dates['late_days'];
         }
     }
     private function setTaViewStartDate($date)

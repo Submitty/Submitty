@@ -77,4 +77,44 @@ class DateUtils {
         }
         return true;
     }
+
+
+    /**
+     * Asserts that the provided date is a \DateTime object and converts it to one
+     *  if its a string, returning any error in parsing.
+     *
+     * @param $date \DateTime|string A reference to the date object to assert.  Set to null if failed.
+     * @param $time_zone \DateTimeZone The timezone to parse with
+     * @return null|string The error message or null
+     */
+    public static function assertDate(&$date, \DateTimeZone $time_zone) {
+        if (gettype($date) === 'string') {
+            try {
+                $date = new \DateTime($date, $time_zone);
+            } catch (\Exception $e) {
+                $date = null;
+                return 'Invalid Format!';
+            }
+        }
+        return null;
+    }
+    /**
+     * Converts a provided date reference to a string if it isn't already
+     *
+     * @param $date &\DateTime | &string A reference to the date object to convert
+     */
+    public static function convertDateTimeToString(&$date) {
+        if(gettype($date) === 'string') return;
+        $date = self::dateTimeToString($date);
+    }
+    /**
+     * Converts a \DateTime object to a string in one place so if we change the format
+     *  here, it changes everywhere
+     *
+     * @param $date \DateTime The date to format
+     * @return string The formatted date
+     */
+    public static function dateTimeToString(DateTime $date) {
+        return $date->format('Y-m-d H:i:sO');
+    }
 }
