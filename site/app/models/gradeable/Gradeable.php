@@ -445,24 +445,7 @@ class Gradeable extends AbstractModel
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
-
-        // Sort the components by 'order'
-        $sortedComponents = [];
-        $max_order = -1; // default to -1 so empty arrays work
-        foreach($components as $component) {
-            if(isset($sortedComponents[$component->getOrder()])) {
-                throw new \InvalidArgumentException('Component orders must be unique');
-            }
-            $sortedComponents[$component->getOrder()] = $component;
-            $max_order = max($max_order, $component->getOrder());
-        }
-
-        // If the max order is not more than the number of marks,
-        //  then there is a missing order value or the numbers are offset, which is invalid
-        if(count($sortedComponents) <= $max_order) {
-            throw new \InvalidArgumentException('Component orders must be continuous');
-        }
-        $this->components = $sortedComponents;
+        $this->components = $components;
     }
 
     public function setAutogradingConfigPath($path)

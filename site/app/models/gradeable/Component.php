@@ -161,24 +161,7 @@ class Component extends AbstractModel
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
-
-        // Sort the marks by 'order'
-        $sortedMarks = [];
-        $max_order = -1; // default to -1 so empty arrays work
-        foreach($marks as $mark) {
-            if(isset($sortedMarks[$mark->getOrder()])) {
-                throw new \InvalidArgumentException('Mark orders must be unique');
-            }
-            $sortedMarks[$mark->getOrder()] = $mark;
-            $max_order = max($max_order, $mark->getOrder());
-        }
-
-        // If the max order is not more than the number of marks,
-        //  then there is a missing order value or the numbers are offset, which is invalid
-        if(count($sortedMarks) <= $max_order) {
-            throw new \InvalidArgumentException('Mark orders must be continuous');
-        }
-        $this->marks = $sortedMarks;
+        $this->marks = $marks;
     }
 
     private function setId($id)
