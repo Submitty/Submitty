@@ -14,25 +14,26 @@ use app\models\AbstractModel;
  *
  * All data describing the configuration of a Gradeable Component
  *
- * @method getId();
- * @method getTitle();
- * @method setTitle($title);
- * @method getTaComment();
- * @method setTaComment($ta_comment);
- * @method getStudentComment();
- * @method setStudentComment($student_comment);
- * @method getLowerClamp();
- * @method getDefault();
- * @method getMaxValue();
- * @method getUpperClamp();
- * @method isText();
- * @method setText($is_text);
- * @method isPeer();
- * @method setPeer($is_peer);
- * @method getOrder();
- * @method setOrder($order);
- * @method getPage();
- * @method setPage($page);
+ * @method int getId()
+ * @method string getTitle()
+ * @method void setTitle($title)
+ * @method string getTaComment()
+ * @method void setTaComment($ta_comment)
+ * @method string getStudentComment()
+ * @method void setStudentComment($student_comment)
+ * @method float getLowerClamp()
+ * @method float getDefault()
+ * @method float getMaxValue()
+ * @method float getUpperClamp()
+ * @method bool isText()
+ * @method void setText($is_text)
+ * @method bool isPeer()
+ * @method void setPeer($is_peer)
+ * @method int getOrder()
+ * @method void setOrder($order)
+ * @method int getPage()
+ * @method void setPage($page)
+ * @method Mark[] getMarks()
  */
 class Component extends AbstractModel
 {

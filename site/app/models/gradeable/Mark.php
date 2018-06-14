@@ -9,14 +9,14 @@ use app\models\AbstractModel;
  * Class Mark
  * @package app\models\gradeable
  *
- * @method getId();
- * @method getPoints();
- * @method getTitle();
- * @method setTitle($title);
- * @method getOrder();
- * @method setOrder($order);
- * @method isPublish();
- * @method setPublish($should_publish);
+ * @method int getId()
+ * @method float getPoints()
+ * @method string getTitle()
+ * @method void setTitle($title)
+ * @method int getOrder()
+ * @method void setOrder($order)
+ * @method bool isPublish()
+ * @method void setPublish($should_publish)
  */
 class Mark extends AbstractModel
 {
