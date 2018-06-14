@@ -38,34 +38,84 @@ HTML;
         return $return;
     }
 
-    public function plagiarismTree($semester, $course, $assignments) {
+    public function plagiarismTree($semester, $course, $assignments, $gradeable_ids_titles) {
         $return = "";
         $return .= <<<HTML
 <div class="content">
 <h1 style="text-align: center">Plagiarism Detection</h1>
 <br>
 HTML;
+        $display = $this->getDisplayForCode("/var/local/submitty/courses/s18/sample/submissions//closed_homework/adamss/1/infinite_loop_time_cutoff.py");
         $return .= <<<HTML
         <div class="nav-buttons">
             <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Run Lichen Plagiarism Detector</a>
-        </div><br /><br />        
+        </div><br /><br /><br />
+        <form name="gradeables_with_plagiarism_result">
+            Gradeables with Plagiarism Result: 
+            <select name="gradeable_id">
+            <option value="" selected>None</option>
 HTML;
-        if ($assignments) {
-            $return .= '<ul>';
-                foreach ($assignments as $assignment) {
-                    $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
-                }
-            $return .= '</ul>';
-        } 
-        else {
+        foreach ($gradeable_ids_titles as $gradeable_id_title) {
+            $title = $gradeable_id_title['g_title'];
+            $id = $gradeable_id_title['g_id'];
             $return .= <<<HTML
-<p>It looks like you have yet to run plagiarism detection on any assignment. See <a href="http://submitty.org/instructor/plagiarism">http://submitty.org/instructor/plagiarism</a> for details.</p>
+                <option value="{$id}">$title</option>
 HTML;
         }
+        $return .= <<<HTML
+        </select>
+        </form><br /><br />
+        <div class="sub">
+        <form name="gradeables_with_plagiarism_result">
+            User: 
+            <select name="user_id">
+                <option value="">None</option>
+            </select>
+            Version: 
+            <select name="version">
+                <option value="">None</option>
+            </select>    
+        </form><br />
+        <div name="code_box_1" style="float:left;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+HTML;
+        // $return .= $display;
+        $return .= <<<HTML
+        </div>
+        <div name="code_box_2" style="float:right;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        </div>
+        </div>
+HTML;
+        // if ($assignments) {
+        //     $return .= '<ul>';
+        //         foreach ($assignments as $assignment) {
+        //             $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
+        //         }
+        //     $return .= '</ul>';
+        // } 
+        
+
         $return .= <<<HTML
 </div>
 HTML;
         return $return;
+    }
+
+    public function getDisplayForCode($file_path){
+        $lines= file($file_path);
+        $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
+        for ($i = 0; $i < count($lines); $i++) {
+            $j = $i + 1;
+            $html .= "<div style='white-space: nowrap;'>";
+            $html .= "<span class='line_number'>{$j}</span>";
+            $html .= "<span class='line_code'>";
+            if (isset($lines[$i])) {
+                $html .= htmlentities($lines[$i]);
+            }
+            $html .= "</span></div>\n";
+        }
+        $j++;
+        $html .= "<div style='white-space: nowrap;'><span class='line_number'>{$j}</span></div></div></div>\n";
+        return $html;
     }
 
     public function plagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {

@@ -52,7 +52,8 @@ class PlagiarismController extends AbstractController {
         } else {
             $assignments = array();
         }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments);  
+        $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);  
     }
 
     public function plagiarismForm() {
