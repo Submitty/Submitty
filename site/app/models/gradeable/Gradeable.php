@@ -80,21 +80,10 @@ class Gradeable extends AbstractModel
     protected $type = GradeableType::ELECTRONIC_FILE;
     /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
     protected $grade_by_registration = true;
-    /** @property @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
-    protected $ta_view_start_date = null;
-    /** @property @var \DateTime The date that graders may start grading */
-    protected $grade_start_date = null;
-    /** @property @var \DateTime The date that grades will be released to students */
-    protected $grade_released_date = null;
-    /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
-    protected $grade_locked_date = null;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
-
-    /** @property @var Component[] An array of all of this gradeable's components */
-    protected $components = array();
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -115,8 +104,6 @@ class Gradeable extends AbstractModel
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
-    /** @property @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
-    protected $team_lock_date = null;
     /** @property @var bool If the gradeable is using any manual grading */
     protected $ta_grading = false;
     /** @property @var bool If students can view submissions */
@@ -131,18 +118,37 @@ class Gradeable extends AbstractModel
     protected $peer_grading = false;
     /** @property @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
-    /** @property @var \DateTime The date students can start making submissions */
-    protected $submission_open_date = null;
-    /** @property @var \DateTime The date, before which all students must make a submissions (or be marked late) */
-    protected $submission_due_date = null;
-    /** @property @var int The number of late days allowed */
-    protected $late_days = 0;
     /** @property @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
     protected $late_submission_allowed = true;
     /** @property @var float The point precision for manual grading */
     protected $precision = 0.0;
+
+    /* Dates for all types of gradeables */
+
+    /** @property @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
+    protected $ta_view_start_date = null;
+    /** @property @var \DateTime The date that graders may start grading */
+    protected $grade_start_date = null;
+    /** @property @var \DateTime The date that grades will be released to students */
+    protected $grade_released_date = null;
+    /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
+    protected $grade_locked_date = null;
+
+    /* Dates for electronic gradeables*/
+
+    /** @property @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
+    protected $team_lock_date = null;
+    /** @property @var \DateTime The date students can start making submissions */
+    protected $submission_open_date = null;
+    /** @property @var \DateTime The date, before which all students must make a submissions (or be marked late) */
+    protected $submission_due_date = null;
+    /** @property @var int The number of late days allowed */
+    protected $late_days = 0;
+
+    /** @property @var Component[] An array of all of this gradeable's components */
+    protected $components = array();
 
     public function __construct(Core $core, $details, array $components)
     {
