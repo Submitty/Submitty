@@ -149,22 +149,12 @@ HTML;
             "CLOSED" => "btn-default",
             "ITEMS BEING GRADED" => "btn-primary",
             "GRADED" => 'btn-danger');
-        //The general text of the button under the category
-        //It is general since the text could change depending if the user submitted something or not and other factors.
-        $title_to_prefix = array(
-            "FUTURE" => "ALPHA SUBMIT",
-            "BETA" => "BETA SUBMIT",
-            "OPEN" => "SUBMIT",
-            "CLOSED" => "LATE SUBMIT",
-            "ITEMS BEING GRADED" => "VIEW SUBMISSION",
-            "GRADED" => "VIEW GRADE"
-        );
-        
+
         $found_assignment = false;
         foreach ($sections_to_list as $title => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
 
-            $section = self::sectionMap[$title];
+            $index = self::sectionMap[$title];
 
             // temporary: want to make future - only visible to
             //  instructor (not released for submission to graders)
@@ -175,7 +165,7 @@ HTML;
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
         <tr class="bar"><td colspan="10"></td></tr>
-        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$this::gradeableSections[$section]["title"]}</td></tr>
+        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$this::gradeableSections[$index]["title"]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
             $title_save = $title;
@@ -344,11 +334,11 @@ HTML;
                         $title_to_button_type_submission['GRADED'] = "btn-default";
                     }
                     else if($title_save == "GRADED" && !$g_data->useTAGrading()) {
-                        $button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
+                        $button_text = "{$this::gradeableSections[$index]["prefix"]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
                         $title_to_button_type_submission['GRADED'] = "btn-default";
                     } // electronic gradeable with no ta grading should never be green
                     else {
-                    	$button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
+                    	$button_text = "{$this::gradeableSections[$index]["prefix"]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
                     }
                     if ($g_data->hasConfig()) {
                         //calculate the point percentage
