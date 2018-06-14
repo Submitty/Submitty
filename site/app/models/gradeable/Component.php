@@ -98,6 +98,15 @@ class Component extends AbstractModel
         $this->gradeable = $gradeable;
     }
 
+    /**
+     * Checks the point values to ensure consistency.  See `setPoints` docs for details
+     *
+     * @param $lower_clamp
+     * @param $default
+     * @param $max_value
+     * @param $upper_clamp
+     * @return array|null
+     */
     private function validatePoints(&$lower_clamp, &$default, &$max_value, &$upper_clamp)
     {
         $errors = array();
@@ -145,6 +154,8 @@ class Component extends AbstractModel
      * Sets component point values and ensures they are consistent:
      *  lower_clamp <= default <= max_value <= upper_clamp
      *
+     * This will round the parameters to the precision of the gradeable
+     *
      * @param $lower_clamp string|float see property doc
      * @param $default string|float see property doc
      * @param $max_value string|float see property doc
@@ -164,6 +175,10 @@ class Component extends AbstractModel
         $this->upper_clamp = $this->getGradeable()->roundPointValue($upper_clamp);
     }
 
+    /**
+     * Sets the array of marks
+     * @param Mark[] $marks Must be an array of only Marks
+     */
     public function setMarks(array $marks)
     {
         // Make sure we're getting only marks
@@ -175,6 +190,10 @@ class Component extends AbstractModel
         $this->marks = $marks;
     }
 
+    /**
+     * Sets the component Id
+     * @param int $id Must be a non-negative integer
+     */
     private function setIdInternal($id)
     {
         if (is_int($id) && $id >= 0) {

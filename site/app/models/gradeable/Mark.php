@@ -59,6 +59,10 @@ class Mark extends AbstractModel
         $this->component = $component;
     }
 
+    /**
+     * Sets the mark id
+     * @param int $id Must be a non-negative integer
+     */
     private function setIdInternal($id)
     {
         if (is_int($id) && $id >= 0) {
@@ -71,6 +75,11 @@ class Mark extends AbstractModel
     {
         throw new \BadFunctionCallException('Cannot set Id of mark');
     }
+
+    /**
+     * Sets the points this mark is worth
+     * @param string|float|int $points Must be a number.  Will be rounded to precision of gradeable.
+     */
     public function setPoints($points)
     {
         if(is_numeric($points)) {

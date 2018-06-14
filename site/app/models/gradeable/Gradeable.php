@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\GradeableComponent;
 
 /**
  * All data describing the configuration of a gradeable
@@ -234,8 +235,11 @@ class Gradeable extends AbstractModel
         return $details;
     }
 
-
-    /* Overridden setters with validation */
+    /**
+     * Validates a set of dates, see docs for `setDates` for the details
+     * @param array $dates A reference to the dates to be checked
+     * @return array|null Any errors in validation
+     */
     private function validateDates(array &$dates)
     {
         $errors = [];
@@ -337,6 +341,15 @@ class Gradeable extends AbstractModel
         return $errors;
     }
 
+    /**
+     * Sets the all of the dates of this gradeable
+     * Validation: All parenthetical values are only relevant for electronic submission and drop out of this expression
+     *  ta_view_start_date <= (submission_open_date) <= (submission_due_date) <= (grade_start_date) <= grade_released_date
+     *      AND
+     *  (submission_due_date + late days) <= grade_released_date
+     *
+     * @param $dates string[]|\DateTime[] An array of dates/date strings indexed by property name
+     */
     public function setDates(array $dates)
     {
         $errors = $this->validateDates($dates);
@@ -393,6 +406,9 @@ class Gradeable extends AbstractModel
         throw new \BadFunctionCallException('Cannot set the autograding config data');
     }
 
+    /**
+     * Sets the gradeable Id.  Must match the regular expression:  ^[a-zA-Z0-9_-]*$
+     */
     private function setIdInternal($id)
     {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
@@ -406,6 +422,10 @@ class Gradeable extends AbstractModel
         throw new \BadFunctionCallException('Cannot change Id of gradeable');
     }
 
+    /**
+     * Sets the gradeable Title
+     * @param string $title Must not be blank.
+     */
     public function setTitle($title)
     {
         if ($title === '') {
@@ -414,6 +434,10 @@ class Gradeable extends AbstractModel
         $this->title = strval($title);
     }
 
+    /**
+     * Sets the gradeable type
+     * @param GradeableType $type Must be a valid GradeableType
+     */
     private function setTypeInternal($type)
     {
         // Call this to make an exception if the type is invalid
@@ -425,16 +449,24 @@ class Gradeable extends AbstractModel
         throw new \BadFunctionCallException('Cannot change gradeable type');
     }
 
+    /**
+     * Sets the minimum user level that can grade an assignment.
+     * @param int $group Must be at least 1 and no more than 4
+     */
     public function setMinGradingGroup($group)
     {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
-        if (is_int($group) && $group > 0) {
+        if (is_int($group) && $group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
         } else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
         }
     }
 
+    /**
+     * Sets the maximum team size
+     * @param int $max_team_size Must be at least 0
+     */
     public function setTeamSizeMax($max_team_size)
     {
         if(is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
@@ -444,6 +476,10 @@ class Gradeable extends AbstractModel
         }
     }
 
+    /**
+     * Sets the peer grading set
+     * @param int $peer_grading_set Must be at least 0
+     */
     public function setPeerGradingSet($peer_grading_set)
     {
         if(is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
@@ -453,6 +489,10 @@ class Gradeable extends AbstractModel
         }
     }
 
+    /**
+     * Sets the array of components
+     * @param Component[] $components Must be an array of only Component
+     */
     public function setComponents(array $components)
     {
         foreach ($components as $component) {
@@ -463,6 +503,10 @@ class Gradeable extends AbstractModel
         $this->components = $components;
     }
 
+    /**
+     * Sets the path to the autograding config
+     * @param string $path Must not be blank
+     */
     public function setAutogradingConfigPath($path)
     {
         if ($path === '') {
@@ -471,6 +515,10 @@ class Gradeable extends AbstractModel
         $this->autograding_config_path = strval($path);
     }
 
+    /**
+     * Sets whether the gradeable is a team gradeable
+     * @param bool $use_teams
+     */
     private function setTeamAssignmentInternal($use_teams)
     {
         $this->team_assignment = $use_teams === true;
