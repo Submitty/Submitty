@@ -95,6 +95,9 @@ class DateUtils {
                 $date = null;
                 return 'Invalid Format!';
             }
+        } else if ($date instanceof \DateTime) { }
+        else {
+            return "Invalid object type!";
         }
         return null;
     }
