@@ -1502,16 +1502,17 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
-function modifyThreadList(currentThreadId, currentCategoryId){
-    var category_value = $( "#thread_category option:selected").val();
+function modifyThreadList(currentThreadId, currentCategoriesId){
+    var categories_value = $("#thread_category").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                thread_category: category_value,
+                thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoryId: currentCategoryId
+                currentCategoriesId: currentCategoriesId
             },
             success: function(r){
                var x = JSON.parse(r).html;

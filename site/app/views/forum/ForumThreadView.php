@@ -219,7 +219,8 @@ HTML;
 	}
 	if($thread_count > 0) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
-		$currentCategoryId = $this->core->getQueries()->getCategoryIdForThread($currentThread);
+		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
+		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
@@ -236,23 +237,44 @@ HTML;
 	$onChange = '';
 	if($thread_count > 0) {
 		$onChange = <<<HTML
-		onchange="modifyThreadList({$currentThread}, {$currentCategoryId[0]["category_id"]});"
+		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}');
 HTML;
 	}
 	$return .= <<<HTML
-		<div style="display:inline-block;position:relative;top:3px;margin-left:5px;" id="category_wrapper">
-		<label for="thread_category">Category:</label>
-	  	<select id="thread_category" name="thread_category" class="form-control" {$onChange}>
-	  	<option value="" selected>None</option>
+		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+
+		<div id="category_wrapper" class="popup-form" style="width: 50%;">
+			<label for="thread_category"><h3>Categories</h3></label><br/>
+			<i>For no filter, unselect all categories</i><br/>
+			<center>
+			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;">
 HTML;
-	    for($i = 0; $i < count($categories); $i++){
-	    	$return .= <<<HTML
-	    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
+			for($i = 0; $i < count($categories); $i++){
+				$return .= <<<HTML
+					<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
 HTML;
-	    } 
+			}
 
 	$return .= <<<HTML
-			</select>
+				</select>
+				</center>
+				<br/>
+				<div  style="float: right; width: auto; margin-top: 10px;">
+					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
+					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
+				</div>
+
+				<script type="text/javascript">
+					$( document ).ready(function() {
+						$('#thread_category option').mousedown(function(e) {
+							e.preventDefault();
+							var current_selection = $(this).prop('selected');
+							$(this).prop('selected', !current_selection);
+							{$onChange}
+							return true;
+						});
+					});
+				</script>
 			</div>
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
@@ -318,7 +340,7 @@ HTML;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoryId[0]["category_id"]);
+				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 
 					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -493,14 +515,14 @@ HTML;
 		return $return;
 	}
 
-	public function showAlteredDislpayList($threads, $filtering, $thread_id, $category_id){
+	public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
 		$tempArray = array();
 		$threadAnnouncement = false;
 		$activeThreadTitle = "";
-		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $category_id);
+		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids);
 	}
 
-	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_category_id){
+	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids){
 					$return = "";
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
@@ -514,7 +536,9 @@ HTML;
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						$date = date_create($first_post['timestamp']);
 						$class = "thread_box";
-						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $current_category_id == $thread["category_id"]) {
+						// $current_categories_ids should be subset of $thread["categories_ids"]
+						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
+						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
 							$class .= " active";
 							$used_active = true;
 							$activeThreadTitle = $thread["title"];
@@ -574,11 +598,20 @@ HTML;
 HTML;
 						}
 
-						$category_desc = htmlentities($thread["category_desc"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						$categories_desc = array();
+						foreach ($thread["categories_desc"] as $category_desc) {
+							$categories_desc[] = htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						}
 						$return .= <<<HTML
 						<h4>{$titleDisplay}</h4>
 						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-						<span class="label_forum label_forum-default">{$thread["category_desc"]}</span>
+HTML;
+						foreach ($categories_desc as $category_desc) {
+							$return .= <<<HTML
+							<span class="label_forum label_forum-default">{$category_desc}</span>
+HTML;
+						}
+						$return .= <<<HTML
 						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
@@ -840,8 +873,51 @@ HTML;
 
             	<br/>
 
-            	<div style="margin-bottom:10px;" class="form-group row">
 
+				<div style="margin-bottom:10px;" class="form-group row">
+HTML;
+					$categories = $this->core->getQueries()->getCategories();
+					$return .= <<<HTML
+					<label for="cat" id="cat_label">Categories</label> <br>
+HTML;
+					for($i = 0; $i < count($categories); $i++){
+						$return .= <<<HTML
+							<a class="btn cat-buttons cat-notselected btn-default">{$categories[$i]['category_desc']}
+								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
+							</a>
+HTML;
+					}
+					$return .= <<<HTML
+					<script type="text/javascript">
+					$(function() {
+						// If JS enabled hide checkbox
+						$("a.cat-buttons input").hide();
+
+						$(".cat-buttons").click(function() {
+							if($(this).hasClass("cat-selected")) {
+								$(this).removeClass("cat-selected");
+								$(this).addClass("cat-notselected");
+								$(this).addClass("btn-default");
+								$(this).removeClass("btn-primary");
+								$(this).find("input[type='checkbox']").prop("checked", false);
+							} else {
+								$(this).removeClass("cat-notselected");
+								$(this).addClass("cat-selected");
+								$(this).removeClass("btn-default");
+								$(this).addClass("btn-primary");
+								$(this).find("input[type='checkbox']").prop("checked", true);
+							}
+						});
+						$("#create_thread_form").submit(function() {
+							if($(this).find('.cat-selected').length == 0) {
+								alert("At least one category must be selected.");
+								return false;
+							}
+						});
+					});
+					</script>
+				</div>
+            	<div style="margin-bottom:10px;" class="form-group row">
             	<span style="float:left;display:inline-block;">
             	<label id="file_input_label" class="btn btn-default" for="file_input">
     				<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
@@ -861,21 +937,8 @@ HTML;
 
 				}
 
-				$categories = $this->core->getQueries()->getCategories();
 				$return .= <<<HTML
-				<label for="cat">Category</label>
-			  	<select style="margin-right:10px;" id="cat" name="cat" class="form-control" required>
-			  	<option value="" selected>None</option>
-HTML;
-			    for($i = 0; $i < count($categories); $i++){
-			    	$return .= <<<HTML
-			    		<option value="{$categories[$i]['category_id']}">{$categories[$i]['category_desc']}</option>
-HTML;
-			    }    
-			        
-			    $return .= <<<HTML
-			    </select>
-				<input type="submit" style="display:inline-block;" name="post" value="Submit Post" class="btn btn-primary" />
+			    <input type="submit" style="display:inline-block;" name="post" value="Submit Post" class="btn btn-primary" />
 				</span>
             	</div>
 

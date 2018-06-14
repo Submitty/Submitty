@@ -147,6 +147,7 @@ pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
+pip3 install PyPDF2
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
@@ -191,13 +192,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -410,6 +410,19 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
 else
     git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
 fi
+
+
+#################################################################
+# RainbowGrades SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
+    echo 'Submitty/RainbowGrades git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+fi
+
 
 
 #################################################################

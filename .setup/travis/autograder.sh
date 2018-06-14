@@ -34,11 +34,12 @@ wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/ha
 
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
-wget https://github.com/Submitty/emma/releases/download/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
-unzip emma-2.0.5312.zip > /dev/null
-mv emma-2.0.5312/lib/emma.jar emma.jar
-rm -rf emma-2.0.5312
-rm emma-2.0.5312.zip
+EMMA_VER=2.0.5312
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+unzip emma-${EMMA_VER}.zip > /dev/null
+mv emma-${EMMA_VER}/lib/emma.jar emma.jar
+rm -rf emma-${EMMA_VER}
+rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
 chmod o+r . *.jar
 
@@ -79,6 +80,10 @@ popd
 # --------------------------------------
 echo -e "Download analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
+
+# --------------------------------------
+echo -e "Download lichen"
+git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
 
 # --------------------------------------
 echo -e "Compile and install the tutorial repository"
