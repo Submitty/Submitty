@@ -223,14 +223,14 @@ class ForumController extends AbstractController {
             $category_color = null;
             $should_update = true;
 
-            if((!empty($_REQUEST["category_desc"])) && isset($_REQUEST["category_desc"])) {
+            if(!empty($_REQUEST["category_desc"])) {
                 $category_desc = $_REQUEST["category_desc"];
                 if($this->isValidCategories(-1, array($category_desc))) {
                     $result["error"] = "That category already exists.";
                     $should_update = false;
                 }
             }
-            if(isset($_REQUEST["category_color"])) {
+            if(!empty($_REQUEST["category_color"])) {
                 $category_color = $_REQUEST["category_color"];
                 if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
                     $result["error"] = "Given category color is not allowed.";
