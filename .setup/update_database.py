@@ -147,4 +147,5 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         # add user/database
         print("\n")
 
-os.system('python3 {}/migration/migrator.py migrate --fake'.format(settings['submitty_repository']))
+# On the first run of this, this will mark the first initial migration as fake, and then leave the rest as being un-run.
+os.system('python3 {}/migration/migrator.py migrate --single --fake'.format(settings['submitty_repository']))
