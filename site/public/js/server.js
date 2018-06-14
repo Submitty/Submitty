@@ -26,23 +26,23 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, count){
+function changeDiffView(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name;
     div_name = "#" + div_name;
     var actual_div = $(div_name).children()[0].children[0].children[1].children[0].children[0];
     var expected_div = $(div_name).children()[0].children[1].children[1].children[0].children[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count};
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index};
 
-    if($("#show_char_"+count).text() != "Hide empty chars"){
-        $("#show_char_"+count).removeClass('btn-default');
-        $("#show_char_"+count).addClass('btn-primary');
-        $("#show_char_"+count).html("Hide empty chars");
+    if($("#show_char_"+index).text() != "Hide empty chars"){
+        $("#show_char_"+index).removeClass('btn-default');
+        $("#show_char_"+index).addClass('btn-primary');
+        $("#show_char_"+index).html("Hide empty chars");
         args['option'] = 'no_empty'
     } else {
-        $("#show_char_"+count).removeClass('btn-primary');
-        $("#show_char_"+count).addClass('btn-default');
-        $("#show_char_"+count).html("Show empty chars");
+        $("#show_char_"+index).removeClass('btn-primary');
+        $("#show_char_"+index).addClass('btn-default');
+        $("#show_char_"+index).html("Show empty chars");
         args['option'] = 'original'
     }
     //Insert actual and expected one at a time
@@ -71,17 +71,17 @@ function changeDiffView(div_name, gradeable_id, who_id, count){
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
 
     if(isVisible){
         toggleDiv(orig_div_name);
-        $("#show_char_"+count).toggle();
+        $("#show_char_"+index).toggle();
         $(div_name).empty();
     }else{
-        $("#show_char_"+count).toggle();
+        $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
 

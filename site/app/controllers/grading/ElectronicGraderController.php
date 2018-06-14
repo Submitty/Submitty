@@ -72,7 +72,7 @@ class ElectronicGraderController extends GradingController {
 		$gradeable_id = $_REQUEST['gradeable_id'];
 		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
 		$gradeable->loadResultDetails();
-		$testcase = $gradeable->getTestcases()[$_REQUEST['count']];
+		$testcase = $gradeable->getTestcases()[$_REQUEST['index']];
 		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'no_empty';
 		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
 		if($testcase->isHidden()){
