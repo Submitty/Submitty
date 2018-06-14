@@ -2275,11 +2275,13 @@ AND gc_id IN (
 
         // Make each component
         foreach($components_raw as $component_raw) {
+            $component = new Component($this->core, $gradeable, $component_raw, []);
             $marks = $component_marks[$component_raw['id']] ?? [];
             foreach($marks as $index=>$mark) {
-                $marks[$index] = new Mark($this->core, $mark);
+                $marks[$index] = new Mark($this->core, $component, $mark);
             }
-            $components[] = new \app\models\gradeable\Component($this->core, $gradeable, $component_raw, $marks);
+            $component->setMarks($marks);
+            $components[] = $component;
         }
 
         return $components;
