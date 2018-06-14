@@ -1150,6 +1150,18 @@ function setupSimpleGrading(action) {
         } 
     }
 
+    // highlights the first jquery-ui autocomplete result if there is only one
+    function highlightOnSingleMatch(is_remove) {
+        var matches = $("#student-search > ul > li");
+        // if there is only one match, use jquery-ui css to highlight it so the user knows it is selected
+        if(matches.length == 1) {
+            $(matches[0]).children("div").addClass("ui-state-active");
+        }
+        else if(is_remove) {
+            $(matches[0]).children("div").removeClass("ui-state-active");
+        }
+    }
+
     var dont_focus = true;                                          // set to allow toggling of focus on input element
     var num_rows = $("td.cell-all").length;                         // the number of rows in the table
     var search_bar_offset = $("#student-search").offset();          // the offset of the search bar: used to lock the searhc bar on scroll
@@ -1161,7 +1173,16 @@ function setupSimpleGrading(action) {
     var child_idx = 0;                                              // the index of the current element in the row
     var child_elems = $("tr[data-row=0]").find(search_selector);    // the clickable elements in the current row
 
-    // movement/grading keybinds
+    // outline the first element in the first row if able
+    if(child_elems.length) {
+        var child = $(child_elems[0]);
+        if(action == 'numeric') {
+            child = child.children("input");
+        }
+        child.css("outline", "3px dashed " + highlight_color);
+    }
+
+    // movement keybinds
     $(document).on("keydown", function(event) {
         if(!$("#student-search-input").is(":focus")) {
             // allow refocusing on the input field by pressing enter when it is not the focus
@@ -1217,35 +1238,6 @@ function setupSimpleGrading(action) {
                     $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
                 }
             }
-            // checkpoint grading commands
-            else if(action == 'lab') {
-                if(event.keyCode == 86 || event.keyCode == 32) { // V key/spacebar clicks the current element to update the grades
-                    event.preventDefault();
-                    $(child_elems[child_idx]).click();
-                }
-                else if(event.keyCode == 67) {  // C key
-                    updateCheckboxScores(0, child_elems, false, child_idx);
-                }
-                else if(event.keyCode == 88) {  // X key
-                    updateCheckboxScores(0.5, child_elems, false, child_idx);
-                }
-                else if(event.keyCode == 90) {  // Z key
-                    updateCheckboxScores(1, child_elems, false, child_idx);
-                }
-                else if(event.keyCode == 70) {  // F key clicks the first element in the row (which clicks all the others)
-                    $(child_elems[0]).click();
-                }
-                else if(event.keyCode == 68) {  // D key
-                    updateCheckboxScores(0, child_elems, true);
-                }
-                else if(event.keyCode == 83) {  // S key
-                    updateCheckboxScores(0.5, child_elems, true);
-                }
-                else if(event.keyCode == 65) {  // A key
-                    updateCheckboxScores(1, child_elems, true);
-                }
-                
-            }
         }
     });
 
@@ -1255,6 +1247,76 @@ function setupSimpleGrading(action) {
             $("#student-search-input").focus();
         }
     });
+    
+    // register empty function locked event handlers for movement keybinds so they show up in the hotkeys menu
+    registerKeyHandler({name: "Toggle Search", code: "Enter", locked: true}, function() {});
+    registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
+    registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
+    registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
+    registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function() {});
+
+    // register keybinds for grading controls
+    if(action == 'lab') {
+        registerKeyHandler({name: "Set Cell to 0", code: "KeyZ"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(0, child_elems, false, child_idx);
+            }
+        });
+        registerKeyHandler({name: "Set Cell to 0.5", code: "KeyX"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(0.5, child_elems, false, child_idx);
+            }
+        });
+        registerKeyHandler({name: "Set Cell to 1", code: "KeyC"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(1, child_elems, false, child_idx);
+            }
+        });
+        registerKeyHandler({name: "Cycle Cell Value", code: "KeyV"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                $(child_elems[child_idx]).click();
+            }
+        });
+        registerKeyHandler({name: "Set Row to 0", code: "KeyA"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(0, child_elems, true);
+            }
+        });
+        registerKeyHandler({name: "Set Row to 0.5", code: "KeyS"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(0.5, child_elems, true);
+            }
+        });
+        registerKeyHandler({name: "Set Row to 1", code: "KeyD"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                updateCheckboxScores(1, child_elems, true);
+            }
+        });
+        registerKeyHandler({name: "Cycle Row Value", code: "KeyF"}, function(event) {
+            if(!$("#student-search-input").is(":focus")) {
+                event.preventDefault();
+                $(child_elems[0]).click();
+            }
+        });
+    }
+    // for numeric gradeables, whenever an input field is focused, update location variables
+    else {
+        $("input[id^=cell-]").on("focus", function(event) {
+            $(child_elems[child_idx]).children("input").css("outline", "");
+            var tr_elem = $(this).parent().parent();
+            table_row = tr_elem.attr("data-row");
+            child_elems = tr_elem.find(search_selector);
+            child_idx = child_elems.index($(this).parent());
+            $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color);
+        });
+    }
 
     // when pressing enter in the search bar, go to the corresponding element
     $("#student-search-input").on("keyup", function(event) {
@@ -1272,7 +1334,7 @@ function setupSimpleGrading(action) {
                     child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
                     if(action == 'lab') {
                         prev_child_elem.css("outline", "");
-                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color); 
+                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color);
                     }
                     else {
                         prev_child_elem.children("input").css("outline", "");
@@ -1282,8 +1344,8 @@ function setupSimpleGrading(action) {
                 }
                 else {
                     // if no match is found and there is at least 1 matching autocomplete label, find its matching value
-                    var first_match = $("#student-search > ul > li:first");
-                    if(first_match.length > 0 && first_match.text().toLowerCase().includes(value)) {
+                    var first_match = $("#student-search > ul > li");
+                    if(first_match.length == 1) {
                         var first_match_label = first_match.text();
                         var first_match_value = "";
                         for(var i = 0; i < student_full.length; i++) {      // NOTE: student_full comes from StudentSearch.twig script
@@ -1305,22 +1367,17 @@ function setupSimpleGrading(action) {
         }
     });
 
+    $("#student-search-input").on("keydown", function() {
+        highlightOnSingleMatch(false);
+    });
+    $("#student-search").on("DOMSubtreeModified", function() {
+        highlightOnSingleMatch(true);
+    });
+
     // clear the input field when it is focused
     $("#student-search-input").on("focus", function(event) {
         $(this).val("");
     });
-
-    // for numeric gradeables, whenever an input field is focused, update location variables
-    if(action == 'numeric') {
-        $("input[id^=cell-]").on("focus", function(event) {
-            $(child_elems[child_idx]).children("input").css("outline", "");
-            var tr_elem = $(this).parent().parent();
-            table_row = tr_elem.attr("data-row");
-            child_elems = tr_elem.find(search_selector);
-            child_idx = child_elems.index($(this).parent());
-            $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color);
-        });
-    }
 
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
@@ -1346,10 +1403,10 @@ function setupSimpleGrading(action) {
 
     // check if the search field needs to be repositioned when the page is resized
     $(window).on("resize", function(event) {
-        var stats_btn_offset = $("#simple-stats-btn").offset();
-        search_bar_offset = {   // NOTE: THE SEARCH BAR IS PLACED RELATIVE TO THE STATS BAR
-            top : stats_btn_offset.top,
-            left : stats_btn_offset.left - $("#student-search").width()
+        var settings_btn_offset = $("#settings-btn").offset();
+        search_bar_offset = {   // NOTE: THE SEARCH BAR IS PLACED RELATIVE TO THE SETTINGS BUTTON
+            top : settings_btn_offset.top,
+            left : settings_btn_offset.left - $("#student-search").width()
         };
         if(search_bar_offset.top < $(window).scrollTop()) {
             var search_field = $("#student-search");

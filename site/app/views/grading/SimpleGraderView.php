@@ -89,7 +89,8 @@ HTML;
         $return .= <<<HTML
     <h2>{$gradeable->getName()}</h2><p>{$ta_instruct}</p><br>
     <p style="float: left;">$info</p>
-    <a class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</a>
+    <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{$action}")'>View Statistics</button>
+    <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
 HTML;
         // Get all the names/ids from all the students
         $student_full = array();
@@ -338,10 +339,15 @@ HTML;
         </tbody></table></div>
 HTML;
 
+        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
             "gradeable" => $gradeable,
             "num_users" => $num_users
         ]);
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
 
         return $return;
     }
