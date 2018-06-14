@@ -45,12 +45,20 @@ class Mark extends AbstractModel
         $this->setPublish($details['publish']);
     }
 
+    /**
+     * Gets the mark's component
+     * @return Component The component the mark belongs to
+     */
     public function getComponent()
     {
         return $this->component;
     }
 
     /* Overridden setters with validation */
+    /**
+     * Sets the mark's component
+     * @param Component $component A non-null component
+     */
     private function setComponent(Component $component)
     {
         if($component === null) {
@@ -71,6 +79,7 @@ class Mark extends AbstractModel
             throw new \InvalidArgumentException('Mark Id must be an integer >= 0');
         }
     }
+    /** @internal */
     public function setId($id)
     {
         throw new \BadFunctionCallException('Cannot set Id of mark');

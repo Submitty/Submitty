@@ -209,6 +209,10 @@ class Gradeable extends AbstractModel
         return $return;
     }
 
+    /**
+     * Loads the autograding config file at $this->autograding_config into an array, or null if error/not found
+     * @return array|bool|null
+     */
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
 
@@ -217,7 +221,7 @@ class Gradeable extends AbstractModel
                 "build_{$this->id}.json"));
         } catch(\Exception $e) {
             // Don't throw an error, just don't make any data
-            return [];
+            return null;
         }
 
         if (isset($details['max_submission_size'])) {
@@ -372,35 +376,44 @@ class Gradeable extends AbstractModel
             $this->late_days = $dates['late_days'];
         }
     }
+
+    /** @internal */
     public function setTaViewStartDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setGradeStartDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setGradeReleasedDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setGradeLockedDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setTeamLockDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setSubmissionOpenDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
+    /** @internal */
     public function setSubmissionDueDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
+    /** @internal */
     public function setAutogradingConfig()
     {
         throw new \BadFunctionCallException('Cannot set the autograding config data');
@@ -417,6 +430,7 @@ class Gradeable extends AbstractModel
         }
         $this->id = $id;
     }
+    /** @internal */
     public function setId($id)
     {
         throw new \BadFunctionCallException('Cannot change Id of gradeable');
@@ -444,6 +458,7 @@ class Gradeable extends AbstractModel
         GradeableType::typeToString($type);
         $this->type = $type;
     }
+    /** @internal */
     public function setType($type)
     {
         throw new \BadFunctionCallException('Cannot change gradeable type');
@@ -523,6 +538,7 @@ class Gradeable extends AbstractModel
     {
         $this->team_assignment = $use_teams === true;
     }
+    /** @internal */
     public function setTeamAssignment($use_teams)
     {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');

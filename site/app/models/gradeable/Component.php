@@ -85,12 +85,20 @@ class Component extends AbstractModel
         $this->setPage($details['page']);
     }
 
+    /**
+     * Gets the component's gradeable
+     * @return Gradeable The component's gradeable
+     */
     public function getGradeable()
     {
         return $this->gradeable;
     }
 
     /* Overridden setters with validation */
+    /**
+     * Sets the component's gradeable
+     * @param Gradeable $gradeable A non-null gradeable
+     */
     private function setGradeable(Gradeable $gradeable)
     {
         if($gradeable === null) {
@@ -203,26 +211,27 @@ class Component extends AbstractModel
             throw new \InvalidArgumentException('Component Id must be an integer >= 0');
         }
     }
+    /** @internal */
     public function setId($id)
     {
         throw new \BadFunctionCallException('Cannot set Id of component');
     }
-
+    /** @internal */
     public function setLowerClamp($lower_clamp)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
-
+    /** @internal */
     public function setDefault($default)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
-
+    /** @internal */
     public function setMaxValue($max_value)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
-
+    /** @internal */
     public function setUpperClamp($upper_clamp)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
