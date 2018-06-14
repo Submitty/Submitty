@@ -391,7 +391,7 @@ function updateMarksOnPage(c_index) {
             getMark(c_index, m_index).name = note;
             parent.prepend(getMarkView(c_index, m_index, id));
             if((editModeEnabled==null || editModeEnabled==false)){
-                var current_mark = $('#mark_id-'+c_index+'-'+m_index);
+                var current_mark = $('#mark_id-'+c_index+'-'+id);
                 current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
                 current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
                 if(points == "None Selected"){
@@ -976,8 +976,8 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     // Gathers all the mark's data (ex. points, note, etc.)
     //getComponent(c_index).marks.sort(compareOrder);
     for(var m_index=0; m_index < arr_length; m_index++){
-        var current_row = $('#mark_id-'       +c_index+'-'+m_index);
-        var info_mark   = $('#mark_info_id-'  +c_index+'-'+m_index);
+        var current_row = $('#mark_id-'       +c_index+'-'+getMark(c_index, m_index).id);
+        var info_mark   = $('#mark_info_id-'  +c_index+'-'+getMark(c_index, m_index).id);
         var success     = true;
         mark_data[m_index] = {
             id      : getMark(c_index, m_index).id,
