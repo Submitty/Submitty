@@ -140,6 +140,16 @@ class Component extends AbstractModel
             return null;
         return $errors;
     }
+
+    /**
+     * Sets component point values and ensures they are consistent:
+     *  lower_clamp <= default <= max_value <= upper_clamp
+     *
+     * @param $lower_clamp string|float see property doc
+     * @param $default string|float see property doc
+     * @param $max_value string|float see property doc
+     * @param $upper_clamp string|float see property doc
+     */
     public function setPoints($lower_clamp, $default, $max_value, $upper_clamp)
     {
         $messages = $this->validatePoints($lower_clamp, $default, $max_value, $upper_clamp);
