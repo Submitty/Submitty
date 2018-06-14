@@ -45,12 +45,11 @@ HTML;
 <h1 style="text-align: center">Plagiarism Detection</h1>
 <br>
 HTML;
-        $display = $this->getDisplayForCode("/var/local/submitty/courses/s18/sample/submissions//closed_homework/adamss/1/infinite_loop_time_cutoff.py");
         $return .= <<<HTML
         <div class="nav-buttons">
             <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Run Lichen Plagiarism Detector</a>
         </div><br /><br /><br />
-        <form name="gradeables_with_plagiarism_result">
+        <form id="gradeables_with_plagiarism_result">
             Gradeables with Plagiarism Result: 
             <select name="gradeable_id">
             <option value="" selected>None</option>
@@ -66,56 +65,45 @@ HTML;
         </select>
         </form><br /><br />
         <div class="sub">
-        <form name="gradeables_with_plagiarism_result">
-            User: 
-            <select name="user_id">
+        <form id="users_with_plagiarism">
+            User 1 (sorted by %match): 
+            <select name="user_id_1">
                 <option value="">None</option>
             </select>
             Version: 
             <select name="version">
                 <option value="">None</option>
-            </select>    
+            </select> 
+            <span style="float:right;"> User 2:
+                <select name="user_id_2">
+                    <option value="">None</option>
+                </select>
+            </span>   
         </form><br />
         <div name="code_box_1" style="float:left;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
-HTML;
-        // $return .= $display;
-        $return .= <<<HTML
         </div>
         <div name="code_box_2" style="float:right;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
         </div>
 HTML;
-        // if ($assignments) {
-        //     $return .= '<ul>';
-        //         foreach ($assignments as $assignment) {
-        //             $return .= "<li><a href=\"{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'index', 'assignment' => $assignment))}\">$assignment</a></li>";
-        //         }
-        //     $return .= '</ul>';
-        // } 
-        
-
         $return .= <<<HTML
 </div>
+<script>
+    var form1 = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    $('[name="gradeable_id"]', form1).change(function(){
+        setRankingForGradeable();
+    });
+    
+    $('[name="user_id_1"]', form2).change(function(){
+        setUserSubmittedCode('user_id_1');
+    });
+    $('[name="version"]', form2).change(function(){
+        setUserSubmittedCode('version');
+    });
+</script>
 HTML;
         return $return;
-    }
-
-    public function getDisplayForCode($file_path){
-        $lines= file($file_path);
-        $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
-        for ($i = 0; $i < count($lines); $i++) {
-            $j = $i + 1;
-            $html .= "<div style='white-space: nowrap;'>";
-            $html .= "<span class='line_number'>{$j}</span>";
-            $html .= "<span class='line_code'>";
-            if (isset($lines[$i])) {
-                $html .= htmlentities($lines[$i]);
-            }
-            $html .= "</span></div>\n";
-        }
-        $j++;
-        $html .= "<div style='white-space: nowrap;'><span class='line_number'>{$j}</span></div></div></div>\n";
-        return $html;
     }
 
     public function plagiarismForm($gradeable_ids_titles, $all_sem_gradeables) {

@@ -20,7 +20,13 @@ class PlagiarismController extends AbstractController {
                 break;    
             case 'run_plagiarism':
                 $this->runPlagiarism();
-                break;    
+                break; 
+            case 'get_plagiarism_ranking_for_gradeable':
+                $this->ajaxGetPlagiarismRankingForGradeable();
+                break; 
+            case 'get_user_submission':
+            	$this->ajaxGetUserSubmission();
+            	break;      
             default:
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismTree();
@@ -53,6 +59,11 @@ class PlagiarismController extends AbstractController {
             $assignments = array();
         }
         $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
+        	if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
+        		unset($gradeable_ids_titles[$i]);
+        	}
+        }
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);  
     }
 
@@ -223,4 +234,53 @@ class PlagiarismController extends AbstractController {
 
         // $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
     }
+
+    public function ajaxGetPlagiarismRankingForGradeable(){
+    	$gradeable_id = $_REQUEST['gradeable_id'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return="";
+        $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
+    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_path))) {
+        	$content =file_get_contents($file_path);
+        	$content = trim(str_replace(array("\r", "\n"), '', $content));
+        	$rankings = preg_split('/ +/', $content);
+    		$rankings = array_chunk($rankings,3);
+    		foreach($rankings as $i => $ranking) {
+    			array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());  
+    		}
+    	    $return = json_encode($rankings);
+        }
+    	echo($return);
+    }
+
+    public function ajaxGetUserSubmission() {
+    	$gradeable_id = $_REQUEST['gradeable_id'];
+    	$user_id =$_REQUEST['user_id'];
+    	$version = $_REQUEST['version'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return="";
+        $active_version = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        if($version == "active") {
+        	$version = $active_version;
+        }
+        $all_versions = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id), array(".", "..", "user_assignment_settings.json"));
+
+        $file_path= $course_path."/submissions/".$gradeable_id."/".$user_id."/".$version;
+        foreach(array_diff(scandir($file_path), array('.', '..', '.submit.timestamp')) as $name) {
+        	$file_name= $name;
+        }
+        $file_path .= "/".$file_name; 
+    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_path))) {
+  			$data= array('file_content'=> htmlentities(file_get_contents($file_path)), 'code_version' => $version, 'active_version' => $active_version, 'all_versions' => $all_versions);
+       	    $return = json_encode($data);
+        }
+    	echo($return);	
+    }
+
 }

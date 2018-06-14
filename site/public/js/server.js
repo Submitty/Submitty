@@ -182,6 +182,100 @@ function addMorePrevGradeable(all_sem_gradeables_json) {
     });
 }
 
+function setRankingForGradeable() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    if(gradeable_id == ""){
+        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+    }
+    else {
+        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
+                'gradeable_id': gradeable_id});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                var rankings = JSON.parse(data);
+                var append_options='<option value="">None</option>';
+                $.each(rankings, function(i,user_ranking_info){
+                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'</option>';
+                });
+                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
+            },
+            error: function(e) {
+                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
+            }
+        })
+    }    
+}
+
+function setUserSubmittedCode(changed) {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    if(user_id_1 == ""){
+        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+    }
+    else {
+        var version = $('[name="version"]', form2).val();
+        if(changed == 'version' && version == '') {
+            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="code_box_1"]').empty();  
+        }
+        else {
+            if( version == '' || changed == 'user_id_1') {    
+                version = "active";                
+            }
+
+            var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_user_submission',
+                    'gradeable_id': gradeable_id , 'user_id':user_id_1, 'version': version});
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    data = JSON.parse(data);
+                    var append_options='<option value="">None</option>';
+                    $.each(data.all_versions, function(i,version_to_append){
+                        if(version_to_append == data.active_version){
+                            append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
+                        }
+                        if(version_to_append != data.active_version){
+                            append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
+                        }
+                    });
+                    $('[name="version"]', form2).find('option').remove().end().append(append_options).val(data.code_version);
+                    $('[name="code_box_1"]').empty().append(getDisplayForCode(data.file_content));
+                },
+                error: function(e) {
+                    alert("Could not load submitted code, please refresh the page and try again.");
+                }
+            })
+        }    
+    }   
+}
+
+function getDisplayForCode(content){
+        var lines= content.split("\n"); 
+        html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
+        for (var i = 0; i < lines.length; i++) {
+            var j = i + 1;
+            html += "<div style='white-space: nowrap;'>";
+            html += "<span class='line_number'>"+ j +"</span>";
+            html += "<span class='line_code'>";
+            html += lines[i];
+            html += "</span></div>";
+        }
+        j++;
+        html += "</div></div>";
+        return html;
+    }
+
 function PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");
     if(select_element_name == "language") {
