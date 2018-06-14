@@ -147,10 +147,11 @@ class Component extends AbstractModel
             throw new AggregateException('Component Points Error!', $messages);
         }
 
-        $this->lower_clamp = $lower_clamp;
-        $this->default = $default;
-        $this->max_value = $max_value;
-        $this->upper_clamp = $upper_clamp;
+        // Round after validation because of potential floating point weirdness
+        $this->lower_clamp = $this->getGradeable()->roundPointValue($lower_clamp);
+        $this->default = $this->getGradeable()->roundPointValue($default);
+        $this->max_value = $this->getGradeable()->roundPointValue($max_value);
+        $this->upper_clamp = $this->getGradeable()->roundPointValue($upper_clamp);
     }
 
     public function setMarks(array $marks)

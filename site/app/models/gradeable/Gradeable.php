@@ -466,4 +466,23 @@ class Gradeable extends AbstractModel
     {
         $this->team_assignment = $use_teams === true;
     }
+
+    /**
+     * Rounds a provided point value to the nearest multiple of $precision
+     *
+     * @param $points float|string The number to round
+     * @return float The rounded result
+     */
+    public function roundPointValue($points)
+    {
+        // Note that changing the gradeable precision does not trigger
+        //  all of the component/mark point values to update.  This is intended.
+        $points = floatval($points);
+        $q = (int)($points/$this->precision);
+        $r = fmod($points, $this->precision);
+
+        // If the remainder is more than half the precision away from zero, then add one
+        //  times the direction from zero to the quotient.  Multiply by precision
+        return ($q + (abs($r) > $this->precision / 2 ? ($r > 0 ? 1 : -1) : 0)) * $this->precision;
+    }
 }

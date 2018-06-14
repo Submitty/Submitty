@@ -66,7 +66,7 @@ class Mark extends AbstractModel
     public function setPoints($points)
     {
         if(is_numeric($points)) {
-            $this->points = floatval($points);
+            $this->points = $this->getComponent()->getGradeable()->roundPointValue($points);
         } else {
             throw new \InvalidArgumentException('Mark points must be a number!');
         }
