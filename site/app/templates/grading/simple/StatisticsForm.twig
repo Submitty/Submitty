@@ -8,17 +8,15 @@
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
-            {% set i = 0 %}
             {% for section in sections %}
                 {% if not component.getIsText() %}
                     <tbody>
                         <tr>
                             <td>{{ section }}</td>
-                            <td id="avg-section-{{ i }}"></td>
-                            <td id="stddev-section-{{ i }}"></td>
+                            <td id="avg-section-{{ section }}"></td>
+                            <td id="stddev-section-{{ section }}"></td>
                         </tr>
                     </tbody>
-                    {% set i = i + 1 %}
                 {% endif %}
             {% endfor %}
             <thead class="persist-thead">

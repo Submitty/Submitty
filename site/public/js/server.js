@@ -687,7 +687,7 @@ $(function() {
 */
 
 function calcSimpleGraderStats(action) {
-    // start variable declatations
+    // start variable declarations
     var average = 0;                // overall average
     var stddev = 0;                 // overall stddev
     var component_averages = [];    // average of each component
@@ -728,16 +728,19 @@ function calcSimpleGraderStats(action) {
             var sum = 0;                            // sum of the scores
             var sum_sqrs = 0;                       // sum of the squares of the scores
             var user_num = 0;                       // the index for has_graded so that it can be tracked whether or not there is a grade
-            var section;                            // the section of the current user
+            var section;                            // the section of the current user (registration or rotating)
+            var reg_section;                        // the registration section of the current user
             elems.each(function() {
                 if(action == "lab") {
-                    section = $(this).parent().find("td:nth-child(2)").text()               // second child of parent has registration section as text            
+                    reg_section = $(this).parent().find("td:nth-child(2)").text();              // second child of parent has registration section as text   
+                    section = $(this).parent().parent().attr("id").split("-")[1];               // grandparent id has section
                 }
                 else if(action == "numeric") {
-                    section = $(this).parent().parent().find("td:nth-child(2)").text();     // second child of grandparent has registration section as text
+                    reg_section = $(this).parent().parent().find("td:nth-child(2)").text();     // second child of grandparent has registration section as text
+                    section = $(this).parent().parent().parent().attr("id").split("-")[1];      // great-grandparent id has section
                 }
 
-                if(section != "") {                 // if section is not null
+                if(reg_section != "") {                 // if section is not null
                     if(!(section in section_counts)) {
                         section_counts[section] = 0;
                         section_sums[section] = 0;
@@ -804,15 +807,13 @@ function calcSimpleGraderStats(action) {
     stats_popup.find("#stddev-total").text(stddev.toFixed(2));  // set the display text of the proper stddev element
 
 
-    c = 0;
     var section_average;
     var section_stddev;
     for(var section in section_counts) {
         section_average = section_sums[section] / section_counts[section];
         section_stddev = Math.sqrt(Math.max(0, (section_sums_sqrs[section] - section_sums[section]**2 / section_counts[section]) / section_counts[section]));
-        stats_popup.find("#avg-section-" + c.toString()).text(section_average.toFixed(2));         // set the display text of the proper average element
-        stats_popup.find("#stddev-section-" + c.toString()).text(section_stddev.toFixed(2));       // set the display text of the prooper stddev element
-        c++;
+        stats_popup.find("#avg-section-" + section).text(section_average.toFixed(2));         // set the display text of the proper average element
+        stats_popup.find("#stddev-section-" + section).text(section_stddev.toFixed(2));       // set the display text of the proper stddev element
     }
     var num_graded_elem = stats_popup.find("#num-graded");
     $(num_graded_elem).text(num_graded.toString() + "/" + num_users.toString());
