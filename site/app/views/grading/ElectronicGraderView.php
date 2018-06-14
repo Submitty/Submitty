@@ -789,7 +789,7 @@ HTML;
     }
 
     public function popupSettings() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
+        return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
 
     private function makeTable($user_id, $gradeable, &$status){

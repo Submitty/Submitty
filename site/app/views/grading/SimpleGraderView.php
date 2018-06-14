@@ -347,7 +347,7 @@ HTML;
             "num_users" => $num_users
         ]);
 
-        $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
+        $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
 
         return $return;
     }
