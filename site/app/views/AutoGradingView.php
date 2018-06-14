@@ -140,12 +140,18 @@ HTML;
 
             $return .= <<<HTML
 <div class="box" {$background}>
-    <a class="btn btn-primary" style="float:right">Show hidden chars</a>
-    <div class="box-title" {$div_click} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
+HTML;
+			if ($testcase->hasDetails() && (!$testcase->isHidden())) {
+				$return .= <<<HTML
+    <a id="show_char_$count" class="btn btn-default" style="float:right; display: none" onclick="changeDiffView('$div_to_populate', '$gradeable_name', '$who_id', '$count')">Show empty chars</a>
+HTML;
+			}
+    		$return .= <<<HTML
+			<div class="box-title" {$div_click} onclick="loadTestcaseOutput('$div_to_populate', '$gradeable_name', '$who_id', '$count')";>
 HTML;
             if ($testcase->hasDetails() && (!$testcase->isHidden() || $show_hidden)) {
                 $return .= <<<HTML
-        <div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
+					<div style="float:right; color: #0000EE; text-decoration: underline">Details</div>
 HTML;
             }
             if ($testcase->hasPoints()) {

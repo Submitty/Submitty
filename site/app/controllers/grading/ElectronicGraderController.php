@@ -59,11 +59,39 @@ class ElectronicGraderController extends GradingController {
             case 'verify_all':
                 $this->verifyGrader(true);
                 break;
+			case 'remove_empty':
+				return $this->ajaxRemoveEmpty();
+				break;
             default:
                 $this->showStatus();
                 break;
         }
     }
+
+    public function ajaxRemoveEmpty(){
+		$gradeable_id = $_REQUEST['gradeable_id'];
+		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
+		$gradeable->loadResultDetails();
+		$testcase = $gradeable->getTestcases()[$_REQUEST['count']];
+		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'no_empty';
+		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
+		if($testcase->isHidden()){
+			return "";
+		}
+		foreach ($testcase->getAutochecks() as $autocheck) {
+			$diff_viewer = $autocheck->getDiffViewer();
+		}
+		$html = "";
+		if($which == "actual"){
+			$html .= $diff_viewer->getDisplayActual($option);
+		} else {
+			$html .= $diff_viewer->getDisplayExpected($option);
+		}
+		$this->core->getOutput()->useFooter(false);
+		$this->core->getOutput()->useHeader(false);
+		echo $html;
+	}
+
     private function verifyGrader($verifyAll = false){
 
         //check that I am able to verify.

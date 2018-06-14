@@ -26,6 +26,51 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
+function changeDiffView(div_name, gradeable_id, who_id, count){
+    orig_div_name = div_name;
+    div_name = "#" + div_name;
+    var actual_div = $(div_name).children()[0].children[0].children[1].children[0].children[0];
+    var expected_div = $(div_name).children()[0].children[1].children[1].children[0].children[0];
+    var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count};
+
+    if($("#show_char_"+count).text() != "Hide empty chars"){
+        $("#show_char_"+count).removeClass('btn-default');
+        $("#show_char_"+count).addClass('btn-primary');
+        $("#show_char_"+count).html("Hide empty chars");
+        args['option'] = 'no_empty'
+    } else {
+        $("#show_char_"+count).removeClass('btn-primary');
+        $("#show_char_"+count).addClass('btn-default');
+        $("#show_char_"+count).html("Show empty chars");
+        args['option'] = 'original'
+    }
+    //Insert actual and expected one at a time
+    args['which'] = 'expected';
+    var url = buildUrl(args);
+    $.ajax({
+        url: url,
+        success: function(data) {
+            $(expected_div).empty();
+            $(expected_div).html(data);
+        },
+        error: function(e) {
+            alert("Could not load diff, please refresh the page and try again.");}
+    });
+    args['which'] = 'actual';
+    url = buildUrl(args);
+    $.ajax({
+        url: url,
+        success: function(data) {
+            $(actual_div).empty();
+            $(actual_div).html(data);
+        },
+        error: function(e) {
+            alert("Could not load diff, please refresh the page and try again.");}
+    });
+
+}
+
 function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
     orig_div_name = div_name
     div_name = "#" + div_name;
@@ -33,8 +78,10 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
 
     if(isVisible){
         toggleDiv(orig_div_name);
+        $("#show_char_"+count).toggle();
         $(div_name).empty();
     }else{
+        $("#show_char_"+count).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
 
@@ -43,7 +90,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
             success: function(data) {
                 $(div_name).empty();
                 $(div_name).html(data);
-                toggleDiv(orig_div_name); 
+                toggleDiv(orig_div_name);
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");

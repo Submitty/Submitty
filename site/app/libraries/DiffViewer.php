@@ -304,14 +304,15 @@ class DiffViewer {
 
     /**
      * Return the output HTML for the actual display
-     *
+	 * @param string Option for displaying. Currently only supports show empty space
+	 *
      * @return string actual html
      * @throws \Exception
      */
-    public function getDisplayActual() {
+    public function getDisplayActual($option="original") {
         $this->buildViewer();
         if ($this->display_actual) {
-            return $this->getDisplay($this->actual, "actual");
+            return $this->getDisplay($this->actual, "actual", $option);
         }
         else {
             return "";
@@ -357,14 +358,15 @@ class DiffViewer {
 
     /**
      * Return the HTML for the expected display
-     *
+     * @param string Option for displaying. Currently only supports show empty space
+	 *
      * @return string expected html
      * @throws \Exception
      */
-    public function getDisplayExpected() {
+    public function getDisplayExpected($option="original") {
         $this->buildViewer();
         if ($this->display_expected) {
-            return $this->getDisplay($this->expected, "expected");
+            return $this->getDisplay($this->expected, "expected", $option);
         }
         else {
             return "";
@@ -384,7 +386,7 @@ class DiffViewer {
      * @return string html to be displayed to user
      * @throws \Exception
      */
-    private function getDisplay($lines, $type="expected") {
+    private function getDisplay($lines, $type="expected", $option="original") {
         $this->buildViewer();
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
@@ -404,7 +406,7 @@ class DiffViewer {
          * there's a difference on that line or that the line doesn't exist.
          */
         for ($i = 0; $i < count($lines); $i++) {
-            $j = $i + 1;
+			$j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
@@ -422,16 +424,25 @@ class DiffViewer {
                 $current = 0;
                 // character highlighting
                 foreach ($this->diff[$type][$i] as $diff) {
-                    $html .= htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
-                    $html .= "<span class='highlight-char'>".htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)))."</span>";
+                    $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
+					$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
+                    if($option == "original"){
+						$html .= $html_orig;
+						$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
+					} else if($option == "no_empty") {
+						$html_no_empty = $this->replaceEmptyChar($html_orig);
+						$html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
+						$html .= $html_no_empty;
+						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+					}
+//                    $html .= "<div class='orig_output' style='display: none'><span class='highlight-char'>".$html_orig."</span></div>";
                     $current = $diff[1]+1;
                 }
                 $html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
-                $html .= "&#9166";
             }
             else {
                 if (isset($lines[$i])) {
-                    $html .= htmlentities($lines[$i]);
+                    $html .= $option == "original" ? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
                 }
             }
             $html .= "</span></div>\n";
@@ -452,11 +463,18 @@ class DiffViewer {
                 $start = null;
                 $html .= "\t</div>\n";
             }
-        }
 
+        }
         $html .= "</div></div>\n";
         return $html;
     }
+
+    private function replaceEmptyChar($html){
+		$return = str_replace('	', '&#11134', $html);
+		$return = str_replace(' ', '&#183;', $return);
+		$return = str_replace('\r\n', '&#9166;', $return);
+		return $return;
+	}
 
     /**
      * Compress an array of numbers into ranges
