@@ -336,7 +336,7 @@ ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 --
 
 CREATE TABLE grading_registration (
-    sections_registration_id integer NOT NULL,
+    sections_registration_id character varying(255) NOT NULL,
     user_id character varying NOT NULL
 );
 
@@ -406,7 +406,7 @@ CREATE TABLE migrations_course (
 --
 
 CREATE TABLE sections_registration (
-    sections_registration_id integer NOT NULL
+    sections_registration_id character varying(255) NOT NULL
 );
 
 
@@ -443,7 +443,7 @@ CREATE TABLE users (
     user_lastname character varying NOT NULL,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
-    registration_section integer,
+    registration_section character varying(255),
     rotating_section integer,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
@@ -458,7 +458,7 @@ CREATE TABLE users (
 CREATE TABLE gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    registration_section integer,
+    registration_section character varying(255),
     rotating_section integer
 );
 
@@ -969,12 +969,20 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
 
 
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
+
+
+
 --
 -- Name: users_rotating_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
+
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
 
 --
 -- Name: gradeable_teams_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

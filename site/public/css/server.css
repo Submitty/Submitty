@@ -853,12 +853,7 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
-.cat-selected:hover {
-    opacity: 0.8;
-    filter: alpha(opacity=80);
-}
-
-.cat-notselected:hover {
+.cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
 }

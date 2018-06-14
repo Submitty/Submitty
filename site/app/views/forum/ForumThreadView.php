@@ -1027,18 +1027,14 @@ HTML;
 						</span>
 HTML;
 					}
-					$return .= <<<HTML
-					<div id='categories-pick-list'>
-					<noscript>
-HTML;
-						for($i = 0; $i < count($categories); $i++){
-							$return .= <<<HTML
-							<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
-								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
-							</a>
-HTML;
-						}
+					for($i = 0; $i < count($categories); $i++){
 						$return .= <<<HTML
+						<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
+							<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
+						</a>
+HTML;
+					}
+					$return .= <<<HTML
 					</noscript>
 					</div>
 					<script type="text/javascript">
