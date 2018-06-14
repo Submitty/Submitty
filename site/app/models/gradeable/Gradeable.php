@@ -554,6 +554,12 @@ class Gradeable extends AbstractModel
     {
         // Note that changing the gradeable precision does not trigger
         //  all of the component/mark point values to update.  This is intended.
+
+        // No precision, no rounding
+        if($this->precision === 0.0) {
+            return $points;
+        }
+
         $points = floatval($points);
         $q = (int)($points/$this->precision);
         $r = fmod($points, $this->precision);
