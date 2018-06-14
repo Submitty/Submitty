@@ -252,21 +252,21 @@ class Gradeable extends AbstractModel
         // Parse all of the dates into DateTime's (no error if null)
         //
         foreach(self::dates as $date) {
-            if($dates[$date] === null) continue;
+            if(!isset($dates[$date]) || $dates[$date] === null) continue;
             $result = DateUtils::assertDate($dates[$date], $this->core->getConfig()->getTimezone());
             if ($result !== null) {
                 $errors[$date] = $result;
             }
         }
-        $dates['late_days'] = intval($dates['late_days']);
+        $dates['late_days'] = intval($dates['late_days'] ?? 0);
 
-        $ta_view_start_date = $dates['ta_view_start_date'];
-        $grade_start_date = $dates['grade_start_date'];
-        $grade_released_date = $dates['grade_released_date'];
-        $team_lock_date = $dates['team_lock_date'];
-        $submission_open_date = $dates['submission_open_date'];
-        $submission_due_date = $dates['submission_due_date'];
-        $late_days = $dates['late_days'];
+        $ta_view_start_date = $dates['ta_view_start_date'] ?? null;
+        $grade_start_date = $dates['grade_start_date'] ?? null;
+        $grade_released_date = $dates['grade_released_date'] ?? null;
+        $team_lock_date = $dates['team_lock_date'] ?? null;
+        $submission_open_date = $dates['submission_open_date'] ?? null;
+        $submission_due_date = $dates['submission_due_date'] ?? null;
+        $late_days = $dates['late_days'] ?? null;
 
         $late_interval = null;
         if ($late_days < 0) {
