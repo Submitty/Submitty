@@ -1048,17 +1048,25 @@ class ElectronicGraderController extends GradingController {
 
             $index = 0;
             // save existing marks
-            foreach ($component->getMarks() as $mark) {
+            foreach ($_POST['marks'] as $post_mark) {
                 if (isset($_POST['num_existing_marks'])) {
                     if ($index >= $_POST['num_existing_marks']) {
                         break;
                     }   
                 }
-                $mark->setPoints($_POST['marks'][$index]['points']);
-                $mark->setNote($_POST['marks'][$index]['note']);
-                $mark->setOrder($_POST['marks'][$index]['order']);
+                $mark = null;
+                foreach ($component->getMarks() as $cmark) {
+                    if ($cmark->getId() === $post_mark["id"]) {
+                        $mark = $cmark;
+                        break;
+                    }
+                }
+
+                $mark->setPoints($post_mark['points']);
+                $mark->setNote($post_mark['note']);
+                $mark->setOrder($post_mark['order']);
                 $mark->save();
-                $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                $post_mark['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
                     $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                 }
@@ -1155,6 +1163,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $return_data = array();
         foreach ($gradeable->getComponents() as $question) {
             if(is_array($question)) {
                 if($question[0]->getId() != $_POST['gradeable_component_id']) {
@@ -1177,13 +1186,14 @@ class ElectronicGraderController extends GradingController {
                     continue;
                 }
             }
-            $return_data = array();
             foreach ($component->getMarks() as $mark) {
                 $temp_array = array();
+                $temp_array['id'] = $mark->getId();
                 $temp_array['score'] = $mark->getPoints();
                 $temp_array['note'] = $mark->getNote();
                 $temp_array['has_mark'] = $mark->getHasMark();
                 $temp_array['is_publish'] = $mark->getPublish();
+                $temp_array['order'] = $mark->getOrder();
                 $return_data[] = $temp_array;
             }
             $temp_array = array();
