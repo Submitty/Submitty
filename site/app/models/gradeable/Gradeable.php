@@ -155,10 +155,10 @@ class Gradeable extends AbstractModel
     {
         parent::__construct($core);
 
-        $this->setId($details['id']);
+        $this->setIdInternal($details['id']);
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
-        $this->setType($details['type']);
+        $this->setTypeInternal($details['type']);
         $this->setGradeByRegistration($details['grade_by_registration']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
@@ -170,7 +170,7 @@ class Gradeable extends AbstractModel
             $this->autograding_config = $this->loadAutogradingConfig();
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
-            $this->setTeamAssignment($details['team_assignment']);
+            $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGrading($details['ta_grading']);
             $this->setStudentView($details['student_view']);
@@ -359,31 +359,31 @@ class Gradeable extends AbstractModel
             $this->late_days = $dates['late_days'];
         }
     }
-    private function setTaViewStartDate($date)
+    public function setTaViewStartDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setGradeStartDate($date)
+    public function setGradeStartDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setGradeReleasedDate($date)
+    public function setGradeReleasedDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setGradeLockedDate($date)
+    public function setGradeLockedDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setTeamLockDate($date)
+    public function setTeamLockDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setSubmissionOpenDate($date)
+    public function setSubmissionOpenDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
-    private function setSubmissionDueDate($date)
+    public function setSubmissionDueDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
@@ -393,13 +393,17 @@ class Gradeable extends AbstractModel
         throw new \BadFunctionCallException('Cannot set the autograding config data');
     }
 
-    private function setId($id)
+    private function setIdInternal($id)
     {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
             throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
         }
         $this->id = $id;
+    }
+    public function setId($id)
+    {
+        throw new \BadFunctionCallException('Cannot change Id of gradeable');
     }
 
     public function setTitle($title)
@@ -410,11 +414,15 @@ class Gradeable extends AbstractModel
         $this->title = strval($title);
     }
 
-    private function setType($type)
+    private function setTypeInternal($type)
     {
         // Call this to make an exception if the type is invalid
         GradeableType::typeToString($type);
         $this->type = $type;
+    }
+    public function setType($type)
+    {
+        throw new \BadFunctionCallException('Cannot change gradeable type');
     }
 
     public function setMinGradingGroup($group)
@@ -463,9 +471,13 @@ class Gradeable extends AbstractModel
         $this->autograding_config_path = strval($path);
     }
 
-    private function setTeamAssignment($use_teams)
+    private function setTeamAssignmentInternal($use_teams)
     {
         $this->team_assignment = $use_teams === true;
+    }
+    public function setTeamAssignment($use_teams)
+    {
+        throw new \BadFunctionCallException('Cannot change teamness of gradeable');
     }
 
     /**

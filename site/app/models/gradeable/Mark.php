@@ -38,7 +38,7 @@ class Mark extends AbstractModel
         parent::__construct($core);
 
         $this->setComponent($component);
-        $this->setId($details['id']);
+        $this->setIdInternal($details['id']);
         $this->setPoints($details['points']);
         $this->setTitle($details['title']);
         $this->setOrder($details['order']);
@@ -59,9 +59,17 @@ class Mark extends AbstractModel
         $this->component = $component;
     }
 
-    private function setId($id)
+    private function setIdInternal($id)
     {
-        $this->id = $id;
+        if (is_int($id) && $id >= 0) {
+            $this->id = $id;
+        } else {
+            throw new \InvalidArgumentException('Mark Id must be an integer >= 0');
+        }
+    }
+    public function setId($id)
+    {
+        throw new \BadFunctionCallException('Cannot set Id of mark');
     }
     public function setPoints($points)
     {

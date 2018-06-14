@@ -73,7 +73,7 @@ class Component extends AbstractModel
 
         $this->setGradeable($gradeable);
         $this->setMarks($marks);
-        $this->setId($details['id']);
+        $this->setIdInternal($details['id']);
         $this->setTitle($details['title']);
         $this->setTaComment($details['ta_comment']);
         $this->setStudentComment($details['student_comment']);
@@ -175,31 +175,35 @@ class Component extends AbstractModel
         $this->marks = $marks;
     }
 
-    private function setId($id)
+    private function setIdInternal($id)
     {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
-            throw new \InvalidArgumentException('Component ID must be an integer >= 0');
+            throw new \InvalidArgumentException('Component Id must be an integer >= 0');
         }
     }
+    public function setId($id)
+    {
+        throw new \BadFunctionCallException('Cannot set Id of component');
+    }
 
-    private function setLowerClamp($lower_clamp)
+    public function setLowerClamp($lower_clamp)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    private function setDefault($default)
+    public function setDefault($default)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    private function setMaxValue($max_value)
+    public function setMaxValue($max_value)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
-    private function setUpperClamp($upper_clamp)
+    public function setUpperClamp($upper_clamp)
     {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
