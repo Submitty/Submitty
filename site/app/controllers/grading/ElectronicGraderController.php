@@ -1122,7 +1122,7 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $count = $_REQUEST['count'];
+        $index = $_REQUEST['index'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         
 
@@ -1137,7 +1137,7 @@ class ElectronicGraderController extends GradingController {
         //display hidden testcases only if the user can view the entirety of this gradeable.
         if($this->canIViewThis($gradeable, $who_id)){
             $can_view_hidden = $this->canIviewThis($gradeable, $who_id, $hidden=true);
-            $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, $popup_css, $can_view_hidden);
+            $return = AutogradingView::loadAutoChecks($gradeable, $index, $who_id, $popup_css, $can_view_hidden);
         }
         //Returns the html to ajax.
         echo($return);

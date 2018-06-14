@@ -83,7 +83,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
     }else{
         $("#show_char_"+count).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
 
         $.ajax({
             url: url,
