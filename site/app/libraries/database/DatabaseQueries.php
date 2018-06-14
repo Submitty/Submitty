@@ -2221,7 +2221,7 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
     }
 
-    public function getGradeableComponentConfigs($g_id) {
+    public function getGradeableComponentConfigs(\app\models\gradeable\Gradeable $gradeable) {
 
         // Get the components
         $query = "
@@ -2241,7 +2241,7 @@ AND gc_id IN (
             FROM gradeable_component
             WHERE g_id=?
             ORDER BY gc_order";
-        $this->course_db->query($query, [$g_id]);
+        $this->course_db->query($query, [$gradeable->getId()]);
 
         $components_raw = $this->course_db->rows();
 
@@ -2257,7 +2257,7 @@ AND gc_id IN (
             FROM gradeable_component_mark
             WHERE gc_id IN (SELECT gc_id FROM gradeable_component WHERE g_id=?
             ORDER BY gcm_order)";
-        $this->course_db->query($query, [$g_id]);
+        $this->course_db->query($query, [$gradeable->getId()]);
 
         $marks = $this->course_db->rows();
         $component_marks = [];
@@ -2279,7 +2279,7 @@ AND gc_id IN (
             foreach($marks as $index=>$mark) {
                 $marks[$index] = new Mark($this->core, $mark);
             }
-            $components[] = new \app\models\gradeable\Component($this->core, $component_raw, $marks);
+            $components[] = new \app\models\gradeable\Component($this->core, $gradeable, $component_raw, $marks);
         }
 
         return $components;
@@ -2339,12 +2339,14 @@ AND gc_id IN (
             throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
         }
 
-        // Get the components data
-        $components = $this->getGradeableComponentConfigs($g_id);
-
         $details = array_merge($details, $elec_details);
 
         // Finally, create the gradeable
-        return new \app\models\gradeable\Gradeable($this->core, $details, $components);
+        $gradeable = new \app\models\gradeable\Gradeable($this->core, $details, []);
+
+        // Get the components data
+        $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
+
+        return $gradeable;
     }
 }

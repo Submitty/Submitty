@@ -36,6 +36,8 @@ use app\models\AbstractModel;
  */
 class Component extends AbstractModel
 {
+    /** @var Gradeable Reference to the gradeable this belongs to */
+    private $gradeable = null;
     /** @property @var int The course-wide unique numeric id of this component */
     protected $id = 0;
     /** @property @var string The title of this component */
@@ -65,10 +67,11 @@ class Component extends AbstractModel
     protected $marks = array();
 
 
-    public function __construct(Core $core, $details, array $marks)
+    public function __construct(Core $core, Gradeable $gradeable, $details, array $marks)
     {
         parent::__construct($core);
 
+        $this->setGradeable($gradeable);
         $this->setMarks($marks);
         $this->setId($details['id']);
         $this->setTitle($details['title']);
@@ -81,7 +84,19 @@ class Component extends AbstractModel
         $this->setPage($details['page']);
     }
 
+    public function getGradeable()
+    {
+        return $this->gradeable;
+    }
+
     /* Overridden setters with validation */
+    private function setGradeable(Gradeable $gradeable)
+    {
+        if($gradeable === null) {
+            throw new \InvalidArgumentException("Gradeable Cannot be null!");
+        }
+        $this->gradeable = $gradeable;
+    }
 
     private function validatePoints(&$lower_clamp, &$default, &$max_value, &$upper_clamp)
     {
