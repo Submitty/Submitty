@@ -2251,7 +2251,7 @@ AND gc_id IN (
                 gc_id,
                 gcm_id AS id,
                 gcm_points AS points,
-                gcm_note AS note,
+                gcm_note AS title,
                 gcm_publish AS publish,
                 gcm_order AS order
             FROM gradeable_component_mark
@@ -2323,7 +2323,7 @@ AND gc_id IN (
                 eg_student_view AS student_view,
                 eg_student_submit AS student_submit,
                 eg_student_download AS student_download,
-                eg_student_any_version AS student_any_version,
+                eg_student_any_version AS student_download_any_version,
                 eg_peer_grading AS peer_grading,
                 eg_peer_grade_set AS peer_grade_set,
                 eg_submission_open_date AS submission_open_date,

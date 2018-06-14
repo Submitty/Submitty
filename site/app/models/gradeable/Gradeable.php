@@ -54,7 +54,7 @@ use app\models\AbstractModel;
  * @method bool isStudentDownload();
  * @method void setStudentDownload($can_student_download);
  * @method bool isStudentAnyVersion();
- * @method void setStudentAnyVersion($student_any_version);
+ * @method void setStudentDownloadAnyVersion($student_download_any_version);
  * @method bool isPeerGrading();
  * @method void setPeerGrading($use_peer_grading);
  * @method int getPeerGradeSet();
@@ -127,7 +127,7 @@ class Gradeable extends AbstractModel
     /** @property @var bool If students can download submitted files */
     protected $student_download = false;
     /** @property @var bool If students can view/download any version of the submitted files, or just the active version */
-    protected $student_any_version = false;
+    protected $student_download_any_version = false;
     /** @property @var bool If the gradeable uses peer grading */
     protected $peer_grading = false;
     /** @property @var int The number of peers each student will be graded by */
@@ -169,7 +169,7 @@ class Gradeable extends AbstractModel
             $this->setStudentView($details["student_view"]);
             $this->setStudentSubmit($details["student_submit"]);
             $this->setStudentDownload($details["student_download"]);
-            $this->setStudentAnyVersion($details["student_any_version"]);
+            $this->setStudentDownloadAnyVersion($details["student_download_any_version"]);
             $this->setPeerGrading($details["peer_grading"]);
             $this->setPeerGradeSet($details["peer_grade_set"]);
             $this->setLateSubmissionAllowed($details["late_submission_allowed"]);
@@ -417,7 +417,7 @@ class Gradeable extends AbstractModel
         if (is_int($group) && $group > 0) {
             $this->min_grading_group = $group;
         } else {
-            throw new \InvalidArgumentException("Grading group must be a natural number");
+            throw new \InvalidArgumentException("Grading group must be an integer larger than 0");
         }
     }
 

@@ -149,7 +149,7 @@ class Component extends AbstractModel
         $this->marks = $marks;
     }
 
-    public function setId($id)
+    private function setId($id)
     {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
@@ -181,7 +181,7 @@ class Component extends AbstractModel
 
     /* Convenience functions for the different types of gradeables */
 
-    public function isExtraCredit()
+    public function hasExtraCredit()
     {
         return $this->upper_clamp > $this->max_value;
     }
@@ -198,7 +198,7 @@ class Component extends AbstractModel
         return $this->default === 0;
     }
 
-    public function isPenalty()
+    public function hasPenalty()
     {
         return $this->lower_clamp < 0;
     }

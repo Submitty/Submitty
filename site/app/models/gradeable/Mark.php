@@ -10,10 +10,9 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * @method getId();
- * @method setId($id);
  * @method getPoints();
- * @method getNote();
- * @method setNote($note);
+ * @method getTitle();
+ * @method setTitle($title);
  * @method getOrder();
  * @method setOrder($order);
  * @method isPublish();
@@ -26,7 +25,7 @@ class Mark extends AbstractModel
     /** @property @var int The number of points this mark will add to the score (negative for deductions) */
     protected $points = 0;
     /** @property @var string The description of this mark (aka why a student would lose/gain these points) */
-    protected $note = "";
+    protected $title = "";
     /** @property @var int The order of the mark within the component */
     protected $order = 0;
     /** @property @var bool If the student should be able to see this mark */
@@ -36,15 +35,18 @@ class Mark extends AbstractModel
     {
         parent::__construct($core);
 
-        $this->id = $details['id'];
+        $this->setId($details['id']);
         $this->points = $details['points'];
-        $this->note = $details['note'];
+        $this->title = $details['title'];
         $this->order = $details['order'];
         $this->publish = $details['publish'];
     }
 
     /* Overridden setters with validation */
-
+    private function setId($id)
+    {
+        $this->id = $id;
+    }
     public function setPoints($points)
     {
         if(is_float($points) || is_int($points)) {
