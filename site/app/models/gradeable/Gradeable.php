@@ -298,10 +298,10 @@ class Gradeable extends AbstractModel
             }
 
             if (!($ta_view_start_date === null || $submission_open_date === null) && $ta_view_start_date > $submission_open_date) {
-                $errors['g_ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
+                $errors['ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
             }
             if (!($submission_open_date === null || $submission_due_date === null) && $submission_open_date > $submission_due_date) {
-                $errors['eg_submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
+                $errors['submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
             }
             if ($this->ta_grading) {
                 if ($grade_start_date === null) {
@@ -311,17 +311,17 @@ class Gradeable extends AbstractModel
 //                    $errors['grade_locked_date'] = 'Value must not be null!';
 //                }
                 if (!($submission_due_date === null || $grade_start_date === null) && $submission_due_date > $grade_start_date) {
-                    $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
+                    $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 }
                 if (!($grade_start_date === null || $grade_released_date === null) && $grade_start_date > $grade_released_date) {
-                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
                 }
             } else {
                 // No TA grading, but we must set this start date so the database
                 //  doesn't complain when we update it
                 $dates['grade_start_date'] = $grade_released_date;
                 if (!($max_due === null || $grade_released_date === null) && $max_due > $grade_released_date) {
-                    $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
+                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
             }
             if ($this->team_assignment) {
@@ -332,7 +332,7 @@ class Gradeable extends AbstractModel
         } else {
             // The only check if its not an electronic gradeable
             if (!($ta_view_start_date === null || $grade_released_date === null) && $ta_view_start_date > $grade_released_date) {
-                $errors['g_grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
+                $errors['grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
             }
         }
 
