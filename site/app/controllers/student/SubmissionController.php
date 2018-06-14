@@ -550,7 +550,7 @@ class SubmissionController extends AbstractController {
                     $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
                   }
                   $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                  if (!copy($file, $move_here)){
+                  if (!@copy($file, $move_here)){
                     return $this->uploadResult("Failed to merge previous version.", false);
                   }
                 }
@@ -711,6 +711,13 @@ class SubmissionController extends AbstractController {
         }
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
+        }
+
+        $merge_previous = false;
+        if(isset($_REQUEST['merge'])) {
+            if($_REQUEST['merge'] === "true") {
+                $merge_previous = true;
+            }
         }
 
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
@@ -957,6 +964,24 @@ class SubmissionController extends AbstractController {
             
             if ($file_size > $max_size) {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
+            }
+
+            if($merge_previous && $new_version !== 1) {
+                $old_version = $new_version - 1;
+                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
+                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
+                $files = glob($to_search);
+                foreach($files as $file) {
+                    $file_base_name = basename($file);
+                    if (strpos($file_base_name, 'version') === false) {
+                        $parts = explode(".", $file_base_name);
+                        $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
+                    }
+                    $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                    if (!@copy($file, $move_here)) {
+                        return $this->uploadResult("Failed to merge previous version.", false);
+                    }
+                }
             }
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {

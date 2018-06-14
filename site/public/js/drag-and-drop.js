@@ -450,8 +450,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 * @param count
 */
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false) {
-    var merge = (merge_previous ? "true" : "false");
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, "merge" : merge_previous});
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var formData = new FormData();
@@ -651,11 +650,12 @@ function handleBulk(gradeable_id, num_pages) {
  * @param repo_id
  * @param student_page
  * @param num_components
+ * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false) {
     $("#submit").prop("disabled", true);
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
+    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var message = "";

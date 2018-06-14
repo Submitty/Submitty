@@ -676,7 +676,8 @@ HTML;
                                 "{$gradeable->getUser()->getId()}",
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous);
             }
             else {
                 handleSubmission({$late_days_use},
@@ -690,7 +691,8 @@ HTML;
                                 user_id,
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous);
             }
         }
         $(function() {
@@ -720,7 +722,7 @@ HTML;
                 }
                 // no user id entered, upload for whoever is logged in
                 else if (user_id == ""){
-                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id)
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id);
                 }
                 // user id entered, need to validate first
                 else {
