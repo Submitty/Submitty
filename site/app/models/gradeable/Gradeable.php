@@ -37,6 +37,7 @@ use app\models\AbstractModel;
  * @method string getTaInstructions();
  * @method void setTaInstructions($instructions);
  * @method string getAutogradingConfigPath();
+ * @method object getAutogradingConfig();
  * @method bool isVcs();
  * @method void setVcs($use_vcs);
  * @method string getVcsSubdirectory();
@@ -95,7 +96,7 @@ class Gradeable extends AbstractModel
     /** @property @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
     /** @property @var string[] The object that contains the autograding config data */
-    private $autograding_config = null;
+    protected $autograding_config = null;
     /** @property @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
@@ -166,6 +167,7 @@ class Gradeable extends AbstractModel
         if($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setTaInstructions($details['ta_instructions']);
             $this->setAutogradingConfigPath($details['autograding_config_path']);
+            $this->autograding_config = $this->loadAutogradingConfig();
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignment($details['team_assignment']);
@@ -208,8 +210,14 @@ class Gradeable extends AbstractModel
 
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
-            "build_{$this->id}.json"));
+
+        try {
+            $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
+                "build_{$this->id}.json"));
+        } catch(\Exception $e) {
+            // Don't throw an error, just don't make any data
+            return [];
+        }
 
         if (isset($details['max_submission_size'])) {
             $details['max_submission_size'] = floatval($details['max_submission_size']);
@@ -224,18 +232,6 @@ class Gradeable extends AbstractModel
         }
 
         return $details;
-    }
-    public function getAutogradingConfig()
-    {
-        if($this->type !== GradeableType::ELECTRONIC_FILE) {
-            throw new \BadFunctionCallException('Cannot load autograding config for non-electronic file!');
-        }
-
-        // use JIT loading
-        if ($this->autograding_config === null) {
-            $this->autograding_config = $this->loadAutogradingConfig();
-        }
-        return $this->autograding_config;
     }
 
 
@@ -390,6 +386,11 @@ class Gradeable extends AbstractModel
     private function setSubmissionDueDate($date)
     {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    public function setAutogradingConfig()
+    {
+        throw new \BadFunctionCallException('Cannot set the autograding config data');
     }
 
     private function setId($id)
