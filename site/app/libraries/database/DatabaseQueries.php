@@ -2239,7 +2239,8 @@ AND gc_id IN (
                 gc_order AS order,
                 gc_page AS page
             FROM gradeable_component
-            WHERE g_id=?";
+            WHERE g_id=?
+            ORDER BY gc_order";
         $this->course_db->query($query, [$g_id]);
 
         $components_raw = $this->course_db->rows();
@@ -2254,7 +2255,8 @@ AND gc_id IN (
                 gcm_publish AS publish,
                 gcm_order AS order
             FROM gradeable_component_mark
-            WHERE gc_id IN (SELECT gc_id FROM gradeable_component WHERE g_id=?)";
+            WHERE gc_id IN (SELECT gc_id FROM gradeable_component WHERE g_id=?
+            ORDER BY gcm_order)";
         $this->course_db->query($query, [$g_id]);
 
         $marks = $this->course_db->rows();
