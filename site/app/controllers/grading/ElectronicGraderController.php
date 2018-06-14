@@ -433,13 +433,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
 
+        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
+
         if ($gradeable == null) {
             $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
             $this->core->redirect($return_url);
         }
 
-        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
-        
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
@@ -503,7 +503,7 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
         if (!FileUtils::createDir($gradeable_path)) {
-            $this->core->addErrorMEssage("Failed to make folder for this assignment");
+            $this->core->addErrorMessage("Failed to make folder for this assignment");
             $this->core->redirect($return_url);
         }    
 
@@ -605,7 +605,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
 
-            $reg_section = $_POST['reg_section'] === "NULL" ? null : intval($_POST['reg_section']);
+            $reg_section = $_POST['reg_section'] === "NULL" ? null : $_POST['reg_section'];
             $rot_section = $_POST['rot_section'] === "NULL" ? null : intval($_POST['rot_section']);
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section);
@@ -622,7 +622,7 @@ class ElectronicGraderController extends GradingController {
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
             $json = FileUtils::readJsonFile($settings_file);
             if ($json === false) {
-                $this->core->addErrorMEssage("Failed to open settings file");
+                $this->core->addErrorMessage("Failed to open settings file");
                 $this->core->redirect($return_url);
             }
             foreach($add_user_ids as $id) {
@@ -634,7 +634,7 @@ class ElectronicGraderController extends GradingController {
                                                     "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
             }
             if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
-                $this->core->addErrorMEssage("Failed to write to team history to settings file");
+                $this->core->addErrorMessage("Failed to write to team history to settings file");
             }
         }   
         
@@ -668,7 +668,7 @@ class ElectronicGraderController extends GradingController {
         //overwrite sections if they are available in the post
         if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
             if ($gradeable->isGradeByRegistration()) {
-                $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+                $registration_section = $_POST['section'] === "NULL" ? null : $_POST['section'];
             }
             else {
                 $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
@@ -687,13 +687,13 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable_path = FileUtils::joinPaths($core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
         if (!FileUtils::createDir($gradeable_path)) {
-            $core->addErrorMEssage("Failed to make folder for this assignment");
+            $core->addErrorMessage("Failed to make folder for this assignment");
             return;
         }
 
         $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
         if (!FileUtils::createDir($user_path)) {
-            $core->addErrorMEssage("Failed to make folder for this assignment for the team");
+            $core->addErrorMessage("Failed to make folder for this assignment for the team");
             return;
         }
 
@@ -708,7 +708,7 @@ class ElectronicGraderController extends GradingController {
             }
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
-            $this->core->addErrorMEssage("Failed to write to team history to settings file");
+            $core->addErrorMessage("Failed to write to team history to settings file");
         }
     }
 
@@ -910,6 +910,7 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $canViewWholeGradeable);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
     }
 
     public function saveSingleComponent() {
@@ -1136,12 +1137,7 @@ class ElectronicGraderController extends GradingController {
             $mark->setPoints($points);
             $mark->setNote($note);
             $mark->setOrder($order_counter);
-            $mark_id = $mark->save();
-            $mark->setId($mark_id);
-            $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-            if($all_false === false) {
-                $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-            }
+            $mark->save();
         }
     }
 
