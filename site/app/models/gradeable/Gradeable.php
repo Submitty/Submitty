@@ -43,7 +43,6 @@ use app\models\AbstractModel;
  * @method void setVcsSubdirectory($subdirectory);
  * @method bool isTeamAssignment();
  * @method int getTeamSizeMax();
- * @method void setTeamSizeMax($max_team_size);
  * @method \DateTime getTeamLockDate();
  * @method bool isTaGrading();
  * @method void setTaGrading($use_ta_grading);
@@ -421,6 +420,24 @@ class Gradeable extends AbstractModel
         }
     }
 
+    public function setTeamSizeMax($max_team_size)
+    {
+        if(is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
+            $this->team_size_max = intval($max_team_size);
+        } else {
+            throw new \InvalidArgumentException("Max team size must be a non-negative integer!");
+        }
+    }
+
+    public function setPeerGradingSet($peer_grading_set)
+    {
+        if(is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
+            $this->peer_grade_set = intval($peer_grading_set);
+        } else {
+            throw new \InvalidArgumentException("Peer grade set must be a non-negative integer!");
+        }
+    }
+
     public function setComponents(array $components)
     {
         foreach ($components as $component) {
@@ -428,7 +445,24 @@ class Gradeable extends AbstractModel
                 throw new \InvalidArgumentException("Object in components array wasn't a component");
             }
         }
-        $this->components = $components;
+
+        // Sort the components by 'order'
+        $sortedComponents = [];
+        $max_order = -1; // default to -1 so empty arrays work
+        foreach($components as $component) {
+            if(isset($sortedComponents[$component->getOrder()])) {
+                throw new \InvalidArgumentException("Component orders must be unique");
+            }
+            $sortedComponents[$component->getOrder()] = $component;
+            $max_order = max($max_order, $component->getOrder());
+        }
+
+        // If the max order is not more than the number of marks,
+        //  then there is a missing order value or the numbers are offset, which is invalid
+        if(count($sortedComponents) <= $max_order) {
+            throw new \InvalidArgumentException("Component orders must be continuous");
+        }
+        $this->components = $sortedComponents;
     }
 
     public function setAutogradingConfigPath($path)

@@ -22,7 +22,7 @@ class Mark extends AbstractModel
 {
     /** @property @var int The course-wide unique numeric id of this mark */
     protected $id = -1;
-    /** @property @var int The number of points this mark will add to the score (negative for deductions) */
+    /** @property @var float The number of points this mark will add to the score (negative for deductions) */
     protected $points = 0;
     /** @property @var string The description of this mark (aka why a student would lose/gain these points) */
     protected $title = "";
@@ -36,10 +36,10 @@ class Mark extends AbstractModel
         parent::__construct($core);
 
         $this->setId($details['id']);
-        $this->points = $details['points'];
-        $this->title = $details['title'];
-        $this->order = $details['order'];
-        $this->publish = $details['publish'];
+        $this->setPoints($details['points']);
+        $this->setTitle($details['title']);
+        $this->setOrder($details['order']);
+        $this->setPublish($details['publish']);
     }
 
     /* Overridden setters with validation */
@@ -49,8 +49,8 @@ class Mark extends AbstractModel
     }
     public function setPoints($points)
     {
-        if(is_float($points) || is_int($points)) {
-            $this->points = $points;
+        if(is_numeric($points)) {
+            $this->points = floatval($points);
         } else {
             throw new \InvalidArgumentException("Mark points must be a number!");
         }
