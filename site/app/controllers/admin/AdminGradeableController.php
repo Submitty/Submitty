@@ -36,7 +36,10 @@ class AdminGradeableController extends AbstractController {
                 break;
             case 'delete_gradeable':
                 $this->deleteGradeable();
-                break;    
+                break; 
+            case 'rebuild_assignement':
+                $this->rebuildAssignment();
+                break;           
             default:
                 $this->viewPage();
                 break;
@@ -591,11 +594,9 @@ class AdminGradeableController extends AbstractController {
 
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             die("Invalid CSRF Token");
-            $this->returnToNav();
         }
         if (!$this->core->getUser()->accessAdmin()) {
             die("Only admins can delete gradeable");
-            $this->returnToNav();
         }
         $this->core->getQueries()->deleteGradeable($g_id);
 
@@ -612,6 +613,28 @@ class AdminGradeableController extends AbstractController {
         $config_build_data = array("semester" => $semester,
                                    "course" => $course,
                                    "no_build" => true);
+
+        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+          die("Failed to write file {$config_build_file}");
+        }
+
+        $this->returnToNav();
+    }
+
+    private function rebuildAssignment(){
+        if (!$this->core->getUser()->accessAdmin()) {
+            die("Only admins can rebuild assignements");
+        }
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $course = $this->core->getConfig()->getCourse();
+        $semester=$this->core->getConfig()->getSemester();
+        $g_id = $_REQUEST['gradeable_id'];
+        $config_build_file = "/var/local/submitty/to_be_built/".$semester."__".$course."__".$g_id.".json";
+        $config_build_data = array("semester" => $semester,
+                                   "course" => $course ,
+                                   "gradeable" => $g_id
+                                    );
 
         if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
           die("Failed to write file {$config_build_file}");

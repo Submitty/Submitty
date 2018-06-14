@@ -16,10 +16,10 @@ import sys
 
 import psycopg2
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
-ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
+ENVIRONMENTS = ['master', 'system', 'course']
 
 
 def parse_args():
@@ -45,6 +45,13 @@ def parse_args():
     args = parser.parse_args()
     if args.environments is None:
         args.environments = ENVIRONMENTS
+    # make sure the order is of 'master', 'system', 'course' depending on what environments have been selected
+    # system must be run after master initially as system relies on master DB being setup for migration table
+    environments = []
+    for env in ENVIRONMENTS:
+        if env in args.environments:
+            environments.append(env)
+    args.environments = environments
     return args
 
 
@@ -56,10 +63,11 @@ def main():
 def create(args):
     now = datetime.now()
     ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(now.year, now.month, now.day, now.hour, now.minute, now.second)
-    filename = "{}_{}.py".format(ver, args.name)
+    filename = "{}_{}".format(ver, args.name)
     check = re.search(r'[^A-Za-z0-9_\-]', filename)
     if check is not None:
         raise ValueError("Name '{}' contains invalid character '{}'".format(filename, check.group(0)))
+    filename += '.py'
     for environment in args.environments:
         with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file:
             open_file.write("""def up({0}):
@@ -89,7 +97,7 @@ def handle_migration(args):
         database = json.load(open_file)
 
     for environment in args.environments:
-        if environment in ['system', 'master']:
+        if environment in ['master', 'system']:
             params = {
                 'dbname': 'submitty',
                 'host': database['database_host'],
@@ -148,7 +156,7 @@ def migrate_environment(connection, environment, args):
             remove_migration(connection, missing_migrations[key], environment, args)
         print()
 
-    args.fake = args.set_fake
+    args.fake = args.set_fake if 'set_fake' in args else False
     if args.direction == 'up':
         keys = list(migrations.keys())
         if args.initial is True:
