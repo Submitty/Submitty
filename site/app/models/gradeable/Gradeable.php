@@ -91,7 +91,7 @@ class Gradeable extends AbstractModel
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
-    protected $syllabus_bucket = "Homework";
+    protected $syllabus_bucket = "homework";
 
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = array();
