@@ -148,31 +148,31 @@ class Gradeable extends AbstractModel
     {
         parent::__construct($core);
 
-        $this->setId($details["id"]);
-        $this->setTitle($details["title"]);
-        $this->setInstructionsUrl($details["instructions_url"]);
-        $this->setType($details["type"]);
-        $this->setGradeByRegistration($details["grade_by_registration"]);
-        $this->setMinGradingGroup($details["min_grading_group"]);
-        $this->setSyllabusBucket($details["syllabus_bucket"]);
+        $this->setId($details['id']);
+        $this->setTitle($details['title']);
+        $this->setInstructionsUrl($details['instructions_url']);
+        $this->setType($details['type']);
+        $this->setGradeByRegistration($details['grade_by_registration']);
+        $this->setMinGradingGroup($details['min_grading_group']);
+        $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setComponents($components);
 
         if($this->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->setTaInstructions($details["ta_instructions"]);
-            $this->setAutogradingConfigPath($details["autograding_config_path"]);
-            $this->setVcs($details["vcs"]);
-            $this->setVcsSubdirectory($details["vcs_subdirectory"]);
-            $this->setTeamAssignment($details["team_assignment"]);
-            $this->setTeamSizeMax($details["team_size_max"]);
-            $this->setTaGrading($details["ta_grading"]);
-            $this->setStudentView($details["student_view"]);
-            $this->setStudentSubmit($details["student_submit"]);
-            $this->setStudentDownload($details["student_download"]);
-            $this->setStudentDownloadAnyVersion($details["student_download_any_version"]);
-            $this->setPeerGrading($details["peer_grading"]);
-            $this->setPeerGradeSet($details["peer_grade_set"]);
-            $this->setLateSubmissionAllowed($details["late_submission_allowed"]);
-            $this->setPrecision($details["precision"]);
+            $this->setTaInstructions($details['ta_instructions']);
+            $this->setAutogradingConfigPath($details['autograding_config_path']);
+            $this->setVcs($details['vcs']);
+            $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setTeamAssignment($details['team_assignment']);
+            $this->setTeamSizeMax($details['team_size_max']);
+            $this->setTaGrading($details['ta_grading']);
+            $this->setStudentView($details['student_view']);
+            $this->setStudentSubmit($details['student_submit']);
+            $this->setStudentDownload($details['student_download']);
+            $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
+            $this->setPeerGrading($details['peer_grading']);
+            $this->setPeerGradeSet($details['peer_grade_set']);
+            $this->setLateSubmissionAllowed($details['late_submission_allowed']);
+            $this->setPrecision($details['precision']);
         }
 
         // Set dates last
@@ -202,7 +202,7 @@ class Gradeable extends AbstractModel
 
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, "config", "build",
+        $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
             "build_{$this->id}.json"));
 
         if (isset($details['max_submission_size'])) {
@@ -222,7 +222,7 @@ class Gradeable extends AbstractModel
     public function getAutogradingConfig()
     {
         if($this->type !== GradeableType::ELECTRONIC_FILE) {
-            throw new \BadFunctionCallException("Cannot load autograding config for non-electronic file!");
+            throw new \BadFunctionCallException('Cannot load autograding config for non-electronic file!');
         }
 
         // use JIT loading
@@ -248,7 +248,7 @@ class Gradeable extends AbstractModel
                 $errors[$date] = $result;
             }
         }
-        $dates["late_days"] = intval($dates["late_days"]);
+        $dates['late_days'] = intval($dates['late_days']);
 
         $ta_view_start_date = $dates['ta_view_start_date'];
         $grade_start_date = $dates['grade_start_date'];
@@ -277,18 +277,18 @@ class Gradeable extends AbstractModel
         }
 
         if ($ta_view_start_date === null) {
-            $errors['ta_view_start_date'] = "Value must not be null!";
+            $errors['ta_view_start_date'] = 'Value must not be null!';
         }
         if ($grade_released_date === null) {
-            $errors['grade_released_date'] = "Value must not be null!";
+            $errors['grade_released_date'] = 'Value must not be null!';
         }
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if ($submission_open_date === null) {
-                $errors['submission_open_date'] = "Value must not be null!";
+                $errors['submission_open_date'] = 'Value must not be null!';
             }
             if ($submission_due_date === null) {
-                $errors['submission_due_date'] = "Value must not be null!";
+                $errors['submission_due_date'] = 'Value must not be null!';
             }
 
             if (!($ta_view_start_date === null || $submission_open_date === null) && $ta_view_start_date > $submission_open_date) {
@@ -299,10 +299,10 @@ class Gradeable extends AbstractModel
             }
             if ($this->ta_grading) {
                 if ($grade_start_date === null) {
-                    $errors['grade_start_date'] = "Value must not be null!";
+                    $errors['grade_start_date'] = 'Value must not be null!';
                 }
 //                if ($grade_locked_date === null) {
-//                    $errors['grade_locked_date'] = "Value must not be null!";
+//                    $errors['grade_locked_date'] = 'Value must not be null!';
 //                }
                 if (!($submission_due_date === null || $grade_start_date === null) && $submission_due_date > $grade_start_date) {
                     $errors['g_grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
@@ -313,14 +313,14 @@ class Gradeable extends AbstractModel
             } else {
                 // No TA grading, but we must set this start date so the database
                 //  doesn't complain when we update it
-                $dates["grade_start_date"] = $grade_released_date;
+                $dates['grade_start_date'] = $grade_released_date;
                 if (!($max_due === null || $grade_released_date === null) && $max_due > $grade_released_date) {
                     $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
             }
             if ($this->team_assignment) {
                 if ($team_lock_date === null) {
-                    $errors['team_lock_date'] = "Value must not be null!";
+                    $errors['team_lock_date'] = 'Value must not be null!';
                 }
             }
         } else {
@@ -340,7 +340,7 @@ class Gradeable extends AbstractModel
         $errors = $this->validateDates($dates);
 
         if ($errors !== null) {
-            throw new AggregateException("Date validation failed!", $errors);
+            throw new AggregateException('Date validation failed!', $errors);
         }
 
         $this->ta_view_start_date = $dates['ta_view_start_date'];
@@ -390,7 +390,7 @@ class Gradeable extends AbstractModel
     {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new \InvalidArgumentException("Gradeable id must be alpha-numeric/hyphen/underscore only");
+            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -398,7 +398,7 @@ class Gradeable extends AbstractModel
     public function setTitle($title)
     {
         if ($title === '') {
-            throw new \InvalidArgumentException("Gradeable title must not be blank");
+            throw new \InvalidArgumentException('Gradeable title must not be blank');
         }
         $this->title = strval($title);
     }
@@ -416,7 +416,7 @@ class Gradeable extends AbstractModel
         if (is_int($group) && $group > 0) {
             $this->min_grading_group = $group;
         } else {
-            throw new \InvalidArgumentException("Grading group must be an integer larger than 0");
+            throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
         }
     }
 
@@ -425,7 +425,7 @@ class Gradeable extends AbstractModel
         if(is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
-            throw new \InvalidArgumentException("Max team size must be a non-negative integer!");
+            throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
         }
     }
 
@@ -434,7 +434,7 @@ class Gradeable extends AbstractModel
         if(is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
-            throw new \InvalidArgumentException("Peer grade set must be a non-negative integer!");
+            throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
         }
     }
 
@@ -442,7 +442,7 @@ class Gradeable extends AbstractModel
     {
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new \InvalidArgumentException("Object in components array wasn't a component");
+                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
 
@@ -451,7 +451,7 @@ class Gradeable extends AbstractModel
         $max_order = -1; // default to -1 so empty arrays work
         foreach($components as $component) {
             if(isset($sortedComponents[$component->getOrder()])) {
-                throw new \InvalidArgumentException("Component orders must be unique");
+                throw new \InvalidArgumentException('Component orders must be unique');
             }
             $sortedComponents[$component->getOrder()] = $component;
             $max_order = max($max_order, $component->getOrder());
@@ -460,7 +460,7 @@ class Gradeable extends AbstractModel
         // If the max order is not more than the number of marks,
         //  then there is a missing order value or the numbers are offset, which is invalid
         if(count($sortedComponents) <= $max_order) {
-            throw new \InvalidArgumentException("Component orders must be continuous");
+            throw new \InvalidArgumentException('Component orders must be continuous');
         }
         $this->components = $sortedComponents;
     }
@@ -468,7 +468,7 @@ class Gradeable extends AbstractModel
     public function setAutogradingConfigPath($path)
     {
         if ($path === '') {
-            throw new \InvalidArgumentException("Autograding configuration file path cannot be blank");
+            throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
         }
         $this->autograding_config_path = strval($path);
     }

@@ -93,7 +93,7 @@ class Component extends AbstractModel
     private function setGradeable(Gradeable $gradeable)
     {
         if($gradeable === null) {
-            throw new \InvalidArgumentException("Gradeable Cannot be null!");
+            throw new \InvalidArgumentException('Gradeable Cannot be null!');
         }
         $this->gradeable = $gradeable;
     }
@@ -103,37 +103,37 @@ class Component extends AbstractModel
         $errors = array();
         if (!is_numeric($lower_clamp)) {
             $lower_clamp = null;
-            $errors['lower_clamp'] = "Value must be a number!";
+            $errors['lower_clamp'] = 'Value must be a number!';
         } else {
             $lower_clamp = floatval($lower_clamp);
         }
         if (!is_numeric($default)) {
             $default = null;
-            $errors['default'] = "Value must be a number!";
+            $errors['default'] = 'Value must be a number!';
         } else {
             $default = floatval($default);
         }
         if (!is_numeric($max_value)) {
             $max_value = null;
-            $errors['max_value'] = "Value must be a number!";
+            $errors['max_value'] = 'Value must be a number!';
         } else {
             $max_value = floatval($max_value);
         }
         if (!is_numeric($upper_clamp)) {
             $upper_clamp = null;
-            $errors['upper_clamp'] = "Value must be a number!";
+            $errors['upper_clamp'] = 'Value must be a number!';
         } else {
             $upper_clamp = floatval($upper_clamp);
         }
 
         if (!($lower_clamp === null || $default === null) && $lower_clamp > $default) {
-            $errors['lower_clamp'] = "Lower clamp can't be more than default!";
+            $errors['lower_clamp'] = 'Lower clamp can\'t be more than default!';
         }
         if (!($default === null || $max_value === null) && $default > $max_value) {
-            $errors['max_value'] = "Max value can't be less than default!";
+            $errors['max_value'] = 'Max value can\'t be less than default!';
         }
         if (!($max_value === null || $upper_clamp === null) && $max_value > $upper_clamp) {
-            $errors['max_value'] = "Max value can't be more than upper clamp!";
+            $errors['max_value'] = 'Max value can\'t be more than upper clamp!';
         }
 
         if (count($errors) === 0)
@@ -144,7 +144,7 @@ class Component extends AbstractModel
     {
         $messages = $this->validatePoints($lower_clamp, $default, $max_value, $upper_clamp);
         if ($messages !== null) {
-            throw new AggregateException("Component Points Error!", $messages);
+            throw new AggregateException('Component Points Error!', $messages);
         }
 
         $this->lower_clamp = $lower_clamp;
@@ -158,7 +158,7 @@ class Component extends AbstractModel
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
-                throw new \InvalidArgumentException("Object in marks array wasn't a mark");
+                throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
 
@@ -167,7 +167,7 @@ class Component extends AbstractModel
         $max_order = -1; // default to -1 so empty arrays work
         foreach($marks as $mark) {
             if(isset($sortedMarks[$mark->getOrder()])) {
-                throw new \InvalidArgumentException("Mark orders must be unique");
+                throw new \InvalidArgumentException('Mark orders must be unique');
             }
             $sortedMarks[$mark->getOrder()] = $mark;
             $max_order = max($max_order, $mark->getOrder());
@@ -176,7 +176,7 @@ class Component extends AbstractModel
         // If the max order is not more than the number of marks,
         //  then there is a missing order value or the numbers are offset, which is invalid
         if(count($sortedMarks) <= $max_order) {
-            throw new \InvalidArgumentException("Mark orders must be continuous");
+            throw new \InvalidArgumentException('Mark orders must be continuous');
         }
         $this->marks = $sortedMarks;
     }
@@ -186,7 +186,7 @@ class Component extends AbstractModel
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
-            throw new \InvalidArgumentException("Component ID must be an integer >= 0");
+            throw new \InvalidArgumentException('Component ID must be an integer >= 0');
         }
     }
 

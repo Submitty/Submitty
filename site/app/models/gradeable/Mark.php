@@ -52,7 +52,7 @@ class Mark extends AbstractModel
         if(is_numeric($points)) {
             $this->points = floatval($points);
         } else {
-            throw new \InvalidArgumentException("Mark points must be a number!");
+            throw new \InvalidArgumentException('Mark points must be a number!');
         }
     }
 }
