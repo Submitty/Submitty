@@ -883,12 +883,12 @@ HTML;
 									$selected = 'selected="selected"';
 								}
 								$return .= <<<HTML
-	  							<option value="{$color_code}" style="color: white;background-color: {$color_code};" {$selected}>{$color_name}</option>
+								<option value="{$color_code}" style="color: white;background-color: {$color_code};" {$selected}>{$color_name}</option>
 HTML;
 							}
 							$return .= <<<HTML
-	  						</select>
-	  						&nbsp;
+							</select>
+							&nbsp;
 							<a class="post_button" title="Delete Category"><i class="fa fa-trash" aria-hidden="true"></i></a>
 							</div>
 						</li>
@@ -1017,8 +1017,6 @@ HTML;
 					$categories = $this->core->getQueries()->getCategories();
 					$return .= <<<HTML
 					<label for="cat" id="cat_label">Categories</label> <br>
-					<div id='categories-pick-list'>
-					<noscript>
 HTML;
 					if(count($categories) == 0) {
 						$return .= <<<HTML
@@ -1027,13 +1025,17 @@ HTML;
 						</span>
 HTML;
 					}
-					for($i = 0; $i < count($categories); $i++){
-						$return .= <<<HTML
-						<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
-							<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
-						</a>
+					$return .= <<<HTML
+					<div id='categories-pick-list'>
+					<noscript>
 HTML;
-					}
+						for($i = 0; $i < count($categories); $i++){
+							$return .= <<<HTML
+							<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
+								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
+							</a>
+HTML;
+						}
 					$return .= <<<HTML
 					</noscript>
 					</div>

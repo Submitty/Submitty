@@ -1492,7 +1492,6 @@ function refreshCategories() {
             $(this).removeClass("cat-notselected");
             $(this).addClass("cat-selected");
             $(this).find("input[type='checkbox']").prop("checked", true);
-            
         }
         $(this).trigger("eventChangeCatClass");
     });
