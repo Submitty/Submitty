@@ -249,6 +249,7 @@ class Gradeable extends AbstractModel
                 $errors[$date] = $result;
             }
         }
+        $dates["late_days"] = intval($dates["late_days"]);
 
         $ta_view_start_date = $dates['ta_view_start_date'];
         $grade_start_date = $dates['grade_start_date'];
@@ -259,7 +260,6 @@ class Gradeable extends AbstractModel
         $late_days = $dates['late_days'];
 
         $late_interval = null;
-        $late_days = intval($late_days);
         if ($late_days < 0) {
             $errors['late_days'] = 'Late day count must be >= 0!';
         } else {
@@ -314,7 +314,7 @@ class Gradeable extends AbstractModel
             } else {
                 // No TA grading, but we must set this start date so the database
                 //  doesn't complain when we update it
-                $grade_start_date = $grade_released_date;
+                $dates["grade_start_date"] = $grade_released_date;
                 if (!($max_due === null || $grade_released_date === null) && $max_due > $grade_released_date) {
                     $errors['g_grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
