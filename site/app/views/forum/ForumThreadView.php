@@ -831,12 +831,12 @@ HTML;
 			$return .= <<<HTML
 			<div class="popup-form" id="category-list">
 				<h3>Categories</h3>
-				<div  style="float: right;">
-					<input style="float: right;" id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
-					<button style="float: right;" type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
+				<span  style="float: right;">
+					<input id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
+					<button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
 						<i class="fa fa-plus-circle fa-1x"></i> Add category
 					</button>
-				</div>
+				</span>
 				<pre>(Drag to re-order)</pre><br>
 HTML;
 				if(count($categories) == 0) {
