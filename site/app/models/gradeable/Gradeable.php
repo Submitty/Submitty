@@ -244,9 +244,9 @@ class Gradeable extends AbstractModel
 
         // Try to parse the grade locked date, but it might be null
         if($grade_locked_date !== null) {
-            $result = $this->assertDate($date);
+            $result = $this->assertDate($grade_locked_date);
             if ($result !== null) {
-                $errors[$date] = $result;
+                $errors['grade_locked_date'] = $result;
             }
         }
 
