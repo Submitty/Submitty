@@ -52,7 +52,7 @@ use app\models\AbstractModel;
  * @method void setStudentSubmit($can_student_submit);
  * @method bool isStudentDownload();
  * @method void setStudentDownload($can_student_download);
- * @method bool isStudentAnyVersion();
+ * @method bool isStudentDownloadAnyVersion();
  * @method void setStudentDownloadAnyVersion($student_download_any_version);
  * @method bool isPeerGrading();
  * @method void setPeerGrading($use_peer_grading);
