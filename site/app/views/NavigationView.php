@@ -6,6 +6,61 @@ use app\libraries\FileUtils;
 
 
 class NavigationView extends AbstractView {
+
+    const gradeableSections = [
+        [
+            //What title is displayed to the user for each category
+            "title" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
+            //What bootstrap button the student button will be. Information about bootstrap buttons can be found here:
+            //https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
+            "button_type_submission" => "btn-default",
+            //What bootstrap button the instructor/TA button will be
+            "button_type_grading" => "btn-default",
+            //The general text of the button under the category
+            //It is general since the text could change depending if the user submitted something or not and other factors.
+            "prefix" => "ALPHA SUBMIT"
+        ],
+        [
+            "title" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
+            "button_type_submission" => "btn-default",
+            "button_type_grading" => "btn-default",
+            "prefix" => "BETA SUBMIT"
+        ],
+        [
+            "title" => "OPEN",
+            "button_type_submission" => "btn-primary" ,
+            "button_type_grading" => "btn-default" ,
+            "prefix" => "SUBMIT"
+        ],
+        [
+            "title" => "PAST DUE",
+            "button_type_submission" => "btn-danger",
+            "button_type_grading" => "btn-default",
+            "prefix" => "LATE SUBMIT"
+        ],
+        [
+            "title" => "CLOSED &nbsp;&nbsp; <em>being graded by TA/Instructor</em>",
+            "button_type_submission" => "btn-default",
+            "button_type_grading" => "btn-primary",
+            "prefix" => "VIEW SUBMISSION"
+        ],
+        [
+            "title" => "GRADES AVAILABLE",
+            "button_type_submission" => 'btn-success',
+            "button_type_grading" => 'btn-danger',
+            "prefix" => "VIEW GRADE"
+        ]
+    ];
+
+    const sectionMap = [
+        "FUTURE" => 0,
+        "BETA" => 1,
+        "OPEN" => 2,
+        "CLOSED" => 3,
+        "ITEMS BEING GRADED" => 4,
+        "GRADED" => 5
+    ];
+
     public function noAccessCourse() {
         return <<<HTML
 <div class="content">
@@ -76,15 +131,6 @@ HTML;
         $return .= <<<HTML
     <table class="gradeable_list" style="width:100%;">
 HTML;
-	//What title is displayed to the user for each category
-        $title_to_category_title = array(
-            "FUTURE" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
-            "BETA" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
-            "OPEN" => "OPEN",
-            "CLOSED" => "PAST DUE",
-            "ITEMS BEING GRADED" => "CLOSED &nbsp;&nbsp; <em>being graded by TA/Instructor</em>",
-            "GRADED" => "GRADES AVAILABLE"
-        );
         //What bootstrap button the student button will be. Information about bootstrap buttons can be found here:
         //https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
         $title_to_button_type_submission = array(
@@ -117,33 +163,19 @@ HTML;
         $found_assignment = false;
         foreach ($sections_to_list as $title => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
+
+            $section = self::sectionMap[$title];
+
             // temporary: want to make future - only visible to
             //  instructor (not released for submission to graders)
             //  and future - grader preview
             //  (released to graders for submission)
             //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
-            if (($title === "FUTURE" || $title === "BETA") && !$this->core->getUser()->accessGrading()) {
-                continue;
-            }
-            // count the # of electronic gradeables in this category that can be viewed
-            $electronic_gradeable_count = 0;
-            foreach ($gradeable_list as $gradeable => $g_data) {
-                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
-                    $electronic_gradeable_count++;
-                    continue;
-                }
-            }
-            // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
-            if (count($gradeable_list) == 0 ||
-                ($electronic_gradeable_count == 0 && !$this->core->getUser()->accessGrading())) {
-                continue;
-            } else {
-                $found_assignment = true;
-            }
+            $found_assignment = true;
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
         <tr class="bar"><td colspan="10"></td></tr>
-        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
+        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$this::gradeableSections[$section]["title"]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
             $title_save = $title;

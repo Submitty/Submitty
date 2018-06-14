@@ -47,18 +47,43 @@ class NavigationController extends AbstractController {
         $grading_gradeables_list = $gradeables_list->getGradingGradeables();
         $graded_gradeables_list = $gradeables_list->getGradedGradeables();
         
-        $sections_to_lists = array("FUTURE" => $future_gradeables_list,
-                                   "BETA" => $beta_gradeables_list,
-                                   "OPEN" => $open_gradeables_list,
-                                   "CLOSED" => $closed_gradeables_list,
-                                   "ITEMS BEING GRADED" => $grading_gradeables_list,
-                                   "GRADED" => $graded_gradeables_list);
-        
-        if (!$this->core->getUser()->accessAdmin()) {
+        $sections_to_lists = [];
+
+        $user = $this->core->getUser();
+
+        if ($user->accessGrading()) {
+            $sections_to_lists["FUTURE"] = $future_gradeables_list;
+            $sections_to_lists["BETA"] = $beta_gradeables_list;
+        }
+
+        $sections_to_lists["OPEN"] = $open_gradeables_list;
+        $sections_to_lists["CLOSED"] = $closed_gradeables_list;
+        $sections_to_lists["ITEMS BEING GRADED"] = $grading_gradeables_list;
+        $sections_to_lists["GRADED"] = $graded_gradeables_list;
+
+        //Remove incomplete gradeables for non-instructors
+        if (!$user->accessAdmin()) {
             foreach ($sections_to_lists as $key => $value) {
                 $sections_to_lists[$key] = array_filter($value, array($this, "filterNoConfig"));
             }
         }
+
+        //Clear empty sections
+        foreach ($sections_to_lists as $key => $value) {
+            $electronic_gradeable_count = 0;
+            foreach ($sections_to_lists[$key] as $gradeable => $g_data) {
+                /* @var Gradeable $g_data */
+                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
+                    $electronic_gradeable_count++;
+                    break;
+                }
+            }
+            // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
+            if (count($sections_to_lists[$key]) == 0 || ($electronic_gradeable_count == 0 && !$user->accessGrading())) {
+                unset($sections_to_lists[$key]);
+            }
+        }
+
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
