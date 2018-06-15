@@ -1209,6 +1209,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
+                console.log(json);
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var time = (new Date(json.post_time));
@@ -1225,10 +1226,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
-                    document.getElementById('edit_thread_tid').value = thread_id;
-                    document.getElementById('edit_thread_title').value = thread_title;
+                    $("#edit_thread_title").prop('disabled', false);
                     $("#edit_thread_form").show();
+                    $('#edit_thread_title').val(thread_title);
                 } else {
+                    $("#edit_thread_title").prop('disabled', true);
                     $("#edit_thread_form").hide();
                 }
             },
