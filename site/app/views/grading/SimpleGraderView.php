@@ -179,6 +179,7 @@ HTML;
         $tbody_open = false;
         $colspan = 5 + count($gradeable->getComponents());
         $num_users = 0;
+        $sections = array();
 
         if($action == 'numeric'){
             $colspan++;
@@ -200,6 +201,9 @@ HTML;
             }
             $display_section = ($section === null) ? "NULL" : $section;
             if ($section !== $last_section) {
+                if($section !== null) {
+                    $sections[] = $section;
+                }
                 $last_section = $section;
                 $count = 1;
                 if ($tbody_open) {
@@ -343,8 +347,9 @@ HTML;
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
-            "gradeable" => $gradeable,
-            "num_users" => $num_users
+            "num_users" => $num_users,
+            "components" => $gradeable->getComponents(),
+            "sections" => $sections
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");

@@ -3,32 +3,56 @@
         <table class="table table-striped table-bordered persist-area">
             <thead class="persist-thead">
             <tr>
-                <td width="33%">Component</td>
+                <td width="33%"><b>By Section</b></td>
                 <td width="33%">Average</td>
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
-            {% set i = 0 %}
-            {% for component in gradeable.getComponents() %}
+            {% for section in sections %}
+                {% if not component.getIsText() %}
+                    <tbody>
+                        <tr>
+                            <td>{{ section }}</td>
+                            <td id="avg-section-{{ section }}"></td>
+                            <td id="stddev-section-{{ section }}"></td>
+                        </tr>
+                    </tbody>
+                {% endif %}
+            {% endfor %}
+            <thead class="persist-thead">
+            <tr>
+                <td><b>By Component</b></td>
+                <td colspan="2"></td>
+            </tr>
+            </thead>
+            {% for component in components %}
                 {% if not component.getIsText() %}
                     <tbody>
                         <tr>
                             <td>{{ component.getTitle() }}</td>
-                            <td id="avg-{{ i }}"></td>
-                            <td id="stddev-{{ i }}"></td>
+                            <td id="avg-component-{{ loop.index0 }}"></td>
+                            <td id="stddev-component-{{ loop.index0 }}"></td>
                         </tr>
                     </tbody>
-                    {% set i = i + 1 %}
                 {% endif %}
             {% endfor %}
-            <tbody><tr>
-                <td>Total</td>
-                <td id="avg-t"></td>
-                <td id="stddev-t"></td>
-            </tr></tbody>
+            <thead class="persist-thead">
+            <tr>
+                <td width="33%"><b>Total</b></td>
+                <td width="33%" id="avg-total"></td>
+                <td width="33%" id="stddev-total"></td>
+            </tr>
+            </thead>
         </table>
-        <p><br></p>
-        <p id="num-graded"></p>
+        <br>
+        <table class="table table-striped table-bordered persist-area">
+            <tbody>
+            <tr>
+                <td width="50%">Students with a nonzero grade</td>
+                <td width="50%" id="num-graded"></td>
+            </tr>
+            </tbody>
+        </table>
     {% else %}
         <p style="text-align: center">No Statistics To View.</p>
     {% endif %}
