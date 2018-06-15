@@ -50,6 +50,14 @@ WHERE user_id=?", array($user_id));
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
+        $orderBy="";
+        if($section_key == "registration_section") {
+          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+        }
+        else {
+          $orderBy = "u.{$section_key}, u.user_id";
+        }
+        
         $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
@@ -58,7 +66,7 @@ LEFT JOIN (
 	FROM grading_registration
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
-ORDER BY u.{$section_key}, u.user_id");
+ORDER BY {$orderBy}");
         $return = array();
         foreach ($this->course_db->rows() as $user) {
             if (isset($user['grading_registration_sections'])) {
@@ -79,7 +87,7 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_group < 4
-ORDER BY u.registration_section, u.user_id");
+ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id");
         $return = array();
         foreach ($this->course_db->rows() as $user) {
             if (isset($user['grading_registration_sections'])) {
@@ -437,7 +445,12 @@ WHERE ".implode(" AND ", $where);
         }
         $order_by = [];
         if ($user_ids !== null) {
-            $order_by[] = "u.{$section_key}";
+            if ($section_key == "rotating_section") { 
+              $order_by[] = "u.rotating_section";
+            }
+            else if ($section_key == "registration_section"){
+              $order_by[] = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')";
+            }  
             $order_by[] = $sort_key;
         }
         $order_by = array_merge($order_by, $extra_order_by);

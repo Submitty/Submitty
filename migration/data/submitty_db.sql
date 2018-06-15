@@ -51,9 +51,9 @@ CREATE TABLE courses (
 CREATE TABLE mapped_courses (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
-    registration_section integer NOT NULL,
+    registration_section character varying(255) NOT NULL,
     mapped_course character varying(255) NOT NULL,
-    mapped_section integer NOT NULL
+    mapped_section character varying(255) NOT NULL
 );
 
 
@@ -81,7 +81,7 @@ CREATE TABLE courses_users (
     course character varying(255) NOT NULL,
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
-    registration_section integer,
+    registration_section character varying(255),
     manual_registration boolean DEFAULT false,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );

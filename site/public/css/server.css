@@ -629,7 +629,7 @@ table tr.table-header {
 .badge {
     float: left;
     display: inline-block;
-    width: 70px;
+    min-width: 70px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
@@ -853,6 +853,34 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.cat-buttons {
+    background-color: #FFF;
+}
+
+.cat-selected {
+    -webkit-transition:background 1s;
+    -moz-transition:background 1s;
+    -o-transition:background 1s;
+    transition:background 1s
+}
+
+.cat-selected:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+.cat-notselected {
+    -webkit-transition:background 1s;
+    -moz-transition:background 1s;
+    -o-transition:background 1s;
+    transition:background 1s
+}
+
+.cat-notselected:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
 .rainbow {
     background: -moz-linear-gradient( left ,
     rgba(255, 0, 0, 1) 0%,
@@ -983,6 +1011,39 @@ textarea.comment_display {
 /*
 end of styles used in the admin gradeable page
 */
+
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#hotkeys-list td {
+    padding: 4px;
+}
+
+.remap-button {
+    width: 100%;
+    text-align: center;
+}
+
+
+
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }

@@ -368,7 +368,7 @@ if [ ${WORKER} == 0 ]; then
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
 fi
 
 ################################################################################################################
@@ -477,9 +477,9 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd > /dev/null
 
-mkdir -p ${clanginstall}
-
 # building clang ASTMatcher.cpp
+mkdir -p ${clanginstall}
+mkdir -p ${clangbuild}
 pushd ${clangbuild}
 # TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
 cmake .
@@ -511,18 +511,21 @@ fi
 # Build & Install Lichen Modules
 
 lichen_repo_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
-lichen_installation_dir=${SUBMITTY_INSTALL_DIR}/Lichen
+min_lichen_version=v.18.06.00
 
-mkdir -p ${lichen_installation_dir}/bin
-
-pushd ${lichen_repo_dir}
-clang++ -I ${nlohmann_dir}/include/ -std=c++11 -Wall tokenizer/plaintext/plaintext_tokenizer.cpp -o ${lichen_installation_dir}/bin/plaintext_tokenizer.out
+pushd ${lichen_repo_dir} > /dev/null
+git merge-base --is-ancestor "${min_lichen_version}" HEAD
+if [ $? -ne 0 ]; then
+    git status
+    git log
+    echo -e "ERROR: Submitty/Lichen repository history does not contain version ${min_lichen_version}"
+    echo -e "   Run 'git fetch' to get the tags from github."
+    echo -e "   Also check to be sure your current branch is up-to-date."
+    exit 1
+fi
 popd > /dev/null
 
-chown -R root:root ${lichen_installation_dir}
-chmod 755 ${lichen_installation_dir}
-chmod 755 ${lichen_installation_dir}/bin
-chmod 755 ${lichen_installation_dir}/bin/*
+${lichen_repo_dir}/install_lichen.sh
 
 
 ################################################################################################################

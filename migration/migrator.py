@@ -19,7 +19,7 @@ import psycopg2
 VERSION = "1.1.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
-ENVIRONMENTS = [path.name for path in MIGRATIONS_PATH.iterdir()]
+ENVIRONMENTS = ['master', 'system', 'course']
 
 
 def parse_args():
@@ -37,6 +37,8 @@ def parse_args():
     sub = subparsers.add_parser('create', help='Create migration')
     sub.add_argument('name', help='Name of argument')
     sub = subparsers.add_parser('migrate', help='Run migrations')
+    sub.add_argument('--single', action='store_true', default=False, dest='single',
+                     help='Only run one migration')
     sub.add_argument('--fake', action='store_true', default=False, dest='set_fake',
                      help='Mark migrations as run without actually running them')
     sub.add_argument('--initial', action='store_true', default=False,
@@ -45,9 +47,13 @@ def parse_args():
     args = parser.parse_args()
     if args.environments is None:
         args.environments = ENVIRONMENTS
-    # make sure the order is of 'system', 'master', 'course' (which is reverse alphabetical)
-    args.environments.sort()
-    args.environments.reverse()
+    # make sure the order is of 'master', 'system', 'course' depending on what environments have been selected
+    # system must be run after master initially as system relies on master DB being setup for migration table
+    environments = []
+    for env in ENVIRONMENTS:
+        if env in args.environments:
+            environments.append(env)
+    args.environments = environments
     return args
 
 
@@ -93,7 +99,7 @@ def handle_migration(args):
         database = json.load(open_file)
 
     for environment in args.environments:
-        if environment in ['system', 'master']:
+        if environment in ['master', 'system']:
             params = {
                 'dbname': 'submitty',
                 'host': database['database_host'],
@@ -162,6 +168,8 @@ def migrate_environment(connection, environment, args):
         for key in keys:
             if migrations[key]['status'] == 0:
                 run_migration(connection, migrations[key], environment, args)
+                if args.single:
+                    break
     else:
         for key in reversed(list(migrations.keys())):
             if migrations[key]['status'] == 1:

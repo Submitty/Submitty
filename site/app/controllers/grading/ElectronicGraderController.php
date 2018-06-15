@@ -605,7 +605,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
 
-            $reg_section = $_POST['reg_section'] === "NULL" ? null : intval($_POST['reg_section']);
+            $reg_section = $_POST['reg_section'] === "NULL" ? null : $_POST['reg_section'];
             $rot_section = $_POST['rot_section'] === "NULL" ? null : intval($_POST['rot_section']);
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section);
@@ -668,7 +668,7 @@ class ElectronicGraderController extends GradingController {
         //overwrite sections if they are available in the post
         if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
             if ($gradeable->isGradeByRegistration()) {
-                $registration_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
+                $registration_section = $_POST['section'] === "NULL" ? null : $_POST['section'];
             }
             else {
                 $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
@@ -1094,7 +1094,7 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $count = $_REQUEST['count'];
+        $index = $_REQUEST['index'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         
 
@@ -1109,7 +1109,7 @@ class ElectronicGraderController extends GradingController {
         //display hidden testcases only if the user can view the entirety of this gradeable.
         if($this->canIViewThis($gradeable, $who_id)){
             $can_view_hidden = $this->canIviewThis($gradeable, $who_id, $hidden=true);
-            $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, $popup_css, $can_view_hidden);
+            $return = AutogradingView::loadAutoChecks($gradeable, $index, $who_id, $popup_css, $can_view_hidden);
         }
         //Returns the html to ajax.
         echo($return);

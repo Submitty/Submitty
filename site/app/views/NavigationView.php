@@ -50,6 +50,13 @@ HTML;
 HTML;
         }
         // ======================================================================================
+        // LATE DAYS TABLE BUTTON
+        // ======================================================================================
+
+        $return .= <<<HTML
+        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table'))}">Show my late days information</a>
+HTML;
+        // ======================================================================================
         // FORUM BUTTON
         // ====================================================================================== 
         
@@ -628,6 +635,16 @@ HTML;
                 else {
                     $admin_button = "";
                 }
+                if (($this->core->getUser()->accessAdmin()) && ($g_data->getType() == GradeableType::ELECTRONIC_FILE)) {
+                    $admin_rebuild_button = <<<HTML
+                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable))}">
+                    Rebuild
+                </a>
+HTML;
+                }
+                else {
+                    $admin_rebuild_button = "";
+                }
                 if ($title_save === "ITEMS BEING GRADED" && $this->core->getUser()->accessAdmin()) {
                     $quick_links = <<<HTML
                         <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable, 'quick_link_action' => 'release_grades_now'))}">
@@ -676,6 +693,7 @@ HTML;
                     $return .= <<<HTML
                 <td style="padding: 20px;">{$gradeable_grade_range}</td>
                 <td style="padding: 20px;">{$admin_button}</td>
+                <td style="padding: 20px;">{$admin_rebuild_button}</td>
                 <td style="padding: 20px;">{$quick_links}</td>
 HTML;
                 }
