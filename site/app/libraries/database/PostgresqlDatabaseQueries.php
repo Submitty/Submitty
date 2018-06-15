@@ -445,7 +445,12 @@ WHERE ".implode(" AND ", $where);
         }
         $order_by = [];
         if ($user_ids !== null) {
-            $order_by[] = "u.{$section_key}";
+            if ($section_key == "rotating_section") { 
+              $order_by[] = "u.rotating_section";
+            }
+            else if ($section_key == "registration_section"){
+              $order_by[] = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')";
+            }  
             $order_by[] = $sort_key;
         }
         $order_by = array_merge($order_by, $extra_order_by);
