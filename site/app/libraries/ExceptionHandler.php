@@ -118,22 +118,22 @@ class ExceptionHandler {
             }
         }
 
-        if ($log_exception) {
+       if ($log_exception) {
             Logger::fatal($message);
         }
 
-        //if (static::$display_exceptions) {
+        if (static::$display_exceptions) {
             return $message;
-      // }
-       // else if ($display_message) {
+        }
+        else if ($display_message) {
             return $exception->getMessage();
-       // }
-       // else {
+        }
+        else {
             return <<<HTML
 An exception was thrown. Please contact an administrator about what you were doing that caused this exception.
 
 HTML;
-        //}
+        }
     }
     
     /**
