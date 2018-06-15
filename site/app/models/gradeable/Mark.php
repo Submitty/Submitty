@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\models\AbstractModel;
 
@@ -58,7 +59,7 @@ class Mark extends AbstractModel {
      */
     private function setComponent(Component $component) {
         if ($component === null) {
-            throw new \InvalidArgumentException('Component Cannot be null!');
+            throw new ValidationException('Invalid component', ['component', 'Component Cannot be null!']);
         }
         $this->component = $component;
     }
@@ -71,7 +72,7 @@ class Mark extends AbstractModel {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
-            throw new \InvalidArgumentException('Mark Id must be an integer >= 0');
+            throw new ValidationException('Invalid mark id', ['id' => 'Mark Id must be an integer >= 0']);
         }
     }
 
@@ -88,7 +89,7 @@ class Mark extends AbstractModel {
         if (is_numeric($points)) {
             $this->points = $this->getComponent()->getGradeable()->roundPointValue($points);
         } else {
-            throw new \InvalidArgumentException('Mark points must be a number!');
+            throw new ValidationException('Invalid point value', ['points' => 'Mark points must be a number!']);
         }
     }
 }
