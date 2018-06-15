@@ -157,6 +157,20 @@ class Component extends AbstractModel {
             }
         }
 
+        //
+        // NOTE: The function `Utils::compareNullableGt(a,b)` in this context is called so that
+        //          it returns TRUE if the two values being compared are incompatible.  If the function
+        //          returns FALSE then either the condition a>b is false, or one of the values are null.
+        //          THIS NULL CASE MUST BE HANDLED IN SOME OTHER WAY.  As you can see, this is achieved by
+        //          null checks in the above foreach loop.
+        //
+        //    i.e. if 'lower_clamp' > 'default', then set an error, but if 'lower_clamp' <= 'default' there is no error
+        //      In the case that either 'lower_clamp' or 'default' are null, the function will return
+        //      FALSE.  In the above foreach loop, if any of the properties are null, then an error gets
+        //      assigned to that property name.  Any of the below comparisons involving that property are irrelevant
+        //      because comparisons involving null values are irrelevant.
+        //
+
         if (Utils::compareNullableGt($points['lower_clamp'], $points['default'])) {
             $errors['lower_clamp'] = 'Lower clamp can\'t be more than default!';
         }

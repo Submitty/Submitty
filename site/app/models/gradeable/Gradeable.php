@@ -288,6 +288,23 @@ class Gradeable extends AbstractModel {
         //  or the parsing failed.  In either case, this is an appropriate message
         $invalid_format_message = 'Invalid date-time value!';
 
+        //
+        // NOTE: The function `Utils::compareNullableGt(a,b)` in this context is called so that
+        //          it returns TRUE if the two values being compared are incompatible.  If the function
+        //          returns FALSE then either the condition a>b is false, or one of the values are null.
+        //          THIS NULL CASE MUST BE HANDLED IN SOME OTHER WAY.  As you can see, this is achieved by
+        //          null checks for each date before the comparisons are made.
+        //
+        //    i.e. in the expression 'Utils::compareNullableGt($ta_view_start_date, $submission_open_date)'
+        //      if 'ta_view_start_date' > 'submission_open_date', then the function will return TRUE and
+        //          we set an error for 'ta_view_start_date', but
+        //      if 'ta_view_start_date' <= 'submission_open_date', then the two values are compatible: no error
+        //      In the case that either value is null, the function will return FALSE.  The comparison becomes
+        //      irrelevant and the conditions:
+        //          '$ta_view_start_date === null' and/or '$submission_open_date === null' will set errors
+        //          for those values appropriately
+        //
+
         $ta_view_start_date = $dates['ta_view_start_date'];
         $grade_start_date = $dates['grade_start_date'];
         $grade_released_date = $dates['grade_released_date'];
