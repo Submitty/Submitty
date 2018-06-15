@@ -426,7 +426,7 @@ class DiffViewer {
                 foreach ($this->diff[$type][$i] as $diff) {
                     $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
 					$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                    if($option == "original"){
+                    if($option == "original" || $i == 0 || $i == count($lines)-1){
 						$html .= $html_orig;
 						$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
 					} else if($option == "no_empty") {
@@ -435,16 +435,16 @@ class DiffViewer {
 						$html .= $html_no_empty;
 						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
 					}
-//                    $html .= "<div class='orig_output' style='display: none'><span class='highlight-char'>".$html_orig."</span></div>";
                     $current = $diff[1]+1;
                 }
                 $html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
             }
             else {
                 if (isset($lines[$i])) {
-                    $html .= $option == "original" ? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
+                    $html .= $option == "original" || $i==0 || $i == count($lines)-1? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
                 }
             }
+			if($option == "no_empty" && $i != 0 && $i != count($lines)-1) $html .= '<span style="border: 1px solid blue">&#9166;</span>';
             $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {
@@ -463,16 +463,14 @@ class DiffViewer {
                 $start = null;
                 $html .= "\t</div>\n";
             }
-
         }
         $html .= "</div></div>\n";
         return $html;
     }
 
     private function replaceEmptyChar($html){
-		$return = str_replace('	', '&#11134', $html);
-		$return = str_replace(' ', '&#183;', $return);
-		$return = str_replace('\r\n', '&#9166;', $return);
+		$return = str_replace(' ', '<span style="border: 1px solid blue">&#183;</span>', $html);
+		$return = str_replace('	', '<span style="border: 1px solid blue">&#11134;</span>', $return);
 		return $return;
 	}
 
