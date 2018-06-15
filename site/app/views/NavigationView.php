@@ -206,6 +206,8 @@ HTML;
         return $return;
     }
 
+    //Tests for if we have the various buttons
+
     /**
      * @param Gradeable $gradeable
      * @return bool
@@ -304,7 +306,39 @@ HTML;
      */
     private function getTeamButton(Gradeable $gradeable): string {
         // Team management button, only visible on team assignments
-        list($team_button_type, $team_display_date, $team_button_text) = $this->getTeamButtonTitle($gradeable);
+        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $past_lock_date = $date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
+
+        if ($past_lock_date) {
+            $team_display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
+        } else {
+            $team_display_date = '';
+        }
+
+        if ($gradeable->getTeam() === null) {
+            if ($past_lock_date) {
+                $team_button_type = 'btn-primary';
+            } else {
+                $team_button_type = 'btn-danger';
+            }
+            $team_button_text = 'CREATE TEAM';
+            $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
+            foreach ($teams as $t) {
+                if ($t->sentInvite($this->core->getUser()->getId())) {
+                    $team_button_text = 'CREATE/JOIN TEAM';
+                    break;
+                }
+            }
+        } else {
+            if ($past_lock_date) {
+                $team_button_type = 'btn-primary';
+                $team_button_text = 'MANAGE TEAM';
+            } else {
+                $team_button_type = 'btn-default';
+                $team_button_text = 'VIEW TEAM';
+            }
+        }
+
         $gradeable_team_range = <<<HTML
                 <a class="btn {$team_button_type}" style="width:100%;"
                 href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team'))}">
@@ -342,7 +376,21 @@ HTML;
         if ($gradeable->getActiveVersion() > 0 && ($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED)) {
             $submit_display_date = "";
         }
-        $submit_button_text = $this->getSubmitButtonTitle($gradeable, $list_section);
+
+        $submit_button_text = self::gradeableSections[self::sectionMap[$list_section]]["prefix"];
+        if ($gradeable->getActiveVersion() >= 1 && $list_section == self::OPEN) {
+            //if the user submitted something on time
+            $submit_button_text = "RESUBMIT";
+        } else if ($gradeable->getActiveVersion() >= 1 && $list_section == self::CLOSED) {
+            //if the user submitted something past time
+            $submit_button_text = "LATE RESUBMIT";
+        } else if (($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED) && $gradeable->getActiveVersion() < 1) {
+            //to change the text to overdue submission if nothing was submitted on time
+            $submit_button_text = "OVERDUE SUBMISSION";
+        } else if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded()) {
+            //when there is no TA grade and due date passed
+            $submit_button_text = "TA GRADE NOT AVAILABLE";
+        }
 
         if ($gradeable->hasConfig()) {
             //calculate the point percentage
@@ -382,25 +430,13 @@ HTML;
                 && ($list_section == self::CLOSED || $list_section == self::OPEN)) {
 
                 if ($points_percent >= 50) {
-                    $gradeable_open_range .= <<<HTML
-								<div class="meter">
-  									<span style="width: {$points_percent}%"></span>
-								</div>				 
-HTML;
+                    $gradeable_open_range .= $this->getProgressBar($points_percent);
                 } else {
                     //Give them an imaginary progress point
                     if ($gradeable->getGradedNonHiddenPoints() == 0) {
-                        $gradeable_open_range .= <<<HTML
-									<div class="meter">
-	  								<span style="width: 2%"></span>
-									</div>					 
-HTML;
+                        $gradeable_open_range .= $this->getProgressBar(2);
                     } else {
-                        $gradeable_open_range .= <<<HTML
-									<div class="meter">
-	  								<span style="width: {$points_percent}%"></span>
-								</div>					 
-HTML;
+                        $gradeable_open_range .= $this->getProgressBar($points_percent);
                     }
                 }
             }
@@ -483,11 +519,7 @@ HTML;
                 }
                 //Give the TAs a progress bar too
                 if (($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED) && $components_total != 0 && $gradeable->useTAGrading()) {
-                    $gradeable_grade_range .= <<<HTML
-                            <div class="meter">
-                                <span style="width: {$TA_percent}%"></span>
-                            </div>               
-HTML;
+                    $gradeable_grade_range .= $this->getProgressBar($TA_percent);
                 }
             } else {
                 $gradeable_grade_range = <<<HTML
@@ -586,30 +618,6 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $list_section
-     * @return string
-     */
-    private function getSubmitButtonTitle(Gradeable $gradeable, string $list_section): string {
-        $prefix = self::gradeableSections[self::sectionMap[$list_section]]["prefix"];
-        if ($gradeable->getActiveVersion() >= 1 && $list_section == self::OPEN) {
-            //if the user submitted something on time
-            $prefix = "RESUBMIT";
-        } else if ($gradeable->getActiveVersion() >= 1 && $list_section == self::CLOSED) {
-            //if the user submitted something past time
-            $prefix = "LATE RESUBMIT";
-        } else if (($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED) && $gradeable->getActiveVersion() < 1) {
-            //to change the text to overdue submission if nothing was submitted on time
-            $prefix = "OVERDUE SUBMISSION";
-        } else if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded()) {
-            //when there is no TA grade and due date passed
-            $prefix = "TA GRADE NOT AVAILABLE";
-        }
-
-        return $prefix;
-    }
-
-    /**
-     * @param Gradeable $gradeable
      * @return array
      */
     private function getTAPercent(Gradeable $gradeable): array {
@@ -701,45 +709,12 @@ HTML;
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @return array
+     * @param float $percent
+     * @return string
      */
-    private function getTeamButtonTitle(Gradeable $gradeable): array {
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        $past_lock_date = $date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
-
-        if ($past_lock_date) {
-            $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
-        } else {
-            $display_date = '';
-        }
-
-        if ($gradeable->getTeam() === null) {
-            if ($past_lock_date) {
-                $button_type = 'btn-primary';
-            } else {
-                $button_type = 'btn-danger';
-            }
-            $button_text = 'CREATE TEAM';
-            $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
-            foreach ($teams as $t) {
-                if ($t->sentInvite($this->core->getUser()->getId())) {
-                    $button_text = 'CREATE/JOIN TEAM';
-                    break;
-                }
-            }
-        } else {
-            if ($past_lock_date) {
-                $button_type = 'btn-primary';
-                $button_text = 'MANAGE TEAM';
-            } else {
-                $button_type = 'btn-default';
-                $button_text = 'VIEW TEAM';
-            }
-        }
-        return array($button_type, $display_date, $button_text);
+    private function getProgressBar(float $percent):string {
+        return "<div class=\"meter\"><span style=\"width: {$percent}%\"></span></div>";
     }
-
 
     public function deleteGradeableForm() {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
