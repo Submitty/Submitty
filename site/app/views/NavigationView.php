@@ -140,16 +140,6 @@ HTML;
         $return .= <<<HTML
     <table class="gradeable_list" style="width:100%;">
 HTML;
-        //What bootstrap button the student button will be. Information about bootstrap buttons can be found here:
-        //https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
-        $title_to_button_type_submission = array(
-            self::FUTURE => "btn-default",
-            self::BETA => "btn-default",
-            self::OPEN => "btn-primary",
-            self::CLOSED => "btn-danger",
-            self::ITEMS_BEING_GRADED => "btn-default",
-            self::GRADED => 'btn-success'
-        );
 
         $found_assignment = false;
         foreach ($sections_to_list as $list_section => $gradeable_list) {
@@ -170,19 +160,19 @@ HTML;
         <tr class="colspan nav-title-row" id="{$section_id}"><td colspan="4">{$this::gradeableSections[$index]["title"]}</td></tr>
         <tbody id="{$section_id}_tbody">
 HTML;
-            $btn_title_save = $title_to_button_type_submission[$display_section];
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
                 $display_section = $list_section;
 
-                $button_type_submission = $title_to_button_type_submission[$list_section];
+                $button_type_submission = self::gradeableSections[$index]["button_type_submission"];
                 if ($gradeable->getActiveVersion() < 1) {
                     if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
                         $display_section = self::CLOSED;
+                        $button_type_submission = "btn-danger";
                     }
                 }
-                if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null) {
-                    $title_to_button_type_submission[self::GRADED] = "btn-default";
+                if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null && $list_section === self::GRADED) {
+                    $button_type_submission = "btn-default";
                 }
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")</span>";
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
@@ -215,10 +205,11 @@ HTML;
                         $display_date = "";
                     }
                     $button_text = $this->getSubmitButtonTitle($gradeable, $display_section, $list_section, $display_date);
-                    if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded()) {
-                        $title_to_button_type_submission[self::GRADED] = "btn-default";
-                    } else if ($list_section == self::GRADED && !$gradeable->useTAGrading()) {
-                        $title_to_button_type_submission[self::GRADED] = "btn-default";
+
+                    if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded() && $gradeable->getActiveVersion() > 0) {
+                        $button_type_submission = "btn-default";
+                    } else if ($list_section == self::GRADED && !$gradeable->useTAGrading() && $gradeable->getActiveVersion() > 0) {
+                        $button_type_submission = "btn-default";
                     }
                     if ($gradeable->hasConfig()) {
                         //calculate the point percentage
@@ -233,7 +224,7 @@ HTML;
                         }
                         if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
                             $gradeable_open_range = <<<HTML
-                <a class="btn {$title_to_button_type_submission[$display_section]} btn-nav" disabled>
+                <a class="btn {$button_type_submission} btn-nav" disabled>
                      MUST BE ON A TEAM TO SUBMIT{$display_date}
                 </a>
 HTML;
@@ -246,7 +237,7 @@ HTML;
 HTML;
                         } else {
                             $gradeable_open_range = <<<HTML
-                 <a class="btn {$title_to_button_type_submission[$display_section]} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
+                 <a class="btn {$button_type_submission} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
                      {$button_text}
                  </a>
 HTML;
@@ -316,7 +307,7 @@ HTML;
                         }
                     } else {
                         $gradeable_open_range = <<<HTML
-                 <button class="btn {$title_to_button_type_submission[$display_section]}" style="width:100%;" disabled>
+                 <button class="btn {$button_type_submission}" style="width:100%;" disabled>
                      Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
                  </button>
 HTML;
