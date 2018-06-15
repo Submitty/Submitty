@@ -29,16 +29,22 @@ function buildUrl(parts) {
 function changeDiffView(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name;
     div_name = "#" + div_name;
-    var actual_div = $(div_name).children()[1].children[0].children[1];
-    var expected_div = $(div_name).children()[1].children[1].children[1];
+    var actual_div = $(div_name).children()[2].children[0].children[1];
+    var expected_div = $(div_name).children()[2].children[1].children[1];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
         ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index};
-
-    if($("#show_char_"+index).text() != "Hide white spaces"){
+    $("#white_space_helper").empty();
+    if($("#show_char_"+index).text() == "Show white spaces"){
         $("#show_char_"+index).removeClass('btn-default');
         $("#show_char_"+index).addClass('btn-primary');
-        $("#show_char_"+index).html("Hide white spaces");
-        args['option'] = 'no_empty'
+        $("#show_char_"+index).html("Show escape characters");
+
+        $("#white_space_helper").html("→→→→ = tabs, &#9166 = newline, ↵ = carriage return, &#183 = space");
+        args['option'] = 'with_unicode'
+    } else if($("#show_char_"+index).text() == "Show escape characters"){
+        $("#show_char_"+index).html("Original View");
+        $("#white_space_helper").html("\\t = tabs, \\n = newline, \\r = carriage return, &#183 = space");
+        args['option'] = 'with_escape'
     } else {
         $("#show_char_"+index).removeClass('btn-primary');
         $("#show_char_"+index).addClass('btn-default');

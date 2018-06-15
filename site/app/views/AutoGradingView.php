@@ -83,6 +83,9 @@ class AutogradingView extends AbstractView {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
+            $return .= <<<HTML
+				<div id="white_space_helper"></div>
+HTML;
             if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf" && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
                 $url = "http" . (isset($_SERVER['HTTPS']) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 $url = preg_replace('/&component.*/', '', $url);

@@ -74,7 +74,7 @@ class ElectronicGraderController extends GradingController {
 		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
 		$gradeable->loadResultDetails();
 		$testcase = $gradeable->getTestcases()[$_REQUEST['index']];
-		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'no_empty';
+		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'original';
 		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
 		foreach ($testcase->getAutochecks() as $autocheck) {
 			$diff_viewer = $autocheck->getDiffViewer();

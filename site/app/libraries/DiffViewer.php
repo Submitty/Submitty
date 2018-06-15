@@ -429,9 +429,14 @@ class DiffViewer {
                     if($option == "original"){
 						$html .= $html_orig;
 						$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
-					} else if($option == "no_empty") {
+					} else if($option == "with_unicode") {
 						$html_no_empty = $this->replaceEmptyChar($html_orig);
 						$html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
+						$html .= $html_no_empty;
+						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+					} else if($option == "with_escape") {
+						$html_no_empty = $this->replaceEmptyCharWEscape($html_orig);
+						$html_no_empty_error = $this->replaceEmptyCharWEscape($html_orig_error);
 						$html .= $html_no_empty;
 						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
 					}
@@ -441,10 +446,20 @@ class DiffViewer {
             }
             else {
                 if (isset($lines[$i])) {
-                    $html .= $option == "original"? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
+                	if($option == "original"){
+                		$html .= htmlentities($lines[$i]);
+					} else if($option == "with_unicode"){
+                		$html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
+					} else if($option == "with_escape"){
+						$html .= $this->replaceEmptyCharWEscape(htmlentities($lines[$i]));
+					}
                 }
             }
-			if($option == "no_empty") $html .= '<span style="border: 1px solid blue">&#9166;</span>';
+			if($option == "with_unicode"){
+				$html .= '<span style="border: 1px solid blue">&#9166;</span>';
+			} else if($option == "with_escape"){
+				$html .= '<span style="border: 1px solid blue">\\n</span>';
+			}
             $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {
@@ -473,6 +488,14 @@ class DiffViewer {
 		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return);
 //		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵\n</span>', $return);
 		$return = str_replace('	', '<span style="outline:1px blue solid;">→→→→</span>', $return);
+		return $return;
+	}
+
+	private function replaceEmptyCharWEscape($html){
+		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html);
+		$return = str_replace("\r", '<span style="outline:1px blue solid;">\\r<br></span>', $return);
+//		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵\n</span>', $return);
+		$return = str_replace('	', '<span style="outline:1px blue solid;">\t</span>', $return);
 		return $return;
 	}
 
