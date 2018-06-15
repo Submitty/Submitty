@@ -147,6 +147,7 @@ pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
+pip3 install PyPDF2
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
@@ -191,13 +192,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -413,6 +413,19 @@ fi
 
 
 #################################################################
+# RainbowGrades SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
+    echo 'Submitty/RainbowGrades git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+fi
+
+
+
+#################################################################
 # BUILD CLANG SETUP
 #################
 
@@ -492,7 +505,7 @@ fi
 if [ ${WORKER} == 0 ]; then
     hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
     PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 fi
 
 echo Beginning Install Submitty Script

@@ -111,6 +111,13 @@ HTML;
             }
         }
 
-        return $output;
+        return $this->core->getOutput()->renderTwigTemplate("admin/UploadConfigForm.twig", [
+            "all_files" => $all_files,
+            "target_dir" => $target_dir,
+            "has_last_build_output" => $has_last_build_output,
+            "course" => $course,
+            "build_script_output_file" => $build_script_output_file,
+            "contents" => $contents,
+        ]);
     }
 }

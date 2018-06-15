@@ -26,7 +26,7 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -36,7 +36,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
         $(div_name).empty();
     }else{
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
 
         $.ajax({
             url: url,
@@ -1279,16 +1279,17 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
-function modifyThreadList(currentThreadId, currentCategoryId){
-    var category_value = $( "#thread_category option:selected").val();
+function modifyThreadList(currentThreadId, currentCategoriesId){
+    var categories_value = $("#thread_category").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                thread_category: category_value,
+                thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoryId: currentCategoryId
+                currentCategoriesId: currentCategoriesId
             },
             success: function(r){
                var x = JSON.parse(r).html;
