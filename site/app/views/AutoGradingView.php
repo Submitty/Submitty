@@ -70,6 +70,7 @@ class AutogradingView extends AbstractView {
 
     public static function loadAutoChecks(Gradeable $gradeable, $index, $who_id, $popup_css_file, $show_hidden = false) {
         $gradeable->loadResultDetails();
+        $gradeable_id = $gradeable->getId();
         $testcase = $gradeable->getTestcases()[$index];
         $return = "";
 
@@ -90,6 +91,11 @@ class AutogradingView extends AbstractView {
                 $file_path = urlencode($file_path);
                 $return .= '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
             } else {
+            	if($description != "STDERR.txt" && $description != "Execution Logfile") {
+					$return .= <<<HTML
+			<a id="show_char_$index" class="btn btn-default" style="float:right;" onclick="changeDiffView('testcase_$index', '$gradeable_id', '$who_id', '$index')">Show empty chars</a>
+HTML;
+				}
                 $return .= <<<HTML
     <div class="box-block">
     <!-- Readded css here so the popups have the css -->

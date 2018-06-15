@@ -69,26 +69,25 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function ajaxRemoveEmpty(){
+    	//TODO: Need to add checks?
 		$gradeable_id = $_REQUEST['gradeable_id'];
 		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
 		$gradeable->loadResultDetails();
 		$testcase = $gradeable->getTestcases()[$_REQUEST['index']];
 		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'no_empty';
 		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
-		if($testcase->isHidden()){
-			return "";
-		}
 		foreach ($testcase->getAutochecks() as $autocheck) {
 			$diff_viewer = $autocheck->getDiffViewer();
 		}
+		$this->core->getOutput()->useFooter(false);
+		$this->core->getOutput()->useHeader(false);
 		$html = "";
 		if($which == "actual"){
 			$html .= $diff_viewer->getDisplayActual($option);
 		} else {
 			$html .= $diff_viewer->getDisplayExpected($option);
 		}
-		$this->core->getOutput()->useFooter(false);
-		$this->core->getOutput()->useHeader(false);
+
 		echo $html;
 	}
 

@@ -29,8 +29,8 @@ function buildUrl(parts) {
 function changeDiffView(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name;
     div_name = "#" + div_name;
-    var actual_div = $(div_name).children()[0].children[0].children[1].children[0].children[0];
-    var expected_div = $(div_name).children()[0].children[1].children[1].children[0].children[0];
+    var actual_div = $(div_name).children()[1].children[0].children[1];
+    var expected_div = $(div_name).children()[1].children[1].children[1];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
         ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index};
 

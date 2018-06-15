@@ -47,7 +47,6 @@
     {% set can_view = (not testcase.isHidden() or show_hidden) %}
     {% if testcase.viewTestcase() %}
         <div class="box" {{ testcase.isHidden() and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
-            <a id="show_char_{{ loop.index0 }}" class="btn btn-default" style="float:right; display: none" onclick="changeDiffView('testcase_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '{{ loop.index0 }}')">Show empty chars</a>
             <div class="box-title" {{ testcase.hasDetails() and can_view ? "style='cursor: pointer;'" : "" }} onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '{{ loop.index0 }}');">
 
                 {# Details button #}

@@ -469,8 +469,10 @@ class DiffViewer {
     }
 
     private function replaceEmptyChar($html){
-		$return = str_replace(' ', '<span style="border: 1px solid blue">&#183;</span>', $html);
-		$return = str_replace('	', '<span style="border: 1px solid blue">&#11134;</span>', $return);
+		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html);
+		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return);
+//		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵\n</span>', $return);
+		$return = str_replace('	', '<span style="outline:1px blue solid;">→→→→</span>', $return);
 		return $return;
 	}
 
