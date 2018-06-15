@@ -154,11 +154,6 @@ HTML;
 
             $index = self::sectionMap[$list_section];
 
-            // temporary: want to make future - only visible to
-            //  instructor (not released for submission to graders)
-            //  and future - grader preview
-            //  (released to graders for submission)
-            //if ($title == self::FUTURE && !$this->core->getUser()->accessAdmin()) {
             $found_assignment = true;
             $section_id = str_replace(" ", "_", strtolower($list_section));
             $return .= <<<HTML
