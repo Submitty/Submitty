@@ -1357,7 +1357,7 @@ HTML;
           $first = true;
           $return = "";
           $display_further_action=true;
-          echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
+        //  echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
             $replyPlaceHolder = "Enter your reply here";
@@ -1399,12 +1399,12 @@ HTML;
         <div style="padding:20px;">
         <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
                                                        'action'=> 'make_request_post',
-                                                       'thread_id'=> $thread_id,
+                                                       'regrade_id'=> $thread_id,
                                                        'gradeable_id' => $gradeable->getId(),
                                                        'user_id' =>$this->core->getUser()->getId()
                                                       ))}">
             <textarea name = "replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{$replyPlaceHolder}" id="makeRequestPost" required></textarea>
-            <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right;">
+            <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
             <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
         </form>
 HTML;

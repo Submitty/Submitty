@@ -215,7 +215,12 @@
             {% if not gradeable.isFullyGraded() %}
                 {% set contents = "Grading Incomplete" %}
             {% else %}
-                {% set contents = "Version Conflict" %}
+                {% if gradeable.getRegradeStatus() == -1 %}
+                    {% set contents = "Regrade Requested" %}
+                    {% set btn_class = "btn-danger" %}
+                {% else %}
+                    {% set contents = "Version Conflict" %}
+                {% endif %}
             {% endif %}
         {% endif %}
     {% else %}

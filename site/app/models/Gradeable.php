@@ -85,6 +85,7 @@ use app\libraries\Utils;
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
+ * @method int getRegradeStatus()
  */
 class Gradeable extends AbstractModel {
     
@@ -1167,10 +1168,6 @@ class Gradeable extends AbstractModel {
             }
         }
         return $return;
-    }
-
-    public function getRegradeStatus(){
-        return $this->regrade_status;
     }
 
     /**
