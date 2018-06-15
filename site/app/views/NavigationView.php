@@ -215,11 +215,11 @@ HTML;
                 }
                 $gradeable_title = $this->getGradeableTitle($gradeable, $gradeable_id);
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                    $display_date = ($list_section == self::FUTURE || $list_section == self::BETA) ? "<br><span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<br><span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
+                    $submit_display_date = ($list_section == self::FUTURE || $list_section == self::BETA) ? "<br><span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<br><span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
                     if ($gradeable->getActiveVersion() > 0 && ($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED)) {
-                        $display_date = "";
+                        $submit_display_date = "";
                     }
-                    $button_text = $this->getSubmitButtonTitle($gradeable, $list_section, $display_date);
+                    $submit_button_text = $this->getSubmitButtonTitle($gradeable, $list_section, $submit_display_date);
 
                     if ($gradeable->hasConfig()) {
                         //calculate the point percentage
@@ -235,20 +235,20 @@ HTML;
                         if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
                             $gradeable_open_range = <<<HTML
                 <a class="btn {$button_type_submission} btn-nav" disabled>
-                     MUST BE ON A TEAM TO SUBMIT{$display_date}
+                     MUST BE ON A TEAM TO SUBMIT{$submit_display_date}
                 </a>
 HTML;
                         } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                             && $list_section == self::CLOSED && $points_percent >= 50) {
                             $gradeable_open_range = <<<HTML
                  <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
-                     {$button_text}
+                     {$submit_button_text}
                  </a>
 HTML;
                         } else {
                             $gradeable_open_range = <<<HTML
                  <a class="btn {$button_type_submission} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
-                     {$button_text}
+                     {$submit_button_text}
                  </a>
 HTML;
                         }
@@ -297,12 +297,12 @@ HTML;
                             REGRADE</a>
 HTML;
                         } else {
-                            $button_type = self::gradeableSections[self::sectionMap[$list_section]]["button_type_grading"];
+                            $grade_button_type = self::gradeableSections[self::sectionMap[$list_section]]["button_type_grading"];
                             if (!$gradeable->useTAGrading()) {
-                                $button_type = 'btn-default';
+                                $grade_button_type = 'btn-default';
                             }
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn {$button_type} btn-nav"
+                            <a class="btn {$grade_button_type} btn-nav"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id))}">
                             {$gradeable_grade_range}</a>
 HTML;
@@ -346,11 +346,11 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 if (($gradeable->isTeamAssignment())) {
-                    list($button_type, $display_date, $button_text) = $this->getTeamButtonTitle($gradeable);
+                    list($team_button_type, $team_display_date, $team_button_text) = $this->getTeamButtonTitle($gradeable);
                     $gradeable_team_range = <<<HTML
-                <a class="btn {$button_type}" style="width:100%;"
+                <a class="btn {$team_button_type}" style="width:100%;"
                 href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'))}">
-                {$button_text}{$display_date}
+                {$team_button_text}{$team_display_date}
 HTML;
                 }
                 if ($this->core->getUser()->accessAdmin()) {
