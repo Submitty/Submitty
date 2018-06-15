@@ -152,8 +152,7 @@ HTML;
         foreach ($sections_to_list as $list_section => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
 
-            $display_section = $list_section;
-            $index = self::sectionMap[$display_section];
+            $index = self::sectionMap[$list_section];
 
             // temporary: want to make future - only visible to
             //  instructor (not released for submission to graders)
@@ -161,7 +160,7 @@ HTML;
             //  (released to graders for submission)
             //if ($title == self::FUTURE && !$this->core->getUser()->accessAdmin()) {
             $found_assignment = true;
-            $section_id = str_replace(" ", "_", strtolower($display_section));
+            $section_id = str_replace(" ", "_", strtolower($list_section));
             $return .= <<<HTML
         <tr class="bar"><td colspan="10"></td></tr>
         <tr class="colspan nav-title-row" id="{$section_id}"><td colspan="4">{$this::gradeableSections[$index]["title"]}</td></tr>
@@ -169,13 +168,13 @@ HTML;
 HTML;
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
-                $display_section = $list_section;
-
                 $button_type_submission = self::gradeableSections[$index]["button_type_submission"];
+                $button_type_grading = self::gradeableSections[$index]["button_type_grading"];
+
                 if ($gradeable->getActiveVersion() < 1) {
-                    if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
-                        $display_section = self::CLOSED;
-                        $button_type_submission = "btn-danger";
+                    if ($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED) {
+                        $button_type_submission = self::gradeableSections[self::sectionMap[self::CLOSED]]["button_type_submission"];
+                        $button_type_grading = self::gradeableSections[self::sectionMap[self::CLOSED]]["button_type_grading"];
                     }
                 }
                 if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null && $list_section === self::GRADED) {
@@ -207,11 +206,11 @@ HTML;
                 }
                 $gradeable_title = $this->getGradeableTitle($gradeable, $gradeable_id);
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                    $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<br><span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<br><span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
-                    if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
+                    $display_date = ($list_section == self::FUTURE || $list_section == self::BETA) ? "<br><span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<br><span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
+                    if ($gradeable->getActiveVersion() > 0 && ($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED)) {
                         $display_date = "";
                     }
-                    $button_text = $this->getSubmitButtonTitle($gradeable, $display_section, $list_section, $display_date);
+                    $button_text = $this->getSubmitButtonTitle($gradeable, $list_section, $display_date);
 
                     if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded() && $gradeable->getActiveVersion() > 0) {
                         $button_type_submission = "btn-default";
@@ -319,7 +318,7 @@ HTML;
                  </button>
 HTML;
                         $gradeable_grade_range = <<<HTML
-                <button class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]}" style="width:100%;" disabled>
+                <button class="btn {$button_type_grading}" style="width:100%;" disabled>
                     Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
                 </button>
 HTML;
@@ -328,13 +327,13 @@ HTML;
                     $gradeable_open_range = '';
                     if ($gradeable->getType() == GradeableType::CHECKPOINTS) {
                         $gradeable_grade_range = <<<HTML
-                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav"
+                <a class="btn {$button_type_grading} btn-nav"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable_id))}">
                 {$gradeable_grade_range}</a>
 HTML;
                     } elseif ($gradeable->getType() == GradeableType::NUMERIC_TEXT) {
                         $gradeable_grade_range = <<<HTML
-                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav"
+                <a class="btn {$button_type_grading} btn-nav"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable_id))}">
                 {$gradeable_grade_range}</a>
 HTML;
@@ -463,14 +462,13 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $display_section
      * @param string $list_section
      * @param string $display_date
      * @return string
      */
-    private function getSubmitButtonTitle(Gradeable $gradeable, string $display_section, string $list_section, string $display_date): string {
-        $prefix = self::gradeableSections[self::sectionMap[$display_section]]["prefix"];
-        if ($gradeable->getActiveVersion() >= 1 && $display_section == self::OPEN) {
+    private function getSubmitButtonTitle(Gradeable $gradeable, string $list_section, string $display_date): string {
+        $prefix = self::gradeableSections[self::sectionMap[$list_section]]["prefix"];
+        if ($gradeable->getActiveVersion() >= 1 && $list_section == self::OPEN) {
             //if the user submitted something on time
             $prefix = "RESUBMIT";
         } else if ($gradeable->getActiveVersion() >= 1 && $list_section == self::CLOSED) {
