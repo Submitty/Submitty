@@ -308,36 +308,6 @@ HTML;
                 break;
             }
         }
-
-/*
-        $display = "none";
-        $current = $gradeable->getCurrentVersion();
-        if ($current !== null) {
-            $totalPointsEarned = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $totalInstructorPointsEarned;
-        } else {
-            //No submission, use the # of points from the TA grading
-            $totalPointsEarned = $gradeable->getGradedTAPoints();
-        }
-        $maxPossiblePoints = $gradeable->getTotalAutograderNonExtraCreditPoints() + $maxScore;
-        $background = "";
-        if($totalPointsEarned >= $maxPossiblePoints){
-            $background = "green-background";
-        }else if($totalPointsEarned > $maxPossiblePoints * 0.5){
-            $background = "yellow-background";
-        }else{
-            $background = "red-background";
-        }
-        $totalScore = $totalPointsEarned . " / " . $maxPossiblePoints;
-        $return .= <<<HTML
-            <div style="display: {$displayTotal}" class="box">
-                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
-                    <span class="badge {$background}"> {$totalScore}</span>
-                    <h4>Total</h4>
-                </div>
-            </div>
-        </div>
-HTML;
-    return $return;*/
         // Todo: this is a lot of math for the view
         //add total points if both autograding and instructor grading exist
         $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
