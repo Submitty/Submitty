@@ -77,7 +77,7 @@ class Component extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setTaComment($details['ta_comment']);
         $this->setStudentComment($details['student_comment']);
-        $this->setPoints($details['lower_clamp'], $details['default'], $details['max_value'], $details['upper_clamp']);
+        $this->setPoints($details);
         $this->setText($details['text']);
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
@@ -164,19 +164,11 @@ class Component extends AbstractModel {
      *
      * This will round the parameters to the precision of the gradeable
      *
-     * @param $lower_clamp string|float see property doc
-     * @param $default string|float see property doc
-     * @param $max_value string|float see property doc
-     * @param $upper_clamp string|float see property doc
+     * @param array $points A partial or complete array of floats or numeric strings indexed by component point property
      */
-    public function setPoints($lower_clamp, $default, $max_value, $upper_clamp) {
+    public function setPoints(array $points) {
         // Wrangle the input to ensure that they're all either floats are null
-        $points = $this->parsePoints([
-            'lower_clamp' => $lower_clamp,
-            'default' => $default,
-            'max_value' => $max_value,
-            'upper_clamp' => $upper_clamp
-        ]);
+        $points = $this->parsePoints($points);
 
         // Assert that the point values are valid
         $this->assertPoints($points);
