@@ -308,13 +308,13 @@ HTML;
                         //if $TA_percent is 100, change the text to REGRADE
                         if ($TA_percent == 100 && $list_section == self::ITEMS_BEING_GRADED) {
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn btn-default btn-nav" \\
+                            <a class="btn btn-default btn-nav"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id))}">
                             {$temp_regrade_text}</a>
 HTML;
                         } else if ($TA_percent == 100 && $list_section == self::GRADED) {
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn btn-default btn-nav" \\
+                            <a class="btn btn-default btn-nav"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id))}">
                             REGRADE</a>
 HTML;
@@ -324,7 +324,7 @@ HTML;
                                 $button_type = 'btn-default';
                             }
                             $gradeable_grade_range = <<<HTML
-                            <a class="btn {$button_type} btn-nav" \\
+                            <a class="btn {$button_type} btn-nav"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id))}">
                             {$gradeable_grade_range}</a>
 HTML;
@@ -367,13 +367,13 @@ HTML;
                     $gradeable_open_range = '';
                     if ($gradeable->getType() == GradeableType::CHECKPOINTS) {
                         $gradeable_grade_range = <<<HTML
-                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav" \\
+                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable_id))}">
                 {$gradeable_grade_range}</a>
 HTML;
                     } elseif ($gradeable->getType() == GradeableType::NUMERIC_TEXT) {
                         $gradeable_grade_range = <<<HTML
-                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav" \\
+                <a class="btn {$this::gradeableSections[$this::sectionMap[$display_section]]["button_type_grading"]} btn-nav"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable_id))}">
                 {$gradeable_grade_range}</a>
 HTML;
@@ -391,7 +391,7 @@ HTML;
                 }
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
-                <a class="btn btn-default" style="width:100%;" \\
+                <a class="btn btn-default" style="width:100%;"
                 href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable_id))}">
                     Edit
                 </a>
