@@ -574,6 +574,14 @@ HTML;
                         <input type="checkbox" id="toggle-merge-default">
                         <label for="toggle-merge-default">Merge By Default</label>
                     </div>
+                    <script>
+                        $("#toggle-merge-default").on("change", function() {
+                            localStorage.setItem("toggle-merge-default", $(this).is(":checked"));
+                        });
+                        if(localStorage.getItem("toggle-merge-default") === "true") {
+                            $("#toggle-merge-default").attr("checked", true);
+                        }
+                    </script>
 HTML;
                 }
 
