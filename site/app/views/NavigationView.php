@@ -210,7 +210,7 @@ HTML;
                 }
                 $gradeable_title = $this->getGradeableTitle($gradeable, $gradeable_id);
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                    $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
+                    $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<br><span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<br><span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
                     if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
                         $display_date = "";
                     }
@@ -234,7 +234,7 @@ HTML;
                         if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
                             $gradeable_open_range = <<<HTML
                 <a class="btn {$title_to_button_type_submission[$display_section]} btn-nav" disabled>
-                     MUST BE ON A TEAM TO SUBMIT<br>{$display_date}
+                     MUST BE ON A TEAM TO SUBMIT{$display_date}
                 </a>
 HTML;
                         } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
@@ -416,39 +416,6 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $list_section
-     * @return string
-     */
-    private function getSubmissionStatusText(Gradeable $gradeable, string $list_section): string {
-        if (!$this->core->getUser()->accessGrading()) {
-
-            if ($gradeable->getActiveVersion() === 0 && $gradeable->getCurrentVersionNumber() != 0) {
-                return "<em style='font-size: .8em;'></em><br> ";
-            } else if ($gradeable->getActiveVersion() === 0 && $gradeable->getCurrentVersionNumber() === 0) {
-                return "<em style='font-size: .8em;'></em><br> ";
-            } else {
-                if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() == array() && ($list_section != self::GRADED && $list_section != self::ITEMS_BEING_GRADED)) {
-                    return "<em style='font-size: .8em;'></em><br> ";
-                } else if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() != array() && ($list_section != self::GRADED && $list_section != self::ITEMS_BEING_GRADED)) {
-                    $autograde_points_earned = $gradeable->getGradedNonHiddenPoints();
-                    $autograde_points_total = $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-                    return " <em style='font-size: .8em;'></em><br>";
-                } else if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() != array() && ($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED)) {
-                    return " ";
-                } else {
-                    $autograde_points_earned = $gradeable->getGradedNonHiddenPoints();
-                    $autograde_points_total = $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-                    return " "; //"<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>";
-
-                }
-            }
-        } else { //don't show submission_status to instructors
-            return "<br> ";
-        }
-    }
-
-    /**
-     * @param Gradeable $gradeable
      * @param string $gradeable_id
      * @return string
      */
@@ -504,8 +471,6 @@ HTML;
      * @return string
      */
     private function getSubmitButtonTitle(Gradeable $gradeable, string $display_section, string $list_section, string $display_date): string {
-        $submission_status_text = $this->getSubmissionStatusText($gradeable, $list_section);
-
         $prefix = self::gradeableSections[self::sectionMap[$display_section]]["prefix"];
         if ($gradeable->getActiveVersion() >= 1 && $display_section == self::OPEN) {
             //if the user submitted something on time
@@ -521,7 +486,7 @@ HTML;
             $prefix = "TA GRADE NOT AVAILABLE";
         }
 
-        $button_text = "{$prefix} {$submission_status_text} {$display_date}";
+        $button_text = "{$prefix} {$display_date}";
         return $button_text;
     }
 
