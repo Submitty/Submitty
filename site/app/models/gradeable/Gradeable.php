@@ -270,6 +270,10 @@ class Gradeable extends AbstractModel {
     private function assertDates(array $dates) {
         $errors = [];
 
+        // A message to set if the date is null, which happens when: the provided date is null,
+        //  or the parsing failed.  In either case, this is an appropriate message
+        $invalid_format_message = 'Invalid date-time value!';
+
         $ta_view_start_date = $dates['ta_view_start_date'];
         $grade_start_date = $dates['grade_start_date'];
         $grade_released_date = $dates['grade_released_date'];
@@ -296,18 +300,18 @@ class Gradeable extends AbstractModel {
         }
 
         if ($ta_view_start_date === null) {
-            $errors['ta_view_start_date'] = 'Value must not be null!';
+            $errors['ta_view_start_date'] = $invalid_format_message;
         }
         if ($grade_released_date === null) {
-            $errors['grade_released_date'] = 'Value must not be null!';
+            $errors['grade_released_date'] = $invalid_format_message;
         }
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if ($submission_open_date === null) {
-                $errors['submission_open_date'] = 'Value must not be null!';
+                $errors['submission_open_date'] = $invalid_format_message;
             }
             if ($submission_due_date === null) {
-                $errors['submission_due_date'] = 'Value must not be null!';
+                $errors['submission_due_date'] = $invalid_format_message;
             }
 
             if (Utils::compareNullableGt($ta_view_start_date, $submission_open_date)) {
@@ -318,10 +322,10 @@ class Gradeable extends AbstractModel {
             }
             if ($this->ta_grading) {
                 if ($grade_start_date === null) {
-                    $errors['grade_start_date'] = 'Value must not be null!';
+                    $errors['grade_start_date'] = $invalid_format_message;
                 }
 //                if ($grade_locked_date === null) {
-//                    $errors['grade_locked_date'] = 'Value must not be null!';
+//                    $errors['grade_locked_date'] = $invalid_format_message;
 //                }
                 if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
                     $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
@@ -336,7 +340,7 @@ class Gradeable extends AbstractModel {
             }
             if ($this->team_assignment) {
                 if ($team_lock_date === null) {
-                    $errors['team_lock_date'] = 'Value must not be null!';
+                    $errors['team_lock_date'] = $invalid_format_message;
                 }
             }
         } else {
