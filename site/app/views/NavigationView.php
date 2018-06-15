@@ -180,6 +180,15 @@ HTML;
                 if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null && $list_section === self::GRADED) {
                     $button_type_submission = "btn-default";
                 }
+
+                if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
+                    if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded() && $gradeable->getActiveVersion() > 0) {
+                        $button_type_submission = "btn-default";
+                    } else if ($list_section == self::GRADED && !$gradeable->useTAGrading() && $gradeable->getActiveVersion() > 0) {
+                        $button_type_submission = "btn-default";
+                    }
+                }
+                
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")</span>";
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                     if ($gradeable->useTAGrading()) {
@@ -212,11 +221,6 @@ HTML;
                     }
                     $button_text = $this->getSubmitButtonTitle($gradeable, $list_section, $display_date);
 
-                    if ($list_section == self::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded() && $gradeable->getActiveVersion() > 0) {
-                        $button_type_submission = "btn-default";
-                    } else if ($list_section == self::GRADED && !$gradeable->useTAGrading() && $gradeable->getActiveVersion() > 0) {
-                        $button_type_submission = "btn-default";
-                    }
                     if ($gradeable->hasConfig()) {
                         //calculate the point percentage
                         if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() == 0) {
