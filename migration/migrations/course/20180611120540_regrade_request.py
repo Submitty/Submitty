@@ -13,7 +13,7 @@ CREATE TABLE regrade_requests (
         cursor.execute("""
 CREATE TABLE "regrade_discussion" (
   "id" serial NOT NULL PRIMARY KEY,
-  "regrade_id" VARCHAR(255) NOT NULL,
+  "regrade_id" INTEGER NOT NULL,
   "timestamp" TIMESTAMP NOT NULL,
   "user_id" VARCHAR(255) NOT NULL,
   "content" TEXT,

@@ -491,11 +491,11 @@ CREATE TABLE regrade_requests (
 --
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
+    regrade_id INTEGER NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
     content TEXT,
-    regrade_id INTEGER NOT NULL,
-    deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 
@@ -1033,7 +1033,7 @@ ALTER TABLE ONLY teams
 --
 
 ALTER TABLE ONLY regrade_discussion
-    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (thread_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
 -- Forum Key relationships
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");

@@ -2277,9 +2277,9 @@ AND gc_id IN (
         $result = ($this->course_db->row()) ? $row['id'] : -1;
         return $result;
     }
-    public function insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content){
-        $params = array($regrade_id,$gradeable_id, $user_id, $content);
-        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, id, timestamp, user_id, content) VALUES (?,?, current_timestamp, ?, ?)", $params);
+    public function insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content){
+        $params = array($regrade_id, $user_id, $content);
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
     }
     public function modifyRegradeStatus($regrade_id, $status){
         $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", array($status,$regrade_id) );

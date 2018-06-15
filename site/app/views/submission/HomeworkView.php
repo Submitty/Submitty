@@ -1357,7 +1357,7 @@ HTML;
           $first = true;
           $return = "";
           $display_further_action=true;
-          //echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
+          echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
           if($this->core->getUser()->accessGrading()){
             $replyMessage = "Reply"; 
             $replyPlaceHolder = "Enter your reply here";
