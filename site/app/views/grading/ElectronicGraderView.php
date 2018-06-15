@@ -512,33 +512,10 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function renderAutogradingPanel(Gradeable $gradeable, bool $canViewWholeGradeable) {
-        $return = <<<HTML
-<div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
-    <div class="draggable_content">
-        <span class="grading_label">Auto-Grading Testcases</span>
-        <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
-        <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
-        <div class="inner-container">
-HTML;
-        if ($gradeable->getActiveVersion() === 0){
-            $return .= <<<HTML
-        <h4>No Submission</h4>
-HTML;
-        }
-        else if (count($gradeable->getTestcases()) === 0) {
-            $return .= <<<HTML
-        <h4>No Autograding For This Assignment</h4>
-HTML;
-        }
-        else{
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
-        }
-        $return .= <<<HTML
-        </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
+            "gradeable" => $gradeable,
+            "canViewWholeGradeable" => $canViewWholeGradeable,
+        ]);
     }
 
     /**
