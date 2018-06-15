@@ -170,7 +170,6 @@ HTML;
 HTML;
             $btn_title_save = $title_to_button_type_submission[$display_section];
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
-                $submission_status = $this->getSubmissionStatus($gradeable, $list_section);
                 $display_section = $list_section;
                 $title_to_button_type_submission[$list_section] = $btn_title_save;
                 if ($gradeable->getActiveVersion() < 1) {
@@ -207,46 +206,7 @@ HTML;
                         $gradeable_grade_range = 'REGRADE';
                     }
                 }
-                if (trim($gradeable->getInstructionsURL()) != '') {
-                    $gradeable_title = '<label>' . $gradeable->getName() . '</label><a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-                } else {
-                    if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                        # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false. 
-                        $no_teams_flag = true;
-                        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
-                        if (!empty($all_teams)) {
-                            $no_teams_flag = false;
-                        }
-                        # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
-                        $no_submission_flag = true;
-                        $semester = $this->core->getConfig()->getSemester();
-                        $course = $this->core->getConfig()->getCourse();
-                        $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $gradeable_id;
-                        if (is_dir($submission_path)) {
-                            $no_submission_flag = false;
-                        }
-                        if ($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
-                            $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
-                            $gradeable_title = <<<HTML
-                    <label>{$gradeable->getName()}</label>&nbsp;
-                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
-HTML;
-                        } else {
-                            $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-                        }
-                    } else if (($gradeable->getType() == GradeableType::NUMERIC_TEXT) || (($gradeable->getType() == GradeableType::CHECKPOINTS))) {
-                        if ($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable_id) === 0) {
-                            $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
-                            $gradeable_title = <<<HTML
-                    <label>{$gradeable->getName()}</label>&nbsp;
-                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
-HTML;
-                        } else {
-                            $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-                        }
-
-                    }
-                }
+                $gradeable_title = $this->getGradeableTitle($gradeable, $gradeable_id);
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                     $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format("m/d/Y{$time}") . "</span>)" : "<span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format("m/d/Y{$time}") . "</span>)";
                     if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
@@ -548,13 +508,62 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
+     * @param string $gradeable_id
+     * @return string
+     */
+    private function getGradeableTitle(Gradeable $gradeable, string $gradeable_id): string {
+        if (trim($gradeable->getInstructionsURL()) != '') {
+            $gradeable_title = '<label>' . $gradeable->getName() . '</label><a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
+        } else {
+            if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
+                # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+                $no_teams_flag = true;
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+                if (!empty($all_teams)) {
+                    $no_teams_flag = false;
+                }
+                # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+                $no_submission_flag = true;
+                $semester = $this->core->getConfig()->getSemester();
+                $course = $this->core->getConfig()->getCourse();
+                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $gradeable_id;
+                if (is_dir($submission_path)) {
+                    $no_submission_flag = false;
+                }
+                if ($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
+                    $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
+                    $gradeable_title = <<<HTML
+                    <label>{$gradeable->getName()}</label>&nbsp;
+                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
+HTML;
+                } else {
+                    $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
+                }
+            } else if (($gradeable->getType() == GradeableType::NUMERIC_TEXT) || (($gradeable->getType() == GradeableType::CHECKPOINTS))) {
+                if ($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable_id) === 0) {
+                    $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
+                    $gradeable_title = <<<HTML
+                    <label>{$gradeable->getName()}</label>&nbsp;
+                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
+HTML;
+                } else {
+                    $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
+                }
+
+            }
+        }
+        return $gradeable_title;
+    }
+
+    /**
+     * @param Gradeable $gradeable
      * @param string $display_section
      * @param string $list_section
      * @param string $display_date
      * @param $title_to_button_type_submission
-     * @return array
+     * @return string
      */
-    private function getSubmitButtonTitle(Gradeable $gradeable, string $display_section, string $list_section, string $display_date, &$title_to_button_type_submission): array {
+    private function getSubmitButtonTitle(Gradeable $gradeable, string $display_section, string $list_section, string $display_date, &$title_to_button_type_submission): string {
         $submission_status = $this->getSubmissionStatus($gradeable, $list_section);
         $index = self::sectionMap[$display_section];
 
@@ -670,7 +679,7 @@ HTML;
         }
         return array($components_total, $TA_percent);
     }
-    
+
     /**
      * @param Gradeable $gradeable
      * @param string $time
