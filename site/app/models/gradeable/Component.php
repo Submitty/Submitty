@@ -99,7 +99,7 @@ class Component extends AbstractModel {
      */
     private function setGradeable(Gradeable $gradeable) {
         if ($gradeable === null) {
-            throw new ValidationException('Invalid gradeable object', ['gradeable' => 'Gradeable Cannot be null!']);
+            throw new \InvalidArgumentException('Gradeable Cannot be null!');
         }
         $this->gradeable = $gradeable;
     }
@@ -187,7 +187,7 @@ class Component extends AbstractModel {
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
-                throw new ValidationException('Invalid marks array', ['marks' => 'Object in marks array was not a mark']);
+                throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
         $this->marks = $marks;
@@ -201,7 +201,7 @@ class Component extends AbstractModel {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
-            throw new ValidationException('Invalid component id', ['id' => 'Component Id must be an integer >= 0']);
+            throw new \InvalidArgumentException('Component Id must be an integer >= 0');
         }
     }
 

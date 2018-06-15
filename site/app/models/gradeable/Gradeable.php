@@ -441,7 +441,7 @@ class Gradeable extends AbstractModel {
     private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
-            throw new ValidationException('Invalid gradeable id', ['id' => 'Gradeable id must be alpha-numeric/hyphen/underscore only']);
+            throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
@@ -457,7 +457,7 @@ class Gradeable extends AbstractModel {
      */
     public function setTitle($title) {
         if ($title === '') {
-            throw new ValidationException('Invalid gradeable title', ['title' => 'Gradeable title must not be blank']);
+            throw new \InvalidArgumentException('Gradeable title must not be blank');
         }
         $this->title = strval($title);
     }
@@ -486,7 +486,7 @@ class Gradeable extends AbstractModel {
         if (is_int($group) && $group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
         } else {
-            throw new ValidationException('Invalid minimum grading group', ['min_grading_group' => 'Grading group must be an integer larger than 0']);
+            throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
         }
     }
 
@@ -498,7 +498,7 @@ class Gradeable extends AbstractModel {
         if (is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
-            throw new ValidationException('Invalid maximum team size', ['team_size_max' => 'Max team size must be a non-negative integer!']);
+            throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
         }
     }
 
@@ -510,7 +510,7 @@ class Gradeable extends AbstractModel {
         if (is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
-            throw new ValidationException('Invalid peer grade set', ['peer_grade_set' => 'Peer grade set must be a non-negative integer!']);
+            throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
         }
     }
 
@@ -521,7 +521,7 @@ class Gradeable extends AbstractModel {
     public function setComponents(array $components) {
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
-                throw new ValidationException('Invalid components array', ['components' => 'Object in components array wasn\'t a component']);
+                throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
         $this->components = $components;
@@ -533,7 +533,7 @@ class Gradeable extends AbstractModel {
      */
     public function setAutogradingConfigPath($path) {
         if ($path === '') {
-            throw new ValidationException('Invalid autograding config path', ['autograding_config_path' => 'Autograding configuration file path cannot be blank']);
+            throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
         }
         $this->autograding_config_path = strval($path);
     }
