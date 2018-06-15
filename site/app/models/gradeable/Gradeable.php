@@ -68,8 +68,7 @@ use app\models\GradeableComponent;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  */
-class Gradeable extends AbstractModel
-{
+class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
 
     /** @property @var string The course-wide unique gradeable id */
@@ -152,8 +151,7 @@ class Gradeable extends AbstractModel
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = array();
 
-    public function __construct(Core $core, $details, array $components)
-    {
+    public function __construct(Core $core, $details, array $components) {
         parent::__construct($core);
 
         $this->setIdInternal($details['id']);
@@ -165,7 +163,7 @@ class Gradeable extends AbstractModel
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setComponents($components);
 
-        if($this->getType() === GradeableType::ELECTRONIC_FILE) {
+        if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setTaInstructions($details['ta_instructions']);
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->autograding_config = $this->loadAutogradingConfig();
@@ -197,12 +195,12 @@ class Gradeable extends AbstractModel
         'submission_due_date',
         'grade_locked_date'
     ];
-    public function toArray()
-    {
+
+    public function toArray() {
         // Use the default behavior for the most part, but convert the dates
         $return = parent::toArray();
 
-        foreach(self::date_properties as $date) {
+        foreach (self::date_properties as $date) {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
@@ -219,7 +217,7 @@ class Gradeable extends AbstractModel
         try {
             $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
                 "build_{$this->id}.json"));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
@@ -245,11 +243,10 @@ class Gradeable extends AbstractModel
      * @return \DateTime[] A full array of \DateTime objects (one element for each gradeable date property or null if not provided / bad format)
      *                      with a 'late_days' integer element
      */
-    private function parseDates(array $dates)
-    {
+    private function parseDates(array $dates) {
         $parsedDates = [];
-        foreach(self::date_properties as $date) {
-            if(isset($dates[$date]) && $dates[$date] !== null) {
+        foreach (self::date_properties as $date) {
+            if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
                     $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getConfig()->getTimezone());
                 } catch (\Exception $e) {
@@ -270,8 +267,7 @@ class Gradeable extends AbstractModel
      * @param array $dates A complete array of property-name-indexed \DateTime objects (or int for 'late_days')
      * @throws ValidationException With all messages for each invalid property
      */
-    private function assertDates(array $dates)
-    {
+    private function assertDates(array $dates) {
         $errors = [];
 
         $ta_view_start_date = $dates['ta_view_start_date'];
@@ -288,8 +284,7 @@ class Gradeable extends AbstractModel
         } else {
             try {
                 $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 // This is for development debugging. In reality, we should never hit this line
                 $errors['late_days'] = "Error parsing late days: {$e}";
             }
@@ -365,8 +360,7 @@ class Gradeable extends AbstractModel
      *
      * @param $dates string[]|\DateTime[] An array of dates/date strings indexed by property name
      */
-    public function setDates(array $dates)
-    {
+    public function setDates(array $dates) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
 
@@ -381,13 +375,13 @@ class Gradeable extends AbstractModel
         $this->grade_released_date = $dates['grade_released_date'];
         $this->grade_locked_date = $dates['grade_locked_date'];
 
-        if($this->type === GradeableType::ELECTRONIC_FILE) {
-            if(!$this->ta_grading) {
+        if ($this->type === GradeableType::ELECTRONIC_FILE) {
+            if (!$this->ta_grading) {
                 // No TA grading, but we must set this start date so the database
                 //  doesn't complain when we update it
                 $this->grade_start_date = $dates['grade_released_date'];
             }
-            if($this->team_assignment) {
+            if ($this->team_assignment) {
                 $this->team_lock_date = $dates['team_lock_date'];
             }
             $this->submission_open_date = $dates['submission_open_date'];
@@ -397,44 +391,42 @@ class Gradeable extends AbstractModel
     }
 
     /** @internal */
-    public function setTaViewStartDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setGradeStartDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setGradeReleasedDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setGradeLockedDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setTeamLockDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setSubmissionOpenDate($date)
-    {
-        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
-    }
-    /** @internal */
-    public function setSubmissionDueDate($date)
-    {
+    public function setTaViewStartDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
     /** @internal */
-    public function setAutogradingConfig()
-    {
+    public function setGradeStartDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setGradeReleasedDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setGradeLockedDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setTeamLockDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setSubmissionOpenDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setSubmissionDueDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setAutogradingConfig() {
         throw new \BadFunctionCallException('Cannot set the autograding config data');
     }
 
@@ -442,17 +434,16 @@ class Gradeable extends AbstractModel
      * Sets the gradeable Id.  Must match the regular expression:  ^[a-zA-Z0-9_-]*$
      * @param string $id The gradeable id to set
      */
-    private function setIdInternal($id)
-    {
+    private function setIdInternal($id) {
         preg_match('/^[a-zA-Z0-9_-]*$/', $id, $matches, PREG_OFFSET_CAPTURE);
         if (count($matches) === 0) {
             throw new \InvalidArgumentException('Gradeable id must be alpha-numeric/hyphen/underscore only');
         }
         $this->id = $id;
     }
+
     /** @internal */
-    public function setId($id)
-    {
+    public function setId($id) {
         throw new \BadFunctionCallException('Cannot change Id of gradeable');
     }
 
@@ -460,8 +451,7 @@ class Gradeable extends AbstractModel
      * Sets the gradeable Title
      * @param string $title Must not be blank.
      */
-    public function setTitle($title)
-    {
+    public function setTitle($title) {
         if ($title === '') {
             throw new \InvalidArgumentException('Gradeable title must not be blank');
         }
@@ -472,15 +462,14 @@ class Gradeable extends AbstractModel
      * Sets the gradeable type
      * @param GradeableType $type Must be a valid GradeableType
      */
-    private function setTypeInternal($type)
-    {
+    private function setTypeInternal($type) {
         // Call this to make an exception if the type is invalid
         GradeableType::typeToString($type);
         $this->type = $type;
     }
+
     /** @internal */
-    public function setType($type)
-    {
+    public function setType($type) {
         throw new \BadFunctionCallException('Cannot change gradeable type');
     }
 
@@ -488,8 +477,7 @@ class Gradeable extends AbstractModel
      * Sets the minimum user level that can grade an assignment.
      * @param int $group Must be at least 1 and no more than 4
      */
-    public function setMinGradingGroup($group)
-    {
+    public function setMinGradingGroup($group) {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
         if (is_int($group) && $group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
@@ -502,9 +490,8 @@ class Gradeable extends AbstractModel
      * Sets the maximum team size
      * @param int $max_team_size Must be at least 0
      */
-    public function setTeamSizeMax($max_team_size)
-    {
-        if(is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
+    public function setTeamSizeMax($max_team_size) {
+        if (is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
@@ -515,9 +502,8 @@ class Gradeable extends AbstractModel
      * Sets the peer grading set
      * @param int $peer_grading_set Must be at least 0
      */
-    public function setPeerGradingSet($peer_grading_set)
-    {
-        if(is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
+    public function setPeerGradingSet($peer_grading_set) {
+        if (is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
@@ -528,8 +514,7 @@ class Gradeable extends AbstractModel
      * Sets the array of components
      * @param Component[] $components Must be an array of only Component
      */
-    public function setComponents(array $components)
-    {
+    public function setComponents(array $components) {
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
@@ -542,8 +527,7 @@ class Gradeable extends AbstractModel
      * Sets the path to the autograding config
      * @param string $path Must not be blank
      */
-    public function setAutogradingConfigPath($path)
-    {
+    public function setAutogradingConfigPath($path) {
         if ($path === '') {
             throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
         }
@@ -554,13 +538,12 @@ class Gradeable extends AbstractModel
      * Sets whether the gradeable is a team gradeable
      * @param bool $use_teams
      */
-    private function setTeamAssignmentInternal($use_teams)
-    {
+    private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
+
     /** @internal */
-    public function setTeamAssignment($use_teams)
-    {
+    public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
     }
 
@@ -570,18 +553,17 @@ class Gradeable extends AbstractModel
      * @param $points float|string The number to round
      * @return float The rounded result
      */
-    public function roundPointValue($points)
-    {
+    public function roundPointValue($points) {
         // Note that changing the gradeable precision does not trigger
         //  all of the component/mark point values to update.  This is intended.
 
         // No precision, no rounding
-        if($this->precision === 0.0) {
+        if ($this->precision === 0.0) {
             return $points;
         }
 
         $points = floatval($points);
-        $q = (int)($points/$this->precision);
+        $q = (int)($points / $this->precision);
         $r = fmod($points, $this->precision);
 
         // If the remainder is more than half the precision away from zero, then add one

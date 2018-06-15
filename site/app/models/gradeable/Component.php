@@ -36,8 +36,7 @@ use app\models\AbstractModel;
  * @method void setPage($page)
  * @method Mark[] getMarks()
  */
-class Component extends AbstractModel
-{
+class Component extends AbstractModel {
     /** @var Gradeable Reference to the gradeable this belongs to */
     private $gradeable = null;
     /** @property @var int The course-wide unique numeric id of this component */
@@ -69,8 +68,7 @@ class Component extends AbstractModel
     protected $marks = array();
 
 
-    public function __construct(Core $core, Gradeable $gradeable, $details, array $marks)
-    {
+    public function __construct(Core $core, Gradeable $gradeable, $details, array $marks) {
         parent::__construct($core);
 
         $this->setGradeable($gradeable);
@@ -90,8 +88,7 @@ class Component extends AbstractModel
      * Gets the component's gradeable
      * @return Gradeable The component's gradeable
      */
-    public function getGradeable()
-    {
+    public function getGradeable() {
         return $this->gradeable;
     }
 
@@ -100,9 +97,8 @@ class Component extends AbstractModel
      * Sets the component's gradeable
      * @param Gradeable $gradeable A non-null gradeable
      */
-    private function setGradeable(Gradeable $gradeable)
-    {
-        if($gradeable === null) {
+    private function setGradeable(Gradeable $gradeable) {
+        if ($gradeable === null) {
             throw new \InvalidArgumentException('Gradeable Cannot be null!');
         }
         $this->gradeable = $gradeable;
@@ -120,10 +116,9 @@ class Component extends AbstractModel
      * @param array $points A partial or complete array of floats or numeric strings indexed by component point property
      * @return array A complete array of floats (or nulls) indexed by component point property
      */
-    private function parsePoints(array $points)
-    {
+    private function parsePoints(array $points) {
         $parsedPoints = [];
-        foreach(self::point_properties as $property) {
+        foreach (self::point_properties as $property) {
             if (is_numeric($points[$property])) {
                 $parsedPoints[$property] = floatval($points[$property]);
             } else {
@@ -132,18 +127,18 @@ class Component extends AbstractModel
         }
         return $parsedPoints;
     }
+
     /**
      * Asserts that the point values are valid.  See `setPoints` docs for details
      *
      * @param array $points An complete array of floats (or nulls) indexed by component point property
      */
-    private function assertPoints(array $points)
-    {
+    private function assertPoints(array $points) {
         $errors = array();
 
         // Give error messages to all null elements
-        foreach(self::point_properties as $property) {
-            if($points[$property] === null) {
+        foreach (self::point_properties as $property) {
+            if ($points[$property] === null) {
                 $errors[$property] = 'Value must be a number!';
             }
         }
@@ -174,8 +169,7 @@ class Component extends AbstractModel
      * @param $max_value string|float see property doc
      * @param $upper_clamp string|float see property doc
      */
-    public function setPoints($lower_clamp, $default, $max_value, $upper_clamp)
-    {
+    public function setPoints($lower_clamp, $default, $max_value, $upper_clamp) {
         // Wrangle the input to ensure that they're all either floats are null
         $points = $this->parsePoints([
             'lower_clamp' => $lower_clamp,
@@ -188,7 +182,7 @@ class Component extends AbstractModel
         $this->assertPoints($points);
 
         // Round after validation because of potential floating point weirdness
-        foreach(self::point_properties as $property) {
+        foreach (self::point_properties as $property) {
             $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
         }
     }
@@ -197,8 +191,7 @@ class Component extends AbstractModel
      * Sets the array of marks
      * @param Mark[] $marks Must be an array of only Marks
      */
-    public function setMarks(array $marks)
-    {
+    public function setMarks(array $marks) {
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
@@ -212,72 +205,65 @@ class Component extends AbstractModel
      * Sets the component Id
      * @param int $id Must be a non-negative integer
      */
-    private function setIdInternal($id)
-    {
+    private function setIdInternal($id) {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
             throw new \InvalidArgumentException('Component Id must be an integer >= 0');
         }
     }
+
     /** @internal */
-    public function setId($id)
-    {
+    public function setId($id) {
         throw new \BadFunctionCallException('Cannot set Id of component');
     }
+
     /** @internal */
-    public function setLowerClamp($lower_clamp)
-    {
+    public function setLowerClamp($lower_clamp) {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
+
     /** @internal */
-    public function setDefault($default)
-    {
+    public function setDefault($default) {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
+
     /** @internal */
-    public function setMaxValue($max_value)
-    {
+    public function setMaxValue($max_value) {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
+
     /** @internal */
-    public function setUpperClamp($upper_clamp)
-    {
+    public function setUpperClamp($upper_clamp) {
         throw new NotImplementedException('Individual setters are disabled, use "setPoints" instead');
     }
 
 
     /* Convenience functions for the different types of gradeables */
 
-    public function hasExtraCredit()
-    {
+    public function hasExtraCredit() {
         return $this->upper_clamp > $this->max_value;
     }
 
     // Numeric/Text
-    public function getNumericScore()
-    {
+    public function getNumericScore() {
         return max($this->upper_clamp, $this->max_value);
     }
 
     // Electronic
-    public function isCountUp()
-    {
+    public function isCountUp() {
         return $this->default === 0;
     }
 
-    public function hasPenalty()
-    {
+    public function hasPenalty() {
         return $this->lower_clamp < 0;
     }
 
-    public function getExtraCreditPoints()
-    {
+    public function getExtraCreditPoints() {
         return $this->upper_clamp - $this->max_value;
     }
 
-    public function getPenaltyPoints()
-    {
+    public function getPenaltyPoints() {
         return $this->isPenalty() ? abs($this->lower_clamp) : 0;
     }
 }

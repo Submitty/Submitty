@@ -18,8 +18,7 @@ use app\models\AbstractModel;
  * @method bool isPublish()
  * @method void setPublish($should_publish)
  */
-class Mark extends AbstractModel
-{
+class Mark extends AbstractModel {
     /** @var Component Reference to the component this belongs to */
     private $component = null;
     /** @property @var int The course-wide unique numeric id of this mark */
@@ -33,8 +32,7 @@ class Mark extends AbstractModel
     /** @property @var bool If the student should be able to see this mark */
     protected $publish = false;
 
-    public function __construct(Core $core, Component $component, $details)
-    {
+    public function __construct(Core $core, Component $component, $details) {
         parent::__construct($core);
 
         $this->setComponent($component);
@@ -49,8 +47,7 @@ class Mark extends AbstractModel
      * Gets the mark's component
      * @return Component The component the mark belongs to
      */
-    public function getComponent()
-    {
+    public function getComponent() {
         return $this->component;
     }
 
@@ -59,9 +56,8 @@ class Mark extends AbstractModel
      * Sets the mark's component
      * @param Component $component A non-null component
      */
-    private function setComponent(Component $component)
-    {
-        if($component === null) {
+    private function setComponent(Component $component) {
+        if ($component === null) {
             throw new \InvalidArgumentException('Component Cannot be null!');
         }
         $this->component = $component;
@@ -71,17 +67,16 @@ class Mark extends AbstractModel
      * Sets the mark id
      * @param int $id Must be a non-negative integer
      */
-    private function setIdInternal($id)
-    {
+    private function setIdInternal($id) {
         if (is_int($id) && $id >= 0) {
             $this->id = $id;
         } else {
             throw new \InvalidArgumentException('Mark Id must be an integer >= 0');
         }
     }
+
     /** @internal */
-    public function setId($id)
-    {
+    public function setId($id) {
         throw new \BadFunctionCallException('Cannot set Id of mark');
     }
 
@@ -89,9 +84,8 @@ class Mark extends AbstractModel
      * Sets the points this mark is worth
      * @param string|float|int $points Must be a number.  Will be rounded to precision of gradeable.
      */
-    public function setPoints($points)
-    {
-        if(is_numeric($points)) {
+    public function setPoints($points) {
+        if (is_numeric($points)) {
             $this->points = $this->getComponent()->getGradeable()->roundPointValue($points);
         } else {
             throw new \InvalidArgumentException('Mark points must be a number!');
