@@ -226,6 +226,7 @@ HTML;
                     $title_to_button_type_submission['GRADED'] = "btn-default";
                 }
                 /** @var Gradeable $g_data */
+                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
                 $time = " @ H:i";
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {

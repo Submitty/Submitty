@@ -61,51 +61,15 @@ class NavigationController extends AbstractController {
         $sections_to_lists["ITEMS BEING GRADED"] = $grading_gradeables_list;
         $sections_to_lists["GRADED"] = $graded_gradeables_list;
 
-        //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin()) {
-            foreach ($sections_to_lists as $key => $value) {
-                $sections_to_lists[$key] = array_filter($value, array($this, "filterNoConfig"));
-            }
-        }
-
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
-            foreach ($sections_to_lists[$key] as $gradeable => $g_data) {
-                /* @var Gradeable $g_data */
-
-                // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-                if ($g_data->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
-                    unset($sections_to_lists[$key][$gradeable]);
-                    continue;
-                }
-
-                // if student view false, never show
-                if (!$g_data->getStudentView() && !$user->accessGrading()) {
-                    unset($sections_to_lists[$key][$gradeable]);
-                    continue;
-                }
-
-                //If we're not instructor and this is not open to TAs
-                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-                if ($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
-                    unset($sections_to_lists[$key][$gradeable]);
-                    continue;
-                }
-            }
+            $sections_to_lists[$key] = array_filter($value, array($this, "filterCanView"));
         }
 
         //Clear empty sections
         foreach ($sections_to_lists as $key => $value) {
-            $electronic_gradeable_count = 0;
-            foreach ($sections_to_lists[$key] as $gradeable => $g_data) {
-                /* @var Gradeable $g_data */
-                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE && $g_data->getStudentView()) {
-                    $electronic_gradeable_count++;
-                    break;
-                }
-            }
-            // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
-            if (count($sections_to_lists[$key]) == 0 || ($electronic_gradeable_count == 0 && !$user->accessGrading())) {
+            // if there are no gradeables, don't show this category
+            if (count($sections_to_lists[$key]) == 0) {
                 unset($sections_to_lists[$key]);
             }
         }
@@ -115,13 +79,34 @@ class NavigationController extends AbstractController {
     }
     
     /**
+     * Test if the current user is allowed to view this gradeable
      * @param Gradeable $gradeable
-     * @return bool
+     * @return bool True if they are
      */
-    private function filterNoConfig($gradeable) {
-        if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-            return $gradeable->hasConfig();
+    private function filterCanView($gradeable) {
+        $user = $this->core->getUser();
+
+        //Remove incomplete gradeables for non-instructors
+        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE && !$gradeable->hasConfig()) {
+            return false;
         }
+
+        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view false, never show
+        if (!$gradeable->getStudentView() && !$user->accessGrading()) {
+            return false;
+        }
+
+        //If we're not instructor and this is not open to TAs
+        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        if ($gradeable->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
+            return false;
+        }
+
         return true;
     }
 }
