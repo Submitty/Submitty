@@ -30,7 +30,7 @@ sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
-sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
+sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
 sudo ${DIR}/../bin/create_untrusted_users.py
 
@@ -75,4 +75,8 @@ sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
 sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
 # necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
 sudo usermod -a -G travis hwphp
+
+# necessary to pass config path as submitty_repository is a symlink
+sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+
 sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean

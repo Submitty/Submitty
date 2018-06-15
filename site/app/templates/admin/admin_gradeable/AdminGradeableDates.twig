@@ -1,0 +1,76 @@
+<div id="gradeable-dates">
+    <input name="g_ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
+    TA Beta Testing Date (gradeable visible to TAs)
+
+    <br />
+
+
+    <div class="electronic_file">
+        <div class="team_yes">
+            <input name="eg_team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
+            Team Lock Date (Instructors can still manually manage teams)
+
+            <br />
+        </div>
+
+        <input id="date_submit" name="eg_submission_open_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
+        Submission Open Date (submission available to students)
+
+        <br />
+
+        <input id="date_due" name="eg_submission_due_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
+        Due Date
+
+        <br />
+    </div>
+
+    <div class="manual_grading">
+        <input name="g_grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
+        TA/Instructor Manual Grading Open Date (graders may begin grading)
+
+        <br />
+    </div>
+
+    <input name="g_grade_released_date" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
+    Grades Released Date (grades will be visible to students)
+
+    <br />
+
+    <div class="electronic_file">
+        How many late days may students use on this assignment?
+        <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text" value="{{ admin_gradeable.getEgLateDays() }}"/>
+
+        <br />
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        $(function() {
+            $( ".date_picker" ).datetimepicker({
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
+                showButtonPanel: true,
+                showTimezone: false,
+                showMillisec: false,
+                showMicrosec: false,
+                beforeShow: function( input ) {
+                    setTimeout(function() {
+                        var buttonPane = $( input )
+                            .datepicker( "widget" )
+                            .find( ".ui-datepicker-buttonpane" );
+
+                        $( "<button>", {
+                            text: "Infinity",
+                            click: function() {
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
+                            }
+                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                    }, 1 );
+                }
+            });
+        });
+    });
+
+</script>

@@ -50,6 +50,14 @@ WHERE user_id=?", array($user_id));
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
+        $orderBy="";
+        if($section_key == "registration_section") {
+          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+        }
+        else {
+          $orderBy = "u.{$section_key}, u.user_id";
+        }
+        
         $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
@@ -58,7 +66,7 @@ LEFT JOIN (
 	FROM grading_registration
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
-ORDER BY u.{$section_key}, u.user_id");
+ORDER BY {$orderBy}");
         $return = array();
         foreach ($this->course_db->rows() as $user) {
             if (isset($user['grading_registration_sections'])) {
@@ -79,7 +87,7 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_group < 4
-ORDER BY u.registration_section, u.user_id");
+ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id");
         $return = array();
         foreach ($this->course_db->rows() as $user) {
             if (isset($user['grading_registration_sections'])) {
@@ -695,7 +703,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getGradersForAllRotatingSections($gradeable_id) {
         $this->course_db->query("
     SELECT
-        u.user_id, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
+        u.user_id, u.user_group, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
     FROM
         users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
     WHERE

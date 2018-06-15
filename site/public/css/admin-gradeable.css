@@ -1,0 +1,116 @@
+body {
+    overflow: scroll;
+}
+
+input[readonly] {
+    background:rgba(0,0,0,0);
+    border:none;
+}
+
+#gradeable-dates input[type="text"] {
+    width: 200px;
+}
+
+.table-wrapper {
+    position: relative;
+}
+.table-scroll {
+    width: 1150px;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.table-wrapper table {
+    width:100%;
+}
+
+select {
+    margin-top:7px;
+    width: 60px;
+    min-width: 60px;
+}
+
+#container-rubric {
+    width:1200px;
+    margin:100px auto;
+    margin-top: 130px;
+    background-color: #fff;
+    border: 1px solid #999;
+    border: 1px solid rgba(0,0,0,0.3);
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;outline: 0;
+    -webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 20px;
+}
+
+.question-icon {
+    display: block;
+    float: left;
+    margin-top: 5px;
+    margin-left: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.question-icon-cross {
+    max-width: none;
+    position: absolute;
+    top:0;
+    left:-313px;
+}
+
+.question-icon-up {
+    max-width: none;
+    position: absolute;
+    top: -96px;
+    left: -290px;
+}
+
+.question-icon-down {
+    max-width: none;
+    position: absolute;
+    top: -96px;
+    left: -313px;
+}
+
+.ui_tpicker_unit_hide {
+    display: none;
+}
+
+.nav-bar {
+    cursor: pointer;
+    width: 160px;
+    vertical-align: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: green;
+}
+
+/* align the radio, buttons and checkboxes with labels */
+input[type="radio"],input[type="checkbox"] {
+    margin-top: -1px;
+    vertical-align: middle;
+}
+
+fieldset {
+    margin: 8px;
+    border: 1px solid silver;
+    padding: 8px;
+    border-radius: 4px;
+    display: block;
+}
+
+legend{
+    padding: 2px;
+    font-size: 12pt;
+}

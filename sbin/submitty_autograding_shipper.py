@@ -17,6 +17,7 @@ import socket
 
 from autograder import grade_items_logging
 from autograder import grade_item
+from autograder import packer_unpacker
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -46,10 +47,28 @@ def initialize(untrusted_queue):
     """
     multiprocessing.current_process().untrusted = untrusted_queue.get()
 
+# ==================================================================================
+def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
 
+    submitty_config  = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'version.json')
+
+    try:
+        with open(submitty_config) as infile:
+            submitty_details = json.load(infile)
+            installed_commit = submitty_details['installed_commit']
+            most_recent_tag  = submitty_details['most_recent_git_tag']
+    except FileNotFoundError as e:
+        raise SystemExit("ERROR, could not locate the submitty.json:", e)
+
+    autograding_worker_json[entry]['server_name']     = socket.getfqdn()
+    autograding_worker_json[entry]['primary_commit']  = installed_commit
+    autograding_worker_json[entry]['most_recent_tag'] = most_recent_tag
+    return autograding_worker_json
 # ==================================================================================
 def update_all_foreign_autograding_workers():
+    success_map = dict()
     all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
+
     try:
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
@@ -58,13 +77,15 @@ def update_all_foreign_autograding_workers():
 
     for key, value in autograding_workers.items():
         formatted_entry = {key: value}
-        server_name = socket.getfqdn()
-        formatted_entry[key]['server_name']=server_name
-        update_foreign_autograding_worker_json(key, formatted_entry)
-
+        formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, key)
+        success = update_worker_json(key, formatted_entry)
+        success_map[key] = success
+    return success_map
 
 # ==================================================================================
-def update_foreign_autograding_worker_json(name, entry):
+# Updates the autograding_worker.json in a workers autograding_TODO folder (tells it)
+#   how many threads to be running on startup.
+def update_worker_json(name, entry):
 
     fd, tmp_json_path = tempfile.mkstemp()
     foreign_json = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
@@ -76,7 +97,7 @@ def update_foreign_autograding_worker_json(name, entry):
     except Exception as e:
         print("ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
         grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
-        return
+        return False
 
     #create a new temporary json with only the entry for the current machine.
     with open(tmp_json_path, 'w') as outfile:
@@ -87,9 +108,11 @@ def update_foreign_autograding_worker_json(name, entry):
             shutil.move(tmp_json_path,foreign_json)
             print("Successfully updated local autograding_TODO/autograding_worker.json")
             grade_items_logging.log_message(JOB_ID, message="Successfully updated local autograding_TODO/autograding_worker.json")
+            return True
         except Exception as e:
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not mv to local autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could not mv to local autograding_worker.json due to the following error: {0}".format(e))
+            return False
         finally:
             os.close(fd)
     #if we are updating a foreign machine, we must connect via ssh and use sftp to update it.
@@ -101,9 +124,9 @@ def update_foreign_autograding_worker_json(name, entry):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname = host, username = user)
         except Exception as e:
-            grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to "+host+" due to following error: "+str(e))
-            print("ERROR: could not ssh to "+host+" due to following error: "+str(e))
-            return
+            grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
+            print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
+            return False
         #try to copy the files over to the host
         try:
             sftp = ssh.open_sftp()
@@ -113,6 +136,7 @@ def update_foreign_autograding_worker_json(name, entry):
             sftp.close()
             print("Successfully forwarded autograding_worker.json to {0}".format(name))
             grade_items_logging.log_message(JOB_ID, message="Successfully forwarded autograding_worker.json to {0}".format(name))
+            success = True
         except Exception as e:
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due to the following error: {0}".format(e))
@@ -122,6 +146,7 @@ def update_foreign_autograding_worker_json(name, entry):
             os.remove(tmp_json_path)
             sftp.close()
             ssh.close()
+            return success
 
 # ==================================================================================
 def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
@@ -136,7 +161,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         address = which_machine.split('@')[1]
     # prepare the zip files
     try:
-        autograding_zip_tmp,submission_zip_tmp = grade_item.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+        autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -193,7 +218,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             return success
 
     # log completion of job preparation
-    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = "regrade" in obj and obj["regrade"]
@@ -207,7 +232,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     # variables needed for logging
-    obj = grade_item.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = "regrade" in obj and obj["regrade"]
@@ -274,7 +299,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
                 return False
     # archive the results of grading
     try:
-        grade_item.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+        packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
@@ -313,7 +338,6 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
             if shipper_counter >= 10:
                 prints(my_name, which_untrusted, "shipper prep loop: ",queue_file)
                 shipper_counter=0
-
         # then wait for grading to be completed
         shipper_counter=0
         while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
@@ -421,7 +445,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overall_lock):
+def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -430,11 +454,13 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
     on an event editing one of the queues.
     """
 
+    which_machine   = full_address
+    my_capabilities = my_data[my_name]['capabilities']
+
     # ignore keyboard interrupts in the shipper processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     counter=0
-
     while True:
         try:
             my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
@@ -444,7 +470,7 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
                 continue
             else:
                 if counter == 0 or counter >= 10:
-                    print (my_name,which_untrusted,"no available job")
+                    print ("{0} {1}: no available job".format(my_name, which_untrusted))
                     counter=0
                 counter+=1
                 time.sleep(1)
@@ -459,12 +485,10 @@ def shipper_process(my_name, which_machine,my_capabilities,which_untrusted,overa
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers():
-
+def launch_shippers(worker_status_map):
     # verify the hwcron user is running this script
     if not int(os.getuid()) == int(HWCRON_UID):
         raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
-
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py launched")
 
     # Clean up old files from previous shipping/autograding (any
@@ -507,22 +531,35 @@ def launch_shippers():
     if not default_present:
         raise SystemExit("ERROR: autograding_workers.json contained no machine with default capabilities")
 
-    # Launch a shipper process for every work on the primary machine and each worker machine
+    # Launch a shipper process for every worker on the primary machine and each worker machine
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        if worker_status_map[name] == False:
+            print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
+            grade_items_logging.log_message(JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
+            continue
+        if machine['enabled'] == False:
+            print("{0} is disabled, so we are not spinning up shipper threads.".format(name))
+            grade_items_logging.log_message(JOB_ID, message="{0} is disabled, so we are not spinning up shipper threads.")
+            continue
         try:
-            which_machine=machine["address"]
-            if which_machine != "localhost":
+            full_address = ""
+            if machine["address"] != "localhost":
                 if machine["username"] == "":
-                    raise SystemExit("ERROR: empty username for worker machine '" + which_machine + "'")
-                which_machine = "{0}@{1}".format(machine["username"], machine["address"])
-            elif not machine["username"] == "":
-                Raise('ERROR: username for primary (localhost) must be ""')
+                    raise SystemExit("ERROR: empty username for worker machine {0} ".format(machine["address"]))
+                full_address = "{0}@{1}".format(machine["username"], machine["address"])
+            else:
+                if not machine["username"] == "":
+                    Raise('ERROR: username for primary (localhost) must be ""')
+                full_address = machine['address']
+
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:
-                raise SystemExit("ERROR: num_workers_on_machine for '" + which_machine + "' must be non-negative.")
-            my_capabilities = machine["capabilities"]
+                raise SystemExit("ERROR: num_workers_on_machine for '{0}' must be non-negative.".format(which_machine))
+
+            single_machine_data = {name : machine}
+            single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
         except Exception as e:
             print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
             grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
@@ -530,7 +567,7 @@ def launch_shippers():
         # launch the shipper threads
         for i in range(0,num_workers_on_machine):
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(name,which_machine,my_capabilities,u,overall_lock))
+            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock))
             p.start()
             processes.append(p)
         total_num_workers += num_workers_on_machine
@@ -573,5 +610,9 @@ def launch_shippers():
 
 # ==================================================================================
 if __name__ == "__main__":
-    update_all_foreign_autograding_workers()
-    launch_shippers()
+    # verify the hwcron user is running this script
+    if not int(os.getuid()) == int(HWCRON_UID):
+        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+
+    worker_status_map = update_all_foreign_autograding_workers()
+    launch_shippers(worker_status_map)

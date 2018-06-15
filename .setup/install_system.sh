@@ -16,7 +16,7 @@ fi
 # PATHS
 SOURCE="${BASH_SOURCE[0]}"
 CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -65,12 +65,6 @@ if [ ${VAGRANT} == 1 ]; then
     echo "Installing stack (haskell)"
     curl -sSL https://get.haskellstack.org/ | sh
 fi
-
-#################################################################
-# BUILD CLANG SETUP
-#################
-
-#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
 
 #################################################################
 # USERS SETUP
@@ -153,10 +147,11 @@ pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
+pip3 install PyPDF2
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
     sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
@@ -197,13 +192,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -383,15 +377,14 @@ if [ ${WORKER} == 0 ]; then
     # assignment configurations
 
     if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        git pull
-        popd
+        echo 'Submitty/Tutorial git repo already exists'
+        echo 'You may need to manually pull updates to this repo'
     else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
+        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
         # remember to change this version in .setup/travis/autograder.sh too
         git checkout v0.94
-        popd
+        popd > /dev/null
     fi
 fi
 
@@ -399,15 +392,73 @@ fi
 # ANALYSIS TOOLS SETUP
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    git pull
-    popd
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools ]; then
+    echo 'Submitty/AnalysisTools git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
 else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 fi
 
 
+#################################################################
+# LICHEN SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
+    echo 'Submitty/Lichen git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+fi
+
+
+#################################################################
+# RainbowGrades SETUP
+#################
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
+    echo 'Submitty/RainbowGrades git repo already exists'
+    echo 'You may need to manually pull updates to this repo'
+else
+    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+fi
+
+
+
+#################################################################
+# BUILD CLANG SETUP
+#################
+
+# NOTE: These variables must match the same variables in INSTALL_SUBMITTY_HELPER.sh
+clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
+clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+# note, we are not running 'ninja install', so this path is unused.
+clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
+ 
+# skip if this is a re-run
+if [ ! -d "${clangsrc}" ]; then
+    echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
+
+    mkdir -p ${clangsrc}
+
+    # checkout the clang sources
+    git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
+    git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
+    git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+
+    # initial cmake for llvm tools (might take a bit of time)
+    mkdir -p ${clangbuild}
+    pushd ${clangbuild}
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    popd > /dev/null
+
+    # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
+    echo 'add_subdirectory(ASTMatcher)' >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+    echo 'add_subdirectory(UnionTool)'  >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+
+    echo 'DONE PREPARING CLANG INSTALLATION'
+fi
+    
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -438,6 +489,25 @@ else
     fi
 fi
 
+if [ ${WORKER} == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
+    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+    fi
+fi
+
+# Create and setup database for non-workers
+if [ ${WORKER} == 0 ]; then
+    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+fi
+
 echo Beginning Install Submitty Script
 source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
@@ -451,7 +521,6 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
     mkdir -p ${SUBMITTY_DATA_DIR}/bin
     touch ${SUBMITTY_DATA_DIR}/instructors/authlist
@@ -465,11 +534,6 @@ if [ ${WORKER} == 0 ]; then
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
     apache2ctl -t
-
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
 
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers
@@ -538,7 +602,7 @@ fi
 
 # pushd /tmp/docker
 # su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
-# popd
+# popd > /dev/null
 
 
 #################################################################

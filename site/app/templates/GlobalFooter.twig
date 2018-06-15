@@ -1,0 +1,28 @@
+    <div id="push"></div>
+</div>
+<div id="footer">
+    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+    <span id="github">
+        <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
+            <i class="fa fa-github fa-lg"></i>
+        </a>
+    </span>
+
+    {% if core.getConfig().isDebug() %}
+    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+    {% endif %}
+</div>
+{% if core.getConfig().isDebug() %}
+    <div id='page-info'>
+        Runtime: {{ runtime }}<br /><br />
+        <h3>Site Details</h3>
+        Total Submitty Details: {{ core.getSubmittyDB().getQueryCount() }}<br /><br />
+        Submitty Queries:<br /> {{ core.getSubmittyDB().getPrintQueries() }}
+
+        <h3>Course Details</h3>
+        Total Course Queries: {{ core.getCourseDB().getQueryCount() }}<br /><br />
+        Course Queries: <br /> {{ core.getCourseDB().getPrintQueries() }}
+    </div>
+{% endif %}
+</body>
+</html>

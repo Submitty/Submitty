@@ -1,0 +1,35 @@
+<div class="popup-form" id="simple-stats-popup">
+    {% if num_users > 0 %}
+        <table class="table table-striped table-bordered persist-area">
+            <thead class="persist-thead">
+            <tr>
+                <td width="33%">Component</td>
+                <td width="33%">Average</td>
+                <td width="33%">Std. Deviation</td>
+            </tr>
+            </thead>
+            {% for component in gradeable.getComponents() %}
+                {% set i = 0 %}
+                {% if not component.getIsText() %}
+                    <tbody>
+                        <tr>
+                            <td>{{ component.getTitle() }}</td>
+                            <td id="avg-{{ i }}"></td>
+                            <td id="stddev-{{ i }}"></td>
+                        </tr>
+                    </tbody>
+                    {% set i = i + 1 %}
+                {% endif %}
+            {% endfor %}
+            <tbody><tr>
+                <td>Total</td>
+                <td id="avg-t"></td>
+                <td id="stddev-t"></td>
+            </tr></tbody>
+        </table>
+        <p><br></p>
+        <p id="num-graded"></p>
+    {% else %}
+        <p style="text-align: center">No Statistics To View.</p>
+    {% endif %}
+</div>

@@ -38,6 +38,7 @@ jobs:
         - pip3 install selenium
         - pip3 install pause
         - pip3 install tzlocal
+        - pip3 install paramiko
       script: skip
     - <<: *00-cache
       php: 7.1
@@ -142,6 +143,7 @@ jobs:
         - pip3 install python-dateutil
         - pip3 install selenium
         - pip3 install pause
+        - pip3 install paramiko
         - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
@@ -157,10 +159,9 @@ jobs:
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
         - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
         - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-        - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
         - sudo ./.setup/travis/autograder.sh
         - ./.setup/travis/setup.sh
-        - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
+        - sudo /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo ./.setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
         - sudo a2enmod include rewrite actions cgi alias headers
@@ -238,6 +239,7 @@ jobs:
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pip3 install paramiko
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd

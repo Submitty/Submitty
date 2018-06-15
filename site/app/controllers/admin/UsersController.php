@@ -52,26 +52,22 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
-        $this->renderUserForm('update_student', $use_database);
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('user', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'classListForm', $use_database);
     }
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
-        $this->renderUserForm('update_grader', $use_database);
-        $this->renderDownloadForm('grader', $use_database);
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'graderListForm', $use_database);
-    }
-
-    private function renderUserForm($action, $use_database) {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action, $use_database);
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
+        $this->renderDownloadForm('grader', $use_database);
     }
 
     private function renderDownloadForm($code, $use_database) {
@@ -115,22 +111,6 @@ class UsersController extends AbstractController {
         }
 
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        if ($_POST['edit_user'] == "true" && $user === null) {
-            $this->core->addErrorMessage("No user found with that user id");
-            $this->core->redirect($return_url);
-        }
-        elseif ($_POST['edit_user'] != "true" && $user !== null) {
-            $user->setRegistrationSection($_POST['registered_section'] === "null" ? null : intval($_POST['registered_section']));
-            $user->setRotatingSection($_POST['rotating_section'] === "null" ? null : intval($_POST['rotating_section']));
-            $user->setGroup(intval($_POST['user_group']));
-            $user->setManualRegistration(isset($_POST['manual_registration']));
-            $user->setGradingRegistrationSections(!isset($_POST['grading_registration_section']) ? array() : array_map("intval", $_POST['grading_registration_section']));
-            //Instructor updated flag tells auto feed to not clobber some of the users data.
-            $user->setInstructorUpdated(true);
-            $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
-            $this->core->addSuccessMessage("Added {$_POST['user_id']} to {$this->core->getConfig()->getCourse()}");
-            $this->core->redirect($return_url);
-        }
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
@@ -185,7 +165,7 @@ class UsersController extends AbstractController {
             $user->setRegistrationSection(null);
         }
         else {
-            $user->setRegistrationSection(intval($_POST['registered_section']));
+            $user->setRegistrationSection($_POST['registered_section']);
         }
 
         if ($_POST['rotating_section'] == "null") {
@@ -200,7 +180,7 @@ class UsersController extends AbstractController {
         $user->setInstructorUpdated(true);
         $user->setManualRegistration(isset($_POST['manual_registration']));
         if (isset($_POST['grading_registration_section'])) {
-            $user->setGradingRegistrationSections(array_map("intval", $_POST['grading_registration_section']));
+            $user->setGradingRegistrationSections($_POST['grading_registration_section']);
         }
         else {
             $user->setGradingRegistrationSections(array());
@@ -226,7 +206,7 @@ class UsersController extends AbstractController {
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $students, $reg_sections,
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
     
@@ -246,64 +226,74 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] != "") {
-            $flag=0;
+            $reg_section_exists=false;
             foreach ($reg_sections as $section) {
                 $section = $section['sections_registration_id'];
-                if ($section == intval($_POST['add_reg_section'])){
-                    $flag = 1;
+                if ($section == ($_POST['add_reg_section'])){
+                    $reg_section_exists = true;
                     break;
                 }
             }
-            if ($flag == 1) {
+            if ($reg_section_exists == true) {
                 $this->core->addErrorMessage("Registration Section already present");
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($return_url);       
             }
             else {
-                $this->core->getQueries()->insertNewRegistrationSection(intval($_POST['add_reg_section']));
+                #validation for registration section
+                if(preg_match("~^[A-Za-z0-9_\-]+$~", $_POST['add_reg_section']) === 1) {
+                    $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
+                    $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
+                }
+                else {
+                    $this->core->addErrorMessage("Registration Section entered do not follow specified format");
+                    $_SESSION['request'] = $_POST;
+                    $this->core->redirect($return_url);       
+                }
             }
         }
 
         if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
-            $valid_reg_section_flag=0;
+            $valid_reg_section_flag=false;
             foreach ($reg_sections as $section) {
                 $section = $section['sections_registration_id'];
-                if ($section == intval($_POST['delete_reg_section'])){
-                    $valid_reg_section_flag = 1;
+                if ($section == $_POST['delete_reg_section']){
+                    $valid_reg_section_flag = true;
                     break;
                 }
             }
-            if ($valid_reg_section_flag == 0) {
+            if ($valid_reg_section_flag == false) {
                 $this->core->addErrorMessage("Not a valid Registration Section");
                 $_SESSION['request'] = $_POST;
                 $this->core->redirect($return_url); 
             }
             else {
-                $no_user_flag=1;
-                $no_grader_flag=1;
+                $no_user_flag=true;
+                $no_grader_flag=true;
                 foreach ($students as $student) {
                     $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-                    if ($registration == intval($_POST['delete_reg_section'])) {
-                        $no_user_flag=0;
+                    if ($registration == $_POST['delete_reg_section']) {
+                        $no_user_flag=false;
                         break;
                     }    
                 }
 
                 foreach ($graders as $grader) {
                     if(($grader->getGroup() == 2) || ($grader->getGroup() == 3)) {
-                        if(in_array(intval($_POST['delete_reg_section']), $grader->getGradingRegistrationSections() )) {
-                            $no_grader_flag=0;
+                        if(in_array(($_POST['delete_reg_section']), $grader->getGradingRegistrationSections() )) {
+                            $no_grader_flag=false;
                             break;
                         }
                     }
                 }    
-                if (($no_user_flag != 1) || ($no_grader_flag != 1)) {
+                if (($no_user_flag != true) || ($no_grader_flag != true)) {
                     $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
                     $_SESSION['request'] = $_POST;
                     $this->core->redirect($return_url);      
                 }
                 else {
-                    $this->core->getQueries()->deleteRegistrationSection(intval($_POST['delete_reg_section']));
+                    $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} deleted");
                 }    
             }
         }
@@ -631,10 +621,7 @@ class UsersController extends AbstractController {
             $vals = array_map('trim', $vals);
 
             if (isset($vals[4])) {
-                if (is_numeric($vals[4])) {
-                    $vals[4] = intval($vals[4]);
-                }
-                else if (strtolower($vals[4]) === "null") {
+                if (strtolower($vals[4]) === "null") {
                     $vals[4] = null;
                 }
             }
@@ -649,8 +636,8 @@ class UsersController extends AbstractController {
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
             $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
 
-            //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-            $error_message .= (($vals[4] > 0 && $vals[4] <= $num_reg_sections) || $vals[4] === null) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
+            //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
+            $error_message .= User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
 
             //Preferred first name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {

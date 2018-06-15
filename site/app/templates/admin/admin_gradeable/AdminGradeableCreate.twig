@@ -1,0 +1,388 @@
+{#
+    Combo box for choosing an existing gradeable as a template for the new one
+        (Only show this option if we aren't in edit mode).
+#}
+{% if action == 'new' %}
+    <div>
+        From Template: 
+        <select name="gradeable_template" style='width: 170px;' value=''>
+            <option>--None--</option>
+
+            {% for template in admin_gradeable.getTemplateList() %}
+                <option {{ admin_gradeable.getGId() == template.g_id ? 'selected' : '' }}
+                    value="{{ template.g_id }}">{{ template.g_title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endif %}
+
+{# 
+    Primary Form
+#}
+<!-- Gradeable Title (read/write in all modes) -->
+What is the title of this gradeable?: 
+    <input style='width: 227px' type='text' name='g_title' id='g_title' class="required"
+        value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
+
+<br />
+
+<!-- Instruction URL (read/write in all modes) -->
+What is the URL to the assignment instructions? (shown to student) 
+    <input style='width: 227px' type='text' name='g_instructions_url'
+        value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
+
+<br />
+
+<!-- Gradeable ID (readonly in edit mode, required) -->
+What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
+<input style='width: 200px' type='text' name='g_id' id="g_id" class="required"
+       value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
+
+<br />
+
+<!-- Gradeable Type radio buttons (readonly in edit mode) -->
+What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
+    <input type='radio' id="radio_electronic_file" name="g_gradeable_type" value="Electronic File"
+        {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Electronic File
+
+    <input type='radio' id="radio_checkpoints" name="g_gradeable_type" value="Checkpoints"
+        {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Checkpoints
+
+    <input type='radio' id="radio_numeric" name="g_gradeable_type" value="Numeric"
+        {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Numeric/Text
+
+    <span id="required_type" style="color:red; display:inline;">(Required)</span>
+
+<br />
+
+<!-- This is only relevant to Electronic Files -->
+<fieldset class="gradeable_type_options electronic_file" id="electronic_file">
+    Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
+    <br />
+    <input type="radio" id="yes_ta_grade" name="eg_use_ta_grading" value="true" class="bool_val rubric_questions"
+            {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_ta_grade" name="eg_use_ta_grading" value="false" class="bool_val rubric_questions"
+            {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
+    <br /><br />
+
+    {% if action == 'new' %}
+        Is this a team assignment?
+    {% else %}
+        {{ admin_gradeable.getEgTeamAssignment() ? 'Team Settings:' : '' }}
+    {% endif %}
+    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
+        <input type="radio" id = "team_yes_radio" name="eg_team_assignment" value="true"
+                {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}> Yes
+
+        <input type="radio" id = "team_no_radio" name="eg_team_assignment" value ="false"
+                {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' :  '' }}> No
+    </div>
+    <br />
+
+    <!-- Team settings (read only in edit mode) -->
+    <div class="team_assignment team_yes" id="team_yes">
+
+        What is the maximum team size?
+            <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{{ admin_gradeable.getEgMaxTeamSize() }}"/>
+
+        {#Use teams from a previous gradeable:
+        <!-- Inherit teams from another gradeable? -->
+        <br />
+
+            <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+
+        {% if action == 'new' %}
+            <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
+                value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                <option value=''>--None--</option>
+
+                {% for parent in admin_gradeable.getInheritTeamsList() %}
+                    <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                        value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
+                value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+        {% endif %}
+        #}
+        <br /> <br />
+    </div>
+
+    {% if action == 'new' %}
+        Are students uploading files or submitting to a Version Control System (VCS) repository?
+    {% else %}
+        Student Submission Format: {{ admin_gradeable.getEgIsRepository() ? 'VCS Repository' : 'Upload File(s)' }}
+    {% endif %}
+
+    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
+        <input type="radio" id="upload_file_radio" name="eg_is_repository" value="false"
+                {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
+
+        <input type="radio" id="repository_radio" name="eg_is_repository" value="true"
+                {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
+    </div>
+    <br />
+
+    <div id="repository">
+        <b>Path for the Version Control System (VCS) repository:</b><br />
+        VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
+        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
+        You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+        <ul style="list-style-position: inside;">
+            <li>gradeable_id</li>
+            <li>user_id OR team_id OR repo_id (only use one)</li>
+        </ul>
+        ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+        <input style='width: 83%' type='text' id="subdirectory" name='eg_subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
+        VCS URL: <kbd id="vcs_url"></kbd>
+        <br />
+    </div>
+
+    <br />
+</fieldset>
+
+<!-- Gradeable bucket (read/write in all modes) -->
+What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
+
+{% set valid_assignment_type = ['homework','assignment','problem-set',
+    'quiz','test','exam',
+    'exercise','lecture-exercise','reading','lab','recitation',
+    'project',
+    'participation','note',
+    'none (for practice only)'] %}
+
+<select name="g_syllabus_bucket" style="width: 170px;">
+    {% for type in valid_assignment_type %}
+        <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
+            {{ type | title }}
+        </option>
+    {% endfor %}
+</select>
+
+<br />
+{% if action == 'new' %}
+    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create Gradeable</button>
+{% endif %}
+
+
+<div id="alert-message" title="WARNING">
+    <p>Gradeable ID must not be blank and only contain characters <strong> a-z A-Z 0-9 _ - </strong> </p>
+</div>
+
+<script type="text/javascript">
+    //
+    // Event Handlers
+    //
+    function onGradeableTypeChange() {
+        // Hide red text once user selects an option
+        if($('#radio_electronic_file').is(':checked') ||
+           $('#radio_checkpoints').is(':checked') ||
+           $('#radio_numeric').is(':checked')) {
+               $('#required_type').hide();
+        }
+
+        disableElementChildren('.electronic_file');
+        disableElementChildren('.checkpoints');
+        disableElementChildren('.numeric');
+
+        // Display the correct options for all forms depending
+        //  on gradeable type
+        if($('#radio_electronic_file').is(':checked')) {
+            disableElementChildren('.electronic_file', false);
+            $('#page_1_nav').show();
+            onManualGradingChange();
+        }
+        else if ($('#radio_checkpoints').is(':checked')) {
+            disableElementChildren('.checkpoints', false);
+        }
+        else if ($('#radio_numeric').is(':checked')) {
+            disableElementChildren('.numeric', false);
+        }
+    }
+
+    function onTeamAssignmentChange() {
+        if($('#team_yes_radio').is(':checked')) {
+            // $('.team_yes').show();
+            disableElementChildren('.team_yes', false);
+        }
+        else {
+            // $('.team_yes').hide();
+            disableElementChildren('.team_yes', true);
+        }
+    }
+
+    function onManualGradingChange() {
+        if($('#yes_ta_grade').is(':checked') || !$('#radio_electronic_file').is(':checked')) {
+            // $('.manual_grading').show();
+            disableElementChildren('.manual_grading', false);
+            disableElementChildren('.no_manual_grading', true);
+        }
+        else {
+            // $('.manual_grading').hide();
+            disableElementChildren('.manual_grading', true);
+            disableElementChildren('.no_manual_grading', false);
+        }
+    }
+
+    function onUploadTypeChange() {
+        if($('#repository_radio').is(':checked')) {
+            // $('#repository').hide();
+            disableElementChildren('#repository', false);
+        }
+        else {
+            // $('#repository').show();
+            disableElementChildren('#repository', true);
+        }
+    }
+
+    function onVcsSubdirChange() {
+        setVcsUrl($('#subdirectory').val());
+    }
+
+    var vcs_base_url = "{{ admin_gradeable.getVcsBaseUrl() }}";
+    function setVcsUrl(subdirectory) {
+        if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
+            $('#vcs_url').text(subdirectory);
+        }
+        else {
+            $('#vcs_url').text(vcs_base_url.replace(/[\/]+$/g, '') + '/' + subdirectory);
+        }
+    }
+
+    $(function () {
+        $('#subdirectory').on('change paste keyup', function() {
+            setVcsUrl(this.value);
+        });
+        setVcsUrl($('#subdirectory').val());
+    });
+
+    $(function () {
+        $("#alert-message").dialog({
+            modal: true,
+            autoOpen: false,
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
+
+    $(document).ready(function() {
+
+        onManualGradingChange();
+        $('[name="eg_use_ta_grading"]').change(onManualGradingChange)
+
+        //
+        // Template Selector Box Events
+        //
+
+        // Event handler for the gradeable template selection change
+        $('[name="gradeable_template"]').change(
+        function() {
+            // TODO: what if this.value === ''?
+            var arrayUrlParts = [];
+            arrayUrlParts["component"]   = ["admin"];
+            arrayUrlParts["page"]        = ["admin_gradeable"];
+            arrayUrlParts["action"]      = ["upload_new_template"];
+            arrayUrlParts["template_id"] = [this.value];
+
+            // Redirect user to the same page, but in the process,
+            //  fetch the data from the template gradeable
+            var new_url = buildUrl(arrayUrlParts);
+            window.location.href = new_url;
+        });
+
+        //
+        // Gradeable Type Radio Button Events
+        //
+
+        // Hide team settings if it isn't a electronic gradeable
+        onGradeableTypeChange();
+        $('[name="g_gradeable_type"]').change(onGradeableTypeChange);
+
+        // Hide team settings if team's are not the selected option
+        onTeamAssignmentChange();
+        $('[name="eg_team_assignment"]').change(onTeamAssignmentChange);
+
+        // Only show repo settings if the gradeable is using repo upload
+        onUploadTypeChange();
+        $('[name="eg_is_repository"]').change(onUploadTypeChange);
+
+        // Upload the vcs url in real time
+        onVcsSubdirChange();
+        $('#subdirectory').keypress(onVcsSubdirChange);
+        $('#subdirectory').keyup(onVcsSubdirChange);
+
+    });
+
+    function checkForm() {
+        var gradeable_id = $('#g_id').val();
+        var gradeable_title = $('#g_title').val();
+        var has_space = gradeable_id.includes(" ");
+        var test = /^[a-zA-Z0-9_-]*$/.test(gradeable_id);
+
+        var check1 = $('#radio_electronic_file').is(':checked');
+        var check2 = $('#radio_checkpoints').is(':checked');
+        var check3 = $('#radio_numeric').is(':checked');
+
+
+        {% if action == 'new' %}
+            var all_gradeable_ids = {{js_gradeables_array|raw}};
+            if(all_gradeable_ids.find(element => element == gradeable_id)) {
+                alert("Gradeable already exists");
+                return false;
+            }
+        {% endif %}
+        if (!test || has_space || gradeable_id == "" || gradeable_id === null) {
+            $( "#alert-message" ).dialog( "open" );
+            return false;
+        }
+
+        if (gradeable_title == '' || gradeable_title === null) {
+            alert("A name for the gradeable must be assigned");
+            return false;
+        }
+
+        if(!check1 && !check2 && !check3) {
+            alert("A type of gradeable must be selected");
+            return false;
+        }
+
+        var subdirectory = $('#subdirectory').val();
+        var vcs_url = $('#vcs_url').text();
+
+        if ($('repository_radio').is(':checked')) {
+            var subdirectory_parts = subdirectory.split("{");
+            // if this is a vcs path extension, make sure it starts with '/'
+            console.log(vcs_url);
+            if (vcs_url.indexOf('://') === -1 && vcs_url[0] !== "/") {
+                alert("VCS path needs to either be a URL or start with a /");
+                return false;
+            }
+            // check that path is made up of valid variables
+            var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
+            var used_id = false;
+            for (var x = 1; x < subdirectory_parts.length; x++) {
+                var subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
+                if (allowed_variables.indexOf(subdirectory_part) === -1) {
+                    alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
+                    return false;
+                }
+                if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    used_id = true;
+                    continue;
+                }
+                if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
+                    alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
+                    return false;
+                }
+            }
+
+        }
+
+        return true;
+    }
+
+</script>

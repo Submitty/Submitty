@@ -8,7 +8,7 @@ echo -e "Copy the submission website"
 
 if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     # constants are not initialized,
-    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../config
+    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
     HWPHP_USER=$(jq -r '.hwphp_user' ${CONF_DIR}/submitty_users.json)
@@ -30,7 +30,7 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
 fi
 
 # install composer dependencies and generate classmap
-su - ${HWPHP_USER} -c "pushd ${SUBMITTY_INSTALL_DIR}/site; composer install --no-dev --optimize-autoloader; popd"
+su - ${HWPHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader"
 
 # TEMPORARY (until we have generalized code for generating charts in html)
 # copy the zone chart images
@@ -44,7 +44,7 @@ chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
 find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
 # "other" can read all of these files
-array=( css otf jpg png ico txt )
+array=( css otf jpg png ico txt twig )
 for i in "${array[@]}"; do
     find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done

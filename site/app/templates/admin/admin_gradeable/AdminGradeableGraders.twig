@@ -1,0 +1,196 @@
+{% import _self as self %} {# Required to use macros in same template #}
+{# 
+Macros
+#}
+
+{# Display the checkboxes for a given set of graders at a grader level #}
+{% macro display_graders(graders, prefix, section_numbers) %}
+    {% for grader in graders %}
+        <tr class="{{ prefix }}">
+            <th>{{grader.user_id}}</th>
+            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader.user_id }}" id="{{ prefix }}_all_{{ grader.user_id }}"
+                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader.user_id }}", 0)'/></td>
+            {% for rs in section_numbers %}
+                <td><input type="checkbox" name="grader_{{prefix}}_{{rs}}_{{grader.user_id}}"
+                        id="grader_{{prefix}}_{{rs}}_{{grader.user_id}}"
+                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader.user_id }}", {{ rs }});'
+                        {{ (rs in grader.sections) ? 'checked' : ''}}/></td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+{% endmacro %}
+
+
+{#
+Variables
+#}
+{# Get array of section numbers #}
+{% set section_numbers = range(1, admin_gradeable.getNumSections()) %}
+{% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
+
+{# 
+Form
+#}
+What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
+    lowest privileged user group</a> that can grade this?
+<select name="g_min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+    {% for num, role in grading_groups %}
+        <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+    {% endfor %}
+</select>
+<br />
+<a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
+<br />
+<fieldset>
+    <input type="radio" name="g_grade_by_registration" value="true" id="registration_section"
+        {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+
+    <input type='radio' name="g_grade_by_registration" value="false" id="rotating_section"
+        {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
+
+    <div id="rotating_data">
+        {% if admin_gradeable.getRotatingGradeables()|length != 0 %}
+            <br />
+            Rotating Section History By Grader:
+            <br />
+            <div class="table-wrapper">
+                <div class="table-scroll">
+                    <table id="grader-history">
+                        <tr>
+                            <th></th>
+                            {% for row in admin_gradeable.getRotatingGradeables() %}
+                                <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            {% set last = '' %}
+                            {% for row in admin_gradeable.getGradeableSectionHistory() %}
+                                {% if row.user_id != last %}
+                                    </tr>
+                                    <tr class="g_history g{{ row.user_group }}">
+                                        <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
+                                {% endif %}
+                                <td style="padding: 8px; border: 3px solid black; text-align: center;">
+                                    {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
+                                </td>
+                                {% set last = row.user_id %}
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        <table id="grader_assignment">
+            {# Helpful debuging line.  Uncomment to view graders data #}
+            {# <tr>{{all_graders|json_encode()}}</tr> #}
+            <tr>
+                <th />
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{rs}}</th>
+                {% endfor %}
+            </tr>
+            <tr class="g1">
+                <th>Instructor Graders</th>
+            </tr>
+            <!-- Instructors -->
+            {{ self.display_graders(all_graders[1], 'g1', section_numbers) }}
+            <tr class="g2">
+                <th>Full Access Graders</th>
+            </tr>
+            <!-- Full Access Graders -->
+            {{ self.display_graders(all_graders[2], 'g2', section_numbers) }}
+            <tr class="g3">
+                <th>Limited Access Graders</th>
+            </tr>
+            <!-- Limited Access Graders -->
+            {{ self.display_graders(all_graders[3], 'g3', section_numbers) }}
+        </table>
+    </div>
+</fieldset>
+
+<script type="text/javascript">
+
+    // Updates the checkboxes for all sections for a student
+    //  This feature purely a front-end convenience.
+    function updateCheckBoxes(prefix, id, section) {
+        var base_cb_name = '#grader_' + prefix + '_';
+        var base_all_cb_name = '#' + prefix + '_';
+
+        // User pressed the "all" box ...
+        if(section === 0) {
+            // ... so update all check boxes for that user with the "all" box state
+            var check = $(base_all_cb_name + 'all_' + id).is(':checked');
+
+            {% for rs in section_numbers %}
+                $(base_cb_name + {{ rs }} + '_' + id).prop('checked', check);
+            {% endfor %}
+        }
+        else {
+            // if all boxes are checked, then check the 'all' box
+            var all_checked = true
+            {% for rs in section_numbers %}
+                && $(base_cb_name + {{ rs }} + '_' + id).is(':checked')
+            {% endfor %}
+            ;
+
+            $(base_all_cb_name + 'all_' + id).prop('checked', all_checked);
+        }
+    }
+
+    function onSectionTypeChange() {
+        if($('#rotating_section').is(':checked')) {
+            // $('#rotating_data').show();
+            disableElementChildren('#rotating_data', false);
+        }
+        else {
+            // $('#rotating_data').hide();
+            disableElementChildren('#rotating_data', true);
+        }
+    }
+
+    function onMinGraderChange() {
+        // $('.g1').show();
+        // $('.g2').show();
+
+        disableElementChildren('.g2', false);
+        disableElementChildren('.g3', false);
+
+        switch ($('#minimum_grading_group').val()) {
+            case '1': // Instructor only?
+                // $('.g1').hide();
+                disableElementChildren('.g2', true);
+            case '2': // Instructors and TA's
+                // $('.g2').hide();
+                disableElementChildren('.g3', true);
+            case '3': // Everyone
+                break;
+            default:
+                alert('Error!  Invalid Minimum Grader!');
+                break;
+        }
+    }
+
+    $(document).ready(function() {
+
+        // Hide rotating sections settings if on registration sections
+        onSectionTypeChange();
+        $('[name="g_grade_by_registration"]').change(onSectionTypeChange);
+
+        // Only show the graders who should have grade access to the assignment
+        onMinGraderChange();
+        $('#minimum_grading_group').change(onMinGraderChange);
+
+        // update "all" check boxes
+        {% for grader in all_graders[1] %}
+        updateCheckBoxes('g1', "{{ grader.user_id }}", 1);
+        {% endfor %}
+        {% for grader in all_graders[2] %}
+        updateCheckBoxes('g2', "{{ grader.user_id }}", 1);
+        {% endfor %}
+        {% for grader in all_graders[3] %}
+        updateCheckBoxes('g3', "{{ grader.user_id }}", 1);
+        {% endfor %}
+
+    });
+
+</script>

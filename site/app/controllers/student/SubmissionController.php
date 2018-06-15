@@ -104,17 +104,10 @@ class SubmissionController extends AbstractController {
                 }
                 else {
                     $gradeable->loadResultDetails();
-                    $ldu = $this->core->loadModel(LateDaysCalculation::class, $gradeable->getUser()->getId());
-                    $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable_id);
-                    if(empty($late_days)) {
-                        $extensions = 0;
-                    }
-                    else{
-                        $extensions = $late_days['extensions'];
-                    }
+                    $extensions = $gradeable->getLateDayExceptions();
                     $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
                     $late_days_use = max(0, $days_late - $extensions);
-                    if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
+                    if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded()) {
                         $gradeable->updateUserViewedDate();
                     }
                     $canViewWholeGradeable = false;

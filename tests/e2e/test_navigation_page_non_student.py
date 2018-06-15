@@ -23,18 +23,18 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_element_by_id('open_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("closed", elements[3].get_attribute('id'))
-        self.assertEqual(1, len(self.driver
+        self.assertEqual(2, len(self.driver
                          .find_element_by_id('closed_tbody')
                          .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("items_being_graded", elements[4].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(4, len(self.driver
                          .find_element_by_id('items_being_graded_tbody')
                          .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("graded", elements[5].get_attribute('id'))
-        self.assertEqual(8, len(self.driver
+        self.assertEqual(9, len(self.driver
                          .find_element_by_id('graded_tbody')
                          .find_elements_by_class_name("gradeable_row")))
-        self.assertEqual(6, len(self.driver.find_element_by_class_name(
+        self.assertEqual(7, len(self.driver.find_element_by_class_name(
             'gradeable_row').find_elements_by_tag_name('td')))
 
     def test_ta(self):
@@ -51,19 +51,19 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_element_by_id('open_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("closed", elements[2].get_attribute('id'))
-        self.assertEqual(1, len(self.driver
+        self.assertEqual(2, len(self.driver
                                 .find_element_by_id('closed_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("items_being_graded", elements[3].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(4, len(self.driver
                                 .find_element_by_id('items_being_graded_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
         self.assertEqual("graded", elements[4].get_attribute('id'))
-        self.assertEqual(8, len(self.driver
+        self.assertEqual(9, len(self.driver
                                 .find_element_by_id('graded_tbody')
                                 .find_elements_by_class_name("gradeable_row")))
 
-        self.assertEqual(6, len(self.driver.find_element_by_class_name(
+        self.assertEqual(7, len(self.driver.find_element_by_class_name(
             'gradeable_row').find_elements_by_tag_name('td')))
 
 

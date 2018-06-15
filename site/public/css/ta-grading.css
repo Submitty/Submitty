@@ -1,7 +1,7 @@
 #bar_wrapper {
      position:relative;
      height: 41px;
-     width: 533px;
+     width: 575px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -24,7 +24,7 @@
     position:relative;
     display: block;
     float: left;
-    width: 291px;
+    width: 333px;
     padding-top:3px;
     padding-bottom:3px;
     background-color: #edf6f6;
@@ -100,6 +100,11 @@
 .icon-selected.fa-user {
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
+}
+
+.icon-selected.fa-wrench {
+    box-shadow: 0px 0px 3px 3px #bbbbbb;
+    background-color: #bbbbbb;
 }
 
 .icon-refresh{
@@ -197,7 +202,6 @@ progress::-webkit-progress-value {
 }
 
 .file-viewer{
-    float: left;
     margin-right: 10px;
     cursor: pointer;
 }
@@ -293,8 +297,7 @@ progress::-webkit-progress-value {
 
 .rubric-table {
     border: 1px solid #dddddd;
-    border-collapse: separate;
-    *border-collapse: collapse;
+    border-collapse: collapse;
     -webkit-border-radius: 4px;
         -moz-border-radius: 4px;
             border-radius: 4px;
@@ -343,22 +346,16 @@ progress::-webkit-progress-value {
 }
 
 .ta-rubric-table {
-    border: 1px solid #dddddd;
-    border-collapse: separate;
-    *border-collapse: collapse;
-    -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-            border-radius: 4px;
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 4px;
 }
 
 .ta-rubric-table th, 
 .ta-rubric-table td {
-    padding: 8px;
-    line-height: 20px;
-    text-align: left;
+    padding: 5px;
     vertical-align: top;
-    border-top: 1px solid #dddddd;
-    border-left: 1px solid #dddddd;
+    border: 1px solid #dddddd;
 }
 
 .ta-rubric-table th {
@@ -394,4 +391,34 @@ tr.is_publish {
     margin-bottom: 5px;
     font-size: 17px;
     padding: 16px;
+}
+
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#hotkeys-list td {
+    padding: 4px;
+}
+
+.remap-button {
+    width: 100%;
+    text-align: center;
 }

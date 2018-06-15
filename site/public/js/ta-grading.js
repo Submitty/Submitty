@@ -29,8 +29,9 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-
-    calculatePercentageTotal();
+    if(getGradeable()!=null){
+        calculatePercentageTotal();
+    }
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -104,8 +105,6 @@ function readCookies(){
 
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var bar_wrapper_width = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var bar_wrapper_height = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -144,8 +143,6 @@ function readCookies(){
 
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
-    (bar_wrapper_width) ? $("#bar_wrapper").css("width", bar_wrapper_width):{};
-    (bar_wrapper_height) ? $("#bar_wrapper").css("height", bar_wrapper_height):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
 
     (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
@@ -231,8 +228,6 @@ function updateCookies(){
 
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
-    document.cookie = "bar_wrapper_width=" + $("#bar_wrapper").css("width") + "; path=/;";
-    document.cookie = "bar_wrapper_height=" + $("#bar_wrapper").css("height") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
 
     var overwrite = "on";
@@ -251,16 +246,15 @@ function updateCookies(){
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() == -2) {
-        if (findCurrentOpenedMark() == -2) {
+    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
+        if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
         } else {
             var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
         }
         var top_pos = current_mark.offsetTop;
-        var rubric_table = document.getElementById('rubric-table');
-        rubric_table = rubric_table.parentElement;
-        top_pos += rubric_table.offsetTop;
+        var rubric_box = document.getElementById('grading-box');
+        top_pos += rubric_box.offsetTop;
         document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";
@@ -282,77 +276,22 @@ function updateCookies(){
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
-//-----------------------------------------------------------------------------
-// Keyboard shortcut handling
-
-var keymap = {};
-
-window.onkeydown = function(e) {
-    if (e.target.tagName === "TEXTAREA" || (e.target.tagName === "INPUT" && e.target.type !== "checkbox") || e.target.tagName === "SELECT") return; // disable keyboard event when typing to textarea/input
-
-    var codeName = e.code;
-
-    //Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
-    if (e.shiftKey && (e.code !== "ShiftLeft" && e.code !== "ShiftRight")) {
-        codeName = "Shift " + codeName;
-    }
-    if (e.metaKey && (e.code !== "MetaLeft" && e.code !== "MetaRight")) {
-        codeName = "Meta " + codeName;
-    }
-    if (e.ctrlKey && (e.code !== "ControlLeft" && e.code !== "ControlRight")) {
-        codeName = "Control " + codeName;
-    }
-    if (e.altKey && (e.code !== "AltLeft" && e.code !== "AltRight")) {
-        codeName = "Alt " + codeName;
-    }
-
-    if (keymap.hasOwnProperty(codeName)) {
-        keymap[codeName].fns.forEach(function (fn) {
-            fn(e);
-        });
-    }
-};
-
-/**
- * Register a function to be called when a key is pressed.
- * @param code Keycode, e.g. "KeyA" or "ArrowUp" or "Ctrl KeyR", see KeyboardEvent.code
- *             Note the alphabetical order of modifier keys: Alt Control Meta Shift
- * @param fn Function / callable
- */
-function registerKeyHandler(code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        keymap[code].fns.append(fn);
+function changeEditorStyle(newStyle){
+    if(newStyle === 'style_light'){
+        localStorage.setItem("codeDisplayStyle", "light");
     } else {
-        keymap[code] = {
-            fns: [fn]
-        };
+        localStorage.setItem("codeDisplayStyle", "dark");
     }
-}
-
-/**
- * Unregister a key handler. Arguments are equivalent to registerKeyHandler()
- * @param code Keycode, see registerKeyHandler()
- * @param fn Function / callable
- */
-function unregisterKeyHandler(code, fn) {
-    if (keymap.hasOwnProperty(code)) {
-        if (keymap[code].fns.indexOf(fn) !== -1) {
-            //Delete the function from the list
-            keymap[code].fns.splice(keymap[code].fns.indexOf(fn), 1);
-        }
-    } else {
-        //Don't care if this key doesn't exist
-    }
+    window.location.reload();
 }
 
 //-----------------------------------------------------------------------------
 // Student navigation
 
 function gotoPrevStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#prev-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#prev-student")[0].dataset.href;
         }
@@ -360,10 +299,9 @@ function gotoPrevStudent() {
 }
 
 function gotoNextStudent() {
-    var rubric = $('#rubric-table')[0].dataset;
-    saveLastOpenedMark(rubric.gradeable_id, rubric.user_id, rubric.active_version, rubric.your_user_id, false, function() {
+    saveLastOpenedMark(true, function () {
         window.location = $("#next-student")[0].dataset.href;
-    }, function() {
+    }, function () {
         if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#next-student")[0].dataset.href;
         }
@@ -371,10 +309,10 @@ function gotoNextStudent() {
 }
 
 //Navigate to the prev / next student buttons
-registerKeyHandler("ArrowLeft", function() {
+registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
     gotoPrevStudent();
 });
-registerKeyHandler("ArrowRight", function() {
+registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
     gotoNextStudent();
 });
 
@@ -456,89 +394,101 @@ function resetModules() {
 }
 
 
-registerKeyHandler("KeyA", function() {
+registerKeyHandler({name: "Reset Panel Positions", code: "KeyR"}, function() {
+    resetModules();
+    updateCookies();
+});
+registerKeyHandler({name: "Toggle Autograding Panel", code: "KeyA"}, function() {
     toggleAutograding();
     updateCookies();
 });
-registerKeyHandler("KeyG", function() {
+registerKeyHandler({name: "Toggle Rubric Panel", code: "KeyG"}, function() {
     toggleRubric();
     updateCookies();
 });
-registerKeyHandler("KeyO", function() {
+registerKeyHandler({name: "Toggle Submissions Panel", code: "KeyO"}, function() {
     toggleSubmissions();
     updateCookies();
 });
-registerKeyHandler("KeyS", function() {
+registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, function() {
     toggleInfo();
-    updateCookies();
-});
-registerKeyHandler("KeyR", function() {
-    resetModules();
     updateCookies();
 });
 
 //-----------------------------------------------------------------------------
 // Show/hide components
 
-registerKeyHandler('ArrowDown', function() {
+registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
-    if (current === -1) {
+    var numQuestions = getGradeable().components.length;
+    if (current === NO_COMPONENT_ID) {
         openMark(1);
+        $('#title-' + 1)[0].scrollIntoView();
     } else if (current === numQuestions) {
-        openMark(current);
+        openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
+    } else if (current === GENERAL_MESSAGE_ID) {
+        closeGeneralMessage(true);
     } else {
         openMark(current + 1);
+        $('#title-' + (current + 1))[0].scrollIntoView();
     }
+    e.preventDefault();
 });
 
-registerKeyHandler('ArrowUp', function() {
+registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
     var current = findCurrentOpenedMark();
-    var numQuestions = parseInt($('#rubric-table')[0].dataset.num_questions);
-    if (current === -1) {
-        openMark(numQuestions);
+    var numQuestions = getGradeable().components.length;
+    if (current === NO_COMPONENT_ID) {
+        openGeneralMessage();
+        $('#title-general')[0].scrollIntoView();
     } else if (current === 1) {
-        openMark(current);
+        closeMark(1);
+    } else if (current === GENERAL_MESSAGE_ID) {
+        openMark(numQuestions);
+        $('#title-' + numQuestions)[0].scrollIntoView();
     } else {
         openMark(current - 1);
+        $('#title-' + (current - 1))[0].scrollIntoView();
     }
+    e.preventDefault();
 });
 
 //-----------------------------------------------------------------------------
 // Selecting marks
 
-registerKeyHandler('Digit1', function() {
+registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
     selectCurrentMarkCheck(0);
 });
-registerKeyHandler('Digit2', function() {
+registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
     selectCurrentMarkCheck(1);
 });
-registerKeyHandler('Digit3', function() {
+registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
     selectCurrentMarkCheck(2);
 });
-registerKeyHandler('Digit4', function() {
+registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
     selectCurrentMarkCheck(3);
 });
-registerKeyHandler('Digit5', function() {
+registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
     selectCurrentMarkCheck(4);
 });
-registerKeyHandler('Digit6', function() {
+registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
     selectCurrentMarkCheck(5);
 });
-registerKeyHandler('Digit7', function() {
+registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
     selectCurrentMarkCheck(6);
 });
-registerKeyHandler('Digit8', function() {
+registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
     selectCurrentMarkCheck(7);
 });
-registerKeyHandler('Digit9', function() {
+registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
     selectCurrentMarkCheck(8);
 });
 
 function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
-    if (opened > 0) {
-        selectMark($("#mark_id-" + opened + "-" + index + "-check"));
+    if (opened > 0 && index < getComponent(opened).marks.length) {
+        selectMark($("#mark_id-" + opened + "-" + index + "-check")[0]);
     }
 }
 
@@ -703,4 +653,10 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
     });
 
     return stored_paths;
+}
+
+function adjustSize(name) {
+    var textarea = document.getElementById(name);
+    textarea.style.height = "";
+    textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }

@@ -5,7 +5,6 @@ namespace app\views\submission;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\LateDaysCalculation;
 
 class HomeworkView extends AbstractView {
 
@@ -100,9 +99,9 @@ HTML;
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
-            $info.= " but your instructor specified that no late days may be used for this assignment.";
+            $info.= "<br>but your instructor specified that no late days may be used for this assignment.";
           } else {
-            $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+            $info.= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
         }
 
@@ -222,11 +221,17 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
-        $late_days_remaining = $late_days_data['remaining_days'];
-        $active_days_late = $gradeable->getActiveDaysLate();
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        $total_late_used = 0;
+        $curr_late = 0;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+            $curr_late = $g->getStudentAllowedLateDays();
+        }
+        $late_days_remaining = $curr_late-$total_late_used;
+        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
 
@@ -1196,11 +1201,12 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased()) {
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
+            // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if ($gradeable->hasGradeFile()) {
+            if ($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;
@@ -1209,7 +1215,7 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-    <h3 class="label">TA grade not available</h3>
+                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
             $return .= <<<HTML
