@@ -932,6 +932,13 @@ table .instructor .two-options{
     width: 95%;
 }
 
+.fill-available {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
+}
+
 .reply-box{
     display: none;
     margin-right: 15px;

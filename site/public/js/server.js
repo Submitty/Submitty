@@ -1215,7 +1215,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var time = (new Date(json.post_time));
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('edit_post_content');
+                var contentBox = document.getElementById('thread_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
@@ -1226,12 +1226,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
-                    $("#edit_thread_title").prop('disabled', false);
-                    $("#edit_thread_form").show();
-                    $('#edit_thread_title').val(thread_title);
+                    $("#title").prop('disabled', false);
+                    // $("#edit_thread_form").show();
+                    $('#title').val(thread_title);
                 } else {
-                    $("#edit_thread_title").prop('disabled', true);
-                    $("#edit_thread_form").hide();
+                    $("#title").prop('disabled', true);
+                    // $("#edit_thread_form").hide();
                 }
             },
             error: function(){
