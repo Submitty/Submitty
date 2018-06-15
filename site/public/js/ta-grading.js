@@ -29,9 +29,8 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    if(getGradeable()!=null){
-        calculatePercentageTotal();
-    }
+
+    calculatePercentageTotal();
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -162,13 +161,6 @@ function readCookies(){
         }
     }
 
-    var testcases_array = JSON.parse(testcases);
-    testcases_array.forEach(function(element) {
-        var id = 'testcase_' + element;
-        if ($("#" + id).attr("style") == "display: none;") {
-            toggleDiv(id);
-        }
-    });
     if (autoscroll == "on") {
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
@@ -245,9 +237,7 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    if(getGradeable()!=null){
-        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-    }
+    document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
@@ -265,16 +255,16 @@ function updateCookies(){
     var testcases = findOpenTestcases();
     testcases = JSON.stringify(testcases);
     document.cookie = "testcases=" + testcases + "; path=/;";
-    if(getGradeable()!=null){
-        var files = [];
-        $('#file-container').children().each(function() {
-            $(this).children('div[id^=div_viewer_]').each(function() {
-                files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
-            });
+
+    var files = [];
+    $('#file-container').children().each(function() {
+        $(this).children('div[id^=div_viewer_]').each(function() {
+            files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
         });
-        files = JSON.stringify(files);
-        document.cookie = "files=" + files + "; path=/;"
-    }
+    });
+    files = JSON.stringify(files);
+    document.cookie = "files=" + files + "; path=/;"
+
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
@@ -291,33 +281,23 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+    saveLastOpenedMark(true, function () {
+        window.location = $("#prev-student")[0].dataset.href;
+    }, function () {
+        if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#prev-student")[0].dataset.href;
-        }, function () {
-            if (confirm("Could not save last mark, change student anyway?")) {
-                window.location = $("#prev-student")[0].dataset.href;
-            }
-        });
-    }
-    else{
-        window.location = $("#prev-student")[0].dataset.href; 
-    }
+        }
+    });
 }
 
 function gotoNextStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+    saveLastOpenedMark(true, function () {
+        window.location = $("#next-student")[0].dataset.href;
+    }, function () {
+        if (confirm("Could not save last mark, change student anyway?")) {
             window.location = $("#next-student")[0].dataset.href;
-        }, function () {
-            if (confirm("Could not save last mark, change student anyway?")) {
-                window.location = $("#next-student")[0].dataset.href;
-            }
-        });
-    }
-    else{
-       window.location = $("#next-student")[0].dataset.href; 
-    }
+        }
+    });
 }
 
 //Navigate to the prev / next student buttons

@@ -9,9 +9,6 @@ GENERAL_MESSAGE_ID = -2;
  * @returns Object Gradeable data
  */
 function getGradeable() {
-    if(grading_data == null){
-        return null;
-    }
     return grading_data.gradeable;
 }
 
