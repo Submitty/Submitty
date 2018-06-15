@@ -68,6 +68,32 @@ class NavigationController extends AbstractController {
             }
         }
 
+        //Remove gradeables we are not allowed to view
+        foreach ($sections_to_lists as $key => $value) {
+            foreach ($sections_to_lists[$key] as $gradeable => $g_data) {
+                /* @var Gradeable $g_data */
+
+                // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+                if ($g_data->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+                    unset($sections_to_lists[$key][$gradeable]);
+                    continue;
+                }
+
+                // if student view false, never show
+                if (!$g_data->getStudentView() && !$user->accessGrading()) {
+                    unset($sections_to_lists[$key][$gradeable]);
+                    continue;
+                }
+
+                //If we're not instructor and this is not open to TAs
+                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+                if ($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
+                    unset($sections_to_lists[$key][$gradeable]);
+                    continue;
+                }
+            }
+        }
+
         //Clear empty sections
         foreach ($sections_to_lists as $key => $value) {
             $electronic_gradeable_count = 0;

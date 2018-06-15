@@ -217,14 +217,6 @@ HTML;
                 }
                 $display_section = $list_section;
                 $title_to_button_type_submission[$list_section] = $btn_title_save;
-                // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-                if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
-                    continue;
-                }
-                // if student view false, never show
-                if (!$g_data->getStudentView() && !$this->core->getUser()->accessGrading()) {
-                    continue;
-                }
                 if ($g_data->getActiveVersion() < 1){
                     if ($display_section == "GRADED" || $display_section == "ITEMS BEING GRADED"){
                         $display_section = "CLOSED";
@@ -234,10 +226,6 @@ HTML;
                     $title_to_button_type_submission['GRADED'] = "btn-default";
                 }
                 /** @var Gradeable $g_data */
-                $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-                if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
-                    continue;
-                }
                 $time = " @ H:i";
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/Y{$time}").")</span>";
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
