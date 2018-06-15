@@ -1295,6 +1295,7 @@ class SubmissionController extends AbstractController {
         // if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
         //     return $this->uploadResult("Invalid CSRF token.", false);
         // }
+        
         $uploaded_files = array();
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
@@ -1346,13 +1347,11 @@ class SubmissionController extends AbstractController {
         //     return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
         // }
 
-        // creating uploads/bulk_pdf/gradeable_id directory
+        // creating uploads/student_images directory
 
         $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
-        alert($upload_img_path);
         if (!FileUtils::createDir($upload_img_path)) {
             //return $this->uploadResult("Failed to make gradeable path.", false);
-            alert("DOESNT WORK");
             return $this->uploadResult($upload_img_path, false);
         }
         if (isset($uploaded_files[1])) {

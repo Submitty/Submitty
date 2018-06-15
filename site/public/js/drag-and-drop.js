@@ -873,6 +873,7 @@ function handleDownloadImages(/*days_late, late_days_allowed, versions_used, ver
         success: function(data) {
             //$("#submit").prop("disabled", false);
             try {
+                console.log(data);
 
                 data = JSON.parse(data);
 
