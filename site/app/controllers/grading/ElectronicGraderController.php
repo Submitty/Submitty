@@ -960,8 +960,6 @@ class ElectronicGraderController extends GradingController {
             }
         }
         if ($gradeable->getCurrentVersion() === null) {
-            $this->core->addErrorMessage("Cannot grade an assignment with no submission.");
-
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
