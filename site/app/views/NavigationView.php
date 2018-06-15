@@ -188,7 +188,7 @@ HTML;
                         $button_type_submission = "btn-default";
                     }
                 }
-                
+
                 $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")</span>";
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                     if ($gradeable->useTAGrading()) {
@@ -423,42 +423,39 @@ HTML;
     private function getGradeableTitle(Gradeable $gradeable, string $gradeable_id): string {
         if (trim($gradeable->getInstructionsURL()) != '') {
             $gradeable_title = '<label>' . $gradeable->getName() . '</label><a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-        } else {
-            if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
-                $no_teams_flag = true;
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
-                if (!empty($all_teams)) {
-                    $no_teams_flag = false;
-                }
-                # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
-                $no_submission_flag = true;
-                $semester = $this->core->getConfig()->getSemester();
-                $course = $this->core->getConfig()->getCourse();
-                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $gradeable_id;
-                if (is_dir($submission_path)) {
-                    $no_submission_flag = false;
-                }
-                if ($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
-                    $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
-                    $gradeable_title = <<<HTML
+        } else if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
+            # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+            $no_teams_flag = true;
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+            if (!empty($all_teams)) {
+                $no_teams_flag = false;
+            }
+            # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+            $no_submission_flag = true;
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $gradeable_id;
+            if (is_dir($submission_path)) {
+                $no_submission_flag = false;
+            }
+            if ($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
+                $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
+                $gradeable_title = <<<HTML
                     <label>{$gradeable->getName()}</label>&nbsp;
                     <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
 HTML;
-                } else {
-                    $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-                }
-            } else if (($gradeable->getType() == GradeableType::NUMERIC_TEXT) || (($gradeable->getType() == GradeableType::CHECKPOINTS))) {
-                if ($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable_id) === 0) {
-                    $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
-                    $gradeable_title = <<<HTML
+            } else {
+                $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
+            }
+        } else if (($gradeable->getType() == GradeableType::NUMERIC_TEXT) || (($gradeable->getType() == GradeableType::CHECKPOINTS))) {
+            if ($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable_id) === 0) {
+                $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable_id));
+                $gradeable_title = <<<HTML
                     <label>{$gradeable->getName()}</label>&nbsp;
                     <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
 HTML;
-                } else {
-                    $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-                }
-
+            } else {
+                $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
             }
         }
         return $gradeable_title;
@@ -587,31 +584,34 @@ HTML;
      */
     private function getTeamButtonTitle(Gradeable $gradeable): array {
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $past_lock_date = $date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
+
+        if ($past_lock_date) {
+            $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
+        } else {
+            $display_date = '';
+        }
 
         if ($gradeable->getTeam() === null) {
-            if ($date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
+            if ($past_lock_date) {
                 $button_type = 'btn-primary';
-                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
             } else {
                 $button_type = 'btn-danger';
-                $display_date = '';
             }
             $button_text = 'CREATE TEAM';
             $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
             foreach ($teams as $t) {
                 if ($t->sentInvite($this->core->getUser()->getId())) {
                     $button_text = 'CREATE/JOIN TEAM';
-                    return array($button_type, $display_date, $button_text);
+                    break;
                 }
             }
         } else {
-            if ($date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
+            if ($past_lock_date) {
                 $button_type = 'btn-primary';
-                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
                 $button_text = 'MANAGE TEAM';
             } else {
                 $button_type = 'btn-default';
-                $display_date = '';
                 $button_text = 'VIEW TEAM';
             }
         }
