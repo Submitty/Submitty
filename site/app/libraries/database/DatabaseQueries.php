@@ -286,11 +286,7 @@ class DatabaseQueries {
     }
 
     public function editThreadTitle($thread_id, $thread_title) {
-        try {
-            $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
-        } catch(DatabaseException $dbException) {
-            return false;
-        } return true;
+        $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
     }
 
     /**

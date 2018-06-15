@@ -298,28 +298,11 @@ class ForumController extends AbstractController {
                 $this->core->getOutput()->renderJson(array('type' => $type));
             } else if($modifyType == 1) { //edit post
                 $thread_id = $_POST["edit_thread_id"];
-                $edit_post_status = null;
-                $edit_thread_status = $this->editThread();
-
-                if(isset($post_id)) {
-                    $post_id = $_POST["edit_post_id"];
-                    $new_post_content = $_POST["edit_post_content"];
-                    $edit_post_status = $this->core->getQueries()->editPost($post_id, $new_post_content);
-                }
-                if(is_null($edit_thread_status) && is_null($edit_post_status)) {
-                    $this->core->addErrorMessage("No data submitted. Please try again.");
-                } else if($edit_thread_status === false || $edit_post_status === false) {
-                    $element_modifying = array();
-                    if($edit_thread_status == false) {
-                        $element_modifying[] = "thread";
-                    }
-                    if($edit_post_status == false) {
-                        $element_modifying[] = "post";
-                    }
-                    $element_modifying = join(" and ",$element_modifying);
-                    $this->core->addErrorMessage("There was an error trying to modify the {$element_modifying}. Please try again.");
-                }
-                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $post_id = $_POST["edit_post_id"];
+                $new_post_content = $_POST["edit_post_content"];
+                if(!$this->core->getQueries()->editPost($post_id, $new_post_content)){
+                    $this->core->addErrorMessage("There was an error trying to modify the post. Please try again.");
+                } $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
             $response = array('type' => $type);
             $this->core->getOutput()->renderJson($response);
@@ -330,19 +313,20 @@ class ForumController extends AbstractController {
     }
 
     public function editThread(){
-        // To be called from alterPost(1);
         $thread_id = $_POST["edit_thread_id"];
         if($this->core->getUser()->getGroup() <= 2){
-            if(!empty($_POST["edit_thread_title"])) {
+            if(isset($_POST["edit_thread_title"])) {
                 $thread_title = $_POST["edit_thread_title"];
-                if($this->core->getQueries()->editThreadTitle($thread_id, $thread_title)) {
-                    return true;
+                if(empty($thread_title)) {
+                    $this->core->addErrorMessage("Thread title can't be empty.");
                 } else {
-                    return false;
+                    $this->core->getQueries()->editThreadTitle($thread_id, $thread_title);
                 }
             }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
         }
-        return null;
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
     private function getSortedThreads($categories_ids){
