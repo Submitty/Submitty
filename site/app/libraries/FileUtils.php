@@ -310,9 +310,9 @@ class FileUtils {
     }
 
     /**
-     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPERATOR constant. This
+     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPARATOR constant. This
      * works in the same way as os.path.join does in Python, making sure that we do not end up with any doubles of
-     * a seperator and that we can start the path with a seperator if we specify the first argument as starting with
+     * a separator and that we can start the path with a separator if we specify the first argument as starting with
      * it.
      *
      * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:
@@ -399,4 +399,57 @@ class FileUtils {
         }
         return $content_type;
     }
+
+    /**
+     * Given a set of new files and a set of existing files (both constructed with the filenames as keys, e.g. 
+     * array("foo.txt" => true, "bar.cpp" => "baz"), a php hashset), this function returns an array
+     * mapping the original names in $new_files to new names that will not conflict among themselves or
+     * with the filenames in $existing_files.
+     *
+     * To use a numerically indexed array (with the filenames as values), call array_flip on it before passing it
+     * as a parameter (note that doing so will remove duplicate elements and thus duplicates won't work).
+     *
+     * @param $existing_files
+     * @param $new_files
+     * @return array
+     */
+    public static function renameNoClobber($new_files, $existing_files) {
+        $new_files_set = array_flip($new_files);
+        $existing_files_set = array_flip($existing_files);
+        foreach($new_files as $file) {
+            if(isset($existing_files_set[$file])) {
+                $original_file = $file;
+                unset($new_files_set[$file]);
+                $parts = explode(".", $file);
+                $num = 3;
+                if(strlen($parts[0])) {
+                    $start = substr($parts[0], 0, strlen($parts[0]) - 1);
+                    $end = substr($parts[0], strlen($parts[0]) - 1, strlen($parts[0]));
+                    // if $start ends with "_version_" and $end is numeric
+                    if(substr_compare($start, "_version_", strlen($start) - 9) === 0 && is_numeric($end)) { 
+                        $parts[0] = $start.($end + 1);
+                        $num = $end + 1;
+                    }
+                    else {
+                        $parts[0] .= "_version_2"; 
+                    }
+                }
+                else {
+                    $parts[0] .= "_version_2"; 
+                }
+                $file = implode(".", $parts);
+                for($c = $num; isset($existing_files_set[$file]) || isset($new_files_set[$file]); $c++) {
+                    $parts = explode(".", $file);
+                    $parts[0] = substr($parts[0], 0, strlen($parts[0]) - 1).$c;
+                    $file = implode(".", $parts);
+                }
+                $new_files_set[$file] = $original_file;
+            }
+            else {
+                $new_files_set[$file] = $file;
+            }
+        }
+        return array_flip($new_files_set);
+    }
+
 }

@@ -714,9 +714,13 @@ class SubmissionController extends AbstractController {
         }
 
         $merge_previous = false;
+        $clobber = false;
         if(isset($_REQUEST['merge'])) {
             if($_REQUEST['merge'] === "true") {
                 $merge_previous = true;
+            }
+            if(isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === "true") {
+                $clobber = true;
             }
         }
 
@@ -897,7 +901,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("No files to be submitted.", false);
             }
             
-            if (count($previous_files) > 0) {
+            if (count($previous_files) > 0 || $merge_previous) {
                 if ($gradeable->getHighestVersion() === 0) {
                     return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
@@ -917,7 +921,29 @@ class SubmissionController extends AbstractController {
                         return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
                     }
                 }
-    
+                
+                if(merge_previous) {
+                    for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                        if(isset($uploaded_files[$i])) {
+                            $previous_files[$i] = array();
+
+                            $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
+                            $filenames = glob($to_search);
+                            $j = 0;
+                            foreach($filenames as $filename) {
+                                $previous_files[$i][$j++] = basename($filename);
+                            }
+                            $old_to_new_filenames = FileUtils::renameNoClobber($uploaded_files[$i]["name"], $previous_files[$i]);
+                            for($j = 0; $j < $count[$i]; $j++) {
+                                $old_filename = $uploaded_files[$i]["name"][$j];
+                                $new_filename = $old_to_new_filenames[$old_filename];
+                                $uploaded_files[$i]["name"][$j] = $new_filename;
+                            }
+                        }
+                    }
+                }
+
+
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     if (isset($previous_files[$i])) {
                         foreach ($previous_files[$i] as $prev_file) {
@@ -955,33 +981,17 @@ class SubmissionController extends AbstractController {
                         }
                     }
                 }
-                if (isset($previous_files[$i]) && isset($previous_part_path[$i])) {
-                    foreach ($previous_files[$i] as $prev_file) {
-                        $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
+                if (isset($previous_part_path[$i])) {
+                    if(isset($previous_files[$i])) {
+                        foreach ($previous_files[$i] as $prev_file) {
+                            $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
+                        }
                     }
                 }
             }
             
             if ($file_size > $max_size) {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
-            }
-
-            if($merge_previous && $new_version !== 1) {
-                $old_version = $new_version - 1;
-                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
-                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
-                $files = glob($to_search);
-                foreach($files as $file) {
-                    $file_base_name = basename($file);
-                    if (strpos($file_base_name, 'version') === false) {
-                        $parts = explode(".", $file_base_name);
-                        $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
-                    }
-                    $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                    if (!@copy($file, $move_here)) {
-                        return $this->uploadResult("Failed to merge previous version.", false);
-                    }
-                }
             }
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
@@ -1006,7 +1016,7 @@ class SubmissionController extends AbstractController {
                                 $zip->close();
                             }
                             else {
-                                // If the zip is an invalid zip (say we remove the last character from the zip file
+                                // If the zip is an invalid zip (say we remove the last character from the zip file)
                                 // then trying to get the status code will throw an exception and not give us a string
                                 // so we have that string hardcoded, otherwise we can just get the status string as
                                 // normal.

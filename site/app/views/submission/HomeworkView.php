@@ -663,7 +663,7 @@ HTML;
 
             $return .= <<<HTML
     <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
@@ -685,9 +685,11 @@ HTML;
                                 repo_id,
                                 {$student_page_string},
                                 {$num_components},
-                                merge_previous=merge_previous);
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
             else {
+                console.log(user_id);
                 handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 highest_version,
@@ -700,7 +702,8 @@ HTML;
                                 repo_id,
                                 {$student_page_string},
                                 {$num_components},
-                                merge_previous=merge_previous);
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
         }
         $(function() {
@@ -734,6 +737,7 @@ HTML;
                 }
                 // user id entered, need to validate first
                 else {
+                    console.log("#####");
                     validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", repo_id, makeSubmission);
                 }
                 e.stopPropagation();

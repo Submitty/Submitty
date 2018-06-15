@@ -22,7 +22,7 @@ var empty_textboxes = true;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
-// initializing file_array and prevous_files
+// initializing file_array and previous_files
 function createArray(num_parts){
     if(file_array.length == 0){
         for(var i=0; i<num_parts; i++){
@@ -380,13 +380,15 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
+                    console.log("######");
+                    console.log(data['previous_submission']);
                     if(data['previous_submission']){
                         $(function() {
                             var dialog = $('<div><p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p><br>\
                                 <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">New Submission</label><br>\
                                 <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">Merge (Don\'t File Clobber)</label><br>\
-                                '//      <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">Merge (File Clobber)</label>\
-                                +'</div>').dialog({
+                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">Merge (File Clobber)</label></div>')
+                                .dialog({
                                 open: function(event, ui) {
                                     $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
                                     var radio_idx = $("#toggle-merge-default").is(":checked") ? 1 : 0;
@@ -404,9 +406,9 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                                             else if($("#instructor-submit-option-merge-1").is(":checked")) {
                                                 makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
                                             }
-                                            // else {
-                                            //     makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                            // }
+                                            else if($("#instructor-submit-option-merge-2").is(":checked")){
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true, clobber=true);
+                                            }
                                             dialog.dialog('destroy');
                                         }
                                     },
@@ -652,11 +654,14 @@ function handleBulk(gradeable_id, num_pages) {
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous});
+    console.log("#######");
+    console.log(merge_previous);
+    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+    console.log(submit_url);
 
     var message = "";
     // check versions used
@@ -719,6 +724,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
+        console.log(previous_files);
     }
 
     var textbox_answers = [];
