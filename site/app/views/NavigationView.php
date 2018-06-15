@@ -163,26 +163,26 @@ HTML;
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
 
-                $gradeable_title       = $this->getTitleCell($gradeable);
-                $gradeable_team_range  = $this->hasTeamButton($gradeable)    ? $this->getTeamButton($gradeable)                     : "";
-                $gradeable_open_range  = $this->hasSubmitButton($gradeable)  ? $this->getSubmitButton($gradeable, $list_section)    : "";
-                $gradeable_grade_range = $this->hasGradeButton($gradeable)   ? $this->getGradeButton($gradeable, $list_section)     : "";
-                $admin_button          = $this->hasEditButton()              ? $this->getEditButton($gradeable)                     : "";
-                $admin_rebuild_button  = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable)                  : "";
-                $quick_links           = $this->hasQuickLinkButton()         ? $this->getQuickLinkButton($gradeable, $list_section) : "";
+                $gradeable_title         = $this->getTitleCell($gradeable);
+                $gradeable_team_button   = $this->hasTeamButton($gradeable)    ? $this->getTeamButton($gradeable)                     : "";
+                $gradeable_open_button   = $this->hasSubmitButton($gradeable)  ? $this->getSubmitButton($gradeable, $list_section)    : "";
+                $gradeable_grade_button  = $this->hasGradeButton($gradeable)   ? $this->getGradeButton($gradeable, $list_section)     : "";
+                $admin_edit_button       = $this->hasEditButton()              ? $this->getEditButton($gradeable)                     : "";
+                $admin_rebuild_button    = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable)                  : "";
+                $admin_quick_link_button = $this->hasQuickLinkButton()         ? $this->getQuickLinkButton($gradeable, $list_section) : "";
 
                 $return .= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
-                <td style="padding: 20px;">{$gradeable_team_range}</td>
-                <td style="padding: 20px;">{$gradeable_open_range}</td>
+                <td style="padding: 20px;">{$gradeable_team_button}</td>
+                <td style="padding: 20px;">{$gradeable_open_button}</td>
 HTML;
                 if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $gradeable->getMinimumGradingGroup())) || ($this->core->getUser()->getGroup() === 4 && $gradeable->getPeerGrading())) {
                     $return .= <<<HTML
-                <td style="padding: 20px;">{$gradeable_grade_range}</td>
-                <td style="padding: 20px;">{$admin_button}</td>
+                <td style="padding: 20px;">{$gradeable_grade_button}</td>
+                <td style="padding: 20px;">{$admin_edit_button}</td>
                 <td style="padding: 20px;">{$admin_rebuild_button}</td>
-                <td style="padding: 20px;">{$quick_links}</td>
+                <td style="padding: 20px;">{$admin_quick_link_button}</td>
 HTML;
                 }
                 $return .= <<<HTML
