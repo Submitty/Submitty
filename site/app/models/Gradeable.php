@@ -1003,10 +1003,6 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->resetUserViewedDate($this);
     }
 
-    public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable($this);
-    }
-
     public function getActiveDaysLate() {
         $return =  DateUtils::calculateDayDiff($this->due_date, $this->submission_time);
         if ($return < 0) {
