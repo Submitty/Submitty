@@ -92,7 +92,7 @@ class AutogradingView extends AbstractView {
             } else {
             	if($description != "STDERR.txt" && $description != "Execution Logfile") {
 					$return .= <<<HTML
-			<a id="show_char_$index" class="btn btn-default" style="float:right;" onclick="changeDiffView('testcase_$index', '$gradeable_id', '$who_id', '$index')">Show empty chars</a>
+			<a id="show_char_$index" class="btn btn-default" style="float:right;" onclick="changeDiffView('testcase_$index', '$gradeable_id', '$who_id', '$index')">Show white spaces</a>
 HTML;
 				}
                 $return .= <<<HTML

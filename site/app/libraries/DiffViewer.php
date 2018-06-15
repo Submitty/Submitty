@@ -426,7 +426,7 @@ class DiffViewer {
                 foreach ($this->diff[$type][$i] as $diff) {
                     $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
 					$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                    if($option == "original" || $i == 0 || $i == count($lines)-1){
+                    if($option == "original"){
 						$html .= $html_orig;
 						$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
 					} else if($option == "no_empty") {
@@ -441,10 +441,10 @@ class DiffViewer {
             }
             else {
                 if (isset($lines[$i])) {
-                    $html .= $option == "original" || $i==0 || $i == count($lines)-1? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
+                    $html .= $option == "original"? htmlentities($lines[$i]): $this->replaceEmptyChar(htmlentities($lines[$i]));
                 }
             }
-			if($option == "no_empty" && $i != 0 && $i != count($lines)-1) $html .= '<span style="border: 1px solid blue">&#9166;</span>';
+			if($option == "no_empty") $html .= '<span style="border: 1px solid blue">&#9166;</span>';
             $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {

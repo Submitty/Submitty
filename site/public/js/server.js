@@ -34,15 +34,15 @@ function changeDiffView(div_name, gradeable_id, who_id, index){
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
         ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index};
 
-    if($("#show_char_"+index).text() != "Hide empty chars"){
+    if($("#show_char_"+index).text() != "Hide white spaces"){
         $("#show_char_"+index).removeClass('btn-default');
         $("#show_char_"+index).addClass('btn-primary');
-        $("#show_char_"+index).html("Hide empty chars");
+        $("#show_char_"+index).html("Hide white spaces");
         args['option'] = 'no_empty'
     } else {
         $("#show_char_"+index).removeClass('btn-primary');
         $("#show_char_"+index).addClass('btn-default');
-        $("#show_char_"+index).html("Show empty chars");
+        $("#show_char_"+index).html("Show white spaces");
         args['option'] = 'original'
     }
     //Insert actual and expected one at a time
