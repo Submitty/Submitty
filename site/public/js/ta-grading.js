@@ -245,7 +245,9 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+    if(getGradeable()!=null){
+        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+    }
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
@@ -263,16 +265,16 @@ function updateCookies(){
     var testcases = findOpenTestcases();
     testcases = JSON.stringify(testcases);
     document.cookie = "testcases=" + testcases + "; path=/;";
-
-    var files = [];
-    $('#file-container').children().each(function() {
-        $(this).children('div[id^=div_viewer_]').each(function() {
-            files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
+    if(getGradeable()!=null){
+        var files = [];
+        $('#file-container').children().each(function() {
+            $(this).children('div[id^=div_viewer_]').each(function() {
+                files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
+            });
         });
-    });
-    files = JSON.stringify(files);
-    document.cookie = "files=" + files + "; path=/;"
-
+        files = JSON.stringify(files);
+        document.cookie = "files=" + files + "; path=/;"
+    }
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
