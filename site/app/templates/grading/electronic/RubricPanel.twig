@@ -5,41 +5,41 @@
     <div class="draggable_content">
         <span class="grading_label">Grading Rubric</span>
         {% if gradeable.useTAGrading() %}
-                <div style="float: right; position: relative; top: 10px; right: 1%;">
-                    {# Verify all button #}
-                    {% if display_verify_all %}
-                        <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
-                    {% endif %}
-                    {# /Verify all button #}
-
-                    {# Checkboxes #}
-                    <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
-                    {% if peer %}
-                        <span> <input type='hidden' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();"/></span>
-                    {% else %}
-                        <span> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> Overwrite Grader </span>
-                    {% endif %}
-                    {# /Checkboxes #}
-                </div>
-
-                {# Wrong version warnings #}
-                {% if gradeable.getActiveVersion() == 0 %}
-                    {% if gradeable.hasSubmitted() %}
-                        {# Cancelled submission #}
-                        <div class="red-message" style="text-align: center">Cancelled Submission</div>
-                    {% else %}
-                        {# No submission #}
-                        <div class="red-message" style="text-align: center">No Submission</div>
-                    {% endif %}
-                {% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
-                    {# Opened a different version #}
-                    <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+            <div style="float: right; position: relative; top: 10px; right: 1%;">
+                {# Verify all button #}
+                {% if display_verify_all %}
+                    <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
                 {% endif %}
+                {# /Verify all button #}
 
-                <div class="inner-container" id="grading-box">
-                {% if gradeable.getActiveVersion() == 0 %}
-                    <h4>No Submission</h4>
+                {# Checkboxes #}
+                <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto scroll / Auto open </span>
+                {% if peer %}
+                    <span> <input type='hidden' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();"/></span>
                 {% else %}
+                    <span> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> Overwrite Grader </span>
+                {% endif %}
+                {# /Checkboxes #}
+            </div>
+
+            {# Wrong version warnings #}
+            {% if gradeable.getActiveVersion() == 0 %}
+                {% if gradeable.hasSubmitted() %}
+                    {# Cancelled submission #}
+                    <div class="red-message" style="text-align: center">Cancelled Submission</div>
+                {% else %}
+                    {# No submission #}
+                    <div class="red-message" style="text-align: center">No Submission</div>
+                {% endif %}
+            {% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+                {# Opened a different version #}
+                <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+            {% endif %}
+
+            <div class="inner-container" id="grading-box">
+            {% if gradeable.getActiveVersion() == 0 %}
+                <h4>No Submission</h4>
+            {% else %}
                 </div>
                 <script type="application/javascript">
                     var grading_data = {{ grading_data|raw }};
