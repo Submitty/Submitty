@@ -1356,8 +1356,10 @@ class SubmissionController extends AbstractController {
         // creating uploads/bulk_pdf/gradeable_id directory
 
         $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
+        alert($upload_img_path);
         if (!FileUtils::createDir($upload_img_path)) {
             //return $this->uploadResult("Failed to make gradeable path.", false);
+            alert("DOESNT WORK");
             return $this->uploadResult($upload_img_path, false);
         }
         if (isset($uploaded_files[1])) {
