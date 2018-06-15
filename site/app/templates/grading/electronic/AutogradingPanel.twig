@@ -1,0 +1,17 @@
+<div id="autograding_results" class="draggable rubric_panel" style="left:15px; top:170px; width:48%; height:36%;">
+    <div class="draggable_content">
+        <span class="grading_label">Auto-Grading Testcases</span>
+        <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
+        <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
+        <div class="inner-container">
+            {% if gradeable.getActiveVersion() == 0 %}
+                <h4>No Submission</h4>
+            {% elseif gradeable.getTestcases()|length == 0 %}
+                <h4>No Autograding For This Assignment</h4>
+            {% else %}
+                {# Todo: make this use include? That twig file has a ton of stuff though #}
+                {{ core.getOutput().renderTemplate('AutoGrading', 'showResults', gradeable, canViewWholeGradeable)|raw }}
+            {% endif %}
+        </div>
+    </div>
+</div>

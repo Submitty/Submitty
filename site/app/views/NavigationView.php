@@ -50,6 +50,13 @@ HTML;
 HTML;
         }
         // ======================================================================================
+        // LATE DAYS TABLE BUTTON
+        // ======================================================================================
+
+        $return .= <<<HTML
+        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table'))}">Show my late days information</a>
+HTML;
+        // ======================================================================================
         // FORUM BUTTON
         // ====================================================================================== 
         
@@ -638,7 +645,7 @@ HTML;
                 }
                 if (($this->core->getUser()->accessAdmin()) && ($g_data->getType() == GradeableType::ELECTRONIC_FILE)) {
                     $admin_rebuild_button = <<<HTML
-                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'gradeable_id' => $gradeable))}">
+                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable))}">
                     Rebuild
                 </a>
 HTML;
