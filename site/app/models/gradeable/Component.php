@@ -2,9 +2,10 @@
 
 namespace app\models\gradeable;
 
-use app\exceptions\AggregateException;
+use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 
 
@@ -107,56 +108,59 @@ class Component extends AbstractModel
         $this->gradeable = $gradeable;
     }
 
+    const point_properties = [
+        'lower_clamp',
+        'default',
+        'max_value',
+        'upper_clamp'
+    ];
+
     /**
-     * Checks the point values to ensure consistency.  See `setPoints` docs for details
-     *
-     * @param $lower_clamp
-     * @param $default
-     * @param $max_value
-     * @param $upper_clamp
-     * @return array|null
+     * Parses points from string or float values into all float / null values
+     * @param array $points A partial or complete array of floats or numeric strings indexed by component point property
+     * @return array A complete array of floats (or nulls) indexed by component point property
      */
-    private function validatePoints(&$lower_clamp, &$default, &$max_value, &$upper_clamp)
+    private function parsePoints(array $points)
+    {
+        $parsedPoints = [];
+        foreach(self::point_properties as $property) {
+            if (is_numeric($points[$property])) {
+                $parsedPoints[$property] = floatval($points[$property]);
+            } else {
+                $parsedPoints[$property] = null;
+            }
+        }
+        return $parsedPoints;
+    }
+    /**
+     * Asserts that the point values are valid.  See `setPoints` docs for details
+     *
+     * @param array $points An complete array of floats (or nulls) indexed by component point property
+     */
+    private function assertPoints(array $points)
     {
         $errors = array();
-        if (!is_numeric($lower_clamp)) {
-            $lower_clamp = null;
-            $errors['lower_clamp'] = 'Value must be a number!';
-        } else {
-            $lower_clamp = floatval($lower_clamp);
-        }
-        if (!is_numeric($default)) {
-            $default = null;
-            $errors['default'] = 'Value must be a number!';
-        } else {
-            $default = floatval($default);
-        }
-        if (!is_numeric($max_value)) {
-            $max_value = null;
-            $errors['max_value'] = 'Value must be a number!';
-        } else {
-            $max_value = floatval($max_value);
-        }
-        if (!is_numeric($upper_clamp)) {
-            $upper_clamp = null;
-            $errors['upper_clamp'] = 'Value must be a number!';
-        } else {
-            $upper_clamp = floatval($upper_clamp);
+
+        // Give error messages to all null elements
+        foreach(self::point_properties as $property) {
+            if($points[$property] === null) {
+                $errors[$property] = 'Value must be a number!';
+            }
         }
 
-        if (!($lower_clamp === null || $default === null) && $lower_clamp > $default) {
+        if (Utils::compareNullableGt($points['lower_clamp'], $points['default'])) {
             $errors['lower_clamp'] = 'Lower clamp can\'t be more than default!';
         }
-        if (!($default === null || $max_value === null) && $default > $max_value) {
+        if (Utils::compareNullableGt($points['default'], $points['max_value'])) {
             $errors['max_value'] = 'Max value can\'t be less than default!';
         }
-        if (!($max_value === null || $upper_clamp === null) && $max_value > $upper_clamp) {
+        if (Utils::compareNullableGt($points['max_value'], $points['upper_clamp'])) {
             $errors['max_value'] = 'Max value can\'t be more than upper clamp!';
         }
 
-        if (count($errors) === 0)
-            return null;
-        return $errors;
+        if (count($errors) !== 0) {
+            throw new ValidationException('Component point validation failed', $errors);
+        }
     }
 
     /**
@@ -172,16 +176,21 @@ class Component extends AbstractModel
      */
     public function setPoints($lower_clamp, $default, $max_value, $upper_clamp)
     {
-        $messages = $this->validatePoints($lower_clamp, $default, $max_value, $upper_clamp);
-        if ($messages !== null) {
-            throw new AggregateException('Component Points Error!', $messages);
-        }
+        // Wrangle the input to ensure that they're all either floats are null
+        $points = $this->parsePoints([
+            'lower_clamp' => $lower_clamp,
+            'default' => $default,
+            'max_value' => $max_value,
+            'upper_clamp' => $upper_clamp
+        ]);
+
+        // Assert that the point values are valid
+        $this->assertPoints($points);
 
         // Round after validation because of potential floating point weirdness
-        $this->lower_clamp = $this->getGradeable()->roundPointValue($lower_clamp);
-        $this->default = $this->getGradeable()->roundPointValue($default);
-        $this->max_value = $this->getGradeable()->roundPointValue($max_value);
-        $this->upper_clamp = $this->getGradeable()->roundPointValue($upper_clamp);
+        foreach(self::point_properties as $property) {
+            $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
+        }
     }
 
     /**

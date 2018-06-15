@@ -80,35 +80,22 @@ class DateUtils {
 
 
     /**
-     * Asserts that the provided date is a \DateTime object and converts it to one
-     *  if its a string, returning any error in parsing.
+     * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
      *
-     * @param $date \DateTime|string A reference to the date object to assert.  Set to null if failed.
+     * @param $date \DateTime|string The date to parse
      * @param $time_zone \DateTimeZone The timezone to parse with
-     * @return null|string The error message or null
+     * @return \DateTime The parsed date
+     * @throws \InvalidArgumentException If $date is not a string or a \DateTime
+     * @throws \Exception If $date is a string, but not a valid date string
      */
-    public static function assertDate(&$date, \DateTimeZone $time_zone) {
-        if (gettype($date) === 'string') {
-            try {
-                $date = new \DateTime($date, $time_zone);
-            } catch (\Exception $e) {
-                $date = null;
-                return 'Invalid Format!';
-            }
-        } else if ($date instanceof \DateTime) { }
-        else {
-            return "Invalid object type!";
+    public static function parseDateTime($date, \DateTimeZone $time_zone) {
+        if ($date instanceof \DateTime) {
+            return $date;
+        } else if (gettype($date) === 'string') {
+            return new \DateTime($date, $time_zone);
+        } else {
+            throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
-        return null;
-    }
-    /**
-     * Converts a provided date reference to a string if it isn't already
-     *
-     * @param $date &\DateTime | &string A reference to the date object to convert
-     */
-    public static function convertDateTimeToString(&$date) {
-        if(gettype($date) === 'string') return;
-        $date = self::dateTimeToString($date);
     }
     /**
      * Converts a \DateTime object to a string in one place so if we change the format

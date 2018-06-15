@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\exceptions\AggregateException;
+use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
@@ -188,7 +188,7 @@ class Gradeable extends AbstractModel
         $this->setDates($details);
     }
 
-    const dates = [
+    const date_properties = [
         'ta_view_start_date',
         'grade_start_date',
         'grade_released_date',
@@ -202,7 +202,7 @@ class Gradeable extends AbstractModel
         // Use the default behavior for the most part, but convert the dates
         $return = parent::toArray();
 
-        foreach(self::dates as $date) {
+        foreach(self::date_properties as $date) {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
@@ -240,37 +240,51 @@ class Gradeable extends AbstractModel
     }
 
     /**
-     * Validates a set of dates, see docs for `setDates` for the details
-     * @param array $dates A reference to the dates to be checked
-     * @return array|null Any errors in validation
+     * Parses array of the date properties to set to force them into a valid format
+     * @param array $dates An array containing a combination of \DateTime and string objects indexed by date property name
+     * @return \DateTime[] A full array of \DateTime objects (one element for each gradeable date property or null if not provided / bad format)
+     *                      with a 'late_days' integer element
      */
-    private function validateDates(array &$dates)
+    private function parseDates(array $dates)
+    {
+        $parsedDates = [];
+        foreach(self::date_properties as $date) {
+            if(isset($dates[$date]) && $dates[$date] !== null) {
+                try {
+                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getConfig()->getTimezone());
+                } catch (\Exception $e) {
+                    $parsedDates[$date] = null;
+                }
+            } else {
+                $parsedDates[$date] = null;
+            }
+        }
+
+        // Assume that if no late days provided that there should be zero of them;
+        $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
+        return $parsedDates;
+    }
+
+    /**
+     * Asserts that a set of dates are valid, see docs for `setDates` for the specification
+     * @param array $dates A complete array of property-name-indexed \DateTime objects (or int for 'late_days')
+     * @throws ValidationException With all messages for each invalid property
+     */
+    private function assertDates(array $dates)
     {
         $errors = [];
 
-        //
-        // Parse all of the dates into DateTime's (no error if null)
-        //
-        foreach(self::dates as $date) {
-            if(!isset($dates[$date]) || $dates[$date] === null) continue;
-            $result = DateUtils::assertDate($dates[$date], $this->core->getConfig()->getTimezone());
-            if ($result !== null) {
-                $errors[$date] = $result;
-            }
-        }
-        $dates['late_days'] = intval($dates['late_days'] ?? 0);
-
-        $ta_view_start_date = $dates['ta_view_start_date'] ?? null;
-        $grade_start_date = $dates['grade_start_date'] ?? null;
-        $grade_released_date = $dates['grade_released_date'] ?? null;
-        $team_lock_date = $dates['team_lock_date'] ?? null;
-        $submission_open_date = $dates['submission_open_date'] ?? null;
-        $submission_due_date = $dates['submission_due_date'] ?? null;
-        $late_days = $dates['late_days'] ?? null;
+        $ta_view_start_date = $dates['ta_view_start_date'];
+        $grade_start_date = $dates['grade_start_date'];
+        $grade_released_date = $dates['grade_released_date'];
+        $team_lock_date = $dates['team_lock_date'];
+        $submission_open_date = $dates['submission_open_date'];
+        $submission_due_date = $dates['submission_due_date'];
+        $late_days = $dates['late_days'];
 
         $late_interval = null;
         if ($late_days < 0) {
-            $errors['late_days'] = 'Late day count must be >= 0!';
+            $errors['late_days'] = 'Late day count must be a non-negative integer!';
         } else {
             try {
                 $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
@@ -282,7 +296,7 @@ class Gradeable extends AbstractModel
         }
 
         $max_due = $submission_due_date;
-        if ($submission_due_date instanceof \DateTime && $late_interval !== null) {
+        if (!($submission_due_date === null || $late_interval === null)) {
             $max_due = (clone $submission_due_date)->add($late_interval);
         }
 
@@ -301,10 +315,10 @@ class Gradeable extends AbstractModel
                 $errors['submission_due_date'] = 'Value must not be null!';
             }
 
-            if (!($ta_view_start_date === null || $submission_open_date === null) && $ta_view_start_date > $submission_open_date) {
+            if (Utils::compareNullableGt($ta_view_start_date, $submission_open_date)) {
                 $errors['ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
             }
-            if (!($submission_open_date === null || $submission_due_date === null) && $submission_open_date > $submission_due_date) {
+            if (Utils::compareNullableGt($submission_open_date, $submission_due_date)) {
                 $errors['submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
             }
             if ($this->ta_grading) {
@@ -314,17 +328,14 @@ class Gradeable extends AbstractModel
 //                if ($grade_locked_date === null) {
 //                    $errors['grade_locked_date'] = 'Value must not be null!';
 //                }
-                if (!($submission_due_date === null || $grade_start_date === null) && $submission_due_date > $grade_start_date) {
+                if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
                     $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 }
-                if (!($grade_start_date === null || $grade_released_date === null) && $grade_start_date > $grade_released_date) {
+                if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
                     $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
                 }
             } else {
-                // No TA grading, but we must set this start date so the database
-                //  doesn't complain when we update it
-                $dates['grade_start_date'] = $grade_released_date;
-                if (!($max_due === null || $grade_released_date === null) && $max_due > $grade_released_date) {
+                if (Utils::compareNullableGt($max_due, $grade_released_date)) {
                     $errors['grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
                 }
             }
@@ -335,14 +346,14 @@ class Gradeable extends AbstractModel
             }
         } else {
             // The only check if its not an electronic gradeable
-            if (!($ta_view_start_date === null || $grade_released_date === null) && $ta_view_start_date > $grade_released_date) {
+            if (Utils::compareNullableGt($ta_view_start_date, $grade_released_date)) {
                 $errors['grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
             }
         }
 
-        if (count($errors) === 0)
-            return null;
-        return $errors;
+        if (count($errors) !== 0) {
+            throw new ValidationException('Date validation failed', $errors);
+        }
     }
 
     /**
@@ -356,11 +367,14 @@ class Gradeable extends AbstractModel
      */
     public function setDates(array $dates)
     {
-        $errors = $this->validateDates($dates);
+        // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
+        $dates = $this->parseDates($dates);
 
-        if ($errors !== null) {
-            throw new AggregateException('Date validation failed!', $errors);
-        }
+        // Asserts that this date information is valid
+        $this->assertDates($dates);
+
+        // Manually set each property (instead of iterating over self::date_properties) so the user
+        //  can't set dates irrelevant to the gradeable settings
 
         $this->ta_view_start_date = $dates['ta_view_start_date'];
         $this->grade_start_date = $dates['grade_start_date'];
@@ -368,6 +382,11 @@ class Gradeable extends AbstractModel
         $this->grade_locked_date = $dates['grade_locked_date'];
 
         if($this->type === GradeableType::ELECTRONIC_FILE) {
+            if(!$this->ta_grading) {
+                // No TA grading, but we must set this start date so the database
+                //  doesn't complain when we update it
+                $this->grade_start_date = $dates['grade_released_date'];
+            }
             if($this->team_assignment) {
                 $this->team_lock_date = $dates['team_lock_date'];
             }
@@ -421,6 +440,7 @@ class Gradeable extends AbstractModel
 
     /**
      * Sets the gradeable Id.  Must match the regular expression:  ^[a-zA-Z0-9_-]*$
+     * @param string $id The gradeable id to set
      */
     private function setIdInternal($id)
     {
