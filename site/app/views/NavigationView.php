@@ -250,54 +250,24 @@ HTML;
                         //If the button is autograded and has been submitted once, give a progress bar.
                         if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                             && ($list_section == self::CLOSED || $list_section == self::OPEN)) {
-                            //from https://css-tricks.com/css3-progress-bars/
+
                             if ($points_percent >= 50) {
                                 $gradeable_open_range .= <<<HTML
-								<style type="text/css">	
-									.meter1 { 
-										height: 10px; 
-										position: relative;
-										background: rgb(224,224,224);
-										padding: 0px;
-									}
-									.meter1 > span {
-							  			display: block;
-							  			height: 100%;
-							  			background-color: rgb(92,184,92);
-							  			position: relative;
-									}
-								</style>	
-								<div class="meter1">
+								<div class="meter">
   									<span style="width: {$points_percent}%"></span>
 								</div>				 
 HTML;
                             } else {
-                                $gradeable_open_range .= <<<HTML
-								<style type="text/css">	
-								.meter2 { 
-									height: 10px; 
-									position: relative;
-									background: rgb(224,224,224);
-									padding: 0px;
-								}
-								.meter2 > span {
-								  	display: block;
-								  	height: 100%;
-								  	background-color: rgb(92,184,92);
-								  	position: relative;
-								}
-								</style>	
-HTML;
                                 //Give them an imaginary progress point
                                 if ($gradeable->getGradedNonHiddenPoints() == 0) {
                                     $gradeable_open_range .= <<<HTML
-									<div class="meter2">
+									<div class="meter">
 	  								<span style="width: 2%"></span>
 									</div>					 
 HTML;
                                 } else {
                                     $gradeable_open_range .= <<<HTML
-									<div class="meter2">
+									<div class="meter">
 	  								<span style="width: {$points_percent}%"></span>
 								</div>					 
 HTML;
@@ -333,21 +303,7 @@ HTML;
                         //Give the TAs a progress bar too                        
                         if (($list_section == self::GRADED || $list_section == self::ITEMS_BEING_GRADED) && $components_total != 0 && $gradeable->useTAGrading()) {
                             $gradeable_grade_range .= <<<HTML
-                            <style type="text/css"> 
-                                .meter3 { 
-                                    height: 10px; 
-                                    position: relative;
-                                    background: rgb(224,224,224);
-                                    padding: 0px;
-                                }
-                                .meter3 > span {
-                                    display: block;
-                                    height: 100%;
-                                    background-color: rgb(92,184,92);
-                                    position: relative;
-                                }
-                            </style>    
-                            <div class="meter3">
+                            <div class="meter">
                                 <span style="width: {$TA_percent}%"></span>
                             </div>               
 HTML;

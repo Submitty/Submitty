@@ -994,6 +994,20 @@ table .instructor .two-options{
     opacity: 1;
 }
 
+/* from https://css-tricks.com/css3-progress-bars/ */
+.meter {
+    height: 10px;
+    position: relative;
+    background: rgb(224,224,224);
+    padding: 0px;
+}
+.meter > span {
+    display: block;
+    height: 100%;
+    background-color: rgb(92,184,92);
+    position: relative;
+}
+
 /*
 The styles used in the admin gradeable page
 */
