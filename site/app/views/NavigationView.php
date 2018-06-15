@@ -79,7 +79,6 @@ class NavigationView extends AbstractView {
 HTML;
     }
     public function showGradeables($sections_to_list) {
-        $site_url = $this->core->getConfig()->getSiteUrl();
         $return = "";
 
         // ======================================================================================
@@ -166,7 +165,7 @@ HTML;
 
                 $gradeable_title       = $this->getTitleCell($gradeable, $gradeable_id);
                 $gradeable_team_range  = $this->getTeamButton($gradeable, $gradeable_id);
-                $gradeable_open_range  = $this->getSubmitButton($gradeable, $gradeable_id, $list_section, $site_url);
+                $gradeable_open_range  = $this->getSubmitButton($gradeable, $gradeable_id, $list_section);
                 $gradeable_grade_range = $this->getGradeButton($gradeable, $gradeable_id, $list_section);
                 $admin_button          = $this->getEditButton($gradeable_id);
                 $admin_rebuild_button  = $this->getRebuildButton($gradeable, $gradeable_id);
@@ -276,10 +275,9 @@ HTML;
      * @param Gradeable $gradeable
      * @param string $gradeable_id
      * @param string $list_section
-     * @param string $site_url
      * @return string
      */
-    private function getSubmitButton(Gradeable $gradeable, string $gradeable_id, string $list_section, string $site_url): string {
+    private function getSubmitButton(Gradeable $gradeable, string $gradeable_id, string $list_section): string {
         $button_type_submission = self::gradeableSections[self::sectionMap[$list_section]]["button_type_submission"];
 
         if ($gradeable->getActiveVersion() < 1) {
@@ -326,13 +324,13 @@ HTML;
                 } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                     && $list_section == self::CLOSED && $points_percent >= 50) {
                     $gradeable_open_range = <<<HTML
-                 <a class="btn btn-default btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
+                 <a class="btn btn-default btn-nav" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id))}">
                      {$submit_button_text}
                  </a>
 HTML;
                 } else {
                     $gradeable_open_range = <<<HTML
-                 <a class="btn {$button_type_submission} btn-nav" href="{$site_url}&component=student&gradeable_id={$gradeable_id}">
+                 <a class="btn {$button_type_submission} btn-nav" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id))}">
                      {$submit_button_text}
                  </a>
 HTML;
