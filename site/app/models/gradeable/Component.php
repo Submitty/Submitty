@@ -92,6 +92,20 @@ class Component extends AbstractModel {
         return $this->gradeable;
     }
 
+    /**
+     * Gets the mark object with the provided mark id
+     * @param int $mark_id
+     * @return Mark|null The Mark with the provided id, or null if not found
+     */
+    public function getMark($mark_id) {
+        foreach($this->marks as $mark) {
+            if($mark->getId() === $mark_id) {
+                return $mark;
+            }
+        }
+        return null;
+    }
+
     /* Overridden setters with validation */
     /**
      * Sets the component's gradeable

@@ -208,6 +208,20 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets the component object with the provided component id
+     * @param int $component_id
+     * @return Component|null The Component with the provided id, or null if not found
+     */
+    public function getComponent($component_id) {
+        foreach($this->components as $component) {
+            if($component->getId() === $component_id) {
+                return $component;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Loads the autograding config file at $this->autograding_config into an array, or null if error/not found
      * @return array|bool|null
      */
