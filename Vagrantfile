@@ -56,13 +56,15 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, mount_options: ["dmode=775", "fmode=774"]
+  owner = 'root'
+  group = 'root'
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group
 
-  optional_repos = ["AnalysisTools","Lichen","RainbowGrades","Tutorial"]
-
+  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial)
   for repo in optional_repos do
-    if File.directory?(File.expand_path("../"+repo))
-      config.vm.synced_folder "../"+repo,"/usr/local/submitty/GIT_CHECKOUT/"+repo, mount_options: ["dmode=775", "fmode=774"]
+    repo_path = File.expand_path("../" + repo)
+    if File.directory?(repo_path)
+      config.vm.synced_folder repo_path,"/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group
     end
   end
 

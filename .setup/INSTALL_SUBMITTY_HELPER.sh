@@ -798,8 +798,7 @@ else
     if [ "${num_machines}" != "1" ]; then
         # in order to update the submitty source files on the worker machines
         # the hwcron user/group must have read access to the repo on the primary machine
-        chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
-        chmod -R g+r ${SUBMITTY_REPOSITORY}
+        chmod -R go+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
         echo -e Updating worker machines
@@ -810,5 +809,5 @@ fi
 # set filemode to false, so that changes to file permissions in the
 # git repository will be ignored for future diffs/commits
 pushd ${SUBMITTY_REPOSITORY}
-git config --local core.filemode false
+#git config --local core.filemode false
 popd > /dev/null
