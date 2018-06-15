@@ -959,7 +959,6 @@ class ElectronicGraderController extends GradingController {
                 return $response;
             }
         }
-        /*
         if ($gradeable->getCurrentVersion() === null) {
             $this->core->addErrorMessage("Cannot grade an assignment with no submission.");
 
@@ -967,7 +966,6 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJson($response);
             return $response;
         }
-        */
         //save the component
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
