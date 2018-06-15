@@ -289,23 +289,33 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#prev-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#prev-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+        window.location = $("#prev-student")[0].dataset.href; 
+    }
 }
 
 function gotoNextStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#next-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#next-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#next-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+       window.location = $("#next-student")[0].dataset.href; 
+    }
 }
 
 //Navigate to the prev / next student buttons
