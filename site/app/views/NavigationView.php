@@ -467,12 +467,17 @@ HTML;
         $button_title = 'PREVIEW GRADING';
         $date_text = '<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")</span>";
         if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-            if ($gradeable->useTAGrading()) {
-                $button_title = 'PREVIEW GRADING';
-                $date_text = '<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . "</span>)";
+            if ($gradeable->hasConfig()) {
+                if ($gradeable->useTAGrading()) {
+                    $button_title = 'PREVIEW GRADING';
+                    $date_text = '<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . "</span>)";
+                } else {
+                    $button_title = 'VIEW SUBMISSIONS';
+                    $date_text = '<br><span style="font-size:smaller;">(<em>no manual grading</em></span>)';
+                }
             } else {
-                $button_title = 'VIEW SUBMISSIONS';
-                $date_text = '<br><span style="font-size:smaller;">(<em>no manual grading</em></span>)';
+                $button_title = "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh";
+                $date_text = "";
             }
         }
         $temp_button_title = "";
@@ -511,7 +516,7 @@ HTML;
                     $regrade_button = <<<HTML
                             <a class="btn {$grade_button_type} btn-nav"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()))}">
-                            {$temp_button_title} {$temp_date_text}</a>
+                            {$button_title} {$date_text}</a>
 HTML;
                 } else if ($TA_percent == 100 && $list_section == self::GRADED) {
                     $regrade_button = <<<HTML
@@ -532,9 +537,9 @@ HTML;
                 }
             } else {
                 $regrade_button = <<<HTML
-                <button class="btn {$button_type_grading}" style="width:100%;" disabled>
-                    Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
-                </button>
+                <a class="btn {$button_type_grading} btn-nav" style="width:100%;" disabled>
+                    {$button_title} {$date_text}
+                </a>
 HTML;
             }
         } else if ($gradeable->getType() == GradeableType::CHECKPOINTS) {
