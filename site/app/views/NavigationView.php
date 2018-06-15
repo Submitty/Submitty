@@ -68,6 +68,8 @@ class NavigationView extends AbstractView {
         self::GRADED => 5
     ];
 
+    const DATE_FORMAT = "m/d/Y @ H:i";
+
     public function noAccessCourse() {
         return <<<HTML
 <div class="content">
@@ -170,6 +172,7 @@ HTML;
 HTML;
             $btn_title_save = $title_to_button_type_submission[$display_section];
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
+                /** @var Gradeable $gradeable */
                 $display_section = $list_section;
                 $title_to_button_type_submission[$list_section] = $btn_title_save;
                 if ($gradeable->getActiveVersion() < 1) {
@@ -180,20 +183,18 @@ HTML;
                 if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null) {
                     $title_to_button_type_submission[self::GRADED] = "btn-default";
                 }
-                /** @var Gradeable $gradeable */
-                $time = " @ H:i";
-                $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format("m/d/Y{$time}") . ")</span>";
+                $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")</span>";
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                     if ($gradeable->useTAGrading()) {
-                        $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format("m/d/Y{$time}") . "</span>)";
+                        $gradeable_grade_range = 'PREVIEW GRADING<br><span style="font-size:smaller;">(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . "</span>)";
                     } else {
                         $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(<em>no manual grading</em></span>)';
                     }
                 }
                 $temp_regrade_text = "";
                 if ($list_section == self::ITEMS_BEING_GRADED) {
-                    $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due ' . $gradeable->getGradeReleasedDate()->format("m/d/Y{$time}") . '</span>)';
-                    $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due ' . $gradeable->getGradeReleasedDate()->format("m/d/Y{$time}") . '</span>)';
+                    $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . '</span>)';
+                    $temp_regrade_text = 'REGRADE<br><span style="font-size:smaller;">(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . '</span>)';
                 }
                 if ($list_section == self::GRADED) {
                     if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
@@ -208,7 +209,7 @@ HTML;
                 }
                 $gradeable_title = $this->getGradeableTitle($gradeable, $gradeable_id);
                 if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                    $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format("m/d/Y{$time}") . "</span>)" : "<span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format("m/d/Y{$time}") . "</span>)";
+                    $display_date = ($display_section == self::FUTURE || $display_section == self::BETA) ? "<span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
                     if ($display_section == self::GRADED || $display_section == self::ITEMS_BEING_GRADED) {
                         $display_date = "";
                     }
@@ -382,7 +383,7 @@ HTML;
                 // Team management button, only visible on team assignments
                 $gradeable_team_range = '';
                 if (($gradeable->isTeamAssignment())) {
-                    list($button_type, $display_date, $button_text) = $this->getTeamButtonTitle($gradeable, $time);
+                    list($button_type, $display_date, $button_text) = $this->getTeamButtonTitle($gradeable);
                     $gradeable_team_range = <<<HTML
                 <a class="btn {$button_type}" style="width:100%;"
                 href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'))}">
@@ -682,16 +683,15 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $time
      * @return array
      */
-    private function getTeamButtonTitle(Gradeable $gradeable, string $time): array {
+    private function getTeamButtonTitle(Gradeable $gradeable): array {
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         if ($gradeable->getTeam() === null) {
             if ($date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
                 $button_type = 'btn-primary';
-                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format("m/d/Y{$time}")})</span>";
+                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
             } else {
                 $button_type = 'btn-danger';
                 $display_date = '';
@@ -707,7 +707,7 @@ HTML;
         } else {
             if ($date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
                 $button_type = 'btn-primary';
-                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format("m/d/Y{$time}")})</span>";
+                $display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
                 $button_text = 'MANAGE TEAM';
             } else {
                 $button_type = 'btn-default';
