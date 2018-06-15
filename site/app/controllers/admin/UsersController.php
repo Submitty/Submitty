@@ -736,8 +736,8 @@ class UsersController extends AbstractController {
         // }
         //$myFile = document.getElementById("mylabel");
 
-        var_dump($_FILES);
-        die();
+        //var_dump($_FILES);
+        //die();
         if ($_FILES['upload']['name'] == "") {
         //if ($myFile == "") {
             $this->core->addErrorMessage("No input file specified ".$_FILES);
@@ -745,7 +745,7 @@ class UsersController extends AbstractController {
         }
 
         //$contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-
+        //handleDownloadImages();
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         //$this->core->addSuccessMessage("Uploaded {$myFile}: ({$added} added, {$updated} updated)");

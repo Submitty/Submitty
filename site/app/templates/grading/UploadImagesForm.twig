@@ -4,17 +4,14 @@
     <p>&emsp;</p>
     <p>
         Follow the instructions to download images of students on:<br>
-        <a href="http://submitty.org/instructor/image_scraper">SIS Image Scraper</a><br><br>
+        <a href="http://submitty.org/instructor/image_scraper">Photo Scraper</a><br><br>
         Zip up the each folder containing the images and upload the file(s).<br>
     </p>
     <br/>
 
 
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_images'}) }}" enctype="multipart/form-data">
+    <form method="post">
       <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-      <div>
-          <input type="file" name="upload" accept=".xlsx, .csv">
-      </div>
       <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
         <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
           <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
@@ -23,9 +20,22 @@
       </div>
       <div style="float: right; width: auto">
           <a onclick="$('#upload-images-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
-          <input class="btn btn-primary" type="submit" value="Submit" />
+          <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
       </div>
     </form>
+    <script type="text/javascript">
+        function makeSubmission() {
+            {# path = decodeURIComponent(path); #}
+
+            handleDownloadImages("{$this->core->getCsrfToken()}");
+        }
+        $(function() {
+            $("#submit").click(function(e){ // Submit button
+                makeSubmission();
+                e.stopPropagation();
+            });
+        });
+    </script>
     <script type="text/javascript">
         createArray(1);
         var dropzone = document.getElementById("upload1");
