@@ -368,7 +368,7 @@ if [ ${WORKER} == 0 ]; then
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
 fi
 
 ################################################################################################################

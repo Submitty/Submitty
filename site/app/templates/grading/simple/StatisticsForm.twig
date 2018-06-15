@@ -25,17 +25,15 @@
                 <td colspan="2"></td>
             </tr>
             </thead>
-            {% set i = 0 %}
             {% for component in components %}
                 {% if not component.getIsText() %}
                     <tbody>
                         <tr>
                             <td>{{ component.getTitle() }}</td>
-                            <td id="avg-component-{{ i }}"></td>
-                            <td id="stddev-component-{{ i }}"></td>
+                            <td id="avg-component-{{ loop.index0 }}"></td>
+                            <td id="stddev-component-{{ loop.index0 }}"></td>
                         </tr>
                     </tbody>
-                    {% set i = i + 1 %}
                 {% endif %}
             {% endfor %}
             <thead class="persist-thead">

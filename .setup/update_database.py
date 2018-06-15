@@ -43,8 +43,11 @@ create_table = """CREATE TABLE migrations_{} (
       commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       status NUMERIC(1) DEFAULT 0 NOT NULL
     );"""
+insert_row = """INSERT INTO migrations_{} VALUES('20180607070236_initial', '2018-06-07 07:02:36', 1)"""
 os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('system'), *variables))
+os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(insert_row.format('system'), *variables))
 os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('master'), *variables))
+os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(insert_row.format('master'), *variables))
 
 # ==============================
 # edits to each course database
@@ -144,7 +147,6 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
 
         # add migrations table
         os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('course'), *variables))
+        os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(insert_row.format('course'), *variables))
         # add user/database
         print("\n")
-
-os.system('python3 {}/migration/migrator.py migrate --fake'.format(settings['submitty_repository']))
