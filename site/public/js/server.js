@@ -26,7 +26,7 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -36,7 +36,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, count){
         $(div_name).empty();
     }else{
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'count' : count});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
 
         $.ajax({
             url: url,
