@@ -201,4 +201,14 @@ class Utils {
         }
 
     }
+
+    /**
+     * Compares two potentially null values using greater-than comparison.
+     * @param mixed $gtL Left operand for greater-than comparison
+     * @param mixed $gtR Righ operand for greater-than comparison
+     * @return bool True if $dtL > $dtR and neither are null, otherwise false
+     */
+    public static function compareNullableGt($gtL, $gtR) {
+        return $gtL !== null && $gtR !== null && $gtL > $gtR;
+    }
 }
