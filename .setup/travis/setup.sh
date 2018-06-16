@@ -32,7 +32,7 @@ sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
-sudo ${DIR}/../bin/create_untrusted_users.py
+sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
 sudo addgroup hwcronphp
 sudo addgroup course_builders

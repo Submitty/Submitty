@@ -805,9 +805,3 @@ else
         sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi
-
-# set filemode to false, so that changes to file permissions in the
-# git repository will be ignored for future diffs/commits
-pushd ${SUBMITTY_REPOSITORY}
-#git config --local core.filemode false
-popd > /dev/null
