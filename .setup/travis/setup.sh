@@ -59,7 +59,7 @@ America/New_York
 http://localhost
 http://localhost/git
 
-${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+${AUTH_METHOD}" | sudo python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -79,4 +79,4 @@ sudo usermod -a -G travis hwphp
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
-sudo /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
+sudo bash /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean

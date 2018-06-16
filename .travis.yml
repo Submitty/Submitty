@@ -159,10 +159,10 @@ jobs:
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
         - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
         - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-        - sudo ./.setup/travis/autograder.sh
-        - ./.setup/travis/setup.sh
-        - sudo /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
-        - sudo ./.setup/travis/setup_test_suite.sh
+        - sudo bash .setup/travis/autograder.sh
+        - bash .setup/travis/setup.sh
+        - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
+        - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
         - sudo a2enmod include rewrite actions cgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
@@ -245,9 +245,9 @@ jobs:
         - popd
         - sudo chmod -R 555 /usr/local/lib/python*/
         - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
-        - sudo ./.setup/travis/autograder.sh
-        - ./.setup/travis/setup.sh
-        - sudo ./.setup/travis/setup_test_suite.sh
+        - sudo bash ./.setup/travis/autograder.sh
+        - bash ./.setup/travis/setup.sh
+        - sudo bash ./.setup/travis/setup_test_suite.sh
       script:
         - sudo /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
