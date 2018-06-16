@@ -249,7 +249,7 @@ jobs:
         - bash ./.setup/travis/setup.sh
         - sudo bash ./.setup/travis/setup_test_suite.sh
       script:
-        - sudo /usr/local/submitty/test_suite/integrationTests/run.py
+        - sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
       env: CLANG_VER="6.0.0"
       if: branch = master OR type = pull_request

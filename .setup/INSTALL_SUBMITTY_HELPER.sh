@@ -741,7 +741,7 @@ if [ "${WORKER}" == 0 ]; then
         # pop the first argument from the list of command args
         shift
         # pass any additional command line arguments to the run test suite
-        ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
         echo -e "\nCompleted Autograding Test Suite\n"
     fi
