@@ -152,23 +152,16 @@ function readCookies(){
     (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
-    if (autoscroll == "on") {
-        onAjaxInit = function() {
-            $('#title-'+opened_mark).click();
 
-            if (scroll_pixel > 0) {
-                document.getElementById('grading_rubric').scrollTop = scroll_pixel;
-            }
+    onAjaxInit = function() {
+        $('#title-'+opened_mark).click();
+
+        if (scroll_pixel > 0) {
+            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
+    }
 
-        var testcases_array = JSON.parse(testcases);
-        testcases_array.forEach(function(element) {
-            var id = 'testcase_' + element;
-            if ($("#" + id).attr("style") == "display: none;") {
-                toggleDiv(id);
-            }
-        });
-
+    if (autoscroll == "on") {
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');
