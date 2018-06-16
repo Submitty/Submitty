@@ -908,7 +908,6 @@ HTML;
 						        reorderCategories();
 						    }
 						});
-						refreshCategories();
 						$("#ui-category-list").find(".fa-trash").click(function() {
 							var item = $(this).parent().parent().parent();
 							var category_id = parseInt(item.attr('id').split("-")[1]);
@@ -1027,20 +1026,19 @@ HTML;
 					}
 					$return .= <<<HTML
 					<div id='categories-pick-list'>
-					<noscript>
 HTML;
 						for($i = 0; $i < count($categories); $i++){
 							$return .= <<<HTML
-							<a class="btn cat-buttons cat-notselected" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
+							<a class="btn cat-buttons cat-notselected" cat-color="{$categories[$i]['color']}" style="background-color: {$categories[$i]['color']}; color: white;">{$categories[$i]['category_desc']}
 								<input type="checkbox" name="cat[]" value="{$categories[$i]['category_id']}">
 							</a>
 HTML;
 						}
 					$return .= <<<HTML
-					</noscript>
 					</div>
 					<script type="text/javascript">
 					$(function() {
+						refreshCategories();
 						$("#create_thread_form").submit(function() {
 							if($(this).find('.cat-selected').length == 0) {
 								alert("At least one category must be selected.");

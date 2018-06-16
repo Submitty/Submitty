@@ -1431,53 +1431,57 @@ function editCategory(category_id, category_desc, category_color) {
 }
 
 function refreshCategories() {
-    var data = $('#ui-category-list').sortable('serialize');
-    if(!data.trim()) {
-        return;
-    }
-    data = data.split("&");
-    var order = [];
-    for(var i = 0; i<data.length; i+=1) {
-        var category_id = parseInt(data[i].split('=')[1]);
-        var category_desc = $("#categorylistitem-"+category_id+" .categorylistitem-desc span").text().trim();
-        var category_color = $("#categorylistitem-"+category_id+" select").val();
-        order.push([category_id, category_desc, category_color]);
-    }
+   if($('#ui-category-list').length) {
+        // Refresh cat-buttons from #ui-category-list
 
-    // Obtain current selected category
-    var selected_button = new Set();
-    var category_pick_buttons = $('.cat-buttons');
-    for(var i = 0; i<category_pick_buttons.length; i+=1) {
-        var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
-        var category_id = parseInt(cat_button_checkbox.val());
-        if(cat_button_checkbox.prop("checked")) {
-            selected_button.add(category_id);
+        var data = $('#ui-category-list').sortable('serialize');
+        if(!data.trim()) {
+            return;
         }
+        data = data.split("&");
+        var order = [];
+        for(var i = 0; i<data.length; i+=1) {
+            var category_id = parseInt(data[i].split('=')[1]);
+            var category_desc = $("#categorylistitem-"+category_id+" .categorylistitem-desc span").text().trim();
+            var category_color = $("#categorylistitem-"+category_id+" select").val();
+            order.push([category_id, category_desc, category_color]);
+        }
+
+        // Obtain current selected category
+        var selected_button = new Set();
+        var category_pick_buttons = $('.cat-buttons');
+        for(var i = 0; i<category_pick_buttons.length; i+=1) {
+            var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
+            var category_id = parseInt(cat_button_checkbox.val());
+            if(cat_button_checkbox.prop("checked")) {
+                selected_button.add(category_id);
+            }
+        }
+
+        // Refresh selected categories
+        $('#categories-pick-list').empty();
+        order.forEach(function(category) {
+            var category_id = category[0];
+            var category_desc = category[1];
+            var category_color = category[2];
+            var selection_class;
+            if(selected_button.has(category_id)) {
+                selection_class = "cat-selected";
+            } else {
+                selection_class = "cat-notselected";
+            }
+            var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
+                                <input type="checkbox" name="cat[]" value="'+category_id+'">\
+                            </a>';
+            $('#categories-pick-list').append(element);
+        });
+
+        $(".cat-buttons input[type='checkbox']").each(function() {
+            if($(this).parent().hasClass("cat-selected")) {
+                $(this).prop("checked",true);
+            }
+        });
     }
-
-    // Refresh selected categories
-    $('#categories-pick-list').empty();
-    order.forEach(function(category) {
-        var category_id = category[0];
-        var category_desc = category[1];
-        var category_color = category[2];
-        var selection_class;
-        if(selected_button.has(category_id)) {
-            selection_class = "cat-selected";
-        } else {
-            selection_class = "cat-notselected";
-        }
-        var element = ' <a class="btn cat-buttons '+selection_class+' btn-default" cat-color="'+category_color+'">'+category_desc+'\
-                            <input type="checkbox" name="cat[]" value="'+category_id+'">\
-                        </a>';
-        $('#categories-pick-list').append(element);
-    });
-
-    $(".cat-buttons input[type='checkbox']").each(function() {
-        if($(this).parent().hasClass("cat-selected")) {
-            $(this).prop("checked",true);
-        }
-    });
 
     // Selectors for categories pick up
     // If JS enabled hide checkbox
