@@ -359,7 +359,7 @@ class ForumController extends AbstractController {
     public function getThreads(){
 
         $show_deleted = false;
-        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_REQUEST["show_deleted"]) == 1) {
+        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_GET["show_deleted"]) == 1) {
             $show_deleted = true;
         }
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
@@ -387,7 +387,7 @@ class ForumController extends AbstractController {
 
         $max_thread = 0;
         $show_deleted = false;
-        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_REQUEST["show_deleted"]) == 1) {
+        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_GET["show_deleted"]) == 1) {
             $show_deleted = true;
         }
         $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
@@ -402,15 +402,15 @@ class ForumController extends AbstractController {
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             if($option == "alpha"){
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'alpha');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
             } else {
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'tree');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
             }
             
         } 
 
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
-            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
+            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
         
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);

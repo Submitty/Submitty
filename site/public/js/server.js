@@ -1281,7 +1281,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
     }
 
     categories_value = (categories_value == null)?"":categories_value.join("|");
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'show_deleted': show_deleted});
     $.ajax({
             url: url,
             type: "POST",
@@ -1289,7 +1289,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                 thread_categories: categories_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
-                show_deleted: show_deleted
             },
             success: function(r){
                var x = JSON.parse(r).html;

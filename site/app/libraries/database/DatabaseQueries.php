@@ -2119,20 +2119,21 @@ AND gc_id IN (
     	return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id, $option = "tree"){
+    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
+    $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
-          $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and pinned = false");
+          $this->course_db->query("SELECT MAX(id) as max from threads WHERE {$query_delete} and pinned = false");
           $thread_id = $this->course_db->rows()[0]["max"];
         } else {
           $thread_id = $announcement_id;
         }
       }
       if($option == 'alpha'){
-        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND deleted = false ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND deleted = false ORDER BY timestamp ASC", array($thread_id));
+        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
       }
       
       $result_rows = $this->course_db->rows();

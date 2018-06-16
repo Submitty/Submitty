@@ -577,6 +577,14 @@ table tr.table-header {
     background-color: #21C2F6;
 }
 
+.deleted {
+    background-color: #FFCCCC;
+}
+
+.deleted.active {
+    background-color: #FF9999;
+}
+
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;

@@ -230,7 +230,21 @@ HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		
 		$return .= <<<HTML
+			<a id='toggle_show_deleted' class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads"><i class="fa fa-trash" aria-hidden="true"></i></a>
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+			<script type="text/javascript">
+				$( document ).ready(function() {
+					var match_show_deleted = RegExp('[?&]show_deleted=([^&]*)').exec(window.location.search);
+					var deleted_status = 0;
+					if(match_show_deleted && match_show_deleted[1] == 1) {
+						deleted_status = 1;
+						$("#toggle_show_deleted").addClass("active");
+					}
+					$("#toggle_show_deleted").click(function() {
+						window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'show_deleted': (deleted_status?0:1)}));
+					});
+				});
+			</script>
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
@@ -550,6 +564,9 @@ HTML;
 						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
+						}
+						if($thread["deleted"]) {
+							$class .= " deleted";
 						}
 
 						//fix legacy code
