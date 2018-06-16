@@ -798,7 +798,8 @@ else
     if [ "${num_machines}" != "1" ]; then
         # in order to update the submitty source files on the worker machines
         # the hwcron user/group must have read access to the repo on the primary machine
-        chmod -R go+r ${SUBMITTY_REPOSITORY}
+        chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
         echo -e Updating worker machines
