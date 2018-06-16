@@ -492,8 +492,8 @@ CREATE TABLE regrade_requests (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
