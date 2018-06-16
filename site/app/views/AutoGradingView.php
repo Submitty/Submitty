@@ -5,7 +5,6 @@ namespace app\views;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\LateDaysCalculation;
 
 class AutogradingView extends AbstractView {
     /**
@@ -300,9 +299,6 @@ HTML;
         //get total score and max possible score
         $graded_score = $gradeable->getGradedTAPoints();
         $graded_max = $gradeable->getTotalTANonExtraCreditPoints();
-        //late day data
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $late_day_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $has_autograding = false;
@@ -327,7 +323,6 @@ HTML;
             "grader_names" => $grader_names,
             "grading_complete" => $grading_complete,
             "has_autograding" => $has_autograding,
-            "late_day_data" => $late_day_data,
             "graded_score" => $graded_score,
             "graded_max" => $graded_max,
             "total_score" => $total_score,

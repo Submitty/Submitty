@@ -23,18 +23,10 @@
                 {% endif %}
             </p>
         </div>
+        {% if gradeable.getLateDays() > 0 %}
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ core.buildUrl({'component': 'student', 'page': 'view_late_table', 'g_id': gradeable.getId()}) }}">Show my late days information</a>
+        {% endif %}
         {# /Overview #}
-
-        {# Late day info #}
-        <div class="box half" style="float:right; width: 40%;">
-            <p>Maximum number of late days allowed on this assignment: {{ gradeable.getAllowedLateDays() }}</p>
-            <p>Number of days late (before extensions): {{ gradeable.getDaysLate() }}</p>
-            <p>Late Days used in previous assignments: {{ late_day_data.late_days_used }}</p>
-            <p>Number of late days used on this assignment: {{ late_day_data.late_days_charged }} </p>
-            <p>Remaining number of late days: {{ late_day_data.remaining_days }}</p>
-            <p>Submission Status: <i>{{ late_day_data.status }}</i></p>
-        </div>
-        {# /Late day info #}
 
         {# Manual total #}
         <div class="box">
