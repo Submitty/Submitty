@@ -144,7 +144,7 @@ HTML;
 		for a specific thread, in addition to all of the threads
 		that have been created to be displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threads, $show_deleted, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -228,23 +228,15 @@ HTML;
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
-		
+		if($show_deleted) {
+			$show_deleted_class = "active";
+		} else {
+			$show_deleted_class = "";
+		}
+		$show_deleted_url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'show_deleted' => ($show_deleted?"0":"1")));
 		$return .= <<<HTML
-			<a id='toggle_show_deleted' class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads"><i class="fa fa-trash" aria-hidden="true"></i></a>
+			<a class="btn btn-primary {$show_deleted_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads" href="{$show_deleted_url}"><i class="fa fa-trash" aria-hidden="true"></i></a>
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-			<script type="text/javascript">
-				$( document ).ready(function() {
-					var match_show_deleted = RegExp('[?&]show_deleted=([^&]*)').exec(window.location.search);
-					var deleted_status = 0;
-					if(match_show_deleted && match_show_deleted[1] == 1) {
-						deleted_status = 1;
-						$("#toggle_show_deleted").addClass("active");
-					}
-					$("#toggle_show_deleted").click(function() {
-						window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'show_deleted': (deleted_status?0:1)}));
-					});
-				});
-			</script>
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();

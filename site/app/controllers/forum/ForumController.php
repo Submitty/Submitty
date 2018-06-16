@@ -413,7 +413,7 @@ class ForumController extends AbstractController {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
         
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $option, $max_thread);
     }
 
     public function showCreateThread(){
