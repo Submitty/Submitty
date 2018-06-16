@@ -515,11 +515,19 @@ HTML;
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                             {$temp_regrade_text}</a>
 HTML;
-                        } else if ($TA_percent == 100 && $title_save=='GRADED') {
+                        } else if ($TA_percent == 100 && $title_save=='GRADED' && $this->core->getQueries()->getNumberRegradeRequests($gradeable_id)==0) {
                             $gradeable_grade_range = <<<HTML
                             <a class="btn btn-default btn-nav" \\
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
                             REGRADE</a>
+HTML;
+                        } 
+                        else if ($TA_percent == 100 && $title_save=='GRADED'){
+                            $gradeable_grade_range = <<<HTML
+                            <a class="btn btn-default btn-nav" \\ 
+                            style="background-color:#d9534f" \\
+                            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}">
+                            REGRADE REQUESTS</a>
 HTML;
                         } else {
                             $button_type = $title_to_button_type_grading[$title_save];
