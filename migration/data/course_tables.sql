@@ -474,6 +474,31 @@ CREATE TABLE teams (
 );
 
 
+--
+-- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_requests (
+    id serial NOT NULL PRIMARY KEY,
+    gradeable_id VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    student_id VARCHAR(255) NOT NULL,
+    status INTEGER DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_discussion (
+    id serial NOT NULL PRIMARY KEY,
+    regrade_id INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    content TEXT,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+
 -- Begins Forum 
 
 --
@@ -1005,8 +1030,12 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+--
+-- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
+--
 
-
+ALTER TABLE ONLY regrade_discussion
+    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
 -- Forum Key relationships
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
@@ -1022,6 +1051,12 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("gradeable_id") REFERENCES "gradeable"("g_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("student_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
+ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 
 ALTER TABLE ONLY categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
