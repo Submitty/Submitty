@@ -874,7 +874,7 @@ HTML;
 								<a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
 								<a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
 							</span>
-							<div style="float: right;">
+							<div style="float: right;width: auto;">
 							<select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
 HTML;
 							foreach ($category_colors as $color_name => $color_code) {
