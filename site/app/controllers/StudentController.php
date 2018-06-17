@@ -16,6 +16,9 @@ class StudentController extends AbstractController {
             case 'team':
                 $controller = new student\TeamController($this->core);
                 break;
+            case 'view_late_table':
+                $controller = new student\LateDaysTableController($this->core);
+                break;
             case 'submission':
             default:
                 $controller = new student\SubmissionController($this->core);

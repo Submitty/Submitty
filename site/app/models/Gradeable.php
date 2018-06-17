@@ -85,6 +85,7 @@ use app\libraries\Utils;
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
+ * @method int getRegradeStatus()
  */
 class Gradeable extends AbstractModel {
     
@@ -356,6 +357,7 @@ class Gradeable extends AbstractModel {
             //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
@@ -470,6 +472,7 @@ class Gradeable extends AbstractModel {
 
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
+
         if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
             $late_flag = true;
@@ -484,6 +487,11 @@ class Gradeable extends AbstractModel {
         // during the semester and they've already used late days
         if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
             $this->late_status = "Bad too many used this term";
+            $late_flag = false;
+        }
+
+        if (!$this->hasSubmitted()){
+            $this->late_status = "No submission";
             $late_flag = false;
         }
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
@@ -1001,10 +1009,6 @@ class Gradeable extends AbstractModel {
 
     public function resetUserViewedDate() {
         $this->core->getQueries()->resetUserViewedDate($this);
-    }
-
-    public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable($this);
     }
 
     public function getActiveDaysLate() {
