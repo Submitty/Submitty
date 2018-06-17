@@ -368,7 +368,7 @@ if [ ${WORKER} == 0 ]; then
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
 fi
 
 ################################################################################################################
@@ -741,7 +741,7 @@ if [ "${WORKER}" == 0 ]; then
         # pop the first argument from the list of command args
         shift
         # pass any additional command line arguments to the run test suite
-        ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
         echo -e "\nCompleted Autograding Test Suite\n"
     fi
@@ -806,9 +806,3 @@ else
         sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi
-
-# set filemode to false, so that changes to file permissions in the
-# git repository will be ignored for future diffs/commits
-pushd ${SUBMITTY_REPOSITORY}
-git config --local core.filemode false
-popd > /dev/null

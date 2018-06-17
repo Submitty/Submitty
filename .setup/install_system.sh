@@ -70,7 +70,7 @@ fi
 # USERS SETUP
 #################
 
-${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
+python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 
 # Special users and groups needed to run Submitty
 #
@@ -467,7 +467,7 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo  Running configure submitty in worker mode
-    ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
@@ -482,10 +482,10 @@ else
     ${SUBMISSION_URL}
     ${GIT_URL}/git
 
-    1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
-        ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
 
@@ -505,11 +505,11 @@ fi
 if [ ${WORKER} == 0 ]; then
     hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
     PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 fi
 
 echo Beginning Install Submitty Script
-source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 
 # (re)start the submitty grading scheduler daemon
@@ -570,7 +570,7 @@ if [ ${WORKER} == 0 ]; then
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
 
         #################################################################
         # SET CSV FIELDS (for classlist upload data)

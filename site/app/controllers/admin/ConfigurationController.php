@@ -36,7 +36,8 @@ class ConfigurationController extends AbstractController {
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
-            'forum_enabled'				=> $this->core->getConfig()->isForumEnabled()
+            'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
+            'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled()
         );
 
         foreach (array('upload_message', 'course_email') as $key) {
@@ -87,7 +88,7 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
@@ -105,7 +106,8 @@ class ConfigurationController extends AbstractController {
                 'course_email'                => $_POST['course_email'],
                 'vcs_base_url'              => $_POST['vcs_base_url'],
                 'vcs_type'                  => $_POST['vcs_type'],
-                'forum_enabled'				=> $_POST['forum_enabled']
+                'forum_enabled'				=> $_POST['forum_enabled'],
+                'regrade_enabled'           => $_POST['regrade_enabled']
             )
         );
 
