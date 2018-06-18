@@ -48,7 +48,7 @@ class NavigationView extends AbstractView {
         ],
         GradeableSection::GRADED => [
             "title" => "GRADES AVAILABLE",
-            "button_type_submission" => 'btn-success',
+            "button_type_submission" => 'btn-default',
             "button_type_grading" => 'btn-default',
             "prefix" => "VIEW GRADE"
         ]
@@ -332,18 +332,46 @@ HTML;
      */
     private function getSubmitButton(Gradeable $gradeable, int $list_section): string {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
-        $title = self::gradeableSections[$list_section]["prefix"];
 
+        $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         $progress = null;
         $disabled = false;
 
-        if ($gradeable->getActiveVersion() < 1) {
-            if ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING) {
-                $class = self::gradeableSections[GradeableSection::CLOSED]["button_type_submission"];
-            }
+        //Button types that override any other buttons
+        if (!$gradeable->hasConfig()) {
+            $button = new Button([
+                "title" => "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh",
+                "disabled" => true,
+                "class" => "btn btn-default btn-nav"
+            ]);
+
+            return $this->renderButton($button);
         }
-        if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null && $list_section === GradeableSection::GRADED) {
-            $class = "btn-default";
+
+        //calculate the point percentage
+        if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() == 0) {
+            $points_percent = 0;
+        } else {
+            $points_percent = $gradeable->getGradedNonHiddenPoints() / $gradeable->getTotalNonHiddenNonExtraCreditPoints();
+        }
+        $points_percent = $points_percent * 100;
+        if ($points_percent > 100) {
+            $points_percent = 100;
+        }
+
+        //If the button is autograded and has been submitted once, give a progress bar.
+        if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
+            && ($list_section == GradeableSection::CLOSED || $list_section == GradeableSection::OPEN)) {
+            $progress = $points_percent;
+        }
+
+        if ($gradeable->getActiveVersion() < 1 && ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING)) {
+            //You forgot to submit
+            $class = "btn-danger";
+        }
+        if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() === null && $list_section === GradeableSection::GRADED) {
+            //Graded and you haven't seen it yet
+            $class = "btn-success";
         }
 
         if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
@@ -354,12 +382,22 @@ HTML;
             }
         }
 
+        if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
+            && $list_section == GradeableSection::CLOSED && $points_percent >= 50) {
+            $class = "btn-default";
+        }
+
         $display_date = ($list_section == GradeableSection::FUTURE || $list_section == GradeableSection::BETA) ? "(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . ")" : "(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . ")";
         if ($gradeable->getActiveVersion() > 0 && ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING)) {
             $display_date = "";
         }
 
-        if ($gradeable->getActiveVersion() >= 1 && $list_section == GradeableSection::OPEN) {
+        $title = self::gradeableSections[$list_section]["prefix"];
+        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
+            //team assignment, no team (non-admin)
+            $title = "MUST BE ON A TEAM TO SUBMIT";
+            $disabled = true;
+        } else if ($gradeable->getActiveVersion() >= 1 && $list_section == GradeableSection::OPEN) {
             //if the user submitted something on time
             $title = "RESUBMIT";
         } else if ($gradeable->getActiveVersion() >= 1 && $list_section == GradeableSection::CLOSED) {
@@ -372,39 +410,6 @@ HTML;
             //when there is no TA grade and due date passed
             $title = "TA GRADE NOT AVAILABLE";
         }
-
-        if ($gradeable->hasConfig()) {
-            //calculate the point percentage
-            if ($gradeable->getTotalNonHiddenNonExtraCreditPoints() == 0) {
-                $points_percent = 0;
-            } else {
-                $points_percent = $gradeable->getGradedNonHiddenPoints() / $gradeable->getTotalNonHiddenNonExtraCreditPoints();
-            }
-            $points_percent = $points_percent * 100;
-            if ($points_percent > 100) {
-                $points_percent = 100;
-            }
-            if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
-                $title = "MUST BE ON A TEAM TO SUBMIT";
-                $disabled = true;
-            } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
-                && $list_section == GradeableSection::CLOSED && $points_percent >= 50) {
-                $class = "btn-default";
-            }
-
-            //If the button is autograded and has been submitted once, give a progress bar.
-            if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
-                && ($list_section == GradeableSection::CLOSED || $list_section == GradeableSection::OPEN)) {
-                $progress = $points_percent;
-            }
-        } else {
-            $title = "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh";
-            $class = "btn-default";
-            $display_date = "";
-            $disabled = true;
-        }
-
-        $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
 
         $button = new Button([
             "title" => $title,
