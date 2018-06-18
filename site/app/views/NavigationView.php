@@ -500,6 +500,13 @@ HTML;
             $date_text = '';
         }
 
+        if ($this->core->getQueries()->getNumberRegradeRequests($gradeable->getId()) !== 0) {
+            //Open regrade requests
+            $button_title = "REGRADE REQUESTS";
+            $date_text = '';
+            $grade_button_type = "btn-danger";
+        }
+
         $regrade_button = "";
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {

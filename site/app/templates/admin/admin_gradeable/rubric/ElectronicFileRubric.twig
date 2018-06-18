@@ -16,19 +16,19 @@ Will this assignment have peer grading?
 
 Is this a PDF with a page assigned to each component?
 <fieldset>
-    <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
+    <input type="radio" id="yes_eg_pdf_page" name="eg_pdf_page" value="true"
             {{ admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_pdf_page" name="eg_pdf_page" value="false"
+    <input type="radio" id="no_eg_pdf_page" name="eg_pdf_page" value="false"
             {{ not admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> No
 
     <br />
 
-    <div id="pdf_page">
+    <div id="eg_pdf_page">
         <br />
         Who will assign pages to components?
-        <input type="radio" id="no_pdf_page_student" name="eg_pdf_page_student" value="false"
+        <input type="radio" id="no_eg_pdf_page_student" name="eg_pdf_page_student" value="false"
                 {{ not admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Instructor
-        <input type="radio" id="yes_pdf_page_student" name="eg_pdf_page_student" value="true"
+        <input type="radio" id="yes_eg_pdf_page_student" name="eg_pdf_page_student" value="true"
                 {{ admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Student
     </div>
 </fieldset>
@@ -117,11 +117,11 @@ Point precision:
                 <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
                 <br>
 
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+                <div id="eg_pdf_page_{{ num }}" class="eg_pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
 
                 <!--
                 <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getEgPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
+                <div id="eg_pdf_page_{{ num }}" class="eg_pdf_page_input" style={{ not admin_gradeable.getEgPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
                 -->
                 {% if num > 1 %}
                     <!--
@@ -162,8 +162,8 @@ Point precision:
                     this.value = 0;
                 }
             });
-            $('.pdf_page_input').hide();
-            $('#pdf_page').hide();
+            $('.eg_pdf_page_input').hide();
+            $('#eg_pdf_page').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
                     $("input[name^='page_component']").each(function () {
@@ -171,8 +171,8 @@ Point precision:
                             this.value = 1;
                         }
                     });
-                    $('.pdf_page_input').show();
-                    $('#pdf_page').show();
+                    $('.eg_pdf_page_input').show();
+                    $('#eg_pdf_page').show();
                 }
             }
         });
@@ -183,7 +183,7 @@ Point precision:
                     this.value = -1;
                 }
             });
-            $('.pdf_page_input').hide();
+            $('.eg_pdf_page_input').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'false') {
                     $("input[name^='page_component']").each(function () {
@@ -191,7 +191,7 @@ Point precision:
                             this.value = 1;
                         }
                     });
-                    $('.pdf_page_input').show();
+                    $('.eg_pdf_page_input').show();
                 }
             }
         });
@@ -332,7 +332,7 @@ Point precision:
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
         row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
-        row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
+        row.find('div[id=eg_pdf_page_' + oldNum +']').attr('id', 'eg_pdf_page_' + newNum);
         row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
@@ -668,7 +668,7 @@ Point precision:
         if($('input[id=peer_no_radio]').is(':checked')) {
             display = 'style="display:none"';
         }
-        if($('input[id=no_pdf_page]').is(':checked') || $('input[id=yes_pdf_page_student]').is(':checked')) {
+        if($('input[id=no_eg_pdf_page]').is(':checked') || $('input[id=yes_eg_pdf_page_student]').is(':checked')) {
             displayPage = 'style="display:none"';
         }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
@@ -706,7 +706,7 @@ Point precision:
                 <!--\
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 -->\
-                <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
+                <div id="eg_pdf_page_'+newQ+'" class="eg_pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
                 <!--\
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \

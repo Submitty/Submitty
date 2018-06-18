@@ -22,6 +22,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $rotating_but_not_registered
      * @param int $viewed_grade
      * @param string $section_type
+     * @param int $regrade_requests
      * @return string
      */
     public function statusPage(
@@ -34,7 +35,8 @@ class ElectronicGraderView extends AbstractView {
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
         int $viewed_grade,
-        string $section_type) {
+        string $section_type,
+        int $regrade_requests) {
 
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
@@ -206,7 +208,8 @@ class ElectronicGraderView extends AbstractView {
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
-            "component_overall_percentage" => $component_overall_percentage
+            "component_overall_percentage" => $component_overall_percentage,
+            "regrade_requests" => $regrade_requests
         ]);
     }
 
@@ -465,6 +468,9 @@ class ElectronicGraderView extends AbstractView {
         }
         if($gradeable->useTAGrading()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
+        }
+        if($gradeable->getRegradeStatus() !== 0){
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
         }
         
         if ($gradeable->getActiveVersion() == 0) {
@@ -760,6 +766,27 @@ HTML;
         return $return;
     }
 
+    /**
+     * Render the Regrade Requests panel
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function renderRegradePanel(Gradeable $gradeable) {
+        $return = <<<HTML
+<div id="regrade_info" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%">
+    <div class = "draggable_content">
+        <div class = "inner-container" style="padding:20px;">
+HTML;
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+        $return .= <<<HTML
+        </div>
+    </div>
+</div>
+HTML;
+        return $return;
+    }
+
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
@@ -769,7 +796,7 @@ HTML;
     }
 
     public function popupSettings() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SettingsForm.twig");
+        return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
 
     private function makeTable($user_id, $gradeable, &$status){

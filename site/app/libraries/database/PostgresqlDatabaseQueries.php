@@ -445,7 +445,12 @@ WHERE ".implode(" AND ", $where);
         }
         $order_by = [];
         if ($user_ids !== null) {
-            $order_by[] = "u.{$section_key}";
+            if ($section_key == "rotating_section") { 
+              $order_by[] = "u.rotating_section";
+            }
+            else if ($section_key == "registration_section"){
+              $order_by[] = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')";
+            }  
             $order_by[] = $sort_key;
         }
         $order_by = array_merge($order_by, $extra_order_by);
@@ -731,9 +736,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
             }
             if($comp->getPage() != 0) {
-                $admin_gradeable->setPdfPage(true);
+                $admin_gradeable->setEgPdfPage(true);
                 if($comp->getPage() == -1) {
-                    $admin_gradeable->setPdfPageStudent(true);
+                    $admin_gradeable->setEgPdfPageStudent(true);
                 }
             }
         }
