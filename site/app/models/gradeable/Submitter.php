@@ -43,14 +43,42 @@ class Submitter extends AbstractModel {
         return $this->team_or_user->toArray();
     }
 
+    /**
+     * Used to check if the submitter is a team
+     * @return bool True if this submitter is a team
+     */
     public function isTeam() {
         return $this->team_or_user instanceof Team;
     }
 
+    /**
+     * Gets the team/user object
+     * @return Team|User The underlying team/user object
+     */
     public function getObject() {
         return $this->team_or_user;
     }
 
+    /**
+     * Gets the user object if it is a user submitter
+     * @return User|null The user object if it is a user submitter, otherwise null
+     */
+    public function getUser() {
+        return !$this->isTeam() ? $this->team_or_user : null;
+    }
+
+    /**
+     * Gets the team object if it is a team submitter
+     * @return Team|null The team object if it is a team submitter, otherwise null
+     */
+    public function getTeam() {
+        return $this->isTeam() ? $this->team_or_user : null;
+    }
+
+    /**
+     * Gets the id of the user/team
+     * @return string The user/team id of the submitter
+     */
     public function getId() {
         return $this->team_or_user->getId();
     }
