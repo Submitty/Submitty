@@ -367,62 +367,21 @@ if [ ${WORKER} == 0 ]; then
     	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
     	service postgresql restart
     fi
-
-
-    #################################################################
-    # CLONE THE TUTORIAL REPO
-    #################
-
-    # grab the tutorial repo, which includes a number of curated example
-    # assignment configurations
-
-    if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        echo 'Submitty/Tutorial git repo already exists'
-        echo 'You may need to manually pull updates to this repo'
-    else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-        # remember to change this version in .setup/travis/autograder.sh too
-        git checkout v0.94
-        popd > /dev/null
-    fi
 fi
 
-#################################################################
-# ANALYSIS TOOLS SETUP
-#################
-
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools ]; then
-    echo 'Submitty/AnalysisTools git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
-fi
 
 
 #################################################################
-# LICHEN SETUP
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
-    echo 'Submitty/Lichen git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting install_system.sh"
+    exit 1
 fi
-
-
-#################################################################
-# RainbowGrades SETUP
-#################
-
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
-    echo 'Submitty/RainbowGrades git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
-fi
-
 
 
 #################################################################
