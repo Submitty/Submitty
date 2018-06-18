@@ -35,6 +35,7 @@ echo "TR_BUILD" ${TRAVIS_BUILD_DIR}
 
 sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
 sudo mkdir -p "${SUBMITTY_DATA_DIR}"
+sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
 sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
 
 sudo python3 ${DIR}/../bin/create_untrusted_users.py
