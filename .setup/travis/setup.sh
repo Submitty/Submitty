@@ -28,6 +28,11 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
+echo "INST" ${SUBMITTY_INSTALL_DIR}
+echo "DATA" ${SUBMITTY_DATA_DIR}
+echo "REPO" ${SUBMITTY_REPOSTIORY}
+echo "TR_BUILD" ${TRAVIS_BUILD_DIR}
+
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
