@@ -69,15 +69,21 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function ajaxRemoveEmpty(){
+    	//This function shows the empty spaces in the diffViewer
     	//TODO: Need to add checks?
 		$gradeable_id = $_REQUEST['gradeable_id'];
 		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
 		$gradeable->loadResultDetails();
 		$testcase = $gradeable->getTestcases()[$_REQUEST['index']];
+		//There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
 		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'original';
+		//There are currently two views, the view of student's code and the expected view.
 		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
+		$autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
 		foreach ($testcase->getAutochecks() as $autocheck) {
 			$diff_viewer = $autocheck->getDiffViewer();
+			if($autocheck_cnt <= 0) break;
+			$autocheck_cnt -= 1;
 		}
 		$this->core->getOutput()->useFooter(false);
 		$this->core->getOutput()->useHeader(false);

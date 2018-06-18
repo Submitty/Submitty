@@ -26,29 +26,29 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, index){
-    orig_div_name = div_name;
-    div_name = "#" + div_name;
-    var actual_div = $(div_name).children()[2].children[0].children[1];
-    var expected_div = $(div_name).children()[2].children[1].children[1];
+function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+    var actual_div_name = "#" + div_name + "_0";
+    var expected_div_name = "#" + div_name + "_1";
+    var actual_div = $(actual_div_name).children()[0];
+    var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index};
-    $("#white_space_helper").empty();
-    if($("#show_char_"+index).text() == "Show white spaces"){
-        $("#show_char_"+index).removeClass('btn-default');
-        $("#show_char_"+index).addClass('btn-primary');
-        $("#show_char_"+index).html("Show escape characters");
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+    $('#'+helper_id).empty();
+    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show white spaces"){
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Show escape characters");
 
-        $("#white_space_helper").html("→→→→ = tabs, &#9166 = newline, ↵ = carriage return, &#183 = space");
+        $('#'+helper_id).html("→→→→ = tabs, &#9166 = newline, ↵ = carriage return, &#183 = space");
         args['option'] = 'with_unicode'
-    } else if($("#show_char_"+index).text() == "Show escape characters"){
-        $("#show_char_"+index).html("Original View");
-        $("#white_space_helper").html("\\t = tabs, \\n = newline, \\r = carriage return, &#183 = space");
+    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show escape characters"){
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
+        $('#'+helper_id).html("\\t = tabs, \\n = newline, \\r = carriage return, &#183 = space");
         args['option'] = 'with_escape'
     } else {
-        $("#show_char_"+index).removeClass('btn-primary');
-        $("#show_char_"+index).addClass('btn-default');
-        $("#show_char_"+index).html("Show white spaces");
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Show white spaces");
         args['option'] = 'original'
     }
     //Insert actual and expected one at a time

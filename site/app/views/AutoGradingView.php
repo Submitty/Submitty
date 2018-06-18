@@ -83,9 +83,6 @@ class AutogradingView extends AbstractView {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
-            $return .= <<<HTML
-				<div id="white_space_helper"></div>
-HTML;
             if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf" && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
                 $url = "http" . (isset($_SERVER['HTTPS']) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 $url = preg_replace('/&component.*/', '', $url);
@@ -93,11 +90,15 @@ HTML;
                 $file_path = urlencode($file_path);
                 $return .= '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
             } else {
-            	if($description != "STDERR.txt" && $description != "Execution Logfile") {
+//            	if($description != "STDERR.txt" && $description != "Execution Logfile") {
+            		$id = "show_char_$index"."_".$autocheck_cnt;
+            		$div_id = "container_$index"."_".$autocheck_cnt;
+            		$helper_id = "white_space_helper_$index"."_".$autocheck_cnt;
 					$return .= <<<HTML
-			<a id="show_char_$index" class="btn btn-default" style="float:right;" onclick="changeDiffView('testcase_$index', '$gradeable_id', '$who_id', '$index')">Show white spaces</a>
+					<div id=$helper_id></div>
+			<a id=$id class="btn btn-default" style="float:right;" onclick="changeDiffView('$div_id', '$gradeable_id', '$who_id', '$index', '$autocheck_cnt', '$helper_id')">Show white spaces</a>
 HTML;
-				}
+//				}
                 $return .= <<<HTML
     <div class="box-block">
     <!-- Readded css here so the popups have the css -->
