@@ -434,94 +434,7 @@ HTML;
      * @return string
      */
     private function getGradeButton(Gradeable $gradeable, int $list_section): string {
-        //Get unbuilt gradeable logic done first because it will overwrite everything else
-        if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-            if (!$gradeable->hasConfig()) {
-                return new Button([
-                    "title" => "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh",
-                    "disabled" => true,
-                    "class" => "btn btn-nav"
-                ]);
-            }
-        }
-
-        $button_type_grading = self::gradeableSections[$list_section]["button_type_grading"];
-
-        //Default button title
-        $button_title = 'FIX ME';
-        $date_text = null;
-
-        $href = "";
-        $disabled = false;
-        $progress = null;
-
-        switch ($list_section) {
-            case GradeableSection::FUTURE:
-            case GradeableSection::BETA:
-            case GradeableSection::OPEN:
-            case GradeableSection::CLOSED:
-                $button_title = 'PREVIEW GRADING';
-                $date_text = '(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
-
-                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                    if (!$gradeable->useTAGrading()) {
-                        $date_text = '(no manual grading)';
-                    }
-                }
-                break;
-
-            case GradeableSection::GRADING:
-                $button_title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
-
-                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                    list($components_total, $TA_percent) = $this->getTAPercent($gradeable);
-
-                    //if $TA_percent is 100, change the text to REGRADE
-                    if (!$gradeable->useTAGrading() || $TA_percent === 100) {
-                        $button_type_grading = 'btn-default';
-                        $button_title = 'REGRADE';
-                    }
-
-                    //Give the TAs a progress bar too
-                    if ($components_total != 0 && $gradeable->useTAGrading()) {
-                        $progress = $TA_percent;
-                    }
-                } else {
-                    $button_type_grading = 'btn-default';
-                }
-                break;
-
-            case GradeableSection::GRADED:
-                if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                    if ($gradeable->useTAGrading()) {
-                        list($components_total, $TA_percent) = $this->getTAPercent($gradeable);
-                        if ($TA_percent === 100) {
-                            $button_title = 'REGRADE';
-                        } else {
-                            //You forgot somebody
-                            $button_title = 'GRADE';
-                            $button_type_grading = 'btn-danger';
-                        }
-
-                        if ($components_total != 0 && $gradeable->useTAGrading()) {
-                            $progress = $TA_percent;
-                        }
-                    } else {
-                        $button_title = 'VIEW SUBMISSIONS';
-                    }
-                } else {
-                    $button_title = 'REGRADE';
-                }
-
-                if ($this->core->getQueries()->getNumberRegradeRequests($gradeable->getId()) !== 0) {
-                    //Open regrade requests
-                    $button_title = "REGRADE";
-                    $button_type_grading = "btn-success";
-                }
-                break;
-        }
-
+        //Location, location never changes
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()));
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
@@ -530,8 +443,83 @@ HTML;
             $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId()));
         }
 
+        //Default values
+        $button_type_grading = self::gradeableSections[$list_section]["button_type_grading"];
+        $date_text = null;
+        $disabled = false;
+        $progress = null;
+
+        //Button types that override any other buttons
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            if (!$gradeable->hasConfig()) {
+                $button = new Button([
+                    "title" => "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh",
+                    "disabled" => true,
+                    "class" => "btn btn-default btn-nav"
+                ]);
+
+                return $this->renderButton($button);
+            }
+
+            if ($this->core->getQueries()->getNumberRegradeRequests($gradeable->getId()) !== 0) {
+                //Open regrade requests
+                $button = new Button([
+                    "title" => "REGRADE",
+                    "class" => "btn btn-success btn-nav btn-nav-grade"
+                ]);
+
+                return $this->renderButton($button);
+            }
+        }
+
+        if ($list_section === GradeableSection::GRADING || $list_section === GradeableSection::GRADED) {
+            if ($list_section === GradeableSection::GRADING) {
+                $title = 'GRADE';
+                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
+            } else {
+                $title = 'REGRADE';
+            }
+
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                if ($gradeable->useTAGrading()) {
+                    list($components_total, $TA_percent) = $this->getTAPercent($gradeable);
+
+                    if ($TA_percent === 100) {
+                        //If they're done, change the text to REGRADE
+                        $button_type_grading = 'btn-default';
+                        $title = 'REGRADE';
+                    } else {
+                        if ($components_total !== 0 && $list_section === GradeableSection::GRADED) {
+                            //You forgot somebody
+                            $button_type_grading = 'btn-danger';
+                            $title = 'GRADE';
+                        }
+                    }
+
+                    //Give the TAs a progress bar too
+                    if ($components_total !== 0) {
+                        $progress = $TA_percent;
+                    }
+                } else {
+                    $title = "VIEW SUBMISSIONS";
+                }
+            } else {
+                //Labs & Tests don't have exciting buttons
+                $button_type_grading = 'btn-default';
+            }
+        } else {
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->useTAGrading()) {
+                $title = "VIEW SUBMISSIONS";
+                $date_text = "(no manual grading)";
+            } else {
+                //Before grading has opened, only thing we can do is preview
+                $title = 'PREVIEW GRADING';
+                $date_text = '(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
+            }
+        }
+
         $button = new Button([
-            "title" => $button_title,
+            "title" => $title,
             "subtitle" => $date_text,
             "href" => $href,
             "progress" => $progress,
