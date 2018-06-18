@@ -350,7 +350,7 @@ HTML;
             }
         }
 
-        $submit_display_date = ($list_section == GradeableSection::FUTURE || $list_section == GradeableSection::BETA) ? "<span style=\"font-size:smaller;\">(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . "</span>)" : "<span style=\"font-size:smaller;\">(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . "</span>)";
+        $submit_display_date = ($list_section == GradeableSection::FUTURE || $list_section == GradeableSection::BETA) ? "(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . ")" : "(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . ")";
         if ($gradeable->getActiveVersion() > 0 && ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING)) {
             $submit_display_date = "";
         }
@@ -465,7 +465,8 @@ HTML;
                 //Open regrade requests
                 $button = new Button([
                     "title" => "REGRADE",
-                    "class" => "btn btn-success btn-nav btn-nav-grade"
+                    "class" => "btn btn-success btn-nav btn-nav-grade",
+                    "href" => $href
                 ]);
 
                 return $this->renderButton($button);
