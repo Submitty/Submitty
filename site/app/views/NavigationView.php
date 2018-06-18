@@ -332,10 +332,10 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $list_section
+     * @param int $list_section
      * @return string
      */
-    private function getSubmitButton(Gradeable $gradeable, string $list_section): string {
+    private function getSubmitButton(Gradeable $gradeable, int $list_section): string {
         $button_type_submission = self::gradeableSections[$list_section]["button_type_submission"];
 
         if ($gradeable->getActiveVersion() < 1) {
@@ -435,10 +435,10 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $list_section
+     * @param int $list_section
      * @return string
      */
-    private function getGradeButton(Gradeable $gradeable, string $list_section): string {
+    private function getGradeButton(Gradeable $gradeable, int $list_section): string {
         $button_type_grading = self::gradeableSections[$list_section]["button_type_grading"];
 
         if ($gradeable->getActiveVersion() < 1) {
@@ -578,46 +578,42 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @param string $list_section
+     * @param int $list_section
      * @return string
      */
-    private function getQuickLinkButton(Gradeable $gradeable, string $list_section): string {
+    private function getQuickLinkButton(Gradeable $gradeable, int $list_section): string {
+        $title = "";
+        $url = "";
         if ($list_section === GradeableSection::ITEMS_BEING_GRADED) {
-            $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now'))}">
-                        RELEASE GRADES NOW
-                        </a>
-HTML;
+            $title = "RELEASE GRADES NOW";
+            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now'));
         } else if ($list_section === GradeableSection::FUTURE) {
-            $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now'))}">
-                        OPEN TO TAS NOW
-                        </a>
-HTML;
+            $title = "OPEN TO TAS NOW";
+            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now'));
         } else if ($list_section === GradeableSection::BETA) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now'))}">
-                        OPEN NOW
-                        </a>
-HTML;
+                $title = "OPEN NOW";
+                $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now'));
             } else {
-                $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'))}">
-                        OPEN TO GRADING NOW
-                        </a>
-HTML;
+                $title = "OPEN TO GRADING NOW";
+                $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'));
             }
         } else if ($list_section === GradeableSection::CLOSED) {
+            $title = "OPEN TO GRADING NOW";
+            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'));
+        }
+
+        if ($title !== "") {
             $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'))}">
-                        OPEN TO GRADING NOW
+                        <a class="btn btn-primary" style="width:100%;" href="{$url}">
+                        {$title}
                         </a>
 HTML;
-        } else {
-            $quick_links = "";
+
+            return $quick_links;
         }
-        return $quick_links;
+
+        return "";
     }
 
     /**
