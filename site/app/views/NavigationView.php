@@ -83,41 +83,43 @@ HTML;
 <div class="content">
     <div class="nav-buttons">
 HTML;
+
+        $top_buttons = [];
+
         // ======================================================================================
         // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
         // ======================================================================================
         if ($this->core->getUser()->accessAdmin()) {
-            $return .= <<<HTML
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page'))}">New Gradeable</a>
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
+            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')), "text" => "New Gradeable"];
+            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')), "text" => "Upload Config & Review Build Output"];
 
-HTML;
         }
         // ======================================================================================
         // LATE DAYS TABLE BUTTON
         // ======================================================================================
 
-        $return .= <<<HTML
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table'))}">Show my late days information</a>
-HTML;
+        $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')), "text" => "Show my late days information"];
         // ======================================================================================
         // FORUM BUTTON
         // ====================================================================================== 
 
         if ($this->core->getConfig()->isForumEnabled()) {
-            $return .= <<<HTML
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Discussion Forum</a>
-HTML;
+            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')), "text" => "Discussion Forum"];
         }
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
         if ($display_rainbow_grades_summary) {
+            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')), "text" => "View Grades"];
+        }
+
+        foreach ($top_buttons as $button) {
             $return .= <<<HTML
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}">View Grades</a>
+        <a class="btn btn-primary" href="{$button["href"]}">{$button["text"]}</a>
 HTML;
         }
+
         $return .= <<<HTML
     </div>
 HTML;
