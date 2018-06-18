@@ -1,0 +1,87 @@
+{
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 21,
+        "AUTO_POINTS" : 21,
+        "TA_POINTS" : 0,
+        "EXTRA_CREDIT_POINTS" : 0
+    },
+
+    "testcases" : [
+
+        // *************** README *****************
+        {
+            "type" : "FileCheck",
+            "title" : "README",
+            "actual_file" : "README.txt",
+            "points" : 2
+        },
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "clang++ -Wall -o a.out -- *.cpp",
+            "executable_name" : "a.out",
+            "points" : 3
+        },
+
+        // *************** TEST CASES *****************
+        {
+            "title" : "Regular char by char comparision",
+            "details" : "./byChar.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
+                    "actual_file" : "output.txt",
+                    "expected_file" : "inst_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by word comparison",
+            "details" : "./byWord.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "comparison" : "byLinebyWord",
+                    "actual_file" : "output.txt",
+                    "expected_file" : "inst_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by line comparison",
+            "details" : "./byLine.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "actual_file" : "output.txt",
+                    "expected_file" : "inst_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by line without whitespace comparison",
+            "details" : "./byLineNoWhite.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "comparison" : "byLine",
+                    "ignoreWhitespace" : true,
+                    "actual_file" : "output.txt",
+                    "expected_file" : "inst_output.txt"
+                }
+            ]
+        }
+    ]
+}
