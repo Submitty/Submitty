@@ -235,48 +235,22 @@ HTML;
         return $this->core->getUser()->accessAdmin();
     }
 
-
     /**
      * @param Gradeable $gradeable
      * @return string
      */
     private function getTitleCell(Gradeable $gradeable): string {
+        $gradeable_title = $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
         if (trim($gradeable->getInstructionsURL()) != '') {
-            $gradeable_title = '<label>' . $gradeable->getName() . '</label><a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-        } else if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-            # no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
-            $no_teams_flag = true;
-            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
-            if (!empty($all_teams)) {
-                $no_teams_flag = false;
-            }
-            # no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
-            $no_submission_flag = true;
-            $semester = $this->core->getConfig()->getSemester();
-            $course = $this->core->getConfig()->getCourse();
-            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $gradeable->getId();
-            if (is_dir($submission_path)) {
-                $no_submission_flag = false;
-            }
-            if ($this->core->getUser()->accessAdmin() && $no_submission_flag && $no_teams_flag) {
-                $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable->getId()));
-                $gradeable_title = <<<HTML
-                    <label>{$gradeable->getName()}</label>&nbsp;
+            $gradeable_title .= '<a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
+        }
+
+        if ($this->core->getUser()->accessAdmin() && $gradeable->canDelete()) {
+            $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable->getId()));
+            $gradeable_title .= <<<HTML
                     <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
 HTML;
-            } else {
-                $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-            }
-        } else if (($gradeable->getType() == GradeableType::NUMERIC_TEXT) || (($gradeable->getType() == GradeableType::CHECKPOINTS))) {
-            if ($this->core->getUser()->accessAdmin() && $this->core->getQueries()->getNumUsersGraded($gradeable->getId()) === 0) {
-                $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable->getId()));
-                $gradeable_title = <<<HTML
-                    <label>{$gradeable->getName()}</label>&nbsp;
-                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
-HTML;
-            } else {
-                $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-            }
+
         }
         return $gradeable_title;
     }

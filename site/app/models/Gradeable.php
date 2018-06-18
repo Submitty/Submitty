@@ -1250,4 +1250,31 @@ class Gradeable extends AbstractModel {
             $this->core->getConfig()->getVcsUrl(), $repo);
         return str_replace('{$team_id}', $team->getId(), $repo);
     }
+
+    public function canDelete() {
+        if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
+            // no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+            $no_teams_flag = true;
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+            if (!empty($all_teams)) {
+                $no_teams_flag = false;
+            }
+            // no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+            $no_submission_flag = true;
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+            if (is_dir($submission_path)) {
+                $no_submission_flag = false;
+            }
+
+            return $no_submission_flag && $no_teams_flag;
+        } else if ($this->getType() == GradeableType::NUMERIC_TEXT || $this->getType() == GradeableType::CHECKPOINTS) {
+            return $this->core->getQueries()->getNumUsersGraded($this->getId()) === 0;
+        }
+
+        // Unknown type, better be safe
+        return false;
+    }
+
 }
