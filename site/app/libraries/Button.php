@@ -9,6 +9,8 @@ namespace app\libraries;
 class Button {
     /** @var string $title */
     protected $title;
+    /** @var string|null $subtitle */
+    protected $subtitle;
     /** @var string $href */
     protected $href;
     /** @var string $class */
@@ -23,6 +25,7 @@ class Button {
      */
     public function __construct(array $details) {
         $this->title    = $details["title"] ?? "";
+        $this->subtitle = $details["subtitle"] ?? null;
         $this->href     = $details["href"] ?? "";
         $this->class    = $details["class"] ?? "btn";
         $this->disabled = $details["disabled"] ?? false;
@@ -34,6 +37,13 @@ class Button {
      */
     public function getTitle(): string {
         return $this->title;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getSubtitle() {
+        return $this->subtitle;
     }
 
     /**

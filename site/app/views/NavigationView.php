@@ -442,31 +442,44 @@ HTML;
             }
         }
 
+        //Default button title
         $button_title = 'PREVIEW GRADING';
+
+        switch ($list_section) {
+            case GradeableSection::FUTURE:
+            case GradeableSection::BETA:
+            case GradeableSection::OPEN:
+                $button_title = 'PREVIEW GRADING';
+                break;
+            case GradeableSection::CLOSED:
+            case GradeableSection::GRADING:
+                $button_title = 'GRADE';
+                break;
+            case GradeableSection::GRADED:
+                $button_title = 'REGRADE';
+                break;
+        }
+
         $date_text = '(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
         if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
             if ($gradeable->hasConfig()) {
                 if ($gradeable->useTAGrading()) {
-                    $button_title = 'PREVIEW GRADING';
                     $date_text = '(grading opens ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
                 } else {
-                    $button_title = 'VIEW SUBMISSIONS';
                     $date_text = '(no manual grading)';
                 }
+
             } else {
                 $button_title = "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh";
                 $date_text = "";
             }
         }
         if ($list_section == GradeableSection::GRADING) {
-            $button_title = 'GRADE';
             $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
         }
         if ($list_section == GradeableSection::GRADED) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                if ($gradeable->useTAGrading()) {
-                    $button_title = 'GRADE';
-                } else {
+                if (!$gradeable->useTAGrading()) {
                     $button_title = 'VIEW SUBMISSIONS';
                 }
             } else {
@@ -478,9 +491,9 @@ HTML;
         $grade_button_type = self::gradeableSections[$list_section]["button_type_grading"];
         if ($this->core->getQueries()->getNumberRegradeRequests($gradeable->getId()) !== 0) {
             //Open regrade requests
-            $button_title = "REGRADE REQUESTS";
+            $button_title = "REGRADE";
             $date_text = '';
-            $grade_button_type = "btn-danger";
+            $grade_button_type = "btn-success";
         }
 
         $date_text = "<br><span style=\"font-size:smaller;\">{$date_text}</span>";
