@@ -401,13 +401,9 @@ class FileUtils {
     }
 
     /**
-     * Given a set of new files and a set of existing files (both constructed with the filenames as keys, e.g. 
-     * array("foo.txt" => true, "bar.cpp" => "baz"), a php hashset), this function returns an array
+     * Given an array of new files and an array of exisiting files, this function returns an array
      * mapping the original names in $new_files to new names that will not conflict among themselves or
      * with the filenames in $existing_files.
-     *
-     * To use a numerically indexed array (with the filenames as values), call array_flip on it before passing it
-     * as a parameter (note that doing so will remove duplicate elements and thus duplicates won't work).
      *
      * @param $existing_files
      * @param $new_files

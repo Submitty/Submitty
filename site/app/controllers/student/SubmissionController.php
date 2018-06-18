@@ -922,7 +922,7 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 
-                if(merge_previous) {
+                if($merge_previous) {
                     for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                         if(isset($uploaded_files[$i])) {
                             $previous_files[$i] = array();
