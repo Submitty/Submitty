@@ -446,7 +446,14 @@ class DiffViewer {
 					}
                     $current = $diff[1]+1;
                 }
-                $html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
+				if($option == "original"){
+					$html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
+				} else if($option == "with_unicode"){
+					$html .= "<span class='line_code_inner'>".$this->replaceEmptyChar(htmlentities(substr($lines[$i], $current)))."</span>";
+				} else if($option == "with_escape"){
+					$html .= "<span class='line_code_inner'>".$this->replaceEmptyCharWEscape(htmlentities(substr($lines[$i], $current)))."</span>";
+				}
+
             }
             else {
                 if (isset($lines[$i])) {
