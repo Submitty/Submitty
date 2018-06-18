@@ -13,11 +13,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
 
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_DATA_DIR=/var/local/submitty
-
-
 #sudo chmod -R 755 /home/travis/build
 
 #if [ ! -f "$SELENIUM_JAR" ]; then
@@ -81,7 +76,11 @@ sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
 # necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
 sudo usermod -a -G travis hwphp
 
+echo 'in setup.sh'
+pwd
+ls -lta
+
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
-sudo bash /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
+sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
