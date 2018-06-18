@@ -446,13 +446,7 @@ class AdminGradeableController extends AbstractController
         $component->setIsText(false);
         $peer_grading_component = (isset($details['peer_component_' . strval($x + 1)]) && $details['peer_component_' . strval($x + 1)] == 'on') ? true : false;
         $component->setIsPeer($peer_grading_component);
-        if (self::isRadioButtonTrue('eg_pdf_page_student')) {
-            $page_component = -1;
-        } else if (self::isRadioButtonTrue('eg_pdf_page')) {
-            $page_component = ($details['page_component_' . strval($x + 1)]);
-        } else {
-            $page_component = 0;
-        }
+        $page_component = $details['page_component_' . strval($x + 1)];
         $component->setPage($page_component);
     }
 
