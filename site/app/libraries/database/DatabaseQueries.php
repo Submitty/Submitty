@@ -277,16 +277,20 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($post_id, $content){
+    public function editPost($post_id, $content, $anon){
         try {
-            $this->course_db->query("UPDATE posts SET content = ? where id = ?", array($content, $post_id));
+            $this->course_db->query("UPDATE posts SET content = ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
         } catch(DatabaseException $dbException) {
             return false;
         } return true;
     }
 
-    public function editThreadTitle($thread_id, $thread_title) {
-        $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
+    public function editThread($thread_id, $thread_title) {
+        try {
+            $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
+        } catch(DatabaseException $dbException) {
+            return false;
+        } return true;
     }
 
     /**

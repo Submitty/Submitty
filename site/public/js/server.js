@@ -1212,26 +1212,28 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 console.log(json);
                 var user_id = escape(json.user);
                 var post_content = json.post;
+                var anon = json.anon;
                 var time = (new Date(json.post_time));
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('thread_content');
+                var contentBox = document.getElementById('thread_post_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
+                $('#thread_post_anon').prop('checked', anon);
                 $('#edit-user-post').css('display', 'block');
 
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
                     $("#title").prop('disabled', false);
-                    // $("#edit_thread_form").show();
+                    $(".edit_thread").show();
                     $('#title').val(thread_title);
                 } else {
                     $("#title").prop('disabled', true);
-                    // $("#edit_thread_form").hide();
+                    $(".edit_thread").hide();
                 }
             },
             error: function(){

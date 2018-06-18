@@ -845,7 +845,7 @@ HTML;
 
 		<script> 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('thread_content');
+			    enableTabsInTextArea('thread_post_content');
 				$("form").areYouSure();
 			});
 		 </script>

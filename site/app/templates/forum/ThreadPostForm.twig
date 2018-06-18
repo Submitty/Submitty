@@ -1,6 +1,8 @@
 <div class="form-group row">
     {% if show_title %}
+    <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
+    </span>
     {% endif %}
 
     {% if show_editcat and core.getUser().getGroup() <= 2 %}
@@ -12,11 +14,11 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row">
-        <button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
-        <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+        <button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
+        <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
     </div>
     <div class="form-group row">
-        <textarea name="thread_content" id="thread_content" class="fill-available" style="resize:none;min-height:40vmin;overflow:hidden;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available" style="resize:none;min-height:40vmin;overflow:hidden;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
     </div>
 <br/>
 {% endif %}
@@ -70,15 +72,15 @@
     {% endif %}
     <span style="display:inline-block;float:right;">
         {% if show_anon %}
-            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="thread_post_anon" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
         {% endif %}
         {% if show_announcement and core.getUser().getGroup() <= 2 %}
             <label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
-                 $('#edit_post_content').val('');$('#edit_post_content').trigger('checkform.areYouSure');
-                 $('#edit_thread_title').val('');$('#edit_thread_title').trigger('checkform.areYouSure');"
+                 $('#thread_post_content').val('');$('#thread_post_content').trigger('checkform.areYouSure');
+                 $('#title').val('');$('#title').trigger('checkform.areYouSure');"
                      class="btn btn-danger">Cancel</a>
         {% endif %}
         <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
