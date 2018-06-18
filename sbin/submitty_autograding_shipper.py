@@ -539,7 +539,7 @@ def launch_shippers(worker_status_map):
             print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
             grade_items_logging.log_message(JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
             continue
-        if machine['enabled'] == False:
+        if 'enabled' in machine and machine['enabled'] == False:
             print("{0} is disabled, so we are not spinning up shipper threads.".format(name))
             grade_items_logging.log_message(JOB_ID, message="{0} is disabled, so we are not spinning up shipper threads.")
             continue
