@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
