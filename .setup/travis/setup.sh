@@ -77,10 +77,6 @@ sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
 # necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
 sudo usermod -a -G travis hwphp
 
-echo 'in setup.sh'
-pwd
-ls -lta
-
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
