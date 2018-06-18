@@ -9,7 +9,7 @@ use app\models\GradeableSection;
 class NavigationView extends AbstractView {
 
     const gradeableSections = [
-        [
+        GradeableSection::FUTURE => [
             //What title is displayed to the user for each category
             "title" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
             //What bootstrap button the student button will be. Information about bootstrap buttons can be found here:
@@ -21,38 +21,38 @@ class NavigationView extends AbstractView {
             //It is general since the text could change depending if the user submitted something or not and other factors.
             "prefix" => "ALPHA SUBMIT"
         ],
-        [
+        GradeableSection::BETA => [
             "title" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-default",
             "prefix" => "BETA SUBMIT"
         ],
-        [
+        GradeableSection::OPEN => [
             "title" => "OPEN",
-            "button_type_submission" => "btn-primary" ,
-            "button_type_grading" => "btn-default" ,
+            "button_type_submission" => "btn-primary",
+            "button_type_grading" => "btn-default",
             "prefix" => "SUBMIT"
         ],
-        [
+        GradeableSection::CLOSED => [
             "title" => "PAST DUE",
             "button_type_submission" => "btn-danger",
             "button_type_grading" => "btn-default",
             "prefix" => "LATE SUBMIT"
         ],
-        [
+        GradeableSection::ITEMS_BEING_GRADED => [
             "title" => "CLOSED &nbsp;&nbsp; <em>being graded by TA/Instructor</em>",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-primary",
             "prefix" => "VIEW SUBMISSION"
         ],
-        [
+        GradeableSection::GRADED => [
             "title" => "GRADES AVAILABLE",
             "button_type_submission" => 'btn-success',
             "button_type_grading" => 'btn-danger',
             "prefix" => "VIEW GRADE"
         ]
     ];
-    
+
     const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function noAccessCourse() {
