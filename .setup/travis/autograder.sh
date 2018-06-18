@@ -11,7 +11,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/src
 cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 
 # --------------------------------------
-"Getting DrMemory..."
+echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
 DRMEM_TAG=release_1.10.1
