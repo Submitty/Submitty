@@ -848,8 +848,11 @@ table .instructor .two-options{
 
 .btn-nav {
     width:100%;
-    padding: 0px !important; 
-    padding-top: 10px !important; 
+}
+
+.btn-nav-submit, .btn-nav-grade {
+    padding: 0px !important;
+    padding-top: 10px !important;
     padding-bottom: 10px !important;
 }
 

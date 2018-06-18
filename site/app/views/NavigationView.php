@@ -137,7 +137,7 @@ HTML;
         }
 
         foreach ($top_buttons as $button) {
-            $return .= $this->renderButton($button);
+            $return .= $this->renderButton($button) . " ";
         }
 
         $return .= <<<HTML
@@ -382,20 +382,20 @@ HTML;
             }
             if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
                 $gradeable_open_range = <<<HTML
-                <a class="btn {$button_type_submission} btn-nav" disabled>
+                <a class="btn {$button_type_submission} btn-nav-submit" disabled>
                      MUST BE ON A TEAM TO SUBMIT<br>{$submit_display_date}
                 </a>
 HTML;
             } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                 && $list_section == GradeableSection::CLOSED && $points_percent >= 50) {
                 $gradeable_open_range = <<<HTML
-                 <a class="btn btn-default btn-nav" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
+                 <a class="btn btn-default btn-nav-submit" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
                      {$submit_button_text}<br>{$submit_display_date}
                  </a>
 HTML;
             } else {
                 $gradeable_open_range = <<<HTML
-                 <a class="btn {$button_type_submission} btn-nav" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
+                 <a class="btn {$button_type_submission} btn-nav-submit" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
                      {$submit_button_text}<br>{$submit_display_date}
                  </a>
 HTML;
@@ -498,19 +498,19 @@ HTML;
                 //if $TA_percent is 100, change the text to REGRADE
                 if ($TA_percent == 100 && $list_section == GradeableSection::ITEMS_BEING_GRADED) {
                     $regrade_button = <<<HTML
-                            <a class="btn {$grade_button_type} btn-nav"
+                            <a class="btn {$grade_button_type} btn-nav-grade"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()))}">
                             {$button_title} {$date_text}</a>
 HTML;
                 } else if ($TA_percent == 100 && $list_section == GradeableSection::GRADED) {
                     $regrade_button = <<<HTML
-                            <a class="btn {$grade_button_type} btn-nav"
+                            <a class="btn {$grade_button_type} btn-nav-grade"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()))}">
                             REGRADE</a>
 HTML;
                 } else {
                     $regrade_button = <<<HTML
-                            <a class="btn {$grade_button_type} btn-nav"
+                            <a class="btn {$grade_button_type} btn-nav-grade"
                             href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()))}">
                             {$button_title} {$date_text}</a>
 HTML;
@@ -521,20 +521,20 @@ HTML;
                 }
             } else {
                 $regrade_button = <<<HTML
-                <a class="btn {$button_type_grading} btn-nav" style="width:100%;" disabled>
+                <a class="btn {$button_type_grading} btn-nav-grade" style="width:100%;" disabled>
                     {$button_title} {$date_text}
                 </a>
 HTML;
             }
         } else if ($gradeable->getType() == GradeableType::CHECKPOINTS) {
             $regrade_button = <<<HTML
-                <a class="btn {$button_type_grading} btn-nav"
+                <a class="btn {$button_type_grading} btn-nav-grade"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId()))}">
                 {$button_title} {$date_text}</a>
 HTML;
         } elseif ($gradeable->getType() == GradeableType::NUMERIC_TEXT) {
             $regrade_button = <<<HTML
-                <a class="btn {$button_type_grading} btn-nav"
+                <a class="btn {$button_type_grading} btn-nav-grade"
                 href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId()))}">
                 {$button_title} {$date_text}</a>
 HTML;
@@ -548,13 +548,12 @@ HTML;
      * @return string
      */
     private function getEditButton(Gradeable $gradeable): string {
-        $admin_button = <<<HTML
-                <a class="btn btn-default" style="width:100%;"
-                href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId()))}">
-                    Edit
-                </a>
-HTML;
-        return $admin_button;
+        $button = new Button([
+            "title" => "Edit",
+            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
+            "class" => "btn btn-default btn-nav"
+        ]);
+        return $this->renderButton($button);
     }
 
     /**
@@ -562,12 +561,12 @@ HTML;
      * @return string
      */
     private function getRebuildButton(Gradeable $gradeable): string {
-        $admin_rebuild_button = <<<HTML
-                <a class="btn btn-default" style="width:100%;" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId()))}">
-                    Rebuild
-                </a>
-HTML;
-        return $admin_rebuild_button;
+        $button = new Button([
+            "title" => "Rebuild",
+            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
+            "class" => "btn btn-default btn-nav"
+        ]);
+        return $this->renderButton($button);
     }
 
     /**
@@ -576,35 +575,43 @@ HTML;
      * @return string
      */
     private function getQuickLinkButton(Gradeable $gradeable, int $list_section): string {
-        $title = "";
-        $url = "";
+        $button = null;
         if ($list_section === GradeableSection::ITEMS_BEING_GRADED) {
-            $title = "RELEASE GRADES NOW";
-            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now'));
+            $button = new Button([
+                "title" => "RELEASE GRADES NOW",
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now')),
+                "class" => "btn btn-primary btn-nav"
+            ]);
         } else if ($list_section === GradeableSection::FUTURE) {
-            $title = "OPEN TO TAS NOW";
-            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now'));
+            $button = new Button([
+                "title" => "OPEN TO TAS NOW",
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now')),
+                "class" => "btn btn-primary btn-nav"
+            ]);
         } else if ($list_section === GradeableSection::BETA) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
-                $title = "OPEN NOW";
-                $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now'));
+                $button = new Button([
+                    "title" => "OPEN NOW",
+                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now')),
+                    "class" => "btn btn-primary btn-nav"
+                ]);
             } else {
-                $title = "OPEN TO GRADING NOW";
-                $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'));
+                $button = new Button([
+                    "title" => "OPEN TO GRADING NOW",
+                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
+                    "class" => "btn btn-primary btn-nav"
+                ]);
             }
         } else if ($list_section === GradeableSection::CLOSED) {
-            $title = "OPEN TO GRADING NOW";
-            $url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now'));
+            $button = new Button([
+                "title" => "OPEN TO GRADING NOW",
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
+                "class" => "btn btn-primary btn-nav"
+            ]);
         }
 
-        if ($title !== "") {
-            $quick_links = <<<HTML
-                        <a class="btn btn-primary" style="width:100%;" href="{$url}">
-                        {$title}
-                        </a>
-HTML;
-
-            return $quick_links;
+        if ($button !== null) {
+            return $this->renderButton($button);
         }
 
         return "";

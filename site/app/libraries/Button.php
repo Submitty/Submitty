@@ -15,7 +15,7 @@ class Button {
     protected $class;
     /** @var bool $disabled */
     protected $disabled;
-    /** @var float $progress */
+    /** @var float|null $progress */
     protected $progress;
 
     /**
@@ -58,9 +58,9 @@ class Button {
     }
 
     /**
-     * @return float
+     * @return float|null
      */
-    public function getProgress(): float {
+    public function getProgress() {
         return $this->progress;
     }
 
