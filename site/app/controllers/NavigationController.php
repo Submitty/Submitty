@@ -53,14 +53,14 @@ class NavigationController extends AbstractController {
         $user = $this->core->getUser();
 
         if ($user->accessGrading()) {
-            $sections_to_lists[GradeableSection::FUTURE] = $future_gradeables_list;
-            $sections_to_lists[GradeableSection::BETA] = $beta_gradeables_list;
+            $sections_to_lists[GradeableList::FUTURE] = $future_gradeables_list;
+            $sections_to_lists[GradeableList::BETA] = $beta_gradeables_list;
         }
 
-        $sections_to_lists[GradeableSection::OPEN] = $open_gradeables_list;
-        $sections_to_lists[GradeableSection::CLOSED] = $closed_gradeables_list;
-        $sections_to_lists[GradeableSection::GRADING] = $grading_gradeables_list;
-        $sections_to_lists[GradeableSection::GRADED] = $graded_gradeables_list;
+        $sections_to_lists[GradeableList::OPEN] = $open_gradeables_list;
+        $sections_to_lists[GradeableList::CLOSED] = $closed_gradeables_list;
+        $sections_to_lists[GradeableList::GRADING] = $grading_gradeables_list;
+        $sections_to_lists[GradeableList::GRADED] = $graded_gradeables_list;
 
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
