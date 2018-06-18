@@ -13,12 +13,14 @@ if [[ "$UID" -ne "0" ]] ; then
     exit 1
 fi
 
+# get the repository name from the location of this script
 MY_PATH="`dirname \"$0\"`"
 SUBMITTY_REPOSITORY=${MY_PATH}/../..
 echo 'in update_repos.sh'
 echo 'MY_PATH '${MY_PATH}
 echo 'SUBMITTY_REPOSITORY '${SUBMITTY_REPOSITORY}
 
+# FIXME: should read this from a config file
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 
 ########################################################################
@@ -101,10 +103,3 @@ clone_or_update_repo  AnalysisTools  ${min_AnalysisTools_version}
 clone_or_update_repo  Lichen  ${min_Lichen_version}
 clone_or_update_repo  RainbowGrades  ${min_RainbowGrades_version}
 clone_or_update_repo  Tutorial  ${min_Tutorial_version}
-
-
-
-
-
-
-
