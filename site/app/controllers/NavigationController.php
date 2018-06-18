@@ -12,6 +12,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableList;
+use app\models\GradeableSection;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -52,14 +53,14 @@ class NavigationController extends AbstractController {
         $user = $this->core->getUser();
 
         if ($user->accessGrading()) {
-            $sections_to_lists["FUTURE"] = $future_gradeables_list;
-            $sections_to_lists["BETA"] = $beta_gradeables_list;
+            $sections_to_lists[GradeableSection::FUTURE] = $future_gradeables_list;
+            $sections_to_lists[GradeableSection::BETA] = $beta_gradeables_list;
         }
 
-        $sections_to_lists["OPEN"] = $open_gradeables_list;
-        $sections_to_lists["CLOSED"] = $closed_gradeables_list;
-        $sections_to_lists["ITEMS BEING GRADED"] = $grading_gradeables_list;
-        $sections_to_lists["GRADED"] = $graded_gradeables_list;
+        $sections_to_lists[GradeableSection::OPEN] = $open_gradeables_list;
+        $sections_to_lists[GradeableSection::CLOSED] = $closed_gradeables_list;
+        $sections_to_lists[GradeableSection::ITEMS_BEING_GRADED] = $grading_gradeables_list;
+        $sections_to_lists[GradeableSection::GRADED] = $graded_gradeables_list;
 
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
