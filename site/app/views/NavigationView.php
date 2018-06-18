@@ -56,13 +56,9 @@ class NavigationView extends AbstractView {
     const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function noAccessCourse() {
-        return <<<HTML
-<div class="content">
-   You don't have access to {$this->core->getDisplayedCourseName()}. If you think this is mistake,
-   please contact your instructor to gain access.
-</div>
-HTML;
+        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig");
     }
+
     public function showGradeables($sections_to_list) {
         $return = "";
 
