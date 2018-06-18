@@ -345,7 +345,7 @@ HTML;
 								"show_announcement" => false,
 								"show_editcat" => false,
 								"show_cancel_edit_form" => true,
-								"submit_label" => "Update Content",
+								"submit_label" => "Update Post",
 							]);
 						$return .= <<<HTML
 					</form>
@@ -888,7 +888,7 @@ HTML;
 					"show_announcement" => true,
 					"show_editcat" => true,
 					"show_cancel_edit_form" => false,
-					"submit_label" => "Create Thread",
+					"submit_label" => "Submit Post",
 				]);
 			$return .= <<<HTML
 			</form>
