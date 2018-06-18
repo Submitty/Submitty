@@ -16,9 +16,6 @@ fi
 # get the repository name from the location of this script
 MY_PATH="`dirname \"$0\"`"
 SUBMITTY_REPOSITORY=${MY_PATH}/../..
-echo 'in update_repos.sh'
-echo 'MY_PATH '${MY_PATH}
-echo 'SUBMITTY_REPOSITORY '${SUBMITTY_REPOSITORY}
 
 # FIXME: should read this from a config file
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
@@ -44,7 +41,8 @@ function clone_or_update_repo {
     parent_repo_dir=${SUBMITTY_REPOSITORY}/..
     repo_dir=${parent_repo_dir}/${repo_name}
 
-    echo "CLONE OR UPDATE ${repo_name}... "
+    
+    "CLONE OR UPDATE ${repo_name}... "
 
     if [ -d "${repo_dir}" ]; then
 
