@@ -24,11 +24,19 @@ class TestLateDays(BaseTestCase):
         super().log_in(user_id='damorw', user_password='damorw', user_name='Wendell')
         self.load_and_test_table('damorw')
 
+    def check_navigation(self):
+        #Check if all the buttons in the navigation view is good
+
     def check_student_late_gradeable_view(self, user_id, late_info):
+        #Check on each button and check if the banner displays the correct info
+        #Also checks if the show late info button displays correctly
+        #Drag in a random file and see if the popup displays correctly
         # open_gradeables = self.driver.find_element_by_xpath("//tbody[contains(text(),'Course Settings')]")
+        pass
 
 
     def load_and_test_table(self, user_id):
+        #Test the late days table using given infomation, compares the rows and column of three users
         self.driver.find_element_by_id(self.get_current_semester() + '_sample').click()
         self.driver.find_element_by_xpath("//a[contains(text(),'Show my late days information')]").click()
         assert 'page=view_late_table' in self.driver.current_url
