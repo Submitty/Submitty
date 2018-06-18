@@ -3,8 +3,6 @@
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 MY_PATH="`dirname \"$0\"`"
 SUBMITTY_REPOSITORY=${MY_PATH}/../..
-echo 'MY_PATH '${MY_PATH}
-echo 'SUBMITTY_REPOSITORY '${SUBMITTY_REPOSITORY}
 SUBMITTY_DATA_DIR=/var/local/submitty
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
@@ -13,7 +11,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/src
 cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 
 # --------------------------------------
-echo "Getting DrMemory..."
+"Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
 DRMEM_TAG=release_1.10.1
