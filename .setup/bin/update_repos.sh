@@ -42,7 +42,7 @@ function clone_or_update_repo {
     repo_dir=${parent_repo_dir}/${repo_name}
 
     
-    "CLONE OR UPDATE ${repo_name}... "
+    echo "CLONE OR UPDATE ${repo_name}... "
 
     if [ -d "${repo_dir}" ]; then
 
