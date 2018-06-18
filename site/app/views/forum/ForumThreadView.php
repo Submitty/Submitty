@@ -330,13 +330,13 @@ HTML;
                     "currentThread" => $currentThread
                 ]);
 				$return .= <<<HTML
-                <div class="popup-form decent" id="edit-user-post">
-			    	<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-			    	 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-			    	 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-			    	 <h3 id="edit_user_prompt"></h3>
+				<div class="popup-form decent" id="edit-user-post">
+					<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+					 <h3 id="edit_user_prompt"></h3>
 HTML;
-			   			$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
+						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
 								"show_title" => true,
 								"show_post" => true,
 								"show_categories" => false,
@@ -348,7 +348,7 @@ HTML;
 								"submit_label" => "Update Content",
 							]);
 						$return .= <<<HTML
-			    	</form>
+					</form>
 				</div>
 HTML;
 			}
@@ -889,9 +889,9 @@ HTML;
 					"show_editcat" => true,
 					"show_cancel_edit_form" => false,
 					"submit_label" => "Create Thread",
-                ]);
+				]);
 			$return .= <<<HTML
-            </form>
+			</form>
 		</div>
 		</div>
 HTML;

@@ -1196,7 +1196,6 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -1209,7 +1208,6 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
-                console.log(json);
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;

@@ -45,9 +45,6 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
-            case 'edit_thread':
-                $this->editThread();
-                break;
             case 'search_threads':
                 $this->search();
                 break;
