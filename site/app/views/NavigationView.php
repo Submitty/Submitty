@@ -316,12 +316,13 @@ HTML;
             }
         }
 
-        $gradeable_team_range = <<<HTML
-                <a class="btn {$team_button_type}" style="width:100%;"
-                href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team'))}">
-                {$team_button_text}{$team_display_date}
-HTML;
-        return $gradeable_team_range;
+        $button = new Button([
+            "title" => $team_button_text . $team_display_date,
+            "href" => $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team')),
+            "class" => "btn {$team_button_type} btn-nav"
+        ]);
+
+        return $this->renderButton($button);
     }
 
     /**
