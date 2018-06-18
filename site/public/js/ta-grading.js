@@ -153,23 +153,18 @@ function readCookies(){
     (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
-    if (autoscroll == "on") {
-        onAjaxInit = function() {
-            $('#title-'+opened_mark).click();
 
-            if (scroll_pixel > 0) {
-                document.getElementById('grading_rubric').scrollTop = scroll_pixel;
-            }
+    onAjaxInit = function() {
+        $('#title-'+opened_mark).click();
+        //for(var i=0; i<testcases.length; i++){
+          //  $('#testcases_'+testcases[i]).show();
+        //}
+        if (scroll_pixel > 0) {
+            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
+    }
 
-        var testcases_array = JSON.parse(testcases);
-        testcases_array.forEach(function(element) {
-            var id = 'testcase_' + element;
-            if ($("#" + id).attr("style") == "display: none;") {
-                toggleDiv(id);
-            }
-        });
-
+    if (autoscroll == "on") {
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');
@@ -198,6 +193,10 @@ function readCookies(){
                 });
             }
         });
+    }
+    for(var x=0; x<testcases.length; x++){
+        if(testcases[x]!='[' && testcases[x]!=']')
+            openAutoGrading(testcases[x]);
     }
 }
 
@@ -247,6 +246,11 @@ function updateCookies(){
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     if(getGradeable()!=null){
         document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+        console.log(findCurrentOpenedMark());
+        var testcases = findOpenTestcases();
+        testcases = JSON.stringify(testcases);
+        document.cookie = "testcases=" + testcases + "; path=/;";
+        console.log(testcases);
     }
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
@@ -261,20 +265,15 @@ function updateCookies(){
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";
     }
-
-    var testcases = findOpenTestcases();
-    testcases = JSON.stringify(testcases);
-    document.cookie = "testcases=" + testcases + "; path=/;";
-    if(getGradeable()!=null){
-        var files = [];
-        $('#file-container').children().each(function() {
-            $(this).children('div[id^=div_viewer_]').each(function() {
-                files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
-            });
+    var files = [];
+    $('#file-container').children().each(function() {
+        $(this).children('div[id^=div_viewer_]').each(function() {
+            files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
         });
-        files = JSON.stringify(files);
-        document.cookie = "files=" + files + "; path=/;"
-    }
+    });
+    files = JSON.stringify(files);
+    document.cookie = "files=" + files + "; path=/;"
+
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
@@ -319,7 +318,6 @@ function gotoNextStudent() {
        window.location = $("#next-student")[0].dataset.href; 
     }
 }
-
 //Navigate to the prev / next student buttons
 registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
     gotoPrevStudent();
@@ -524,11 +522,15 @@ function updateValue(obj, option1, option2) {
     });
 
 }
-
+function openAutoGrading(num){
+    $('#tc_' + num).click();
+    $('#testcase_' + num)[0].style.display="block";
+}
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
-    $("[id^='testcase_']").show();
+     $("[id^='tc_']").click();
+     $("[id^='testcase_']")[0].style.display="block";
 }
 
 // close all outputs in Auto-Grading Testcases section
@@ -625,6 +627,7 @@ function findOpenTestcases() {
         current_testcase = $(this).find('div[id^=testcase_]');
         if (typeof current_testcase[0] !== 'undefined'){
             if (current_testcase[0].style.display != 'none' ) {
+               // console.log(current_testcase.attr('id').split('_')[1]);
                 testcase_num.push(parseInt(current_testcase.attr('id').split('_')[1]));
             }
         }

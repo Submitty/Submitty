@@ -1129,6 +1129,7 @@ function closeMark(id, save) {
 function toggleMark(id, save) {
     if (findCurrentOpenedMark() === id) {
         closeMark(id, save);
+        updateCookies();
     } else {
         openMark(id);
     }
