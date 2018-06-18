@@ -39,6 +39,21 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
 fi
 
 
+########################################################################################################################
+########################################################################################################################
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
+
+bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting INSTALL_SUBMITTY_HELPER.sh"
+    exit 1
+fi
+
+
+########################################################################################################################
+########################################################################################################################
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
 

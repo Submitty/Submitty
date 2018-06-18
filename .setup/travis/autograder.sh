@@ -77,18 +77,15 @@ chown root:root TestRunner.class
 chmod 444 TestRunner.class
 popd
 
-# --------------------------------------
-echo -e "Download analysis tools"
-git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 
-# --------------------------------------
-echo -e "Download lichen"
-git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+#################################################################
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
+#################
 
-# --------------------------------------
-echo -e "Compile and install the tutorial repository"
-git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-# remember to change this version in .setup/install_system.sh too
-git checkout v0.94
-popd
+bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting autograder.sh"
+    exit 1
+fi
