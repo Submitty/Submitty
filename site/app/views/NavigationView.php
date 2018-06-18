@@ -331,43 +331,46 @@ HTML;
      * @return string
      */
     private function getSubmitButton(Gradeable $gradeable, int $list_section): string {
-        $button_type_submission = self::gradeableSections[$list_section]["button_type_submission"];
+        $class = self::gradeableSections[$list_section]["button_type_submission"];
+        $title = self::gradeableSections[$list_section]["prefix"];
+
+        $progress = null;
+        $disabled = false;
 
         if ($gradeable->getActiveVersion() < 1) {
             if ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING) {
-                $button_type_submission = self::gradeableSections[GradeableSection::CLOSED]["button_type_submission"];
+                $class = self::gradeableSections[GradeableSection::CLOSED]["button_type_submission"];
             }
         }
         if ($gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getUserViewedDate() !== null && $list_section === GradeableSection::GRADED) {
-            $button_type_submission = "btn-default";
+            $class = "btn-default";
         }
 
         if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
             if ($list_section == GradeableSection::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded() && $gradeable->getActiveVersion() > 0) {
-                $button_type_submission = "btn-default";
+                $class = "btn-default";
             } else if ($list_section == GradeableSection::GRADED && !$gradeable->useTAGrading() && $gradeable->getActiveVersion() > 0) {
-                $button_type_submission = "btn-default";
+                $class = "btn-default";
             }
         }
 
-        $submit_display_date = ($list_section == GradeableSection::FUTURE || $list_section == GradeableSection::BETA) ? "(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . ")" : "(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . ")";
+        $display_date = ($list_section == GradeableSection::FUTURE || $list_section == GradeableSection::BETA) ? "(opens " . $gradeable->getOpenDate()->format(self::DATE_FORMAT) . ")" : "(due " . $gradeable->getDueDate()->format(self::DATE_FORMAT) . ")";
         if ($gradeable->getActiveVersion() > 0 && ($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING)) {
-            $submit_display_date = "";
+            $display_date = "";
         }
 
-        $submit_button_text = self::gradeableSections[$list_section]["prefix"];
         if ($gradeable->getActiveVersion() >= 1 && $list_section == GradeableSection::OPEN) {
             //if the user submitted something on time
-            $submit_button_text = "RESUBMIT";
+            $title = "RESUBMIT";
         } else if ($gradeable->getActiveVersion() >= 1 && $list_section == GradeableSection::CLOSED) {
             //if the user submitted something past time
-            $submit_button_text = "LATE RESUBMIT";
+            $title = "LATE RESUBMIT";
         } else if (($list_section == GradeableSection::GRADED || $list_section == GradeableSection::GRADING) && $gradeable->getActiveVersion() < 1) {
             //to change the text to overdue submission if nothing was submitted on time
-            $submit_button_text = "OVERDUE SUBMISSION";
+            $title = "OVERDUE SUBMISSION";
         } else if ($list_section == GradeableSection::GRADED && $gradeable->useTAGrading() && !$gradeable->beenTAgraded()) {
             //when there is no TA grade and due date passed
-            $submit_button_text = "TA GRADE NOT AVAILABLE";
+            $title = "TA GRADE NOT AVAILABLE";
         }
 
         if ($gradeable->hasConfig()) {
@@ -382,50 +385,37 @@ HTML;
                 $points_percent = 100;
             }
             if (($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) && (!$this->core->getUser()->accessAdmin())) {
-                $gradeable_open_range = <<<HTML
-                <a class="btn {$button_type_submission} btn-nav btn-nav-submit" disabled>
-                     MUST BE ON A TEAM TO SUBMIT<br>{$submit_display_date}
-                </a>
-HTML;
+                $title = "MUST BE ON A TEAM TO SUBMIT";
+                $disabled = true;
             } else if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                 && $list_section == GradeableSection::CLOSED && $points_percent >= 50) {
-                $gradeable_open_range = <<<HTML
-                 <a class="btn btn-default btn-nav btn-nav-submit" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
-                     {$submit_button_text}<br>{$submit_display_date}
-                 </a>
-HTML;
-            } else {
-                $gradeable_open_range = <<<HTML
-                 <a class="btn {$button_type_submission} btn-nav btn-nav-submit" href="{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}">
-                     {$submit_button_text}<br>{$submit_display_date}
-                 </a>
-HTML;
+                $class = "btn-default";
             }
-
 
             //If the button is autograded and has been submitted once, give a progress bar.
             if ($gradeable->beenAutograded() && $gradeable->getTotalNonHiddenNonExtraCreditPoints() != 0 && $gradeable->getActiveVersion() >= 1
                 && ($list_section == GradeableSection::CLOSED || $list_section == GradeableSection::OPEN)) {
-
-                if ($points_percent >= 50) {
-                    $gradeable_open_range .= $this->getProgressBar($points_percent);
-                } else {
-                    //Give them an imaginary progress point
-                    if ($gradeable->getGradedNonHiddenPoints() == 0) {
-                        $gradeable_open_range .= $this->getProgressBar(2);
-                    } else {
-                        $gradeable_open_range .= $this->getProgressBar($points_percent);
-                    }
-                }
+                $progress = $points_percent;
             }
         } else {
-            $gradeable_open_range = <<<HTML
-                 <a class="btn {$button_type_submission}" style="width:100%;" disabled>
-                     Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
-                 </a>
-HTML;
+            $title = "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh";
+            $class = "btn-default";
+            $display_date = "";
+            $disabled = true;
         }
-        return $gradeable_open_range;
+
+        $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+
+        $button = new Button([
+            "title" => $title,
+            "subtitle" => $display_date,
+            "href" => $href,
+            "progress" => $progress,
+            "disabled" => $disabled,
+            "class" => "btn {$class} btn-nav btn-nav-submit"
+        ]);
+
+        return $this->renderButton($button);
     }
 
     /**
@@ -444,9 +434,8 @@ HTML;
         }
 
         //Default values
-        $button_type_grading = self::gradeableSections[$list_section]["button_type_grading"];
+        $class = self::gradeableSections[$list_section]["button_type_grading"];
         $date_text = null;
-        $disabled = false;
         $progress = null;
 
         //Button types that override any other buttons
@@ -487,12 +476,12 @@ HTML;
 
                     if ($TA_percent === 100) {
                         //If they're done, change the text to REGRADE
-                        $button_type_grading = 'btn-default';
+                        $class = 'btn-default';
                         $title = 'REGRADE';
                     } else {
                         if ($components_total !== 0 && $list_section === GradeableSection::GRADED) {
                             //You forgot somebody
-                            $button_type_grading = 'btn-danger';
+                            $class = 'btn-danger';
                             $title = 'GRADE';
                         }
                     }
@@ -506,7 +495,7 @@ HTML;
                 }
             } else {
                 //Labs & Tests don't have exciting buttons
-                $button_type_grading = 'btn-default';
+                $class = 'btn-default';
             }
         } else {
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->useTAGrading()) {
@@ -524,8 +513,7 @@ HTML;
             "subtitle" => $date_text,
             "href" => $href,
             "progress" => $progress,
-            "class" => "btn btn-nav btn-nav-grade {$button_type_grading}",
-            "disabled" => $disabled
+            "class" => "btn btn-nav btn-nav-grade {$class}",
         ]);
 
         return $this->renderButton($button);
@@ -702,11 +690,15 @@ HTML;
      * @return string
      */
     private function getProgressBar(float $percent):string {
+        //Give them an imaginary progress point if they need it
+        $percent = max($percent, 2);
         return "<div class=\"meter\"><span style=\"width: {$percent}%\"></span></div>";
     }
 
     private function renderButton(Button $button) {
-        $html = "<a class=\"{$button->getClass()}\" href=\"{$button->getHref()}\">";
+        $disable = $button->isDisabled() ? "disabled" : "";
+        $href = $button->isDisabled() ? "" : "href=\"{$button->getHref()}\"";
+        $html = "<a class=\"{$button->getClass()}\" $href $disable>";
         $html .= $button->getTitle();
         if ($button->getSubtitle() !== null) {
             $html .= "<br><span style=\"font-size:smaller;\">{$button->getSubtitle()}</span>";
