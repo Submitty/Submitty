@@ -297,8 +297,11 @@ HTML;
         //find all names of instructors who graded part(s) of this assignment that are full access grader_names
         if (!$gradeable->getPeerGrading()) {
             foreach ($gradeable->getComponents() as $component) {
-                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
-                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
+	        if ($component->getGrader() == NULL) {
+		   continue;
+		}
+	        $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+		if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
             }

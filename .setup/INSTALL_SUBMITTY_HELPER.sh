@@ -39,6 +39,21 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
 fi
 
 
+########################################################################################################################
+########################################################################################################################
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
+
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting INSTALL_SUBMITTY_HELPER.sh"
+    exit 1
+fi
+
+
+########################################################################################################################
+########################################################################################################################
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
 
@@ -741,7 +756,7 @@ if [ "${WORKER}" == 0 ]; then
         # pop the first argument from the list of command args
         shift
         # pass any additional command line arguments to the run test suite
-        ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
+        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
         echo -e "\nCompleted Autograding Test Suite\n"
     fi
@@ -806,9 +821,3 @@ else
         sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi
-
-# set filemode to false, so that changes to file permissions in the
-# git repository will be ignored for future diffs/commits
-pushd ${SUBMITTY_REPOSITORY}
-git config --local core.filemode false
-popd > /dev/null
