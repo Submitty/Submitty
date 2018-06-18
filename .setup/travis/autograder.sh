@@ -1,7 +1,10 @@
 #!/bin/bash
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+MY_PATH="`dirname \"$0\"`"
+SUBMITTY_REPOSITORY=MY_PATH/../..
+echo 'MY_PATH '${MY_PATH}
+echo 'SUBMITTY_REPOSITORY '${SUBMITTY_REPOSITORY}
 SUBMITTY_DATA_DIR=/var/local/submitty
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
