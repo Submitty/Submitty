@@ -736,9 +736,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
             }
             if($comp->getPage() != 0) {
-                $admin_gradeable->setPdfPage(true);
+                $admin_gradeable->setEgPdfPage(true);
                 if($comp->getPage() == -1) {
-                    $admin_gradeable->setPdfPageStudent(true);
+                    $admin_gradeable->setEgPdfPageStudent(true);
                 }
             }
         }

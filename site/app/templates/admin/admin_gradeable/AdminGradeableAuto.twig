@@ -54,17 +54,17 @@
         };
 
     function onPdfChange() {
-        if($('#yes_pdf_page').is(':checked')) {
-            // $('#pdf_page').show();
-            // $('.pdf_page_input').show();
-            disableElementChildren('#pdf_page', false);
-            disableElementChildren('.pdf_page_input', $('#yes_pdf_page_student').is(':checked'));
+        if($('#yes_eg_pdf_page').is(':checked')) {
+            // $('#eg_pdf_page').show();
+            // $('.eg_pdf_page_input').show();
+            disableElementChildren('#eg_pdf_page', false);
+            disableElementChildren('.eg_pdf_page_input', $('#yes_eg_pdf_page_student').is(':checked'));
         }
         else {
-            // $('#pdf_page').hide();
-            // $('.pdf_page_input').hide();
-            disableElementChildren('#pdf_page', true);
-            disableElementChildren('.pdf_page_input', true);
+            // $('#eg_pdf_page').hide();
+            // $('.eg_pdf_page_input').hide();
+            disableElementChildren('#eg_pdf_page', true);
+            disableElementChildren('.eg_pdf_page_input', true);
         }
     }
 
