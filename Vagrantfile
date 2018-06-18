@@ -13,8 +13,9 @@ GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
-chmod -R 777 ${GIT_PATH}/.vagrant/${DISTRO}/
+chmod -R 777 ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
+chmod -R 777 ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
