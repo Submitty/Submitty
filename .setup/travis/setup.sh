@@ -13,6 +13,11 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
 
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
+
+
 #sudo chmod -R 755 /home/travis/build
 
 #if [ ! -f "$SELENIUM_JAR" ]; then
