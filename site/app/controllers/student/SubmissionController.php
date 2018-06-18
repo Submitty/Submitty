@@ -933,11 +933,13 @@ class SubmissionController extends AbstractController {
                             foreach($filenames as $filename) {
                                 $previous_files[$i][$j++] = basename($filename);
                             }
-                            $old_to_new_filenames = FileUtils::renameNoClobber($uploaded_files[$i]["name"], $previous_files[$i]);
-                            for($j = 0; $j < $count[$i]; $j++) {
-                                $old_filename = $uploaded_files[$i]["name"][$j];
-                                $new_filename = $old_to_new_filenames[$old_filename];
-                                $uploaded_files[$i]["name"][$j] = $new_filename;
+                            if(!$clobber) {
+                                $old_to_new_filenames = FileUtils::renameNoClobber($uploaded_files[$i]["name"], $previous_files[$i]);
+                                for($j = 0; $j < $count[$i]; $j++) {
+                                    $old_filename = $uploaded_files[$i]["name"][$j];
+                                    $new_filename = $old_to_new_filenames[$old_filename];
+                                    $uploaded_files[$i]["name"][$j] = $new_filename;
+                                }
                             }
                         }
                     }

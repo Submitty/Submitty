@@ -689,7 +689,6 @@ HTML;
                                 clobber=clobber);
             }
             else {
-                console.log(user_id);
                 handleSubmission({$late_days_use},
                                 {$gradeable->getAllowedLateDays()},
                                 highest_version,
@@ -737,7 +736,6 @@ HTML;
                 }
                 // user id entered, need to validate first
                 else {
-                    console.log("#####");
                     validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", repo_id, makeSubmission);
                 }
                 e.stopPropagation();
