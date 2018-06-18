@@ -501,7 +501,6 @@ class DiffViewer {
 	 */
     private function replaceEmptyChar($html){
     	$count = 0;
-		$html = $this->w1250_to_utf8($html);
 		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html, $count);
 		if($count > 0) $this->white_spaces['space'] = '&#183;';
 		$count = 0;
@@ -515,7 +514,6 @@ class DiffViewer {
 
 	private function replaceEmptyCharWEscape($html){
 		$count = 0;
-		$html = $this->w1250_to_utf8($html);
 		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html,$count);
 		if($count > 0) $this->white_spaces['space'] = '&#183;';
 		$count = 0;
@@ -533,13 +531,6 @@ class DiffViewer {
 		$return = str_replace($which, $what, $text,$count);
 		if($count > 0) $this->white_spaces[$description] = $what;
 		return $return;
-	}
-
-	private function w1250_to_utf8($text) {
-		$map = array(
-
-		);
-		return html_entity_decode(mb_convert_encoding(strtr($text, $map), 'UTF-8', 'ISO-8859-2'), ENT_QUOTES, 'UTF-8');
 	}
 
     /**
