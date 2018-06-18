@@ -83,11 +83,7 @@ popd
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-echo "in autograder.sh"
-
-pwd
-
-bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
     echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
