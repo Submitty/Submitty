@@ -1,5 +1,6 @@
 <?php
 namespace app\views;
+use app\libraries\Button;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\libraries\FileUtils;
@@ -84,40 +85,59 @@ HTML;
     <div class="nav-buttons">
 HTML;
 
+        /* @var Button[] $top_buttons */
         $top_buttons = [];
 
         // ======================================================================================
         // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
         // ======================================================================================
         if ($this->core->getUser()->accessAdmin()) {
-            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')), "text" => "New Gradeable"];
-            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')), "text" => "Upload Config & Review Build Output"];
+            $top_buttons[] = new Button([
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                "title" => "New Gradeable",
+                "class" => "btn btn-primary"
+            ]);
+            $top_buttons[] = new Button([
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
+                "title" => "Upload Config & Review Build Output",
+                "class" => "btn btn-primary"
+            ]);
 
         }
         // ======================================================================================
         // LATE DAYS TABLE BUTTON
         // ======================================================================================
 
-        $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')), "text" => "Show my late days information"];
+        $top_buttons[] = new Button([
+            "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+            "title" => "Show my late days information",
+            "class" => "btn btn-primary"
+        ]);
         // ======================================================================================
         // FORUM BUTTON
         // ====================================================================================== 
 
         if ($this->core->getConfig()->isForumEnabled()) {
-            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')), "text" => "Discussion Forum"];
+            $top_buttons[] = new Button([
+                "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
+                "title" => "Discussion Forum",
+                "class" => "btn btn-primary"
+            ]);
         }
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
         if ($display_rainbow_grades_summary) {
-            $top_buttons[] = ["href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')), "text" => "View Grades"];
+            $top_buttons[] = new Button([
+                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
+                "title" => "View Grades",
+                "class" => "btn btn-primary"
+            ]);
         }
 
         foreach ($top_buttons as $button) {
-            $return .= <<<HTML
-        <a class="btn btn-primary" href="{$button["href"]}">{$button["text"]}</a>
-HTML;
+            $return .= $this->renderButton($button);
         }
 
         $return .= <<<HTML
@@ -143,6 +163,8 @@ HTML;
 HTML;
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
+
+                $buttons = [];
 
                 $gradeable_title         = $this->getTitleCell($gradeable);
                 $gradeable_team_button   = $this->hasTeamButton($gradeable)    ? $this->getTeamButton($gradeable)                     : "";
@@ -397,9 +419,9 @@ HTML;
             }
         } else {
             $gradeable_open_range = <<<HTML
-                 <button class="btn {$button_type_submission}" style="width:100%;" disabled>
+                 <a class="btn {$button_type_submission}" style="width:100%;" disabled>
                      Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
-                 </button>
+                 </a>
 HTML;
         }
         return $gradeable_open_range;
@@ -686,6 +708,15 @@ HTML;
      */
     private function getProgressBar(float $percent):string {
         return "<div class=\"meter\"><span style=\"width: {$percent}%\"></span></div>";
+    }
+
+    private function renderButton(Button $button) {
+        $html = "<a class=\"{$button->getClass()}\" href=\"{$button->getHref()}\">{$button->getTitle()}</a>";
+        if ($button->getProgress() !== null) {
+            $html .= $this->getProgressBar($button->getProgress());
+        }
+
+        return $html;
     }
 
     public function deleteGradeableForm() {
