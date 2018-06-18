@@ -79,6 +79,15 @@ class ForumController extends AbstractController {
         }
     }
 
+    private function showDeleted() {
+        return ($this->core->getUser()->getGroup() <= 2 && isset($_SESSION['show_deleted']) && $_SESSION['show_deleted'] === true);
+    }
+
+    private function updateShowDeleted($show_deleted) {
+        if($this->core->getUser()->getGroup() <= 2) {
+            $_SESSION['show_deleted'] = $show_deleted;
+        }
+    }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
             //Notify User
@@ -358,10 +367,7 @@ class ForumController extends AbstractController {
 
     public function getThreads(){
 
-        $show_deleted = false;
-        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_GET["show_deleted"]) == 1) {
-            $show_deleted = true;
-        }
+        $show_deleted = $this->showDeleted();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
@@ -386,10 +392,10 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        $show_deleted = false;
-        if($this->core->getUser()->getGroup() <= 2 && array_key_exists('show_deleted', $_REQUEST) && ((int)$_GET["show_deleted"]) == 1) {
-            $show_deleted = true;
+        if(array_key_exists('show_deleted', $_REQUEST)) {
+            $this->updateShowDeleted(((int)$_GET["show_deleted"]) == 1);
         }
+        $show_deleted = $this->showDeleted();
         $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
 
         $current_user = $this->core->getUser()->getId();

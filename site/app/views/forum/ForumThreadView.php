@@ -657,6 +657,9 @@ HTML;
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
+		if($post["deleted"]) {
+			$classes .= " deleted";
+		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
 		$return = <<<HTML

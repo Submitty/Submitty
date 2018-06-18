@@ -351,12 +351,6 @@ class Core {
      * @return string
      */
     public function buildUrl($parts=array(), $hash = null) {
-        $persistent_request = array("show_deleted");
-        foreach ($persistent_request as $request) {
-            if(isset($_GET[$request]) && !array_key_exists($request, $parts)) {
-                $parts[$request] = $_GET[$request];
-            }
-        }
         $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
         if ($hash !== null) {
             $url .= "#".$hash;

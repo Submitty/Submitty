@@ -578,7 +578,7 @@ table tr.table-header {
 }
 
 .deleted {
-    background-color: #FFCCCC;
+    background-color: #FFCCCC !important;
 }
 
 .deleted.active {
