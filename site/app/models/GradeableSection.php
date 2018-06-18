@@ -8,7 +8,7 @@ abstract class GradeableSection {
     const BETA               = 1;
     const OPEN               = 2;
     const CLOSED             = 3;
-    const ITEMS_BEING_GRADED = 4;
+    const GRADING = 4;
     const GRADED             = 5;
 
 

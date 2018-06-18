@@ -59,7 +59,7 @@ class NavigationController extends AbstractController {
 
         $sections_to_lists[GradeableSection::OPEN] = $open_gradeables_list;
         $sections_to_lists[GradeableSection::CLOSED] = $closed_gradeables_list;
-        $sections_to_lists[GradeableSection::ITEMS_BEING_GRADED] = $grading_gradeables_list;
+        $sections_to_lists[GradeableSection::GRADING] = $grading_gradeables_list;
         $sections_to_lists[GradeableSection::GRADED] = $graded_gradeables_list;
 
         //Remove gradeables we are not allowed to view
