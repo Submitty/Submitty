@@ -33,17 +33,17 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
         ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+    var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show white spaces"){
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Show escape characters");
-
-        $('#'+helper_id).html("→→→→ = tabs, &#9166 = newline, ↵ = carriage return, &#183 = space");
+        list_white_spaces['newline'] = '&#9166;';
         args['option'] = 'with_unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show escape characters"){
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
-        $('#'+helper_id).html("\\t = tabs, \\n = newline, \\r = carriage return, &#183 = space");
+        list_white_spaces['newline'] = '\\n';
         args['option'] = 'with_escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
@@ -54,22 +54,32 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     //Insert actual and expected one at a time
     args['which'] = 'expected';
     var url = buildUrl(args);
-    $.ajax({
+
+    $.getJSON({
         url: url,
         success: function(data) {
+            for(property in data.whitespaces){
+                list_white_spaces[property] = data.whitespaces[property];
+            }
             $(expected_div).empty();
-            $(expected_div).html(data);
-        },
-        error: function(e) {
-            alert("Could not load diff, please refresh the page and try again.");}
-    });
-    args['which'] = 'actual';
-    url = buildUrl(args);
-    $.ajax({
-        url: url,
-        success: function(data) {
-            $(actual_div).empty();
-            $(actual_div).html(data);
+            $(expected_div).html(data.html);
+            args['which'] = 'actual';
+            url = buildUrl(args);
+            $.getJSON({
+                url: url,
+                success: function(data) {
+                    for(property in data.whitespaces){
+                        list_white_spaces[property] = data.whitespaces[property];
+                    }
+                    for(property in list_white_spaces){
+                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    }
+                    $(actual_div).empty();
+                    $(actual_div).html(data.html);
+                },
+                error: function(e) {
+                    alert("Could not load diff, please refresh the page and try again.");}
+            });
         },
         error: function(e) {
             alert("Could not load diff, please refresh the page and try again.");}

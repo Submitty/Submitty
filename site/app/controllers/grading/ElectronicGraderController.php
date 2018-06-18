@@ -93,8 +93,8 @@ class ElectronicGraderController extends GradingController {
 		} else {
 			$html .= $diff_viewer->getDisplayExpected($option);
 		}
-
-		echo $html;
+		$white_spaces = $diff_viewer->getWhiteSpaces();
+		echo json_encode(array("html"=>"$html", "whitespaces"=>$white_spaces));
 	}
 
     private function verifyGrader($verifyAll = false){

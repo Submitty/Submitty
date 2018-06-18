@@ -73,7 +73,11 @@ class DiffViewer {
      * @var string
      */
     private $id = "id";
-    
+	/**
+	 * @var array
+	 */
+    private $white_spaces = array();
+
     /**
      * Reset the DiffViewer to its starting values.
      */
@@ -483,18 +487,59 @@ class DiffViewer {
         return $html;
     }
 
+    public function getWhiteSpaces(){
+    	$return = "";
+    	foreach($this->white_spaces as $key => $value){
+			$return .= "$value" . " = " . "$key". " ";
+		}
+		return $this->white_spaces;
+	}
+
+	/**
+	 * @param $html the original HTML before any text transformation
+	 * @return HTML after white spaces replaced with visuals
+	 */
     private function replaceEmptyChar($html){
-		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html);
-		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return);
-		$return = str_replace('	', '<span style="outline:1px blue solid;">→→→→</span>', $return);
+    	$count = 0;
+		$html = $this->w1250_to_utf8($html);
+		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html, $count);
+		if($count > 0) $this->white_spaces['space'] = '&#183;';
+		$count = 0;
+		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return, $count);
+		if($count > 0) $this->white_spaces['carriage return'] = '↵';
+		$count = 0;
+		$return = str_replace('	', '<span style="outline:1px blue solid;">↹</span>', $return, $count);
+		if($count > 0) $this->white_spaces['tab'] = '↹';
 		return $return;
 	}
 
 	private function replaceEmptyCharWEscape($html){
-		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html);
-		$return = str_replace("\r", '<span style="outline:1px blue solid;">\\r<br></span>', $return);
-		$return = str_replace('	', '<span style="outline:1px blue solid;">\t</span>', $return);
+		$count = 0;
+		$html = $this->w1250_to_utf8($html);
+		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html,$count);
+		if($count > 0) $this->white_spaces['space'] = '&#183;';
+		$count = 0;
+		$return = str_replace("\r", '<span style="outline:1px blue solid;">\\r<br></span>', $return,$count);
+		if($count > 0) $this->white_spaces['carriage return'] = '\\r';
+		$count = 0;
+		$return = str_replace('	', '<span style="outline:1px blue solid;">\t</span>', $return,$count);
+		if($count > 0) $this->white_spaces['tab'] = '\\t';
 		return $return;
+	}
+
+	private function replaceUTF(&$text, $which, $what, $description){
+		$count = 0;
+		$what = '<span style="outline:1px blue solid;">'.$what.'</span>';
+		$return = str_replace($which, $what, $text,$count);
+		if($count > 0) $this->white_spaces[$description] = $what;
+		return $return;
+	}
+
+	private function w1250_to_utf8($text) {
+		$map = array(
+
+		);
+		return html_entity_decode(mb_convert_encoding(strtr($text, $map), 'UTF-8', 'ISO-8859-2'), ENT_QUOTES, 'UTF-8');
 	}
 
     /**
