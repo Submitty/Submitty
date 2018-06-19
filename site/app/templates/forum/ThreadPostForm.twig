@@ -7,7 +7,7 @@
 
     {% if show_editcat and core.getUser().getGroup() <= 2 %}
         <span style="float:right;display:inline-block;">
-            New Category: <input id="new_category_text" style="resize:none;" rows="1" type="text" size="30" name="new_category" id="new_category" /><button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm"> <i class="fa fa-plus-circle fa-1x"></i> Add category </button>
+        <a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
         </span>
     {% endif %}
 </div>
@@ -23,42 +23,33 @@
 <br/>
 {% endif %}
 {% if show_categories %}
-<div style="margin-bottom:10px;" class="form-group row">
-    <label for="cat" id="cat_label">Categories</label> <br>
-    {% for category in core.getQueries().getCategories() %}
-        <a class="btn cat-buttons cat-notselected btn-default">{{ category.category_desc }}
-            <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
-        </a>
-    {% endfor %}
-	<script type="text/javascript">
-        $(function() {
-            // If JS enabled hide checkbox
-            $("a.cat-buttons input").hide();
-
-            $(".cat-buttons").click(function() {
-                if($(this).hasClass("cat-selected")) {
-                $(this).removeClass("cat-selected");
-                $(this).addClass("cat-notselected");
-                $(this).addClass("btn-default");
-                $(this).removeClass("btn-primary");
-                $(this).find("input[type='checkbox']").prop("checked", false);
-            } else {
-                $(this).removeClass("cat-notselected");
-                $(this).addClass("cat-selected");
-                $(this).removeClass("btn-default");
-                $(this).addClass("btn-primary");
-                $(this).find("input[type='checkbox']").prop("checked", true);
-            }
-        });
+    {% set categories = core.getQueries().getCategories() %}
+    <div style="margin-bottom:10px;" class="form-group row">
+        <label for="cat" id="cat_label">Categories</label> <br>
+        {% if categories | length == 0 %}
+            <span class='category-list-no-element' style="margin-left: 1em;" >
+                No categories exists please create one.
+            </span>
+        {% endif %}
+        <div id='categories-pick-list'>
+        {% for category in core.getQueries().getCategories() %}
+            <a class="btn cat-buttons cat-notselected" cat-color="{{ category.color }}" style="background-color: {{ category.color }}; color: white;">{{ category.category_desc }}
+                <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
+            </a>
+        {% endfor %}
+    </div>
+    <script type="text/javascript">
+    $(function() {
+        refreshCategories();
         $("#create_thread_form").submit(function() {
             if($(this).find('.cat-selected').length == 0) {
                 alert("At least one category must be selected.");
                 return false;
-                }
-            });
+            }
         });
+    });
     </script>
-</div>
+    </div>
 {% endif %}
 <div style="margin-bottom:10px;" class="form-group row">
     {% if show_attachments %}
