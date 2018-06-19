@@ -405,6 +405,9 @@ class FileUtils {
      * mapping the original names in $new_files to new names that will not conflict among themselves or
      * with the filenames in $existing_files.
      *
+     * If a filename is in use, the new filename has "_version_2" appended to it.
+     * If a filename that ends with "_version_#" (where # is a number) is in use, the filename with #+1 is tried instead.
+     *
      * @param $existing_files
      * @param $new_files
      * @return array

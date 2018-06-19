@@ -408,6 +408,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
+        // check for whether the item should be merged with previous submission,
+        // and if so, whether or not file clobbering should be done.
         $merge_previous = false;
         $clobber = false;
         if(isset($_REQUEST['merge'])){
@@ -533,12 +535,13 @@ class SubmissionController extends AbstractController {
         $uploaded_file_base_name = "upload.pdf";
 
         if (isset($uploaded_file)) {
-            //if we are merging in the previous submission (TODO check folder support)
+            // if we are merging in the previous submission (TODO check folder support)
             if($merge_previous && $new_version !== 1) {
                 $old_version = $new_version - 1;
                 $old_version_path = FileUtils::joinPaths($user_path, $old_version);
                 $to_search = FileUtils::joinPaths($old_version_path, "*.*");
                 $files = glob($to_search);
+                // if not clobbering, give a new filename in the case one is necessary.
                 if(!$clobber) {
                     $existing_files = array();
                     foreach($files as $file) {
@@ -725,6 +728,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
+        // check for whether the item should be merged with previous submission,
+        // and if so, whether or not file clobbering should be done.
         $merge_previous = false;
         $clobber = false;
         if(isset($_REQUEST['merge'])) {
@@ -913,6 +918,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("No files to be submitted.", false);
             }
             
+            // $merge_previous will only be true if there is a previous submission.
             if (count($previous_files) > 0 || $merge_previous) {
                 if ($gradeable->getHighestVersion() === 0) {
                     return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
@@ -934,11 +940,12 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 
+                // if merging is being done, get all the old filenames and put them into $previous_files
+                // while checking for name conflicts and preventing them if clobbering is not enabled.
                 if($merge_previous) {
                     for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                         if(isset($uploaded_files[$i])) {
                             $previous_files[$i] = array();
-
                             $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
                             $filenames = glob($to_search);
                             $j = 0;

@@ -568,6 +568,7 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
                 }
+                // if the user is admin, give them a checkbox to turn merging on by default (w/o clobbering) and save checkbox state in localStorage
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
                     <div style="float: right;">
