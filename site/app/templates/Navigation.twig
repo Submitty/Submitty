@@ -38,7 +38,7 @@
                                 </a>
                             {% endif %}
                             {% if g_info.can_delete %}
-                                <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{{  core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': gradeable.getId()}) }}","{{ g_info.name }}");'></i>
+                                <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
                             {% endif %}
                         </td>
                         {% for button in g_info.buttons %}
