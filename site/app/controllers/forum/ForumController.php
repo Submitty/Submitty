@@ -60,6 +60,15 @@ class ForumController extends AbstractController {
             case 'add_category':
                 $this->addNewCategory();
                 break;
+            case 'delete_category':
+                $this->deleteCategory();
+                break;
+            case 'edit_category':
+                $this->editCategory();
+                break;
+            case 'reorder_categories':
+                $this->reorderCategories();
+                break;
             case 'show_stats':
                 $this->showStats();
                 break;
@@ -109,10 +118,50 @@ class ForumController extends AbstractController {
         } return $imageCheck;
     }
 
-    private function isValidCategory($inputCategoryId = -1, $inputCategoryName = ''){
+    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
+        $rows = $this->core->getQueries()->getCategories();
+        if(is_array($inputCategoriesIds)) {
+            if(count($inputCategoriesIds) < 1) {
+                return false;
+            }
+            foreach ($inputCategoriesIds as $category_id) {
+                $match_found = false;
+                foreach($rows as $index => $values){
+                    if($values["category_id"] === $category_id) {
+                        $match_found = true;
+                        break;
+                    }
+                }
+                if(!$match_found) {
+                    return false;
+                }
+            }
+        }
+        if(is_array($inputCategoriesName)) {
+            if(count($inputCategoriesName) < 1) {
+                return false;
+            }
+            foreach ($inputCategoriesName as $category_name) {
+                $match_found = false;
+                foreach($rows as $index => $values){
+                    if($values["category_desc"] === $category_name) {
+                        $match_found = true;
+                        break;
+                    }
+                }
+                if(!$match_found) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private function isCategoryDeletionGood($category_id){
+        // Check if not the last category which exists
         $rows = $this->core->getQueries()->getCategories();
         foreach($rows as $index => $values){
-            if($values["category_id"] === $inputCategoryId || $values["category_desc"] === $inputCategoryName) {
+            if(((int)$values["category_id"]) !== $category_id) {
                 return true;
             }
         }
@@ -124,7 +173,7 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
-                if($this->isValidCategory(-1, $category)) {
+                if($this->isValidCategories(-1, array($category))) {
                     $result["error"] = "That category already exists.";
                 } else {
                     $newCategoryId = $this->core->getQueries()->addNewCategory($category);
@@ -140,6 +189,94 @@ class ForumController extends AbstractController {
         return $result;
     }
 
+    public function deleteCategory(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            if(!empty($_REQUEST["deleteCategory"])) {
+                $category = (int)$_REQUEST["deleteCategory"];
+                if(!$this->isValidCategories(array($category))) {
+                    $result["error"] = "That category doesn't exists.";
+                } else if(!$this->isCategoryDeletionGood($category)) {
+                    $result["error"] = "Last category can't be deleted.";
+                } else {
+                    if($this->core->getQueries()->deleteCategory($category)) {
+                        $result["success"] = "OK";
+                    } else {
+                        $result["error"] = "Category is in use.";
+                    }
+                }
+            } else {
+                $result["error"] = "No category data submitted. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function editCategory(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $category_id = $_REQUEST["category_id"];
+            $category_desc = null;
+            $category_color = null;
+            $should_update = true;
+
+            if(!empty($_REQUEST["category_desc"])) {
+                $category_desc = $_REQUEST["category_desc"];
+                if($this->isValidCategories(-1, array($category_desc))) {
+                    $result["error"] = "That category already exists.";
+                    $should_update = false;
+                }
+            }
+            if(!empty($_REQUEST["category_color"])) {
+                $category_color = $_REQUEST["category_color"];
+                if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
+                    $result["error"] = "Given category color is not allowed.";
+                    $should_update = false;
+                }
+            }
+            if($should_update) {
+                $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+                $result["success"] = "OK";
+            } else if(!isset($result["error"])) {
+                $result["error"] = "No category data updated. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function reorderCategories(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $rows = $this->core->getQueries()->getCategories();
+
+            $current_order = array();
+            foreach ($rows as $row) {
+                $current_order[] = (int)$row['category_id'];
+            }
+            $new_order = array();
+            foreach ($_POST['categorylistitem'] as $item) {
+                $new_order[] = (int)$item;
+            }
+
+            if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
+                $this->core->getQueries()->reorderCategories($new_order);
+                $results["success"] = "ok";
+            } else {
+                $result["error"] = "Different Categories IDs given";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
@@ -147,12 +284,15 @@ class ForumController extends AbstractController {
         $thread_content = str_replace("\r", "", $_POST["thread_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
-        $category_id = (int)$_POST["cat"];
+        $categories_ids  = array();
+        foreach ($_POST["cat"] as $category_id) {
+            $categories_ids[] = (int)$category_id;
+        }
         if(empty($title) || empty($thread_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!$this->isValidCategory($category_id)){
-            $this->core->addErrorMessage("You must select a valid category. Please re-submit your thread.");
+        }else if(!$this->isValidCategories($categories_ids)){
+            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
@@ -160,7 +300,7 @@ class ForumController extends AbstractController {
                 return;
             }
 
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $category_id);
+            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_content, $anon, $announcment, $hasGoodAttachment, $categories_ids);
             $id = $result["thread_id"];
             $post_id = $result["post_id"];
 
@@ -277,11 +417,11 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function getSortedThreads($category_id){
+    private function getSortedThreads($categories_ids){
         $current_user = $this->core->getUser()->getId();
-        if($this->isValidCategory($category_id)) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($category_id);
-            $reg_threads = $this->core->getQueries()->loadThreads($category_id);
+        if($this->isValidCategories($categories_ids)) {
+            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids);
+            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids);
         } else {
             $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
             $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
@@ -312,22 +452,34 @@ class ForumController extends AbstractController {
                 $ordered_threads[] = $thread;
             }
         }
+
+        foreach ($ordered_threads as &$thread) {
+            $list = array();
+            foreach(explode("|", $thread['categories_ids']) as $id ) {
+                $list[] = (int)$id;
+            }
+            $thread['categories_ids'] = $list;
+            $thread['categories_desc'] = explode("|", $thread['categories_desc']);
+            $thread['categories_color'] = explode("|", $thread['categories_color']);
+        }
         return $ordered_threads;
     }
 
     public function getThreads(){
 
-        $category_id = array_key_exists('thread_category', $_POST) && !empty($_POST["thread_category"]) ? (int)$_POST['thread_category'] : -1;
-
+        $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
+        foreach ($categories_ids as &$id) {
+            $id = (int)$id;
+        }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread);
 
-        $currentCategoryId = array_key_exists('currentCategoryId', $_POST) ? (int)$_POST["currentCategoryId"] : -1;
+        $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
         $current_thread_title = "";
         $activeThread = false;
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDislpayList', $threads, true, $currentThreadId, $currentCategoryId);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));
@@ -339,7 +491,7 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread);
+        $threads = $this->getSortedThreads(array($category_id), $max_thread);
 
         $current_user = $this->core->getUser()->getId();
 
@@ -365,8 +517,21 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
     }
 
+    private function getAllowedCategoryColor() {
+        $colors = array();
+        $colors["MAROON"]   = "#800000";
+        $colors["OLIVE"]    = "#808000";
+        $colors["GREEN"]    = "#008000";
+        $colors["TEAL"]     = "#008080";
+        $colors["NAVY"]     = "#000080";
+        $colors["PURPLE"]   = "#800080";
+        $colors["GRAY"]     = "#808080";
+        $colors["BLACK"]    = "#000000";
+        return $colors;
+    }
+
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
+         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
     public function getEditPostContent(){

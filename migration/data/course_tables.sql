@@ -336,7 +336,7 @@ ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 --
 
 CREATE TABLE grading_registration (
-    sections_registration_id integer NOT NULL,
+    sections_registration_id character varying(255) NOT NULL,
     user_id character varying NOT NULL
 );
 
@@ -406,7 +406,7 @@ CREATE TABLE migrations_course (
 --
 
 CREATE TABLE sections_registration (
-    sections_registration_id integer NOT NULL
+    sections_registration_id character varying(255) NOT NULL
 );
 
 
@@ -443,7 +443,7 @@ CREATE TABLE users (
     user_lastname character varying NOT NULL,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
-    registration_section integer,
+    registration_section character varying(255),
     rotating_section integer,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
@@ -458,7 +458,7 @@ CREATE TABLE users (
 CREATE TABLE gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    registration_section integer,
+    registration_section character varying(255),
     rotating_section integer
 );
 
@@ -471,6 +471,31 @@ CREATE TABLE teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     state integer NOT NULL
+);
+
+
+--
+-- Name: regrade_requests; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_requests (
+    id serial NOT NULL PRIMARY KEY,
+    gradeable_id VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    student_id VARCHAR(255) NOT NULL,
+    status INTEGER DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE regrade_discussion (
+    id serial NOT NULL PRIMARY KEY,
+    regrade_id INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    content TEXT,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 
@@ -515,6 +540,8 @@ CREATE TABLE "thread_categories" (
 CREATE TABLE "categories_list" (
 	"category_id" serial NOT NULL,
 	"category_desc" varchar NOT NULL,
+	"rank" int,
+	"color" varchar DEFAULT '#000080' NOT NULL,
 	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
@@ -967,12 +994,20 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
 
 
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
+
+
+
 --
 -- Name: users_rotating_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
+
+ALTER TABLE ONLY gradeable_teams
+    ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
 
 --
 -- Name: gradeable_teams_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -995,8 +1030,12 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+--
+-- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
+--
 
-
+ALTER TABLE ONLY regrade_discussion
+    ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
 -- Forum Key relationships
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
@@ -1012,6 +1051,12 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("gradeable_id") REFERENCES "gradeable"("g_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("student_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
+ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 
 ALTER TABLE ONLY categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
