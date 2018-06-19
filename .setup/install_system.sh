@@ -303,7 +303,7 @@ EOF
             # Allow remote profiling and upload outputs to the shared folder
             cat << EOF >> /etc/php/7.0/mods-available/xdebug.ini
 xdebug.profiler_enable_trigger=1
-xdebug.profiler_output_dir=/usr/local/submitty/GIT_CHECKOUT/Submitty/.vagrant/Ubuntu/profiler
+xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
         fi
     fi
