@@ -422,7 +422,7 @@ class ForumController extends AbstractController {
                         $type_opposite = $status_edit_thread?"Post":"Thread";
                         if($status_edit_thread || $status_edit_post) {
                             //$type is true
-                            $this->core->addSuccessMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");       
+                            $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
                         } else {
                             $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");       
                         }
