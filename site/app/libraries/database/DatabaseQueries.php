@@ -115,17 +115,17 @@ class DatabaseQueries {
         $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
         $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
 
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
         return $this->course_db->rows();
     }
 
     public function loadAnnouncementsWithoutCategory(){
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
             return $this->course_db->rows();
     }
 
     public function loadThreadsWithoutCategory(){
-         $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc  FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
+         $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
          return $this->course_db->rows();
     }
 
@@ -134,7 +134,7 @@ class DatabaseQueries {
         $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
         $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
 
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
+        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE deleted = false and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
         return $this->course_db->rows();
     }
 
@@ -2162,9 +2162,39 @@ AND gc_id IN (
         return $this->course_db->rows()[0];
     }
 
+    public function deleteCategory($category_id) {
+        // TODO, check if no thread is using current category
+        $this->course_db->query("SELECT 1 FROM thread_categories WHERE category_id = ?", array($category_id));
+        if(count($this->course_db->rows()) == 0) {
+            $this->course_db->query("DELETE FROM categories_list WHERE category_id = ?", array($category_id));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function editCategory($category_id, $category_desc, $category_color) {
+        $this->course_db->beginTransaction();
+        if(!is_null($category_desc)) {
+            $this->course_db->query("UPDATE categories_list SET category_desc = ? WHERE category_id = ?", array($category_desc, $category_id));
+        }
+        if(!is_null($category_color)) {
+            $this->course_db->query("UPDATE categories_list SET color = ? WHERE category_id = ?", array($category_color, $category_id));
+        }
+        $this->course_db->commit();
+    }
+
+    public function reorderCategories($categories_in_order) {
+        $this->course_db->beginTransaction();
+        foreach ($categories_in_order as $rank => $id) {
+            $this->course_db->query("UPDATE categories_list SET rank = ? WHERE category_id = ?", array($rank, $id));
+        }
+        $this->course_db->commit();
+    }
+
     public function getCategories(){
-    	$this->course_db->query("SELECT * from categories_list ORDER BY category_id DESC");
-    	return $this->course_db->rows();
+        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST");
+        return $this->course_db->rows();
     }
 
     public function getPostsForThread($current_user, $thread_id, $option = "tree"){
