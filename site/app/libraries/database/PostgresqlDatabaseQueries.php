@@ -929,7 +929,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param string[]|null $users The ids of the users to get data for
      * @param string[]null $teams The ids of the teams to get data for
-     * @return DatabaseRowIterator|bool Iterator to access each GradeableData or false if failed
+     * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
      */
     public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
@@ -1170,7 +1170,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $graded_components = [];
             $graded_versions = [];
 
-            // Break down the graded component / version data into an array of arrays
+            // Break down the graded component / version / grader data into an array of arrays
             //  instead of arrays of sql array-strings
             $user_properties = [
                 'user_id',
@@ -1219,32 +1219,31 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $comp_array[$property] = $db_row_split[$property][$i];
                 }
 
-                // Create the grader user
-                $grader = null;
-                if (isset($db_row_split['grader_id'])) {
-                    // Similarly, transpose just this grader
-                    $user_array = [];
-                    foreach ($user_properties as $property) {
-                        $user_array[$property] = $db_row_split['grader_' . $property][$i];
-                    }
-
-                    // If the registration section is not-null, then convert the sections into an array
-                    if(isset($user_array['grading_registration_sections'])) {
-                        if(gettype($user_array['grading_registration_sections']) === 'string') {
-                            // i.e. "3,4,5,6" => [3,4,5,6]
-                            $user_array['grading_registration_sections'] =
-                                array_map(
-                                    function($elem) { return intval($elem); },
-                                    explode(',', trim($user_array['grading_registration_sections'], '"'))
-                                );
-                        } else {
-                            // i.e. 4 => [4]
-                            $user_array['grading_registration_sections'] = [$user_array['grading_registration_sections']];
-                        }
-                    }
-                    $grader = new User($this->core, $user_array);
+                //  Similarly, transpose just this grader
+                $user_array = [];
+                foreach ($user_properties as $property) {
+                    $user_array[$property] = $db_row_split['grader_' . $property][$i];
                 }
 
+                // If the registration section is not-null, then convert the sections into an array
+                if(isset($user_array['grading_registration_sections'])) {
+                    if(gettype($user_array['grading_registration_sections']) === 'string') {
+                        // i.e. "3,4,5,6" => [3,4,5,6]
+                        $user_array['grading_registration_sections'] =
+                            array_map(
+                                function($elem) { return intval($elem); },
+                                explode(',', trim($user_array['grading_registration_sections'], '"'))
+                            );
+                    } else {
+                        // i.e. 4 => [4]
+                        $user_array['grading_registration_sections'] = [$user_array['grading_registration_sections']];
+                    }
+                }
+
+                // Create the grader user
+                $grader = new User($this->core, $user_array);
+
+                // Create the component
                 $graded_components[] = new GradedComponent($this->core,
                     $graded_gradeable,
                     $grader,
