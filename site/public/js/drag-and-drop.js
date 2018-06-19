@@ -452,7 +452,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
     var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
-    console.log(url);
+    
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
