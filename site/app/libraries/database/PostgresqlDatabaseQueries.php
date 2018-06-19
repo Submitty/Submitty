@@ -922,7 +922,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
     /**
      * Gets all GradedGradeable's associated with a Gradeable.  If
-     *  both $users and $teams are null, then everyone will be retrieved
+     *  both $users and $teams are null, then everyone will be retrieved.
+     *  Note: if the gradeable is a team gradeable, use the $teams parameter,
+     *      otherwise use the $users parameter.  You will not get GradeableData
+     *      for a team submission by passing team member names to $users.
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param string[]|null $users The ids of the users to get data for
      * @param string[]null $teams The ids of the teams to get data for
@@ -949,6 +952,21 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // If both are zero-count, that indicates to get all users/teams
         $all = (count($users) === count($teams)) && count($users) === 0;
+
+        // Since the query won't like an empty array, try to filter it
+        $selector_union_list = [];
+        $selector_union_list[] = strval($this->course_db->convertBoolean($all));
+        // Users were provided, so check that list
+        if(count($users) > 0) {
+            $user_placeholders = implode(',', array_fill(0, count($users), '?'));
+            $selector_union_list[] = "(gd.gd_user_id IN ($user_placeholders))";
+        }
+        // Teams were provided, so check that list
+        if(count($teams) > 0) {
+            $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
+            $selector_union_list[] = "(gd.gd_team_id IN ($team_placeholders))";
+        }
+        $submitter_selector = implode(' OR ', $selector_union_list);
 
         $query = "
             SELECT
@@ -1013,13 +1031,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable_data as in_egd
                 GROUP BY g_id, user_id, team_id
               ) AS egd ON (egd.team_id=gd.gd_team_id OR egd.user_id=gd.gd_user_id) AND egd.g_id=gd.g_id
-            WHERE gd.g_id=? AND ((gd.gd_user_id IN (?)) OR (gd.gd_team_id IN (?)) OR ?)";
+            WHERE gd.g_id=? AND ($submitter_selector)";
 
-        $this->course_db->query($query, array(
-            $gradeable->getId(),
-            implode(',', $users),
-            implode(',', $teams),
-            $this->course_db->convertBoolean($all)));
+        $this->course_db->query($query, array_merge(
+            [
+                $gradeable->getId()
+            ],
+            array_values($users),
+            array_values($teams)));
 
         $graded_gradeables = [];
 
