@@ -464,6 +464,8 @@ function addMark(me, num) {
                 score: points
             });
             parent.append(getMarkView(num, id2, id2, 1));
+           // saveMark(me, true);
+            window.location.reload();
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {
             //     updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id);
@@ -1172,7 +1174,9 @@ function openMark(c_index) {
     saveLastOpenedMark(true);
     saveMark(c_index, true);
     updateMarksOnPage(c_index);
-
+    if(editModeEnabled==true){
+     //   $('#marks-extra-'+c_index)[0].style.display="block";
+    }
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== c_index) {
         openClose(c_index);

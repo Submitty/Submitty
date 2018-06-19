@@ -668,6 +668,12 @@ function toggleEditMode(){
     }
     editModeEnabled=!editModeEnabled;
     if(findCurrentOpenedMark()>0){
+        if(editModeEnabled==false){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
+        }
+        if(editModeEnabled==true){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
+        }
         var id=findCurrentOpenedMark();
         saveMark(id, true);
         updateMarksOnPage(id);
