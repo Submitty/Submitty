@@ -479,21 +479,27 @@ class Gradeable extends AbstractModel {
         }
         //If late days used - extensions applied > allowed per assignment then status is "Bad..."
         if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
-            $this->late_status = "Bad too many used for this assignment";
+            $this->late_status = "Bad (too many late days used on this assignment)";
             $late_flag = false;
         }
         // If late days used - extensions applied > allowed per term then status is "Bad..."
         // Do a max(0, ...) to protect against the case where the student's late days goes down
         // during the semester and they've already used late days
         if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
-            $this->late_status = "Bad too many used this term";
+            $this->late_status = "Bad (too many late days used this term)";
             $late_flag = false;
         }
 
-        if (!$this->hasSubmitted()){
-            $this->late_status = "No submission";
-            $late_flag = false;
-        }
+		if($this->getActiveVersion() == 0){
+			if ($this->hasSubmitted()){
+				$this->late_status = "Cancelled Submission";
+			} else {
+				$this->late_status = "No submission";
+			}
+			$late_flag = false;
+		}
+
+
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
         //be less than 0 in cases of excess extensions. Decrement remaining late days.
         if ($late_flag) {
