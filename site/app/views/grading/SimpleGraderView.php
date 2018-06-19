@@ -45,9 +45,11 @@ HTML;
         }
         if($gradeable->isGradeByRegistration()){
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+            $section_message = "Students enrolled in Registration Section";
         }
         else{
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
+            $section_message = "Students assigned to Rotating Section";
         }
 
         if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0)){
@@ -220,7 +222,7 @@ HTML;
                 $return .= <<<HTML
             <tr class="info persist-header">
                 <td colspan="{$colspan}" style="text-align: center">
-                Students Enrolled in Section {$display_section}
+                {$section_message} {$display_section}
 HTML;
                 if($action == 'lab'){
                     $return .= <<<HTML
