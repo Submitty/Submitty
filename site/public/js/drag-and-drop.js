@@ -388,8 +388,15 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                                 <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">Merge (File Clobber)</label></div>')
                                 .dialog({
                                 open: function(event, ui) { // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
+
                                     $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-                                    var radio_idx = $("#toggle-merge-default").is(":checked") ? 1 : 0;
+                                    var radio_idx;
+                                    if(localStorage.getItem("instructor-submit-option") === null) {
+                                        radio_idx = 0;
+                                    }
+                                    else {
+                                        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+                                    }
                                     $(this).find('input:radio')[radio_idx].checked = true;
                                     $(this).parent().find(".btn-success").focus();
                                 },
@@ -399,12 +406,15 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                                         class: "btn btn-success",
                                         click: function() { // on click, make submission based on which radio input was checked
                                             if($("#instructor-submit-option-new").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "0");
                                                 makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
                                             }
                                             else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "1");
                                                 makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
                                             }
                                             else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "2");
                                                 makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true, clobber=true);
                                             }
                                             dialog.dialog('destroy');
@@ -414,6 +424,15 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                                         text: "Cancel",
                                         class: "btn btn-danger",
                                         click: function() {
+                                            if($("#instructor-submit-option-new").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "0");
+                                            }
+                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "1");
+                                            }
+                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "2");
+                                            }
                                             dialog.dialog('destroy');
                                         }
                                     }

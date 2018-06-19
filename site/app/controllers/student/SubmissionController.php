@@ -1041,11 +1041,9 @@ class SubmissionController extends AbstractController {
                         }
                     }
                 }
-                if (isset($previous_part_path[$i])) {
-                    if(isset($previous_files[$i])) {
-                        foreach ($previous_files[$i] as $prev_file) {
-                            $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
-                        }
+                if(isset($previous_part_path[$i]) && isset($previous_files[$i])) {
+                    foreach ($previous_files[$i] as $prev_file) {
+                        $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
                     }
                 }
             }

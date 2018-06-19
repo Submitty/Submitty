@@ -573,24 +573,6 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
                 }
-                // if the user is admin, give them a checkbox to turn merging on by default (w/o clobbering) and save checkbox state in localStorage
-                if($this->core->getUser()->accessAdmin()) {
-                    $return .= <<<HTML
-                    <div style="float: right;">
-                        <input type="checkbox" id="toggle-merge-default">
-                        <label for="toggle-merge-default">Merge By Default</label>
-                    </div>
-                    <script>
-                        $("#toggle-merge-default").on("change", function() {
-                            localStorage.setItem("toggle-merge-default", $(this).is(":checked"));
-                        });
-                        if(localStorage.getItem("toggle-merge-default") === "true") {
-                            $("#toggle-merge-default").attr("checked", true);
-                        }
-                    </script>
-HTML;
-                }
-
                 $old_files = "";
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     foreach ($gradeable->getPreviousFiles($i) as $file) {
