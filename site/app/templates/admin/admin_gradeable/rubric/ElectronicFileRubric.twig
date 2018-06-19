@@ -1,42 +1,46 @@
 <!--
 Will this assignment have peer grading?
 <fieldset>
-    <input type="radio" id="peer_yes_radio" name="peer_grading" value="true" class="peer_yes" {{ admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> Yes
-    <input type="radio" id="peer_no_radio" name="peer_grading" value="false" class="peer_no" {{ not admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> No
+    <input type="radio" id="peer_yes_radio" name="eg_peer_grading" value="true" class="peer_yes" {{ admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> Yes
+    <input type="radio" id="peer_no_radio" name="eg_peer_grading" value="false" class="peer_no" {{ not admin_gradeable.getEgPeerGrading() ? 'checked' : '' }}/> No
     <div class="peer_input" style="display:none;">
         <br />
         How many peers should each student grade?
-        <input style='width: 50px' type='text' name="peer_grade_set" value="{{ admin_gradeable.getEgPeerGradeSet() }}" class='int_val' />
+        <input style='width: 50px' type='text' name="eg_peer_grade_set" value="{{ admin_gradeable.getEgPeerGradeSet() }}" class='int_val' />
         <br />
         How many points should be associated with a students completion of their grading?
-        <input style='width: 50px' type='text' name="peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
+        <input style='width: 50px' type='text' name="eg_peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
     </div>
 </fieldset>
 <br />-->
+
 Is this a PDF with a page assigned to each component?
 <fieldset>
-    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
-            {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
-            {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
+    <input type="radio" id="yes_eg_pdf_page" name="eg_pdf_page" value="true"
+            {{ admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_eg_pdf_page" name="eg_pdf_page" value="false"
+            {{ not admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> No
 
     <br />
 
-    <div id="pdf_page">
+    <div id="eg_pdf_page">
         <br />
         Who will assign pages to components?
-        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
-                {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
-        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
-                {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+        <input type="radio" id="no_eg_pdf_page_student" name="eg_pdf_page_student" value="false"
+                {{ not admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Instructor
+        <input type="radio" id="yes_eg_pdf_page_student" name="eg_pdf_page_student" value="true"
+                {{ admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Student
     </div>
 </fieldset>
 
 Point precision:
-<input style='width: 50px' type='text' id="point_precision_id" name='point_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<br/>
+<span style="color:red; size: 20px">Warning! Electronic Rubric information does not save automatically!  Press 'Save' Button to save</span>
+<div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br /><br />
 
-<table class="electronic_file table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
+<table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
     <thead style="background: #E1E1E1;">
     <tr>
         <th>Manual/TA/Peer Grading Rubric</th>
@@ -60,29 +64,17 @@ Point precision:
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
                                   display: block; height: auto;">{{ question.getStudentComment() }}</textarea>
                 <div id="mark_questions_{{ num }}">
-                    {% if marks|length == 0 %}
-                        <div id="mark_id-{{ num }}-0" name="mark_{{ num }}" data-gcm_id="NEW" class="gradeable_display">
-                            <input type="hidden" name="mark_gcmid_{{ num }}_0" value="NEW">
-                            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_{{ num }}_0" value="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_0" class="comment_display">Full Credit</textarea>
-                            <!--
-                            <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            -->
-                            <br>
-                        </div>
-                    {% endif %}
                     {% set first = true %}
                     {% set hide_icons = "" %}
-                    {% for mark in marks[question.getId()] %}
-                        <div id="mark_id-{{ num }}-{{ mark.order }}" name="mark_{{ num }}" data-gcm_id="{{ mark.id }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
-                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.order }}" value="{{ mark.id }}">
+                    {% for mark in question.getMarks() %}
+                        <div id="mark_id-{{ num }}-{{ mark.getOrder() }}" name="mark_{{ num }}" data-gcm_id="{{ mark.getId() }}" class="gradeable_display" style="{{ first ? 'background-color:#EBEBE4' : '' }}">
+                            <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.getOrder() }}" value="{{ mark.getId() }}">
                             <i class="fa fa-circle" aria-hidden="true"></i>
-                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.order }}"
-                                   value="{{ mark.points }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.order }}" class="comment_display">{{ mark.note }}</textarea>
+                            <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.getOrder() }}"
+                                   value="{{ mark.getPoints() }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getNote() }}</textarea>
                             {% if not first %}
-                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.order }}" {{ mark.publish ? 'checked' : '' }}> Publish
+                                <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.getOrder() }}" {{ mark.getPublish() ? 'checked' : '' }}> Publish
                             {% endif %}
 
                             <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -125,11 +117,11 @@ Point precision:
                 <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
                 <br>
 
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+                <div id="eg_pdf_page_{{ num }}" class="eg_pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
 
                 <!--
                 <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
+                <div id="eg_pdf_page_{{ num }}" class="eg_pdf_page_input" style={{ not admin_gradeable.getEgPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
                 -->
                 {% if num > 1 %}
                     <!--
@@ -157,19 +149,21 @@ Point precision:
     </tr>
     </tbody>
 </table>
+<div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
+<br/>
 
 <script type="text/javascript">
 
 
     $(document).ready(function() {
-        $('input:radio[name="pdf_page"]').change(function () {
+        $('input:radio[name="eg_pdf_page"]').change(function () {
             $("input[name^='page_component']").each(function () {
                 if (this.value < 0) {
                     this.value = 0;
                 }
             });
-            $('.pdf_page_input').hide();
-            $('#pdf_page').hide();
+            $('.eg_pdf_page_input').hide();
+            $('#eg_pdf_page').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'true') {
                     $("input[name^='page_component']").each(function () {
@@ -177,19 +171,19 @@ Point precision:
                             this.value = 1;
                         }
                     });
-                    $('.pdf_page_input').show();
-                    $('#pdf_page').show();
+                    $('.eg_pdf_page_input').show();
+                    $('#eg_pdf_page').show();
                 }
             }
         });
 
-        $('input:radio[name="pdf_page_student"]').change(function () {
+        $('input:radio[name="eg_pdf_page_student"]').change(function () {
             $("input[name^='page_component']").each(function () {
                 if (this.value < -1) {
                     this.value = -1;
                 }
             });
-            $('.pdf_page_input').hide();
+            $('.eg_pdf_page_input').hide();
             if ($(this).is(':checked')) {
                 if ($(this).val() == 'false') {
                     $("input[name^='page_component']").each(function () {
@@ -197,78 +191,11 @@ Point precision:
                             this.value = 1;
                         }
                     });
-                    $('.pdf_page_input').show();
+                    $('.eg_pdf_page_input').show();
                 }
             }
         });
     });
-
-    function checkFormRubricElec() {
-        // Check rubric
-        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'true') {
-            var index = 1;
-            var exists = true;
-            var error = false;
-            var error_message = ``;
-            while(exists){ //goes through questions
-                if($("#grade-"+index).length) {
-                    var type = 0;
-                    if ($('input[name=grade_by-'+index+']:radio:checked').val() === 'count_up') {
-                        type = 1;
-                    } else {
-                        type = 0;
-                    }
-                    var points = parseFloat($("#grade-"+index).val());
-                    var temp_points = 0;
-                    var temp_num = -1;
-                    var exists2 = ($('#mark_id-'+index+'-0').length) ? true : false;
-                    var index2 = 0;
-                    while (exists2) { //goes through marks
-                        temp_num = parseFloat($('#mark_id-'+index+'-'+index2).find('input[name=mark_points_'+index+'_'+index2+']').val());
-                        if (type === 1) {
-                            if (temp_num > 0) {
-                                temp_points += temp_num;
-                            }
-                        } else {
-                            if (temp_num < 0) {
-                                temp_points += (temp_num * -1);
-                            }
-                        }
-                        index2++;
-                        exists2 = ($('#mark_id-'+index+'-'+index2).length) ? true : false;
-                    }
-
-                    //fun fact between caution and warning: http://www.stevensstrategic.com/technical-writing-the-difference-between-warnings-and-cautions/
-                    if (temp_points < points && index2 > 1) { //display caution message if points are not enough and more than 1 mark
-                        if (error === false) {
-                            error_message = error_message + `Caution! \n`;
-                        } else {
-                            error_message = error_message + `\n`;
-                        }
-                        error = true;
-                        var temp_error_message = ``;
-                        if (type === 1) {
-                            temp_error_message = `Component ` + index + ` is count up but the marks' values are not enough to reach the point value.`;
-                        } else {
-                            temp_error_message = `Component ` + index + ` is count down but the marks' values are not enough to drop to the point value.`;
-                        }
-                        error_message = error_message + temp_error_message;
-                    }
-                }
-                else {
-                    exists = false;
-                }
-                index++;
-            }
-            if (error === true) {
-                error_message = error_message + `\n` + `Do you still wish to submit this gradeable?`;
-                return confirm(error_message);
-            }
-        }
-
-        return true;
-    }
-
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"_" + question ).style.display == "block") {
@@ -405,7 +332,7 @@ Point precision:
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('div[id=peer_checkbox_' + oldNum +']').attr('id', 'peer_checkbox_' + newNum);
         row.find('input[name=peer_component_'+ oldNum + ']').attr('name', 'peer_component_' + newNum);
-        row.find('div[id=pdf_page_' + oldNum +']').attr('id', 'pdf_page_' + newNum);
+        row.find('div[id=eg_pdf_page_' + oldNum +']').attr('id', 'eg_pdf_page_' + newNum);
         row.find('input[name=page_component_' + oldNum + ']').attr('name', 'page_component_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
@@ -741,7 +668,7 @@ Point precision:
         if($('input[id=peer_no_radio]').is(':checked')) {
             display = 'style="display:none"';
         }
-        if($('input[id=no_pdf_page]').is(':checked') || $('input[id=yes_pdf_page_student]').is(':checked')) {
+        if($('input[id=no_eg_pdf_page]').is(':checked') || $('input[id=yes_eg_pdf_page_student]').is(':checked')) {
             displayPage = 'style="display:none"';
         }
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
@@ -779,7 +706,7 @@ Point precision:
                 <!--\
                 <div id="peer_checkbox_'+newQ+'" class="peer_input" '+display+'>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_'+newQ+'" value="on" class="peer_component" /></div> \
                 -->\
-                <div id="pdf_page_'+newQ+'" class="pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
+                <div id="eg_pdf_page_'+newQ+'" class="eg_pdf_page_input" '+displayPage+'>Page:&nbsp;&nbsp;<input type="number" name="page_component_'+newQ+'" value="1" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div> \
                 <!--\
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <i class="fa fa-times" aria-hidden="true"></i></a> \
