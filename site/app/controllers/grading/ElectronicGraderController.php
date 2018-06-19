@@ -69,36 +69,38 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function ajaxRemoveEmpty(){
-    	//This function shows the empty spaces in the diffViewer
-    	//TODO: Need to add checks?
-		$gradeable_id = $_REQUEST['gradeable_id'];
-		$gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
-		$gradeable->loadResultDetails();
-		$testcase = $gradeable->getTestcases()[$_REQUEST['index']];
-		//There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
-		$option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'original';
-		//There are currently two views, the view of student's code and the expected view.
-		$which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
-		$autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
-		foreach ($testcase->getAutochecks() as $autocheck) {
-			$diff_viewer = $autocheck->getDiffViewer();
-			if($autocheck_cnt <= 0) break;
-			$autocheck_cnt -= 1;
-		}
-		$this->core->getOutput()->useFooter(false);
-		$this->core->getOutput()->useHeader(false);
-		$html = "";
-		if($which == "actual"){
-			$html .= $diff_viewer->getDisplayActual($option);
-		} else {
-			$html .= $diff_viewer->getDisplayExpected($option);
-		}
-		$white_spaces = $diff_viewer->getWhiteSpaces();
-		echo json_encode(array("html"=>"$html", "whitespaces"=>$white_spaces));
-	}
+        //This function shows the empty spaces in the diffViewer
+        //TODO: Need to add checks?
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
+        $gradeable->loadResultDetails();
+        $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
+        //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
+        $option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'original';
+        //There are currently two views, the view of student's code and the expected view.
+        $which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
+        $autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
+        foreach ($testcase->getAutochecks() as $autocheck) {
+            $diff_viewer = $autocheck->getDiffViewer();
+            if($autocheck_cnt <= 0) {
+                break;
+            }
+            $autocheck_cnt -= 1;
+        }
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        $html = "";
+        if($which == "actual"){
+            $html .= $diff_viewer->getDisplayActual($option);
+        }
+        else {
+            $html .= $diff_viewer->getDisplayExpected($option);
+        }
+        $white_spaces = $diff_viewer->getWhiteSpaces();
+        echo json_encode(array("html"=>"$html", "whitespaces"=>$white_spaces));
+    }
 
     private function verifyGrader($verifyAll = false){
-
         //check that I am able to verify.
         if(!$this->core->getUser()->accessAdmin() && !$this->core->getUser()->accessFullGrading()){
             $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
@@ -114,7 +116,9 @@ class ElectronicGraderController extends GradingController {
         //Search across all components for components to verify
         foreach ($gradeable->getComponents() as $component) {
             //If this component hasn't been graded, we can't verify it.
-            if(!$component->getGrader()) continue;
+            if(!$component->getGrader()) {
+                continue;
+            }
             //If we are either verifying all components or this is the component we were asked to verify,
             //verify the component.
             if($verifyAll || $component->getId() == $component_id){
@@ -125,7 +129,9 @@ class ElectronicGraderController extends GradingController {
                     $verified = true;
                 }
                 //If we aren't verifying all, we have verified the only component we need to.
-                if(!$verifyAll && $component->getId() == $component_id) break;
+                if(!$verifyAll && $component->getId() == $component_id) {
+                    break;
+                }
             }
         }
 
