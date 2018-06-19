@@ -331,7 +331,7 @@ HTML;
                 ]);
 				$return .= <<<HTML
 				<div class="popup-form decent" id="edit-user-post">
-					<form method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
 					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
 					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
 					 <h3 id="edit_user_prompt"></h3>
@@ -339,7 +339,7 @@ HTML;
 						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
 								"show_title" => true,
 								"show_post" => true,
-								"show_categories" => false,
+								"show_categories" => true,
 								"show_attachments" => false,
 								"show_anon" => true,
 								"show_announcement" => false,
@@ -1014,7 +1014,7 @@ HTML;
 
 		<h3> Create Thread </h3>
 
-			<form id="create_thread_form" style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
+			<form id="thread_form" style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 HTML;
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,

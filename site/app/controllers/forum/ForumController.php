@@ -443,7 +443,16 @@ class ForumController extends AbstractController {
             if(!empty($_POST["title"])) {
                 $thread_id = $_POST["edit_thread_id"];
                 $thread_title = $_POST["title"];
-                return $this->core->getQueries()->editThread($thread_id, $thread_title);
+                $categories_ids  = array();
+                if(!empty($_POST["cat"])) {
+                    foreach ($_POST["cat"] as $category_id) {
+                        $categories_ids[] = (int)$category_id;
+                    }
+                }
+                if(!$this->isValidCategories($categories_ids)) {
+                    return false;
+                }
+                return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids);
             }
         }
         return null;
@@ -600,6 +609,7 @@ class ForumController extends AbstractController {
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThreadTitle($thread_id);
         $output['title'] = $result["title"];
+        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
     }
 
     public function showStats(){
