@@ -893,6 +893,8 @@ class Course(object):
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                                 active_version=active_version)
                             json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
+                            if user.id in gradeable.plagiarized_user:
+                                
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
@@ -935,7 +937,6 @@ class Course(object):
                             for component in gradeable.components:
                                 if random.random() < 0.01 and skip_grading < 0.3:
                                     #This is used to simulate unfinished grading.
-                                    # pdb.set_trace()
                                     break
                                 if status == 0 or random.random() < 0.4:
                                     score = 0
@@ -1198,6 +1199,8 @@ class Gradeable(object):
         self.gradeable_config = None
         self.config_path = None
         self.sample_path = None
+        self.lichen_sample_path = None
+        self.plagiarized_user = {}
         self.title = ""
         self.instructions_url = ""
         self.overall_ta_instructions = ""
@@ -1246,9 +1249,17 @@ class Gradeable(object):
 
             examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
+            lichen_example_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "lichen_submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
+                if os.path.isdir(lichen_example_path):
+                    self.lichen_sample_path = lichen_example_path
+                    data = load_data_yaml(os.path.join(lichen_example_path, "users.yml"))
+                    for i in data:
+                        temp = i.split(" - ")
+                        self.plagiarized_user[temp[0]] = temp[1:]
+                    pdb.set_trace(  )
                 if os.path.isdir(examples_path):
                     self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
