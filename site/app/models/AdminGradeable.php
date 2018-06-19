@@ -143,9 +143,9 @@ class AdminGradeable extends AbstractModel {
         $this->g_gradeable_type = $details['g_gradeable_type'];
         $this->g_grade_by_registration = $details['g_grade_by_registration'];
         if(!$template){
-            $this->g_ta_view_start_date = $details['g_ta_view_start_date'];
-            $this->g_grade_start_date = $details['g_grade_start_date'];
-            $this->g_grade_released_date = $details['g_grade_released_date'];
+            $this->g_ta_view_start_date = new \DateTime($details['g_ta_view_start_date']);
+            $this->g_grade_start_date = new \DateTime($details['g_grade_start_date']);
+            $this->g_grade_released_date = new \DateTime($details['g_grade_released_date']);
         }
         $this->g_min_grading_group = $details['g_min_grading_group'];
         $this->g_syllabus_bucket = $details['g_syllabus_bucket'];        
