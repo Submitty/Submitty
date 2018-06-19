@@ -1061,7 +1061,19 @@ class ElectronicGraderController extends GradingController {
                         break;
                     }
                 }
-
+                if($mark==null){
+                    $mark = new GradeableComponentMark($this->core);
+                    $mark->setGcId($component->getId());
+                    $mark->setPoints($_POST['marks'][$index]['points']);
+                    $mark->setNote($_POST['marks'][$index]['note']);
+                    $mark->setOrder($_POST['marks'][$index]['order']);
+                    $mark_id = $mark->save();
+                    $mark->setId($mark_id);
+                    $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
+                    if($all_false === false) {
+                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+                    }
+                }
                 $mark->setPoints($post_mark['points']);
                 $mark->setNote($post_mark['note']);
                 $mark->setOrder($post_mark['order']);

@@ -1,5 +1,5 @@
-{# If this is the first item, it's the No Credit / Full Credit item and we should not be allowed to edit it #}
-{% if m_index == 0 %}
+{# If fc==0, it's the No Credit / Full Credit item and we should not be allowed to edit it #}
+{% if fc == 0 %}
     {% set disabled = true %}
     {% set editable = "readonly" %}
     {% set appearEditable = "cursor: default; border:none; outline:none; background-color: initial;" %}
@@ -9,15 +9,15 @@
     {% set appearEditable = "" %}
 {% endif %}
 
-<tr id="mark_id-{{ c_index }}-{{ m_id }}" name="mark_{{ c_index }}" class="{{ mark.publish ? "is_publish" : "" }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}">
+<tr id="mark_id-{{ c_index }}-{{ m_id }}" name="mark_{{ c_index }}" class="{{ mark.publish ? "is_publish" : "" }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}">
     <td colspan="1" style=" width: 90px; text-align: center">
-        <span id="mark_id-{{ c_index }}-{{ m_id }}-check" onclick="selectMark(this); event.stopPropagation();" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}">
+        <span id="mark_id-{{ c_index }}-{{ m_id }}-check" onclick="selectMark(this); event.stopPropagation();" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}">
             <i class="fa fa-square{{ mark.has ? "" : "-o" }} mark fa-lg" name="mark_icon_{{ c_index }}_{{ m_id }}" style="visibility: visible; cursor: pointer; position: relative; top: 2px;"></i>
         </span>
-        <input {{ editable }} name="mark_points_{{ c_index }}_{{ m_id }}" type="number" onchange="updateMarkPoints(this);" step="{{ gradeable.precision }}" onclick="event.stopPropagation();" value="{{ mark.points }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}" style="width: 50%; resize:none; min-width: 50px; {{ appearEditable }}">
+        <input {{ editable }} name="mark_points_{{ c_index }}_{{ m_id }}" type="number" onchange="updateMarkPoints(this);" step="{{ gradeable.precision }}" onclick="event.stopPropagation();" value="{{ mark.points }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width: 50%; resize:none; min-width: 50px; {{ appearEditable }}">
     </td>
     <td colspan="4">
-        <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_id }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" onclick="event.stopPropagation();" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_index }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
+        <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_id }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" onclick="event.stopPropagation();" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
         <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
             <i class="fa fa-users icon-got-this-mark"></i>
         </span>

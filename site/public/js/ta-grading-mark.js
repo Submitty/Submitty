@@ -27,8 +27,13 @@ function getComponent(c_index) {
  * @param m_index 0-indexed mark index
  * @returns Object Mark data
  */
-function getMark(c_index, m_index) {
-    return grading_data.gradeable.components[c_index - 1].marks[m_index];
+function getMark(c_index, m_index){
+    for(var i=0; i<grading_data.gradeable.components[c_index-1].marks.length; i++){
+        if(grading_data.gradeable.components[c_index - 1].marks[i].id==m_index){
+            return grading_data.gradeable.components[c_index - 1].marks[i];
+        }
+    }
+    return null;
 }
 
 /**
@@ -109,14 +114,15 @@ function checkIfSelected(me) {
  * @param m_index 0-indexed mark index
  * @returns DOM structure for the mark
  */
-function getMarkView(c_index, m_index, m_id) {
+function getMarkView(c_index, m_index, m_id, fc) {
     return Twig.twig({ref: "Mark"}).render({
         gradeable: getGradeable(),
         component: getComponent(c_index),
         mark: getMark(c_index, m_index),
         c_index: c_index,
         m_index: m_index,
-        m_id: m_id
+        m_id: m_id,
+        fc: fc
     });
 }
 
@@ -325,7 +331,7 @@ function updateMarksOnPage(c_index) {
                     getMark(c_index, row.dataset.mark_index).order=i;
                 }
             }
-            // getComponent(c_index).marks.sort(compareOrder);
+            getComponent(c_index).marks.sort(compareOrder);
         };
         sortableMarks.sortable( { 
             items: '> tr:not(:first)',
@@ -343,6 +349,10 @@ function updateMarksOnPage(c_index) {
             stop: sortEvent,
             disabled: true 
         });
+    }
+    var ids= [];
+    for(var idIndex=0; idIndex<component.marks.length; idIndex++){
+        ids.push(component.marks[idIndex].id);
     }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
@@ -375,21 +385,19 @@ function updateMarksOnPage(c_index) {
             getComponent(c_index).score = score;
             getComponent(c_index).comment = note;
         }
-        
         // Add all marks back
-        // data['data'].length - 2 to ignore the custom mark
-        for (var m_index = data['data'].length-2; m_index >= 0; m_index--) {
+        for (var m_index = ids.length-1; m_index >= 0; m_index--) {
             var is_publish = data['data'][m_index]['is_publish'] == 't';
             var id         = data['data'][m_index]['id'];
             var hasMark    = data['data'][m_index]['has_mark'];
             var score      = data['data'][m_index]['score'];
             var note       = data['data'][m_index]['note'];
-            getMark(c_index, m_index).id = id;
-            getMark(c_index, m_index).publish = is_publish;
-            getMark(c_index, m_index).has = hasMark;
-            getMark(c_index, m_index).score = score;
-            getMark(c_index, m_index).name = note;
-            parent.prepend(getMarkView(c_index, m_index, id));
+            getMark(c_index, ids[m_index]).id = id;
+            getMark(c_index, ids[m_index]).publish = is_publish;
+            getMark(c_index, ids[m_index]).has = hasMark;
+            getMark(c_index, ids[m_index]).score = score;
+            getMark(c_index, ids[m_index]).name = note;
+            parent.prepend(getMarkView(c_index, ids[m_index], id, m_index));
             if((editModeEnabled==null || editModeEnabled==false)){
                 var current_mark = $('#mark_id-'+c_index+'-'+id);
                 current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
@@ -403,18 +411,6 @@ function updateMarksOnPage(c_index) {
                     current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
                 }
             }
-            /*
-            else{
-                if(points == "None Selected"){
-                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; border:none; outline: none; background-color: #E9EFEF");
-                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; border:none; outline: none; background-color: #E9EFEF");
-                }
-                else{
-                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; border:none; outline: none; background-color: #f9f9f9");
-                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; border:none; outline: none; background-color: #f9f9f9");
-                }
-            }
-            */
         }
     });
 }
@@ -449,19 +445,25 @@ function addMark(me, num) {
             $("#mark-creation-popup-error").css("display", "inherit");
         } else {
             $('#mark-creation-popup').css('display', 'none');
-            
+            var max=-1;
+            for(var j=0; j<getComponent(num).marks.length; j++){
+                if(max<parseInt(getComponent(num).marks[j].id)){
+                    max=parseInt(getComponent(num).marks[j].id);
+                }
+            }
             var parent = $('#marks-parent-'+num);
+            var id2     = ""+(max+1); 
             var x      = $('tr[name=mark_'+num+']').length;
-
             getComponent(num).marks.push({
+                id: id2,
                 name: note,
+                order:(""+x),
                 points: points,
                 publish: false,
-                has: false
+                has: false,
+                score: points
             });
-
-            parent.append(getMarkView(num, x, -1));
-
+            parent.append(getMarkView(num, id2, id2, 1));
             
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {
@@ -976,15 +978,16 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     // Gathers all the mark's data (ex. points, note, etc.)
     //getComponent(c_index).marks.sort(compareOrder);
     for(var m_index=0; m_index < arr_length; m_index++){
-        var current_row = $('#mark_id-'       +c_index+'-'+getMark(c_index, m_index).id);
-        var info_mark   = $('#mark_info_id-'  +c_index+'-'+getMark(c_index, m_index).id);
+        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+        var current_row = $('#mark_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
+        var info_mark   = $('#mark_info_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
         var success     = true;
         mark_data[m_index] = {
-            id      : getMark(c_index, m_index).id,
-            points  : getMark(c_index, m_index).points,
-            note    : getMark(c_index, m_index).name,
-            selected: getMark(c_index, m_index).has,
-            order   : getMark(c_index, m_index).order
+            id      : getMark(c_index, current_mark_id).id,
+            points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
+            note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
+            selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
+            order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
         };
         info_mark[0].style.display = '';
         existing_marks_num++;
