@@ -45,7 +45,7 @@ class GradedComponent extends AbstractModel {
     protected $grader_id = "";
     /** @property @var int The submission version this grade is for */
     protected $graded_version = 0;
-    /** @property @var null The time which this grade was most recently updated */
+    /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
 
     /**
@@ -84,6 +84,15 @@ class GradedComponent extends AbstractModel {
         if (isset($details['score'])) {
             $this->setScore($details['score']);
         }
+    }
+
+    public function toArray() {
+        $details = parent::toArray();
+
+        // Make sure to convert the date into a string
+        $details['grade_time'] = DateUtils::dateTimeToString($this->grade_time);
+
+        return $details;
     }
 
     /**

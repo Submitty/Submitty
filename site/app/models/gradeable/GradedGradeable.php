@@ -66,6 +66,9 @@ class GradedGradeable extends AbstractModel {
     public function toArray() {
         $details = parent::toArray();
 
+        // Make sure to convert the date into a string
+        $details['user_viewed_date'] = $this->user_viewed_date !== null ? DateUtils::dateTimeToString($this->user_viewed_date) : null;
+
         // When serializing a graded gradeable, put the grader information into
         //  the graded gradeable instead of each component so if one grader  grades
         //  multiple components, their information only gets sent once
