@@ -358,7 +358,6 @@ function updateMarksOnPage(c_index) {
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
         data = JSON.parse(data);
-
         // If nothing has changed, then don't update
         if (!haveMarksChanged(c_index, data)){
             return;
@@ -402,6 +401,7 @@ function updateMarksOnPage(c_index) {
                 var current_mark = $('#mark_id-'+c_index+'-'+id);
                 current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
                 current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
+                $('#marks-extra-'+c_index)[0].style.display="none";
                 if(points == "None Selected"){
                     current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
                     current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
@@ -464,7 +464,6 @@ function addMark(me, num) {
                 score: points
             });
             parent.append(getMarkView(num, id2, id2, 1));
-            
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {
             //     updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id);
@@ -1067,7 +1066,6 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
 
     gradedByElement.hide();
     savingElement.show();
-
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
         data = JSON.parse(data);
