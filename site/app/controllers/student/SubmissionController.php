@@ -409,9 +409,14 @@ class SubmissionController extends AbstractController {
         }
 
         $merge_previous = false;
+        $clobber = false;
         if(isset($_REQUEST['merge'])){
-            if($_REQUEST['merge']  === "true"){
+            if($_REQUEST['merge'] === "true") {
                 $merge_previous = true;
+            }
+
+            if(isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === "true") {
+                $clobber = true;
             }
         }
     
@@ -525,10 +530,34 @@ class SubmissionController extends AbstractController {
             $gradeable->getId(), $path);
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
+        $uploaded_file_base_name = "upload.pdf";
 
-        // copy over the uploaded file
         if (isset($uploaded_file)) {
-            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,"upload.pdf"))) {
+            //if we are merging in the previous submission (TODO check folder support)
+            if($merge_previous && $new_version !== 1) {
+                $old_version = $new_version - 1;
+                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
+                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
+                $files = glob($to_search);
+                if(!$clobber) {
+                    $existing_files = array();
+                    foreach($files as $file) {
+                        $existing_files[] = basename($file);
+                    }
+                    $new_files = array($uploaded_file_base_name);
+                    $old_to_new_filenames = FileUtils::renameNoClobber($new_files, $existing_files);
+                    $uploaded_file_base_name = $old_to_new_filenames[$uploaded_file_base_name];
+                }
+                foreach($files as $file) {
+                  $file_base_name = basename($file);
+                  $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                  if (!@copy($file, $move_here)){
+                    return $this->uploadResult("Failed to merge previous version.", false);
+                  }
+                }
+            }
+            // copy over the uploaded file
+            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path, $uploaded_file_base_name))) {
                 return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
             }
             if (!@unlink($uploaded_file)) {
@@ -537,24 +566,7 @@ class SubmissionController extends AbstractController {
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
             }
-            //if we are merging in the previous submission (TODO check folder support)
-            if($merge_previous && $new_version !== 1){
-                $old_version = $new_version -1;
-                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
-                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
-                $files = glob($to_search);
-                foreach($files as $file){
-                  $file_base_name = basename($file);
-                  if (strpos($file_base_name, 'version') === false) {
-                    $parts = explode(".", $file_base_name);
-                    $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
-                  }
-                  $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                  if (!@copy($file, $move_here)){
-                    return $this->uploadResult("Failed to merge previous version.", false);
-                  }
-                }
-            }
+
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory

@@ -667,7 +667,7 @@ HTML;
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous, clobber=clobber);
                 moveNextInput(count);
             }
             
