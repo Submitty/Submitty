@@ -135,10 +135,6 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY categories_list ADD COLUMN rank int'".format(*variables))
         os.system("PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"ALTER TABLE ONLY categories_list ADD COLUMN color varchar DEFAULT '#000080' NOT NULL\"".format(*variables))
 
-        # To allow delete gradeable
-        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign DROP CONSTRAINT peer_assign_g_id_fkey'""".format(*variables))
-        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE ONLY peer_assign ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE'""".format(*variables))
-
         # add migrations table
         os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('course'), *variables))
         os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c "{0}" """.format(insert_row.format('course'), *variables))
