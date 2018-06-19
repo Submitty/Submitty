@@ -1,0 +1,17 @@
+<div class="content">
+    {#
+        Default is viewing your sections
+        Limited grader does not have "View All" option
+        If nothing to grade, Instructor will see all sections
+    #}
+    {% if show_all_sections_button %}
+        <div style="float: right; margin-bottom: 10px">
+            <a class="btn btn-default"
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort 'view': view_all ? null : "all"}) }}">
+                {{ view_all ? "View Your Sections" : "View All" }}
+            </a>
+        </div>
+    {% endif %}
+
+
+</div>
