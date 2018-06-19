@@ -956,7 +956,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               gcd.array_grader_id,
               gcd.array_graded_version,
               gcd.array_grade_time,
-              gcd.array_mark_id
+              gcd.array_mark_id,
+              egv.active_version
             FROM gradeable_data gd
               LEFT JOIN (
                 SELECT
@@ -978,7 +979,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     GROUP BY gc_id, gd_id
                   ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id
                 GROUP BY in_gcd.gd_id
-            ) AS gcd ON gcd.gd_id=gd.gd_id
+              ) AS gcd ON gcd.gd_id=gd.gd_id
+              LEFT JOIN (
+                SELECT * 
+                FROM electronic_gradeable_version
+              ) AS egv ON (egv.team_id=gd.gd_team_id OR egv.user_id=gd.gd_user_id) AND egv.g_id=gd.g_id
             WHERE gd.g_id=? AND ((gd.gd_user_id IN (?)) OR (gd.gd_team_id IN (?)) OR ?)";
 
         $this->course_db->query($query, array(

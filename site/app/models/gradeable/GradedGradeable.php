@@ -17,6 +17,7 @@ use \app\models\AbstractModel;
  * @method string getOverallComment()
  * @method void setOverallComment($comment)
  * @method \DateTime getUserViewedDate()
+ * @method int getActiveVersion()
  */
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
@@ -30,6 +31,8 @@ class GradedGradeable extends AbstractModel {
     protected $overall_comment = "";
     /** @property @var \DateTime The date the user viewed their grade */
     protected $user_viewed_date = null;
+    /** @property @var int The active submission version for electronic gradeables */
+    protected $active_version = 0;
 
     /** @property @var Submitter The submitter who received this graded gradeable */
     protected $submitter = null;
@@ -54,6 +57,7 @@ class GradedGradeable extends AbstractModel {
         $this->setIdInternal($details['id']);
         $this->setOverallComment($details['overall_comment']);
         $this->setUserViewedDate($details['user_viewed_date']);
+        $this->setActiveVersion($details['active_version']);
     }
 
     public function toArray() {
@@ -140,6 +144,18 @@ class GradedGradeable extends AbstractModel {
             $this->id = intval($id);
         } else {
             throw new \InvalidArgumentException('Id must be a non-negative integer');
+        }
+    }
+
+    /**
+     * Sets the active submission version for this electronic gradeable
+     * @param int $version
+     */
+    public function setActiveVersion($version) {
+        if (is_int($version) || ctype_digit($version) && intval($version) >= 0) {
+            $this->active_version = intval($version);
+        } else {
+            throw new \InvalidArgumentException('Active version must be a non-negative integer');
         }
     }
 
