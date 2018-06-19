@@ -56,17 +56,22 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
+  # ideally we would use hwcron or something as the owner/group, but since that user doesn't exist
+  # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
+  # which is guaranteed to exist and that during install_system.sh we add hwcron/hwphp/etc to the
+  # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
-  group = 'root'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group
+  group = 'vagrant'
+  mount_options = %w(dmode=775 fmode=664)
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
 
   optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial)
-  for repo in optional_repos do
+  optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path,"/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options
     end
-  end
+  }
 
   config.vm.provision 'shell', inline: $script
 

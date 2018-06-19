@@ -28,9 +28,10 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
-sudo mkdir -p ${SUBMITTY_DATA_DIR}
-sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
+sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
+sudo mkdir -p "${SUBMITTY_DATA_DIR}"
+sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
+sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
 
 sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
@@ -79,4 +80,4 @@ sudo usermod -a -G travis hwphp
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
-sudo bash /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh clean
+sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
