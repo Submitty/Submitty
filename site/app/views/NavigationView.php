@@ -86,17 +86,6 @@ class NavigationView extends AbstractView {
             $message_file_contents = file_get_contents($message_file_path);
         }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
-        if ($display_custom_message && $message_file_contents != "") {
-            $return .= <<<HTML
-<div class="content">
-   {$message_file_contents}
-</div>
-HTML;
-        }
-        $return .= <<<HTML
-<div class="content">
-    <div class="nav-buttons">
-HTML;
 
         /* @var Button[] $top_buttons */
         $top_buttons = [];
@@ -149,86 +138,66 @@ HTML;
             ]);
         }
 
-        foreach ($top_buttons as $button) {
-            $return .= $this->renderButton($button) . " ";
-        }
-
-        $return .= <<<HTML
-    </div>
-HTML;
         // ======================================================================================
         // INDEX OF ALL GRADEABLES
         // ======================================================================================
-        $return .= <<<HTML
-    <table class="gradeable_list" style="width:100%;">
-HTML;
 
-        $found_assignment = false;
+        $render_sections = [];
+
         foreach ($sections_to_list as $list_section => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
 
-            $found_assignment = true;
-            $section_id = self::gradeableSections[$list_section]["section_id"];
-
-            $title_html = self::gradeableSections[$list_section]["title"];
-            if (self::gradeableSections[$list_section]["subtitle"] !== "") {
-                $title_html .= " &nbsp;&nbsp; <em>" . self::gradeableSections[$list_section]["subtitle"] . "</em>";
-            }
-
-            $return .= <<<HTML
-        <tr class="bar"><td colspan="10"></td></tr>
-        <tr class="colspan nav-title-row" id="{$section_id}"><td colspan="4">{$title_html}</td></tr>
-        <tbody id="{$section_id}_tbody">
-HTML;
+            $render_gradeables = [];
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
 
-                $buttons = [];
-
-                $title_cell = $this->getTitleCell($gradeable);
-                $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable) : null;
-                $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $list_section): null;
-
-                //Grade button if we can access grading
-                if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $gradeable->getMinimumGradingGroup())) || ($this->core->getUser()->getGroup() === 4 && $gradeable->getPeerGrading())) {
-                    $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
-                }
-
-                //Admin buttons
-                if ($this->core->getUser()->accessAdmin()) {
-                    $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
-                    $buttons[] = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable) : null;
-                    $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
-                }
-
-                $return .= <<<HTML
-            <tr class="gradeable_row">
-                <td>{$title_cell}</td>
-HTML;
-                foreach ($buttons as $button) {
-                    $return .= <<<HTML
-                <td style="padding: 20px;">{$this->renderButton($button)}</td>
-HTML;
-                }
-                $return .= <<<HTML
-            </tr>
-HTML;
+                $render_gradeables[] = [
+                    "id" => $gradeable->getId(),
+                    "name" => $gradeable->getName(),
+                    "url" => $gradeable->getInstructionsURL(),
+                    "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
+                    "buttons" => $this->getButtons($gradeable, $list_section)
+                ];
             }
-            $return .= '</tbody><tr class="colspan"><td colspan="10" style="border-bottom:2px black solid;"></td></tr>';
+
+            //Copy
+            $render_section = self::gradeableSections[$list_section];
+            $render_section["gradeables"] = $render_gradeables;
+
+            $render_sections[] = $render_section;
         }
-        if ($found_assignment == false) {
-            $return .= <<<HTML
-    <div class="container">
-    <p>There are currently no assignments posted.  Please check back later.</p>
-    </div></table></div>
-HTML;
-            return $return;
+        return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
+            "top_buttons" => $top_buttons,
+            "sections" => $render_sections,
+            "message_file_contents" => $message_file_contents,
+            "display_custom_message" => $display_custom_message
+        ]);
+    }
+
+    /**
+     * Get the list of buttons to display to the user for a Gradeable
+     * @param Gradeable $gradeable
+     * @param int $list_section
+     * @return array
+     */
+    private function getButtons(Gradeable $gradeable, int $list_section): array {
+        $buttons = [];
+        $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable) : null;
+        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $list_section): null;
+
+        //Grade button if we can access grading
+        if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $gradeable->getMinimumGradingGroup())) || ($this->core->getUser()->getGroup() === 4 && $gradeable->getPeerGrading())) {
+            $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
         }
-        $return .= <<<HTML
-                            </table>
-                        </div>
-HTML;
-        return $return;
+
+        //Admin buttons
+        if ($this->core->getUser()->accessAdmin()) {
+            $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
+            $buttons[] = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable) : null;
+            $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
+        }
+
+        return $buttons;
     }
 
     //Tests for if we have the various buttons
@@ -281,26 +250,6 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
-     * @return string
-     */
-    private function getTitleCell(Gradeable $gradeable): string {
-        $gradeable_title = $gradeable_title = '<label>' . $gradeable->getName() . '</label>';
-        if (trim($gradeable->getInstructionsURL()) != '') {
-            $gradeable_title .= '<a class="external" href="' . $gradeable->getInstructionsURL() . '" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-        }
-
-        if ($this->core->getUser()->accessAdmin() && $gradeable->canDelete()) {
-            $form_action = $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'delete_gradeable', 'id' => $gradeable->getId()));
-            $gradeable_title .= <<<HTML
-                    <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{$form_action}","{$gradeable->getName()}");'></i>
-HTML;
-
-        }
-        return $gradeable_title;
-    }
-
-    /**
-     * @param Gradeable $gradeable
      * @return Button|null
      */
     private function getTeamButton(Gradeable $gradeable) {
@@ -309,7 +258,7 @@ HTML;
         $past_lock_date = $date->format('Y-m-d H:i:s') < $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
 
         if ($past_lock_date) {
-            $team_display_date = "<br><span style=\"font-size:smaller;\">(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})</span>";
+            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})";
         } else {
             $team_display_date = '';
         }
@@ -339,7 +288,8 @@ HTML;
         }
 
         $button = new Button([
-            "title" => $team_button_text . $team_display_date,
+            "title" => $team_button_text,
+            "subtitle" => $team_display_date,
             "href" => $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team')),
             "class" => "btn {$team_button_type} btn-nav"
         ]);
@@ -712,40 +662,6 @@ HTML;
             $TA_percent = $TA_percent * 100;
         }
         return array($components_total, $TA_percent);
-    }
-
-    /**
-     * @param float $percent
-     * @return string
-     */
-    private function getProgressBar(float $percent): string {
-        //Give them an imaginary progress point if they need it
-        $percent = max($percent, 2);
-        return "<div class=\"meter\"><span style=\"width: {$percent}%\"></span></div>";
-    }
-
-    /**
-     * @param Button|null $button
-     * @return string
-     */
-    private function renderButton($button): string {
-        if ($button === null) {
-            return "";
-        }
-
-        $disable = $button->isDisabled() ? "disabled" : "";
-        $href = $button->isDisabled() ? "" : "href=\"{$button->getHref()}\"";
-        $html = "<a class=\"{$button->getClass()}\" $href $disable>";
-        $html .= $button->getTitle();
-        if ($button->getSubtitle() !== null) {
-            $html .= "<br><span style=\"font-size:smaller;\">{$button->getSubtitle()}</span>";
-        }
-        $html .= "</a>";
-        if ($button->getProgress() !== null) {
-            $html .= $this->getProgressBar($button->getProgress());
-        }
-
-        return $html;
     }
 
     public function deleteGradeableForm() {
