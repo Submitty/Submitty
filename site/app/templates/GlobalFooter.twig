@@ -17,11 +17,11 @@
         Runtime: {{ runtime }}<br /><br />
         <h3>Site Details</h3>
         Total Submitty Details: {{ core.getSubmittyDB().getQueryCount() }}<br /><br />
-        Submitty Queries:<br /> {{ core.getSubmittyDB().getPrintQueries() }}
+        Submitty Queries:<br /> {{ core.getSubmittyDB().getPrintQueries()|raw }}
 
         <h3>Course Details</h3>
         Total Course Queries: {{ core.getCourseDB().getQueryCount() }}<br /><br />
-        Course Queries: <br /> {{ core.getCourseDB().getPrintQueries() }}
+        Course Queries: <br /> {{ core.getCourseDB().getPrintQueries()|raw }}
     </div>
 {% endif %}
 </body>
