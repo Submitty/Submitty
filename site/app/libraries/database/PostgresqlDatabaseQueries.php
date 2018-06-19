@@ -6,6 +6,9 @@ use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\AdminGradeable;
 use app\models\Gradeable;
+use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
@@ -823,6 +826,240 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     	}
 
         $this->course_db->query($query, $vals);
+    }
+
+    /**
+     * Returns array of User objects for users with given User IDs
+     * @param string[] $user_ids
+     * @return User[]
+     */
+    public function getUsersById(array $user_ids) {
+
+        // Generate placeholders for each team id
+        $place_holders = implode(',', array_fill(0, count($user_ids), '?'));
+        $query = "
+            SELECT u.*, sr.grading_registration_sections
+            FROM users u
+            LEFT JOIN (
+                SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+                FROM grading_registration
+                GROUP BY user_id
+            ) as sr ON u.user_id=sr.user_id
+            WHERE u.user_id IN ($place_holders)";
+        $this->course_db->query($query, $user_ids);
+
+        $users = [];
+        foreach ($this->course_db->rows() as $user) {
+            if (isset($user['grading_registration_sections'])) {
+                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+            }
+            $user = new User($this->core, $user);
+            $users[$user->getId()] = $user;
+        }
+
+        return $users;
+    }
+
+    /**
+     * Return array of Team objects for teams with given Team IDs
+     * @param string[] $team_ids
+     * @return Team[]
+     */
+    public function getTeamsById(array $team_ids) {
+
+        // Generate placeholders for each team id
+        $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
+        $query = "
+          SELECT 
+            g_team.team_id, 
+            registration_section, 
+            rotating_section,
+            team.array_user,
+            team.array_state
+          FROM gradeable_teams g_team
+          LEFT JOIN (
+            SELECT
+              in_team.team_id,
+              array_agg(in_team.user_id) as array_user,
+              array_agg(in_team.state) as array_state
+            FROM teams as in_team
+            GROUP BY in_team.team_id
+          ) AS team ON team.team_id=g_team.team_id
+          WHERE g_team.team_id IN ($place_holders)";
+
+        $this->course_db->query($query, $team_ids);
+
+        $teams = [];
+        foreach ($this->course_db->rows() as $team_row) {
+            // Get the user data for the team
+            $row = [];
+            $row['user'] = $this->course_db->fromDatabaseToPHPArray($team_row['array_user']);
+            $row['state'] = $this->course_db->fromDatabaseToPHPArray($team_row['array_state']);
+
+            // Transpose the users/states array
+            $users = [];
+            for ($j = 0; $j < count($row['user']); ++$j) {
+                $users[$j] = [
+                    'user_id' => $row['user'][$j],
+                    'state' => $row['state'][$j]
+                ];
+            }
+
+            // Create the team with the query results and users array
+            $team = new Team($this->core, array_merge($team_row, ['users' => $users]));
+            $teams[$team->getId()] = $team;
+        }
+
+        return $teams;
+    }
+
+    /**
+     * Gets all GradedGradeable's associated with a Gradeable.  If
+     *  both $users and $teams are null, then everyone will be retrieved
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string[]|null $users The ids of the users to get data for
+     * @param string[]null $teams The ids of the teams to get data for
+     * @return GradedGradeable[]
+     * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
+     */
+    public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
+
+        // Make sure that our users/teams are arrays
+        if ($users !== null) {
+            if (!is_array($users)) {
+                $users = [$users];
+            }
+        } else {
+            $users = [];
+        }
+        if ($teams !== null) {
+            if (!is_array($teams)) {
+                $teams = [$teams];
+            }
+        } else {
+            $teams = [];
+        }
+
+        // If both are zero-count, that indicates to get all users/teams
+        $all = (count($users) === count($teams)) && count($users) === 0;
+
+        $query = "
+            SELECT
+              gd.gd_id AS id,
+              gd.gd_user_id as user_id,
+              gd.gd_team_id AS team_id,
+              gd.gd_overall_comment as overall_comment,
+              gd.gd_user_viewed_date as user_viewed_date,
+              gcd.array_comp_id,
+              gcd.array_score,
+              gcd.array_comment,
+              gcd.array_grader_id,
+              gcd.array_graded_version,
+              gcd.array_grade_time,
+              gcd.array_mark_id
+            FROM gradeable_data gd
+              LEFT JOIN (
+                SELECT
+                  array_agg(in_gcd.gc_id) as array_comp_id,
+                  array_agg(gcd_score) as array_score,
+                  array_agg(gcd_component_comment) as array_comment,
+                  array_agg(gcd_grader_id) as array_grader_id,
+                  array_agg(gcd_graded_version) as array_graded_version,
+                  array_agg(gcd_grade_time) as array_grade_time,
+                  array_agg(string_mark_id) as array_mark_id,
+                  in_gcd.gd_id
+                FROM gradeable_component_data in_gcd
+                  LEFT JOIN (
+                    SELECT
+                      array_to_string(array_agg(gcm_id), ',') AS string_mark_id,
+                      gc_id,
+                      gd_id
+                    FROM gradeable_component_mark_data
+                    GROUP BY gc_id, gd_id
+                  ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id
+                GROUP BY in_gcd.gd_id
+            ) AS gcd ON gcd.gd_id=gd.gd_id
+            WHERE gd.g_id=? AND ((gd.gd_user_id IN (?)) OR (gd.gd_team_id IN (?)) OR ?)";
+
+        $this->course_db->query($query, array(
+            $gradeable->getId(),
+            implode(',', $users),
+            implode(',', $teams),
+            $this->course_db->convertBoolean($all)));
+
+        $graded_gradeables = [];
+
+        $db_rows = $this->course_db->rows();
+
+        $user_ids = [];
+        $team_ids = [];
+
+        // Cache the graders / submitters
+        foreach($db_rows as $db_row) {
+            $user_ids = array_merge($user_ids, $this->course_db->fromDatabaseToPHPArray($db_row['array_grader_id']));
+
+            $s_user = $db_row['user_id'];
+            $s_team = $db_row['team_id'];
+            if($s_user !== null) {
+                $user_ids[] = $s_user;
+            }
+            if($s_team !== null) {
+                $team_ids[] = $s_team;
+            }
+        }
+        $user_ids = array_unique($user_ids);
+        $team_ids = array_unique($team_ids);
+
+        $users = $this->getUsersById($user_ids);
+        $teams = $this->getTeamsById($team_ids);
+
+        // decode the gradeable data
+        foreach ($db_rows as $db_row) {
+            $submitter = null;
+
+            // Use the cached teams/users from above
+            if (isset($db_row['team_id'])) {
+                $submitter = $teams[$db_row['team_id']];
+            } else {
+                $submitter = $users[$db_row['user_id']];
+            }
+
+            // Create the graded gradeable instance
+            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), $db_row);
+
+            $graded_components = [];
+
+            // Break down the graded component data into an array of arrays instead of arrays of sql array-strings
+            $array_properties = ['comp_id', 'score', 'comment', 'grader_id', 'graded_version', 'grade_time', 'mark_id'];
+            $db_row_split = [];
+            foreach ($array_properties as $property) {
+                $db_row_split[$property] = $this->course_db->fromDatabaseToPHPArray($db_row['array_' . $property]);
+            }
+
+            // Create all of the GradedComponents
+            for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
+                // Create a temporary array for each graded component instead of trying
+                //  to transpose the entire $db_row_split array
+                $comp_array = [
+                    'score' => $db_row_split['score'][$i],
+                    'comment' => $db_row_split['comment'][$i],
+                    'graded_version' => $db_row_split['graded_version'][$i],
+                    'grade_time' => $db_row_split['grade_time'][$i]
+                ];
+
+                $graded_components[] = new GradedComponent($this->core,
+                    $graded_gradeable,
+                    $users[$db_row_split['grader_id'][$i]],
+                    $db_row_split['comp_id'][$i],
+                    explode(',', $db_row_split['mark_id'][$i]),
+                    $comp_array);
+            }
+
+            $graded_gradeable->setGradedComponents($graded_components);
+            $graded_gradeables[] = $graded_gradeable;
+        }
+
+        return $graded_gradeables;
     }
 
 }

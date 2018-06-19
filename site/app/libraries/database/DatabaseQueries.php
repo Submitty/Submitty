@@ -2584,4 +2584,16 @@ AND gc_id IN (
 
         return $graded_gradeable;
     }
+
+    public function getUsersById(array $user_ids) {
+        throw new NotImplementedException();
+    }
+
+    public function getTeamsById(array $team_ids) {
+        throw new NotImplementedException();
+    }
+
+    public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
+        throw new NotImplementedException();
+    }
 }
