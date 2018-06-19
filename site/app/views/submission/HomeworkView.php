@@ -978,7 +978,7 @@ HTML;
             }
             else {
                 if($gradeable->getActiveVersion() > 0
-                    && $gradeable->getActiveVersion() === $current_version->getVersion()) {
+                    && $gradeable->validateVersions($current_version->getVersion())) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
         <p class="green-message">
