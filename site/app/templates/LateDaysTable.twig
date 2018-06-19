@@ -7,9 +7,9 @@
     {% set temp = student_gradeables[0].getStudentAllowedLateDays() %}
     {% for lateday in late_update %}
         {% if lateday.allowed_late_days - temp >= 0 %}
-            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d')}}: Earned {{ lateday.allowed_late_days - temp}} late day(s)</p>
+            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y')}}: Earned {{ lateday.allowed_late_days - temp}} late day(s)</p>
         {% else %}
-            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d')}}: Lost {{ (lateday.allowed_late_days - temp)|abs}} late day(s)</p>
+            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y')}}: Lost {{ (lateday.allowed_late_days - temp)|abs}} late day(s)</p>
         {% endif %}
         {% set temp = lateday.allowed_late_days %}
     {% endfor %}
