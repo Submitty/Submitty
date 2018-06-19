@@ -835,6 +835,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @return User[]
      */
     public function getUsersById(array $user_ids) {
+        if (count($user_ids) === 0) {
+            return [];
+        }
 
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($user_ids), '?'));
@@ -847,7 +850,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 GROUP BY user_id
             ) as sr ON u.user_id=sr.user_id
             WHERE u.user_id IN ($place_holders)";
-        $this->course_db->query($query, $user_ids);
+        $this->course_db->query($query, array_values($user_ids));
 
         $users = [];
         foreach ($this->course_db->rows() as $user) {
@@ -867,6 +870,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @return Team[]
      */
     public function getTeamsById(array $team_ids) {
+        if (count($team_ids) === 0) {
+            return [];
+        }
 
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
@@ -888,7 +894,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
           ) AS team ON team.team_id=g_team.team_id
           WHERE g_team.team_id IN ($place_holders)";
 
-        $this->course_db->query($query, $team_ids);
+        $this->course_db->query($query, array_values($team_ids));
 
         $teams = [];
         foreach ($this->course_db->rows() as $team_row) {
@@ -1035,8 +1041,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $team_ids[] = $s_team;
             }
         }
-        $user_ids = array_unique($user_ids);
-        $team_ids = array_unique($team_ids);
+
+        // Remove null / duplicate values being sneaky in our arrays
+        $filter_null = function($val) { return $val !== null; };
+        $user_ids = array_filter(array_unique($user_ids), $filter_null);
+        $team_ids = array_filter(array_unique($team_ids), $filter_null);
 
         $users = $this->getUsersById($user_ids);
         $teams = $this->getTeamsById($team_ids);
