@@ -80,13 +80,7 @@ class ForumController extends AbstractController {
     }
 
     private function showDeleted() {
-        return ($this->core->getUser()->getGroup() <= 2 && isset($_SESSION['show_deleted']) && $_SESSION['show_deleted'] === true);
-    }
-
-    private function updateShowDeleted($show_deleted) {
-        if($this->core->getUser()->getGroup() <= 2) {
-            $_SESSION['show_deleted'] = $show_deleted;
-        }
+        return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
@@ -392,9 +386,6 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        if(array_key_exists('show_deleted', $_REQUEST)) {
-            $this->updateShowDeleted(((int)$_GET["show_deleted"]) == 1);
-        }
         $show_deleted = $this->showDeleted();
         $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
 

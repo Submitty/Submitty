@@ -230,12 +230,13 @@ HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
 			$show_deleted_class = "active";
+			$show_deleted_action = "alterShowDeletedStatus(0);";
 		} else {
 			$show_deleted_class = "";
+			$show_deleted_action = "alterShowDeletedStatus(1);";
 		}
-		$show_deleted_url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'show_deleted' => ($show_deleted?"0":"1")));
 		$return .= <<<HTML
-			<a class="btn btn-primary {$show_deleted_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads" href="{$show_deleted_url}">Show Deleted Threads</a>
+			<a class="btn btn-primary {$show_deleted_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads" onclick="{$show_deleted_action}">Show Deleted Threads</a>
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 HTML;
 	}
