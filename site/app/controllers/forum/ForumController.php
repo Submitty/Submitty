@@ -60,6 +60,15 @@ class ForumController extends AbstractController {
             case 'add_category':
                 $this->addNewCategory();
                 break;
+            case 'delete_category':
+                $this->deleteCategory();
+                break;
+            case 'edit_category':
+                $this->editCategory();
+                break;
+            case 'reorder_categories':
+                $this->reorderCategories();
+                break;
             case 'show_stats':
                 $this->showStats();
                 break;
@@ -148,6 +157,17 @@ class ForumController extends AbstractController {
         return true;
     }
 
+    private function isCategoryDeletionGood($category_id){
+        // Check if not the last category which exists
+        $rows = $this->core->getQueries()->getCategories();
+        foreach($rows as $index => $values){
+            if(((int)$values["category_id"]) !== $category_id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function addNewCategory(){
         $result = array();
         if($this->core->getUser()->getGroup() <= 2){
@@ -161,6 +181,94 @@ class ForumController extends AbstractController {
                 }
             } else {
                 $result["error"] = "No category data submitted. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function deleteCategory(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            if(!empty($_REQUEST["deleteCategory"])) {
+                $category = (int)$_REQUEST["deleteCategory"];
+                if(!$this->isValidCategories(array($category))) {
+                    $result["error"] = "That category doesn't exists.";
+                } else if(!$this->isCategoryDeletionGood($category)) {
+                    $result["error"] = "Last category can't be deleted.";
+                } else {
+                    if($this->core->getQueries()->deleteCategory($category)) {
+                        $result["success"] = "OK";
+                    } else {
+                        $result["error"] = "Category is in use.";
+                    }
+                }
+            } else {
+                $result["error"] = "No category data submitted. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function editCategory(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $category_id = $_REQUEST["category_id"];
+            $category_desc = null;
+            $category_color = null;
+            $should_update = true;
+
+            if(!empty($_REQUEST["category_desc"])) {
+                $category_desc = $_REQUEST["category_desc"];
+                if($this->isValidCategories(-1, array($category_desc))) {
+                    $result["error"] = "That category already exists.";
+                    $should_update = false;
+                }
+            }
+            if(!empty($_REQUEST["category_color"])) {
+                $category_color = $_REQUEST["category_color"];
+                if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
+                    $result["error"] = "Given category color is not allowed.";
+                    $should_update = false;
+                }
+            }
+            if($should_update) {
+                $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+                $result["success"] = "OK";
+            } else if(!isset($result["error"])) {
+                $result["error"] = "No category data updated. Please try again.";
+            }
+        } else {
+            $result["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $result;
+    }
+
+    public function reorderCategories(){
+        $result = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $rows = $this->core->getQueries()->getCategories();
+
+            $current_order = array();
+            foreach ($rows as $row) {
+                $current_order[] = (int)$row['category_id'];
+            }
+            $new_order = array();
+            foreach ($_POST['categorylistitem'] as $item) {
+                $new_order[] = (int)$item;
+            }
+
+            if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
+                $this->core->getQueries()->reorderCategories($new_order);
+                $results["success"] = "ok";
+            } else {
+                $result["error"] = "Different Categories IDs given";
             }
         } else {
             $result["error"] = "You do not have permissions to do that.";
@@ -352,6 +460,7 @@ class ForumController extends AbstractController {
             }
             $thread['categories_ids'] = $list;
             $thread['categories_desc'] = explode("|", $thread['categories_desc']);
+            $thread['categories_color'] = explode("|", $thread['categories_color']);
         }
         return $ordered_threads;
     }
@@ -408,8 +517,21 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
     }
 
+    private function getAllowedCategoryColor() {
+        $colors = array();
+        $colors["MAROON"]   = "#800000";
+        $colors["OLIVE"]    = "#808000";
+        $colors["GREEN"]    = "#008000";
+        $colors["TEAL"]     = "#008080";
+        $colors["NAVY"]     = "#000080";
+        $colors["PURPLE"]   = "#800080";
+        $colors["GRAY"]     = "#808080";
+        $colors["BLACK"]    = "#000000";
+        return $colors;
+    }
+
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread');
+         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
     public function getEditPostContent(){

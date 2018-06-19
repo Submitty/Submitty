@@ -856,32 +856,35 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
-.cat-buttons {
-    background-color: #FFF;
-}
-
-.cat-selected {
-    -webkit-transition:background 1s;
-    -moz-transition:background 1s;
-    -o-transition:background 1s;
-    transition:background 1s
-}
-
-.cat-selected:hover {
+.cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
 }
 
-.cat-notselected {
-    -webkit-transition:background 1s;
-    -moz-transition:background 1s;
-    -o-transition:background 1s;
-    transition:background 1s
+#ui-category-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 60%;
 }
 
-.cat-notselected:hover {
+#ui-category-list li {
+    border-style: solid;
+    border-color: LightGray;
+    border-width: thin;
+    border-radius: 0.3em;
+    margin: 0.3em 0.1em 0.3em 0.1em;
+    padding: 0.2em;
+    height: 18px;
+}
+
+#ui-category-list .handle {
     opacity: 0.8;
     filter: alpha(opacity=80);
+}
+
+#ui-category-list .handle:hover {
+ cursor: move;
 }
 
 .rainbow {
