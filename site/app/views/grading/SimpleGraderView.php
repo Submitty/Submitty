@@ -362,75 +362,16 @@ HTML;
         $g_id = $gradeable->getId();
         $section_type = ($gradeable->isGradeByRegistration() ? "Registration": "Rotating");
 
-        $return = <<<HTML
-        Name: ________________________________________
-        <span style="float:right;">
-        Date: ____________________
-        </span>
-        <br />
-        {$gradeable->getName()}</b>
-        <span style="float:right;">
-        Section: <b>{$section}</b>
-        </span>
-        <br />
-        <br />
-        <table border="1" width="100%">
-            <tr>
-                <td style="width: 10%">User Id</td>
-                <td style="width: 20%">First Name</td>
-                <td style="width: 20%">Last Name</td>
-HTML;
-
         //Get the names of all of the checkpoints
         $checkpoints = array();
         foreach($gradeable->getComponents() as $row){
           array_push($checkpoints, $row->getTitle());
         }
-
-        $width = (50/count($checkpoints));
-        for($i = 0; $i < count($checkpoints); $i++) {
-            $return .= <<<HTML
-                <td style="width: {$width}%">{$checkpoints[$i]}</td>
-HTML;
-        }
-
-        $return .= <<<HTML
-            </tr>
-HTML;
-        $j = 0;
-        foreach($students as $student) {
-            $color = ($j % 2 == 0) ? "white" : "lightgrey";
-            $return .= <<<HTML
-            <tr style="background-color: {$color}">
-                <td>
-                    {$student->getId()}
-                </td>
-HTML;
-            $return .= <<<HTML
-                <td>
-                    {$student->getDisplayedFirstName()}
-                </td>
-HTML;
-            $return .= <<<HTML
-                <td>
-                    {$student->getLastName()}
-                </td>
-HTML;
-            for($i = 0; $i < count($checkpoints); $i++) {
-                $return .= <<<HTML
-                <td></td>
-HTML;
-            }
-            $return .= <<<HTML
-            </tr>
-HTML;
-            $j++;
-        }
-
-        $return .= <<<HTML
-        </table>
-HTML;
-    return $return;
-
+        return $this->core->getOutput()->renderTwigTemplate("grading/simple/PrintLab.twig", [
+            "gradeable" => $gradeable,
+            "section" => $section,
+            "checkpoints" => $checkpoints,
+            "students" => $students
+        ]);
     }
 }
