@@ -11,7 +11,11 @@ class NavigationView extends AbstractView {
     const gradeableSections = [
         GradeableList::FUTURE => [
             //What title is displayed to the user for each category
-            "title" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
+            "title" => "FUTURE",
+            //Shown italicized after the title
+            "subtitle" => "visible only to Instructors",
+            //Element id of the header row (used primarily by e2e tests)
+            "section_id" => "future",
             //What bootstrap button the student button will be. Information about bootstrap buttons can be found here:
             //https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
             "button_type_submission" => "btn-default",
@@ -22,31 +26,41 @@ class NavigationView extends AbstractView {
             "prefix" => "ALPHA SUBMIT"
         ],
         GradeableList::BETA => [
-            "title" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
+            "title" => "BETA",
+            "subtitle" => "open for testing by TAs",
+            "section_id" => "beta",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-default",
             "prefix" => "BETA SUBMIT"
         ],
         GradeableList::OPEN => [
             "title" => "OPEN",
+            "subtitle" => "",
+            "section_id" => "open",
             "button_type_submission" => "btn-primary",
             "button_type_grading" => "btn-default",
             "prefix" => "SUBMIT"
         ],
         GradeableList::CLOSED => [
             "title" => "PAST DUE",
+            "subtitle" => "",
+            "section_id" => "closed",
             "button_type_submission" => "btn-danger",
             "button_type_grading" => "btn-default",
             "prefix" => "LATE SUBMIT"
         ],
         GradeableList::GRADING => [
-            "title" => "CLOSED &nbsp;&nbsp; <em>being graded by TA/Instructor</em>",
+            "title" => "CLOSED",
+            "subtitle" => "being graded by TA/Instructor",
+            "section_id" => "items_being_graded",
             "button_type_submission" => "btn-default",
             "button_type_grading" => "btn-primary",
             "prefix" => "VIEW SUBMISSION"
         ],
         GradeableList::GRADED => [
             "title" => "GRADES AVAILABLE",
+            "subtitle" => "",
+            "section_id" => "graded",
             "button_type_submission" => 'btn-default',
             "button_type_grading" => 'btn-default',
             "prefix" => "VIEW GRADE"
@@ -154,10 +168,16 @@ HTML;
             /** @var Gradeable[] $gradeable_list */
 
             $found_assignment = true;
-            $section_id = str_replace(" ", "_", strtolower($list_section));
+            $section_id = self::gradeableSections[$list_section]["section_id"];
+
+            $title_html = self::gradeableSections[$list_section]["title"];
+            if (self::gradeableSections[$list_section]["subtitle"] !== "") {
+                $title_html .= " &nbsp;&nbsp; <em>" . self::gradeableSections[$list_section]["subtitle"] . "</em>";
+            }
+
             $return .= <<<HTML
         <tr class="bar"><td colspan="10"></td></tr>
-        <tr class="colspan nav-title-row" id="{$section_id}"><td colspan="4">{$this::gradeableSections[$list_section]["title"]}</td></tr>
+        <tr class="colspan nav-title-row" id="{$section_id}"><td colspan="4">{$title_html}</td></tr>
         <tbody id="{$section_id}_tbody">
 HTML;
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
