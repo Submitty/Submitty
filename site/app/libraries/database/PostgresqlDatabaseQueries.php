@@ -8,6 +8,7 @@ use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\GradedVersion;
 use app\models\gradeable\Submitter;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -957,6 +958,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               gcd.array_graded_version,
               gcd.array_grade_time,
               gcd.array_mark_id,
+              egd.array_version,
+              egd.array_non_hidden_non_extra_credit,
+              egd.array_non_hidden_extra_credit,
+              egd.array_hidden_non_extra_credit,
+              egd.array_hidden_extra_credit,
+              egd.array_submission_time,
+              egd.array_autograding_complete,
               egv.active_version
             FROM gradeable_data gd
               LEFT JOIN (
@@ -984,6 +992,21 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 SELECT * 
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=gd.gd_team_id OR egv.user_id=gd.gd_user_id) AND egv.g_id=gd.g_id
+              LEFT JOIN (
+                SELECT
+                  array_agg(in_egd.g_version) AS array_version,
+                  array_agg(in_egd.autograding_non_hidden_non_extra_credit) AS array_non_hidden_non_extra_credit,
+                  array_agg(in_egd.autograding_non_hidden_extra_credit) AS array_non_hidden_extra_credit,
+                  array_agg(in_egd.autograding_hidden_non_extra_credit) AS array_hidden_non_extra_credit,
+                  array_agg(in_egd.autograding_hidden_extra_credit) AS array_hidden_extra_credit,
+                  array_agg(in_egd.submission_time) AS array_submission_time,
+                  array_agg(in_egd.autograding_complete) AS array_autograding_complete,
+                  g_id,
+                  user_id,
+                  team_id
+                FROM electronic_gradeable_data as in_egd
+                GROUP BY g_id, user_id, team_id
+              ) AS egd ON (egd.team_id=gd.gd_team_id OR egd.user_id=gd.gd_user_id) AND egd.g_id=gd.g_id
             WHERE gd.g_id=? AND ((gd.gd_user_id IN (?)) OR (gd.gd_team_id IN (?)) OR ?)";
 
         $this->course_db->query($query, array(
@@ -1033,11 +1056,30 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), $db_row);
 
             $graded_components = [];
+            $graded_versions = [];
 
-            // Break down the graded component data into an array of arrays instead of arrays of sql array-strings
-            $array_properties = ['comp_id', 'score', 'comment', 'grader_id', 'graded_version', 'grade_time', 'mark_id'];
+            // Break down the graded component / version data into an array of arrays
+            //  instead of arrays of sql array-strings
+            $comp_array_properties = [
+                'comp_id',
+                'score',
+                'comment',
+                'grader_id',
+                'graded_version',
+                'grade_time',
+                'mark_id',
+            ];
+            $version_array_properties = [
+                'version',
+                'non_hidden_non_extra_credit',
+                'non_hidden_extra_credit',
+                'hidden_non_extra_credit',
+                'hidden_extra_credit',
+                'submission_time',
+                'autograding_complete'
+            ];
             $db_row_split = [];
-            foreach ($array_properties as $property) {
+            foreach (array_merge($version_array_properties, $comp_array_properties) as $property) {
                 $db_row_split[$property] = $this->course_db->fromDatabaseToPHPArray($db_row['array_' . $property]);
             }
 
@@ -1045,12 +1087,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
                 // Create a temporary array for each graded component instead of trying
                 //  to transpose the entire $db_row_split array
-                $comp_array = [
-                    'score' => $db_row_split['score'][$i],
-                    'comment' => $db_row_split['comment'][$i],
-                    'graded_version' => $db_row_split['graded_version'][$i],
-                    'grade_time' => $db_row_split['grade_time'][$i]
-                ];
+                $comp_array = [];
+                foreach ($comp_array_properties as $property) {
+                    $comp_array[$property] = $db_row_split[$property][$i];
+                }
 
                 $graded_components[] = new GradedComponent($this->core,
                     $graded_gradeable,
@@ -1060,7 +1100,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $comp_array);
             }
 
+            // Create all of the GradedVersions
+            for ($i = 0; $i < count($db_row_split['version']); ++$i) {
+                // Similarly, transpose each version
+                $version_array = [];
+                foreach ($version_array_properties as $property) {
+                    $version_array[$property] = $db_row_split[$property][$i];
+                }
+
+                $version = new GradedVersion($this->core, $graded_gradeable, $version_array);
+                $graded_versions[$version->getVersion()] = $version;
+            }
+
             $graded_gradeable->setGradedComponents($graded_components);
+            $graded_gradeable->setGradedVersions($graded_versions);
             $graded_gradeables[] = $graded_gradeable;
         }
 
