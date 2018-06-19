@@ -24,7 +24,7 @@
 {% endif %}
 {% if show_categories %}
     {% set categories = core.getQueries().getCategories() %}
-    <div style="margin-bottom:10px;" class="form-group row">
+    <div id="category-selection-container" style="margin-bottom:10px;" class="form-group row">
         <label for="cat" id="cat_label">Categories</label> <br>
         {% if categories | length == 0 %}
             <span class='category-list-no-element' style="margin-left: 1em;" >
@@ -33,7 +33,7 @@
         {% endif %}
         <div id='categories-pick-list'>
         {% for category in core.getQueries().getCategories() %}
-            <a class="btn cat-buttons cat-notselected" cat-color="{{ category.color }}" style="background-color: {{ category.color }}; color: white;">{{ category.category_desc }}
+            <a class="btn cat-buttons" cat-color="{{ category.color }}" style="background-color: {{ category.color }}; color: white;">{{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
             </a>
         {% endfor %}
@@ -41,8 +41,9 @@
     <script type="text/javascript">
     $(function() {
         refreshCategories();
-        $("#create_thread_form").submit(function() {
-            if($(this).find('.cat-selected').length == 0) {
+        $("#thread_form").submit(function() {
+
+            if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
                 alert("At least one category must be selected.");
                 return false;
             }
