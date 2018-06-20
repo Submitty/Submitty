@@ -467,6 +467,7 @@ function addMark(me, num) {
                 score: points
             });
             parent.append(getMarkView(num, id2, id2, 1, editModeEnabled));
+            window.location.reload();
             //updateMarksOnPage(num);
           //  window.location.reload();
           //  toggleEditMode();
@@ -517,6 +518,8 @@ function deleteMark(me, c_index, last_num) {
         current_mark.attr('id', 'mark_id-'+c_index+'-'+new_num);
     }
     saveMark(c_index, true);
+    updateMarksOnPage(c_index);
+    //window.location.reload();
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
