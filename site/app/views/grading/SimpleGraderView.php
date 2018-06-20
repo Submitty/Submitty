@@ -17,20 +17,11 @@ class SimpleGraderView extends AbstractView {
      * @return string
      */
     public function simpleDisplay($gradeable, $rows, $graders, $section_type) {
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
-
-        $return = '';
 
         // Default is viewing your sections sorted by id
         // Limited grader does not have "View All"
         // If nothing to grade, Instuctor will see all sections
-        if (!isset($_GET['sort'])) {
-            $sort = 'id';
-        } else {
-            $sort = $_GET['sort'];
-        }
         if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
             $view = 'all';
         } else {
@@ -55,8 +46,6 @@ class SimpleGraderView extends AbstractView {
         $components_numeric = [];
         $components_text = [];
 
-        $num_text = 0;
-        $num_numeric = count($gradeable->getComponents());
         $comp_ids = array();
         if ($action != 'lab') {
             foreach ($gradeable->getComponents() as $component) {
@@ -69,9 +58,6 @@ class SimpleGraderView extends AbstractView {
             }
         }
 
-
-        $count = 1;
-        $row = 0;
         $num_users = 0;
         $sections = array();
 
@@ -94,20 +80,12 @@ class SimpleGraderView extends AbstractView {
                 ];
             }
             $sections[$section]["rows"][] = $gradeable_row;
-        }
-        $component_ids = json_encode($comp_ids);
-        if (false) {
+
             if ($gradeable_row->getUser()->getRegistrationSection() != "") {
                 $num_users++;
             }
-
-            $return .= <<<HTML
-            </tr>
-HTML;
-            $row++;
-            $count++;
         }
-
+        $component_ids = json_encode($comp_ids);
 
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -127,11 +105,10 @@ HTML;
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
             "num_users" => $num_users,
-            "components" => $gradeable->getComponents(),
+            "components_numeric" => $components_numeric,
             "sections" => $sections
         ]);
 
-        $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
 
         return $return;
     }

@@ -121,9 +121,9 @@
                         </td>
                     </tr>
                 </tbody>
-                <tbody id="section-{$section}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
+                <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
                     {% for row in section.rows %}
-                        {{ self.render_row(self, action, gradeable, section, row, loop.index0, components_numeric, components_text) }}
+                        {{ self.render_row(self, action, gradeable, section, row, loop.index0, components_numeric) }}
                     {% endfor %}
                 </tbody>
             {% endfor %}
@@ -131,7 +131,8 @@
     </table>
 </div>
 
-{% macro render_row(self, action, gradeable, section, row, index, components_numeric, components_text) %}
+{# Render one student's row in the table #}
+{% macro render_row(self, action, gradeable, section, row, index, components_numeric) %}
     {% set sytle = "" %}
     {% if row.getUser().accessGrading() %}
         {% set sytle = "style='background: #7bd0f7;'" %}
@@ -146,11 +147,12 @@
         {% if action == 'lab' %}
             {{ self.render_lab_cols(self, gradeable, section, row, index) }}
         {% else %}
-            {{ self.render_numeric_cols(self, gradeable, section, row, index, components_numeric, components_text) }}
+            {{ self.render_numeric_cols(self, gradeable, section, row, index, components_numeric) }}
         {% endif %}
     </tr>
 {% endmacro %}
 
+{# Render the grading columns for a lab #}
 {% macro render_lab_cols(self, gradeable, section, row, index) %}
     {% for component in row.getComponents() %}
         {% if component.getIsText() %}
@@ -161,6 +163,8 @@
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
+                data-row-index="{{ index }}"
+                data-col-index="{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component.getScore() }}"
                 {% if component.getGrader() != null %}
@@ -179,7 +183,8 @@
     {% endfor %}
 {% endmacro %}
 
-{% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric, components_text) %}
+{# Render the grading columns for a test #}
+{% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric) %}
     {% set col = 0 %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
@@ -192,8 +197,10 @@
                         style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : ""}}"
                         type="text"
                         id="cell-{{ index }}-{{ col }}"
-                        value="{{  component.getScore() }}"
+                        data-row-index="{{ index }}"
+                        data-col-index="{{ col }}"
                         data-id="{{  component.getId() }}"
+                        value="{{  component.getScore() }}"
                         {% if component.getGrader() != null %}
                             data-grader="{{ component.getGrader().getId() }}"
                         {% endif %}
@@ -217,17 +224,21 @@
         </td>
     {% endif %}
 
-    {% for component in components_text %}
-        <td class="option-small-input">
-            <input
-                class="option-small-box"
-                type="text"
-                id="cell-{{ index }}-{{ col }}"
-                value="{{ component.getComment() }}"
-                data-id="{{ component.getId() }}"
-            />
-        </td>
-        {# See above #}
-        {% set col = col + 1 %}
+    {% for component in row.getComponents() %}
+        {% if component.getIsText() %}
+            <td class="option-small-input">
+                <input
+                    class="option-small-box"
+                    type="text"
+                    id="cell-{{ index }}-{{ col }}"
+                    data-row-index="{{ index }}"
+                    data-col-index="{{ col }}"
+                    value="{{ component.getComment() }}"
+                    data-id="{{ component.getId() }}"
+                />
+            </td>
+            {# See above #}
+            {% set col = col + 1 %}
+        {% endif %}
     {% endfor %}
 {% endmacro %}

@@ -8,16 +8,14 @@
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
-            {% for section in sections %}
-                {% if not component.getIsText() %}
-                    <tbody>
-                        <tr>
-                            <td>{{ section }}</td>
-                            <td id="avg-section-{{ section }}"></td>
-                            <td id="stddev-section-{{ section }}"></td>
-                        </tr>
-                    </tbody>
-                {% endif %}
+            {% for section, info in sections %}
+                <tbody>
+                    <tr>
+                        <td>{{ section }}</td>
+                        <td id="avg-section-{{ section }}"></td>
+                        <td id="stddev-section-{{ section }}"></td>
+                    </tr>
+                </tbody>
             {% endfor %}
             <thead class="persist-thead">
             <tr>
@@ -25,16 +23,14 @@
                 <td colspan="2"></td>
             </tr>
             </thead>
-            {% for component in components %}
-                {% if not component.getIsText() %}
-                    <tbody>
-                        <tr>
-                            <td>{{ component.getTitle() }}</td>
-                            <td id="avg-component-{{ loop.index0 }}"></td>
-                            <td id="stddev-component-{{ loop.index0 }}"></td>
-                        </tr>
-                    </tbody>
-                {% endif %}
+            {% for component in components_numeric %}
+                <tbody>
+                    <tr>
+                        <td>{{ component.getTitle() }}</td>
+                        <td id="avg-component-{{ loop.index0 }}"></td>
+                        <td id="stddev-component-{{ loop.index0 }}"></td>
+                    </tr>
+                </tbody>
             {% endfor %}
             <thead class="persist-thead">
             <tr>
