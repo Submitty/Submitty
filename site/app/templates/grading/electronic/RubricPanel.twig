@@ -34,26 +34,26 @@
             {% endif %}
 
             <div class="inner-container" id="grading-box">
-            {% if gradeable.getActiveVersion() == 0 %}
-                <h4>No Submission</h4>
-                <script type="application/javascript">
-                    var grading_data = null;
-                </script>
-            {% else %}
-                </div>
-                <script type="application/javascript">
-                    var grading_data = {{ grading_data|raw }};
-                    renderGradeable(grading_data)
-                        .then(function(elements) {
-                            $("#grading-box").append(elements);
-                            updateAllProgressPoints();
-                        })
-                        .catch(function(err) {
-                            alert("Could not render gradeable: " + err.message);
-                            console.error(err);
-                        });
-                </script>
-            {% endif %}
+                {% if gradeable.getActiveVersion() == 0 %}
+                    <h4>No Submission</h4>
+                    <script type="application/javascript">
+                        var grading_data = null;
+                    </script>
+                {% else %}
+                    <script type="application/javascript">
+                        var grading_data = {{ grading_data|raw }};
+                        renderGradeable(grading_data)
+                            .then(function(elements) {
+                                $("#grading-box").append(elements);
+                                updateAllProgressPoints();
+                            })
+                            .catch(function(err) {
+                                alert("Could not render gradeable: " + err.message);
+                                console.error(err);
+                            });
+                    </script>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 </div>
