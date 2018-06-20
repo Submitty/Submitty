@@ -3,7 +3,7 @@
 {% if not gradeable.beenTAgraded() %}
     <br>
     <h3>This assignment has not been graded yet</h3>
-{% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+{% elseif not active_same_as_graded %}
     <br>
     <h3>The version you have selected above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
 {% elseif not grading_complete %}
