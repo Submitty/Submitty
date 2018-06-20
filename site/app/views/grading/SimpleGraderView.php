@@ -2,7 +2,6 @@
 
 namespace app\views\grading;
 
-use app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\User;
 use app\views\AbstractView;

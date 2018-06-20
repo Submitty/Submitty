@@ -49,52 +49,54 @@
     {% endif %}
 
     <table class="table table-striped table-bordered persist-area">
+        {# Table header #}
         <thead class="persist-thead">
-        <tr>
-            <td width="1%"></td>
-            <td width="3%">Section</td>
-            <td width="68" style="text-align: left">
-                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
-                    <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i>
-                </a>
-            </td>
-            <td width="92" style="text-align: left">
-                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
-                    <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i>
-                </a>
-            </td>
-            <td width="91" style="text-align: left">
-                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
-                    <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i>
-                </a>
-            </td>
+            <tr>
+                <td width="1%"></td>
+                <td width="3%">Section</td>
+                <td width="68" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
+                <td width="92" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
+                <td width="91" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
 
-            {% if action == 'lab' %}
-                {% set colspan = 5 + gradeable.getComponents()|length %}
-                {% for component in gradeable.getComponents() %}
-                    <td width="100">
-                        {{ component.getTitle() }}
-                    </td>
-                {% endfor %}
-            {% else %}
-                {% set colspan = 5 + components_numeric|length + components_text|length %}
-                {% if components_numeric|length > 0 %}
-                    {% set colspan = colspan + 1 %}
-                    {% for component in components_numeric %}
-                        <td width="35" style="text-align: center">
-                            {{ component.getTitle() }}({{ component.getMaxValue() }})
+                {% if action == 'lab' %}
+                    {% set colspan = 5 + gradeable.getComponents()|length %}
+                    {% for component in gradeable.getComponents() %}
+                        <td width="100">
+                            {{ component.getTitle() }}
                         </td>
                     {% endfor %}
-                    <td width="25" style="text-align: center">Total</td>
+                {% else %}
+                    {% set colspan = 5 + components_numeric|length + components_text|length %}
+                    {% if components_numeric|length > 0 %}
+                        {% set colspan = colspan + 1 %}
+                        {% for component in components_numeric %}
+                            <td width="35" style="text-align: center">
+                                {{ component.getTitle() }}({{ component.getMaxValue() }})
+                            </td>
+                        {% endfor %}
+                        <td width="25" style="text-align: center">Total</td>
+                    {% endif %}
+                    {% for component in components_text %}
+                        <td style="text-align: center">
+                            {{ component.getTitle() }}
+                        </td>
+                    {% endfor %}
                 {% endif %}
-                {% for component in components_text %}
-                    <td style="text-align: center">
-                        {{ component.getTitle() }}
-                    </td>
-                {% endfor %}
-            {% endif %}
-        </tr>
+            </tr>
         </thead>
+        {# /Table header #}
         {% if sections|length == 0 %}
             <tbody>
                 <tr class="info">
@@ -103,6 +105,7 @@
             </tbody>
         {% else %}
             {% for section_id, section in sections %}
+                {# Section header #}
                 <tbody>
                     <tr class="info persist-header">
                         <td colspan="{{ colspan }}" style="text-align: center">
@@ -121,6 +124,7 @@
                         </td>
                     </tr>
                 </tbody>
+                {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
                     {% for row in section.rows %}
                         {{ self.render_row(self, action, gradeable, section, row, loop.index0, components_numeric) }}
