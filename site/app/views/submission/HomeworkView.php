@@ -25,13 +25,27 @@ class HomeworkView extends AbstractView {
         return "re-submit";
     }
 
+    /**
+     * @param Gradeable $gradeable
+     * @param int $extensions
+     * @return string
+     */
+    public function renderLateDayMessage(Gradeable $gradeable, int $extensions) {
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        $total_late_used = 0;
+        $curr_late = 0;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+            $curr_late = $g->getStudentAllowedLateDays();
+        }
+        $late_days_remaining = $curr_late - $total_late_used;
+        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
+        $would_be_days_late = $gradeable->getWouldBeDaysLate();
+        $late_days_allowed = $gradeable->getAllowedLateDays();
 
-    public function printLateDayInformationMessage($extensions,
-                                                   $late_days_remaining,
-                                                   $active_version,
-                                                   $active_days_late,
-                                                   $would_be_days_late,
-                                                   $late_days_allowed) {
+        $active_version = $gradeable->getActiveVersion();
 
         $info = "";
         $error = false;
@@ -206,38 +220,15 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-        $order_by = [
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
-        ];
-        $total_late_used = 0;
-        $curr_late = 0;
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
-            $g->calculateLateDays($total_late_used);
-            $curr_late = $g->getStudentAllowedLateDays();
-        }
-        $late_days_remaining = $curr_late - $total_late_used;
-        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
-        $would_be_days_late = $gradeable->getWouldBeDaysLate();
-        $late_days_allowed = $gradeable->getAllowedLateDays();
-
-        $active_version = $gradeable->getActiveVersion();
-
-        $return .= $this->printLateDayInformationMessage($extensions,
-            $late_days_remaining,
-            $active_version,
-            $active_days_late,
-            $would_be_days_late,
-            $late_days_allowed);
 
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
-        $student_page = false;
         $num_components = count($gradeable->getComponents());
         $time = " @ H:i";
-        $return .= <<<HTML
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-HTML;
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+
+        $return .= $this->renderLateDayMessage($gradeable, $extensions);
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= $this->renderSubmision($gradeable, $late_days_use, $time, $upload_message, $current_version_number, $num_components);
@@ -355,6 +346,8 @@ HTML;
      * @return string
      */
     private function renderSubmision($gradeable, $late_days_use, string $time, string $upload_message, int $current_version_number, int $num_components): string {
+        $student_page = false;
+
         $return = <<<HTML
 <div class="content">
     <div class="upperinfo">
@@ -727,10 +720,10 @@ HTML;
     }
 
     /**
-     * @param $gradeable
+     * @param Gradeable $gradeable
      * @return string
      */
-    private function renderBulkForm($gradeable): string {
+    private function renderBulkForm(Gradeable $gradeable): string {
         $return = "";
         $all_directories = $gradeable->getUploadsFiles();
 
@@ -1235,7 +1228,11 @@ HTML;
         return $return;
     }
 
-    public function showRequestForm($gradeable) {
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function showRequestForm(Gradeable $gradeable): string {
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
         $existsStaffPost = false;
@@ -1356,7 +1353,11 @@ HTML;
         return $return;
     }
 
-    public function showRegradeDiscussion($gradeable) {
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function showRegradeDiscussion(Gradeable $gradeable): string {
         $return = "";
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
