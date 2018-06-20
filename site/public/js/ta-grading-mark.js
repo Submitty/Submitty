@@ -114,7 +114,7 @@ function checkIfSelected(me) {
  * @param m_index 0-indexed mark index
  * @returns DOM structure for the mark
  */
-function getMarkView(c_index, m_index, m_id, fc) {
+function getMarkView(c_index, m_index, m_id, fc, editEnabled) {
     return Twig.twig({ref: "Mark"}).render({
         gradeable: getGradeable(),
         component: getComponent(c_index),
@@ -122,7 +122,8 @@ function getMarkView(c_index, m_index, m_id, fc) {
         c_index: c_index,
         m_index: m_index,
         m_id: m_id,
-        fc: fc
+        fc: fc,
+        editEnabled: editEnabled
     });
 }
 
@@ -392,23 +393,25 @@ function updateMarksOnPage(c_index) {
             var score      = data['data'][m_index]['score'];
             var note       = data['data'][m_index]['note'];
             getMark(c_index, ids[m_index]).id = id;
-            getMark(c_index, ids[m_index]).publish = is_publish;
-            getMark(c_index, ids[m_index]).has = hasMark;
-            getMark(c_index, ids[m_index]).score = score;
-            getMark(c_index, ids[m_index]).name = note;
-            parent.prepend(getMarkView(c_index, ids[m_index], id, m_index));
-            if((editModeEnabled==null || editModeEnabled==false)){
-                var current_mark = $('#mark_id-'+c_index+'-'+id);
-                current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
-                current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
-                $('#marks-extra-'+c_index)[0].style.display="none";
-                if(points == "None Selected"){
-                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
-                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
-                }
-                else{
-                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
-                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+            if(getMark(c_index, ids[m_index])!=null){
+                getMark(c_index, ids[m_index]).publish = is_publish;
+                getMark(c_index, ids[m_index]).has = hasMark;
+                getMark(c_index, ids[m_index]).score = score;
+                getMark(c_index, ids[m_index]).name = note;
+                parent.prepend(getMarkView(c_index, ids[m_index], id, m_index, editModeEnabled));
+                if((editModeEnabled==null || editModeEnabled==false)){
+                    var current_mark = $('#mark_id-'+c_index+'-'+id);
+                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
+                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
+                    $('#marks-extra-'+c_index)[0].style.display="none";
+                    if(points == "None Selected"){
+                        current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                        current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                    }
+                    else{
+                        current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                        current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                    }
                 }
             }
         }
@@ -463,11 +466,11 @@ function addMark(me, num) {
                 has: false,
                 score: points
             });
-            parent.append(getMarkView(num, id2, id2, 1));
-           // saveMark(me, true);
-            window.location.reload();
-            toggleEditMode();
-            openMark(me);
+            parent.append(getMarkView(num, id2, id2, 1, editModeEnabled));
+            //updateMarksOnPage(num);
+          //  window.location.reload();
+          //  toggleEditMode();
+         //   openMark(me);
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {
             //     updateMarksOnPage(num, background, min, max, precision, gradeable_id, user_id, get_active_version, question_id, your_user_id);
@@ -478,6 +481,19 @@ function addMark(me, num) {
 
 // TODO: this
 function deleteMark(me, c_index, last_num) {
+    console.log("ID1");
+    console.log(last_num);
+    var index=-1;
+    console.log("in loop");
+    for(var i=0; i<getComponent(c_index).marks.length; i++){
+        console.log(getComponent(c_index).marks[i].id);
+        if(getComponent(c_index).marks[i].id==last_num){
+            index=i;
+            break;
+        }
+    }
+    console.log("out of loop");
+    getComponent(c_index).marks.splice(index, 1);
     var current_row = $(me.parentElement.parentElement);
     current_row.remove();
     var last_row = $('[name=mark_'+c_index+']').last().attr('id');
@@ -500,6 +516,7 @@ function deleteMark(me, c_index, last_num) {
         current_mark.find('span[id=mark_info_id-'+c_index+'-'+m_index+']').attr('id', 'mark_info_id-'+c_index+'-'+new_num);
         current_mark.attr('id', 'mark_id-'+c_index+'-'+new_num);
     }
+    saveMark(c_index, true);
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -992,7 +1009,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
             selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
             order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
         };
-        info_mark[0].style.display = '';
+        //info_mark[0].style.display = '';
         existing_marks_num++;
     }
     var current_row = $('#mark_custom_id-'+c_index);
