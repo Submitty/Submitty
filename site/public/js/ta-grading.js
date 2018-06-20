@@ -246,11 +246,9 @@ function updateCookies(){
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
     if(getGradeable()!=null){
         document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-        console.log(findCurrentOpenedMark());
         var testcases = findOpenTestcases();
         testcases = JSON.stringify(testcases);
         document.cookie = "testcases=" + testcases + "; path=/;";
-        console.log(testcases);
     }
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
@@ -627,7 +625,6 @@ function findOpenTestcases() {
         current_testcase = $(this).find('div[id^=testcase_]');
         if (typeof current_testcase[0] !== 'undefined'){
             if (current_testcase[0].style.display != 'none' ) {
-               // console.log(current_testcase.attr('id').split('_')[1]);
                 testcase_num.push(parseInt(current_testcase.attr('id').split('_')[1]));
             }
         }
