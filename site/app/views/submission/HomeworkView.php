@@ -7,26 +7,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
-
-    public function noGradeable($gradeable_id) {
-        if ($gradeable_id === null) {
-            return <<<HTML
-<div class="content">
-    No gradeable id specified. Contact your instructor if you think this is an error.
-</div>
-HTML;
-        }
-        else {
-            $gradeable = htmlentities($gradeable_id, ENT_QUOTES);
-            return <<<HTML
-<div class="content">
-    {$gradeable} is not a valid electronic submission gradeable. Contact your instructor if you think this
-    is an error.
-</div>
-HTML;
-        }
-    }
-
+        
     /**
      * @param Gradeable $gradeable
      *

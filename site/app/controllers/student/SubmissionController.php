@@ -130,7 +130,7 @@ class SubmissionController extends AbstractController {
 
             // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+                $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
@@ -164,7 +164,7 @@ class SubmissionController extends AbstractController {
             return array('id' => $gradeable_id, 'error' => $error);
         }
         else {
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }
