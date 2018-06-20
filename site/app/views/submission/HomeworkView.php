@@ -13,17 +13,17 @@ class HomeworkView extends AbstractView {
             "gradeable" => $gradeable
         ]);
     }
-    
+
     public function dayOrDays($d) {
-      if ($d == 1) return "day";
-      return "days";
+        if ($d == 1) return "day";
+        return "days";
     }
 
     public function submitOrResubmit($version) {
-      if ($version == 0) return "submit";
-      return "re-submit";
+        if ($version == 0) return "submit";
+        return "re-submit";
     }
-    
+
 
     public function printLateDayInformationMessage($extensions,
                                                    $late_days_remaining,
@@ -32,157 +32,172 @@ class HomeworkView extends AbstractView {
                                                    $would_be_days_late,
                                                    $late_days_allowed) {
 
-      $info = "";
-      $error = false;
-      
-      // ------------------------------------------------------------
-      // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
-      if ($extensions > 0) {
-        $info .= "You have a {$extensions} day deadline extension for this assignment.";
-      }
+        $info = "";
+        $error = false;
 
-      // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
-      $active_days_charged = max(0,$active_days_late-$extensions);
-
-      // ------------------------------------------------------------
-      // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
-      if ($active_version >= 1 && $active_days_late > 0) {
-
-        // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-        if ($active_days_charged > $late_days_remaining) {
-          $error = true;
-          if ($info != "") { $info .= "<br><br>"; }
-          $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-            . " but you ";
-          if ($late_days_remaining == 0) {
-            $info .= "have no remaining late days.";
-          } else {
-            $info .= "only have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . ".";
-          }
+        // ------------------------------------------------------------
+        // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
+        if ($extensions > 0) {
+            $info .= "You have a {$extensions} day deadline extension for this assignment.";
         }
-
-        // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
-        else if ($active_days_charged > $late_days_allowed) {
-          $error = true;
-          if ($info != "") { $info .= "<br<br>>"; }
-          $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
-          $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
-          if ($late_days_allowed == 0) {
-            $info.= "<br>but your instructor specified that no late days may be used for this assignment.";
-          } else {
-            $info.= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
-          }
-        }
-
-        // LATE STATUS
-        else {
-          if ($info != "") { $info .= "<br><br>"; }
-          $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-            . " and you have been charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment.";
-          if ($info != "") { $info .= "<br>"; }
-          if ($late_days_remaining == 0) {
-            $info .= "You have no late days remaining for future assignments.";
-          } else {
-            $info .= "You have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . " to use on future assignments.";
-          }
-        }
-
-        if ($error) {
-          if ($info != "") { $info .= "<br>"; }
-          $info .= "Your grade for this assignment will be recorded as a zero.";
-        }
-      }
-          
-      // ------------------------------------------------------------
-      // (IF LATE) PRINT LATE DAY INFORMATION
-      if ($would_be_days_late > 0) {
 
         // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
-        $new_late_charged = max(0,$would_be_days_late - $extensions);
-        
-        // if unsubmitted, or submitted but still in the late days allowed window
-        if ($active_version < 1 ||
-            ($new_late_charged <= $late_days_remaining &&
-             $new_late_charged <= $late_days_allowed)) {
+        $active_days_charged = max(0, $active_days_late - $extensions);
 
-          // PRINT WOULD BE HOW MANY DAYS LATE
-          if ($info != "") { $info .= "<br><br>"; }
-          $info .= "The current time is {$would_be_days_late} " . $this->dayOrDays($would_be_days_late) . " past the due date.";
+        // ------------------------------------------------------------
+        // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
+        if ($active_version >= 1 && $active_days_late > 0) {
 
-          // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
-          if ($new_late_charged > $late_days_remaining) {
-            if ($info != "") { $info .= "<br>"; }
-            if ($late_days_remaining==0) {
-              $info .= "You have no remaining late days.";
-            } else {
-              $info .= "You only have {$late_days_remaining} late " . $this->dayOrDays($late_days_remaining) . " remaining.";
+            // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
+            if ($active_days_charged > $late_days_remaining) {
+                $error = true;
+                if ($info != "") {
+                    $info .= "<br><br>";
+                }
+                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
+                    . " but you ";
+                if ($late_days_remaining == 0) {
+                    $info .= "have no remaining late days.";
+                } else {
+                    $info .= "only have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . ".";
+                }
+            } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
+            else if ($active_days_charged > $late_days_allowed) {
+                $error = true;
+                if ($info != "") {
+                    $info .= "<br<br>>";
+                }
+                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
+                $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
+                if ($late_days_allowed == 0) {
+                    $info .= "<br>but your instructor specified that no late days may be used for this assignment.";
+                } else {
+                    $info .= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+                }
+            } // LATE STATUS
+            else {
+                if ($info != "") {
+                    $info .= "<br><br>";
+                }
+                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
+                    . " and you have been charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment.";
+                if ($info != "") {
+                    $info .= "<br>";
+                }
+                if ($late_days_remaining == 0) {
+                    $info .= "You have no late days remaining for future assignments.";
+                } else {
+                    $info .= "You have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . " to use on future assignments.";
+                }
             }
-            $error = true;
-            if ($info != "") { $info .= "<br>"; }
-            $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
-          }
-          
-          // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
-          else if ($new_late_charged > $late_days_allowed) {
-            if ($info != "") { $info .= "<br>"; }
-            if ($late_days_allowed==0) {
-              $info .= "Your instructor specified that no late days may be used for this assignment.";
-            } else {
-              $info .= "Your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
-            }
-            $error = true;
-            if ($info != "") { $info .= "<br>"; }
-            $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
-          }
-          
-          // SUBMISSION NOW WOULD BE LATE
-          else {
-            if ($info != "") { $info .= "<br>"; }
-            $new_late_days_remaining = $late_days_remaining + $active_days_charged - $new_late_charged;
-            $info .= "If you  " . $this->submitOrResubmit($active_version) . " to this assignment now," .
-              " you will be charged {$new_late_charged} late " . $this->dayOrDays($new_late_charged) . "," .
-              " and have $new_late_days_remaining remaining late " . $this->dayOrDays($new_late_days_remaining) . " for future assignments.";
-          }
-        }
-      }
 
-      // ------------------------------------------------------------
-      // IN CASE OF AUTOMATIC ZERO, MAKE THE MESSAGE RED
-      $style = "";
-      if ($error == true) {
-          $style = 'background-color: #d9534f;';
-          if ($info != "") { $info .= "<br><br>"; }
-          $info .= "Contact your instructor if you believe that this is an error or that you should be granted ";
-          if ($extensions == 0) {
-            $info .= " a deadline extension.";
-          } else {
-            $info .= " an additional deadline extension.";
-          }
+            if ($error) {
+                if ($info != "") {
+                    $info .= "<br>";
+                }
+                $info .= "Your grade for this assignment will be recorded as a zero.";
+            }
         }
-      
-      // ------------------------------------------------------------
-      // WRAP THE LATE DAY INFORMATION IN A DIV
-      $return = "";
-      if ($info != "") {
-        $return = <<<HTML
+
+        // ------------------------------------------------------------
+        // (IF LATE) PRINT LATE DAY INFORMATION
+        if ($would_be_days_late > 0) {
+
+            // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
+            $new_late_charged = max(0, $would_be_days_late - $extensions);
+
+            // if unsubmitted, or submitted but still in the late days allowed window
+            if ($active_version < 1 ||
+                ($new_late_charged <= $late_days_remaining &&
+                    $new_late_charged <= $late_days_allowed)) {
+
+                // PRINT WOULD BE HOW MANY DAYS LATE
+                if ($info != "") {
+                    $info .= "<br><br>";
+                }
+                $info .= "The current time is {$would_be_days_late} " . $this->dayOrDays($would_be_days_late) . " past the due date.";
+
+                // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
+                if ($new_late_charged > $late_days_remaining) {
+                    if ($info != "") {
+                        $info .= "<br>";
+                    }
+                    if ($late_days_remaining == 0) {
+                        $info .= "You have no remaining late days.";
+                    } else {
+                        $info .= "You only have {$late_days_remaining} late " . $this->dayOrDays($late_days_remaining) . " remaining.";
+                    }
+                    $error = true;
+                    if ($info != "") {
+                        $info .= "<br>";
+                    }
+                    $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
+                } // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
+                else if ($new_late_charged > $late_days_allowed) {
+                    if ($info != "") {
+                        $info .= "<br>";
+                    }
+                    if ($late_days_allowed == 0) {
+                        $info .= "Your instructor specified that no late days may be used for this assignment.";
+                    } else {
+                        $info .= "Your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+                    }
+                    $error = true;
+                    if ($info != "") {
+                        $info .= "<br>";
+                    }
+                    $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
+                } // SUBMISSION NOW WOULD BE LATE
+                else {
+                    if ($info != "") {
+                        $info .= "<br>";
+                    }
+                    $new_late_days_remaining = $late_days_remaining + $active_days_charged - $new_late_charged;
+                    $info .= "If you  " . $this->submitOrResubmit($active_version) . " to this assignment now," .
+                        " you will be charged {$new_late_charged} late " . $this->dayOrDays($new_late_charged) . "," .
+                        " and have $new_late_days_remaining remaining late " . $this->dayOrDays($new_late_days_remaining) . " for future assignments.";
+                }
+            }
+        }
+
+        // ------------------------------------------------------------
+        // IN CASE OF AUTOMATIC ZERO, MAKE THE MESSAGE RED
+        $style = "";
+        if ($error == true) {
+            $style = 'background-color: #d9534f;';
+            if ($info != "") {
+                $info .= "<br><br>";
+            }
+            $info .= "Contact your instructor if you believe that this is an error or that you should be granted ";
+            if ($extensions == 0) {
+                $info .= " a deadline extension.";
+            } else {
+                $info .= " an additional deadline extension.";
+            }
+        }
+
+        // ------------------------------------------------------------
+        // WRAP THE LATE DAY INFORMATION IN A DIV
+        $return = "";
+        if ($info != "") {
+            $return = <<<HTML
 <div class="content" style="{$style}"><h4>{$info}</h4></div>
 HTML;
-      }
-      return $return;
+        }
+        return $return;
     }
-
 
 
     /**
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
      *
      * @param Gradeable $gradeable
-     * @param int       $late_days_use
-     * @param int       $extensions
+     * @param int $late_days_use
+     * @param int $extensions
      *
      * @return string
      */
-    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable=false) {
+    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
         $return = "";
         // hiding entire page if user is not a grader and student cannot view
         if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
@@ -199,19 +214,19 @@ HTML;
             $g->calculateLateDays($total_late_used);
             $curr_late = $g->getStudentAllowedLateDays();
         }
-        $late_days_remaining = $curr_late-$total_late_used;
+        $late_days_remaining = $curr_late - $total_late_used;
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
 
         $active_version = $gradeable->getActiveVersion();
-        
+
         $return .= $this->printLateDayInformationMessage($extensions,
-                                                         $late_days_remaining,
-                                                         $active_version,
-                                                         $active_days_late,
-                                                         $would_be_days_late,
-                                                         $late_days_allowed);
+            $late_days_remaining,
+            $active_version,
+            $active_days_late,
+            $would_be_days_late,
+            $late_days_allowed);
 
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
@@ -249,10 +264,10 @@ HTML;
                     $student = $student_pair[0];
 
                     $student_entry = array('value' => $student->getId(),
-                                           'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+                        'label' => $student->getDisplayedFirstName() . ' ' . $student->getLastName() . ' <' . $student->getId() . '>');
 
                     if ($student_pair[1] !== 0) {
-                        $student_entry['label'] .= ' ('.$student_pair[1].' Prev Submission)';
+                        $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
                     }
 
                     $students_full[] = $student_entry;
@@ -341,28 +356,26 @@ HTML;
             $return .= <<<HTML
     </div>
 HTML;
-            if($gradeable->useVcsCheckout()) {
-/*              TODO: Build ability for students to specify their own repo url
-                if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                    $return .= <<<HTML
-    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-HTML;
-                }
-                else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                    $return .= <<<HTML
-    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-HTML;
-                }
-*/
+            if ($gradeable->useVcsCheckout()) {
+                /*              TODO: Build ability for students to specify their own repo url
+                                if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
+                                    $return .= <<<HTML
+                    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
+                HTML;
+                                }
+                                else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
+                                    $return .= <<<HTML
+                    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
+                    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
+                HTML;
+                                }
+                */
                 if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
                     $vcs_path = $gradeable->getSubdirectory();
-                }
-                else {
+                } else {
                     if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
                         $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
-                    }
-                    else {
+                    } else {
                         $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
                     }
                 }
@@ -381,8 +394,7 @@ HTML;
     <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
     <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
-            }
-            else {
+            } else {
                 $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
@@ -391,39 +403,38 @@ HTML;
 
                     $image_width = $image_height = 0;
 
-                    if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != ""){
+                    if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != "") {
                         $images = $gradeable->getTextboxes()[$i]['images'];
-                    }
-                    else{
+                    } else {
                         $images = array();
                     }
 
-                    foreach($images as $currImage){
+                    foreach ($images as $currImage) {
                         $currImageName = $currImage["image_name"];
-                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(),"test_input",$gradeable->getId(),$currImageName);
+                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
                         $content_type = FileUtils::getContentType($imgPath);
                         if (substr($content_type, 0, 5) === "image") {
-                           // Read image path, convert to base64 encoding
-                           $textBoxImageData = base64_encode(file_get_contents($imgPath));
-                           // Format the image SRC:  data:{mime};base64,{data};
-                           $textBoximagesrc = 'data: '.mime_content_type($imgPath).';charset=utf-8;base64,'.$textBoxImageData;
-                           // insert the sample image data
+                            // Read image path, convert to base64 encoding
+                            $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                            // Format the image SRC:  data:{mime};base64,{data};
+                            $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                            // insert the sample image data
 
-                            if(isset($currImage['image_height']) && (int)$currImage['image_height'] > 0){
+                            if (isset($currImage['image_height']) && (int)$currImage['image_height'] > 0) {
                                 $image_height = $currImage['image_height'];
                             }
 
-                            if(isset($currImage['image_width']) && (int)$currImage['image_width'] > 0){
+                            if (isset($currImage['image_width']) && (int)$currImage['image_width'] > 0) {
                                 $image_width = $currImage['image_width'];
                             }
 
-                            $image_display = '<img src="'.$textBoximagesrc.'"';
+                            $image_display = '<img src="' . $textBoximagesrc . '"';
 
-                            if($image_width > 0){
-                                $image_display .= ' width="'.$image_width.'"';
+                            if ($image_width > 0) {
+                                $image_display .= ' width="' . $image_width . '"';
                             }
-                            if($image_height > 0){
-                                $image_display .= ' height="'.$image_height.'"';
+                            if ($image_height > 0) {
+                                $image_display .= ' height="' . $image_height . '"';
                             }
                             $image_display .= ">";
                             $return .= $image_display;
@@ -433,7 +444,7 @@ HTML;
                     $label = $gradeable->getTextboxes()[$i]['label'];
                     $rows = $gradeable->getTextboxes()[$i]['rows'];
                     if ($rows == 0) {
-                      $return .= <<<HTML
+                        $return .= <<<HTML
                     <p style="max-width: 50em;">
                     $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
                     </p><br>
@@ -445,13 +456,13 @@ HTML;
                     </p><br>
 HTML;
 
-                  // Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                  // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-$return .= <<<HTML
+                        // Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                        // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+                        $return .= <<<HTML
 <script>
 $("#textbox_{$i}").keydown(function(e) {
 HTML;
-$return .= <<<'HTML'
+                        $return .= <<<'HTML'
     if(e.keyCode === 9) { // tab was pressed
         // get caret position/selection
         var start = this.selectionStart;
@@ -478,8 +489,7 @@ HTML;
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     if ($gradeable->getNumParts() > 1) {
                         $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
-                    }
-                    else {
+                    } else {
                         $label = "Drag your file(s) here or click to open file browser";
                     }
                     $return .= <<<HTML
@@ -495,10 +505,9 @@ HTML;
 HTML;
                 // does this gradeable have parts assigned by students
                 foreach ($gradeable->getComponents() as $question) {
-                    if(is_array($question)) {
+                    if (is_array($question)) {
                         $page_num = $question[0]->getPage();
-                    }
-                    else {
+                    } else {
                         $page_num = $question->getPage();
                     }
                     if ($page_num === -1) {
@@ -506,7 +515,7 @@ HTML;
                         break;
                     }
                 }
-                if ($student_page) {                
+                if ($student_page) {
                     $return .= <<<HTML
     <form id="pdfPageStudent">
         <div class="sub">
@@ -536,7 +545,7 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-                if($current_version_number === $gradeable->getHighestVersion()
+                if ($current_version_number === $gradeable->getHighestVersion()
                     && $current_version_number > 0) {
                     $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
@@ -549,10 +558,9 @@ HTML;
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
-                            $escape_quote_filename = str_replace('\'','\\\'',substr($file['relative_name'], strlen("part{$i}/")));
-                        }
-                        else
-                            $escape_quote_filename = str_replace('\'','\\\'',$file['relative_name']);
+                            $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
+                        } else
+                            $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
                         $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
@@ -704,13 +712,12 @@ HTML;
             $all_directories = $gradeable->getUploadsFiles();
 
             if (count($all_directories) > 0) {
-                if($gradeable->isTeamAssignment()){
+                if ($gradeable->isTeamAssignment()) {
                     $return .= <<<HTML
 <div class="content">
     <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
 HTML;
-                }
-                else{
+                } else {
                     $return .= <<<HTML
 <div class="content">
     <h2>Unassigned PDF Uploads</h2>
@@ -746,11 +753,11 @@ HTML;
                         // get the full filename for PDF popout
                         // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
                         $filename = rawurlencode(htmlspecialchars($filename));
-                        $url = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename."&path=".$path."&ta_grading=false";
-                        $filename_full = str_replace("_cover.pdf", ".pdf",  $filename );
+                        $url = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename . "&path=" . $path . "&ta_grading=false";
+                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
                         $path_full = str_replace("_cover.pdf", ".pdf", $path);
-                        $url_full = $this->core->getConfig()->getSiteUrl()."&component=misc&page=display_file&dir=uploads&file=".$filename_full."&path=".$path_full."&ta_grading=false";
-                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode( $filename_full) );
+                        $url_full = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename_full . "&path=" . $path_full . "&ta_grading=false";
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
                         //decode the filename after to display correctly for users
                         $filename_full = rawurldecode($filename_full);
                         $return .= <<<HTML
@@ -771,14 +778,14 @@ HTML;
                     <div id="users_{$count}">
                         <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
 HTML;
-                    if ($gradeable->isTeamAssignment()){
-                        for($i = 1; $i < $gradeable->getMaxTeamSize(); $i++){
-                            $return .= <<<HTML
+                        if ($gradeable->isTeamAssignment()) {
+                            for ($i = 1; $i < $gradeable->getMaxTeamSize(); $i++) {
+                                $return .= <<<HTML
                         <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
 HTML;
+                            }
                         }
-                    }
-                    $return .= <<<HTML
+                        $return .= <<<HTML
                     </div>
                 </td>
                 <td>
@@ -873,8 +880,7 @@ HTML;
     <span style="font-style: italic">No submissions for this assignment.</span>
 </div>
 HTML;
-        }
-        else {
+        } else {
             $return .= <<<HTML
 <div class="content">
     {$team_header}
@@ -891,8 +897,7 @@ HTML;
                     $version = 0;
                     $button = '<input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
                     $onsubmit = "";
-                }
-                else {
+                } else {
                     $version = $current_version->getVersion();
                     $button = '<input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">';
                     $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
@@ -900,9 +905,9 @@ HTML;
                 $return .= <<<HTML
     <form style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
-                                                 'action' => 'update',
-                                                 'gradeable_id' => $gradeable->getId(),
-                                                 'new_version' => $version))}">
+                    'action' => 'update',
+                    'gradeable_id' => $gradeable->getId(),
+                    'new_version' => $version))}">
         <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
         {$button}
     </form>
@@ -934,7 +939,7 @@ HTML;
 HTML;
             }
 
-            if($gradeable->getActiveVersion() === 0 && $current_version_number === 0) {
+            if ($gradeable->getActiveVersion() === 0 && $current_version_number === 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
@@ -944,9 +949,8 @@ HTML;
         </p>
     </div>
 HTML;
-            }
-            else {
-                if($gradeable->getActiveVersion() > 0
+            } else {
+                if ($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
@@ -955,17 +959,15 @@ HTML;
         </p>
     </div>
 HTML;
-                }
-                else {
-                    if($gradeable->getActiveVersion() > 0) {
+                } else {
+                    if ($gradeable->getActiveVersion() > 0) {
                         $return .= <<<HTML
    <div class="sub" id="submission_message">
        <p class="red-message">
             Note: This version of your assignment will not be graded the instructor/TAs. <br />
 HTML;
-                    }
-                    else {
-                       $return .= <<<HTML
+                    } else {
+                        $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
             Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
@@ -973,7 +975,7 @@ HTML;
 HTML;
                     }
 
-                        $return .= <<<HTML
+                    $return .= <<<HTML
             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
@@ -997,8 +999,7 @@ HTML;
                 foreach ($array as $file) {
                     if (isset($file['size'])) {
                         $size = number_format($file['size'] / 1024, 2);
-                    }
-                    else {
+                    } else {
                         $size = number_format(-1);
                     }
                     $return .= "{$file['relative_name']} ({$size}kb)";
@@ -1022,8 +1023,7 @@ HTML;
             <a onclick='downloadFile("{$filename}","{$filepath}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= "<br />";
                     }
                 }
@@ -1032,21 +1032,20 @@ HTML;
         <div class="box half">
 HTML;
                 $results = $gradeable->getResults();
-                if($gradeable->hasResults()) {
+                if ($gradeable->hasResults()) {
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
-                    if($results['num_autogrades'] > 1) {
-                        $regrades = $results['num_autogrades']-1;
+                    if ($results['num_autogrades'] > 1) {
+                        $regrades = $results['num_autogrades'] - 1;
                         $return .= <<<HTML
 <br />
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
-                    }
-                    else {
+                    } else {
                         $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
@@ -1054,9 +1053,8 @@ HTML;
                     if (isset($results['revision'])) {
                         if (empty($results['revision'])) {
                             $revision = "None";
-                        }
-                        else {
-                            $revision =  substr($results['revision'], 0, 7);
+                        } else {
+                            $revision = substr($results['revision'], 0, 7);
                         }
                         $return .= <<<HTML
 git commit hash: {$revision}<br />
@@ -1086,10 +1084,10 @@ HTML;
                 $refresh_js = <<<HTML
         <script type="text/javascript">
             checkRefreshSubmissionPage("{$this->core->buildUrl(array('component' => 'student',
-                                                                     'page' => 'submission',
-                                                                     'action' => 'check_refresh',
-                                                                     'gradeable_id' => $gradeable->getId(),
-                                                                     'gradeable_version' => $current_version_number))}")
+                    'page' => 'submission',
+                    'action' => 'check_refresh',
+                    'gradeable_id' => $gradeable->getId(),
+                    'gradeable_version' => $current_version_number))}")
         </script>
 HTML;
 
@@ -1127,29 +1125,27 @@ HTML;
                     $return .= <<<HTML
         {$refresh_js}
 HTML;
-                }
-                else if(!$gradeable->hasResults()) {
+                } else if (!$gradeable->hasResults()) {
                     $return .= <<<HTML
         <p class="red-message">
             Something has gone wrong with grading this submission. Please contact your instructor about this.
         </p>
 HTML;
-                }
-                else {
+                } else {
                     if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
                         // FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria
                         //foreach ($gradeable->getVersions() as $version) {
-                            if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() &&
-                                    $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
-                                $return.= <<<HTML
+                        if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() &&
+                            $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                            $return .= <<<HTML
             <script type="text/javascript">
                 $(function() {
                     $('#incentive_message').show();
                 });
             </script>
 HTML;
-                               // break;
-                            }
+                            // break;
+                        }
                         //}
                     }
                     if (!$this->core->getOutput()->bufferOutput()) {
@@ -1169,7 +1165,7 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-    }
+        }
         if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
             // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
@@ -1190,30 +1186,31 @@ HTML;
             $return .= <<<HTML
             </div>
 HTML;
-    if($this->core->getConfig()->isRegradeEnabled()){
-      $return .= <<<HTML
+            if ($this->core->getConfig()->isRegradeEnabled()) {
+                $return .= <<<HTML
       <div class="content"> 
 HTML;
-      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-    }
-    $return .= <<<HTML
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+            }
+            $return .= <<<HTML
   </div>
 HTML;
         }
         return $return;
     }
-    public function showRequestForm($gradeable){
-      $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
-      $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
-      $existsStaffPost = false;
-      foreach ($threads as $thread) {
-        if($this->core->getQueries()->isStaffPost($thread['user_id'])){ 
-          $existsStaffPost = true;
-          break;
+
+    public function showRequestForm($gradeable) {
+        $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+        $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+        $existsStaffPost = false;
+        foreach ($threads as $thread) {
+            if ($this->core->getQueries()->isStaffPost($thread['user_id'])) {
+                $existsStaffPost = true;
+                break;
+            }
         }
-      }
-      $return = <<<HTML
+        $return = <<<HTML
       <div class = "sub">
         <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
 HTML;
@@ -1222,55 +1219,55 @@ HTML;
         $url = "";
         $class = "btn-default";
         $deleteMode = false;
-        if($gradeable->getRegradeStatus() === 0){
-          $message = "Request Regrade";
-          $action = "showPopUp()";
-          $deleteMode = false;
-          $url = $this->core->buildUrl(array('component' => 'student',
-                                             'action' => 'request_regrade',
-                                             'gradeable_id' => $gradeable->getId(),
-                                             'student_id' =>$this->core->getUser()->getId()
-                                        ));
-        }else if($gradeable->getRegradeStatus() === -1){
-          if($this->core->getUser()->accessGrading()){
-            $message = "Delete Request";
-            $class = "btn-danger";
-            $is_disabled = "";
+        if ($gradeable->getRegradeStatus() === 0) {
+            $message = "Request Regrade";
+            $action = "showPopUp()";
+            $deleteMode = false;
             $url = $this->core->buildUrl(array('component' => 'student',
-                                               'action'=> 'delete_request',
-                                               'gradeable_id' => $gradeable->getId(),
-                                               'student_id' => $gradeable->getUser()->getId()
-                                            ));
-            $return .= <<<HTML
+                'action' => 'request_regrade',
+                'gradeable_id' => $gradeable->getId(),
+                'student_id' => $this->core->getUser()->getId()
+            ));
+        } else if ($gradeable->getRegradeStatus() === -1) {
+            if ($this->core->getUser()->accessGrading()) {
+                $message = "Delete Request";
+                $class = "btn-danger";
+                $is_disabled = "";
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'action' => 'delete_request',
+                    'gradeable_id' => $gradeable->getId(),
+                    'student_id' => $gradeable->getUser()->getId()
+                ));
+                $return .= <<<HTML
 
 HTML;
-            $deleteMode = true;
-          }else{
+                $deleteMode = true;
+            } else {
+                $is_disabled = "disabled";
+                $message = "Request in Review";
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'action' => 'delete_request',
+                    'gradeable_id' => $gradeable->getId(),
+                    'student_id' => $gradeable->getUser()->getId()
+                ));
+                $deleteMode = false;
+            }
+        } else {
+            $message = "Request Reviewed";
             $is_disabled = "disabled";
-            $message = "Request in Review";
             $url = $this->core->buildUrl(array('component' => 'student',
-                                               'action'=> 'delete_request',
-                                               'gradeable_id' => $gradeable->getId(),
-                                               'student_id' => $gradeable->getUser()->getId()
-                                            ));
+                'action' => 'delete_request',
+                'gradeable_id' => $gradeable->getId(),
+                'student_id' => $gradeable->getUser()->getId()
+            ));
             $deleteMode = false;
-          }
-        }else{
-          $message = "Request Reviewed";
-          $is_disabled = "disabled";
-          $url = $this->core->buildUrl(array('component' => 'student',
-                                               'action'=> 'delete_request',
-                                               'gradeable_id' => $gradeable->getId(),
-                                               'student_id' => $gradeable->getUser()->getId()
-                                            ));
-          $deleteMode = false;
         }
-        if(!$deleteMode){
-        $return .= <<<HTML
+        if (!$deleteMode) {
+            $return .= <<<HTML
           <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
 HTML;
-        }else{
-          $return .= <<<HTML
+        } else {
+            $return .= <<<HTML
           <div style="float:right">
             <form method="POST" action="{$url}" id="deleteRequest">
               <button class = "btn {$class}" type = "submit">$message</button>
@@ -1321,40 +1318,40 @@ HTML;
         }; 
       </script>
 HTML;
-      return $return;
+        return $return;
     }
-    public function showRegradeDiscussion($gradeable){
-          $return = "";
-          $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
-          $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
-          $user = $this->core->getUser()->getId();
-          $first = true;
-          $return = "";
-          $display_further_action=true;
+
+    public function showRegradeDiscussion($gradeable) {
+        $return = "";
+        $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+        $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+        $user = $this->core->getUser()->getId();
+        $first = true;
+        $return = "";
+        $display_further_action = true;
         //  echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
-          if($this->core->getUser()->accessGrading()){
-            $replyMessage = "Reply"; 
+        if ($this->core->getUser()->accessGrading()) {
+            $replyMessage = "Reply";
             $replyPlaceHolder = "Enter your reply here";
-          }
-          else{
-            if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==0){
-              $display_further_action=false;
+        } else {
+            if ($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()) == 0) {
+                $display_further_action = false;
             }
-            $replyMessage = "Request further TA/Instructor action"; 
+            $replyMessage = "Request further TA/Instructor action";
             $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
-          }
-          foreach ($threads as $thread) {
-            if(empty($threads)) break;
+        }
+        foreach ($threads as $thread) {
+            if (empty($threads)) break;
             $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
             $id = $thread['id'];
             $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
-            $content = $thread['content']; 
-            if($first){
-              $class .= " first_post";
-              $first = false;                                      
-            }                                      
-            $function_date = 'date_format';                                      
+            $content = $thread['content'];
+            if ($first) {
+                $class .= " first_post";
+                $first = false;
+            }
+            $function_date = 'date_format';
             $return .= <<<HTML
             <div style="margin-top: 20px ">                                       
               <div class = '$class' style="padding:20px;">                                       
@@ -1362,21 +1359,21 @@ HTML;
                 <hr>                                       
                 <div style="float:right">                                      
                   <b>{$name}</b> &nbsp;                                       
-                {$function_date($date,"m/d/Y g:i A")}                                      
+                {$function_date($date, "m/d/Y g:i A")}                                      
                 </div>                                       
               </div>
             </div>                                       
 HTML;
-          }
-        if($display_further_action){
-        $return .= <<<HTML
+        }
+        if ($display_further_action) {
+            $return .= <<<HTML
         <div style="padding:20px;">
         <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
-                                                       'action'=> 'make_request_post',
-                                                       'regrade_id'=> $thread_id,
-                                                       'gradeable_id' => $gradeable->getId(),
-                                                       'user_id' =>$this->core->getUser()->getId()
-                                                      ))}">
+                'action' => 'make_request_post',
+                'regrade_id' => $thread_id,
+                'gradeable_id' => $gradeable->getId(),
+                'user_id' => $this->core->getUser()->getId()
+            ))}">
             <textarea name = "replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{$replyPlaceHolder}" id="makeRequestPost" required></textarea>
             <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
             <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
@@ -1399,6 +1396,6 @@ HTML;
         </script>
       </div>
 HTML;
-      return $return;
+        return $return;
     }
 }
