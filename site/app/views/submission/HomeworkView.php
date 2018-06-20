@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\models\Gradeable;
+use app\models\GradeableVersion;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -239,43 +240,158 @@ HTML;
 HTML;
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
+            $return .= $this->renderSubmision($gradeable, $late_days_use, $time, $upload_message, $current_version_number, $num_components);
+        }
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= $this->renderBulkForm($gradeable);
+        }
+        $return .= $this->renderResults($gradeable, $canViewWholeGradeable, $current_version_number, $current_version);
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array $textbox
+     * @param int $i
+     * @return string
+     */
+    private function renderTextbox(Gradeable $gradeable, array $textbox, int $i): string {
+        $return = "";
+
+        $image_width = $image_height = 0;
+
+        if (isset($textbox['images']) && $textbox['images'] != "") {
+            $images = $textbox['images'];
+        } else {
+            $images = array();
+        }
+
+        foreach ($images as $currImage) {
+            $currImageName = $currImage["image_name"];
+            $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
+            $content_type = FileUtils::getContentType($imgPath);
+            if (substr($content_type, 0, 5) === "image") {
+                // Read image path, convert to base64 encoding
+                $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                // Format the image SRC:  data:{mime};base64,{data};
+                $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                // insert the sample image data
+
+                if (isset($currImage['image_height']) && (int)$currImage['image_height'] > 0) {
+                    $image_height = $currImage['image_height'];
+                }
+
+                if (isset($currImage['image_width']) && (int)$currImage['image_width'] > 0) {
+                    $image_width = $currImage['image_width'];
+                }
+
+                $image_display = '<img src="' . $textBoximagesrc . '"';
+
+                if ($image_width > 0) {
+                    $image_display .= ' width="' . $image_width . '"';
+                }
+                if ($image_height > 0) {
+                    $image_display .= ' height="' . $image_height . '"';
+                }
+                $image_display .= ">";
+                $return .= $image_display;
+            }
+        }
+
+        $label = $textbox['label'];
+        $rows = $textbox['rows'];
+        if ($rows == 0) {
             $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
+                    </p><br>
+HTML;
+        } else {
+            $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
+                    </p><br>
+HTML;
+
+            // Allow tab in the larger text boxes (normally tab moves to the next textbox)
+            // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+            $return .= <<<HTML
+<script>
+$("#textbox_{$i}").keydown(function(e) {
+HTML;
+            $return .= <<<'HTML'
+    if(e.keyCode === 9) { // tab was pressed
+        // get caret position/selection
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        var $this = $(this);
+        var value = $this.val();
+        // set textarea value to: text before caret + tab + text after caret
+        $this.val(value.substring(0, start)
+                    + "\t"
+                    + value.substring(end));
+        // put caret at right position again (add one for the tab)
+        this.selectionStart = this.selectionEnd = start + 1;
+        // prevent the focus lose
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+});
+</script>
+HTML;
+
+        }
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param int $late_days_use
+     * @param string $time
+     * @param string $upload_message
+     * @param int $current_version_number
+     * @param int $num_components
+     * @return string
+     */
+    private function renderSubmision($gradeable, $late_days_use, string $time, string $upload_message, int $current_version_number, int $num_components): string {
+        $return = <<<HTML
 <div class="content">
     <div class="upperinfo">
         <h2 class="upperinfo-left">New submission for: {$gradeable->getName()}</h2>
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
-                $students = $this->core->getQueries()->getAllUsers();
-                $student_ids = array();
-                foreach ($students as $student) {
-                    $student_ids[] = $student->getId();
+        if ($this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers();
+            $student_ids = array();
+            foreach ($students as $student) {
+                $student_ids[] = $student->getId();
+            }
+
+            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
+            $students_version = array();
+            foreach ($gradeables as $g) {
+                $students_version[] = array($g->getUser(), $g->getActiveVersion());
+            }
+
+            $students_full = array();
+            foreach ($students_version as $student_pair) {
+                $student = $student_pair[0];
+
+                $student_entry = array('value' => $student->getId(),
+                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getLastName() . ' <' . $student->getId() . '>');
+
+                if ($student_pair[1] !== 0) {
+                    $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
                 }
 
-                $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
-                $students_version = array();
-                foreach ($gradeables as $g) {
-                    $students_version[] = array($g->getUser(), $g->getActiveVersion());
-                }
+                $students_full[] = $student_entry;
+            }
 
-                $students_full = array();
-                foreach ($students_version as $student_pair) {
-                    $student = $student_pair[0];
+            $students_full = json_encode($students_full);
 
-                    $student_entry = array('value' => $student->getId(),
-                        'label' => $student->getDisplayedFirstName() . ' ' . $student->getLastName() . ' <' . $student->getId() . '>');
-
-                    if ($student_pair[1] !== 0) {
-                        $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
-                    }
-
-                    $students_full[] = $student_entry;
-                }
-
-                $students_full = json_encode($students_full);
-
-                $return .= <<<HTML
+            $return .= <<<HTML
     <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
@@ -283,13 +399,13 @@ HTML;
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
-                if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
-                    $return .= <<<HTML
+            if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
+                $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
                 Bulk Upload
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
         </div>
         <div id="user_id_input" style="display: none">
             <div class="sub">
@@ -307,7 +423,7 @@ HTML;
         </div>
     </form>
 HTML;
-                $return .= <<<HTML
+            $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
             var cookie = document.cookie;
@@ -344,98 +460,98 @@ HTML;
         });
     </script>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
     <div class="sub">
 HTML;
-            if ($gradeable->hasAssignmentMessage()) {
-                $return .= <<<HTML
+        if ($gradeable->hasAssignmentMessage()) {
+            $return .= <<<HTML
         <p class='green-message'>{$gradeable->getAssignmentMessage()}</p>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
     </div>
 HTML;
-            if ($gradeable->useVcsCheckout()) {
-                /*              TODO: Build ability for students to specify their own repo url
-                                if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                                    $return .= <<<HTML
-                    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-                HTML;
-                                }
-                                else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                                    $return .= <<<HTML
-                    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-                    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-                HTML;
-                                }
-                */
+        if ($gradeable->useVcsCheckout()) {
+            /*              TODO: Build ability for students to specify their own repo url
+                            if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
+                                $return .= <<<HTML
+                repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
+            HTML;
+                            }
+                            else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
+                                $return .= <<<HTML
+                Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
+                repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
+            HTML;
+                            }
+            */
 
-                $vcs_path = $gradeable->getRepositoryPath();
-                $return .= <<<HTML
+            $vcs_path = $gradeable->getRepositoryPath();
+            $return .= <<<HTML
     <h3>To access your Repository:</h3>
     <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
     <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
     <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
 HTML;
-            } else {
-                $return .= <<<HTML
+        } else {
+            $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
 
-                for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                    $textbox = $gradeable->getTextboxes()[$i];
-                    $return .= $this->renderTextbox($gradeable, $textbox, $i);
+            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                $textbox = $gradeable->getTextboxes()[$i];
+                $return .= $this->renderTextbox($gradeable, $textbox, $i);
+            }
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                if ($gradeable->getNumParts() > 1) {
+                    $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
+                } else {
+                    $label = "Drag your file(s) here or click to open file browser";
                 }
-                for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                    if ($gradeable->getNumParts() > 1) {
-                        $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
-                    } else {
-                        $label = "Drag your file(s) here or click to open file browser";
-                    }
-                    $return .= <<<HTML
+                $return .= <<<HTML
 
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
             <h3 class="label" id="label{$i}">{$label}</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" multiple />
         </div>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
     </div>
 HTML;
-                // does this gradeable have parts assigned by students
-                foreach ($gradeable->getComponents() as $question) {
-                    if (is_array($question)) {
-                        $page_num = $question[0]->getPage();
-                    } else {
-                        $page_num = $question->getPage();
-                    }
-                    if ($page_num === -1) {
-                        $student_page = true;
-                        break;
-                    }
+            // does this gradeable have parts assigned by students
+            foreach ($gradeable->getComponents() as $question) {
+                if (is_array($question)) {
+                    $page_num = $question[0]->getPage();
+                } else {
+                    $page_num = $question->getPage();
                 }
-                if ($student_page) {
-                    $return .= <<<HTML
+                if ($page_num === -1) {
+                    $student_page = true;
+                    break;
+                }
+            }
+            if ($student_page) {
+                $return .= <<<HTML
     <form id="pdfPageStudent">
         <div class="sub">
         <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
 HTML;
-                    $count = 0;
-                    foreach ($gradeable->getComponents() as $question) {
-                        $title = $question->getTitle();
-                        $return .= <<<HTML
+                $count = 0;
+                foreach ($gradeable->getComponents() as $question) {
+                    $title = $question->getTitle();
+                    $return .= <<<HTML
         <div>{$title}: <input type="number" id="page_{$count}" min="1"></div><br />
 HTML;
-                        $count++;
-                    }
-                    $return .= <<<HTML
+                    $count++;
+                }
+                $return .= <<<HTML
         </div>
     </form>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
     <div>
         {$upload_message}
     <br>
@@ -446,32 +562,32 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-                if ($current_version_number === $gradeable->getHighestVersion()
-                    && $current_version_number > 0) {
-                    $return .= <<<HTML
+            if ($current_version_number === $gradeable->getHighestVersion()
+                && $current_version_number > 0) {
+                $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
-                }
+            }
 
-                $old_files = "";
-                for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                    foreach ($gradeable->getPreviousFiles($i) as $file) {
-                        $size = number_format($file['size'] / 1024, 2);
-                        // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
-                        if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
-                            $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                        } else
-                            $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
-                        $old_files .= <<<HTML
+            $old_files = "";
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                foreach ($gradeable->getPreviousFiles($i) as $file) {
+                    $size = number_format($file['size'] / 1024, 2);
+                    // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
+                    } else
+                        $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
+                    $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
                 readPrevious('$escape_quote_filename', {$i});
 HTML;
-                    }
                 }
-                if ($current_version_number == $gradeable->getHighestVersion()
-                    && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
-                    $return .= <<<HTML
+            }
+            if ($current_version_number == $gradeable->getHighestVersion()
+                && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
+                $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
             setUsePrevious();
@@ -479,15 +595,15 @@ HTML;
         });
     </script>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
             setButtonStatus();
         });
     </script>
 HTML;
-                $return .= <<<HTML
+            $return .= <<<HTML
 
     <script type="text/javascript">
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
@@ -523,12 +639,12 @@ HTML;
         }
     </script>
 HTML;
-            }
+        }
 
-            $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
-            $student_page_string = ($student_page) ? "true" : "false";
+        $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
+        $student_page_string = ($student_page) ? "true" : "false";
 
-            $return .= <<<HTML
+        $return .= <<<HTML
     <script type="text/javascript">
         function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
             // submit the selected pdf
@@ -607,24 +723,30 @@ HTML;
     </script>
 </div>
 HTML;
-        }
-        if ($this->core->getUser()->accessAdmin()) {
+        return $return;
+    }
 
-            $all_directories = $gradeable->getUploadsFiles();
+    /**
+     * @param $gradeable
+     * @return string
+     */
+    private function renderBulkForm($gradeable): string {
+        $return = "";
+        $all_directories = $gradeable->getUploadsFiles();
 
-            if (count($all_directories) > 0) {
-                if ($gradeable->isTeamAssignment()) {
-                    $return .= <<<HTML
+        if (count($all_directories) > 0) {
+            if ($gradeable->isTeamAssignment()) {
+                $return .= <<<HTML
 <div class="content">
     <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
 HTML;
-                } else {
-                    $return .= <<<HTML
+            } else {
+                $return .= <<<HTML
 <div class="content">
     <h2>Unassigned PDF Uploads</h2>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
     <form id="bulkForm" method="post">
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
@@ -640,28 +762,28 @@ HTML;
         </thead>
         <tbody>
 HTML;
-                $count = 1;
-                $count_array = array();
-                foreach ($all_directories as $timestamp => $content) {
-                    $files = $content["files"];
+            $count = 1;
+            $count_array = array();
+            foreach ($all_directories as $timestamp => $content) {
+                $files = $content["files"];
 
-                    foreach ($files as $filename => $details) {
-                        $clean_timestamp = str_replace("_", " ", $timestamp);
-                        $path = rawurlencode(htmlspecialchars($details["path"]));
-                        if (strpos($filename, "cover") === false) {
-                            continue;
-                        }
-                        // get the full filename for PDF popout
-                        // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
-                        $filename = rawurlencode(htmlspecialchars($filename));
-                        $url = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename . "&path=" . $path . "&ta_grading=false";
-                        $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
-                        $path_full = str_replace("_cover.pdf", ".pdf", $path);
-                        $url_full = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename_full . "&path=" . $path_full . "&ta_grading=false";
-                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
-                        //decode the filename after to display correctly for users
-                        $filename_full = rawurldecode($filename_full);
-                        $return .= <<<HTML
+                foreach ($files as $filename => $details) {
+                    $clean_timestamp = str_replace("_", " ", $timestamp);
+                    $path = rawurlencode(htmlspecialchars($details["path"]));
+                    if (strpos($filename, "cover") === false) {
+                        continue;
+                    }
+                    // get the full filename for PDF popout
+                    // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
+                    $filename = rawurlencode(htmlspecialchars($filename));
+                    $url = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename . "&path=" . $path . "&ta_grading=false";
+                    $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                    $path_full = str_replace("_cover.pdf", ".pdf", $path);
+                    $url_full = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename_full . "&path=" . $path_full . "&ta_grading=false";
+                    $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
+                    //decode the filename after to display correctly for users
+                    $filename_full = rawurldecode($filename_full);
+                    $return .= <<<HTML
             <tr class="tr tr-vertically-centered">
                 <td>{$count}</td>
                 <td>{$clean_timestamp}</td> 
@@ -679,14 +801,14 @@ HTML;
                     <div id="users_{$count}">
                         <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
 HTML;
-                        if ($gradeable->isTeamAssignment()) {
-                            for ($i = 1; $i < $gradeable->getMaxTeamSize(); $i++) {
-                                $return .= <<<HTML
+                    if ($gradeable->isTeamAssignment()) {
+                        for ($i = 1; $i < $gradeable->getMaxTeamSize(); $i++) {
+                            $return .= <<<HTML
                         <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
 HTML;
-                            }
                         }
-                        $return .= <<<HTML
+                    }
+                    $return .= <<<HTML
                     </div>
                 </td>
                 <td>
@@ -697,11 +819,11 @@ HTML;
                 </td>
             </tr>
 HTML;
-                        $count++;
-                    }
-                    $count_array_json = json_encode($count_array);
+                    $count++;
                 }
-                $return .= <<<HTML
+                $count_array_json = json_encode($count_array);
+            }
+            $return .= <<<HTML
 <script type="text/javascript">
     $(function() {
         $("#bulkForm input").autocomplete({
@@ -760,14 +882,26 @@ HTML;
     });
 </script>
 HTML;
-                $return .= <<<HTML
+            $return .= <<<HTML
         </tbody>
     </table>
     </form>
 </div>
 HTML;
-            }
         }
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param bool $canViewWholeGradeable
+     * @param int $current_version_number
+     * @param GradeableVersion $current_version
+     * @return string
+     */
+    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable, int $current_version_number, GradeableVersion $current_version): string {
+        $return = "";
+
         $team_header = '';
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             $team_header = <<<HTML
@@ -1297,102 +1431,6 @@ HTML;
         </script>
       </div>
 HTML;
-        return $return;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @param array $textbox
-     * @param int $i
-     * @return string
-     */
-    private function renderTextbox(Gradeable $gradeable, array $textbox, int $i): string {
-        $return = "";
-
-        $image_width = $image_height = 0;
-
-        if (isset($textbox['images']) && $textbox['images'] != "") {
-            $images = $textbox['images'];
-        } else {
-            $images = array();
-        }
-
-        foreach ($images as $currImage) {
-            $currImageName = $currImage["image_name"];
-            $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
-            $content_type = FileUtils::getContentType($imgPath);
-            if (substr($content_type, 0, 5) === "image") {
-                // Read image path, convert to base64 encoding
-                $textBoxImageData = base64_encode(file_get_contents($imgPath));
-                // Format the image SRC:  data:{mime};base64,{data};
-                $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
-                // insert the sample image data
-
-                if (isset($currImage['image_height']) && (int)$currImage['image_height'] > 0) {
-                    $image_height = $currImage['image_height'];
-                }
-
-                if (isset($currImage['image_width']) && (int)$currImage['image_width'] > 0) {
-                    $image_width = $currImage['image_width'];
-                }
-
-                $image_display = '<img src="' . $textBoximagesrc . '"';
-
-                if ($image_width > 0) {
-                    $image_display .= ' width="' . $image_width . '"';
-                }
-                if ($image_height > 0) {
-                    $image_display .= ' height="' . $image_height . '"';
-                }
-                $image_display .= ">";
-                $return .= $image_display;
-            }
-        }
-
-        $label = $textbox['label'];
-        $rows = $textbox['rows'];
-        if ($rows == 0) {
-            $return .= <<<HTML
-                    <p style="max-width: 50em;">
-                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
-                    </p><br>
-HTML;
-        } else {
-            $return .= <<<HTML
-                    <p style="max-width: 50em;">
-                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
-                    </p><br>
-HTML;
-
-            // Allow tab in the larger text boxes (normally tab moves to the next textbox)
-            // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-            $return .= <<<HTML
-<script>
-$("#textbox_{$i}").keydown(function(e) {
-HTML;
-            $return .= <<<'HTML'
-    if(e.keyCode === 9) { // tab was pressed
-        // get caret position/selection
-        var start = this.selectionStart;
-        var end = this.selectionEnd;
-        var $this = $(this);
-        var value = $this.val();
-        // set textarea value to: text before caret + tab + text after caret
-        $this.val(value.substring(0, start)
-                    + "\t"
-                    + value.substring(end));
-        // put caret at right position again (add one for the tab)
-        this.selectionStart = this.selectionEnd = start + 1;
-        // prevent the focus lose
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }
-});
-</script>
-HTML;
-
-        }
         return $return;
     }
 }
