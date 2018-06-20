@@ -46,8 +46,8 @@ fi
 /bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
-    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
-    echo -n "Exiting INSTALL_SUBMITTY_HELPER.sh"
+    echo -e "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -e "Exiting INSTALL_SUBMITTY_HELPER.sh\n"
     exit 1
 fi
 

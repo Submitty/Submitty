@@ -149,6 +149,13 @@ pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
 
+# for Lichen / Plagiarism Detection
+pip3 install parso
+
+# (yes, we need to run Python2 for clang tokenizer)
+pip install clang
+pip3 install clang
+
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
