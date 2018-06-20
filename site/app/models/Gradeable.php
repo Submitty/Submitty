@@ -489,15 +489,16 @@ class Gradeable extends AbstractModel {
             $this->late_status = "Bad (too many late days used this term)";
             $late_flag = false;
         }
-
-		if($this->getActiveVersion() == 0){
-			if ($this->hasSubmitted()){
-				$this->late_status = "Cancelled Submission";
-			} else {
-				$this->late_status = "No submission";
-			}
-			$late_flag = false;
-		}
+        
+        if ($this->getActiveVersion() == 0) {
+            if ($this->hasSubmitted()) {
+                $this->late_status = "Cancelled Submission";
+            }
+            else {
+                $this->late_status = "No submission";
+            }
+            $late_flag = false;
+        }
 
 
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
