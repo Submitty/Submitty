@@ -288,7 +288,7 @@
 {% macro render_column_team_members(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            {{ gradeable.getUser().getId() }}
+            {{ gradeable.getUser() }}
         {% else %}
             {%- for member in gradeable.getTeam().getMembers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
