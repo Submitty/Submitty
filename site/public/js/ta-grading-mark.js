@@ -519,6 +519,7 @@ function deleteMark(me, c_index, last_num) {
     }
     saveMark(c_index, true);
     updateMarksOnPage(c_index);
+    openMark(c_index);
     //window.location.reload();
 }
 
