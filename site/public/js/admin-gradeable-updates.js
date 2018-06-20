@@ -114,6 +114,26 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
 
 function serializeRubric() {
     return function () {
+
+        // make pdf pages reflect the pdf page setting
+        if ($('#yes_pdf_page').is(':checked')) {
+            if ($('#yes_pdf_page_student').is(':checked')) {
+                $("input[name^='page_component']").each(function () {
+                    this.value = -1;
+                });
+            } else {
+                $("input[name^='page_component']").each(function () {
+                    if (this.value < 1) {
+                        this.value = 1;
+                    }
+                });
+            }
+        } else {
+            $("input[name^='page_component']").each(function () {
+                this.value = 0;
+            });
+        }
+
         let o = {};
         let a = this.serializeArray();
         let ignore = ["numeric_label_0", "max_score_0", "numeric_extra_0", "numeric_extra_0",

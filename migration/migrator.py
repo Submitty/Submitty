@@ -123,9 +123,11 @@ def handle_migration(args):
                     if args.course is None or [semester, course] == args.course:
                         print("Running {} migrations for {}.{}...".format(args.direction, semester, course))
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
-                        with psycopg2.connect(**params) as connection:
-                            migrate_environment(connection, environment, args)
-
+                        try:
+                            with psycopg2.connect(**params) as connection:
+                                migrate_environment(connection, environment, args)
+                        except psycopg2.OperationalError:
+                            print ("Submitty Database Migration Warning:  Database does not exist for semester=", semester, " course=",course)
 
 def migrate_environment(connection, environment, args):
     # Get the migration table and if it doesn't exist, then we have to create it

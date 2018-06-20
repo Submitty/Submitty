@@ -397,7 +397,8 @@ function addMark(me, num) {
             });
 
             parent.append(getMarkView(num, x));
-
+            saveLastOpenedMark(true);
+            saveMark(id, true);
             
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {

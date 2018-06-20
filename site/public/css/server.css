@@ -853,32 +853,35 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
-.cat-buttons {
-    background-color: #FFF;
-}
-
-.cat-selected {
-    -webkit-transition:background 1s;
-    -moz-transition:background 1s;
-    -o-transition:background 1s;
-    transition:background 1s
-}
-
-.cat-selected:hover {
+.cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
 }
 
-.cat-notselected {
-    -webkit-transition:background 1s;
-    -moz-transition:background 1s;
-    -o-transition:background 1s;
-    transition:background 1s
+#ui-category-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 60%;
 }
 
-.cat-notselected:hover {
+#ui-category-list li {
+    border-style: solid;
+    border-color: LightGray;
+    border-width: thin;
+    border-radius: 0.3em;
+    margin: 0.3em 0.1em 0.3em 0.1em;
+    padding: 0.2em;
+    height: 18px;
+}
+
+#ui-category-list .handle {
     opacity: 0.8;
     filter: alpha(opacity=80);
+}
+
+#ui-category-list .handle:hover {
+ cursor: move;
 }
 
 .rainbow {
@@ -912,6 +915,8 @@ table .instructor .two-options{
     border: 1px solid #000000;
     padding: 10px;
     display: none;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 .popup-form div {
@@ -930,6 +935,13 @@ table .instructor .two-options{
 
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.fill-available {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
 }
 
 .reply-box{
@@ -1012,7 +1024,65 @@ textarea.comment_display {
 end of styles used in the admin gradeable page
 */
 
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#hotkeys-list td {
+    padding: 4px;
+}
+
+.remap-button {
+    width: 100%;
+    text-align: center;
+}
+
+
+
+
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }
 .required::-moz-placeholder { color: red; }
 .required:-ms-input-placeholder { color: red; }
+
+.modal{
+    display: none;
+    position: fixed;
+    z-index: 50;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content{
+    text-align: center;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    padding-top: 15px;
+    border: 1px solid #888;
+    width: 420px;
+    min-width: 400px;
+    border-radius: 5px;
+}
