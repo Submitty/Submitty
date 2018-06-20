@@ -279,13 +279,9 @@ HTML;
      */
     public function showTAResults(Gradeable $gradeable) {
         $grading_complete = true;
-        $active_same_as_graded = true;
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->getGrader()) {
                 $grading_complete = false;
-            }
-            if ($component->getGradedVersion() != $gradeable->getActiveVersion()) {
-                $active_same_as_graded = false;
             }
         }
         $grader_names = array();
@@ -334,7 +330,6 @@ HTML;
             "graded_max" => $graded_max,
             "total_score" => $total_score,
             "total_max" => $total_max,
-            "active_same_as_graded" => $active_same_as_graded,
         ]);
     }
 }
