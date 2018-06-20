@@ -1522,7 +1522,7 @@ function checkNumFilesForumUpload(input, post_id){
 
 }
 
-function editPost(post_id, thread_id) {
+function editPost(post_id, thread_id, shouldEditThread) {
      var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
      $.ajax({
             url: url,
@@ -1532,7 +1532,6 @@ function editPost(post_id, thread_id) {
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -1547,16 +1546,43 @@ function editPost(post_id, thread_id) {
                 }
                 var user_id = escape(json.user);
                 var post_content = json.post;
+                var anon = json.anon;
                 var time = (new Date(json.post_time));
+                var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('edit_post_content');
+                var contentBox = document.getElementById('thread_post_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
+                $('#thread_post_anon').prop('checked', anon);
                 $('#edit-user-post').css('display', 'block');
+
+                $(".cat-buttons input").prop('checked', false);
+                // If first post of thread
+                if(shouldEditThread) {
+                    var thread_title = json.title;
+                    $("#title").prop('disabled', false);
+                    $(".edit_thread").show();
+                    $("#title").val(thread_title);
+                    // Categories
+                    $(".cat-buttons").removeClass('cat-selected');
+                    $.each(categories_ids, function(index, category_id) {
+                        var cat_input = $(".cat-buttons input[value="+category_id+"]");
+                        cat_input.prop('checked', true);
+                        cat_input.parent().addClass('cat-selected');
+                    });
+                    $(".cat-buttons").trigger("eventChangeCatClass");
+                    $("#thread_form").prop("ignore-cat",false);
+                    $("#category-selection-container").show();
+                } else {
+                    $("#title").prop('disabled', true);
+                    $(".edit_thread").hide();
+                    $("#thread_form").prop("ignore-cat",true);
+                    $("#category-selection-container").hide();
+                }
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
@@ -1805,11 +1831,9 @@ function refreshCategories() {
             var category_id = category[0];
             var category_desc = category[1];
             var category_color = category[2];
-            var selection_class;
+            var selection_class = "";
             if(selected_button.has(category_id)) {
                 selection_class = "cat-selected";
-            } else {
-                selection_class = "cat-notselected";
             }
             var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
                                 <input type="checkbox" name="cat[]" value="'+category_id+'">\
@@ -1831,10 +1855,8 @@ function refreshCategories() {
     $(".cat-buttons").click(function() {
         if($(this).hasClass("cat-selected")) {
             $(this).removeClass("cat-selected");
-            $(this).addClass("cat-notselected");
-             $(this).find("input[type='checkbox']").prop("checked", false);
+            $(this).find("input[type='checkbox']").prop("checked", false);
         } else {
-            $(this).removeClass("cat-notselected");
             $(this).addClass("cat-selected");
             $(this).find("input[type='checkbox']").prop("checked", true);
         }

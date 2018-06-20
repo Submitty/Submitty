@@ -923,6 +923,8 @@ table .instructor .two-options{
     border: 1px solid #000000;
     padding: 10px;
     display: none;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 .popup-form div {
@@ -941,6 +943,13 @@ table .instructor .two-options{
 
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.fill-available {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
 }
 
 .reply-box{

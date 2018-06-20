@@ -284,10 +284,25 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($post_id, $content){
+    public function editPost($post_id, $content, $anon){
         try {
-            $this->course_db->query("UPDATE posts SET content = ? where id = ?", array($content, $post_id));
+            $this->course_db->query("UPDATE posts SET content = ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
         } catch(DatabaseException $dbException) {
+            return false;
+        } return true;
+    }
+
+    public function editThread($thread_id, $thread_title, $categories_ids) {
+        try {
+            $this->course_db->beginTransaction();
+            $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
+            $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", array($thread_id));
+            foreach ($categories_ids as $category_id) {
+                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));
+            }
+            $this->course_db->commit();
+        } catch(DatabaseException $dbException) {
+            $this->course_db->rollback();
             return false;
         } return true;
     }
