@@ -904,6 +904,7 @@ class Course(object):
                                 #If the user is in the plagirized folder, then only add those submissions
                                 src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
                                 dst = os.path.join(submission_path, str(version))
+                                # pdb.set_trace()
                                 create_gradeable_submission(src, dst)
                             else:
                                 if isinstance(gradeable.submissions, dict):
@@ -1258,16 +1259,16 @@ class Gradeable(object):
 
             examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
-            lichen_example_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "lichen_submissions")
+            if 'eg_lichen_sample_path' in gradeable:
+                # pdb.set_trace()
+                self.lichen_sample_path = gradeable['eg_lichen_sample_path']
+                if 'eg_plagiarized_users' in gradeable:
+                    for user in gradeable['eg_plagiarized_users']:
+                        temp = user.split(" - ")
+                        self.plagiarized_user[temp[0]] = temp[1:]
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
-                if os.path.isdir(lichen_example_path):
-                    self.lichen_sample_path = lichen_example_path
-                    data = load_data_yaml(os.path.join(lichen_example_path, "users.yml"))
-                    for i in data:
-                        temp = i.split(" - ")
-                        self.plagiarized_user[temp[0]] = temp[1:]
                 if os.path.isdir(examples_path):
                     self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
