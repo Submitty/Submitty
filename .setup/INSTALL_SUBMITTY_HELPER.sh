@@ -540,7 +540,7 @@ if [ $? -ne 0 ]; then
 fi
 popd > /dev/null
 
-${lichen_repo_dir}/install_lichen.sh
+/bin/bash ${lichen_repo_dir}/install_lichen.sh
 
 
 ################################################################################################################
