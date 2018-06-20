@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 <div class="content">
     {#
         Default is viewing your sections
@@ -93,14 +95,139 @@
             {% endif %}
         </tr>
         </thead>
-        <tbody>
-            {% if rows|length == 0 %}
+        {% if sections|length == 0 %}
+            <tbody>
                 <tr class="info">
                     <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
                 </tr>
-            {% else %}
-
-            {% endif %}
-        </tbody>
+            </tbody>
+        {% else %}
+            {% for section_id, section in sections %}
+                <tbody>
+                    <tr class="info persist-header">
+                        <td colspan="{{ colspan }}" style="text-align: center">
+                            Students Enrolled in Section {{ section_id ?? "NULL" }}
+                            {# Print button #}
+                            {% if action == 'lab' %}
+                                <a target=_blank href="{{ this.core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="info">
+                        <td colspan="{{ colspan }}" style="text-align: center">
+                            Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody id="section-{$section}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
+                    {% for row in section.rows %}
+                        {{ self.render_row(self, action, gradeable, section, row, loop.index0, components_numeric, components_text) }}
+                    {% endfor %}
+                </tbody>
+            {% endfor %}
+        {% endif %}
     </table>
 </div>
+
+{% macro render_row(self, action, gradeable, section, row, index, components_numeric, components_text) %}
+    {% set sytle = "" %}
+    {% if row.getUser().accessGrading() %}
+        {% set sytle = "style='background: #7bd0f7;'" %}
+    {% endif %}
+    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}" {{ style }}>
+        <td class="">{{ index + 1 }}</td>
+        <td class="">{{ row.getUser().getRegistrationSection() }}</td>
+        <td class="cell-all" style="text-align: left">{{ row.getUser().getId() }}</td>
+        <td class="" style="text-align: left">{{ row.getUser().getDisplayedFirstName() }}</td>
+        <td class="" style="text-align: left">{{ row.getUser().getLastName() }}</td>
+
+        {% if action == 'lab' %}
+            {{ self.render_lab_cols(self, gradeable, section, row, index) }}
+        {% else %}
+            {{ self.render_numeric_cols(self, gradeable, section, row, index, components_numeric, components_text) }}
+        {% endif %}
+    </tr>
+{% endmacro %}
+
+{% macro render_lab_cols(self, gradeable, section, row, index) %}
+    {% for component in row.getComponents() %}
+        {% if component.getIsText() %}
+            <td>
+                {{ component.getComment() }}
+            </td>
+        {% else %}
+            <td
+                class="cell-grade"
+                id="cell-{{ index }}-{{ loop.index0 }}"
+                data-id="{{ component.getId() }}"
+                data-score="{{ component.getScore() }}"
+                {% if component.getGrader() != null %}
+                    data-grader="{{ component.getGrader().getId() }}"
+                {% endif %}
+                {% if component.getGradeTime() != null %}
+                    data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                {% endif %}
+                {% if component.getScore() == 1.0 %}
+                    style="background-color: #149bdf;"
+                {% elseif component.getScore() == 0.5 %}
+                    style="background-color: #88d0f4;"
+                {% endif %}
+            ></td>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric, components_text) %}
+    {% set col = 0 %}
+    {% if components_numeric|length > 0 %}
+        {% set total = 0 %}
+        {% for component in row.getComponents() %}
+            {% if not component.getIsText() %}
+                {% set total = total + component.getScore() %}
+                <td class="option-small-input">
+                    <input
+                        class="option-small-box"
+                        style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : ""}}"
+                        type="text"
+                        id="cell-{{ index }}-{{ col }}"
+                        value="{{  component.getScore() }}"
+                        data-id="{{  component.getId() }}"
+                        {% if component.getGrader() != null %}
+                            data-grader="{{ component.getGrader().getId() }}"
+                        {% endif %}
+                        {% if component.getGradeTime() != null %}
+                            data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                        {% endif %}
+                        data-num="true"
+                    />
+                </td>
+                {#
+                    This is ugly but we can't easily split up the components and need
+                    to keep track of what index we're on. And no, we can't use
+                    components_numeric because they're part of the static gradeable
+                #}
+                {% set col = col + 1 %}
+            {% endif %}
+        {% endfor %}
+
+        <td class="option-small-output">
+            <input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{{ index }}" value="{{ total }}" data-total="true" readonly>
+        </td>
+    {% endif %}
+
+    {% for component in components_text %}
+        <td class="option-small-input">
+            <input
+                class="option-small-box"
+                type="text"
+                id="cell-{{ index }}-{{ col }}"
+                value="{{ component.getComment() }}"
+                data-id="{{ component.getId() }}"
+            />
+        </td>
+        {# See above #}
+        {% set col = col + 1 %}
+    {% endfor %}
+{% endmacro %}
