@@ -20,7 +20,7 @@ class LateDaysTableView extends AbstractView {
             $status_array[] = $gradeable->getLateStatus();
             $late_charged_array[] = $gradeable->getCurrLateCharged();
         }
-		$preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
+        $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
         return $this->core->getOutput()->renderTwigTemplate("/LateDaysTable.twig", [
             "user_id" => $user_id,
             "student_gradeables" => $student_gradeables,
@@ -29,7 +29,7 @@ class LateDaysTableView extends AbstractView {
             "total_late_used" => $total_late_used,
             "g_id" => $g_id,
             "late_update" => $late_update,
-			"preferred_name" => $preferred_name
+            "preferred_name" => $preferred_name
         ]);
     }
 }
