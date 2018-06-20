@@ -107,7 +107,7 @@ class SimpleGraderView extends AbstractView {
             "components_numeric" => $components_numeric,
             "sections" => $sections
         ]);
-        
+
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
 
         return $return;

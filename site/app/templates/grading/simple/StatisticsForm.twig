@@ -9,13 +9,15 @@
             </tr>
             </thead>
             {% for section, info in sections %}
-                <tbody>
-                    <tr>
-                        <td>{{ section }}</td>
-                        <td id="avg-section-{{ section }}"></td>
-                        <td id="stddev-section-{{ section }}"></td>
-                    </tr>
-                </tbody>
+                {% if section != null %}
+                    <tbody>
+                        <tr>
+                            <td>{{ section }}</td>
+                            <td id="avg-section-{{ section }}"></td>
+                            <td id="stddev-section-{{ section }}"></td>
+                        </tr>
+                    </tbody>
+                {% endif %}
             {% endfor %}
             <thead class="persist-thead">
             <tr>
