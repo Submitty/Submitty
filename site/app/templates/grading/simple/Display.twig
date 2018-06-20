@@ -7,11 +7,100 @@
     {% if show_all_sections_button %}
         <div style="float: right; margin-bottom: 10px">
             <a class="btn btn-default"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort 'view': view_all ? null : "all"}) }}">
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}">
                 {{ view_all ? "View Your Sections" : "View All" }}
             </a>
         </div>
     {% endif %}
 
+    <h2>
+        {{ gradeable.getName() }}
+    </h2>
+    <p>
+        {% if gradeable.getTaInstructions() != "" %}
+            Overall TA Instructions: {{ gradeable.getTaInstructions() }}
+        {% endif %}
+    </p>
+    <br>
+    <p style="float: left;">
+        {% if action == 'lab' %}
+            No Color - No Credit<br />
+            Dark Blue - Full Credit<br />
+            Light Blue - Half Credit<br />
+            Red - [SAVE ERROR] Refresh Page
+        {% else %}
+            Red - [SAVE ERROR] Refresh Page
+        {% endif %}
+    </p>
+    <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+    <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
 
+    {# Search box #}
+    {% include "grading/simple/StudentSearch.twig" %}
+
+    {% if action == 'numeric' and core.getUser().accessAdmin() %}
+        <br> <br> <br>
+        <p style="float: right;">The CSV file should be formated as such: <br />
+            user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
+        <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+        <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
+    {% endif %}
+
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+        <tr>
+            <td width="1%"></td>
+            <td width="3%">Section</td>
+            <td width="68" style="text-align: left">
+                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
+                    <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i>
+                </a>
+            </td>
+            <td width="92" style="text-align: left">
+                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
+                    <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i>
+                </a>
+            </td>
+            <td width="91" style="text-align: left">
+                <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
+                    <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i>
+                </a>
+            </td>
+
+            {% if action == 'lab' %}
+                {% set colspan = 5 + gradeable.getComponents()|length %}
+                {% for component in gradeable.getComponents() %}
+                    <td width="100">
+                        {{ component.getTitle() }}
+                    </td>
+                {% endfor %}
+            {% else %}
+                {% set colspan = 5 + components_numeric|length + components_text|length %}
+                {% if components_numeric|length > 0 %}
+                    {% set colspan = colspan + 1 %}
+                    {% for component in components_numeric %}
+                        <td width="35" style="text-align: center">
+                            {{ component.getTitle() }}({{ component.getMaxValue() }})
+                        </td>
+                    {% endfor %}
+                    <td width="25" style="text-align: center">Total</td>
+                {% endif %}
+                {% for component in components_text %}
+                    <td style="text-align: center">
+                        {{ component.getTitle() }}
+                    </td>
+                {% endfor %}
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+            {% if rows|length == 0 %}
+                <tr class="info">
+                    <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
+                </tr>
+            {% else %}
+
+            {% endif %}
+        </tbody>
+    </table>
 </div>
