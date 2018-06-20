@@ -45,11 +45,11 @@ HTML;
         }
         if($gradeable->isGradeByRegistration()){
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-            $section_message = "Students enrolled in Registration Section";
+            $section_message = "Students Enrolled in Registration Section";
         }
         else{
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),$this->core->getUser()->getId()));
-            $section_message = "Students assigned to Rotating Section";
+            $section_message = "Students Assigned to Rotating Section";
         }
 
         if($this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0)){
