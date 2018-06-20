@@ -27,7 +27,7 @@ SUBMITTY_INSTALL_DIR=/usr/local/submitty
 
 min_AnalysisTools_version=v.18.06.00
 min_Lichen_version=v.18.06.00
-min_RainbowGrades_version=v.18.06.00
+min_RainbowGrades_version=v.18.06.01
 min_Tutorial_version=v.18.06.00
 
 ########################################################################
