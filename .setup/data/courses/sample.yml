@@ -557,6 +557,7 @@ gradeables:
   g_id: lichen_homework_cat
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: C++ Cats (Lichen)
+  eg_max_individual_submissions: 1
   gradeable_config: lichen_cat
   g_bucket: homework
 
