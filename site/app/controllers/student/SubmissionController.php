@@ -302,7 +302,7 @@ class SubmissionController extends AbstractController {
         }
 
         // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
+        if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -339,9 +339,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-	if ($max_size < 10000000) {
-	    $max_size = 10000000;
-	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -468,8 +468,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -780,8 +780,8 @@ class SubmissionController extends AbstractController {
         // repo_id for VCS use
         $repo_id = $_POST['repo_id'];
 
-        // make sure is admin if the two ids do not match
-        if ($original_user_id !== $user_id && !$this->core->getUser()->accessAdmin()) {
+        // make sure is full grader if the two ids do not match
+        if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
