@@ -279,20 +279,24 @@ HTML;
      */
     public function showTAResults(Gradeable $gradeable) {
         $grading_complete = true;
+        $active_same_as_graded = true;
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->getGrader()) {
                 $grading_complete = false;
+            }
+            if ($component->getGradedVersion() != $gradeable->getActiveVersion()) {
+                $active_same_as_graded = false;
             }
         }
         $grader_names = array();
         //find all names of instructors who graded part(s) of this assignment that are full access grader_names
         if (!$gradeable->getPeerGrading()) {
             foreach ($gradeable->getComponents() as $component) {
-            if ($component->getGrader() == NULL) {
-           continue;
-        }
-            $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
-        if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
+                if ($component->getGrader() == NULL) {
+                    continue;
+                }
+                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
             }
@@ -330,6 +334,7 @@ HTML;
             "graded_max" => $graded_max,
             "total_score" => $total_score,
             "total_max" => $total_max,
+            "active_same_as_graded" => $active_same_as_graded,
         ]);
     }
 }
