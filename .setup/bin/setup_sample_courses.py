@@ -459,7 +459,6 @@ def create_gradeable_submission(src, dst):
     if zip_dst is not None and isinstance(zip_dst, str):
         os.remove(zip_dst)
 
-
 class User(object):
     """
     A basic object to contain the objects loaded from the users.json file. We use this to link
@@ -856,7 +855,12 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
+                    if user.id in gradeable.plagiarized_user:
+                        #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to 
+                        # be the same as the number of assignments defined in users.yml in the lichen_submissions folder.
+                        versions_to_submit = len(gradeable.plagiarized_user[user.id])
+                    else:    
+                        versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
@@ -892,28 +896,33 @@ class Course(object):
                                 if version == versions_to_submit:
                                     conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                                 active_version=active_version)
-                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
-                            if user.id in gradeable.plagiarized_user:
-                                
+                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})      
+
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
-                            if isinstance(gradeable.submissions, dict):
-                                for key in gradeable.submissions:
-                                    os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
-                                    submission = random.choice(gradeable.submissions[key])
-                                    src = os.path.join(gradeable.sample_path, submission)
-                                    dst = os.path.join(submission_path, str(version), key)
-                                    create_gradeable_submission(src, dst)
+                            if user.id in gradeable.plagiarized_user:
+                                #If the user is in the plagirized folder, then only add those submissions
+                                src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
+                                dst = os.path.join(submission_path, str(version))
+                                create_gradeable_submission(src, dst)
                             else:
-                                submission = random.choice(gradeable.submissions)
-                                if isinstance(submission, list):
-                                    submissions = submission
+                                if isinstance(gradeable.submissions, dict):
+                                    for key in gradeable.submissions:
+                                        os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
+                                        submission = random.choice(gradeable.submissions[key])
+                                        src = os.path.join(gradeable.sample_path, submission)
+                                        dst = os.path.join(submission_path, str(version), key)
+                                        create_gradeable_submission(src, dst)
                                 else:
-                                    submissions = [submission]
-                                for submission in submissions:
-                                    src = os.path.join(gradeable.sample_path, submission)
-                                    dst = os.path.join(submission_path, str(version))
-                                    create_gradeable_submission(src, dst)
+                                    submission = random.choice(gradeable.submissions)
+                                    if isinstance(submission, list):
+                                        submissions = submission
+                                    else:
+                                        submissions = [submission]
+                                    for submission in submissions:
+                                        src = os.path.join(gradeable.sample_path, submission)
+                                        dst = os.path.join(submission_path, str(version))
+                                        create_gradeable_submission(src, dst)
                             random_days-=0.5
                         
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
@@ -1259,7 +1268,6 @@ class Gradeable(object):
                     for i in data:
                         temp = i.split(" - ")
                         self.plagiarized_user[temp[0]] = temp[1:]
-                    pdb.set_trace(  )
                 if os.path.isdir(examples_path):
                     self.sample_path = examples_path
                 elif os.path.isdir(tutorial_path):
