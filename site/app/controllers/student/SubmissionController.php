@@ -145,7 +145,7 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->disableBuffer();
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeableError', $gradeable);
+                                                           'unbuiltGradeable', $gradeable);
                     $error = true;
                 }
                 else {

@@ -7,24 +7,12 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
-        
-    /**
-     * @param Gradeable $gradeable
-     *
-     * @return bool|string
-     */
-    public function showGradeableError($gradeable) {
-        return <<<HTML
-<div class="content">
-    <p class="red-message">
-    {$gradeable->getName()} has not been built and cannot accept submissions at this time. The instructor
-    needs to configure the config.json for this assignment and then build the course.
-    </p>
-</div>
-HTML;
+
+    public function unbuiltGradeable(Gradeable $gradeable) {
+        return $this->core->getOutput()->renderTwigTemplate("error/UnbuiltGradeable.twig", [
+            "gradeable" => $gradeable
+        ]);
     }
-
-
     
     public function dayOrDays($d) {
       if ($d == 1) return "day";
