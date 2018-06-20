@@ -1590,13 +1590,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(id){
-    var t = document.getElementById(id);
-
-    $(t).on('input', function() {
+function enableTabsInTextArea(jQuerySelector){
+    $(jQuerySelector).on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
-    $(t).trigger('input');
+    $(jQuerySelector).trigger('input');
         t.onkeydown = function(t){
             if(t.keyCode == 9){
                 var text = this.value;
