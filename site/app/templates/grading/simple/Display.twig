@@ -104,6 +104,7 @@
                 </tr>
             </tbody>
         {% else %}
+            {% set row_index_start = 0 %}
             {% for section_id, section in sections %}
                 {# Section header #}
                 <tbody>
@@ -127,9 +128,10 @@
                 {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
                     {% for row in section.rows %}
-                        {{ self.render_row(self, action, gradeable, section, row, loop.index0, components_numeric) }}
+                        {{ self.render_row(self, action, gradeable, section, row, loop.index0 + row_index_start, components_numeric) }}
                     {% endfor %}
                 </tbody>
+                {% set row_index_start = row_index_start + section.rows|length %}
             {% endfor %}
         {% endif %}
     </table>
@@ -167,8 +169,6 @@
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
-                data-row-index="{{ index }}"
-                data-col-index="{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component.getScore() }}"
                 {% if component.getGrader() != null %}
@@ -201,8 +201,6 @@
                         style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : ""}}"
                         type="text"
                         id="cell-{{ index }}-{{ col }}"
-                        data-row-index="{{ index }}"
-                        data-col-index="{{ col }}"
                         data-id="{{  component.getId() }}"
                         value="{{  component.getScore() }}"
                         {% if component.getGrader() != null %}
@@ -235,8 +233,6 @@
                     class="option-small-box"
                     type="text"
                     id="cell-{{ index }}-{{ col }}"
-                    data-row-index="{{ index }}"
-                    data-col-index="{{ col }}"
                     value="{{ component.getComment() }}"
                     data-id="{{ component.getId() }}"
                 />

@@ -46,12 +46,12 @@ class SimpleGraderView extends AbstractView {
         $components_text = [];
 
         $comp_ids = array();
-        if ($action != 'lab') {
-            foreach ($gradeable->getComponents() as $component) {
-                if ($component->getIsText()) {
-                    $components_text[] = $component;
-                } else {
-                    $components_numeric[] = $component;
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getIsText()) {
+                $components_text[] = $component;
+            } else {
+                $components_numeric[] = $component;
+                if ($action != 'lab') {
                     $comp_ids[] = $component->getId();
                 }
             }
