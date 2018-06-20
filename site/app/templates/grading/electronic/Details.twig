@@ -203,14 +203,24 @@
         {% set btn_class = "btn-default" %}
     {% elseif gradeable.beenTAgraded() %}
         {% if gradeable.validateVersions() %}
-            {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
-            {% set btn_class = "btn-default" %}
+            {% if gradeable.getRegradeStatus() == -1 %}
+                {% set contents = "Regrade Requested" %}
+                {% set btn_class = "btn-danger" %}
+            {% else %}
+                {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% endif %}
         {% else %}
             {% set btn_class = "btn-primary" %}
             {% if not gradeable.isFullyGraded() %}
                 {% set contents = "Grading Incomplete" %}
             {% else %}
-                {% set contents = "Version Conflict" %}
+                {% if gradeable.getRegradeStatus() == -1 %}
+                    {% set contents = "Regrade Requested" %}
+                    {% set btn_class = "btn-danger" %}
+                {% else %}
+                    {% set contents = "Version Conflict" %}
+                {% endif %}
             {% endif %}
         {% endif %}
     {% else %}

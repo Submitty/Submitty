@@ -91,7 +91,7 @@ def main():
     os.system("mkdir -p {}/courses".format(SUBMITTY_DATA_DIR))
     os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
     os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
-    os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
+    os.system("bash {}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
     distro = platform.linux_distribution()[0].lower()
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         os.system("rm -rf {}/logs".format(SUBMITTY_DATA_DIR))
@@ -99,7 +99,6 @@ def main():
 
         os.system('mkdir {}/.vagrant/{}/logs'.format(SUBMITTY_REPOSITORY, distro))
         os.system('ln -s {}/.vagrant/{}/logs {}'.format(SUBMITTY_REPOSITORY, distro, SUBMITTY_DATA_DIR))
-
 
         os.system('mkdir {}/.vagrant/{}/logs/autograding'.format(SUBMITTY_REPOSITORY, distro))
         os.system('mkdir {}/.vagrant/{}/logs/access'.format(SUBMITTY_REPOSITORY, distro))

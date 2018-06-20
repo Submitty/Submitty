@@ -30,8 +30,9 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-
-    calculatePercentageTotal();
+    if(getGradeable()!=null){
+        calculatePercentageTotal();
+    }
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -69,7 +70,7 @@ function eraseCookie(name) {
 function deleteCookies(){
     $.each(document.cookie.split(/; */), function(){
         var cookie = this.split("=")
-        if(!cookie[1] || cookie[1] == 'undefined'){
+        if(!cookie[1] || cookie[1] == 'undefined'){https://github.com/Submitty/Submitty/projects
             document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             document.cookie = "cookie_version=-1; path=/;";
         }
@@ -102,6 +103,12 @@ function readCookies(){
     var status_width = document.cookie.replace(/(?:(?:^|.*;\s*)status_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_height = document.cookie.replace(/(?:(?:^|.*;\s*)status_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_visible = document.cookie.replace(/(?:(?:^|.*;\s*)status_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    var regrade_top = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var regrade_left = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var regrade_width = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var regrade_height = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var regrade_visible = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -141,6 +148,12 @@ function readCookies(){
     (status_height) ? $("#student_info").css("height", status_height):{};
     (status_visible) ? $("#student_info").css("display", status_visible):{};
 
+    (regrade_top) ? $("#regrade_info").css("top", regrade_top):{};
+    (regrade_left) ? $("#regrade_info").css("left", regrade_left):{};
+    (regrade_width) ? $("#regrade_info").css("width", regrade_width):{};
+    (regrade_height) ? $("#regrade_info").css("height", regrade_height):{};
+    (regrade_visible) ? $("#regrade_info").css("display", regrade_visible):{};
+
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
@@ -149,27 +162,21 @@ function readCookies(){
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
-
+    (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper-o").removeClass("icon-selected") : $(".fa-hand-paper-o").addClass("icon-selected")) : {};
+   
     (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
-    if (autoscroll == "on") {
-        onAjaxInit = function() {
-            $('#title-'+opened_mark).click();
 
-            if (scroll_pixel > 0) {
-                document.getElementById('grading_rubric').scrollTop = scroll_pixel;
-            }
+    onAjaxInit = function() {
+        $('#title-'+opened_mark).click();
+
+        if (scroll_pixel > 0) {
+            document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
+    }
 
-        var testcases_array = JSON.parse(testcases);
-        testcases_array.forEach(function(element) {
-            var id = 'testcase_' + element;
-            if ($("#" + id).attr("style") == "display: none;") {
-                toggleDiv(id);
-            }
-        });
-
+    if (autoscroll == "on") {
         var files_array = JSON.parse(files);
         files_array.forEach(function(element) {
             var file_path = element.split('#$SPLIT#$');
@@ -199,6 +206,10 @@ function readCookies(){
             }
         });
     }
+    for(var x=0; x<testcases.length; x++){
+        if(testcases[x]!='[' && testcases[x]!=']')
+            openAutoGrading(testcases[x]);
+    }
 }
 
 function updateCookies(){
@@ -226,6 +237,12 @@ function updateCookies(){
     document.cookie = "status_height=" + $("#student_info").css("height") + "; path=/;";
     document.cookie = "status_visible=" + $("#student_info").css("display") + "; path=/;";
 
+    document.cookie = "regrade_top=" + $("#regrade_info").css("top") + "; path=/;";
+    document.cookie = "regrade_left=" + $("#regrade_info").css("left") + "; path=/;";
+    document.cookie = "regrade_width=" + $("#regrade_info").css("width") + "; path=/;";
+    document.cookie = "regrade_height=" + $("#regrade_info").css("height") + "; path=/;";
+    document.cookie = "regrade_visible=" + $("#regrade_info").css("display") + "; path=/;";
+
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
@@ -245,7 +262,12 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+    if(getGradeable()!=null){
+        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+        var testcases = findOpenTestcases();
+        testcases = JSON.stringify(testcases);
+        document.cookie = "testcases=" + testcases + "; path=/;";
+    }
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
@@ -259,11 +281,6 @@ function updateCookies(){
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";
     }
-
-    var testcases = findOpenTestcases();
-    testcases = JSON.stringify(testcases);
-    document.cookie = "testcases=" + testcases + "; path=/;";
-
     var files = [];
     $('#file-container').children().each(function() {
         $(this).children('div[id^=div_viewer_]').each(function() {
@@ -289,25 +306,34 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#prev-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#prev-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+        window.location = $("#prev-student")[0].dataset.href; 
+    }
 }
 
 function gotoNextStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#next-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#next-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#next-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+       window.location = $("#next-student")[0].dataset.href; 
+    }
 }
-
 //Navigate to the prev / next student buttons
 registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
     gotoPrevStudent();
@@ -334,7 +360,9 @@ function isSubmissionsVisible() {
 function isInfoVisible() {
     return $("#student_info").is(":visible");
 }
-
+function isRegradeVisible(){
+    return $("#regrade_info").is(":visible");
+}
 
 function setAutogradingVisible(visible) {
     $('.fa-list-alt').toggleClass('icon-selected', visible);
@@ -360,6 +388,11 @@ function setInfoVisible(visible) {
     hideIfEmpty("#student_info");
 }
 
+function setRegradeVisible(visible) {
+    $('.fa-hand-paper-o').toggleClass('icon-selected', visible);
+    $("#regrade_info").toggle(visible);
+    hideIfEmpty("#regrade_info");
+}
 
 function toggleAutograding() {
     setAutogradingVisible(!isAutogradingVisible());
@@ -376,7 +409,9 @@ function toggleSubmissions() {
 function toggleInfo() {
     setInfoVisible(!isInfoVisible());
 }
-
+function toggleRegrade() {
+    setRegradeVisible(!isRegradeVisible());
+}
 
 function resetModules() {
     $('.fa-list-alt').addClass('icon-selected');
@@ -388,6 +423,8 @@ function resetModules() {
     $('.fa-user').addClass('icon-selected');
     $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
     $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
+    $('.fa-hand-paper-o').addClass('icon-selected');
+    $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     hideIfEmpty(".rubric_panel");
     deleteCookies();
     updateCookies();
@@ -414,7 +451,10 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
     toggleInfo();
     updateCookies();
 });
-
+registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, function() {
+    toggleRegrade();
+    updateCookies();
+});
 //-----------------------------------------------------------------------------
 // Show/hide components
 
@@ -512,11 +552,15 @@ function updateValue(obj, option1, option2) {
     });
 
 }
-
+function openAutoGrading(num){
+    $('#tc_' + num).click();
+    $('#testcase_' + num)[0].style.display="block";
+}
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
-    $("[id^='testcase_']").show();
+     $("[id^='tc_']").click();
+     $("[id^='testcase_']")[0].style.display="block";
 }
 
 // close all outputs in Auto-Grading Testcases section
@@ -679,4 +723,3 @@ function toggleEditMode(){
         updateMarksOnPage(id);
     }
 }
-

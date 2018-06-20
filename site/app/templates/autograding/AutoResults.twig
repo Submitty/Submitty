@@ -1,0 +1,101 @@
+{% import 'functions/Badge.twig' as Badge %}
+
+{% if num_visible_testcases > 1 %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
+        });
+    </script>
+{% endif %}
+
+{% if num_visible_testcases > 1 %}
+    {% if show_hidden_breakdown %}
+        <div class="box">
+            <div class="box-title">
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
+                <h4>Total (No Hidden Points)</h4>
+            </div>
+        </div>
+
+        <div class="box" style="background-color:#D3D3D3;">
+            <div class="box-title">
+                {{ Badge.render(hidden_earned, hidden_max, false) }}
+                <h4>Total (With Hidden Points)</h4>
+            </div>
+        </div>
+    {% else %}
+        {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
+
+        <div class="box">
+            <div class="box-title">
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
+                <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }}</h4>
+            </div>
+        </div>
+        {% if display_hidden %}
+            <div class="box">
+                <div class="box-title">
+                    {{ Badge.render(hidden_earned, hidden_max, false) }}
+                    <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+{% for testcase in gradeable.getTestcases() %}
+    {% set can_view = (not testcase.isHidden() or show_hidden) %}
+    {% if testcase.viewTestcase() %}
+        <div class="box" {{ testcase.isHidden() and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
+            <div id='tc_{{ loop.index0 }}'class="box-title" {{ testcase.hasDetails() and can_view ? "style='cursor: pointer;'" : "" }} onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '{{ loop.index0 }}');">
+
+                {# Details button #}
+                {% if testcase.hasDetails() and can_view %}
+                    <div style="float:right; color: #0000EE; text-decoration: underline">
+                        Details
+                    </div>
+                {% endif %}
+                {# /Details button #}
+
+                {# Badge #}
+                {% if testcase.hasPoints() %}
+                    {% if can_view %}
+                        {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                    {% else %}
+                        <div class="badge">
+                            Hidden
+                            {% if gradeable.taGradesReleased() %}
+                                <br>
+                                {{ Badge.format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% elseif has_badges %}
+                    <div class="no-badge"></div>
+                {% endif %}
+                {# /Badge #}
+
+                <h4>
+                    {% if testcase.isHidden() and show_hidden %}
+                        HIDDEN:
+                    {% endif %}
+                    {{ testcase.getName() }}
+                    &nbsp;&nbsp;&nbsp;
+                    <code>{{ testcase.getDetails() }}</code>
+                    &nbsp;&nbsp;
+                    {% if testcase.isExtraCredit() %}
+                        <span class='italics' style="color: #0a6495;">Extra Credit</span>
+                    {% endif %}
+                    &nbsp;&nbsp;
+                    {% if can_view and testcase.viewTestcaseMessage() %}
+                        <span class='italics' style="color: #af0000;">{{ testcase.getTestcaseMessage() }}</span>
+                    {% endif %}
+                </h4>
+            </div>
+
+            {% if testcase.hasDetails() and can_view %}
+                <div id="testcase_{{ loop.index0 }}" style="display:{{ num_visible_testcases == 0 ? "block" : "none" }};"></div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}

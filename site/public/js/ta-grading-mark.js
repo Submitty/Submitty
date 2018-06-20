@@ -9,6 +9,9 @@ GENERAL_MESSAGE_ID = -2;
  * @returns Object Gradeable data
  */
 function getGradeable() {
+    if(grading_data == null){
+        return null;
+    }
     return grading_data.gradeable;
 }
 
@@ -1207,9 +1210,13 @@ function closeMark(c_index, save) {
  * @param c_index 1-indexed component index
  * @param save If changes should be saved
  */
-function toggleMark(c_index, save) {
-    if (findCurrentOpenedMark() === c_index) {
-        closeMark(c_index, save);
+
+
+
+function toggleMark(id, save) {
+    if (findCurrentOpenedMark() === id) {
+        closeMark(id, save);
+        updateCookies();
     } else {
         openMark(c_index);
     }

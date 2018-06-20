@@ -1,7 +1,7 @@
 #bar_wrapper {
      position:relative;
      height: 41px;
-     width: 575px;
+     width: 600px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -24,7 +24,6 @@
     position:relative;
     display: block;
     float: left;
-    width: 333px;
     padding-top:3px;
     padding-bottom:3px;
     background-color: #edf6f6;
@@ -101,6 +100,14 @@
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
+.icon-selected.fa-hand-paper-o {
+    box-shadow: 0px 0px 3px 3px #ffa500;
+    background-color: #ffa500;
+}
+.icon-header {
+    text-align: center;
+    width: 1em;
+}
 
 .icon-selected.fa-wrench {
     box-shadow: 0px 0px 3px 3px #bbbbbb;
@@ -143,7 +150,7 @@
 .progress_bar {
     position: relative;
     height: 31px;
-    width: 230px;
+    width: 190px;
     float: right;
     background-color: #edf6f6;
     border: 5px solid #edf6f6;
@@ -182,7 +189,9 @@ progress::-webkit-progress-value {
 #submission_browser.rubric_panel {
     border:5px solid #0088bf ;
 }
-
+#regrade_info.rubric_panel {
+    border:5px solid #ffa500 ;
+}
 #student_info.rubric_panel {
     border:5px solid black;
 }
@@ -391,6 +400,10 @@ tr.is_publish {
     margin-bottom: 5px;
     font-size: 17px;
     padding: 16px;
+}
+
+#regrade_request_box.rubric_panel{
+    border:5px solid #f47a42 ;
 }
 
 #settings-content {

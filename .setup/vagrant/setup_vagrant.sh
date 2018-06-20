@@ -15,5 +15,5 @@ if [ -x "$(command -v pip3)" ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
 
-sudo ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
+sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
 
