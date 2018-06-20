@@ -571,22 +571,17 @@ class SubmissionController extends AbstractController {
                 $old_version_path = FileUtils::joinPaths($user_path, $old_version);
                 $to_search = FileUtils::joinPaths($old_version_path, "*.*");
                 $files = glob($to_search);
-                // if not clobbering, give a new filename in the case one is necessary.
-                if(!$clobber) {
-                    $existing_files = array();
-                    foreach($files as $file) {
-                        $existing_files[] = basename($file);
-                    }
-                    $new_files = array($uploaded_file_base_name);
-                    $old_to_new_filenames = FileUtils::renameNoClobber($new_files, $existing_files);
-                    $uploaded_file_base_name = $old_to_new_filenames[$uploaded_file_base_name];
-                }
                 foreach($files as $file) {
-                  $file_base_name = basename($file);
-                  $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                  if (!@copy($file, $move_here)){
-                    return $this->uploadResult("Failed to merge previous version.", false);
-                  }
+                    $file_base_name = basename($file);
+                    if(!$clobber && $file_base_name === $uploaded_file_base_name) {
+                        $parts = explode(".", $file_base_name);
+                        $parts[0] .= "_version_".$old_version;
+                        $file_base_name = implode(".", $parts);
+                    }
+                    $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                    if (!@copy($file, $move_here)){
+                        return $this->uploadResult("Failed to merge previous version.", false);
+                    }
                 }
             }
             // copy over the uploaded file
@@ -924,13 +919,15 @@ class SubmissionController extends AbstractController {
                 }
             }
     
-            $previous_files = array();
+            $previous_files_src = array();
+            $previous_files_dst = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
             if (!empty($tmp)) {
                 for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
                     if (count($tmp[$i]) > 0) {
-                        $previous_files[$i + 1] = $tmp[$i];
+                        $previous_files_src[$i + 1] = $tmp[$i];
+                        $previous_files_dst[$i + 1] = $tmp[$i];
                     }
                 }
             }
@@ -941,7 +938,7 @@ class SubmissionController extends AbstractController {
             }
             
             // $merge_previous will only be true if there is a previous submission.
-            if (count($previous_files) > 0 || $merge_previous) {
+            if (count($previous_files_src) > 0 || $merge_previous) {
                 if ($gradeable->getHighestVersion() === 0) {
                     return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
@@ -967,20 +964,22 @@ class SubmissionController extends AbstractController {
                 if($merge_previous) {
                     for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                         if(isset($uploaded_files[$i])) {
-                            $previous_files[$i] = array();
+                            $current_files_set = array_flip($uploaded_files[$i]["name"]);
+                            $previous_files_src[$i] = array();
+                            $previous_files_dst[$i] = array();
                             $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
                             $filenames = glob($to_search);
                             $j = 0;
                             foreach($filenames as $filename) {
-                                $previous_files[$i][$j++] = basename($filename);
-                            }
-                            if(!$clobber) {
-                                $old_to_new_filenames = FileUtils::renameNoClobber($uploaded_files[$i]["name"], $previous_files[$i]);
-                                for($j = 0; $j < $count[$i]; $j++) {
-                                    $old_filename = $uploaded_files[$i]["name"][$j];
-                                    $new_filename = $old_to_new_filenames[$old_filename];
-                                    $uploaded_files[$i]["name"][$j] = $new_filename;
+                                $file_base_name = basename($filename);
+                                $previous_files_src[$i][$j] = $file_base_name;
+                                if(!$clobber && isset($current_files_set[$file_base_name])) {
+                                    $parts = explode(".", $file_base_name);
+                                    $parts[0] .= "_version_".$gradeable->getHighestVersion();
+                                    $file_base_name = implode(".", $parts);
                                 }
+                                $previous_files_dst[$i][$j] = $file_base_name;
+                                $j++;
                             }
                         }
                     }
@@ -988,8 +987,8 @@ class SubmissionController extends AbstractController {
 
 
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                    if (isset($previous_files[$i])) {
-                        foreach ($previous_files[$i] as $prev_file) {
+                    if (isset($previous_files_src[$i])) {
+                        foreach ($previous_files_src[$i] as $prev_file) {
                             $filename = FileUtils::joinPaths($previous_part_path[$i], $prev_file);
                             if (!file_exists($filename)) {
                                 $name = basename($filename);
@@ -1024,8 +1023,8 @@ class SubmissionController extends AbstractController {
                         }
                     }
                 }
-                if(isset($previous_part_path[$i]) && isset($previous_files[$i])) {
-                    foreach ($previous_files[$i] as $prev_file) {
+                if(isset($previous_part_path[$i]) && isset($previous_files_src[$i])) {
+                    foreach ($previous_files_src[$i] as $prev_file) {
                         $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
                     }
                 }
@@ -1037,12 +1036,12 @@ class SubmissionController extends AbstractController {
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 // copy selected previous submitted files
-                if (isset($previous_files[$i])){
-                    for ($j=0; $j < count($previous_files[$i]); $j++){
-                        $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files[$i][$j]);
-                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files[$i][$j]);
+                if (isset($previous_files_src[$i])){
+                    for ($j=0; $j < count($previous_files_src[$i]); $j++){
+                        $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files_src[$i][$j]);
+                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files_dst[$i][$j]);
                         if (!@copy($src, $dst)) {
-                            return $this->uploadResult("Failed to copy previously submitted file {$previous_files[$i][$j]} to current submission.", false);
+                            return $this->uploadResult("Failed to copy previously submitted file {$previous_files_src[$i][$j]} to current submission.", false);
                         }
                     }
                 }
