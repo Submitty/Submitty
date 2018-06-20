@@ -16,10 +16,24 @@
         </span>
         <input {{ editable }} name="mark_points_{{ c_index }}_{{ m_id }}" type="number" onchange="updateMarkPoints(this);" step="{{ gradeable.precision }}" onclick="event.stopPropagation();" value="{{ mark.points }}" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width: 50%; resize:none; min-width: 50px; {{ appearEditable }}">
     </td>
-    <td colspan="4">
-        <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_id }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" onclick="event.stopPropagation();" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
-        <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
-            <i class="fa fa-users icon-got-this-mark"></i>
-        </span>
-    </td>
+    {% if EditEnabled == true %}
+        <td colspan="3">
+            <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_id }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" onclick="event.stopPropagation();" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
+            <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
+                <i class="fa fa-users icon-got-this-mark"></i>
+            </span>
+        </td>
+        <td colspan="1">    
+            <span id="mark_delete_id-{{ c_index }}-{{ m_id }}" onclick="deleteMark(this, {{ c_index }}, {{ m_id }})">
+                <i class="fa fa-times"></i>
+            </span>
+        </td>
+    {% else %}
+        <td colspan="4">
+            <textarea {{ editable }} name="mark_text_{{ c_index }}_{{ m_id }}" onchange="updateMarkText(this);" onkeyup="autoResizeComment(event);" onclick="event.stopPropagation();" rows="1" cols="120" data-component_index="{{ c_index }}" data-mark_index="{{ m_id }}" style="width:90%; resize:none; {{ appearEditable }}">{{ mark.name }}</textarea>
+            <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
+                <i class="fa fa-users icon-got-this-mark"></i>
+            </span>
+        </td>
+    {% endif %}
 </tr>
