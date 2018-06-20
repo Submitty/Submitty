@@ -447,19 +447,10 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
-        // check for whether the item should be merged with previous submission,
-        // and if so, whether or not file clobbering should be done.
-        $merge_previous = false;
-        $clobber = false;
-        if(isset($_REQUEST['merge'])){
-            if($_REQUEST['merge'] === "true") {
-                $merge_previous = true;
-            }
-
-            if(isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === "true") {
-                $clobber = true;
-            }
-        }
+        // check for whether the item should be merged with previous submission
+        // and whether or not file clobbering should be done
+        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
+        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -768,17 +759,9 @@ class SubmissionController extends AbstractController {
         }
 
         // check for whether the item should be merged with previous submission,
-        // and if so, whether or not file clobbering should be done.
-        $merge_previous = false;
-        $clobber = false;
-        if(isset($_REQUEST['merge'])) {
-            if($_REQUEST['merge'] === "true") {
-                $merge_previous = true;
-            }
-            if(isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === "true") {
-                $clobber = true;
-            }
-        }
+        // and whether or not file clobbering should be done.
+        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
+        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
 
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
         if ($vcs_checkout && !isset($_POST['repo_id'])) {
