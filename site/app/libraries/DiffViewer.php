@@ -508,8 +508,8 @@ class DiffViewer {
 	 */
     private function replaceEmptyChar($html){
     	$count = 0;
-		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html, $count);
-		if($count > 0) $this->white_spaces['space'] = '&#183;';
+		$return = str_replace(' ', '<span style="outline:1px blue solid;"> </span>', $html, $count);
+		if($count > 0) $this->white_spaces['space'] = '&nbsp;';
 		$count = 0;
 		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return, $count);
 		if($count > 0) $this->white_spaces['carriage return'] = '↵';
@@ -521,8 +521,8 @@ class DiffViewer {
 
 	private function replaceEmptyCharWEscape($html){
 		$count = 0;
-		$return = str_replace(' ', '<span style="outline:1px blue solid;">&#183;</span>', $html,$count);
-		if($count > 0) $this->white_spaces['space'] = '&#183;';
+		$return = str_replace(' ', '<span style="outline:1px blue solid;"> </span>', $html,$count);
+		if($count > 0) $this->white_spaces['space'] = '&nbsp;';
 		$count = 0;
 		$return = str_replace("\r", '<span style="outline:1px blue solid;">\\r<br></span>', $return,$count);
 		if($count > 0) $this->white_spaces['carriage return'] = '\\r';
