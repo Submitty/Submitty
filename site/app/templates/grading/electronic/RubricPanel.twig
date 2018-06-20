@@ -1,6 +1,3 @@
-<script type="application/javascript">
-    var grading_data=null;
-</script>
 <div id="grading_rubric" class="draggable rubric_panel {{ gradeable.useTAGrading() ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
     <div class="draggable_content">
         <span class="grading_label">Grading Rubric</span>
@@ -39,6 +36,9 @@
             <div class="inner-container" id="grading-box">
             {% if gradeable.getActiveVersion() == 0 %}
                 <h4>No Submission</h4>
+                <script type="application/javascript">
+                    var grading_data = null;
+                </script>
             {% else %}
                 </div>
                 <script type="application/javascript">
