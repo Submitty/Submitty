@@ -370,24 +370,8 @@ HTML;
                 HTML;
                                 }
                 */
-                if (strpos($gradeable->getSubdirectory(), '://') !== false || substr($gradeable->getSubdirectory(), 0, 1) === '/') {
-                    $vcs_path = $gradeable->getSubdirectory();
-                } else {
-                    if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
-                        $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $gradeable->getSubdirectory();
-                    } else {
-                        $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $gradeable->getSubdirectory());
-                    }
-                }
 
-                $vcs_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_path);
-                $vcs_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_path);
-                if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-                    $vcs_path = str_replace('{$team_id}', $gradeable->getTeam()->getId(), $vcs_path);
-                }
-                $vcs_path = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
-                    $this->core->getConfig()->getVcsUrl(), $vcs_path);
-
+                $vcs_path = $gradeable->getRepositoryPath();
                 $return .= <<<HTML
     <h3>To access your Repository:</h3>
     <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
@@ -400,91 +384,8 @@ HTML;
 HTML;
 
                 for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-
-                    $image_width = $image_height = 0;
-
-                    if (isset($gradeable->getTextboxes()[$i]['images']) && $gradeable->getTextboxes()[$i]['images'] != "") {
-                        $images = $gradeable->getTextboxes()[$i]['images'];
-                    } else {
-                        $images = array();
-                    }
-
-                    foreach ($images as $currImage) {
-                        $currImageName = $currImage["image_name"];
-                        $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
-                        $content_type = FileUtils::getContentType($imgPath);
-                        if (substr($content_type, 0, 5) === "image") {
-                            // Read image path, convert to base64 encoding
-                            $textBoxImageData = base64_encode(file_get_contents($imgPath));
-                            // Format the image SRC:  data:{mime};base64,{data};
-                            $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
-                            // insert the sample image data
-
-                            if (isset($currImage['image_height']) && (int)$currImage['image_height'] > 0) {
-                                $image_height = $currImage['image_height'];
-                            }
-
-                            if (isset($currImage['image_width']) && (int)$currImage['image_width'] > 0) {
-                                $image_width = $currImage['image_width'];
-                            }
-
-                            $image_display = '<img src="' . $textBoximagesrc . '"';
-
-                            if ($image_width > 0) {
-                                $image_display .= ' width="' . $image_width . '"';
-                            }
-                            if ($image_height > 0) {
-                                $image_display .= ' height="' . $image_height . '"';
-                            }
-                            $image_display .= ">";
-                            $return .= $image_display;
-                        }
-                    }
-
-                    $label = $gradeable->getTextboxes()[$i]['label'];
-                    $rows = $gradeable->getTextboxes()[$i]['rows'];
-                    if ($rows == 0) {
-                        $return .= <<<HTML
-                    <p style="max-width: 50em;">
-                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
-                    </p><br>
-HTML;
-                    } else {
-                        $return .= <<<HTML
-                    <p style="max-width: 50em;">
-                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
-                    </p><br>
-HTML;
-
-                        // Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                        // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-                        $return .= <<<HTML
-<script>
-$("#textbox_{$i}").keydown(function(e) {
-HTML;
-                        $return .= <<<'HTML'
-    if(e.keyCode === 9) { // tab was pressed
-        // get caret position/selection
-        var start = this.selectionStart;
-        var end = this.selectionEnd;
-        var $this = $(this);
-        var value = $this.val();
-        // set textarea value to: text before caret + tab + text after caret
-        $this.val(value.substring(0, start)
-                    + "\t"
-                    + value.substring(end));
-        // put caret at right position again (add one for the tab)
-        this.selectionStart = this.selectionEnd = start + 1;
-        // prevent the focus lose
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }
-});
-</script>
-HTML;
-
-                    }
+                    $textbox = $gradeable->getTextboxes()[$i];
+                    $return .= $this->renderTextbox($gradeable, $textbox, $i);
                 }
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     if ($gradeable->getNumParts() > 1) {
@@ -1396,6 +1297,102 @@ HTML;
         </script>
       </div>
 HTML;
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array $textbox
+     * @param int $i
+     * @return string
+     */
+    private function renderTextbox(Gradeable $gradeable, array $textbox, int $i): string {
+        $return = "";
+
+        $image_width = $image_height = 0;
+
+        if (isset($textbox['images']) && $textbox['images'] != "") {
+            $images = $textbox['images'];
+        } else {
+            $images = array();
+        }
+
+        foreach ($images as $currImage) {
+            $currImageName = $currImage["image_name"];
+            $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
+            $content_type = FileUtils::getContentType($imgPath);
+            if (substr($content_type, 0, 5) === "image") {
+                // Read image path, convert to base64 encoding
+                $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                // Format the image SRC:  data:{mime};base64,{data};
+                $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                // insert the sample image data
+
+                if (isset($currImage['image_height']) && (int)$currImage['image_height'] > 0) {
+                    $image_height = $currImage['image_height'];
+                }
+
+                if (isset($currImage['image_width']) && (int)$currImage['image_width'] > 0) {
+                    $image_width = $currImage['image_width'];
+                }
+
+                $image_display = '<img src="' . $textBoximagesrc . '"';
+
+                if ($image_width > 0) {
+                    $image_display .= ' width="' . $image_width . '"';
+                }
+                if ($image_height > 0) {
+                    $image_display .= ' height="' . $image_height . '"';
+                }
+                $image_display .= ">";
+                $return .= $image_display;
+            }
+        }
+
+        $label = $textbox['label'];
+        $rows = $textbox['rows'];
+        if ($rows == 0) {
+            $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
+                    </p><br>
+HTML;
+        } else {
+            $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
+                    </p><br>
+HTML;
+
+            // Allow tab in the larger text boxes (normally tab moves to the next textbox)
+            // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+            $return .= <<<HTML
+<script>
+$("#textbox_{$i}").keydown(function(e) {
+HTML;
+            $return .= <<<'HTML'
+    if(e.keyCode === 9) { // tab was pressed
+        // get caret position/selection
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        var $this = $(this);
+        var value = $this.val();
+        // set textarea value to: text before caret + tab + text after caret
+        $this.val(value.substring(0, start)
+                    + "\t"
+                    + value.substring(end));
+        // put caret at right position again (add one for the tab)
+        this.selectionStart = this.selectionEnd = start + 1;
+        // prevent the focus lose
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+});
+</script>
+HTML;
+
+        }
         return $return;
     }
 }
