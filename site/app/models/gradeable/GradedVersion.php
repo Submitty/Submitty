@@ -131,7 +131,7 @@ class GradedVersion extends AbstractModel {
      * @param string|\DateTime $submission_time The date or date string of when the submitter submitted this version
      * @throws \Exception if $submission_time is a string and failed to parse into a \DateTime object
      */
-    public function setSubmissionTimeInternal($submission_time) {
+    private function setSubmissionTimeInternal($submission_time) {
         if ($submission_time !== null) {
             $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
         } else {
