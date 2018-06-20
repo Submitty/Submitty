@@ -68,6 +68,12 @@
                         Number of students who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                     {% endif %}
                 {% endif %}
+
+                {% if core.getConfig().isRegradeEnabled() and not peer %}
+                    <br />
+                    <br />
+                    Number of students who have ongoing regrade requests: {{ regrade_requests }}
+                {% endif %}
             </div>
             {# /Left panel #}
 

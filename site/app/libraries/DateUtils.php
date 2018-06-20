@@ -77,4 +77,34 @@ class DateUtils {
         }
         return true;
     }
+
+
+    /**
+     * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
+     *
+     * @param $date \DateTime|string The date to parse
+     * @param $time_zone \DateTimeZone The timezone to parse with
+     * @return \DateTime The parsed date
+     * @throws \InvalidArgumentException If $date is not a string or a \DateTime
+     * @throws \Exception If $date is a string, but not a valid date string
+     */
+    public static function parseDateTime($date, \DateTimeZone $time_zone) {
+        if ($date instanceof \DateTime) {
+            return $date;
+        } else if (gettype($date) === 'string') {
+            return new \DateTime($date, $time_zone);
+        } else {
+            throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
+        }
+    }
+    /**
+     * Converts a \DateTime object to a string in one place so if we change the format
+     *  here, it changes everywhere
+     *
+     * @param $date \DateTime The date to format
+     * @return string The formatted date
+     */
+    public static function dateTimeToString(DateTime $date) {
+        return $date->format('Y-m-d H:i:sO');
+    }
 }

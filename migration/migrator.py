@@ -37,6 +37,8 @@ def parse_args():
     sub = subparsers.add_parser('create', help='Create migration')
     sub.add_argument('name', help='Name of argument')
     sub = subparsers.add_parser('migrate', help='Run migrations')
+    sub.add_argument('--single', action='store_true', default=False, dest='single',
+                     help='Only run one migration')
     sub.add_argument('--fake', action='store_true', default=False, dest='set_fake',
                      help='Mark migrations as run without actually running them')
     sub.add_argument('--initial', action='store_true', default=False,
@@ -121,9 +123,11 @@ def handle_migration(args):
                     if args.course is None or [semester, course] == args.course:
                         print("Running {} migrations for {}.{}...".format(args.direction, semester, course))
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
-                        with psycopg2.connect(**params) as connection:
-                            migrate_environment(connection, environment, args)
-
+                        try:
+                            with psycopg2.connect(**params) as connection:
+                                migrate_environment(connection, environment, args)
+                        except psycopg2.OperationalError:
+                            print ("Submitty Database Migration Warning:  Database does not exist for semester=", semester, " course=",course)
 
 def migrate_environment(connection, environment, args):
     # Get the migration table and if it doesn't exist, then we have to create it
@@ -166,6 +170,8 @@ def migrate_environment(connection, environment, args):
         for key in keys:
             if migrations[key]['status'] == 0:
                 run_migration(connection, migrations[key], environment, args)
+                if args.single:
+                    break
     else:
         for key in reversed(list(migrations.keys())):
             if migrations[key]['status'] == 1:
