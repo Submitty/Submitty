@@ -1,0 +1,244 @@
+{% import _self as self %}
+
+<div class="content">
+    {#
+        Default is viewing your sections
+        Limited grader does not have "View All" option
+        If nothing to grade, Instructor will see all sections
+    #}
+    {% if show_all_sections_button %}
+        <div style="float: right; margin-bottom: 10px">
+            <a class="btn btn-default"
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}">
+                {{ view_all ? "View Your Sections" : "View All" }}
+            </a>
+        </div>
+    {% endif %}
+
+    <h2>
+        {{ gradeable.getName() }}
+    </h2>
+    <p>
+        {% if gradeable.getTaInstructions() != "" %}
+            Overall TA Instructions: {{ gradeable.getTaInstructions() }}
+        {% endif %}
+    </p>
+    <br>
+    <p style="float: left;">
+        {% if action == 'lab' %}
+            No Color - No Credit<br />
+            Dark Blue - Full Credit<br />
+            Light Blue - Half Credit<br />
+            Red - [SAVE ERROR] Refresh Page
+        {% else %}
+            Red - [SAVE ERROR] Refresh Page
+        {% endif %}
+    </p>
+    <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+    <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
+
+    {# Search box #}
+    {% include "grading/simple/StudentSearch.twig" %}
+
+    {% if action == 'numeric' and core.getUser().accessAdmin() %}
+        <br> <br> <br>
+        <p style="float: right;">The CSV file should be formated as such: <br />
+            user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
+        <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+        <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
+    {% endif %}
+
+    <table class="table table-striped table-bordered persist-area">
+        {# Table header #}
+        <thead class="persist-thead">
+            <tr>
+                <td width="1%"></td>
+                <td width="3%">Section</td>
+                <td width="68" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
+                <td width="92" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
+                <td width="91" style="text-align: left">
+                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
+                        <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i>
+                    </a>
+                </td>
+
+                {% if action == 'lab' %}
+                    {% set colspan = 5 + gradeable.getComponents()|length %}
+                    {% for component in gradeable.getComponents() %}
+                        <td width="100">
+                            {{ component.getTitle() }}
+                        </td>
+                    {% endfor %}
+                {% else %}
+                    {% set colspan = 5 + components_numeric|length + components_text|length %}
+                    {% if components_numeric|length > 0 %}
+                        {% set colspan = colspan + 1 %}
+                        {% for component in components_numeric %}
+                            <td width="35" style="text-align: center">
+                                {{ component.getTitle() }}({{ component.getMaxValue() }})
+                            </td>
+                        {% endfor %}
+                        <td width="25" style="text-align: center">Total</td>
+                    {% endif %}
+                    {% for component in components_text %}
+                        <td style="text-align: center">
+                            {{ component.getTitle() }}
+                        </td>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+        </thead>
+        {# /Table header #}
+        {% if sections|length == 0 %}
+            <tbody>
+                <tr class="info">
+                    <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
+                </tr>
+            </tbody>
+        {% else %}
+            {% set row_index_start = 0 %}
+            {% for section_id, section in sections %}
+                {# Section header #}
+                <tbody>
+                    <tr class="info persist-header">
+                        <td colspan="{{ colspan }}" style="text-align: center">
+                            Students Enrolled in Section {{ section_id ?? "NULL" }}
+                            {# Print button #}
+                            {% if action == 'lab' %}
+                                <a target=_blank href="{{ this.core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="info">
+                        <td colspan="{{ colspan }}" style="text-align: center">
+                            Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
+                        </td>
+                    </tr>
+                </tbody>
+                {# /Section header #}
+                <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
+                    {% for row in section.rows %}
+                        {{ self.render_row(self, action, gradeable, section, row, loop.index0 + row_index_start, components_numeric) }}
+                    {% endfor %}
+                </tbody>
+                {% set row_index_start = row_index_start + section.rows|length %}
+            {% endfor %}
+        {% endif %}
+    </table>
+</div>
+
+{# Render one student's row in the table #}
+{% macro render_row(self, action, gradeable, section, row, index, components_numeric) %}
+    {% set sytle = "" %}
+    {% if row.getUser().accessGrading() %}
+        {% set sytle = "style='background: #7bd0f7;'" %}
+    {% endif %}
+    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}" {{ style }}>
+        <td class="">{{ index + 1 }}</td>
+        <td class="">{{ row.getUser().getRegistrationSection() }}</td>
+        <td class="cell-all" style="text-align: left">{{ row.getUser().getId() }}</td>
+        <td class="" style="text-align: left">{{ row.getUser().getDisplayedFirstName() }}</td>
+        <td class="" style="text-align: left">{{ row.getUser().getLastName() }}</td>
+
+        {% if action == 'lab' %}
+            {{ self.render_lab_cols(self, gradeable, section, row, index) }}
+        {% else %}
+            {{ self.render_numeric_cols(self, gradeable, section, row, index, components_numeric) }}
+        {% endif %}
+    </tr>
+{% endmacro %}
+
+{# Render the grading columns for a lab #}
+{% macro render_lab_cols(self, gradeable, section, row, index) %}
+    {% for component in row.getComponents() %}
+        {% if component.getIsText() %}
+            <td>
+                {{ component.getComment() }}
+            </td>
+        {% else %}
+            <td
+                class="cell-grade"
+                id="cell-{{ index }}-{{ loop.index0 }}"
+                data-id="{{ component.getId() }}"
+                data-score="{{ component.getScore() }}"
+                {% if component.getGrader() != null %}
+                    data-grader="{{ component.getGrader().getId() }}"
+                {% endif %}
+                {% if component.getGradeTime() != null %}
+                    data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                {% endif %}
+                {% if component.getScore() == 1.0 %}
+                    style="background-color: #149bdf;"
+                {% elseif component.getScore() == 0.5 %}
+                    style="background-color: #88d0f4;"
+                {% endif %}
+            ></td>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{# Render the grading columns for a test #}
+{% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric) %}
+    {% set col = 0 %}
+    {% if components_numeric|length > 0 %}
+        {% set total = 0 %}
+        {% for component in row.getComponents() %}
+            {% if not component.getIsText() %}
+                {% set total = total + component.getScore() %}
+                <td class="option-small-input">
+                    <input
+                        class="option-small-box"
+                        style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : ""}}"
+                        type="text"
+                        id="cell-{{ index }}-{{ col }}"
+                        data-id="{{  component.getId() }}"
+                        value="{{  component.getScore() }}"
+                        {% if component.getGrader() != null %}
+                            data-grader="{{ component.getGrader().getId() }}"
+                        {% endif %}
+                        {% if component.getGradeTime() != null %}
+                            data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                        {% endif %}
+                        data-num="true"
+                    />
+                </td>
+                {#
+                    This is ugly but we can't easily split up the components and need
+                    to keep track of what index we're on. And no, we can't use
+                    components_numeric because they're part of the static gradeable
+                #}
+                {% set col = col + 1 %}
+            {% endif %}
+        {% endfor %}
+
+        <td class="option-small-output">
+            <input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{{ index }}" value="{{ total }}" data-total="true" readonly>
+        </td>
+    {% endif %}
+
+    {% for component in row.getComponents() %}
+        {% if component.getIsText() %}
+            <td class="option-small-input">
+                <input
+                    class="option-small-box"
+                    type="text"
+                    id="cell-{{ index }}-{{ col }}"
+                    value="{{ component.getComment() }}"
+                    data-id="{{ component.getId() }}"
+                />
+            </td>
+            {# See above #}
+            {% set col = col + 1 %}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
