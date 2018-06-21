@@ -404,6 +404,7 @@ class DiffViewer {
                 $html .= "\t</div>\n";
             }
         }
+
         /*
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
@@ -420,15 +421,7 @@ class DiffViewer {
             else {
                 $html .= "\t<div>";
             }
-            $html .= "<span class='line_number'>";
-            $digits_at_line = strlen((string)$j);
-			$max_digits = strlen((string)count($lines));
-            $counter = $max_digits-$digits_at_line;
-            while($counter > 0){
-				$counter--;
-				$html .= "&nbsp;";
-			}
-			$html .= "{$j}</span>";
+            $html .= "<span class='line_number'>{$j}</span>";
             $html .= "<span class='line_code'>";
             if (isset($this->diff[$type][$i])) {
                 // highlight the line
