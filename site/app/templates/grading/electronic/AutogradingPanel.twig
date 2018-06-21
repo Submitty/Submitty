@@ -9,8 +9,7 @@
             {% elseif gradeable.getTestcases()|length == 0 %}
                 <h4>No Autograding For This Assignment</h4>
             {% else %}
-                {# Todo: make this use include? That twig file has a ton of stuff though #}
-                {{ core.getOutput().renderTemplate('AutoGrading', 'showResults', gradeable, canViewWholeGradeable)|raw }}
+                {{ render_template('AutoGrading', 'showResults', gradeable, canViewWholeGradeable) }}
             {% endif %}
         </div>
     </div>
