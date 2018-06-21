@@ -925,13 +925,19 @@ class ElectronicGraderController extends GradingController {
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
                 $this->core->addErrorMessage("You do not have permission to grade this");
-                return;
+
+                $response = array('status' => 'failure');
+                $this->core->getOutput()->renderJson($response);
+                return $response;
             }
             else {
                 $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
                 if(!in_array($user_id, $user_ids_to_grade)) {
                     $this->core->addErrorMessage("You do not have permission to grade this student");
-                    return;
+
+                    $response = array('status' => 'failure');
+                    $this->core->getOutput()->renderJson($response);
+                    return $response;
                 }
             }
         }
@@ -947,8 +953,17 @@ class ElectronicGraderController extends GradingController {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
             if (!in_array($user_id, $user_ids_to_grade)) {
                 $this->core->addErrorMessage("You do not have permission to grade {$user_id}");
-                return;
+
+                $response = array('status' => 'failure');
+                $this->core->getOutput()->renderJson($response);
+                return $response;
             }
+        }
+
+        if ($gradeable->getCurrentVersion() === null) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
         }
 
         //save the component
