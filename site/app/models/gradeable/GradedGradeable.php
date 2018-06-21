@@ -11,8 +11,8 @@ use \app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * @method string getGradeableId()
- * @method GradedComponent[] getGradedComponents()
- * @method GradedVersion[] getGradedVersions();
+ * @method GradedComponent[][] getGradedComponents()
+ * @method GradedVersion[] getGradedVersions()
  * @method Submitter getSubmitter()
  * @method int getId()
  * @method string getOverallComment()
@@ -37,7 +37,7 @@ class GradedGradeable extends AbstractModel {
 
     /** @property @var Submitter The submitter who received this graded gradeable */
     protected $submitter = null;
-    /** @property @var GradedComponent[] The graded components */
+    /** @property @var GradedComponent[][] The an array of arrays of GradedComponents, indexed by component id */
     protected $graded_components = array();
     /** @property @var array GradedVersion[] The graded versions for electronic gradeables */
     protected $graded_versions = array();
@@ -73,11 +73,13 @@ class GradedGradeable extends AbstractModel {
         //  the graded gradeable instead of each component so if one grader  grades
         //  multiple components, their information only gets sent once
         $details['graders'] = [];
-        foreach ($this->graded_components as $graded_component) {
-            if ($graded_component->getGrader() !== null) {
-                // Only set once if multiple components have the same grader
-                if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
-                    $details['graders'][$graded_component->getGrader()->getId()] = $graded_component->getGrader()->toArray();
+        foreach ($this->graded_components as $graded_components) {
+            foreach($graded_components as $graded_component) {
+                if ($graded_component->getGrader() !== null) {
+                    // Only set once if multiple components have the same grader
+                    if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
+                        $details['graders'][$graded_component->getGrader()->getId()] = $graded_component->getGrader()->toArray();
+                    }
                 }
             }
         }
@@ -120,15 +122,37 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of graded components for this gradeable data
-     * @param GradedComponent[] $graded_components
+     * @param GradedComponent[][]|GradedComponent[] $graded_components
      */
     public function setGradedComponents(array $graded_components) {
-        foreach ($graded_components as $graded_component) {
+
+        // Flatten the array if we are given a 2d array.  Don't trust the user to
+        //  give us properly indexed components
+        $graded_components_flat = [];
+        foreach($graded_components as $graded_component) {
+            if(is_array($graded_component)) {
+                $graded_components_flat = array_merge($graded_component, $graded_components_flat);
+            } else {
+                $graded_components_flat[] = $graded_component;
+            }
+        }
+
+        // Next, setup the components to index by component id
+        $graded_components_by_id = [];
+        foreach ($graded_components_flat as $graded_component) {
+            if($graded_components)
             if (!($graded_component instanceof GradedComponent)) {
                 throw new \InvalidArgumentException('Graded Component array contained invalid type');
             }
+
+            // Index by component id
+            if(isset($graded_components_by_id[$graded_component->getComponentId()])) {
+                $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
+            } else {
+                $graded_components_by_id[$graded_component->getComponentId()] = [$graded_component];
+            }
         }
-        $this->graded_components = $graded_components;
+        $this->graded_components = $graded_components_by_id;
     }
 
     /**
