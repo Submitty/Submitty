@@ -3,6 +3,7 @@
 namespace app\libraries;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
+use Twig_Function;
 
 /**
  * Class Output
@@ -47,7 +48,9 @@ class Output {
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->addGlobal("core", $this->core);
-
+        $this->twig->addFunction(new Twig_Function("render_template", function(... $args) {
+            return call_user_func_array('self::renderTemplate', $args);
+        }, ["is_safe" => ["html"]]));
     }
 
     public function setInternalResources() {

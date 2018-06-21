@@ -246,7 +246,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
     * that contains filename, file path, and the file size. */
     protected $uploads_files = array();
-
+    /** @var array|bool $result_details */
     protected $result_details;
 
     protected $in_interactive_queue = false;

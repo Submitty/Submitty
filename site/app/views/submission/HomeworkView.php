@@ -747,130 +747,24 @@ HTML;
         }
         unset($file); //Clean up reference
 
-
         $results = $gradeable->getResults();
-        if ($gradeable->hasResults()) {
-            $return .= <<<HTML
-submission timestamp: {$current_version->getSubmissionTime()}<br />
-days late: {$current_version->getDaysLate()} (before extensions)<br />
-grading time: {$results['grade_time']} seconds<br />
-HTML;
-            if ($results['num_autogrades'] > 1) {
-                $regrades = $results['num_autogrades'] - 1;
-                $return .= <<<HTML
-<br />
-number of re-autogrades: {$regrades}<br />
-last re-autograde finished: {$results['grading_finished']}<br />
-HTML;
-            } else {
-                $return .= <<<HTML
-queue wait time: {$results['wait_time']} seconds<br />
-HTML;
-            }
-            if (isset($results['revision'])) {
-                if (empty($results['revision'])) {
-                    $revision = "None";
-                } else {
-                    $revision = substr($results['revision'], 0, 7);
-                }
-                $return .= <<<HTML
-git commit hash: {$revision}<br />
-HTML;
-            }
-        }
 
-
-
-
-
-
-
-        $num_visible_testcases = 0;
+        $show_testcases = false;
         foreach ($gradeable->getTestcases() as $testcase) {
             if ($testcase->viewTestcase()) {
-                $num_visible_testcases++;
+                $show_testcases = true;
+                break;
             }
-        }
-        if ($num_visible_testcases > 0) {
-            $return .= <<<HTML
-        <h4>Results</h4>
-HTML;
-        }
-        $refresh_js = <<<HTML
-        <script type="text/javascript">
-            checkRefreshSubmissionPage("{$this->core->buildUrl(array('component' => 'student',
-            'page' => 'submission',
-            'action' => 'check_refresh',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => $gradeable->getCurrentVersionNumber()))}")
-        </script>
-HTML;
-
-        if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
-            if ($gradeable->beingGradedBatchQueue()) {
-                $return .= <<<HTML
-        <p class="red-message">
-            This submission is currently being regraded.
-        </p>
-HTML;
-            } else {
-                $return .= <<<HTML
-        <p class="red-message">
-            This submission is currently in the queue to be regraded.
-        </p>
-HTML;
-            }
-
-        }
-        if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
-            if ($gradeable->beingGradedInteractiveQueue() ||
-                (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
-                $return .= <<<HTML
-        <p class="red-message">
-            This submission is currently being graded.
-        </p>
-HTML;
-            } else {
-                $return .= <<<HTML
-        <p class="red-message">
-            This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
-        </p>
-HTML;
-            }
-            $return .= <<<HTML
-        {$refresh_js}
-HTML;
-        } else if (!$gradeable->hasResults()) {
-            $return .= <<<HTML
-        <p class="red-message">
-            Something has gone wrong with grading this submission. Please contact your instructor about this.
-        </p>
-HTML;
-        } else {
-            if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
-                // FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria
-                //foreach ($gradeable->getVersions() as $version) {
-                if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() &&
-                    $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
-                    $return .= <<<HTML
-            <script type="text/javascript">
-                $(function() {
-                    $('#incentive_message').show();
-                });
-            </script>
-HTML;
-                    // break;
-                }
-                //}
-            }
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("submission/SubmissionChoice.twig", [
             "gradeable" => $gradeable,
             "current_version" => $current_version,
             "can_download" => $can_download,
-            "files" => $files
+            "files" => $files,
+            "results" => $results,
+            "show_testcases" => $show_testcases,
+            "canViewWholeGradeable" => $canViewWholeGradeable,
         ]);
     }
 

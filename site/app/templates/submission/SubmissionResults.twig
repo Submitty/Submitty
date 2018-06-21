@@ -4,6 +4,7 @@
     </div>
 {% endif %}
 
+{# Submitted files #}
 <div class="sub">
     <h4>Submitted Files</h4>
     <div class="box half">
@@ -18,13 +19,86 @@
         {% endfor %}
     </div>
     <div class="box half">
-
-
-
+        {% if gradeable.hasResults() %}
+            submission timestamp: {{ current_version.getSubmissionTime() }}<br />
+            days late: {{ current_version.getDaysLate() }} (before extensions)<br />
+            grading time: {{ results.grade_time }} seconds<br />
+            {% if results.num_autogrades > 1 %}
+                <br />
+                number of re-autogrades: {{ results.num_autogrades - 1 }}<br />
+                last re-autograde finished: {{  results.grading_finished }}<br />
+            {% else %}
+                queue wait time: {{ results.wait_time }} seconds<br />
+            {% endif %}
+            {% if results.revision %}
+                git commit hash:
+                {% if results.revision %}
+                    {{ results.revision[0:7] }}
+                {% else %}
+                    None
+                {% endif %}
+                <br />
+            {% endif %}
+        {% endif %}
     </div>
 </div>
+{# /Submitted files #}
+
 <div class="sub">
+    {% if show_testcases %}
+        <h4>Results</h4>
+    {% endif %}
 
 
+    {% if gradeable.inBatchQueue() and gradeable.hasResults() %}
+        {% if gradeable.beingGradedBatchQueue() %}
+            <p class="red-message">
+                This submission is currently being regraded.
+            </p>
+        {% else %}
+            <p class="red-message">
+                This submission is currently in the queue to be regraded.
+            </p>
+        {% endif %}
+    {% endif %}
 
+    {# Actual results #}
+    {% if gradeable.inInteractiveQueue() or (gradeable.inBatchQueue() and not gradeable.hasResults()) %}
+        {% if gradeable.beingGradedInteractiveQueue() or (not gradeable.hasResults() and gradeable.beingGradedBatchQueue()) %}
+            <p class="red-message">
+                This submission is currently being graded.
+            </p>
+        {% else %}
+            <p class="red-message">
+                This submission is currently in the queue to be graded. Your submission is number {gradeable.getInteractiveQueuePosition()} out of {gradeable.getInteractiveQueueTotal()}.
+            </p>
+        {% endif %}
+        <script type="text/javascript">
+            checkRefreshSubmissionPage("{{ this.core.buildUrl({'component': 'student',
+                'page': 'submission',
+                'action': 'check_refresh',
+                'gradeable_id': gradeable.getId(),
+                'gradeable_version': gradeable.getCurrentVersionNumber()}) }}")
+        </script>
+    {% elseif not gradeable.hasResults() %}
+        <p class="red-message">
+            Something has gone wrong with grading this submission. Please contact your instructor about this.
+        </p>
+    {% else %}
+        {# Has results! #}
+        {% if gradeable.hasIncentiveMessage() and gradeable.getActiveVersion() > 0 %}
+            {# FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria #}
+            {# foreach (gradeable.getVersions() as version) { #}
+            {% if gradeable.getEarlyTotal() >= gradeable.getMinimumPoints() and current_version.getDaysEarly() > gradeable.getMinimumDaysEarly() %}
+                <script type="text/javascript">
+                    (function() {
+                        ('#incentive_message').show();
+                    })();
+                </script>
+            {% endif %}
+        {% endif %}
+
+        {{ render_template('AutoGrading', 'showResults', gradeable, canViewWholeGradeable) }}
+    {% endif %}
+    {# /Actual results #}
 </div>
