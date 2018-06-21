@@ -284,7 +284,7 @@ HTML;
             if (!$component->getGrader()) {
                 $grading_complete = false;
             }
-            if ($component->getGradedVersion() != $gradeable->getActiveVersion()) {
+            if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
                 $active_same_as_graded = false;
             }
         }
