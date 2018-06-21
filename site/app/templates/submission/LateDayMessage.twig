@@ -1,0 +1,96 @@
+{% import _self as self %}
+
+{% if messages|length > 0 %}
+{# WRAP THE LATE DAY INFORMATION IN A DIV #}
+<div class="content"
+    {% if error %}
+        style="background-color: #d9534f;"
+    {% endif %}
+>
+    <h4>
+        {% for message in messages %}
+            {% if loop.index0 > 0 %}
+                <br>
+            {% endif %}
+            {% if message.type == 'extension' %}
+                You have a {{ message.info.extensions }} day deadline extension for this assignment.
+            {% elseif message.type == 'too_few_remain' %}
+                Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }}
+                after the deadline but you
+                {% if message.info.remaining == 0 %}
+                    have no remaining late days.
+                {% else %}
+                    only have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }}.
+                {% endif %}
+            {% elseif message.type == 'too_many_used' %}
+                Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }} after the deadline,
+                and you would be charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }} for this assignment,
+                {% if message.info.allowed == 0 %}
+                    but your instructor specified that no late days may be used for this assignment.
+                {% else %}
+                    but your instructor specified that a maximum of {{ message.info.allowed }} late {{ self.day_or_days(message.info.allowed) }}
+                    may be used for this assignment.
+                {% endif %}
+            {% elseif message.type == 'late' %}
+                Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }} after the deadline,
+                and you have been charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }} for this assignment.
+                {% if message.info.remaining == 0 %}
+                    You have no late days remaining for future assignments.
+                {% else %}
+                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} to use on future assignments.
+                {% endif %}
+            {% elseif message.type == 'getting_zero' %}
+                Your grade for this assignment will be recorded as a zero.
+            {% elseif message.type == 'would_late' %}
+                The current time is {{ message.info.late }} {{ self.day_or_days(message.info.late) }} past the due date.
+            {% elseif message.type == 'would_too_few_remain' %}
+                {% if message.info.remaining == 0 %}
+                    You have no remaining late days.
+                {% else %}
+                    You only have {{ message.info.remaining }} late {{ self.day_or_days(message.info.remaining) }} remaining.
+                {% endif %}
+            {% elseif message.type == 'would_too_many_used' %}
+                {% if message.info.allowed == 0 %}
+                    Your instructor specified that no late days may be used for this assignment.
+                {% else %}
+                    Your instructor specified that a maximum of {{ message.info.allowed }} late {{ self.day_or_days(message.info.allowed) }}
+                    may be used for this assignment.
+                {% endif %}
+            {% elseif message.type == 'would_allowed' %}
+                If you {{ self.submit_or_resubmit(message.info.active_version) }} to this assignment now,
+                you will be charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }},
+                and have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for future assignments.
+            {% elseif message.type == 'would_get_zero' %}
+                If you submit to this assignment now, your grade for this assignment will be recorded as a zero.
+            {% elseif message.type == 'contact_instructor' %}
+                Contact your instructor if you believe that this is an error or that you should be granted
+                {% if message.info.extensions == 0 %}
+                    a deadline extension.
+                {% else %}
+                    an additional deadline extension.
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </h4>
+</div>
+{% endif %}
+
+{% macro day_or_days(count) -%}
+    {%- spaceless %}
+        {% if count == 1 %}
+            day
+        {% else %}
+            days
+        {% endif %}
+    {% endspaceless -%}
+{%- endmacro %}
+
+{% macro submit_or_resubmit(version) -%}
+    {%- spaceless %}
+        {% if version == 0 %}
+            submit
+        {% else %}
+            re-submit
+        {% endif %}
+    {% endspaceless -%}
+{%- endmacro %}

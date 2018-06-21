@@ -15,16 +15,6 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
-    public function dayOrDays($d) {
-        if ($d == 1) return "day";
-        return "days";
-    }
-
-    public function submitOrResubmit($version) {
-        if ($version == 0) return "submit";
-        return "re-submit";
-    }
-
     /**
      * @param Gradeable $gradeable
      * @param int $extensions
@@ -50,10 +40,14 @@ class HomeworkView extends AbstractView {
         $info = "";
         $error = false;
 
+        $messages = [];
+
         // ------------------------------------------------------------
         // ALWAYS PRINT DEADLINE EXTENSION (IF ANY)
         if ($extensions > 0) {
-            $info .= "You have a {$extensions} day deadline extension for this assignment.";
+            $messages[] = ["type" => "extension", "info" => [
+                "extensions" => $extensions
+            ]];
         }
 
         // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
@@ -66,51 +60,29 @@ class HomeworkView extends AbstractView {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
             if ($active_days_charged > $late_days_remaining) {
                 $error = true;
-                if ($info != "") {
-                    $info .= "<br><br>";
-                }
-                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-                    . " but you ";
-                if ($late_days_remaining == 0) {
-                    $info .= "have no remaining late days.";
-                } else {
-                    $info .= "only have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . ".";
-                }
+                $messages[] = ["type" => "too_few_remain", "info" => [
+                    "late" => $active_days_late,
+                    "remaining" => $late_days_remaining
+                ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
             else if ($active_days_charged > $late_days_allowed) {
                 $error = true;
-                if ($info != "") {
-                    $info .= "<br<br>>";
-                }
-                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
-                $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
-                if ($late_days_allowed == 0) {
-                    $info .= "<br>but your instructor specified that no late days may be used for this assignment.";
-                } else {
-                    $info .= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
-                }
+                $messages[] = ["type" => "too_many_used", "info" => [
+                    "late" => $active_days_late,
+                    "charged" => $active_days_charged,
+                    "allowed" => $late_days_allowed
+                ]];
             } // LATE STATUS
             else {
-                if ($info != "") {
-                    $info .= "<br><br>";
-                }
-                $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-                    . " and you have been charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment.";
-                if ($info != "") {
-                    $info .= "<br>";
-                }
-                if ($late_days_remaining == 0) {
-                    $info .= "You have no late days remaining for future assignments.";
-                } else {
-                    $info .= "You have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . " to use on future assignments.";
-                }
+                $messages[] = ["type" => "late", "info" => [
+                    "late" => $active_days_late,
+                    "charged" => $active_days_charged,
+                    "remaining" => $late_days_remaining
+                ]];
             }
-
             if ($error) {
-                if ($info != "") {
-                    $info .= "<br>";
-                }
-                $info .= "Your grade for this assignment will be recorded as a zero.";
+                //You're going to get a zero
+                $messages[] = ["type" => "getting_zero"];
             }
         }
 
@@ -127,89 +99,55 @@ class HomeworkView extends AbstractView {
                     $new_late_charged <= $late_days_allowed)) {
 
                 // PRINT WOULD BE HOW MANY DAYS LATE
-                if ($info != "") {
-                    $info .= "<br><br>";
-                }
-                $info .= "The current time is {$would_be_days_late} " . $this->dayOrDays($would_be_days_late) . " past the due date.";
+                $messages[] = ["type" => "would_late", "info" => [
+                    "late" => $would_be_days_late
+                ]];
 
                 // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
                 if ($new_late_charged > $late_days_remaining) {
-                    if ($info != "") {
-                        $info .= "<br>";
-                    }
-                    if ($late_days_remaining == 0) {
-                        $info .= "You have no remaining late days.";
-                    } else {
-                        $info .= "You only have {$late_days_remaining} late " . $this->dayOrDays($late_days_remaining) . " remaining.";
-                    }
+                    $messages[] = ["type" => "would_too_few_remain", "info" => [
+                        "remaining" => $late_days_remaining
+                    ]];
                     $error = true;
-                    if ($info != "") {
-                        $info .= "<br>";
-                    }
-                    $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
+                    $messages[] = ["type" => "would_get_zero"];
                 } // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
                 else if ($new_late_charged > $late_days_allowed) {
-                    if ($info != "") {
-                        $info .= "<br>";
-                    }
-                    if ($late_days_allowed == 0) {
-                        $info .= "Your instructor specified that no late days may be used for this assignment.";
-                    } else {
-                        $info .= "Your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
-                    }
+                    $messages[] = ["type" => "would_too_many_used", "info" => [
+                        "allowed" => $late_days_allowed
+                    ]];
                     $error = true;
-                    if ($info != "") {
-                        $info .= "<br>";
-                    }
-                    $info .= "If you submit to this assignment now, your grade for this assignment will be recorded as a zero.";
+                    $messages[] = ["type" => "would_get_zero"];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
-                    if ($info != "") {
-                        $info .= "<br>";
-                    }
                     $new_late_days_remaining = $late_days_remaining + $active_days_charged - $new_late_charged;
-                    $info .= "If you  " . $this->submitOrResubmit($active_version) . " to this assignment now," .
-                        " you will be charged {$new_late_charged} late " . $this->dayOrDays($new_late_charged) . "," .
-                        " and have $new_late_days_remaining remaining late " . $this->dayOrDays($new_late_days_remaining) . " for future assignments.";
+                    $messages[] = ["type" => "would_allowed", "info" => [
+                        "charged" => $new_late_charged,
+                        "remaining" => $new_late_days_remaining
+                    ]];
                 }
             }
         }
 
         // ------------------------------------------------------------
         // IN CASE OF AUTOMATIC ZERO, MAKE THE MESSAGE RED
-        $style = "";
         if ($error == true) {
-            $style = 'background-color: #d9534f;';
-            if ($info != "") {
-                $info .= "<br><br>";
-            }
-            $info .= "Contact your instructor if you believe that this is an error or that you should be granted ";
-            if ($extensions == 0) {
-                $info .= " a deadline extension.";
-            } else {
-                $info .= " an additional deadline extension.";
-            }
+            $messages[] = ["type" => "contact_instructor", "info" => [
+                "extensions" => $extensions
+            ]];
         }
 
-        // ------------------------------------------------------------
-        // WRAP THE LATE DAY INFORMATION IN A DIV
-        $return = "";
-        if ($info != "") {
-            $return = <<<HTML
-<div class="content" style="{$style}"><h4>{$info}</h4></div>
-HTML;
-        }
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("submission/LateDayMessage.twig", [
+            "messages" => $messages,
+            "error" => $error
+        ]);
     }
 
 
     /**
-     * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
-     *
      * @param Gradeable $gradeable
      * @param int $late_days_use
      * @param int $extensions
-     *
+     * @param bool $canViewWholeGradeable
      * @return string
      */
     public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
@@ -899,10 +837,10 @@ HTML;
      * @param Gradeable $gradeable
      * @param bool $canViewWholeGradeable
      * @param int $current_version_number
-     * @param GradeableVersion $current_version
+     * @param GradeableVersion|null $current_version
      * @return string
      */
-    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable, int $current_version_number, GradeableVersion $current_version): string {
+    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable, int $current_version_number, $current_version): string {
         $return = "";
 
         $team_header = '';
