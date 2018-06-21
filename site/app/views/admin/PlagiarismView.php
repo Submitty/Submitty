@@ -101,6 +101,9 @@ HTML;
     $('[name="version"]', form2).change(function(){
         setUserSubmittedCode('version');
     });
+    $('[name="user_id_2"]', form2).change(function(){
+        setUserSubmittedCode('user_id_2');
+    });
 </script>
 HTML;
         return $return;

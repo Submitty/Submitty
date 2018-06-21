@@ -26,6 +26,9 @@ class PlagiarismController extends AbstractController {
                 break; 
             case 'get_user_submission':
             	$this->ajaxGetUserSubmission();
+            	break;
+            case 'get_matching_users':
+            	$this->ajaxGetMatchingUsers();
             	break;      
             default:
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
@@ -266,21 +269,71 @@ class PlagiarismController extends AbstractController {
 
         $return="";
         $active_version = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        if($version == "active") {
-        	$version = $active_version;
+        $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
+    	$content =file_get_contents($file_path);
+    	$content = trim(str_replace(array("\r", "\n"), '', $content));
+    	$rankings = preg_split('/ +/', $content);
+		$rankings = array_chunk($rankings,3);
+		foreach($rankings as $ranking) {
+			if($ranking[1] == $user_id) {
+				$max_matching_version = $ranking[2];
+			}
+		}
+        if($version == "max_matching") {
+        	$version = $max_matching_version;
         }
         $all_versions = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id), array(".", "..", "user_assignment_settings.json"));
 
-        $file_path= $course_path."/submissions/".$gradeable_id."/".$user_id."/".$version;
-        foreach(array_diff(scandir($file_path), array('.', '..', '.submit.timestamp')) as $name) {
-        	$file_name= $name;
-        }
-        $file_path .= "/".$file_name; 
-    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_path))) {
-  			$data= array('file_content'=> htmlentities(file_get_contents($file_path)), 'code_version' => $version, 'active_version' => $active_version, 'all_versions' => $all_versions);
+        $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id."/".$version."/submission.concatenated";
+ 
+    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+  			$data= array('file_content'=> htmlentities(file_get_contents($file_name)), 'code_version' => $version, 'max_matching_version' => $max_matching_version, 'active_version' => $active_version, 'all_versions' => $all_versions);
        	    $return = json_encode($data);
         }
     	echo($return);	
+    }
+
+    public function ajaxGetMatchingUsers() {
+    	$gradeable_id = $_REQUEST['gradeable_id'];
+    	$user_id =$_REQUEST['user_id'];
+    	$version = $_REQUEST['version'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return = array();
+        $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
+    	$content =file_get_contents($file_path);
+    	$content = trim(str_replace(array("\r", "\n"), '', $content));
+    	$rankings = preg_split('/ +/', $content);
+		$rankings = array_chunk($rankings,3);
+		foreach($rankings as $ranking) {
+			if($ranking[1] == $user_id) {
+				$max_matching_version = $ranking[2];
+			}
+		}
+        if($version == "max_matching") {
+        	$version = $max_matching_version;
+        }
+        $file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id."/".$version."/matches.json";
+        if (!file_exists($file_path)) {
+        	echo("no_match_for_this_version");
+        }
+        else {
+	        $content = json_decode(file_get_contents($file_path), true);
+	    	foreach($content as $match) {
+	    		if($match["type"] == "match") {
+	    			foreach ($match["others"] as $match_info) {
+	    				array_push($return, array($match_info["username"],$match_info["version"]));
+	    			}
+	    		}
+	    	}
+	    	foreach($return as $i => $match_user) {
+    			array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());  
+    		}
+	    	$return = json_encode($return);
+	        echo($return);
+	    }    
     }
 
 }
