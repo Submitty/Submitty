@@ -33,16 +33,12 @@ class HomeworkView extends AbstractView {
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-        $upload_message = $this->core->getConfig()->getUploadMessage();
-        $current_version = $gradeable->getCurrentVersion();
-        $current_version_number = $gradeable->getCurrentVersionNumber();
-        $num_components = count($gradeable->getComponents());
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
         $return .= $this->renderLateDayMessage($gradeable, $extensions);
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
-            $return .= $this->renderSubmision($gradeable, $late_days_use, $upload_message, $current_version_number, $num_components);
+            $return .= $this->renderSubmision($gradeable, $late_days_use);
         }
         if ($this->core->getUser()->accessAdmin()) {
             $return .= $this->renderBulkForm($gradeable);
@@ -57,7 +53,7 @@ class HomeworkView extends AbstractView {
           }
          */
 
-        $return .= $this->renderResults($gradeable, $canViewWholeGradeable, $current_version_number, $current_version);
+        $return .= $this->renderResults($gradeable, $canViewWholeGradeable);
         return $return;
     }
 
@@ -287,13 +283,11 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param int $late_days_use
-     * @param string $upload_message
-     * @param int $current_version_number
-     * @param int $num_components
      * @return string
      */
-    private function renderSubmision($gradeable, $late_days_use, string $upload_message, int $current_version_number, int $num_components): string {
+    private function renderSubmision(Gradeable $gradeable, int $late_days_use): string {
         $student_page = false;
+        $num_components = count($gradeable->getComponents());
 
         $return = <<<HTML
 <div class="content">
@@ -493,7 +487,7 @@ HTML;
             }
             $return .= <<<HTML
     <div>
-        {$upload_message}
+        {$this->core->getConfig()->getUploadMessage()}
     <br>
     &nbsp;
     </div>
@@ -502,8 +496,8 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-            if ($current_version_number === $gradeable->getHighestVersion()
-                && $current_version_number > 0) {
+            if ($gradeable->getCurrentVersionNumber() === $gradeable->getHighestVersion()
+                && $gradeable->getCurrentVersionNumber() > 0) {
                 $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
@@ -525,8 +519,8 @@ HTML;
 HTML;
                 }
             }
-            if ($current_version_number == $gradeable->getHighestVersion()
-                && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
+            if ($gradeable->getCurrentVersionNumber() == $gradeable->getHighestVersion()
+                && $gradeable->getCurrentVersionNumber() > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                 $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
@@ -549,7 +543,7 @@ HTML;
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
-        var assignment_version = {$current_version_number};
+        var assignment_version = {$gradeable->getCurrentVersionNumber()};
         var highest_version = {$gradeable->getHighestVersion()};
         for (var i = 1; i <= num_parts; i++ ){
             var dropzone = document.getElementById("upload" + i);
@@ -835,12 +829,11 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param bool $canViewWholeGradeable
-     * @param int $current_version_number
-     * @param GradeableVersion|null $current_version
      * @return string
      */
-    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable, int $current_version_number, $current_version): string {
+    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable): string {
         $return = "";
+        $current_version = $gradeable->getCurrentVersion();
 
         $team_header = '';
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
@@ -867,7 +860,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
 
             // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($current_version_number > 0) {
+            if ($gradeable->getCurrentVersionNumber() > 0) {
                 if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
@@ -914,7 +907,7 @@ HTML;
 HTML;
             }
 
-            if ($gradeable->getActiveVersion() === 0 && $current_version_number === 0) {
+            if ($gradeable->getActiveVersion() === 0 && $gradeable->getCurrentVersionNumber() === 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
@@ -1062,7 +1055,7 @@ HTML;
                     'page' => 'submission',
                     'action' => 'check_refresh',
                     'gradeable_id' => $gradeable->getId(),
-                    'gradeable_version' => $current_version_number))}")
+                    'gradeable_version' => $gradeable->getCurrentVersionNumber()))}")
         </script>
 HTML;
 
