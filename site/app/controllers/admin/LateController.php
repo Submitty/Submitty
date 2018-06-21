@@ -118,8 +118,37 @@ class LateController extends AbstractController {
                 $this->getLateDays();
             }
             else{
-                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                $this->getExtensions($_POST['g_id']);
+            	$team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
+            	//0 is for single submission, 1 is for team submission
+            	$option = isset($_POST['option']) ? $_POST['option'] : -1;
+            	if($team != NULL && $team->getSize() > 1){
+            		if($option == 0){
+						$this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
+						$this->getExtensions($_POST['g_id']);
+					} else if($option == 1){
+						$team_member_ids = explode(", ", $team->getMemberList());
+						for($i = 0; $i < count($team_member_ids); $i++){
+							$this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $_POST['late_days']);
+						}
+						$this->getExtensions($_POST['g_id']);
+					} else {
+						$this->core->getOutput()->useHeader(false);
+						$this->core->getOutput()->useFooter(false);
+						$team_member_ids = explode(", ", $team->getMemberList());
+						$team_members = array();
+						for($i = 0; $i < count($team_member_ids); $i++){
+							$team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
+								$this->core->getQueries()->getUserById($team_member_ids[$i])->getLastName();
+						}
+						$return = $this->core->getOutput()->renderTwigTemplate("admin/users/MoreExtensions.twig",
+							['g_id' => $_POST['g_id'],
+								'member_list' => $team_members]);
+						echo json_encode(array('is_team' => true, 'popup' => $return));
+					}
+				} else {
+					$this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
+					$this->getExtensions($_POST['g_id']);
+				}
             }
         }
 

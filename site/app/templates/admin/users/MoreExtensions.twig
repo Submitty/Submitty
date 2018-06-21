@@ -1,0 +1,17 @@
+<div class="popup-form" id="more_extension_popup">
+    <h3>This student has one or more teammates, should the extension apply to them as well?</h3>
+    <p>Team member list: </p>
+    {% for id, user in member_list %}
+        <p>{{ user }} ({{ id }})</p>
+    {% endfor %}
+    <script>
+        function confirmExtension(option){
+            $('.popup-form').css('display', 'none');
+            $('input[name="option"]').val(option);
+            $('#excusedAbsenceForm').submit();
+            $('input[name="option"]').val(-1);
+        }
+    </script>
+    <a class="btn btn-primary" onclick="confirmExtension(1)">Yes</a>
+    <a class="btn btn-default" onclick="confirmExtension(0)">No</a>
+</div>
