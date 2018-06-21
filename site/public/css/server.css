@@ -582,7 +582,7 @@ table tr.table-header {
 }
 
 .deleted.active {
-    background-color: #FF9999;
+    background-color: #FF9999 !important;
 }
 
 .important {
