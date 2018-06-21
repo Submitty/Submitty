@@ -28,8 +28,10 @@ class SimpleGraderView extends AbstractView {
         }
         if ($gradeable->isGradeByRegistration()) {
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+            $section_message = "Students Enrolled in Registration Section";
         } else {
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
+            $section_message = "Students Assigned to Rotating Section";
         }
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
@@ -67,6 +69,85 @@ class SimpleGraderView extends AbstractView {
             } else {
                 $section = $gradeable_row->getUser()->getRotatingSection();
             }
+            $display_section = ($section === null) ? "NULL" : $section;
+            if ($section !== $last_section) {
+                if($section !== null) {
+                    $sections[] = $section;
+                }
+                $last_section = $section;
+                $count = 1;
+                if ($tbody_open) {
+                    $return .= <<<HTML
+        </tbody>
+HTML;
+                }
+                if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
+                    $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
+                }
+                else {
+                    $section_graders = "Nobody";
+                }
+                $return .= <<<HTML
+            <tr class="info persist-header">
+                <td colspan="{$colspan}" style="text-align: center">
+                {$section_message} {$display_section}
+HTML;
+                if($action == 'lab'){
+                    $return .= <<<HTML
+                    <a target=_blank href="{$this->core->buildUrl(array(
+                                                                  'component' => 'grading',
+                                                                  'page' => 'simple',
+                                                                  'action' => 'print_lab', 
+                                                                  'sort' => $sort,
+                                                                  'section' => $section,
+                                                                  'sectionType' => $section_type,
+                                                                  'g_id' => $g_id))}">
+                      <i class="fa fa-print"></i>
+                    </a>
+HTML;
+                }
+                $component_ids = json_encode($comp_ids);
+                $return .= <<<HTML
+                </td>
+            </tr>
+            <tr class="info">
+                <td colspan="{$colspan}" style="text-align: center">Graders: {$section_graders}</td>
+            </tr>
+        <tbody id="section-{$section}" data-numnumeric="{$num_numeric}" data-numtext="{$num_text}" data-compids = "{$component_ids}">
+HTML;
+            }
+            $style = "";
+            if ($gradeable_row->getUser()->accessGrading()) {
+                $style = "style='background: #7bd0f7;'";
+            }
+            $return .= <<<HTML
+            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}" data-row="{$row}" {$style}> 
+                <td class="">{$count}</td>
+                <td class="">{$gradeable_row->getUser()->getRegistrationSection()}</td>
+                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getId()}</td>
+                <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
+                <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
+HTML;
+            if($action == 'lab'){
+                $col = 0;
+                foreach ($gradeable_row->getComponents() as $component) {
+                    $grader = ($component->getGrader() !== null) ? "data-grader='{$component->getGrader()->getId()}'" : '';
+                    $time = ($component->getGradeTime() !== null) ? "data-grade-time='{$component->getGradeTime()->format('Y-m-d H:i:s')}'" : '';
+                    if ($component->getIsText()) {
+                        $return .= <<<HTML
+                <td>{$component->getComment()}</td>
+HTML;
+                    }
+                    else {
+                        if($component->getScore() === 1.0) {
+                            $background_color = "background-color: #149bdf";
+                        }
+                        else if($component->getScore() === 0.5) {
+                            $background_color = "background-color: #88d0f4";
+                        }
+                        else {
+                            $background_color = "";
+                        }
 
             $display_section = ($section === null) ? "NULL" : $section;
 
