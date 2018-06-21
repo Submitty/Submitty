@@ -479,21 +479,28 @@ class Gradeable extends AbstractModel {
         }
         //If late days used - extensions applied > allowed per assignment then status is "Bad..."
         if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
-            $this->late_status = "Bad too many used for this assignment";
+            $this->late_status = "Bad (too many late days used on this assignment)";
             $late_flag = false;
         }
         // If late days used - extensions applied > allowed per term then status is "Bad..."
         // Do a max(0, ...) to protect against the case where the student's late days goes down
         // during the semester and they've already used late days
         if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
-            $this->late_status = "Bad too many used this term";
+            $this->late_status = "Bad (too many late days used this term)";
+            $late_flag = false;
+        }
+        
+        if ($this->getActiveVersion() == 0) {
+            if ($this->hasSubmitted()) {
+                $this->late_status = "Cancelled Submission";
+            }
+            else {
+                $this->late_status = "No submission";
+            }
             $late_flag = false;
         }
 
-        if (!$this->hasSubmitted()){
-            $this->late_status = "No submission";
-            $late_flag = false;
-        }
+
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
         //be less than 0 in cases of excess extensions. Decrement remaining late days.
         if ($late_flag) {
@@ -1245,9 +1252,36 @@ class Gradeable extends AbstractModel {
         $repo = $vcs_path;
 
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
-        $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
+        $repo = str_replace('{$user_id}', $this->getUser()->getId(), $repo);
         $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
             $this->core->getConfig()->getVcsUrl(), $repo);
         return str_replace('{$team_id}', $team->getId(), $repo);
     }
+
+    public function canDelete() {
+        if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
+            // no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+            $no_teams_flag = true;
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+            if (!empty($all_teams)) {
+                $no_teams_flag = false;
+            }
+            // no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+            $no_submission_flag = true;
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+            if (is_dir($submission_path)) {
+                $no_submission_flag = false;
+            }
+
+            return $no_submission_flag && $no_teams_flag;
+        } else if ($this->getType() == GradeableType::NUMERIC_TEXT || $this->getType() == GradeableType::CHECKPOINTS) {
+            return $this->core->getQueries()->getNumUsersGraded($this->getId()) === 0;
+        }
+
+        // Unknown type, better be safe
+        return false;
+    }
+
 }
