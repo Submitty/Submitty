@@ -40,7 +40,8 @@ class HomeworkView extends AbstractView {
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
             $return .= $this->renderSubmision($gradeable, $late_days_use);
         }
-        if ($this->core->getUser()->accessAdmin()) {
+        $all_directories = $gradeable->getUploadsFiles();
+        if ($this->core->getUser()->accessAdmin() && count($all_directories) > 0) {
             $return .= $this->renderBulkForm($gradeable);
         }
 
@@ -665,165 +666,46 @@ HTML;
      * @return string
      */
     private function renderBulkForm(Gradeable $gradeable): string {
-        $return = "";
         $all_directories = $gradeable->getUploadsFiles();
 
-        if (count($all_directories) > 0) {
-            if ($gradeable->isTeamAssignment()) {
-                $return .= <<<HTML
-<div class="content">
-    <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
-HTML;
-            } else {
-                $return .= <<<HTML
-<div class="content">
-    <h2>Unassigned PDF Uploads</h2>
-HTML;
-            }
-            $return .= <<<HTML
-    <form id="bulkForm" method="post">
-    <table class="table table-striped table-bordered persist-area">
-        <thead class="persist-thead">
-            <tr>
-                <td width="3%"></td>
-                <td width="8%">Timestamp</td>
-                <td width="53%">PDF preview</td>
-                <td width="5%">Full PDF</td>
-                <td width="15%">User ID</td>
-                <td width="8%">Submit</td>
-                <td width="8%">Delete</td>
-            </tr>
-        </thead>
-        <tbody>
-HTML;
-            $count = 1;
-            $count_array = array();
-            foreach ($all_directories as $timestamp => $content) {
-                $files = $content["files"];
+        $files = [];
 
-                foreach ($files as $filename => $details) {
-                    $clean_timestamp = str_replace("_", " ", $timestamp);
-                    $path = rawurlencode(htmlspecialchars($details["path"]));
-                    if (strpos($filename, "cover") === false) {
-                        continue;
-                    }
-                    // get the full filename for PDF popout
-                    // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
-                    $filename = rawurlencode(htmlspecialchars($filename));
-                    $url = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename . "&path=" . $path . "&ta_grading=false";
-                    $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
-                    $path_full = str_replace("_cover.pdf", ".pdf", $path);
-                    $url_full = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename_full . "&path=" . $path_full . "&ta_grading=false";
-                    $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
-                    //decode the filename after to display correctly for users
-                    $filename_full = rawurldecode($filename_full);
-                    $return .= <<<HTML
-            <tr class="tr tr-vertically-centered">
-                <td>{$count}</td>
-                <td>{$clean_timestamp}</td> 
-                <td>
-                    {$filename_full}</br>
-                    <object data="{$url}" type="application/pdf" width="100%" height="300">
-                        alt : <a href="{$url}">pdf.pdf</a>
-                    </object>
-                </td>
-                <td>
-                    <a onclick="openFile('{$url_full}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
-                </td>
-                <td>
-                    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    <div id="users_{$count}">
-                        <input type="text" id="bulk_user_id_{$count}[0]" value =""/>
-HTML;
-                    if ($gradeable->isTeamAssignment()) {
-                        for ($i = 1; $i < $gradeable->getMaxTeamSize(); $i++) {
-                            $return .= <<<HTML
-                        <input type="text" id="bulk_user_id_{$count}[{$i}]" value =""/>
-HTML;
-                        }
-                    }
-                    $return .= <<<HTML
-                    </div>
-                </td>
-                <td>
-                    <button type="button" id="bulk_submit_{$count}" class="btn btn-success">Submit</button>
-                </td>
-                <td>
-                    <button type="button" id="bulk_delete_{$count}" class="btn btn-danger">Delete</button>
-                </td>
-            </tr>
-HTML;
-                    $count++;
+        $count = 1;
+        $count_array = array();
+        foreach ($all_directories as $timestamp => $content) {
+            $dir_files = $content["files"];
+
+            foreach ($dir_files as $filename => $details) {
+                $clean_timestamp = str_replace("_", " ", $timestamp);
+                $path = rawurlencode(htmlspecialchars($details["path"]));
+                if (strpos($filename, "cover") === false) {
+                    continue;
                 }
-                $count_array_json = json_encode($count_array);
+                // get the full filename for PDF popout
+                // add "timestamp / full filename" to count_array so that path to each filename is to the full PDF, not the cover
+                $filename = rawurlencode(htmlspecialchars($filename));
+                $url = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename . "&path=" . $path . "&ta_grading=false";
+                $filename_full = str_replace("_cover.pdf", ".pdf", $filename);
+                $path_full = str_replace("_cover.pdf", ".pdf", $path);
+                $url_full = $this->core->getConfig()->getSiteUrl() . "&component=misc&page=display_file&dir=uploads&file=" . $filename_full . "&path=" . $path_full . "&ta_grading=false";
+                $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
+                //decode the filename after to display correctly for users
+                $filename_full = rawurldecode($filename_full);
+                $files[] = [
+                    "clean_timestamp" => $clean_timestamp,
+                    "filename_full" => $filename_full,
+                    "url" => $url,
+                    "url_full" => $url_full,
+                ];
+                $count++;
             }
-            $return .= <<<HTML
-<script type="text/javascript">
-    $(function() {
-        $("#bulkForm input").autocomplete({
-            source: students_full
-        });
-        $("#bulkForm button").click(function(e) {
-            var btn = $(document.activeElement);
-            var id = btn.attr("id");
-            var count = btn.parent().parent().index()+1;
-            var name = "bulk_user_id_"+count;
-            var user_ids = [];
-            $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); }); 
-            var js_count_array = $count_array_json;
-            var path = decodeURIComponent(js_count_array[count]);
-            if (id.includes("delete")) {
-                message = "Are you sure you want to delete this submission?";
-                if (!confirm(message)) {
-                    return;
-                }
-                deleteSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", path, count);
-                moveNextInput(count);
-            } else {
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
-            }
-            e.preventDefault();
-            e.stopPropagation();
-        });
-        $("#bulkForm input").keydown(function(e) {
-            if(e.keyCode === 13) { // enter was pressed
-                var text = $(document.activeElement);
-                var id = text.attr("id");
-                var count = text.parent().parent().parent().index()+1;
-                var name = "bulk_user_id_"+count;
-                var user_ids = [];
-                $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
-                var js_count_array = $count_array_json;
-                var path = js_count_array[count];
-                validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_ids, true, path, count, "", makeSubmission);
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
-        $("#bulkForm button").keydown(function(e) {
-            if(e.keyCode === 9) { // tab was pressed
-                var text = $(document.activeElement);
-                var id = text.attr("id");
-                var count = text.parent().parent().index()+1;
-                // default behavior is okay for input/submit, but delete should go to next input
-                if (id.includes("delete")) {
-                    moveNextInput(count);
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }
-        });
-    });
-</script>
-HTML;
-            $return .= <<<HTML
-        </tbody>
-    </table>
-    </form>
-</div>
-HTML;
         }
-        return $return;
+
+        return $this->core->getOutput()->renderTwigTemplate("submission/BulkUploadForm.twig", [
+            "gradeable" => $gradeable,
+            "count_array" => $count_array,
+            "files" => $files,
+        ]);
     }
 
     /**

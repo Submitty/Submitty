@@ -58,6 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
+ * @method array getUploadsFiles()
  * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()

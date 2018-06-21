@@ -1,0 +1,117 @@
+<div class="content">
+    {% if gradeable.isTeamAssignment() %}
+        <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
+    {% else %}
+        <h2>Unassigned PDF Uploads</h2>
+    {% endif %}
+
+    <form id="bulkForm" method="post">
+        <table class="table table-striped table-bordered persist-area">
+            <thead class="persist-thead">
+            <tr>
+                <td width="3%"></td>
+                <td width="8%">Timestamp</td>
+                <td width="53%">PDF preview</td>
+                <td width="5%">Full PDF</td>
+                <td width="15%">User ID</td>
+                <td width="8%">Submit</td>
+                <td width="8%">Delete</td>
+            </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                    {% set index = loop.index %}
+                    <tr class="tr tr-vertically-centered">
+                        <td>{{ index }}</td>
+                        <td>{{ file.clean_timestamp }}</td>
+                        <td>
+                            {{ file.filename_full }}
+                            <br>
+                            <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
+                                alt : <a href="{{ file.url }}">pdf.pdf</a>
+                            </object>
+                        </td>
+                        <td>
+                            <a onclick="openFile('{{ file.url_full }}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
+                        </td>
+                        <td>
+                            <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                            <div id="users_{{ index }}">
+                                <input type="text" id="bulk_user_id_{{ index }}[0]" value =""/>
+                                {% if gradeable.isTeamAssignment() %}
+                                    {% for i in 1..gradeable.getMaxTeamSize() %}
+                                        <input type="text" id="bulk_user_id_{{ index }}[{{ i }}]" value =""/>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button" id="bulk_submit_{{ index }}" class="btn btn-success">Submit</button>
+                        </td>
+                        <td>
+                            <button type="button" id="bulk_delete_{{ index }}" class="btn btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{# Todo: This should go into its own file if possible #}
+<script type="text/javascript">
+    $(function() {
+        $("#bulkForm input").autocomplete({
+            source: students_full
+        });
+        $("#bulkForm button").click(function(e) {
+            var btn = $(document.activeElement);
+            var id = btn.attr("id");
+            var count = btn.parent().parent().index()+1;
+            var name = "bulk_user_id_"+count;
+            var user_ids = [];
+            $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
+            var js_count_array = {{ count_array|json_encode|raw }};
+            var path = decodeURIComponent(js_count_array[count]);
+            if (id.includes("delete")) {
+                message = "Are you sure you want to delete this submission?";
+                if (!confirm(message)) {
+                    return;
+                }
+                deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", path, count);
+                moveNextInput(count);
+            } else {
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        $("#bulkForm input").keydown(function(e) {
+            if(e.keyCode === 13) { // enter was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().parent().index()+1;
+                var name = "bulk_user_id_"+count;
+                var user_ids = [];
+                $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
+                var js_count_array = {{ count_array|json_encode|raw }};
+                var path = js_count_array[count];
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        $("#bulkForm button").keydown(function(e) {
+            if(e.keyCode === 9) { // tab was pressed
+                var text = $(document.activeElement);
+                var id = text.attr("id");
+                var count = text.parent().parent().index()+1;
+                // default behavior is okay for input/submit, but delete should go to next input
+                if (id.includes("delete")) {
+                    moveNextInput(count);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
+    });
+</script>
