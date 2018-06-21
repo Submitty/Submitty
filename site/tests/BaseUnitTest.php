@@ -10,20 +10,21 @@ use app\models\Config;
 use app\models\User;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
-
+    /** @noinspection PhpDocMissingThrowsInspection */
+    /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
      * repeatidly for a variety of tests. This
      *
-     * @param $config_values
-     * @parma $user_config
-     * @return \PHPUnit\Framework\MockObject\MockObject
+     * @param array $config_values
+     * @param array $user_config
      *
-     * @throws \ReflectionException
+     * @return Core
      */
     protected function createMockCore($config_values=array(), $user_config=array()) {
         $core = $this->createMock(Core::class);
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
@@ -61,6 +62,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $queries = $this->createMock(DatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $user = $this->createMockModel(User::class);
         $user->method('getId')->willReturn("testUser");
         if (isset($user_config['access_grading'])) {
@@ -75,6 +77,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $output = $this->createMock(Output::class);
         $core->method('getOutput')->willReturn($output);
 
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $core;
     }
 
