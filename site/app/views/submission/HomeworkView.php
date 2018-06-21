@@ -17,6 +17,51 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
+     * @param int $late_days_use
+     * @param int $extensions
+     * @param bool $canViewWholeGradeable
+     * @return string
+     */
+    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
+        $return = "";
+        // hiding entire page if user is not a grader and student cannot view
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
+            $message = "Students cannot view that gradeable.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $upload_message = $this->core->getConfig()->getUploadMessage();
+        $current_version = $gradeable->getCurrentVersion();
+        $current_version_number = $gradeable->getCurrentVersionNumber();
+        $num_components = count($gradeable->getComponents());
+        $time = " @ H:i";
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+
+        $return .= $this->renderLateDayMessage($gradeable, $extensions);
+        // showing submission if user is grader or student can submit
+        if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
+            $return .= $this->renderSubmision($gradeable, $late_days_use, $time, $upload_message, $current_version_number, $num_components);
+        }
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= $this->renderBulkForm($gradeable);
+        }
+
+        /*
+          See #1624 and #1967
+
+          if (!$this->core->getOutput()->bufferOutput()) {
+              echo $return;
+              $return = "";
+          }
+         */
+
+        $return .= $this->renderResults($gradeable, $canViewWholeGradeable, $current_version_number, $current_version);
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
      * @param int $extensions
      * @return string
      */
@@ -140,52 +185,6 @@ class HomeworkView extends AbstractView {
             "messages" => $messages,
             "error" => $error
         ]);
-    }
-
-
-    /**
-     * @param Gradeable $gradeable
-     * @param int $late_days_use
-     * @param int $extensions
-     * @param bool $canViewWholeGradeable
-     * @return string
-     */
-    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
-        $return = "";
-        // hiding entire page if user is not a grader and student cannot view
-        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
-            $message = "Students cannot view that gradeable.";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
-
-        $upload_message = $this->core->getConfig()->getUploadMessage();
-        $current_version = $gradeable->getCurrentVersion();
-        $current_version_number = $gradeable->getCurrentVersionNumber();
-        $num_components = count($gradeable->getComponents());
-        $time = " @ H:i";
-        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-
-        $return .= $this->renderLateDayMessage($gradeable, $extensions);
-        // showing submission if user is grader or student can submit
-        if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
-            $return .= $this->renderSubmision($gradeable, $late_days_use, $time, $upload_message, $current_version_number, $num_components);
-        }
-        if ($this->core->getUser()->accessAdmin()) {
-            $return .= $this->renderBulkForm($gradeable);
-        }
-
-        /*
-          See #1624 and #1967
-
-          if (!$this->core->getOutput()->bufferOutput()) {
-              echo $return;
-              $return = "";
-          }
-         */
-
-        $return .= $this->renderResults($gradeable, $canViewWholeGradeable, $current_version_number, $current_version);
-        return $return;
     }
 
     /**
