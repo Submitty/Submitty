@@ -29,8 +29,9 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-
-    calculatePercentageTotal();
+    if(getGradeable()!=null){
+        calculatePercentageTotal();
+    }
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -204,6 +205,10 @@ function readCookies(){
             }
         });
     }
+    for(var x=0; x<testcases.length; x++){
+        if(testcases[x]!='[' && testcases[x]!=']')
+            openAutoGrading(testcases[x]);
+    }
 }
 
 function updateCookies(){
@@ -256,7 +261,12 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+    if(getGradeable()!=null){
+        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
+        var testcases = findOpenTestcases();
+        testcases = JSON.stringify(testcases);
+        document.cookie = "testcases=" + testcases + "; path=/;";
+    }
     if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
         if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
             var current_mark = document.getElementById('title-general');
@@ -270,11 +280,6 @@ function updateCookies(){
     } else {
         document.cookie = "scroll_pixel=" + 0 + "; path=/;";
     }
-
-    var testcases = findOpenTestcases();
-    testcases = JSON.stringify(testcases);
-    document.cookie = "testcases=" + testcases + "; path=/;";
-
     var files = [];
     $('#file-container').children().each(function() {
         $(this).children('div[id^=div_viewer_]').each(function() {
@@ -300,25 +305,34 @@ function changeEditorStyle(newStyle){
 // Student navigation
 
 function gotoPrevStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#prev-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#prev-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+        window.location = $("#prev-student")[0].dataset.href; 
+    }
 }
 
 function gotoNextStudent() {
-    saveLastOpenedMark(true, function () {
-        window.location = $("#next-student")[0].dataset.href;
-    }, function () {
-        if (confirm("Could not save last mark, change student anyway?")) {
+    if(getGradeable()!=null){
+        saveLastOpenedMark(true, function () {
             window.location = $("#next-student")[0].dataset.href;
-        }
-    });
+        }, function () {
+            if (confirm("Could not save last mark, change student anyway?")) {
+                window.location = $("#next-student")[0].dataset.href;
+            }
+        });
+    }
+    else{
+       window.location = $("#next-student")[0].dataset.href; 
+    }
 }
-
 //Navigate to the prev / next student buttons
 registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
     gotoPrevStudent();
@@ -537,11 +551,15 @@ function updateValue(obj, option1, option2) {
     });
 
 }
-
+function openAutoGrading(num){
+    $('#tc_' + num).click();
+    $('#testcase_' + num)[0].style.display="block";
+}
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
-    $("[id^='testcase_']").show();
+     $("[id^='tc_']").click();
+     $("[id^='testcase_']")[0].style.display="block";
 }
 
 // close all outputs in Auto-Grading Testcases section
