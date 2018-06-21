@@ -731,7 +731,6 @@ HTML;
      * @return string
      */
     private function renderSubmissionChoice(Gradeable $gradeable, bool $canViewWholeGradeable): string {
-        $return = "";
         $current_version = $gradeable->getCurrentVersion();
 
         // if not active version and student cannot see any more than active version
