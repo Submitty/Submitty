@@ -1590,26 +1590,22 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(id){
-    var t = document.getElementById(id);
-
-    $(t).on('input', function() {
+function enableTabsInTextArea(jQuerySelector){
+    var t = $(jQuerySelector);
+    t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
-    $(t).trigger('input');
-        t.onkeydown = function(t){
-            if(t.keyCode == 9){
-                var text = this.value;
-                var beforeCurse = this.selectionStart;
-                var afterCurse = this.selectionEnd;
-                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
-                this.selectionStart = this.selectionEnd = beforeCurse+1;
-
-                return false;
-
-            }
-        };
-
+    t.trigger('input');
+    t.keydown(function(t){
+        if(t.keyCode == 9){
+            var text = this.value;
+            var beforeCurse = this.selectionStart;
+            var afterCurse = this.selectionEnd;
+            this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+            this.selectionStart = this.selectionEnd = beforeCurse+1;
+            return false;
+        }
+    });
 }
 
 function changeDisplayOptions(option, thread_id){

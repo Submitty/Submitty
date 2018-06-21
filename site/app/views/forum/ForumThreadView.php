@@ -177,7 +177,7 @@ HTML;
 		}
 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('post_content');
+			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
 				$("form").areYouSure();
@@ -489,7 +489,7 @@ HTML;
 					$return .= <<<HTML
             	</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
+	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -825,7 +825,7 @@ HTML;
             				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
             			</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to {$visible_username} here..." required></textarea>
+	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to {$visible_username} here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -862,7 +862,7 @@ HTML;
 
 		<script> 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('thread_post_content');
+			    enableTabsInTextArea('#thread_post_content');
 				$("form").areYouSure();
 			});
 		 </script>
