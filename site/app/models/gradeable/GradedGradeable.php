@@ -39,8 +39,8 @@ class GradedGradeable extends AbstractModel {
     protected $submitter = null;
     /** @property @var GradedComponent[][] The an array of arrays of GradedComponents, indexed by component id */
     protected $graded_components = array();
-    /** @property @var array AutogradingVersion[] The graded versions for electronic gradeables */
-    protected $graded_versions = array();
+    /** @property @var AutogradingVersion[] The graded versions for electronic gradeables */
+    protected $autograding_versions = array();
 
 
     /**
@@ -156,16 +156,16 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the array of graded versions for this gradeable data
-     * @param AutogradingVersion[] $graded_versions
+     * Sets the array of autograding versions for this gradeable data
+     * @param AutogradingVersion[] $autograding_versions
      */
-    public function setAutogradingVersions(array $graded_versions) {
-        foreach ($graded_versions as $graded_version) {
-            if (!($graded_version instanceof AutogradingVersion)) {
-                throw new \InvalidArgumentException('Graded Version array contained invalid type');
+    public function setAutogradingVersions(array $autograding_versions) {
+        foreach ($autograding_versions as $autograding_version) {
+            if (!($autograding_version instanceof AutogradingVersion)) {
+                throw new \InvalidArgumentException('Autograding version array contained invalid type');
             }
         }
-        $this->graded_versions = $graded_versions;
+        $this->autograding_versions = $autograding_versions;
     }
 
     /**
