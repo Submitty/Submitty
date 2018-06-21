@@ -8,8 +8,8 @@
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
-            {% for section in sections %}
-                {% if not component.getIsText() %}
+            {% for section, info in sections %}
+                {% if section != null %}
                     <tbody>
                         <tr>
                             <td>{{ section }}</td>
@@ -25,16 +25,14 @@
                 <td colspan="2"></td>
             </tr>
             </thead>
-            {% for component in components %}
-                {% if not component.getIsText() %}
-                    <tbody>
-                        <tr>
-                            <td>{{ component.getTitle() }}</td>
-                            <td id="avg-component-{{ loop.index0 }}"></td>
-                            <td id="stddev-component-{{ loop.index0 }}"></td>
-                        </tr>
-                    </tbody>
-                {% endif %}
+            {% for component in components_numeric %}
+                <tbody>
+                    <tr>
+                        <td>{{ component.getTitle() }}</td>
+                        <td id="avg-component-{{ loop.index0 }}"></td>
+                        <td id="stddev-component-{{ loop.index0 }}"></td>
+                    </tr>
+                </tbody>
             {% endfor %}
             <thead class="persist-thead">
             <tr>
