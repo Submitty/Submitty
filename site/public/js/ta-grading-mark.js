@@ -352,9 +352,12 @@ function updateMarksOnPage(c_index) {
         });
     }
     var ids= [];
+    console.log("IDS");
     for(var idIndex=0; idIndex<component.marks.length; idIndex++){
         ids.push(component.marks[idIndex].id);
+        console.log(component.marks[idIndex].id);
     }
+    console.log("ENDIDs");
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
@@ -386,14 +389,16 @@ function updateMarksOnPage(c_index) {
             getComponent(c_index).comment = note;
         }
         // Add all marks back
+        console.log("updating");
         for (var m_index = ids.length-1; m_index >= 0; m_index--) {
             var is_publish = data['data'][m_index]['is_publish'] == 't';
             var id         = data['data'][m_index]['id'];
             var hasMark    = data['data'][m_index]['has_mark'];
             var score      = data['data'][m_index]['score'];
             var note       = data['data'][m_index]['note'];
-            getMark(c_index, ids[m_index]).id = id;
-            if(getMark(c_index, ids[m_index])!=null){
+                console.log(id);
+                getMark(c_index, ids[m_index]).id = id;
+                console.log(getMark(c_index, ids[m_index]).id);
                 getMark(c_index, ids[m_index]).publish = is_publish;
                 getMark(c_index, ids[m_index]).has = hasMark;
                 getMark(c_index, ids[m_index]).score = score;
@@ -413,9 +418,9 @@ function updateMarksOnPage(c_index) {
                         current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
                     }
                 }
-            }
         }
     });
+    console.log("done updating");
 }
 
 
@@ -456,18 +461,33 @@ function addMark(me, num) {
             }
             var parent = $('#marks-parent-'+num);
             var id2     = ""+(max+1); 
+            console.log("LOOKING FOR");
+            console.log(id2);
             var x      = $('tr[name=mark_'+num+']').length;
+            parent.append(getMarkView(num, id2, id2, 1, editModeEnabled));
             getComponent(num).marks.push({
                 id: id2,
                 name: note,
-                order:(""+x),
                 points: points,
                 publish: false,
-                has: false,
-                score: points
+                has: false
             });
-            parent.append(getMarkView(num, id2, id2, 1, editModeEnabled));
-            window.location.reload();
+           /* grading_data.gradeable.components[num-1].marks.push({
+                id: id2,
+                name: note,
+                points: points,
+                publish: false,
+                has: false
+            });*/
+            for(var i=0; i<getComponent(num).marks.length; i++){
+                console.log(getComponent(num).marks[i].id);
+                console.log("IDs above\n");
+            }
+            saveMark(num, true);
+    updateMarksOnPage(num);
+    closeMark(num);
+    openMark(num);
+           // window.location.reload();
             //updateMarksOnPage(num);
           //  window.location.reload();
           //  toggleEditMode();
@@ -482,6 +502,7 @@ function addMark(me, num) {
 
 // TODO: this
 function deleteMark(me, c_index, last_num) {
+    var parent = $('#marks-parent-'+c_index);
     console.log("ID1");
     console.log(last_num);
     var index=-1;
@@ -490,13 +511,19 @@ function deleteMark(me, c_index, last_num) {
         console.log(getComponent(c_index).marks[i].id);
         if(getComponent(c_index).marks[i].id==last_num){
             index=i;
-            break;
+       //     break;
         }
     }
     console.log("out of loop");
     getComponent(c_index).marks.splice(index, 1);
+    //grading_data.gradeable.components[c_index - 1].marks.splice(index, 1);
     var current_row = $(me.parentElement.parentElement);
     current_row.remove();
+    console.log("loop2 in");
+    for(var i=0; i<getComponent(c_index).marks.length; i++){
+        console.log(getComponent(c_index).marks[i].id);
+    }
+    console.log("loop2 out");
     var last_row = $('[name=mark_'+c_index+']').last().attr('id');
     var totalD = -1;
     if (last_row == null) {
@@ -507,9 +534,11 @@ function deleteMark(me, c_index, last_num) {
     }
 
     //updates the remaining marks's info
-    var current_num = parseInt(last_num);
-    for (var m_index = current_num + 1; m_index <= totalD; m_index++) {
+    for (var m_index = index + 1; m_index <= totalD; m_index++) {
         var new_num = m_index-1;
+        console.log("substiting");
+        console.log(new_num);
+        console.log(m_index);
         var current_mark = $('#mark_id-'+c_index+'-'+m_index);
         current_mark.find('input[name=mark_points_'+c_index+'_'+m_index+']').attr('name', 'mark_points_'+c_index+'_'+new_num);
         current_mark.find('textarea[name=mark_text_'+c_index+'_'+m_index+']').attr('name', 'mark_text_'+c_index+'_'+new_num);
@@ -517,10 +546,25 @@ function deleteMark(me, c_index, last_num) {
         current_mark.find('span[id=mark_info_id-'+c_index+'-'+m_index+']').attr('id', 'mark_info_id-'+c_index+'-'+new_num);
         current_mark.attr('id', 'mark_id-'+c_index+'-'+new_num);
     }
+    parent.empty();
+    for(var i=0; i<getComponent(c_index).marks.length; i++){
+        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
+        if(getMark(c_index, current_mark_id)==null){
+            console.log("NULLLL");
+            grading_data.gradeable.components[c_index-1].marks.splice(i, 1);  
+            getComponent(c_index).marks.splice(i, 1);
+            var current_row = $(getMark(c_index, current_mark_id).parentElement.parentElement);
+            current_row.remove();
+        }
+        else{
+            parent.append(getMarkView(c_index, current_mark_id, current_mark_id, 1, editModeEnabled));
+        }
+    }
     saveMark(c_index, true);
     updateMarksOnPage(c_index);
+    closeMark(c_index);
     openMark(c_index);
-    //window.location.reload();
+   // window.location.reload();
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -1002,19 +1046,24 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     // Gathers all the mark's data (ex. points, note, etc.)
     //getComponent(c_index).marks.sort(compareOrder);
     for(var m_index=0; m_index < arr_length; m_index++){
-        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
-        var current_row = $('#mark_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
-        var info_mark   = $('#mark_info_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
-        var success     = true;
-        mark_data[m_index] = {
-            id      : getMark(c_index, current_mark_id).id,
-            points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-            note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-            selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-            order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
-        };
-        //info_mark[0].style.display = '';
-        existing_marks_num++;
+        if(grading_data.gradeable.components[c_index-1].marks[m_index]==null){
+            grading_data.gradeable.components[c_index-1].marks.splice(m_index, 1);
+        }
+        else{
+            var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+            var current_row = $('#mark_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
+            var info_mark   = $('#mark_info_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
+            var success     = true;
+            mark_data[m_index] = {
+                id      : getMark(c_index, current_mark_id).id,
+                points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
+                note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
+                selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
+                order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
+            };
+            //info_mark[0].style.display = '';
+            existing_marks_num++;
+        }
     }
     var current_row = $('#mark_custom_id-'+c_index);
 
@@ -1033,8 +1082,9 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     var new_text   = "";
     var first_text = true;
     var all_false  = true;
-
+    var arr_length = mark_data.length
     for (var m_index = 0; m_index < arr_length; m_index++) {
+        console.log(mark_data[m_index].id);
         if (mark_data[m_index].selected === true) {
             all_false = false;
             

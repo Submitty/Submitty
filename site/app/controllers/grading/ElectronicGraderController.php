@@ -1051,17 +1051,21 @@ class ElectronicGraderController extends GradingController {
             foreach ($_POST['marks'] as $post_mark) {
                 if (isset($_POST['num_existing_marks'])) {
                     if ($index >= $_POST['num_existing_marks']) {
-                        break;
+                       // break;
                     }   
                 }
                 $mark = null;
                 foreach ($component->getMarks() as $cmark) {
+                    echo("\nPOSTMARK");
+                    echo($post_mark["id"]);
+                    echo("\nCMARK");
+                    echo($cmark->getId());
                     if ($cmark->getId() === $post_mark["id"]) {
                         $mark = $cmark;
                         break;
                     }
                 }
-                if($mark==null){
+               /* if($mark==null){
                     $mark = new GradeableComponentMark($this->core);
                     $mark->setGcId($component->getId());
                     $mark->setPoints($_POST['marks'][$index]['points']);
@@ -1073,7 +1077,7 @@ class ElectronicGraderController extends GradingController {
                     if($all_false === false) {
                         $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                     }
-                }
+                }*/
                 $mark->setPoints($post_mark['points']);
                 $mark->setNote($post_mark['note']);
                 $mark->setOrder($post_mark['order']);
