@@ -705,8 +705,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
