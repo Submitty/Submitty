@@ -236,6 +236,16 @@ HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= $this->renderBulkForm($gradeable);
         }
+
+        /*
+          See #1624 and #1967
+
+          if (!$this->core->getOutput()->bufferOutput()) {
+              echo $return;
+              $return = "";
+          }
+         */
+
         $return .= $this->renderResults($gradeable, $canViewWholeGradeable, $current_version_number, $current_version);
         return $return;
     }
@@ -1176,15 +1186,7 @@ HTML;
                         }
                         //}
                     }
-                    if (!$this->core->getOutput()->bufferOutput()) {
-                        echo $return;
-                        $return = "";
-                    }
                     $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
-                    if (!$this->core->getOutput()->bufferOutput()) {
-                        echo $return;
-                        $return = "";
-                    }
                 }
                 $return .= <<<HTML
     </div>
