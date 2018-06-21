@@ -38,7 +38,7 @@ class HomeworkView extends AbstractView {
         $return .= $this->renderLateDayMessage($gradeable, $extensions);
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
-            $return .= $this->renderSubmision($gradeable, $late_days_use);
+            $return .= $this->renderSubmitBox($gradeable, $late_days_use);
         }
         $all_directories = $gradeable->getUploadsFiles();
         if ($this->core->getUser()->accessAdmin() && count($all_directories) > 0) {
@@ -54,7 +54,14 @@ class HomeworkView extends AbstractView {
           }
          */
 
-        $return .= $this->renderResults($gradeable, $canViewWholeGradeable);
+        if ($gradeable->getSubmissionCount() === 0) {
+            $return .= $this->renderNoSubmission($gradeable);
+        } else {
+            $return .= $this->renderSubmissionChoice($gradeable, $canViewWholeGradeable);
+        }
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
+            $return .= $this->renderTAResults($gradeable);
+        }
         return $return;
     }
 
@@ -286,7 +293,7 @@ HTML;
      * @param int $late_days_use
      * @return string
      */
-    private function renderSubmision(Gradeable $gradeable, int $late_days_use): string {
+    private function renderSubmitBox(Gradeable $gradeable, int $late_days_use): string {
         $student_page = false;
         $num_components = count($gradeable->getComponents());
 
@@ -710,10 +717,20 @@ HTML;
 
     /**
      * @param Gradeable $gradeable
+     * @return string
+     */
+    private function renderNoSubmission(Gradeable $gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("submission/NoSubmission.twig", [
+            "gradeable" => $gradeable
+        ]);
+    }
+
+    /**
+     * @param Gradeable $gradeable
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    private function renderResults(Gradeable $gradeable, bool $canViewWholeGradeable): string {
+    private function renderSubmissionChoice(Gradeable $gradeable, bool $canViewWholeGradeable): string {
         $return = "";
         $current_version = $gradeable->getCurrentVersion();
 
@@ -723,49 +740,41 @@ HTML;
     <h3>Team: {$gradeable->getTeam()->getMemberList()}</h3><br />
 HTML;
         }
-        if ($gradeable->getSubmissionCount() === 0) {
-            $return .= <<<HTML
-<div class="content">
-    {$team_header}
-    <span style="font-style: italic">No submissions for this assignment.</span>
-</div>
-HTML;
-        } else {
-            $return .= <<<HTML
+        $return .= <<<HTML
 <div class="content">
     {$team_header}
     <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
 HTML;
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => ""))}', this)";
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
+        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange);
 
-            // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($gradeable->getCurrentVersionNumber() > 0) {
-                if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
-                    $version = 0;
-                    $button = '<input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
-                    $onsubmit = "";
-                } else {
-                    $version = $current_version->getVersion();
-                    $button = '<input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">';
-                    $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
-                }
-                $return .= <<<HTML
+        // If viewing the active version, show cancel button, otherwise so button to switch active
+        if ($gradeable->getCurrentVersionNumber() > 0) {
+            if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
+                $version = 0;
+                $button = '<input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
+                $onsubmit = "";
+            } else {
+                $version = $current_version->getVersion();
+                $button = '<input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">';
+                $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
+            }
+            $return .= <<<HTML
     <form style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
-                    'action' => 'update',
-                    'gradeable_id' => $gradeable->getId(),
-                    'new_version' => $version))}">
+                'action' => 'update',
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => $version))}">
         <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
         {$button}
     </form>
 HTML;
-            }
-            // disable changing submissions or cancelling assignment if student submit not allowed
-            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
-                $return .= <<<HTML
+        }
+        // disable changing submissions or cancelling assignment if student submit not allowed
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
+            $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
             $("#do_not_grade").prop("disabled", true);
@@ -773,10 +782,10 @@ HTML;
         });
     </script>
 HTML;
-            }
-            // disable looking at other submissions if student any version not allowed
-            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
-                $return .= <<<HTML
+        }
+        // disable looking at other submissions if student any version not allowed
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentAnyVersion()) {
+            $return .= <<<HTML
     <script type="text/javascript">
         $(function() {
             $('select[name=submission_version]').hide();
@@ -787,10 +796,10 @@ HTML;
         });
     </script>
 HTML;
-            }
+        }
 
-            if ($gradeable->getActiveVersion() === 0 && $gradeable->getCurrentVersionNumber() === 0) {
-                $return .= <<<HTML
+        if ($gradeable->getActiveVersion() === 0 && $gradeable->getCurrentVersionNumber() === 0) {
+            $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
             Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
@@ -799,246 +808,215 @@ HTML;
         </p>
     </div>
 HTML;
-            } else {
-                if ($gradeable->getActiveVersion() > 0
-                    && $gradeable->getActiveVersion() === $current_version->getVersion()) {
-                    $return .= <<<HTML
+        } else {
+            if ($gradeable->getActiveVersion() > 0
+                && $gradeable->getActiveVersion() === $current_version->getVersion()) {
+                $return .= <<<HTML
     <div class="sub" id="submission_message">
         <p class="green-message">
             Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
         </p>
     </div>
 HTML;
-                } else {
-                    if ($gradeable->getActiveVersion() > 0) {
-                        $return .= <<<HTML
+            } else {
+                if ($gradeable->getActiveVersion() > 0) {
+                    $return .= <<<HTML
    <div class="sub" id="submission_message">
        <p class="red-message">
             Note: This version of your assignment will not be graded the instructor/TAs. <br />
 HTML;
-                    } else {
-                        $return .= <<<HTML
+                } else {
+                    $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
             Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
             This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
-                    }
+                }
 
-                    $return .= <<<HTML
+                $return .= <<<HTML
             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
 HTML;
-                }
+            }
 
-                if ($gradeable->hasIncentiveMessage()) {
-                    $return .= <<<HTML
+            if ($gradeable->hasIncentiveMessage()) {
+                $return .= <<<HTML
     <div class="sub" id="incentive_message" style="display: none;">
         <p class='green-message'>{$gradeable->getIncentiveMessage()}</p>    
     </div>
 HTML;
-                }
+            }
 
-                $return .= <<<HTML
+            $return .= <<<HTML
     <div class="sub">
         <h4>Submitted Files</h4>
         <div class="box half">
 HTML;
-                $array = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
-                foreach ($array as $file) {
-                    if (isset($file['size'])) {
-                        $size = number_format($file['size'] / 1024, 2);
-                    } else {
-                        $size = number_format(-1);
+            $array = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
+            foreach ($array as $file) {
+                if (isset($file['size'])) {
+                    $size = number_format($file['size'] / 1024, 2);
+                } else {
+                    $size = number_format(-1);
+                }
+                $return .= "{$file['relative_name']} ({$size}kb)";
+                // download icon if student can download files
+                if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
+                    // if not active version and student cannot see any more than active version
+                    if ($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion()) {
+                        $return .= "<br />";
+                        continue;
                     }
-                    $return .= "{$file['relative_name']} ({$size}kb)";
-                    // download icon if student can download files
-                    if (!$gradeable->useVcsCheckout() && $gradeable->getStudentDownload()) {
-                        // if not active version and student cannot see any more than active version
-                        if ($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion()) {
-                            $return .= "<br />";
-                            continue;
-                        }
-                        $return .= <<<HTML
+                    $return .= <<<HTML
             <script type="text/javascript">
                 function downloadFile(file, path) {
                     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
                 }
             </script>
 HTML;
-                        $filename = rawurlencode($file['relative_name']);
-                        $filepath = rawurlencode($file['path']);
-                        $return .= <<< HTML
+                    $filename = rawurlencode($file['relative_name']);
+                    $filepath = rawurlencode($file['path']);
+                    $return .= <<< HTML
             <a onclick='downloadFile("{$filename}","{$filepath}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             <br />
 HTML;
-                    } else {
-                        $return .= "<br />";
-                    }
+                } else {
+                    $return .= "<br />";
                 }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
         </div>
         <div class="box half">
 HTML;
-                $results = $gradeable->getResults();
-                if ($gradeable->hasResults()) {
-                    $return .= <<<HTML
+            $results = $gradeable->getResults();
+            if ($gradeable->hasResults()) {
+                $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
-                    if ($results['num_autogrades'] > 1) {
-                        $regrades = $results['num_autogrades'] - 1;
-                        $return .= <<<HTML
+                if ($results['num_autogrades'] > 1) {
+                    $regrades = $results['num_autogrades'] - 1;
+                    $return .= <<<HTML
 <br />
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
-                    } else {
-                        $return .= <<<HTML
+                } else {
+                    $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
+                }
+                if (isset($results['revision'])) {
+                    if (empty($results['revision'])) {
+                        $revision = "None";
+                    } else {
+                        $revision = substr($results['revision'], 0, 7);
                     }
-                    if (isset($results['revision'])) {
-                        if (empty($results['revision'])) {
-                            $revision = "None";
-                        } else {
-                            $revision = substr($results['revision'], 0, 7);
-                        }
-                        $return .= <<<HTML
+                    $return .= <<<HTML
 git commit hash: {$revision}<br />
 HTML;
-                    }
                 }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
         </div>
 HTML;
-                $return .= <<<HTML
+            $return .= <<<HTML
     </div>
 HTML;
-                $return .= <<<HTML
+            $return .= <<<HTML
     <div class="sub">
 HTML;
-                $num_visible_testcases = 0;
-                foreach ($gradeable->getTestcases() as $testcase) {
-                    if ($testcase->viewTestcase()) {
-                        $num_visible_testcases++;
-                    }
+            $num_visible_testcases = 0;
+            foreach ($gradeable->getTestcases() as $testcase) {
+                if ($testcase->viewTestcase()) {
+                    $num_visible_testcases++;
                 }
-                if ($num_visible_testcases > 0) {
-                    $return .= <<<HTML
+            }
+            if ($num_visible_testcases > 0) {
+                $return .= <<<HTML
         <h4>Results</h4>
 HTML;
-                }
-                $refresh_js = <<<HTML
+            }
+            $refresh_js = <<<HTML
         <script type="text/javascript">
             checkRefreshSubmissionPage("{$this->core->buildUrl(array('component' => 'student',
-                    'page' => 'submission',
-                    'action' => 'check_refresh',
-                    'gradeable_id' => $gradeable->getId(),
-                    'gradeable_version' => $gradeable->getCurrentVersionNumber()))}")
+                'page' => 'submission',
+                'action' => 'check_refresh',
+                'gradeable_id' => $gradeable->getId(),
+                'gradeable_version' => $gradeable->getCurrentVersionNumber()))}")
         </script>
 HTML;
 
-                if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
-                    if ($gradeable->beingGradedBatchQueue()) {
-                        $return .= <<<HTML
+            if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
+                if ($gradeable->beingGradedBatchQueue()) {
+                    $return .= <<<HTML
         <p class="red-message">
             This submission is currently being regraded.
         </p>
 HTML;
-                    } else {
-                        $return .= <<<HTML
+                } else {
+                    $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be regraded.
         </p>
 HTML;
-                    }
-
                 }
-                if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
-                    if ($gradeable->beingGradedInteractiveQueue() ||
-                        (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
-                        $return .= <<<HTML
+
+            }
+            if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
+                if ($gradeable->beingGradedInteractiveQueue() ||
+                    (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
+                    $return .= <<<HTML
         <p class="red-message">
             This submission is currently being graded.
         </p>
 HTML;
-                    } else {
-                        $return .= <<<HTML
+                } else {
+                    $return .= <<<HTML
         <p class="red-message">
             This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
         </p>
 HTML;
-                    }
-                    $return .= <<<HTML
+                }
+                $return .= <<<HTML
         {$refresh_js}
 HTML;
-                } else if (!$gradeable->hasResults()) {
-                    $return .= <<<HTML
+            } else if (!$gradeable->hasResults()) {
+                $return .= <<<HTML
         <p class="red-message">
             Something has gone wrong with grading this submission. Please contact your instructor about this.
         </p>
 HTML;
-                } else {
-                    if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
-                        // FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria
-                        //foreach ($gradeable->getVersions() as $version) {
-                        if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() &&
-                            $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
-                            $return .= <<<HTML
+            } else {
+                if ($gradeable->hasIncentiveMessage() && $gradeable->getActiveVersion() > 0) {
+                    // FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria
+                    //foreach ($gradeable->getVersions() as $version) {
+                    if ($gradeable->getEarlyTotal() >= $gradeable->getMinimumPoints() &&
+                        $current_version->getDaysEarly() > $gradeable->getMinimumDaysEarly()) {
+                        $return .= <<<HTML
             <script type="text/javascript">
                 $(function() {
                     $('#incentive_message').show();
                 });
             </script>
 HTML;
-                            // break;
-                        }
-                        //}
+                        // break;
                     }
-                    $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
+                    //}
                 }
-                $return .= <<<HTML
+                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $gradeable, $canViewWholeGradeable);
+            }
+            $return .= <<<HTML
     </div>
 HTML;
-            }
-            $return .= <<<HTML
+        }
+        $return .= <<<HTML
 </div>
 HTML;
-        }
-        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
-            // If the student does not submit anything, the only message will be "No submissions for this assignment."
-            $return .= <<<HTML
-<div class="content">
-HTML;
-            if ($gradeable->beenTAgraded()) {
-                $return .= <<<HTML
-    <h3 class="label">TA / Instructor grade</h3>
-HTML;
-                $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
-                $return .= <<<HTML
-HTML;
-            } else {
-                $return .= <<<HTML
-                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
-HTML;
-            }
-            $return .= <<<HTML
-            </div>
-HTML;
-            if ($this->core->getConfig()->isRegradeEnabled()) {
-                $return .= <<<HTML
-      <div class="content"> 
-HTML;
-                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-                $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-            }
-            $return .= <<<HTML
-  </div>
-HTML;
-        }
+
         return $return;
     }
 
@@ -1245,6 +1223,45 @@ HTML;
           });
         </script>
       </div>
+HTML;
+        return $return;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    private function renderTAResults(Gradeable $gradeable): string {
+        $return = "";
+
+        // If the student does not submit anything, the only message will be "No submissions for this assignment."
+        $return .= <<<HTML
+<div class="content">
+HTML;
+        if ($gradeable->beenTAgraded()) {
+            $return .= <<<HTML
+    <h3 class="label">TA / Instructor grade</h3>
+HTML;
+            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
+            $return .= <<<HTML
+HTML;
+        } else {
+            $return .= <<<HTML
+                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
+HTML;
+        }
+        $return .= <<<HTML
+            </div>
+HTML;
+        if ($this->core->getConfig()->isRegradeEnabled()) {
+            $return .= <<<HTML
+      <div class="content"> 
+HTML;
+            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+        }
+        $return .= <<<HTML
+  </div>
 HTML;
         return $return;
     }
