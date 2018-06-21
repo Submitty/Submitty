@@ -9,6 +9,8 @@ use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
 
+    const DATE_FORMAT = "m/d/Y @ H:i";
+
     public function unbuiltGradeable(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("error/UnbuiltGradeable.twig", [
             "gradeable" => $gradeable
@@ -35,13 +37,12 @@ class HomeworkView extends AbstractView {
         $current_version = $gradeable->getCurrentVersion();
         $current_version_number = $gradeable->getCurrentVersionNumber();
         $num_components = count($gradeable->getComponents());
-        $time = " @ H:i";
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
         $return .= $this->renderLateDayMessage($gradeable, $extensions);
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
-            $return .= $this->renderSubmision($gradeable, $late_days_use, $time, $upload_message, $current_version_number, $num_components);
+            $return .= $this->renderSubmision($gradeable, $late_days_use, $upload_message, $current_version_number, $num_components);
         }
         if ($this->core->getUser()->accessAdmin()) {
             $return .= $this->renderBulkForm($gradeable);
@@ -286,20 +287,19 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param int $late_days_use
-     * @param string $time
      * @param string $upload_message
      * @param int $current_version_number
      * @param int $num_components
      * @return string
      */
-    private function renderSubmision($gradeable, $late_days_use, string $time, string $upload_message, int $current_version_number, int $num_components): string {
+    private function renderSubmision($gradeable, $late_days_use, string $upload_message, int $current_version_number, int $num_components): string {
         $student_page = false;
 
         $return = <<<HTML
 <div class="content">
     <div class="upperinfo">
         <h2 class="upperinfo-left">New submission for: {$gradeable->getName()}</h2>
-        <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
+        <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format($this::DATE_FORMAT)}</h2>
     </div>
 HTML;
         if ($this->core->getUser()->accessAdmin()) {
