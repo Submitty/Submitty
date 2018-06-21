@@ -705,6 +705,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $gradeable_list[$gradeable_id];
         $gradeable->loadResultDetails();
