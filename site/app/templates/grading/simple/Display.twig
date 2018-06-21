@@ -110,7 +110,11 @@
                 <tbody>
                     <tr class="info persist-header">
                         <td colspan="{{ colspan }}" style="text-align: center">
-                            Students Enrolled in Section {{ section_id ?? "NULL" }}
+                            {% if gradeable.isGradeByRegistration() %}
+                                Students Enrolled in Section {{ section_id ?? "NULL" }}
+                            {% else %}
+                                Students Assigned to Rotating Section {{ section_id ?? "NULL" }}
+                            {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
                                 <a target=_blank href="{{ this.core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
