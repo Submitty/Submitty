@@ -262,7 +262,7 @@ HTML;
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessGrading()) {
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
                 foreach ($students as $student) {
@@ -296,9 +296,13 @@ HTML;
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
+HTML;
+                if($this->core->getUser()->accessFullGrading()) {
+                    $return .= <<<HTML
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
+                }
                 if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
@@ -730,7 +734,7 @@ HTML;
 </div>
 HTML;
         }
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessGrading()) {
 
             $all_directories = $gradeable->getUploadsFiles();
 
