@@ -607,6 +607,26 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grading_lab_rotating
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grading Lab (Rotating Sections)
+  g_type: 1
+  g_bucket: lab
+  g_grade_by_registration: False
+
+- components:
+  - gc_title: Question 1
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 1
+    gc_upper_clamp: 1
+  - gc_title: Question 2
+    gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 1
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_id: grades_released_lab
@@ -677,6 +697,28 @@ gradeables:
   g_title: Grading Test
   g_type: 2
   g_bucket: test
+
+- components:
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 0
+    gc_upper_clamp: 5
+    gc_title: Question 1
+  - gc_lower_clamp: 0
+    gc_default: 0
+    gc_max_value: 5
+    gc_upper_clamp: 5
+    gc_title: Question 2
+  - gc_is_text: true
+    gc_title: Text 1
+  g_grade_released_date: 9998-12-31 23:59:59
+  g_grade_start_date: 1971-01-01 23:59:59
+  g_id: grading_test_rotating
+  g_ta_view_start_date: 1970-01-01 23:59:59
+  g_title: Grading Test (Rotating Sections)
+  g_type: 2
+  g_bucket: test
+  g_grade_by_registration: False
 
 - components:
   - gc_lower_clamp: 0

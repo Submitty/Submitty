@@ -1,0 +1,82 @@
+{% import _self as self %}
+
+{% if display_custom_message %}
+    <div class="content">
+        {{ message_file_contents }}
+    </div>
+{% endif %}
+
+<div class="content">
+    <div class="nav-buttons">
+        {% for button in top_buttons %}
+            {{ self.renderButton(button) }}
+        {% endfor %}
+    </div>
+
+    <table class="gradeable_list" style="width:100%;">
+        {% if sections|length > 0 %}
+            {% for list_section, info in sections %}
+                <tr class="bar">
+                    <td colspan="10">{# spacing #}</td>
+                </tr>
+                <tr class="colspan nav-title-row" id="{{ info.section_id }}">
+                    <td colspan="4">
+                        {{ info.title }}
+                        {% if info.subtitle != "" %}
+                            &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tbody id="{{ info.section_id }}_tbody">
+                    {% for g_info in info.gradeables %}
+                    <tr class="gradeable_row">
+                        <td>
+                            <label>{{ g_info.name }}</label>
+                            {% if g_info.url|trim != "" %}
+                                <a class="external" href="{{ g_info.url }}" target="_blank">
+                                    <i style="margin-left: 10px;" class="fa fa-external-link"></i>
+                                </a>
+                            {% endif %}
+                            {% if g_info.can_delete %}
+                                <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
+                            {% endif %}
+                        </td>
+                        {% for button in g_info.buttons %}
+                            <td style="padding: 20px;">{{ self.renderButton(button) }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tr class="colspan">
+                    <td colspan="10" style="border-bottom:2px black solid;">{# hr #}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <div class="container">
+                <p>There are currently no assignments posted.  Please check back later.</p>
+            </div>
+        {% endif %}
+    </table>
+</div>
+
+{% macro renderButton(button) %}
+    {% if button != null %}
+        <a class="{{ button.getClass() }}"
+            {% if button.isDisabled() %}
+                disabled
+            {% else %}
+                href="{{ button.getHref() }}"
+            {% endif %}
+        >
+            {{ button.getTitle() }}
+            {% if button.getSubtitle() != null %}
+                <br><span style="font-size: smaller;">{{ button.getSubtitle() }}</span>
+            {% endif %}
+        </a>
+        {% if button.getProgress() != null %}
+            <div class="meter">
+                <span style="width: {{ max(2, button.getProgress()) }}%"></span>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endmacro %}

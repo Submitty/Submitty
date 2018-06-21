@@ -37,7 +37,7 @@ class FileHandler(FileSystemEventHandler):
         installer = Path(self.setup_path, 'INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
         if event.src_path.endswith('.swp') or event.src_path == '.DS_Store':
             return
-        run([str(installer)], stdout=sys.stdout, stderr=sys.stderr)
+        run(["bash", str(installer)], stdout=sys.stdout, stderr=sys.stderr)
         print("DONE\n")
 
     def on_created(self, event):
