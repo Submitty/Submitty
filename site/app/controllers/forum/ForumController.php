@@ -473,7 +473,7 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $show_deleted = false){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted = false){
         $current_user = $this->core->getUser()->getId();
         if($this->isValidCategories($categories_ids)) {
             $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids, $show_deleted);
