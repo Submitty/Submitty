@@ -513,6 +513,10 @@ function check_server(url) {
     );
 }
 
+function downloadFile(file, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+}
+
 function changeColor(div, hexColor){
     div.style.color = hexColor;
 }

@@ -1,0 +1,30 @@
+{% if gradeable.hasIncentiveMessage() %}
+    <div class="sub" id="incentive_message" style="display: none;">
+        <p class='green-message'>{{ gradeable.getIncentiveMessage() }}</p>
+    </div>
+{% endif %}
+
+<div class="sub">
+    <h4>Submitted Files</h4>
+    <div class="box half">
+        {% for file in files %}
+            {{ file.relative_name }} ({{ file.size }}kb)
+
+            {# download icon if student can download files #}
+            {% if can_download %}
+                <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+                <br />
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="box half">
+
+
+
+    </div>
+</div>
+<div class="sub">
+
+
+
+</div>

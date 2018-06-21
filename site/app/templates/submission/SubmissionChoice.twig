@@ -1,0 +1,93 @@
+<div class="content">
+    {% if gradeable.isTeamAssignment() and gradeable.getTeam() != null %}
+        <h3>Team: {{ gradeable.getTeam().getMemberList() }}</h3><br />
+    {% endif %}
+
+    <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
+    {% include 'grading/VersionChoice.twig' with({
+        'gradeable': gradeable,
+        'formatting': '',
+        'onChange': "versionChange('" ~ core.buildUrl({
+            'component': 'student',
+            'gradeable_id': gradeable.getId(),
+            'gradeable_version': ""
+        }) ~ "', this)"
+    }) %}
+
+    {# If viewing the active version, show cancel button, otherwise so button to switch active #}
+    {% if gradeable.getCurrentVersionNumber() > 0 %}
+        {% if current_version.getVersion() == gradeable.getActiveVersion() %}
+            <form style="display: inline;" method="post"
+                  action="{{ core.buildUrl({'component': 'student',
+                      'action': 'update',
+                      'gradeable_id': gradeable.getId(),
+                      'new_version': 0}) }}">
+                <input type='hidden' name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                <input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">
+            </form>
+        {% else %}
+            <form style="display: inline;" method="post"
+                  onsubmit='return checkVersionChange({{ gradeable.getDaysLate() }},{{ gradeable.getAllowedLateDays() }})'
+                  action="{{ core.buildUrl({'component': 'student',
+                      'action': 'update',
+                      'gradeable_id': gradeable.getId(),
+                      'new_version': current_version.getVersion()}) }}">
+                <input type='hidden' name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+            </form>
+        {% endif %}
+    {% endif %}
+    {# /Switch version button #}
+
+    {# disable changing submissions or cancelling assignment if student submit not allowed #}
+    {% if not core.getUser().accessGrading() and not gradeable.getStudentSubmit() %}
+        <script type="text/javascript">
+            $(function() {
+                $("#do_not_grade").prop("disabled", true);
+                $("#version_change").prop("disabled", true);
+            });
+        </script>
+    {% endif %}
+
+    {# disable looking at other submissions if student any version not allowed #}
+    {% if not core.getUser().accessGrading() and not gradeable.getStudentAnyVersion() %}
+        <script type="text/javascript">
+            $(function() {
+                $('select[name=submission_version]').hide();
+                $('#do_not_grade').hide();
+                $('#version_change').hide();
+                $('#submission_header').hide();
+                $('#submission_message').hide();
+            });
+        </script>
+    {% endif %}
+
+    <div class="sub">
+        {% if gradeable.getActiveVersion() == 0 and gradeable.getCurrentVersionNumber() == 0 %}
+            <p class="red-message">
+                Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+                This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+                You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
+            </p>
+        {% elseif gradeable.getActiveVersion() > 0 and gradeable.getActiveVersion() == current_version.getVersion() %}
+            <p class="green-message">
+                Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
+            </p>
+        {% elseif gradeable.getActiveVersion() > 0 %}
+            <p class="red-message">
+                Note: This version of your assignment will not be graded the instructor/TAs. <br />
+                Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+            </p>
+        {% else %}
+            <p class="red-message">
+                Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+                This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+                Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+            </p>
+        {% endif %}
+    </div>
+
+    {% if gradeable.getActiveVersion() != 0 or gradeable.getCurrentVersionNumber() != 0 %}
+        {% include 'submission/SubmissionResults.twig' %}
+    {% endif %}
+</div>
