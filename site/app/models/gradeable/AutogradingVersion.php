@@ -14,7 +14,7 @@ use app\libraries\DateUtils;
 use app\models\AbstractModel;
 
 /**
- * Class GradedVersion
+ * Class AutogradingVersion
  * @package app\models\gradeable
  *
  * Data about and results of autograding for one submission version
@@ -27,10 +27,10 @@ use app\models\AbstractModel;
  * @method \DateTime getSubmissionTime()
  * @method isAutogradingComplete()
  */
-class GradedVersion extends AbstractModel {
+class AutogradingVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
     private $graded_gradeable = null;
-    /** @property @var int The submission version for this GradedVersion */
+    /** @property @var int The submission version for this AutogradingVersion */
     protected $version = 0;
     /** @property @var float The number of "normal" points */
     protected $non_hidden_non_extra_credit = 0;
@@ -46,7 +46,7 @@ class GradedVersion extends AbstractModel {
     protected $autograding_complete = false;
 
     /**
-     * GradedVersion constructor.
+     * AutogradingVersion constructor.
      * @param Core $core
      * @param GradedGradeable $graded_gradeable GradedGradeable this version data is associated with
      * @param array $details

@@ -12,7 +12,7 @@ use \app\models\AbstractModel;
  *
  * @method string getGradeableId()
  * @method GradedComponent[][] getGradedComponents()
- * @method GradedVersion[] getGradedVersions()
+ * @method AutogradingVersion[] getAutogradingVersions()
  * @method Submitter getSubmitter()
  * @method int getId()
  * @method string getOverallComment()
@@ -39,7 +39,7 @@ class GradedGradeable extends AbstractModel {
     protected $submitter = null;
     /** @property @var GradedComponent[][] The an array of arrays of GradedComponents, indexed by component id */
     protected $graded_components = array();
-    /** @property @var array GradedVersion[] The graded versions for electronic gradeables */
+    /** @property @var array AutogradingVersion[] The graded versions for electronic gradeables */
     protected $graded_versions = array();
 
 
@@ -157,11 +157,11 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of graded versions for this gradeable data
-     * @param GradedVersion[] $graded_versions
+     * @param AutogradingVersion[] $graded_versions
      */
-    public function setGradedVersions(array $graded_versions) {
+    public function setAutogradingVersions(array $graded_versions) {
         foreach ($graded_versions as $graded_version) {
-            if (!($graded_version instanceof GradedVersion)) {
+            if (!($graded_version instanceof AutogradingVersion)) {
                 throw new \InvalidArgumentException('Graded Version array contained invalid type');
             }
         }
