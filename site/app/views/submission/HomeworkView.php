@@ -62,15 +62,8 @@ class HomeworkView extends AbstractView {
         if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
             $return .= $this->renderTAResultsBox($gradeable);
         }
-        if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= <<<HTML
-      <div class="content"> 
-HTML;
-            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-        $return .= <<<HTML
-  </div>
-HTML;
+        if ($this->core->getConfig()->isRegradeEnabled() && $gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getSubmissionCount() !== 0) {
+            $return .= $this->renderRegradeBox($gradeable);
         }
         return $return;
     }
@@ -791,7 +784,17 @@ HTML;
      * @param Gradeable $gradeable
      * @return string
      */
-    public function showRequestForm(Gradeable $gradeable): string {
+    private function renderRegradeBox(Gradeable $gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("submission/RegradeBox.twig", [
+            "gradeable" => $gradeable
+        ]);
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
+    public function showRegradeRequestForm(Gradeable $gradeable): string {
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
         $existsStaffPost = false;
