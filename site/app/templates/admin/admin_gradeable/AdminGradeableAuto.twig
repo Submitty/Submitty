@@ -5,39 +5,39 @@
     <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
     <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
 
-    <input style='width: 83%' type='text' id='config_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" />
+    <input style='width: 83%' type='text' id='config_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" />
     <br /> <br />
 
     Should students be able to view submissions?
     <fieldset>
-        <input type="radio" id="yes_student_view" name="eg_student_view" value="true"
-                {{ admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> Yes
-        <input type="radio" id="no_student_view" name="eg_student_view" value="false"
-                {{ not admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+        <input type="radio" id="yes_student_view" name="student_view" value="true"
+                {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+        <input type="radio" id="no_student_view" name="student_view" value="false"
+                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
         (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
         <div id="student_submit_download_view">
 
             <br />
             Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
-            <input type="radio" id="yes_student_submit" name="eg_student_submit" value="true"
-                    {{ admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_submit" name="eg_student_submit" value="false"
-                    {{ not admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
             <br /> <br />
 
             Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_download" name="eg_student_download" value="true"
-                    {{ admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_download" name="eg_student_download" value="false"
-                    {{ not admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_download" name="student_download" value="true"
+                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_download" name="student_download" value="false"
+                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> No
             <br /> <br />
 
             Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_any_version" name="eg_student_any_version" value="true"
-                    {{ admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Any version
-            <input type="radio" id="no_student_any_version" name="eg_student_any_version" value="false"
-                    {{ not admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Active version only
+            <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
+                    {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
+            <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
+                    {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
 
         </div>
         <br />
@@ -87,13 +87,13 @@
 
         // Hide PDF settings if not in use
         onPdfChange();
-        $('[name="eg_pdf_page"]').change(onPdfChange);
+        $('[name="pdf_page"]').change(onPdfChange);
 
         // Hide PDF pages in Rubric if students assign them
-        $('[name="eg_pdf_page_student"]').change(onPdfChange);
+        $('[name="pdf_page_student"]').change(onPdfChange);
 
         // Only show the settings if the setting is enabled
         onStudentViewChange();
-        $('[name="eg_student_view"]').change(onStudentViewChange);
+        $('[name="student_view"]').change(onStudentViewChange);
     });
 </script>

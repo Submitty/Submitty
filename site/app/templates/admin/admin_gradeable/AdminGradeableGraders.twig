@@ -4,22 +4,21 @@ Macros
 #}
 
 {# Display the checkboxes for a given set of graders at a grader level #}
-{% macro display_graders(graders, prefix, section_numbers) %}
+{% macro display_graders(graders, prefix, section_numbers, history, g_id) %}
     {% for grader in graders %}
         <tr class="{{ prefix }}">
-            <th>{{grader.user_id}}</th>
-            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader.user_id }}" id="{{ prefix }}_all_{{ grader.user_id }}"
-                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader.user_id }}", 0)'/></td>
+            <th>{{grader}}</th>
+            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader }}" id="{{ prefix }}_all_{{ grader }}"
+                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", 0)'/></td>
             {% for rs in section_numbers %}
-                <td><input type="checkbox" name="grader_{{prefix}}_{{rs}}_{{grader.user_id}}"
-                        id="grader_{{prefix}}_{{rs}}_{{grader.user_id}}"
-                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader.user_id }}", {{ rs }});'
-                        {{ (rs in grader.sections) ? 'checked' : ''}}/></td>
+                <td><input type="checkbox" name="grader_{{prefix}}_{{rs}}_{{grader}}"
+                        id="grader_{{prefix}}_{{rs}}_{{grader}}"
+                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", {{ rs }});'
+                        {{ (rs in history[grader][g_id]) ? 'checked' : ''}}/></td>
             {% endfor %}
         </tr>
     {% endfor %}
 {% endmacro %}
-
 
 {#
 Variables
@@ -33,20 +32,20 @@ Form
 #}
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
     lowest privileged user group</a> that can grade this?
-<select name="g_min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+<select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
-        <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+        <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
     {% endfor %}
 </select>
 <br />
 <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
 <br />
 <fieldset>
-    <input type="radio" name="g_grade_by_registration" value="true" id="registration_section"
-        {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+    <input type="radio" name="grade_by_registration" value="true" id="registration_section"
+        {{ (gradeable.isGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 
-    <input type='radio' name="g_grade_by_registration" value="false" id="rotating_section"
-        {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
+    <input type='radio' name="grade_by_registration" value="false" id="rotating_section"
+        {{ gradeable.isGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
     <div id="rotating_data">
         {% if admin_gradeable.getRotatingGradeables()|length != 0 %}
@@ -58,22 +57,20 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                     <table id="grader-history">
                         <tr>
                             <th></th>
-                            {% for row in admin_gradeable.getRotatingGradeables() %}
-                                <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                            {% for row in admin_gradeable.getRotatingGradeables() if row != gradeable.getId() %}
+                                <th>{{ row }}</th>
                             {% endfor %}
                         </tr>
                         <tr>
-                            {% set last = '' %}
-                            {% for row in admin_gradeable.getGradeableSectionHistory() %}
-                                {% if row.user_id != last %}
+                            {% for user_group,users in admin_gradeable.getGradersFromUsertypes() %}
+                                {% for user_id in users %}
+                                    <tr class="g_history g{{ user_group }}">
+                                        <th>{{ user_id }}</th>
+                                        {% for g_id in admin_gradeable.getRotatingGradeables() if g_id != gradeable.getId() %}
+                                            <td>{{ admin_gradeable.getGradeableSectionHistory()[user_id][g_id]|join(',') }}</td>
+                                        {% endfor %}
                                     </tr>
-                                    <tr class="g_history g{{ row.user_group }}">
-                                        <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
-                                {% endif %}
-                                <td style="padding: 8px; border: 3px solid black; text-align: center;">
-                                    {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
-                                </td>
-                                {% set last = row.user_id %}
+                                {% endfor %}
                             {% endfor %}
                     </table>
                 </div>
@@ -93,17 +90,20 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                 <th>Instructor Graders</th>
             </tr>
             <!-- Instructors -->
-            {{ self.display_graders(all_graders[1], 'g1', section_numbers) }}
+            {{ self.display_graders(admin_gradeable.getGradersFromUsertypes()[1], 'g1',
+                section_numbers, admin_gradeable.getGradeableSectionHistory(), gradeable.getId()) }}
             <tr class="g2">
                 <th>Full Access Graders</th>
             </tr>
             <!-- Full Access Graders -->
-            {{ self.display_graders(all_graders[2], 'g2', section_numbers) }}
+            {{ self.display_graders(admin_gradeable.getGradersFromUsertypes()[2], 'g2',
+                section_numbers, admin_gradeable.getGradeableSectionHistory(), gradeable.getId()) }}
             <tr class="g3">
                 <th>Limited Access Graders</th>
             </tr>
             <!-- Limited Access Graders -->
-            {{ self.display_graders(all_graders[3], 'g3', section_numbers) }}
+            {{ self.display_graders(admin_gradeable.getGradersFromUsertypes()[3], 'g3',
+                section_numbers, admin_gradeable.getGradeableSectionHistory(), gradeable.getId()) }}
         </table>
     </div>
 </fieldset>
@@ -174,21 +174,21 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
-        $('[name="g_grade_by_registration"]').change(onSectionTypeChange);
+        $('[name="grade_by_registration"]').change(onSectionTypeChange);
 
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
         $('#minimum_grading_group').change(onMinGraderChange);
 
         // update "all" check boxes
-        {% for grader in all_graders[1] %}
-        updateCheckBoxes('g1', "{{ grader.user_id }}", 1);
+        {% for grader in admin_gradeable.getGradersFromUsertypes()[1] %}
+        updateCheckBoxes('g1', "{{ grader }}", 1);
         {% endfor %}
-        {% for grader in all_graders[2] %}
-        updateCheckBoxes('g2', "{{ grader.user_id }}", 1);
+        {% for grader in admin_gradeable.getGradersFromUsertypes()[2] %}
+        updateCheckBoxes('g2', "{{ grader }}", 1);
         {% endfor %}
-        {% for grader in all_graders[3] %}
-        updateCheckBoxes('g3', "{{ grader.user_id }}", 1);
+        {% for grader in admin_gradeable.getGradersFromUsertypes()[3] %}
+        updateCheckBoxes('g3', "{{ grader }}", 1);
         {% endfor %}
 
     });

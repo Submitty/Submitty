@@ -153,19 +153,19 @@
         });
 
         if ($('#radio_numeric').is(':checked')) {
-            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
-            $.each(components, function(i,elem) {
+            var gradeable = {{ gradeable.toArray()|json_encode|raw }};
+            $.each(gradeable.components, function(i,elem) {
                 if(i < {{ admin_gradeable.getNumNumeric() }}) {
                     var extra_credit = false;
-                    if (elem.gc_upper_clamp > elem.gc_max_value){
-                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
+                    if (elem.upper_clamp > elem.max_value){
+                        addNumeric(elem.title,elem.upper_clamp,true);
                     }
                     else{
-                        addNumeric(elem.gc_title,elem.gc_max_value,false);
+                        addNumeric(elem.title,elem.max_value,false);
                     }
                 }
                 else {
-                    addText(elem.gc_title);
+                    addText(elem.title);
                 }
             });
             $('#numeric_num-items').val({{ admin_gradeable.getNumNumeric() }});

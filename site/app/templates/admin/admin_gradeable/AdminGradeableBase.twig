@@ -85,7 +85,7 @@
                 $(this).hide();
             }
             else {
-                $(this).attr('style', '{{ action == 'new' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+                $(this).attr('style', '{{ action != 'edit' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
             }
         });
 
@@ -117,13 +117,13 @@
         // Update navigation on load
 
         {# Disable navigation on 'new' mode #}
-        {% if action == 'new' %}
+        {% if action == 'edit' %}
+            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
+        {% else %}
             adminGradeableNavTab = 0;
             $('.nav-bar').each(function() {
                 $(this).attr('onClick', '');
             });
-        {% else %}
-            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
         {% endif %}
 
         updateNavItemsStatus();

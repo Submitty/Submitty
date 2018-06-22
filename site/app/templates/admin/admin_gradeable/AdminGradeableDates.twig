@@ -1,5 +1,5 @@
 <div id="gradeable-dates">
-    <input name="g_ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ admin_gradeable.getGTaViewStartDate() }}">
+    <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
     TA Beta Testing Date (gradeable visible to TAs)
 
     <br />
@@ -7,38 +7,38 @@
 
     <div class="electronic_file">
         <div class="team_yes">
-            <input name="eg_team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ admin_gradeable.getEgTeamLockDate() }}">
+            <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
             Team Lock Date (Instructors can still manually manage teams)
 
             <br />
         </div>
 
-        <input id="date_submit" name="eg_submission_open_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionOpenDate() }}">
+        <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format) }}">
         Submission Open Date (submission available to students)
 
         <br />
 
-        <input id="date_due" name="eg_submission_due_date" class="date_picker" type="text" value="{{ admin_gradeable.getEgSubmissionDueDate() }}">
+        <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format) }}">
         Due Date
 
         <br />
     </div>
 
     <div class="manual_grading">
-        <input name="g_grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeStartDate() }}">
+        <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
         TA/Instructor Manual Grading Open Date (graders may begin grading)
 
         <br />
     </div>
 
-    <input name="g_grade_released_date" id="date_released" class="date_picker" type="text" value="{{ admin_gradeable.getGGradeReleasedDate() }}">
+    <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
     Grades Released Date (grades will be visible to students)
 
     <br />
 
     <div class="electronic_file">
         How many late days may students use on this assignment?
-        <input style="width: 50px" id="eg_late_days" name="eg_late_days" class="int_val" type="text" value="{{ admin_gradeable.getEgLateDays() }}"/>
+        <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
         <br />
     </div>

@@ -15,31 +15,31 @@ Will this assignment have peer grading?
 <br />-->
 
 Point precision:
-<input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
+<input style='width: 50px' type='text' id="point_precision_id" name='precision' onchange="fixPointPrecision(this);" value="{{ gradeable.getPrecision() }}" class="float_val" />
 <br/>
 <span style="color:red; size: 20px">Warning! Electronic Rubric information does not save automatically!  Press 'Save' Button to save</span>
 <div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br /><br />
 
 <div class="electronic_file" id="gradeable_rubric">
-    Is this a PDF with a page assigned to each component?
-    <fieldset>
-        <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
-                {{ admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_pdf_page" name="eg_pdf_page" value="false"
-                {{ not admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> No
+Is this a PDF with a page assigned to each component?
+<fieldset>
+    <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+            {{ admin_gradeable.getPdfPage() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+            {{ not admin_gradeable.getPdfPage() ? 'checked' : '' }} /> No
 
+    <br />
+
+    <div id="pdf_page">
         <br />
-
-        <div id="pdf_page">
-            <br />
-            Who will assign pages to components?
-            <input type="radio" id="no_pdf_page_student" name="eg_pdf_page_student" value="false"
-                    {{ not admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Instructor
-            <input type="radio" id="yes_pdf_page_student" name="eg_pdf_page_student" value="true"
-                    {{ admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Student
-        </div>
-    </fieldset>
+        Who will assign pages to components?
+        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+                {{ not admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Instructor
+        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+                {{ admin_gradeable.getPdfPageStudent() ? 'checked' : '' }} /> Student
+    </div>
+</fieldset>
 <table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
     <thead style="background: #E1E1E1;">
     <tr>
@@ -50,7 +50,7 @@ Point precision:
     <tbody style="background: #f9f9f9;">
 
     {% set num = 1 %}
-    {% for question in admin_gradeable.getOldComponents() if question.getOrder() != -1 %}
+    {% for question in gradeable.getComponents() if question.getOrder() != -1 %}
         <tr class="rubric-row" id="row-{{ num }}">
             <td style="overflow: hidden;">
                 <input type="hidden" name="component_id_{{ num }}" value="{{ question.getId() }}">
@@ -71,8 +71,8 @@ Point precision:
                             <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.getOrder() }}" value="{{ mark.getId() }}">
                             <i class="fa fa-circle" aria-hidden="true"></i>
                             <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.getOrder() }}"
-                                   value="{{ mark.getPoints() }}" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getNote() }}</textarea>
+                                   value="{{ mark.getPoints() }}" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getTitle() }}</textarea>
                             {% if not first %}
                                 <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.getOrder() }}" {{ mark.getPublish() ? 'checked' : '' }}> Publish
                             {% endif %}
@@ -97,19 +97,19 @@ Point precision:
                 {% set extra_credit = old_upper_clamp > old_max %}
                 {% set penalty = old_lower_clamp < 0 %}
                 {% set grade_up = question.getDefault() == 0 %}
-                Points: <input type="number" id="grade-{{ num }}" class="points" name="points_{{ num }}" value="{{ old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                Points: <input type="number" id="grade-{{ num }}" class="points" name="points_{{ num }}" value="{{ old_max }}" min="0" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
                 <br>
                 Extra Credit:
                 <input type="radio" id="rad_id_extra_credit_yes-{{ num }}" name="rad_extra_credit-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openExtra(this);" {{ extra_credit ? 'checked' : '' }}> Yes
                 <input type="radio" id="rad_id_extra_credit_no-{{ num }}" name="rad_extra_credit-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closeExtra(this);" {{ not extra_credit ? 'checked' : '' }}> No
                 <div id="extra_credit_{{ num }}" style="{{ not extra_credit ? 'display: none;' : '' }}">
-                    Extra Credit Points: <input type="number" class="points3" name="upper_{{ num }}" value="{{ old_upper_clamp - old_max }}" min="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
+                    Extra Credit Points: <input type="number" class="points3" name="upper_{{ num }}" value="{{ old_upper_clamp - old_max }}" min="0" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:40px; resize:none;">
                 </div>
                 Penalty:
                 <input type="radio" id="rad_id_penalty_yes-{{ num }}" name="rad_penalty-{{ num }}" value="yes" data-question_num="{{ num }}" onclick="openPenalty(this);" {{ penalty ? 'checked' : '' }}> Yes
                 <input type="radio" id="rad_id_penalty_no-{{ num }}" name="rad_penalty-{{ num }}" value="no" data-question_num="{{ num }}" onclick="closePenalty(this);" {{ not penalty ? 'checked' : '' }}> No
                 <div id="penalty_{{ num }}" style="{{ not penalty ? 'display: none' : '' }}">
-                    Penalty Points: <input type="number" class="points2" name="lower_{{ num }}" value="{{ old_lower_clamp }}" max="0" step="{{ admin_gradeable.getEgPrecision() }}" placeholder="±0.5" style="width:40px; resize:none;">
+                    Penalty Points: <input type="number" class="points2" name="lower_{{ num }}" value="{{ old_lower_clamp }}" max="0" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" style="width:40px; resize:none;">
                 </div>
                 <br>
                 <input type="radio" id="id_grade_by_up-{{ num }}" name="grade_by-{{ num }}" value="count_up" data-question_num="{{ num }}" onclick="onAddition(this);" {{ grade_up ? 'checked' : '' }}> Grade by count up
@@ -117,11 +117,10 @@ Point precision:
                 <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
                 <br>
 
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getEgPdfPageStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getPdfPage() or admin_gradeable.getPdfPageStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
 
                 <!--
-                <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style={{ not admin_gradeable.getEgPdfPage() ? 'display: none;' : '' }}>Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value={{ question.getPage() }} class="page_component" max="1000" step="1" style="width:50px; resize:none;" /></div>
+                <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
                 -->
                 {% if num > 1 %}
                     <!--
@@ -155,9 +154,14 @@ Point precision:
 
 <script type="text/javascript">
 
-
     $(document).ready(function() {
-        $('input:radio[name="eg_pdf_page"]').change(function () {
+
+        let pdf_page = $('#yes_pdf_page').is(':checked');
+        let pdf_page_student = $('#yes_pdf_page_student').is(':checked');
+        disableElementChildren('.pdf_page_input', !pdf_page || pdf_page_student);
+        disableElementChildren('#pdf_page', !pdf_page);
+
+        $('input:radio[name="pdf_page"]').change(function() {
             if ($(this).val() === 'true') {
                 $('.pdf_page_input').show();
                 $('#pdf_page').show();
@@ -172,15 +176,20 @@ Point precision:
             }
         });
 
-        $('input:radio[name="eg_pdf_page_student"]').change(function () {
-            if ($(this).val() == 'false') {
-                $('.pdf_page_input').show();
-                $('input[name^=page_component]').each(function () {
-                    if(this.value < 1) {
+        $('input:radio[name="pdf_page_student"]').change(function() {
+            if ($(this).val() === 'false') {
+                $("input[name^='page_component']").each(function () {
+                    if (this.value < 1) {
                         this.value = 1;
                     }
                 });
+                $('.pdf_page_input').show();
             } else {
+                $("input[name^='page_component']").each(function () {
+                    if (this.value < -1) {
+                        this.value = -1;
+                    }
+                });
                 $('.pdf_page_input').hide();
             }
         });
