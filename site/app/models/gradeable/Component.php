@@ -221,6 +221,11 @@ class Component extends AbstractModel {
             }
         }
         $this->marks = $marks;
+
+        // sort by order
+        usort($this->marks, function(Mark $a, Mark $b) {
+            return $a->getOrder() - $b->getOrder();
+        });
     }
 
     /**
