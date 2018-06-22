@@ -837,80 +837,29 @@ HTML;
      * @return string
      */
     public function showRegradeDiscussion(Gradeable $gradeable): string {
-        $return = "";
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
-        $user = $this->core->getUser()->getId();
-        $first = true;
-        $return = "";
-        $display_further_action = true;
-        //  echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
-        if ($this->core->getUser()->accessGrading()) {
-            $replyMessage = "Reply";
-            $replyPlaceHolder = "Enter your reply here";
-        } else {
-            if ($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()) == 0) {
-                $display_further_action = false;
-            }
-            $replyMessage = "Request further TA/Instructor action";
-            $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
-        }
+
+        $posts = [];
+
         foreach ($threads as $thread) {
             if (empty($threads)) break;
-            $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
-            $id = $thread['id'];
-            $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
+            $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
+            $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
             $content = $thread['content'];
-            if ($first) {
-                $class .= " first_post";
-                $first = false;
-            }
-            $function_date = 'date_format';
-            $return .= <<<HTML
-            <div style="margin-top: 20px ">                                       
-              <div class = '$class' style="padding:20px;">                                       
-                <p>{$content}</p>                                      
-                <hr>                                       
-                <div style="float:right">                                      
-                  <b>{$name}</b> &nbsp;                                       
-                {$function_date($date, "m/d/Y g:i A")}                                      
-                </div>                                       
-              </div>
-            </div>                                       
-HTML;
+
+            $posts[] = [
+                "is_staff" => $is_staff,
+                "date" => date_format($date, "m/d/Y g:i A"),
+                "name" => $name,
+                "content" => $content,
+            ];
         }
-        if ($display_further_action) {
-            $return .= <<<HTML
-        <div style="padding:20px;">
-        <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
-                'action' => 'make_request_post',
-                'regrade_id' => $thread_id,
-                'gradeable_id' => $gradeable->getId(),
-                'user_id' => $this->core->getUser()->getId()
-            ))}">
-            <textarea name = "replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{$replyPlaceHolder}" id="makeRequestPost" required></textarea>
-            <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
-            <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-        </form>
-HTML;
-        }
-        $return .= <<<HTML
-        <script type = "text/javascript">
-          $("#replyTextForm").submit(function(event) {
-            $.ajax({
-              type: "POST",
-              url: $(this).attr("action"),
-              data: $(this).serialize(), 
-              success: function(data){
-                 window.location.reload();
-              }
-            });
-            event.preventDefault();
-          });
-        </script>
-      </div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
+            "posts" => $posts,
+            "gradeable" => $gradeable,
+            "thread_id" => $thread_id
+        ]);
     }
 }
