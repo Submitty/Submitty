@@ -727,8 +727,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         u.user_group BETWEEN 1 AND 3
     GROUP BY
         u.user_id
+    ORDER BY
+        u.user_group ASC
     ",array($gradeable_id));
-        return $this->course_db->rows();
+
+        // Split arrays into php arrays
+        $rows = $this->course_db->rows();
+        $modified_rows = [];
+        foreach($rows as $row) {
+            $modified_rows[$row['user_id']] = $this->course_db->fromDatabaseToPHPArray($row['sections']);
+        }
+        return $modified_rows;
     }
 
     public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {

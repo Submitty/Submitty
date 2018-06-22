@@ -981,6 +981,11 @@ ORDER BY rotating_section");
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets rotating sections of each grader for a gradeable
+     * @param $gradeable_id
+     * @return array An array (indexed by user id) of arrays of section numbers
+     */
     public function getGradersForAllRotatingSections($gradeable_id) {
         throw new NotImplementedException();
     }
@@ -2385,12 +2390,18 @@ AND gc_id IN (
 
         return $components;
     }
+
+    /**
+     * Gets the Gradeable instance for a given id
+     * @param string $g_id id of the gradeable to retrieve
+     * @return \app\models\gradeable\Gradeable
+     */
     public function getGradeableConfig($g_id) {
 
         // First, get the gradeable data
         $query = "
             SELECT 
-                g_id AS id,
+                g.g_id AS id,
                 g_title AS title,
                 g_instructions_url AS instructions_url,
                 g_overall_ta_instructions AS ta_instructions,
@@ -2401,19 +2412,12 @@ AND gc_id IN (
                 g_grade_released_date AS grade_released_date,
                 g_grade_locked_date AS grade_locked_date,
                 g_min_grading_group AS min_grading_group,
-                g_syllabus_bucket AS syllabus_bucket
-            FROM gradeable 
-            WHERE g_id=?";
-        $this->course_db->query($query, array($g_id));
-
-        $details = $this->course_db->row();
-        if(count($details) === 0) {
-            throw new \InvalidArgumentException("Gradeable ID did not exist!");
-        }
-
-        // Next, get the electronic gradeable data
-        $query = "
-            SELECT
+                g_syllabus_bucket AS syllabus_bucket,
+                eg.*
+            FROM gradeable g
+            LEFT JOIN (
+              SELECT
+                g_id as eg_id,
                 eg_config_path AS autograding_config_path,
                 eg_is_repository AS vcs,
                 eg_subdirectory AS vcs_subdirectory,
@@ -2432,15 +2436,19 @@ AND gc_id IN (
                 eg_late_days AS late_days,
                 eg_allow_late_submission AS late_submission_allowed,
                 eg_precision AS precision
-            FROM electronic_gradeable WHERE g_id=?";
+              FROM electronic_gradeable
+            ) AS eg ON g.g_id=eg.eg_id
+            WHERE g.g_id=?";
         $this->course_db->query($query, array($g_id));
 
-        $elec_details = $this->course_db->row();
-        if(count($elec_details) === 0 && $details['type'] === GradeableType::ELECTRONIC_FILE) {
-            throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
+        $details = $this->course_db->row();
+        if(count($details) === 0) {
+            throw new \InvalidArgumentException("Gradeable ID did not exist!");
         }
 
-        $details = array_merge($details, $elec_details);
+        if(!isset($details['eg_id']) && $details['type'] === GradeableType::ELECTRONIC_FILE) {
+            throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
+        }
 
         // Finally, create the gradeable
         $gradeable = new \app\models\gradeable\Gradeable($this->core, $details, []);
@@ -2448,7 +2456,20 @@ AND gc_id IN (
         // Get the components data
         $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
 
+        // Set the rotating sections data
+        $gradeable->setRotatingGraderSections($this->getGradersForAllRotatingSections($g_id));
+
         return $gradeable;
+    }
+
+    /**
+     * Gets whether a gradeable has any manual grades yet
+     * @param string $g_id id of the gradeable
+     * @return bool True if the gradeable has manual grades
+     */
+    public function getGradeableHasGrades($g_id) {
+        $this->course_db->query('SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=?)', array($g_id));
+        return $this->course_db->row()['exists'];
     }
 
     /**
@@ -2862,9 +2883,7 @@ AND gc_id IN (
                 $this->createComponent($component);
                 $invalidateComponents = true;
             } else {
-                // updateComponent returns true if there were new marks, so
-                //  it needs to be recreated
-                $invalidateComponents |= $this->updateComponent($component);
+                $this->updateComponent($component);
             }
         }
 
@@ -2971,6 +2990,9 @@ AND gc_id IN (
                       eg_peer_grade_set=?
                     WHERE g_id=?", $params);
             }
+
+            // Save the rotating sections
+            $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
         }
 
         // Also make sure to update components
