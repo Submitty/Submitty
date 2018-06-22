@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\models\Gradeable;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -196,9 +197,9 @@ class HomeworkView extends AbstractView {
      */
     private function renderSubmitBox(Gradeable $gradeable, int $late_days_use): string {
         $student_page = false;
-        $return = "";
         $students_full = [];
         $textboxes = [];
+        $old_files = [];
 
         if ($this->core->getUser()->accessAdmin()) {
             $students = $this->core->getQueries()->getAllUsers();
@@ -215,6 +216,7 @@ class HomeworkView extends AbstractView {
 
             $students_full = array();
             foreach ($students_version as $student_pair) {
+                /* @var User $student */
                 $student = $student_pair[0];
 
                 $student_entry = array('value' => $student->getId(),
@@ -268,7 +270,6 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            $old_files = [];
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
