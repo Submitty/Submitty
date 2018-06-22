@@ -15,7 +15,6 @@ use app\models\gradeable\Gradeable;
  * @method int getNumSections()
  * @method array getGradersFromUsertypes()
  * @method string[] getTemplateList()
- * @method bool getHasGrades()
  * @method getDefaultLateDays()
  * @method string getVcsBaseUrl()
  * @method bool getPdfPage()
@@ -37,8 +36,6 @@ class AdminGradeable extends AbstractModel {
     protected $template_list = array();
     /** @property @var string[] Array of previous team gradeables */
     //protected $inherit_teams_list = array();
-    /** @property @var bool Whether this gradeable has grades yet */
-    protected $has_grades = false;
     /** @property @var int Default late day count for course */
     protected $default_late_days;
     /** @property @var string Course url for vcs */
@@ -77,9 +74,6 @@ class AdminGradeable extends AbstractModel {
 
         $this->num_sections = $this->core->getQueries()->getNumberRotatingSections();
         $this->template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
-        // TODO: Should this be part of the Gradeable class?
-        $this->has_grades = false;
 
         $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $this->vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
@@ -135,10 +129,6 @@ class AdminGradeable extends AbstractModel {
     }
 
     public function setTemplateList($template_list) {
-        throw new \BadFunctionCallException('Setters disabled for AdminGradeable');
-    }
-
-    public function setHasGrades($has_graders) {
         throw new \BadFunctionCallException('Setters disabled for AdminGradeable');
     }
 

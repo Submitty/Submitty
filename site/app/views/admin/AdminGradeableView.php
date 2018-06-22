@@ -21,7 +21,7 @@ class AdminGradeableView extends AbstractView {
     }
 
     public function show_edit_gradeable(AdminGradeable $admin_gradeable, $nav_tab, $semester, $course) {
-        $label_message = ($admin_gradeable->getHasGrades()) ?
+        $label_message = ($admin_gradeable->getGradeable()->hasManualGrades()) ?
             "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : '';
 
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
