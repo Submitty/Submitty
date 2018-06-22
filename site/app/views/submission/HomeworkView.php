@@ -383,8 +383,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        $active_same_as_graded = true;
         if ($gradeable->getActiveVersion() !== 0 || $gradeable->getCurrentVersionNumber() !== 0) {
-            $active_same_as_graded = true;
             foreach ($gradeable->getComponents() as $component) {
                 if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
                     $active_same_as_graded = false;
