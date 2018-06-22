@@ -1279,88 +1279,6 @@ INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcd_grader_id, gcm_id)
 VALUES (?, ?, ?, ?)", $params);
     }
 
-    /**
-     * Creates a new gradeable in the database
-     *
-     * @param AdminGradeable $gradeable
-     */
-    public function createNewGradeable(AdminGradeable $gradeable) {
-        $params = array($gradeable->g_id,
-            $gradeable->g_title,
-            $gradeable->g_instructions_url,
-            $gradeable->g_overall_ta_instructions,
-            $gradeable->g_gradeable_type,
-            var_export($gradeable->g_grade_by_registration, true),
-            $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
-            $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
-            $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
-            $gradeable->g_min_grading_group,
-            $gradeable->g_syllabus_bucket);
-        $this->course_db->query("
-INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        if ($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->g_id,
-                $gradeable->eg_submission_open_date->format('Y/m/d H:i:s'),
-                $gradeable->eg_submission_due_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_is_repository, true),
-                $gradeable->eg_subdirectory,
-                var_export($gradeable->eg_team_assignment,true),
-                $gradeable->eg_max_team_size,
-                $gradeable->eg_team_lock_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_use_ta_grading, true),
-                var_export($gradeable->eg_student_view, true),
-                var_export($gradeable->eg_student_submit, true),
-                var_export($gradeable->eg_student_download, true),
-                var_export($gradeable->eg_student_any_version, true),
-                $gradeable->eg_config_path,
-                $gradeable->eg_late_days,
-                $gradeable->eg_precision,
-                var_export($gradeable->eg_peer_grading, true),
-                $gradeable->eg_peer_grade_set);
-            $this->course_db->query("
-INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository,
-eg_subdirectory, eg_team_assignment, eg_max_team_size, eg_team_lock_date, eg_use_ta_grading, eg_student_view, eg_student_submit, eg_student_download,
-eg_student_any_version, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        }
-    }
-
-    /**
-     * Updates the current gradeable with new properties.
-     * TODO: it could be worth while to be able to only update some properties
-     *
-     * @param AdminGradeable $gradeable
-     */
-    public function updateGradeable(AdminGradeable $gradeable) {
-        $params = array($gradeable->g_title, $gradeable->g_instructions_url, $gradeable->g_overall_ta_instructions,
-                        $gradeable->g_gradeable_type,
-                        var_export($gradeable->g_grade_by_registration, true),
-                        $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_min_grading_group, $gradeable->g_syllabus_bucket, $gradeable->g_id);
-        $this->course_db->query("
-UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=?,
-g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?,
-g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
-        if ($gradeable->g_gradeable_type === 0) {
-            $params = array($gradeable->eg_submission_open_date->format('Y/m/d H:i:s'),
-                $gradeable->eg_submission_due_date->format('Y/m/d H:i:s'), var_export($gradeable->eg_is_repository, true),
-                $gradeable->eg_subdirectory, var_export($gradeable->eg_team_assignment,true),
-                $gradeable->eg_max_team_size, $gradeable->eg_team_lock_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_use_ta_grading, true), var_export($gradeable->eg_student_view, true),
-                var_export($gradeable->eg_student_submit, true), var_export($gradeable->eg_student_download, true),
-                var_export($gradeable->eg_student_any_version, true), $gradeable->eg_config_path,
-                $gradeable->eg_late_days, $gradeable->eg_precision, var_export($gradeable->eg_peer_grading, true),
-                $gradeable->eg_peer_grade_set, $gradeable->g_id);
-            $this->course_db->query("
-UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?,
-eg_subdirectory=?, eg_team_assignment=?, eg_max_team_size=?, eg_team_lock_date=?, eg_use_ta_grading=?, eg_student_view=?, eg_student_submit=?,
-eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=?, eg_peer_grade_set=? WHERE g_id=?", $params);
-        }
-    }
-
     public function createNewGradeableComponent(GradeableComponent $component, $gradeable_id) {
         $params = array($gradeable_id, $component->getTitle(), $component->getTaComment(),
                         $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(),
@@ -2977,11 +2895,8 @@ AND gc_id IN (
     /**
      * Updates the gradeable and its components/marks with new properties
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to update
-     * 
-     * FIXME: The 'new' at the end of this should be removed when the method
-     * FIXME:  'updateGradeable' gets deleted
      */
-    public function updateGradeableNew(\app\models\gradeable\Gradeable $gradeable) {
+    public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
 
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
