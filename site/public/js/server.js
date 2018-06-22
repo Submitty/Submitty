@@ -1585,7 +1585,7 @@ function checkNumFilesForumUpload(input, post_id){
 
 }
 
-function editPost(post_id, thread_id) {
+function editPost(post_id, thread_id, shouldEditThread) {
      var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
      $.ajax({
             url: url,
@@ -1595,7 +1595,6 @@ function editPost(post_id, thread_id) {
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -1610,16 +1609,43 @@ function editPost(post_id, thread_id) {
                 }
                 var user_id = escape(json.user);
                 var post_content = json.post;
+                var anon = json.anon;
                 var time = (new Date(json.post_time));
+                var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('edit_post_content');
+                var contentBox = document.getElementById('thread_post_content');
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
+                $('#thread_post_anon').prop('checked', anon);
                 $('#edit-user-post').css('display', 'block');
+
+                $(".cat-buttons input").prop('checked', false);
+                // If first post of thread
+                if(shouldEditThread) {
+                    var thread_title = json.title;
+                    $("#title").prop('disabled', false);
+                    $(".edit_thread").show();
+                    $("#title").val(thread_title);
+                    // Categories
+                    $(".cat-buttons").removeClass('cat-selected');
+                    $.each(categories_ids, function(index, category_id) {
+                        var cat_input = $(".cat-buttons input[value="+category_id+"]");
+                        cat_input.prop('checked', true);
+                        cat_input.parent().addClass('cat-selected');
+                    });
+                    $(".cat-buttons").trigger("eventChangeCatClass");
+                    $("#thread_form").prop("ignore-cat",false);
+                    $("#category-selection-container").show();
+                } else {
+                    $("#title").prop('disabled', true);
+                    $(".edit_thread").hide();
+                    $("#thread_form").prop("ignore-cat",true);
+                    $("#category-selection-container").hide();
+                }
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
@@ -1627,26 +1653,22 @@ function editPost(post_id, thread_id) {
         });
 }
 
-function enableTabsInTextArea(id){
-    var t = document.getElementById(id);
-
-    $(t).on('input', function() {
+function enableTabsInTextArea(jQuerySelector){
+    var t = $(jQuerySelector);
+    t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
-    $(t).trigger('input');
-        t.onkeydown = function(t){
-            if(t.keyCode == 9){
-                var text = this.value;
-                var beforeCurse = this.selectionStart;
-                var afterCurse = this.selectionEnd;
-                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
-                this.selectionStart = this.selectionEnd = beforeCurse+1;
-
-                return false;
-
-            }
-        };
-
+    t.trigger('input');
+    t.keydown(function(t){
+        if(t.keyCode == 9){
+            var text = this.value;
+            var beforeCurse = this.selectionStart;
+            var afterCurse = this.selectionEnd;
+            this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+            this.selectionStart = this.selectionEnd = beforeCurse+1;
+            return false;
+        }
+    });
 }
 
 function changeDisplayOptions(option, thread_id){
@@ -1725,15 +1747,219 @@ function addNewCategory(){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category '+ escape(newCategory) +'.</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
-                $('#cat').append('<option value="' + json['new_id'] + '">' + escape(newCategory) +'</option>');
+                // Create new item in #ui-category-list using dummy category
+                var category_id = json['new_id'];
+                var category_color_code = "#000080";
+                var category_desc = escapeSpecialChars(newCategory);
+                newelement = $($('#ui-category-list li')[0]).clone(true);
+                newelement.attr('id',"categorylistitem-"+category_id);
+                newelement.css('color',category_color_code);
+                newelement.find(".categorylistitem-desc span").text(category_desc);
+                newelement.find(".category-color-picker").val(category_color_code);
+                newelement.show();
+                newelement.addClass("category-sortable");
+                newcatcolorpicker = newelement.find(".category-color-picker");
+                newcatcolorpicker.css("background-color",newcatcolorpicker.val());
+                $('#ui-category-list').append(newelement);
+                $(".category-list-no-element").hide();
+                refreshCategories();
             },
             error: function(){
                 window.alert("Something went wrong while trying to add a new category. Please try again.");
             }
     })
+}
+
+function deleteCategory(category_id, category_desc){
+    var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                deleteCategory: category_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
+                $('#messages').append(message);
+                $('#categorylistitem-'+category_id).remove();
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    })
+}
+
+function editCategory(category_id, category_desc, category_color) {
+    if(category_desc === null && category_color === null) {
+        return;
+    }
+    var data = {category_id: category_id};
+    if(category_desc !== null) {
+        data['category_desc'] = category_desc;
+    }
+    if(category_color !== null) {
+        data['category_color'] = category_color;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'edit_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully updated!</div>';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                if(category_color !== null) {
+                    $("#categorylistitem-"+category_id).css("color",category_color);
+                }
+                if(category_desc !== null) {
+                    $("#categorylistitem-"+category_id).find(".categorylistitem-desc span").text(category_desc);
+                }
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    });
+}
+
+function refreshCategories() {
+   if($('#ui-category-list').length) {
+        // Refresh cat-buttons from #ui-category-list
+
+        var data = $('#ui-category-list').sortable('serialize');
+        if(!data.trim()) {
+            return;
+        }
+        data = data.split("&");
+        var order = [];
+        for(var i = 0; i<data.length; i+=1) {
+            var category_id = parseInt(data[i].split('=')[1]);
+            var category_desc = $("#categorylistitem-"+category_id+" .categorylistitem-desc span").text().trim();
+            var category_color = $("#categorylistitem-"+category_id+" select").val();
+            order.push([category_id, category_desc, category_color]);
+        }
+
+        // Obtain current selected category
+        var selected_button = new Set();
+        var category_pick_buttons = $('.cat-buttons');
+        for(var i = 0; i<category_pick_buttons.length; i+=1) {
+            var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
+            var category_id = parseInt(cat_button_checkbox.val());
+            if(cat_button_checkbox.prop("checked")) {
+                selected_button.add(category_id);
+            }
+        }
+
+        // Refresh selected categories
+        $('#categories-pick-list').empty();
+        order.forEach(function(category) {
+            var category_id = category[0];
+            var category_desc = category[1];
+            var category_color = category[2];
+            var selection_class = "";
+            if(selected_button.has(category_id)) {
+                selection_class = "cat-selected";
+            }
+            var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
+                                <input type="checkbox" name="cat[]" value="'+category_id+'">\
+                            </a>';
+            $('#categories-pick-list').append(element);
+        });
+
+        $(".cat-buttons input[type='checkbox']").each(function() {
+            if($(this).parent().hasClass("cat-selected")) {
+                $(this).prop("checked",true);
+            }
+        });
+    }
+
+    // Selectors for categories pick up
+    // If JS enabled hide checkbox
+    $("a.cat-buttons input").hide();
+
+    $(".cat-buttons").click(function() {
+        if($(this).hasClass("cat-selected")) {
+            $(this).removeClass("cat-selected");
+            $(this).find("input[type='checkbox']").prop("checked", false);
+        } else {
+            $(this).addClass("cat-selected");
+            $(this).find("input[type='checkbox']").prop("checked", true);
+        }
+        $(this).trigger("eventChangeCatClass");
+    });
+
+    $(".cat-buttons").bind("eventChangeCatClass", function(){
+        var cat_color = $(this).attr('cat-color');
+        $(this).css("border-color",cat_color);
+        if($(this).hasClass("cat-selected")) {
+            $(this).css("background-color",cat_color);
+            $(this).css("color","white");
+        } else {
+            $(this).css("background-color","white");
+            $(this).css("color",cat_color);
+        }
+    });
+    $(".cat-buttons").trigger("eventChangeCatClass");
+}
+
+function reorderCategories(){
+    var data = $('#ui-category-list').sortable('serialize');
+    var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully reordered categories.';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to reordering categories. Please try again.");
+            }
+    });
 }
 
 /*This function ensures that only one reply box is open at a time*/

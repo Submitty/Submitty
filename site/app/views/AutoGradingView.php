@@ -319,7 +319,6 @@ HTML;
                 break;
             }
         }
-
         // Todo: this is a lot of math for the view
         //add total points if both autograding and instructor grading exist
         $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
