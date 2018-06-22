@@ -80,9 +80,9 @@ class PlagiarismController extends AbstractController {
                 unset($gradeable_ids_titles[$i]);
             }
         }
-        $all_sem_gradeables = FileUtils::getAllSemesterGradeables();
+        $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismForm', $gradeable_ids_titles, $all_sem_gradeables);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismForm', $gradeable_ids_titles, $prior_term_gradeables);
     }
 
     public function runPlagiarism() {
@@ -96,7 +96,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $prev_gradeable_number = $_POST['prev_gradeables_number'];
+        $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
         $ignore_submission_number = $_POST['ignore_submission_number'];
         $gradeable = $_POST['gradeable_id'];
         $version_option = $_POST['version_option'];
@@ -210,10 +210,12 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        $json_file = "/usr/local/submitty/Lichen/to_be_run/".$semester."__".$course."__".$gradeable.".json";
+        $config_dir = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/";
+        $number_of_undone_jobs = count(array_diff(scandir($config_dir), array(".","..")));
+        $json_file = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/".$gradeable."_".$number_of_undone_jobs.".json";
         $json_data = array("semester" =>    $semester,
                             "course" =>     $course,
-                            "gradeable" =>  $gradeable_path,
+                            "gradeable" =>  $gradeable,
                             "version" =>    $version_option,
                             "file_option" =>$file_option,
                             "language" =>   $language,
@@ -230,12 +232,12 @@ class PlagiarismController extends AbstractController {
         if($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;   
         }
-        die(json_encode($json_data, JSON_PRETTY_PRINT));
-        // if (file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT)) === false) {
-        //   die("Failed to write file {$json_file}");
-        // }
 
-        // $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
+        if (file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT)) === false) {
+          die("Failed to write file {$json_file}");
+        }
+
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
     }
 
     public function ajaxGetPlagiarismRankingForGradeable(){

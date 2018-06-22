@@ -405,23 +405,28 @@ class FileUtils {
      * within each course , there will be list of all gradeable ids for that course
      * @return array $return
      */
-    public static function getAllSemesterGradeables(){
+    public static function getGradeablesFromPriorTerm(){
         $return = array();
-        $semesters = array_diff(scandir("/var/local/submitty/courses/"), array('.', '..'));
         
-        foreach ($semesters as $semester) {
-            $courses = array_diff(scandir("/var/local/submitty/courses/$semester/"), array('.', '..'));
-            foreach($courses as $course) {
-                $gradeables = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));  
-                if (!array_key_exists($semester, $return)) {
-                    $return[$semester] = array($course=>$gradeables);
+        $file = fopen("/var/local/submitty/courses/gradeables_from_prior_terms.txt", "r") or exit("Unable to open file!");
+        while(!feof($file)){
+            $line = fgets($file);
+            $line= trim($line," ");
+            $line= explode("/",$line);
+            $sem = $line[5];
+            $course = $line[6];
+            $gradeables= array();
+            while(!feof($file)){
+                $line = fgets($file);
+                if(trim(trim($line," "),"\n") == "") {
+                    break;
                 }
-                else {
-                    $return[$semester][$course] = $gradeables;   
-                }
+                array_push($gradeables, trim(trim($line," "),"\n"));
             }
+            $return[$sem][$course] = $gradeables;    
+            
         }
-
+        fclose($file);
         uksort($return, function($semester_a, $semester_b) {
             $year_a = (int)substr($semester_a, 1);
             $year_b = (int)substr($semester_b, 1);
@@ -433,6 +438,7 @@ class FileUtils {
                 return ($semester_a[0] == 'f')? 0 : 1 ;
             }                       
         });
+        
         return $return;
     }
 }

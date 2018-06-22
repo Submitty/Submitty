@@ -166,19 +166,19 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
-function addMorePrevGradeable(all_sem_gradeables_json) {
+function addMorePriorTermGradeable(prior_term_gradeables) {
     var form = $("#run-plagiarism-form");
-    var prev_gradeables_number = $('[name="prev_gradeables_number"]', form).val();
-    var to_append = '<br /><select name="prev_sem_'+ prev_gradeables_number +'"><option value="">None</option>';
-    $.each(all_sem_gradeables_json, function(sem,courses_gradeables){
+    var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
+    var to_append = '<br /><br /><span style="position:absolute;left:30%"> <select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
+    $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
-    to_append += '</select><select name="prev_course_'+ prev_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prev_gradeables_number +'"><option value="">None</option></select>'; 
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select></span>'; 
     $('[name="prev_gradeable_div"]', form).append(to_append);
-    $('[name="prev_gradeables_number"]', form).val(parseInt(prev_gradeables_number)+1);
+    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name);
+        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
 
@@ -334,7 +334,7 @@ function getDisplayForCode(content){
         return html;
     }
 
-function PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name) {
+function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");
     if(select_element_name == "language") {
         if ($('[name="language"]', form).val() == "python") {
@@ -357,7 +357,7 @@ function PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name) {
         $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_sem != '') {
             var append_options = '';
-            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
                 if(selected_sem == sem) {
                     $.each(courses_gradeables, function(course,gradeables){
                         append_options += '<option value="'+ course +'">'+ course +'</option>';
@@ -374,7 +374,7 @@ function PlagiarismFormOptionChanged(all_sem_gradeables, select_element_name) {
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_course != '') {
             var append_options = '';
-            $.each(all_sem_gradeables, function(sem,courses_gradeables){
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
                 if(selected_sem == sem) {
                     $.each(courses_gradeables, function(course,gradeables){
                         if(selected_course == course) {
