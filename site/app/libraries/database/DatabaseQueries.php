@@ -2402,9 +2402,10 @@ AND gc_id IN (
     }
 
     /**
-     * Loads the components for a gradeable into the gradeable
+     * Gets an array of components associated with a gradeable
      * Note: This does not need to be manually called on a Gradeable instance
      * @param \app\models\gradeable\Gradeable $gradeable
+     * @return Component[]
      */
     public function getComponentConfigs(\app\models\gradeable\Gradeable $gradeable) {
 
@@ -2469,7 +2470,7 @@ AND gc_id IN (
             $components[] = $component;
         }
 
-        $gradeable->setComponents($components);
+        return $components;
     }
 
     /**
@@ -2985,7 +2986,7 @@ AND gc_id IN (
         // If any components were new, recreate the components array
         $components = $gradeable->getComponents();
         if ($invalidateComponents) {
-            $new_components = $this->getGradeableComponentConfigs($gradeable);
+            $new_components = $this->getComponentConfigs($gradeable);
 
             // Transfer marks to new component instances
             for($i = 0; $i < count($new_components); ++$i) {
@@ -3002,7 +3003,7 @@ AND gc_id IN (
 
         // If any marks were new, recreate the components array
         if ($invalidateMarks) {
-            $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
+            $gradeable->setComponents($this->getComponentConfigs($gradeable));
         }
     }
 

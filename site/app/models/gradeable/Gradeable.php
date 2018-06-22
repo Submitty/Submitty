@@ -480,7 +480,7 @@ class Gradeable extends AbstractModel {
      */
     public function getComponents() {
         if($this->components === null) {
-            $this->core->getQueries()->getComponentConfigs($this);
+            $this->setComponents($this->core->getQueries()->getComponentConfigs($this));
         }
         return $this->components;
     }
