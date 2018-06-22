@@ -800,54 +800,32 @@ HTML;
     }
 
     private function makeTable($user_id, $gradeable, &$status){
-        $return = <<<HTML
-        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                </tr>
-            </thead>
-            <tbody>
-HTML;
         $total_late_used = 0;
+        $student_gradeables = [];
+        $status_array = [];
+        $late_charged_array = [];
+		$late_updates = $this->core->getQueries()->getLateDayUpdates($user_id);
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
-            $class = "";
-            if($g->getId() == $gradeable->getId()){
-                $class = "class='yellow-background'";
-                $status = $g->getLateStatus();
-            }
-            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
-            $return .= <<<HTML
-                <tr>
-                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
-                </tr>
-HTML;
+            $student_gradeables[] = $g;
+			if($g->getId() == $gradeable->getId()){
+				$status = $g->getLateStatus(); //Setting the background color based on the status of this assignment.
+			}
+            $status_array[] = $g->getLateStatus();
+            $late_charged_array[] = $g->getCurrLateCharged();
         }
-        $return .= <<<HTML
-            </tbody>
-        </table>
-HTML;
-        return $return;
+		return $this->core->getOutput()->renderTwigTemplate("/LateDaysTable.twig", [
+			"user_id" => $user_id,
+			"student_gradeables" => $student_gradeables,
+			"status_array" => $status_array,
+			"late_charged_array" => $late_charged_array,
+			"total_late_used" => $total_late_used,
+			"g_id" => $gradeable->getId(),
+			"late_update" => $late_updates,
+			"preferred_name" => $user_id
+		]);
     }
 }
