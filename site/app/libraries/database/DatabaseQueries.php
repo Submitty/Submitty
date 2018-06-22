@@ -2938,9 +2938,7 @@ AND gc_id IN (
                 $this->createComponent($component);
                 $invalidateComponents = true;
             } else {
-                // updateComponent returns true if there were new marks, so
-                //  it needs to be recreated
-                $invalidateComponents |= $this->updateComponent($component);
+                $this->updateComponent($component);
             }
         }
 
