@@ -2473,11 +2473,20 @@ AND gc_id IN (
     }
 
     /**
-     * Gets the Gradeable instance for a given id
-     * @param string $g_id id of the gradeable to retrieve
-     * @return \app\models\gradeable\Gradeable
+     * Gets one or more gradeable instances
+     * @param string|string[]|$ids $g_id id(s) of the gradeable to retrieve or null if all
+     * @return DatabaseRowIterator Iterator to access each Gradeable
+     * @throws \Exception If any Gradeable fails to construct
      */
-    public function getGradeableConfig($g_id) {
+    public function getGradeableConfigs($ids) {
+        $selection_filter = '';
+        if($ids !== null) {
+            if(!is_array($ids)) {
+                $ids = [$ids];
+            }
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $selection_filter = "WHERE g.g_id IN {$placeholders}";
+        }
 
         // First, get the gradeable data
         $query = "
@@ -2519,28 +2528,33 @@ AND gc_id IN (
                 eg_precision AS precision
               FROM electronic_gradeable
             ) AS eg ON g.g_id=eg.eg_id
-            WHERE g.g_id=?";
-        $this->course_db->query($query, array($g_id));
+            {$selection_filter}";
 
-        $details = $this->course_db->row();
-        if(count($details) === 0) {
-            throw new \InvalidArgumentException("Gradeable ID did not exist!");
+        $constructGradeable = function($details) {
+            if(!isset($details['eg_id']) && $details['type'] === GradeableType::ELECTRONIC_FILE) {
+                throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
+            }
+
+            // create the gradeable
+            return new \app\models\gradeable\Gradeable($this->core, $details, []);
+        };
+
+        return $this->course_db->queryIterator($query,
+            $ids ?? [],
+            $constructGradeable);
+    }
+
+    /**
+     * Gets a single gradeable instance
+     * @param string $id Id of the gradeable to fetch
+     * @return Gradeable The fetched gradeable
+     * @throws \Exception If the Gradeable failed to construct
+     */
+    public function getGradeableConfig($id) {
+        foreach($this->getGradeableConfigs([$id]) as $gradeable) {
+            return $gradeable;
         }
-
-        if(!isset($details['eg_id']) && $details['type'] === GradeableType::ELECTRONIC_FILE) {
-            throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
-        }
-
-        // Finally, create the gradeable
-        $gradeable = new \app\models\gradeable\Gradeable($this->core, $details, []);
-
-        // Get the components data
-        $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
-
-        // Set the rotating sections data
-        $gradeable->setRotatingGraderSections($this->getGradersForAllRotatingSections($g_id));
-
-        return $gradeable;
+        throw new \InvalidArgumentException('Gradeable id did not exist!');
     }
 
     /**
