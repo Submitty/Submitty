@@ -337,7 +337,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         var check3 = $('#radio_numeric').is(':checked');
 
 
-        {% if action == 'new' %}
+        {% if action != 'edit' %}
             var all_gradeable_ids = {{admin_gradeable.getTemplateList()|json_encode|raw}};
             if(all_gradeable_ids.find(element => element.g_id == gradeable_id)) {
                 alert("Gradeable already exists");
