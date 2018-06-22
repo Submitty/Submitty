@@ -1,13 +1,39 @@
-<div class = "sub">
+{% if btn_type == "request" %}
+    {% set message = "Request Regrade" %}
+    {% set is_disabled = false %}
+    {% set class = "btn-default" %}
+    {% set action = "showPopUp()" %}
+    {% set submit = false %}
+{% elseif btn_type == "delete" %}
+    {% set message = "Delete Request" %}
+    {% set is_disabled = false %}
+    {% set class = "btn-danger" %}
+    {% set action = "" %}
+    {% set submit = true %}
+{% elseif btn_type == "pending" %}
+    {% set message = "Request in Review" %}
+    {% set is_disabled = true %}
+    {% set class = "btn-default" %}
+    {% set action = "" %}
+    {% set submit = false %}
+{% elseif btn_type == "completed" %}
+    {% set message = "Request Reviewed" %}
+    {% set is_disabled = true %}
+    {% set class = "btn-default" %}
+    {% set action = "" %}
+    {% set submit = false %}
+{% endif %}
+
+<div class="sub">
     <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
-    {% if can_delete %}
-        <div style="float:right"><button class="btn {{ class }}" onclick="{{ action }}" {{ is_disabled }} >{{ message }}</button></div>
-    {% else %}
+    {% if submit %}
         <div style="float:right">
             <form method="POST" action="{{ url }}" id="deleteRequest">
                 <button class="btn {{ class }}" type="submit">{{ message }}</button>
             </form>
         </div>
+    {% else %}
+        <div style="float:right"><button class="btn {{ class }}" onclick="{{ action }}" {{ is_disabled ? "disabled" : "" }} >{{ message }}</button></div>
     {% endif %}
     <div class="modal" id="modal-container">
         <div class="modal-content" id="regradeBox">

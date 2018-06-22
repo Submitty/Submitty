@@ -795,24 +795,8 @@ HTML;
      * @return string
      */
     public function showRegradeRequestForm(Gradeable $gradeable): string {
-        $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
-        $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
-        $existsStaffPost = false;
-        foreach ($threads as $thread) {
-            if ($this->core->getQueries()->isStaffPost($thread['user_id'])) {
-                $existsStaffPost = true;
-                break;
-            }
-        }
-        $is_disabled = "";
-        $action = "";
-        $url = "";
-        $class = "btn-default";
-        $deleteMode = false;
         if ($gradeable->getRegradeStatus() === 0) {
-            $message = "Request Regrade";
-            $action = "showPopUp()";
-            $deleteMode = false;
+            $btn_type = "request";
             $url = $this->core->buildUrl(array('component' => 'student',
                 'action' => 'request_regrade',
                 'gradeable_id' => $gradeable->getId(),
@@ -820,42 +804,31 @@ HTML;
             ));
         } else if ($gradeable->getRegradeStatus() === -1) {
             if ($this->core->getUser()->accessGrading()) {
-                $message = "Delete Request";
-                $class = "btn-danger";
-                $is_disabled = "";
+                $btn_type = "delete";
                 $url = $this->core->buildUrl(array('component' => 'student',
                     'action' => 'delete_request',
                     'gradeable_id' => $gradeable->getId(),
                     'student_id' => $gradeable->getUser()->getId()
                 ));
-                $deleteMode = true;
             } else {
-                $is_disabled = "disabled";
-                $message = "Request in Review";
+                $btn_type = "pending";
                 $url = $this->core->buildUrl(array('component' => 'student',
                     'action' => 'delete_request',
                     'gradeable_id' => $gradeable->getId(),
                     'student_id' => $gradeable->getUser()->getId()
                 ));
-                $deleteMode = false;
             }
         } else {
-            $message = "Request Reviewed";
-            $is_disabled = "disabled";
+            $btn_type = "completed";
             $url = $this->core->buildUrl(array('component' => 'student',
                 'action' => 'delete_request',
                 'gradeable_id' => $gradeable->getId(),
                 'student_id' => $gradeable->getUser()->getId()
             ));
-            $deleteMode = false;
         }
         return $this->core->getOutput()->renderTwigTemplate("submission/regrade/RequestForm.twig", [
-            "is_disabled" => $is_disabled,
-            "action" => $action,
+            "btn_type" => $btn_type,
             "url" => $url,
-            "class" => $class,
-            "message" => $message,
-            "can_delete" => !$deleteMode,
         ]);
     }
 
