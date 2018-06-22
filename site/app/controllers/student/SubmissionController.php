@@ -447,6 +447,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
+
         $merge_previous = false;
         if(isset($_REQUEST['merge'])){
             if($_REQUEST['merge']  === "true"){
@@ -466,13 +473,6 @@ class SubmissionController extends AbstractController {
         }
         if (!isset($_POST['path'])) {
             return $this->uploadResult("Invalid path.", false);
-        }
-
-        // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -693,6 +693,13 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
+
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
         
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
 
@@ -703,13 +710,6 @@ class SubmissionController extends AbstractController {
         }
         if (!isset($_POST['path'])) {
             return $this->uploadResult("Invalid path.", false);
-        }
-
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'];

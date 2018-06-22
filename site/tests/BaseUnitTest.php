@@ -69,6 +69,19 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $user->method('accessGrading')->willReturn(false);
         }
+        if (isset($user_config['access_full_grading'])) {
+            $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
+        }
+        else {
+            $user->method('accessFullGrading')->willReturn(false);
+        }
+        if (isset($user_config['access_admin'])) {
+            $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
+        }
+        else {
+            $user->method('accessAdmin')->willReturn(false);
+        }
+        
 
         $core->method('getUser')->willReturn($user);
 
