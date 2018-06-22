@@ -45,7 +45,7 @@ class AdminGradeableController extends AbstractController {
             case 'delete_gradeable':
                 $this->deleteGradeable();
                 break;
-            case 'rebuild_assignement':
+            case 'rebuild_assignment':
                 $this->rebuildAssignmentRequest();
                 break;
             default:
