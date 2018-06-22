@@ -11,7 +11,10 @@ use app\libraries\GradeableType;
 use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
+use app\models\gradeable\Submitter;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
@@ -2521,5 +2524,121 @@ AND gc_id IN (
         $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
 
         return $gradeable;
+    }
+
+    /**
+     * Retrieves all GradedComponents for a given GradedGradeable
+     * @param GradedGradeable $graded_gradeable The gradeable associated with the components
+     * @return GradedComponent[]
+     * @throws \Exception If the database information is invalid
+     */
+    public function getGradeableComponentData(GradedGradeable $graded_gradeable) {
+        $query = "
+            SELECT
+                gc_id as comp_id,
+                gcd_score as score,
+                gcd_component_comment as comment,
+                gcd_grader_id AS grader_id,
+                gcd_graded_version AS graded_version,
+                gcd_grade_time AS grade_time
+            FROM gradeable_component_data
+            WHERE gd_id=?";
+        $this->course_db->query($query, array($graded_gradeable->getId()));
+
+        $component_data_raw = $this->course_db->rows();
+
+        $query = "
+            SELECT 
+                gc_id as comp_id,
+                gcm_id AS id
+            FROM gradeable_component_mark_data
+            WHERE gd_id=?";
+        $this->course_db->query($query, array($graded_gradeable->getId()));
+
+        $mark_data_raw = $this->course_db->rows();
+
+        // Construct an array of array of mark ids for easy construction of graded components
+        $marks_by_comp_id = [];
+        foreach ($mark_data_raw as $mark_data) {
+            if (isset($marks_by_comp_id[$mark_data['comp_id']])) {
+                $marks_by_comp_id[$mark_data['comp_id']][] = $mark_data['id'];
+            } else {
+                $marks_by_comp_id[$mark_data['comp_id']] = [$mark_data['id']];
+            }
+        }
+
+        // Construct all of the graded components with the provided marks
+        $graded_components = [];
+        foreach ($component_data_raw as $component_data) {
+            $graded_components[] = new GradedComponent($this->core,
+                $graded_gradeable,
+                $this->getUserById($component_data['grader_id']),
+                $component_data['comp_id'],
+                $marks_by_comp_id[$component_data['comp_id']] ?? [], // If no marks for this component, empty array
+                $component_data);
+        }
+
+        return $graded_components;
+    }
+
+    /**
+     * Retrieves a GradedGradeable instance from the database for a team/user.
+     *  Note: this internally calls getGradeableComponentData
+     * @param \app\models\gradeable\Gradeable $gradeable The gradeable associated with this grade
+     * @param string|null $user_id The user id to search for (or null if searching for a team)
+     * @param string|null $team_id The team id to search for (or null of searching for a user)
+     * @return GradedGradeable
+     * @throws \Exception If the database information is invalid
+     */
+    public function getGradeableData(\app\models\gradeable\Gradeable $gradeable, $user_id, $team_id = null) {
+
+        // Get the user/team FIRST so if they throw errors, we don't query anything else
+        $submitter = null;
+        if ($team_id !== null) {
+            $submitter = $this->getTeamById($team_id);
+        } else if ($user_id !== null) {
+            $submitter = $this->getUserById($user_id);
+        } else {
+            throw new \InvalidArgumentException('Must provide a non-null team or user id');
+        }
+
+        // Query for the gradeable data
+        $query = "
+            SELECT 
+                gd_id AS id,
+                gd_team_id AS team_id,
+                gd_overall_comment as overall_comment,
+                gd_user_viewed_date as user_viewed_date
+            FROM gradeable_data
+            WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)";
+        $this->course_db->query($query, array($gradeable->getId(), $user_id, $team_id));
+
+        // Throw an exception if the data was not found in the database.
+        //  Its better to throw that here instead of in the GradedGradeable constructor
+        //   so the stacktrace is more obvious
+        $details = $this->course_db->row();
+        if (count($details) === 0) {
+            throw new \InvalidArgumentException("Gradeable data did not exist!");
+        }
+
+        // Construct the graded gradeable
+        $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), $details);
+
+        // Query for the gradeable component data entries for this gradeable data
+        $graded_gradeable->setGradedComponents($this->getGradeableComponentData($graded_gradeable));
+
+        return $graded_gradeable;
+    }
+
+    public function getUsersById(array $user_ids) {
+        throw new NotImplementedException();
+    }
+
+    public function getTeamsById(array $team_ids) {
+        throw new NotImplementedException();
+    }
+
+    public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
+        throw new NotImplementedException();
     }
 }
