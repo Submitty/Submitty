@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 
 # noinspection PyPep8Naming
@@ -33,7 +34,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver = None
         """ :type driver: webdriver.Chrome """
         self.options = Options()
-        self.options.add_argument('--headless')
+        # self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
@@ -86,15 +87,32 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
-    def click_class(self, course, course_name):
-        self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
-
     def log_out(self):
         if self.logged_in:
             self.logged_in = False
             self.driver.find_element_by_id('logout').click()
             self.driver.find_element_by_id('login-guest')
+
+    def click_class(self, course, course_name):
+        self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
+        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
+
+    def wait_for_new_header(self, new_header_text):
+        """
+        waits until the content header text matches new_header_text
+        use to wait for page to load
+        """
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format(new_header_text))))
+
+    def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, new_header_text):
+        """
+        see Navigation.twig for css selectors
+        """
+        self.driver.find_element_by_css_selector("#{}_tbody #{} [name={}_button]".format(gradeable_category, gradeable_id, button_name)).click()
+        self.wait_for_new_header(new_header_text)
+
+
+    
 
     @staticmethod
     def wait_user_input():
