@@ -1,64 +1,65 @@
-<br />
-How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val" onchange="calculateTotalScore();"/>
-&emsp;&emsp;
+<div id="gradeable_rubric">
+    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    &emsp;&emsp;
 
-How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
-<br /> <br />
+    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <br /> <br />
 
-<div class="multi-field-wrapper-numeric">
-    <h5>Numeric Items</h5>
-    <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
-        <!-- Headings -->
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th> Label </th>
-            <th> Max Score </th>
-            <th> Extra Credit?</th>
-        </tr>
-        </thead>
-        <!-- Footers -->
-        <tfoot style="background: #E1E1E1;">
-        <tr>
-            <td><strong> Total </strong></td>
-            <td><strong id="totalScore"></strong></td>
-            <td><strong id="totalEC"></strong></td>
-        </tr>
-        </tfoot>
-        <tbody style="background: #f9f9f9;">
-        <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="multi-field" id="mult-field-0" style="display:none;">
-            <td>
-                <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" />
-            </td>
-            <td>
-                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/>
-            </td>
-            <td>
-                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
-            </td>
-        </tr>
-    </table>
+    <div class="multi-field-wrapper-numeric">
+        <h5>Numeric Items</h5>
+        <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+            <!-- Headings -->
+            <thead style="background: #E1E1E1;">
+            <tr>
+                <th> Label </th>
+                <th> Max Score </th>
+                <th> Extra Credit?</th>
+            </tr>
+            </thead>
+            <!-- Footers -->
+            <tfoot style="background: #E1E1E1;">
+            <tr>
+                <td><strong> Total </strong></td>
+                <td><strong id="totalScore"></strong></td>
+                <td><strong id="totalEC"></strong></td>
+            </tr>
+            </tfoot>
+            <tbody style="background: #f9f9f9;">
+            <!-- This is a bit of a hack, but it works (^_^) -->
+            <tr class="multi-field" id="mult-field-0" style="display:none;">
+                <td>
+                    <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" />
+                </td>
+                <td>
+                    <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/>
+                </td>
+                <td>
+                    <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
+                </td>
+            </tr>
+        </table>
 
-    <h5>Text Items</h5>
-    <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th> Label </th>
-        </tr>
-        </thead>
-        <tbody style="background: #f9f9f9;">
-        <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="multi-field" id="mult-field-0" style="display:none;">
-            <td>
-                <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/>
-            </td>
-        </tr>
-    </table>
+        <h5>Text Items</h5>
+        <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
+            <thead style="background: #E1E1E1;">
+            <tr>
+                <th> Label </th>
+            </tr>
+            </thead>
+            <tbody style="background: #f9f9f9;">
+            <!-- This is a bit of a hack, but it works (^_^) -->
+            <tr class="multi-field" id="mult-field-0" style="display:none;">
+                <td>
+                    <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 <br />
 <!--Do you want a box for an (optional) message from the TA to the student?
-<input type="radio" name="opt_ta_messg" value="yes" /> Yes
-<input type="radio" name="opt_ta_messg" value="no" /> No-->
+<input type="radio" name="opt_ta_messg" value="true" /> Yes
+<input type="radio" name="opt_ta_messg" value="false" /> No-->
 
 <script type="text/javascript">
     function calculateTotalScore() {
@@ -86,9 +87,9 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             var wrapper = $('.numerics-table');
             numNumeric++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numNumeric).find('.numeric_label').val(label).focus();
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric);
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric);
-            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).val(max_score);
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).val(max_score).change(() => saveRubric(false));
             if (extra_credit) {
                 $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('checked', true);
             }
@@ -107,7 +108,8 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             var wrapper = $('.text-table');
             numText++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
-            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText);
+            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).change(() => saveRubric(false));
+
             $('#mult-field-' + numText, wrapper).show();
         }
 
@@ -129,6 +131,9 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             while (numText > requestedText) {
                 removeText();
             }
+
+            // When changing text item count, save the rubric
+            saveRubric(false);
         });
 
         $('#numeric_num-items').on('input', function (e) {
@@ -142,6 +147,9 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             while (numNumeric > requestedNumeric) {
                 removeNumeric();
             }
+
+            // When numeric item count, save the rubric
+            saveRubric(false);
         });
 
         if ($('#radio_numeric').is(':checked')) {
@@ -166,18 +174,4 @@ How many text items? <input style="width: 50px" id="numeric_num_text_items" name
             $('#grading_questions').show();
         }
     });
-
-    function checkFormRubricNum() {
-        var numOfNumeric = 0;
-        var wrapper = $('.numerics-table');
-
-        for (var i = 0; i < $('#numeric_num-items').val(); i++) {
-            numOfNumeric++;
-            if ($('#mult-field-' + numOfNumeric,wrapper).find('.max_score').attr('name','max_score_'+numOfNumeric).val() == 0) {
-                alert("Max score cannot be 0 [Question " + numOfNumeric + "]");
-                return false;
-            }
-        }
-        return true;
-    }
 </script>

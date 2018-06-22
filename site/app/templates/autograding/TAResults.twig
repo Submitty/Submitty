@@ -1,0 +1,79 @@
+{% import 'functions/Badge.twig' as Badge %}
+
+{% if not gradeable.beenTAgraded() %}
+    <br>
+    <h3>This assignment has not been graded yet</h3>
+{% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+    <br>
+    <h3>The version you have selected above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+{% elseif not grading_complete %}
+    <br>
+    <h3>Grading not complete, please contact an instructor/grader</h3>
+{% else %}
+    <div class="sub">
+        {# Overview #}
+        <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
+            <p>Graded by: {{ grader_names|join(", ") }}</p>
+            <i>Any regrade requests are due within 7 days of posting</i>
+            <p>
+                {% if gradeable.getOverallComment()|length != 0 %}
+                    <hr>
+                    Overall note from Grader:
+                    <span class='gradeable_comment'>{{ gradeable.getOverallComment() }}</span>
+                {% endif %}
+            </p>
+        </div>
+        {% if gradeable.getLateDays() > 0 %}
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ core.buildUrl({'component': 'student', 'page': 'view_late_table', 'g_id': gradeable.getId()}) }}">Show my late days information</a>
+        {% endif %}
+        {# /Overview #}
+
+        {# Manual total #}
+        <div class="box">
+            <div class="box-title">
+                {{ Badge.render(graded_score, graded_max, false) }}
+                <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
+            </div>
+        </div>
+        {# /Manual total #}
+
+        {# Component boxes #}
+        {% for component in gradeable.getComponents() %}
+            {% if component is not iterable %}
+                {# Todo: This is heinous #}
+                {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
+
+                <div class="box">
+                    <div class="box-title">
+                        {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
+                        <h4>{{ component.getTitle() }}
+                            {# Grader only shows up if they are not peer and full access #}
+                            {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
+                                <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                            {% endif %}
+                        </h4>
+                        <div style="float:left; word-break: break-word;">
+                            <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
+                            <p>
+                                {# Todo: move this out of the model #}
+                                <span class="gradeable_comment">{{ component.getGradedTAComments('<br>', true, gradeable, false)|raw }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        {# /Component boxes #}
+
+        {# Total auto + manual #}
+        {% if has_autograding %}
+            <div class="box">
+                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                    {{ Badge.render(total_score, total_max, false) }}
+                    <h4>Total</h4>
+                </div>
+            </div>
+        {% endif %}
+        {# /Total auto + manual #}
+    </div>
+{% endif %}

@@ -1,0 +1,55 @@
+<div class="content">
+    <h3>{{ preferred_name }}'s late day usage</h3><br/>
+    <p>Initial total late days allowed: {{ student_gradeables[0].getStudentAllowedLateDays() }}</p>
+    {% if late_update|length != 0 %}
+        <p>Late day history:</p>
+    {% endif %}
+    {% set temp = student_gradeables[0].getStudentAllowedLateDays() %}
+    {% for lateday in late_update %}
+        {% if lateday.allowed_late_days - temp >= 0 %}
+            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y')}}: Earned {{ lateday.allowed_late_days - temp}} late day(s)</p>
+        {% else %}
+            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y')}}: Lost {{ (lateday.allowed_late_days - temp)|abs}} late day(s)</p>
+        {% endif %}
+        {% set temp = lateday.allowed_late_days %}
+    {% endfor %}
+    {#We use the most recent gradeable for allowed per term because late days are flexible#}
+    {% set curr_late = student_gradeables[student_gradeables|length-1].getStudentAllowedLateDays() %}
+    <p>Total late days used: {{ total_late_used }}</p>
+    <p>Total late days remaining for future assignments: {{ curr_late - total_late_used}}</p>
+    <br>
+    <br>
+    <table>
+        <thead>
+        <tr>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle;" align="left">Assignment name</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Due date</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Maximum number of late days allowed for this
+                assignment</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Assignment submitted # of days after deadline</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Student granted # of days extension for this assignment</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days charged for this assignment</th>
+        </tr>
+        </thead>
+        <tbody id="late_day_table">
+        {% set num_status = 0 %}
+        {% for gradeable in student_gradeables %}
+            {% if g_id != NULL and gradeable.getId() == g_id %}
+                {% set class = "class=btn-primary" %}
+            {% endif %}
+            <tr>
+                <td {{ class }} style="padding:5px; border:thin solid black">{{gradeable.getName()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getDueDate()|date('m/d/Y')}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDays() != 0) ? gradeable.getLateDays() : ""}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDayExceptions() != 0) ? gradeable.getLateDayExceptions() : ""}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{attribute(status_array, num_status)}}</td>
+                <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(attribute(late_charged_array, num_status) != 0 ) ? attribute(late_charged_array, num_status) : ""}}</td>
+            </tr>
+            {% set num_status = num_status + 1 %}
+            {% set class = "" %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

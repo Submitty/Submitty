@@ -81,11 +81,8 @@ class GlobalView extends AbstractView {
     }
 
     public function invalidPage($page) {
-        return <<<HTML
-<div class="box">
-The page {$page} does not exist. Please try again.
-</div>
-HTML;
-
+        return $this->core->getOutput()->renderTwigTemplate("error/InvalidPage.twig", [
+            "page" => $page
+        ]);
     }
 }

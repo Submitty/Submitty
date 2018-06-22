@@ -1,5 +1,5 @@
 <div class="multi-field-wrapper-checkpoints">
-    <table class="checkpoints-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+    <table class="checkpoints-table table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA; max-width:50% !important;">
         <!-- Headings -->
         <thead style="background: #E1E1E1;">
         <tr>
@@ -33,8 +33,8 @@
 </div>
 <br />
 <!--Do you want a box for an (optional) message from the TA to the student?
-<input type="radio" name="checkpoint_opt_ta_messg" value="yes" /> Yes
-<input type="radio" name="checkpoint_opt_ta_messg" value="no" /> No-->
+<input type="radio" name="checkpoint_opt_ta_messg" value="true" /> Yes
+<input type="radio" name="checkpoint_opt_ta_messg" value="false" /> No-->
 
 <script type="text/javascript">
 
@@ -45,13 +45,13 @@
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints);
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints);
-            if (extra_credit) {
-                $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('checked', true);
-            }
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints).change(() => saveRubric(false));
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).attr('checked', extra_credit).change(() => saveRubric(false));
             $('#remove-checkpoint_field').show();
             $('#mult-field-' + numCheckpoints, wrapper).show();
+
+            // When adding a checkpoint, save the rubric
+            saveRubric(false);
         }
 
         function removeCheckpoint() {
@@ -60,6 +60,9 @@
                 if (--numCheckpoints === 1) {
                     $('#remove-checkpoint_field').hide();
                 }
+
+                // When removing a checkpoint, save the rubric
+                saveRubric(false);
             }
         }
 
@@ -88,9 +91,4 @@
             $('#grading_questions').show();
         }
     });
-
-
-    function checkFormRubricCheck() {
-        return true;
-    }
 </script>

@@ -33,7 +33,7 @@ Form
 #}
 What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
     lowest privileged user group</a> that can grade this?
-<select name="minimum_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+<select name="g_min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ admin_gradeable.getGMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
     {% endfor %}
@@ -42,40 +42,44 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
 <br />
 <fieldset>
-    <input type="radio" name="section_type" value="reg_section" id="registration-section"
+    <input type="radio" name="g_grade_by_registration" value="true" id="registration_section"
         {{ (admin_gradeable.getGGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 
-    <input type='radio' name="section_type" value="rotating-section" id="rotating-section"
+    <input type='radio' name="g_grade_by_registration" value="false" id="rotating_section"
         {{ admin_gradeable.getGGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
     <div id="rotating_data">
         {% if admin_gradeable.getRotatingGradeables()|length != 0 %}
-        <br />
-        Rotating Section History By Grader:
-        <br />
-        <table id="grader-history" style="border: 3px solid black;">
-            <tr>
-                <th></th>
-                {% for row in admin_gradeable.getRotatingGradeables() %}
-                    <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
-                {% endfor %}
-            </tr>
-            <tr>
-                {% set last = '' %}
-                {% for row in admin_gradeable.getGradeableSectionHistory() %}
-                    {% if row.user_id != last %}
+            <br />
+            Rotating Section History By Grader:
+            <br />
+            <div class="table-wrapper">
+                <div class="table-scroll">
+                    <table id="grader-history">
+                        <tr>
+                            <th></th>
+                            {% for row in admin_gradeable.getRotatingGradeables() %}
+                                <th style="padding: 8px; border: 3px solid black;">{{ row.g_id }}</th>
+                            {% endfor %}
                         </tr>
-                        <tr class="g_history g{{ row.user_group }}">
-                            <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
-                    {% endif %}
-                    <td style="padding: 8px; border: 3px solid black; text-align: center;">
-                        {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
-                    </td>
-                    {% set last = row.user_id %}
-                {% endfor %}
-        </table>
+                        <tr>
+                            {% set last = '' %}
+                            {% for row in admin_gradeable.getGradeableSectionHistory() %}
+                                {% if row.user_id != last %}
+                                    </tr>
+                                    <tr class="g_history g{{ row.user_group }}">
+                                        <th style="padding: 8px; border: 3px solid black;">{{ row.user_id }}</th>
+                                {% endif %}
+                                <td style="padding: 8px; border: 3px solid black; text-align: center;">
+                                    {{ row.sections_rotating_id | trim('{', 'left') | trim('}', 'right') }}
+                                </td>
+                                {% set last = row.user_id %}
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
         {% endif %}
-        <table>
+        <table id="grader_assignment">
             {# Helpful debuging line.  Uncomment to view graders data #}
             {# <tr>{{all_graders|json_encode()}}</tr> #}
             <tr>
@@ -134,7 +138,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     }
 
     function onSectionTypeChange() {
-        if($('#rotating-section').is(':checked')) {
+        if($('#rotating_section').is(':checked')) {
             // $('#rotating_data').show();
             disableElementChildren('#rotating_data', false);
         }
@@ -170,11 +174,11 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
-        $('[name="section_type"]').change(onSectionTypeChange);
+        $('[name="g_grade_by_registration"]').change(onSectionTypeChange);
 
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
-        $('[name="minimum_grading_group"]').change(onMinGraderChange);
+        $('#minimum_grading_group').change(onMinGraderChange);
 
         // update "all" check boxes
         {% for grader in all_graders[1] %}
@@ -188,20 +192,5 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         {% endfor %}
 
     });
-
-    function checkFormGraders() {
-        var checkRegister = $('#registration-section').is(':checked');
-        var checkRotate = $('#rotating-section').is(':checked');
-
-        // This seems pretty unlikely to happen since the input is a boolean
-        if($('[name="ta_grading"]').is(':checked') || check2 || check3) {
-            if(!checkRegister && !checkRotate) {
-                alert("A type of way for TAs to grade must be selected");
-                return false;
-            }
-        }
-        return true;
-    }
-
 
 </script>

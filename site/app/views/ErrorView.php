@@ -55,11 +55,9 @@ HTML;
     }
 
     public function invalidPage($page) {
-        return <<<HTML
-<div>
-    The page you requested {$page} does not exist and cannot be used.
-</div>
-HTML;
+        return $this->core->getOutput()->renderTwigTemplate("error/InvalidPage.twig", [
+            "page" => $page
+        ]);
     }
 
     public function errorPage($error_message) {
@@ -119,21 +117,8 @@ return $return;
     }
 
     public function noGradeable($gradeable_id = null) {
-        if ($gradeable_id === null) {
-            return <<<HTML
-<div class="content">
-    No gradeable id specified. Contact your instructor if you think this is an error.
-</div>
-HTML;
-        }
-        else {
-            $gradeable_id = htmlentities($gradeable_id, ENT_QUOTES);
-            return <<<HTML
-<div class="content">
-    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
-    is an error.
-</div>
-HTML;
-        }
+        return $this->core->getOutput()->renderTwigTemplate("error/InvalidGradeable.twig", [
+            "gradeable_id" => $gradeable_id
+        ]);
     }
 }
