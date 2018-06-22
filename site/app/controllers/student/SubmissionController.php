@@ -86,7 +86,7 @@ class SubmissionController extends AbstractController {
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        $content = $_POST['replyTextArea']:
+        $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
