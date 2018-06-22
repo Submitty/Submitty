@@ -722,6 +722,3 @@ function toggleEditMode(){
         updateMarksOnPage(id);
     }
 }
-
-=======
-}

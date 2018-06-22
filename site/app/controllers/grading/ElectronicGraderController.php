@@ -128,6 +128,7 @@ class ElectronicGraderController extends GradingController {
         /*
          * we need number of students per section
          */
+
         $no_team_users = array();
         $graded_components = array();
         $graders = array();
@@ -141,7 +142,6 @@ class ElectronicGraderController extends GradingController {
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
-        $regrade_requests = $this->core->getQueries()->getNumberRegradeRequests($gradeable_id);
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -280,7 +280,7 @@ class ElectronicGraderController extends GradingController {
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key);
     }
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -928,19 +928,13 @@ class ElectronicGraderController extends GradingController {
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
                 $this->core->addErrorMessage("You do not have permission to grade this");
-
-                $response = array('status' => 'failure');
-                $this->core->getOutput()->renderJson($response);
-                return $response;
+                return;
             }
             else {
                 $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
                 if(!in_array($user_id, $user_ids_to_grade)) {
                     $this->core->addErrorMessage("You do not have permission to grade this student");
-
-                    $response = array('status' => 'failure');
-                    $this->core->getOutput()->renderJson($response);
-                    return $response;
+                    return;
                 }
             }
         }
@@ -956,17 +950,8 @@ class ElectronicGraderController extends GradingController {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
             if (!in_array($user_id, $user_ids_to_grade)) {
                 $this->core->addErrorMessage("You do not have permission to grade {$user_id}");
-
-                $response = array('status' => 'failure');
-                $this->core->getOutput()->renderJson($response);
-                return $response;
+                return;
             }
-        }
-
-        if ($gradeable->getCurrentVersion() === null) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
         }
 
         //save the component
@@ -1153,7 +1138,7 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $index = $_REQUEST['index'];
+        $count = $_REQUEST['count'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         
 
@@ -1168,7 +1153,7 @@ class ElectronicGraderController extends GradingController {
         //display hidden testcases only if the user can view the entirety of this gradeable.
         if($this->canIViewThis($gradeable, $who_id)){
             $can_view_hidden = $this->canIviewThis($gradeable, $who_id, $hidden=true);
-            $return = AutogradingView::loadAutoChecks($gradeable, $index, $who_id, $popup_css, $can_view_hidden);
+            $return = AutogradingView::loadAutoChecks($gradeable, $count, $who_id, $popup_css, $can_view_hidden);
         }
         //Returns the html to ajax.
         echo($return);

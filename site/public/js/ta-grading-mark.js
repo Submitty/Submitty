@@ -1254,7 +1254,7 @@ function toggleMark(id, save) {
         closeMark(id, save);
         updateCookies();
     } else {
-        openMark(c_index);
+        openMark(id);
     }
 }
 
