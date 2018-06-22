@@ -530,7 +530,7 @@ function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback)
         //console.log(data);
     });
    saveMark(c_index, false);
-   openMark(c_index);
+   window.location.reload();
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
