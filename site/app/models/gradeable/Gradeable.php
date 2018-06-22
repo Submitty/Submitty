@@ -416,9 +416,9 @@ class Gradeable extends AbstractModel {
                 //  doesn't complain when we update it
                 $this->grade_start_date = $dates['grade_released_date'];
             }
-            if ($this->team_assignment) {
-                $this->team_lock_date = $dates['team_lock_date'];
-            }
+
+            // Set team lock date even if not team assignment because it is NOT NULL in the db
+            $this->team_lock_date = $dates['team_lock_date'];
             $this->submission_open_date = $dates['submission_open_date'];
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
