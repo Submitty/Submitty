@@ -645,6 +645,10 @@ class Gradeable extends AbstractModel {
      * @param array $rotating_grader_sections An array (indexed by grader id) of arrays of section numbers
      */
     public function setRotatingGraderSections($rotating_grader_sections) {
+
+        // Number of total rotating sections
+        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
+
         $parsed_graders_sections = [];
         foreach($rotating_grader_sections as $user=>$grader_sections) {
             if($grader_sections !== null) {
@@ -654,16 +658,17 @@ class Gradeable extends AbstractModel {
                 // Parse each section array into strings
                 $parsed_sections = [];
                 foreach($grader_sections as $section) {
-                    if (is_int($section) || ctype_digit($section) && intval($section) > 0) {
+                    if (is_int($section) || ctype_digit($section) && intval($section) > 0 && intval($section) <= $num_sections) {
                         $parsed_sections[] = intval($section);
                     } else {
-                        throw new \InvalidArgumentException('Grading section must be a positive integer!');
+                        throw new \InvalidArgumentException('Grading section must be a positive integer no more than the number of rotating sections!');
                     }
                 }
                 $parsed_graders_sections[$user] = $parsed_sections;
             }
         }
         $this->rotating_grader_sections = $parsed_graders_sections;
+        $this->modified = true;
     }
 
     /**
