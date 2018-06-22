@@ -3,13 +3,10 @@
 namespace app\views\submission;
 
 use app\models\Gradeable;
-use app\models\GradeableVersion;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class HomeworkView extends AbstractView {
-
-    const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function unbuiltGradeable(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("error/UnbuiltGradeable.twig", [
@@ -295,15 +292,9 @@ HTML;
      */
     private function renderSubmitBox(Gradeable $gradeable, int $late_days_use): string {
         $student_page = false;
-        $num_components = count($gradeable->getComponents());
+        $return = "";
+        $students_full = [];
 
-        $return = <<<HTML
-<div class="content">
-    <div class="upperinfo">
-        <h2 class="upperinfo-left">New submission for: {$gradeable->getName()}</h2>
-        <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format($this::DATE_FORMAT)}</h2>
-    </div>
-HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $students = $this->core->getQueries()->getAllUsers();
             $student_ids = array();
@@ -330,138 +321,14 @@ HTML;
 
                 $students_full[] = $student_entry;
             }
-
-            $students_full = json_encode($students_full);
-
-            $return .= <<<HTML
-    <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
-        <div >
-            <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
-                Normal Submission
-            <input type='radio' id="radio_student" name="submission_type">
-                Make Submission for a Student
-HTML;
-            if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
-                $return .= <<<HTML
-            <input type='radio' id="radio_bulk" name="submission_type">
-                Bulk Upload
-HTML;
-            }
-            $return .= <<<HTML
-        </div>
-        <div id="user_id_input" style="display: none">
-            <div class="sub">
-                Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
-            </div>
-            <div class="sub">
-                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                user_id: <input type="text" id= "user_id" value ="" placeholder="{$gradeable->getUser()->getId()}"/>
-            </div>
-        </div>
-        <div class = "sub" id="pdf_submit_button" style="display: none">
-            <div class="sub">
-                # of page(s) per PDF: <input type="number" id= "num_pages" placeholder="required"/>
-            </div>
-        </div>
-    </form>
-HTML;
-            $return .= <<<HTML
-    <script type="text/javascript">
-        $(function() {
-            var cookie = document.cookie;
-            students_full = {$students_full};
-            if (cookie.indexOf("student_checked=") !== -1) {
-                var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
-                $("#radio_student").prop("checked", cookieValue==1);
-                $("#radio_bulk").prop("checked", cookieValue==2);
-                document.cookie="student_checked="+0;
-            }
-            if ($("#radio_student").is(":checked")) {
-                $('#user_id_input').show();
-            }
-            if ($("#radio_bulk").is(":checked")) {
-                $('#pdf_submit_button').show();
-            }
-            $('#radio_normal').click(function() {
-                $('#user_id_input').hide();
-                $('#pdf_submit_button').hide();
-                $('#user_id').val('');
-            });
-            $('#radio_student').click(function() {
-                $('#pdf_submit_button').hide();
-                $('#user_id_input').show();
-            });
-            $('#radio_bulk').click(function()  {
-                $('#user_id_input').hide();
-                $('#pdf_submit_button').show();
-                $('#user_id').val('');
-            });
-            $("#user_id").autocomplete({
-                source: students_full
-            });
-        });
-    </script>
-HTML;
         }
-        $return .= <<<HTML
-    <div class="sub">
-HTML;
-        if ($gradeable->hasAssignmentMessage()) {
-            $return .= <<<HTML
-        <p class='green-message'>{$gradeable->getAssignmentMessage()}</p>
-HTML;
-        }
-        $return .= <<<HTML
-    </div>
-HTML;
-        if ($gradeable->useVcsCheckout()) {
-            /*              TODO: Build ability for students to specify their own repo url
-                            if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                                $return .= <<<HTML
-                repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-            HTML;
-                            }
-                            else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                                $return .= <<<HTML
-                Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-                repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-            HTML;
-                            }
-            */
 
-            $vcs_path = $gradeable->getRepositoryPath();
-            $return .= <<<HTML
-    <h3>To access your Repository:</h3>
-    <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-    <samp>git  clone  {$vcs_path}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
-    <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
-HTML;
-        } else {
-            $return .= <<<HTML
-    <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
-HTML;
-
+        if (!$gradeable->useVcsCheckout()) {
+            //TODO: Textboxes
             for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
                 $textbox = $gradeable->getTextboxes()[$i];
                 $return .= $this->renderTextbox($gradeable, $textbox, $i);
             }
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                if ($gradeable->getNumParts() > 1) {
-                    $label = "Drag your {$gradeable->getPartNames()[$i]} here or click to open file browser";
-                } else {
-                    $label = "Drag your file(s) here or click to open file browser";
-                }
-                $return .= <<<HTML
-
-        <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">{$label}</h3>
-            <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" multiple />
-        </div>
-HTML;
-            }
-            $return .= <<<HTML
-    </div>
-HTML;
             // does this gradeable have parts assigned by students
             foreach ($gradeable->getComponents() as $question) {
                 if (is_array($question)) {
@@ -474,198 +341,30 @@ HTML;
                     break;
                 }
             }
-            if ($student_page) {
-                $return .= <<<HTML
-    <form id="pdfPageStudent">
-        <div class="sub">
-        <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
-HTML;
-                $count = 0;
-                foreach ($gradeable->getComponents() as $question) {
-                    $title = $question->getTitle();
-                    $return .= <<<HTML
-        <div>{$title}: <input type="number" id="page_{$count}" min="1"></div><br />
-HTML;
-                    $count++;
-                }
-                $return .= <<<HTML
-        </div>
-    </form>
-HTML;
-            }
-            $return .= <<<HTML
-    <div>
-        {$this->core->getConfig()->getUploadMessage()}
-    <br>
-    &nbsp;
-    </div>
 
-    <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-    <button type="button" id="startnew" class="btn btn-primary">Clear</button>
-
-HTML;
-            if ($gradeable->getCurrentVersionNumber() === $gradeable->getHighestVersion()
-                && $gradeable->getCurrentVersionNumber() > 0) {
-                $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
-HTML;
-            }
-
-            $old_files = "";
+            $old_files = [];
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
                     // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                     if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
                         $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                    } else
+                    } else {
                         $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
-                    $old_files .= <<<HTML
+                    }
 
-                addLabel('$escape_quote_filename', '{$size}', {$i}, true);
-                readPrevious('$escape_quote_filename', {$i});
-HTML;
+                    $old_files[] = ["name" => $escape_quote_filename, "size" => $size, "part" => $i];
                 }
             }
-            if ($gradeable->getCurrentVersionNumber() == $gradeable->getHighestVersion()
-                && $gradeable->getCurrentVersionNumber() > 0 && $this->core->getConfig()->keepPreviousFiles()) {
-                $return .= <<<HTML
-    <script type="text/javascript">
-        $(function() {
-            setUsePrevious();
-            {$old_files}
-        });
-    </script>
-HTML;
-            }
-            $return .= <<<HTML
-    <script type="text/javascript">
-        $(function() {
-            setButtonStatus();
-        });
-    </script>
-HTML;
-            $return .= <<<HTML
-
-    <script type="text/javascript">
-        // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
-        var num_parts = {$gradeable->getNumParts()};
-        createArray(num_parts);
-        var assignment_version = {$gradeable->getCurrentVersionNumber()};
-        var highest_version = {$gradeable->getHighestVersion()};
-        for (var i = 1; i <= num_parts; i++ ){
-            var dropzone = document.getElementById("upload" + i);
-            dropzone.addEventListener("click", clicked_on_box, false);
-            dropzone.addEventListener("dragenter", draghandle, false);
-            dropzone.addEventListener("dragover", draghandle, false);
-            dropzone.addEventListener("dragleave", draghandle, false);
-            dropzone.addEventListener("drop", drop, false);
         }
 
-        $("#startnew").click(function(e){ // Clear all the selected files in the buckets
-            for (var i = 1; i <= num_parts; i++){
-              deleteFiles(i);
-            }
-            e.stopPropagation();
-        });
-
-        // GET FILES OF THE HIGHEST VERSION
-        if (assignment_version == highest_version && highest_version > 0) {
-            $("#getprev").click(function(e){
-                $("#startnew").click();
-                {$old_files}
-                setUsePrevious();
-                setButtonStatus();
-                e.stopPropagation();
-            });
-        }
-    </script>
-HTML;
-        }
-
-        $vcs_string = ($gradeable->useVcsCheckout()) ? "true" : "false";
-        $student_page_string = ($student_page) ? "true" : "false";
-
-        $return .= <<<HTML
-    <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
-            // submit the selected pdf
-            path = decodeURIComponent(path);
-            if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
-                moveNextInput(count);
-            }
-            
-            // otherwise, this is a regular submission of the uploaded files
-            else if (user_id == "") {
-                handleSubmission({$late_days_use},
-                                {$gradeable->getAllowedLateDays()},
-                                {$gradeable->getHighestVersion()},
-                                {$gradeable->getMaxSubmissions()},
-                                "{$this->core->getCsrfToken()}",
-                                {$vcs_string},
-                                {$gradeable->getNumTextBoxes()},
-                                "{$gradeable->getId()}",
-                                "{$gradeable->getUser()->getId()}",
-                                repo_id,
-                                {$student_page_string},
-                                {$num_components});
-            }
-            else {
-                handleSubmission({$late_days_use},
-                                {$gradeable->getAllowedLateDays()},
-                                highest_version,
-                                {$gradeable->getMaxSubmissions()},
-                                "{$this->core->getCsrfToken()}",
-                                {$vcs_string},
-                                {$gradeable->getNumTextBoxes()},
-                                "{$gradeable->getId()}",
-                                user_id,
-                                repo_id,
-                                {$student_page_string},
-                                {$num_components});
-            }
-        }
-        $(function() {
-            $("#submit").click(function(e){ // Submit button
-                var user_id = "";
-                var repo_id = "";
-                var num_pages = 0;
-                // depending on which is checked, update cookie
-                if ($('#radio_normal').is(':checked')) {
-                    document.cookie="student_checked="+0;
-                };
-                if ($('#radio_student').is(':checked')) {
-                    document.cookie="student_checked="+1;
-                    user_id = $("#user_id").val();
-                };
-                if ($('#radio_bulk').is(':checked')) {
-                    document.cookie="student_checked="+2;
-                    num_pages = $("#num_pages").val();
-                };
-                // vcs upload
-                if ({$vcs_string}) {
-                    repo_id = $("#repo_id").val();
-                }
-                // bulk upload
-                if ($("#radio_bulk").is(":checked")) {
-                    handleBulk("{$gradeable->getId()}", num_pages);
-                }
-                // no user id entered, upload for whoever is logged in
-                else if (user_id == ""){
-                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id)
-                }
-                // user id entered, need to validate first
-                else {
-                    validateUserId("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, false, "", "", repo_id, makeSubmission);
-                }
-                e.stopPropagation();
-            });
-        });
-    </script>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("submission/SubmitBox.twig", [
+            "gradeable" => $gradeable,
+            "student_page" => $student_page,
+            "students_full" => $students_full,
+            "late_days_use" => $late_days_use,
+            "old_files" => $old_files,
+        ]);
     }
 
     /**
