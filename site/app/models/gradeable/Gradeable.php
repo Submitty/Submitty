@@ -517,7 +517,7 @@ class Gradeable extends AbstractModel {
      */
     public function setMinGradingGroup($group) {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
-        if (is_int($group) && $group > 0 && $group <= 4) {
+        if ((is_int($group) || ctype_digit($group)) && intval($group) > 0 && intval($group) <= 4) {
             $this->min_grading_group = $group;
         } else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
@@ -530,7 +530,7 @@ class Gradeable extends AbstractModel {
      * @param int $max_team_size Must be at least 0
      */
     public function setTeamSizeMax($max_team_size) {
-        if (is_int($max_team_size) || ctype_digit($max_team_size) && intval($max_team_size) >= 0) {
+        if ((is_int($max_team_size) || ctype_digit($max_team_size)) && intval($max_team_size) >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
