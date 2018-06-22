@@ -409,7 +409,7 @@ class DiffViewer {
          * there's a difference on that line or that the line doesn't exist.
          */
         for ($i = 0; $i < count($lines); $i++) {
-			$j = $i + 1;
+        	$j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
@@ -422,10 +422,8 @@ class DiffViewer {
             }
             $html .= "<span class='line_number'>";
             $digits_at_line = strlen((string)$j);
-			$max_digits = strlen((string)count($lines));
-            $counter = $max_digits-$digits_at_line;
-            while($counter > 0){
-				$counter--;
+            $max_digits = strlen((string)count($lines));
+			for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
 				$html .= "&nbsp;";
 			}
 			$html .= "{$j}</span>";
@@ -435,13 +433,13 @@ class DiffViewer {
                 $current = 0;
                 // character highlighting
                 foreach ($this->diff[$type][$i] as $diff) {
-                    $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
-					$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                    if($option == "original"){
-						$html .= $html_orig;
-						$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
+                	$html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
+                	$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
+                	if($option == "original"){
+                		$html .= $html_orig;
+                		$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
 					} else if($option == "with_unicode") {
-						$html_no_empty = $this->replaceEmptyChar($html_orig);
+                		$html_no_empty = $this->replaceEmptyChar($html_orig);
 						$html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
 						$html .= $html_no_empty;
 						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
@@ -453,14 +451,15 @@ class DiffViewer {
 					}
                     $current = $diff[1]+1;
                 }
-				if($option == "original"){
-					$html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
-				} else if($option == "with_unicode"){
-					$html .= "<span class='line_code_inner'>".$this->replaceEmptyChar(htmlentities(substr($lines[$i], $current)))."</span>";
-				} else if($option == "with_escape"){
-					$html .= "<span class='line_code_inner'>".$this->replaceEmptyCharWEscape(htmlentities(substr($lines[$i], $current)))."</span>";
+				$html .= "<span class='line_code_inner'>";
+				$inner = htmlentities(substr($lines[$i], $current));
+				if ($option === 'with_unicode') {
+					$inner = $this->replaceEmptyChar($inner);
 				}
-
+				elseif ($option === 'with_escape') {
+					$inner = $this->replaceEmptyCharWEscape($inner);
+				}
+				$html .= "{$inner}</span>";
             }
             else {
                 if (isset($lines[$i])) {
@@ -469,7 +468,7 @@ class DiffViewer {
 					} else if($option == "with_unicode"){
                 		$html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
 					} else if($option == "with_escape"){
-						$html .= $this->replaceEmptyCharWEscape(htmlentities($lines[$i]));
+						$html .= $this->replaceEmptyCharWithEscape(htmlentities($lines[$i]));
 					}
                 }
             }
@@ -526,7 +525,7 @@ class DiffViewer {
 		return $return;
 	}
 
-	private function replaceEmptyCharWEscape($html){
+	private function replaceEmptyCharWithEscape($html){
 		$count = 0;
 		$return = str_replace(' ', '<span style="outline:1px blue solid;"> </span>', $html,$count);
 		if($count > 0) $this->white_spaces['space'] = '&nbsp;';
