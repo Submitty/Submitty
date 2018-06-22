@@ -66,6 +66,7 @@ use app\models\GradeableComponent;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
+ * @method array getRotatingGraderSections()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -84,6 +85,8 @@ class Gradeable extends AbstractModel {
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
+    /** @property @var bool If any manual grades have been entered for this gradeable */
+    private $has_manual_grades = false;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -150,6 +153,11 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = array();
 
+    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
+     *                          Array (indexed by grader id) of arrays of rotating section numbers
+     */
+    protected $rotating_grader_sections = array();
+
     public function __construct(Core $core, $details, array $components) {
         parent::__construct($core);
 
@@ -181,6 +189,9 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
         }
 
+        // Since this property is immutable, calculate it instead of taking it as a parameter
+        $this->has_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
+
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
@@ -204,6 +215,9 @@ class Gradeable extends AbstractModel {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
+        // Serialize this even though its not mutable
+        $return['has_manual_grades'] = $this->has_manual_grades;
+
         return $return;
     }
 
@@ -219,6 +233,14 @@ class Gradeable extends AbstractModel {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
+     * @return bool True if any manual grades exist
+     */
+    public function hasManualGrades() {
+        return $this->has_manual_grades;
     }
 
     /**
@@ -616,6 +638,32 @@ class Gradeable extends AbstractModel {
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
+    }
+
+    /**
+     * Sets the rotating grader sections for this gradeable
+     * @param array $rotating_grader_sections An array (indexed by grader id) of arrays of section numbers
+     */
+    public function setRotatingGraderSections($rotating_grader_sections) {
+        $parsed_graders_sections = [];
+        foreach($rotating_grader_sections as $user=>$grader_sections) {
+            if($grader_sections !== null) {
+                if(!is_array($grader_sections)) {
+                    throw new \InvalidArgumentException('Rotating grader section for grader was not array');
+                }
+                // Parse each section array into strings
+                $parsed_sections = [];
+                foreach($grader_sections as $section) {
+                    if (is_int($section) || ctype_digit($section) && intval($section) > 0) {
+                        $parsed_sections[] = intval($section);
+                    } else {
+                        throw new \InvalidArgumentException('Grading section must be a positive integer!');
+                    }
+                }
+                $parsed_graders_sections[$user] = $parsed_sections;
+            }
+        }
+        $this->rotating_grader_sections = $parsed_graders_sections;
     }
 
     /**
