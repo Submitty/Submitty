@@ -63,14 +63,14 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $template_gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['template_id']);
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_template_gradeable',
-            new AdminGradeable($this->core, $template_gradeable), $_GET['semester'], $_GET['course']);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable',
+            new AdminGradeable($this->core, $template_gradeable), 'template');
     }
 
     //view the page with no data from previous gradeables
     private function viewPage() {
-        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_new_gradeable',
-            new AdminGradeable($this->core), $_GET['semester'], $_GET['course']);
+        $this->core->getOutput()->renderOutput(array('admin', 'AdminGradeable'), 'show_add_gradeable',
+            new AdminGradeable($this->core), 'new');
     }
 
     //view the page with pulled data from the gradeable to be edited
@@ -632,7 +632,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function createGradeableRequest() {
-        $gradeable_id = $_POST['g_id'];
+        $gradeable_id = $_POST['id'];
         $result = $this->createGradeable($gradeable_id, $_POST);
 
         if ($result === null) {
@@ -650,44 +650,19 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function createGradeable($gradeable_id, $details) {
-        // First assert that the gradeable ID is valid
-        preg_match('/^[a-zA-Z0-9_-]*$/', $gradeable_id, $matches, PREG_OFFSET_CAPTURE);
-        if (count($matches) === 0) {
-            return [1, 'Invalid Gradeable Id!'];
-        }
-
         // Make sure the gradeable doesn't already exist
         if ($this->core->getQueries()->existsGradeable($gradeable_id)) {
             return [1, 'Gradeable Already Exists!'];
         }
 
-
         // Create the gradeable with good default information
         //
-        $gradeable_type = GradeableType::stringToType($details['g_gradeable_type']);
+        $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
             'grade_by_registration' => true,
             'min_grading_group' => 1,
         ];
-
-        // Electronic-only values
-        if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $electronic_file_property = [
-                'team_assignment',
-                'vcs',
-                'max_team_size',
-            ];
-            foreach ($electronic_file_property as $property) {
-                $gradeable_create_data[$property] = $details[$property];
-            }
-            $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => $details['team_assignment'] === 'true',
-                'vcs' => $details['is_repository'] === 'true',
-
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
-            ]);
-        }
 
         $template_property_names = [
             'min_grading_group',
@@ -737,20 +712,40 @@ class AdminGradeableController extends AbstractController {
             'id',
             'title',
             'instructions_url',
-            'team_size_max',
-            'subdirectory',
             'syllabus_bucket'
-        ];
-        $bool_front_page_property_names = [
-            'ta_grading',
-            'vcs',
-            'team'
         ];
         foreach ($front_page_property_names as $prop) {
             $gradeable_create_data[$prop] = $details[$prop];
         }
-        foreach ($bool_front_page_property_names as $prop) {
-            $gradeable_create_data[$prop] = $details[$prop] === 'true';
+
+        // Electronic-only values
+        if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
+            $gradeable_create_data = array_merge($gradeable_create_data, [
+                'team_assignment' => $details['team_assignment'] === 'true',
+                'vcs' => $details['vcs'] === 'true',
+                'ta_grading' => $details['ta_grading'] === 'true',
+                'team_size_max' => $details['team_size_max'],
+                'vcs_subdirectory' => $details['vcs_subdirectory'],
+
+                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
+
+                // TODO: properties that aren't supported yet
+                'peer_grading' => false,
+                'peer_grade_set' => 0,
+                'late_submission_allowed' => true
+            ]);
+        } else {
+            // Values for these electronic-only properties
+            $gradeable_create_data = array_merge($gradeable_create_data, [
+                'team_assignment' => false,
+                'vcs' => false,
+                'team_size_max' => 0,
+                'vcs_subdirectory' => '',
+                'autograding_config_path' => '',
+                'peer_grading' => false,
+                'peer_grade_set' => 0,
+                'late_submission_allowed' => true
+            ]);
         }
 
         // Setup good default dates
@@ -781,7 +776,7 @@ class AdminGradeableController extends AbstractController {
             return [2, 'Build queue entry failed!'];
         }
 
-        return [];
+        return null;
     }
 
     private function updateGradeableRequest() {

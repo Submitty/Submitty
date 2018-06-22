@@ -111,14 +111,14 @@
     $(document).ready(function() {
 
         updateNavItemsStatus();
-        $('[name="g_gradeable_type"]').change(updateNavItemsStatus);
-        $('[name="eg_use_ta_grading"]').change(updateNavItemsStatus)
+        $('[name="type"]').change(updateNavItemsStatus);
+        $('[name="ta_grading"]').change(updateNavItemsStatus)
 
         // Update navigation on load
 
         {# Disable navigation on 'new' mode #}
         {% if action == 'edit' %}
-            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
+            adminGradeableNavTab = {{ nav_tab == -1 ? (gradeable.getType() == 0 ? 1 : 2) : nav_tab }};
         {% else %}
             adminGradeableNavTab = 0;
             $('.nav-bar').each(function() {

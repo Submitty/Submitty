@@ -14,11 +14,10 @@ function updateErrors(data) {
 
 function setError(name, err) {
     $('input[name="' + name + '"]').each(function (i, elem) {
-        elem.title = (err[0] !== 0 ? '[Warning] ' : '') + err[1];
+        elem.title = err;
         elem.style.backgroundColor = '#FDD';
     });
-    if(err[0] === 0)
-        errors[name] = err[1];
+    errors[name] = err[1];
 }
 function clearError(name) {
     $('input[name="' + name + '"]').each(function (i, elem) {

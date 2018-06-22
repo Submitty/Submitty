@@ -7,22 +7,16 @@ use app\models\AdminGradeable;
 
 class AdminGradeableView extends AbstractView {
 
-    public function show_add_new_gradeable(AdminGradeable $admin_gradeable, $semester, $course) {
+    public function show_add_gradeable(AdminGradeable $admin_gradeable, $action) {
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'admin_gradeable' => $admin_gradeable,
-            'action'          => 'new',
-            'semester'        => $semester,
-            'course'          => $course
-        ]);
-    }
-
-    public function show_add_template_gradeable(AdminGradeable $admin_gradeable, $semester, $course) {
-        return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
+            'submit_url'        => $this->core->buildUrl([
+                    'component' => 'admin',
+                    'page'      => 'admin_gradeable',
+                    'action'    => 'upload_new_gradeable'
+                ]),
             'admin_gradeable' => $admin_gradeable,
             'gradeable'       => $admin_gradeable->getGradeable(),
-            'action'          => 'template',
-            'semester'        => $semester,
-            'course'          => $course
+            'action'          => $action
         ]);
     }
 
