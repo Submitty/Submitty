@@ -85,8 +85,15 @@ class Gradeable extends AbstractModel {
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
+
+    /* Properties calculated Just-in-time */
+
     /** @property @var bool If any manual grades have been entered for this gradeable */
-    private $has_manual_grades = false;
+    private $any_manual_grades = null;
+    /** @property @var bool If any submissions exist */
+    private $any_submissions = null;
+    /** @property @var bool If any teams have been formed */
+    private $any_teams = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -189,9 +196,6 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
         }
 
-        // Since this property is immutable, calculate it instead of taking it as a parameter
-        $this->has_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
-
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
@@ -215,9 +219,6 @@ class Gradeable extends AbstractModel {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
-        // Serialize this even though its not mutable
-        $return['has_manual_grades'] = $this->has_manual_grades;
-
         return $return;
     }
 
@@ -233,14 +234,6 @@ class Gradeable extends AbstractModel {
             }
         }
         return null;
-    }
-
-    /**
-     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
-     * @return bool True if any manual grades exist
-     */
-    public function hasManualGrades() {
-        return $this->has_manual_grades;
     }
 
     /**
@@ -693,5 +686,65 @@ class Gradeable extends AbstractModel {
         // If the remainder is more than half the precision away from zero, then add one
         //  times the direction from zero to the quotient.  Multiply by precision
         return ($q + (abs($r) > $this->precision / 2 ? ($r > 0 ? 1 : -1) : 0)) * $this->precision;
+    }
+
+
+
+    /**
+     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
+     * @return bool True if any manual grades exist
+     */
+    public function anyManualGrades() {
+        if($this->any_manual_grades === null) {
+            $this->any_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
+        }
+        return $this->any_manual_grades;
+    }
+
+    /**
+     * Gets if this gradeable has any submissions yet
+     * @return bool
+     */
+    public function anySubmissions() {
+        if($this->any_submissions === null) {
+            // Until we find a submission, assume there are none
+            $this->any_submissions = false;
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $semester = $this->core->getConfig()->getSemester();
+                $course = $this->core->getConfig()->getCourse();
+                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+                if (is_dir($submission_path)) {
+                    $this->any_submissions = false;
+                }
+            }
+        }
+        return $this->any_submissions;
+    }
+
+    /**
+     * Gets if this gradeable has any teams formed yet
+     * @return bool
+     */
+    public function anyTeams() {
+        if($this->any_teams === null) {
+            // Unless we find a team, assume there are none
+            $this->any_teams = false;
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                if (!empty($all_teams)) {
+                    $this->any_teams = true;
+                }
+            }
+        }
+        return $this->any_teams;
+    }
+
+    /**
+     * Used to decide whether a gradeable can be deleted or not.
+     * This means: No submissions, No manual grades entered, and No teams formed
+     * @return bool True if the gradeable can be deleted
+     */
+    public function canDelete() {
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
     }
 }
