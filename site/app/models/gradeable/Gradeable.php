@@ -33,7 +33,6 @@ use app\models\GradeableComponent;
  * @method \DateTime getMinGradingGroup()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
- * @method Component[] getComponents()
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
@@ -66,7 +65,6 @@ use app\models\GradeableComponent;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
- * @method array getRotatingGraderSections()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -86,7 +84,7 @@ class Gradeable extends AbstractModel {
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
 
-    /* Properties calculated Just-in-time */
+    /* (private) Properties calculated Just-in-time */
 
     /** @property @var bool If any manual grades have been entered for this gradeable */
     private $any_manual_grades = null;
@@ -94,6 +92,12 @@ class Gradeable extends AbstractModel {
     private $any_submissions = null;
     /** @property @var bool If any teams have been formed */
     private $any_teams = null;
+    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
+     *                          Array (indexed by grader id) of arrays of rotating section numbers
+     */
+    private $rotating_grader_sections = null;
+    /** @property @var Component[] An array of all of this gradeable's components */
+    private $components = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -157,14 +161,6 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
-    /** @property @var Component[] An array of all of this gradeable's components */
-    protected $components = array();
-
-    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
-     *                          Array (indexed by grader id) of arrays of rotating section numbers
-     */
-    protected $rotating_grader_sections = array();
-
     public function __construct(Core $core, $details, array $components) {
         parent::__construct($core);
 
@@ -218,6 +214,10 @@ class Gradeable extends AbstractModel {
         foreach (self::date_properties as $date) {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
+
+        // Serialize important private JIT values
+        $return['components'] = parent::parseObject($this->getComponents());
+        $return['rotating_grader_sections'] = parent::parseObject($this->getRotatingGraderSections());
 
         return $return;
     }
@@ -455,6 +455,34 @@ class Gradeable extends AbstractModel {
             $dates[$property] = $this->$property;
         }
         return $dates;
+    }
+
+    /**
+     * Gets the rotating section grader assignment
+     * @return array An array (indexed by user id) of arrays of section ids
+     */
+    public function getRotatingGraderSections() {
+        if($this->rotating_grader_sections === null) {
+            $modified_old = $this->modified;
+            $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
+
+            // Reset modified flag if we weren't already modified yet
+            if($modified_old === false) {
+                $this->modified = false;
+            }
+        }
+        return $this->rotating_grader_sections;
+    }
+
+    /**
+     * Gets the components for this gradeable
+     * @return Component[]
+     */
+    public function getComponents() {
+        if($this->components === null) {
+            $this->core->getQueries()->getComponentConfigs($this);
+        }
+        return $this->components;
     }
 
     /** @internal */

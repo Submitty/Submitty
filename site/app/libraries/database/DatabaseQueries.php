@@ -2401,7 +2401,12 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
     }
 
-    public function getGradeableComponentConfigs(\app\models\gradeable\Gradeable $gradeable) {
+    /**
+     * Loads the components for a gradeable into the gradeable
+     * Note: This does not need to be manually called on a Gradeable instance
+     * @param \app\models\gradeable\Gradeable $gradeable
+     */
+    public function getComponentConfigs(\app\models\gradeable\Gradeable $gradeable) {
 
         // Get the components
         $query = "
@@ -2464,7 +2469,7 @@ AND gc_id IN (
             $components[] = $component;
         }
 
-        return $components;
+        $gradeable->setComponents($components);
     }
 
     /**
