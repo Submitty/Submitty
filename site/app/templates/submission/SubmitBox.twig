@@ -73,7 +73,7 @@
 
     <div class="sub">
         {% if gradeable.hasAssignmentMessage() %}
-            <p class='green-message'>{{ gradeable.getAssignmentMessage() }}</p>
+            <p class='green-message'>{{ gradeable.getAssignmentMessage()|raw }}</p>
         {% endif %}
     </div>
 
