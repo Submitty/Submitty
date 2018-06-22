@@ -985,9 +985,15 @@ ORDER BY rotating_section");
         throw new NotImplementedException();
     }
 
-    public function getGradersFromUserType($user_type) {
-        $this->course_db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array($user_type));
-        return $this->course_db->rows();
+    public function getGradersByUserType() {
+        $this->course_db->query(
+            "SELECT user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
+        $users = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $users[$row['user_group']][] = $row['user_id'];
+        }
+        return $users;
     }
 
     /**

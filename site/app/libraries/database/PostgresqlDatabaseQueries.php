@@ -706,7 +706,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     GROUP BY g_id, user_id
   ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
   ORDER BY user_group, user_id, g_grade_start_date");
-        return $this->course_db->rows();
+        $rows = $this->course_db->rows();
+        $modified_rows = [];
+        foreach($rows as $row) {
+            $row['sections_rotating_id'] = $this->course_db->fromDatabaseToPHPArray($row['sections_rotating_id']);
+            $modified_rows[] = $row;
+        }
+        return $modified_rows;
     }
 
     public function getGradersForAllRotatingSections($gradeable_id) {
