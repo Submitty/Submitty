@@ -426,6 +426,18 @@ class Gradeable extends AbstractModel {
         $this->modified = true;
     }
 
+    /**
+     * Gets all of the gradeable's date values indexed by property name
+     * @return \DateTime[]
+     */
+    public function getDates() {
+        $dates = [];
+        foreach(self::date_properties as $property) {
+            $dates[$property] = $this->$property;
+        }
+        return $dates;
+    }
+
     /** @internal */
     public function setTaViewStartDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
