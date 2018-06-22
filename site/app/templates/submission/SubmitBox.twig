@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 <div class="content">
     <div class="upperinfo">
         <h2 class="upperinfo-left">New submission for: {{ gradeable.getName() }}</h2>
@@ -98,6 +100,12 @@
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+
+            {# Text boxes #}
+            {% for textbox in textboxes %}
+                {{ self.render_textbox(textbox) }}
+            {% endfor %}
+            {# /Text boxes #}
 
             {# Submit boxes #}
             {% for part in gradeable.getPartNames() %}
@@ -272,3 +280,52 @@
         });
     });
 </script>
+
+{% macro render_textbox(textbox) %}
+    {% for image in textbox.images %}
+        <img src="{{ image.src }}"
+        {% if image.image_width > 0 %}
+            width="{{ image.image_width }}"
+        {% endif %}
+        {% if image.image_height > 0 %}
+            height="{{ image.image_height }}"
+        {% endif %}
+        />
+    {% endfor %}
+
+    <p style="max-width: 50em;">
+        {{ textbox.label }}
+        <br>
+        {% if textbox.rows == 0 %}
+            <input type="text" name="textbox_{{ textbox.index }}" id="textbox_{{ textbox.index }}" onKeyPress="handle_textbox_keypress();">
+        {% else %}
+            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ textbox.index }}" id="textbox_{{ textbox.index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            {#
+                Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+            #}
+            <script>
+                $("#textbox_{{ textbox.index }}").keydown(function(e) {
+                    if(e.keyCode === 9) { // tab was pressed
+                        // get caret position/selection
+                        var start = this.selectionStart;
+                        var end = this.selectionEnd;
+                        var $this = $(this);
+                        var value = $this.val();
+                        // set textarea value to: text before caret + tab + text after caret
+                        $this.val(value.substring(0, start)
+                            + "\t"
+                            + value.substring(end));
+                        // put caret at right position again (add one for the tab)
+                        this.selectionStart = this.selectionEnd = start + 1;
+                        // prevent the focus lose
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                });
+            </script>
+        {% endif %}
+    </p>
+    <br>
+{% endmacro %}

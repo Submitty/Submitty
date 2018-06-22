@@ -70,7 +70,7 @@
             </p>
         {% else %}
             <p class="red-message">
-                This submission is currently in the queue to be graded. Your submission is number {gradeable.getInteractiveQueuePosition()} out of {gradeable.getInteractiveQueueTotal()}.
+                This submission is currently in the queue to be graded. Your submission is number {{ gradeable.getInteractiveQueuePosition() }} out of {{ gradeable.getInteractiveQueueTotal() }}.
             </p>
         {% endif %}
         <script type="text/javascript">
