@@ -14,7 +14,7 @@ use app\models\GradeableComponent;
 
 /**
  * All data describing the configuration of a gradeable
- *  Note: All per-student data is in the (TODO) class
+ *  Note: All per-student data is in the GradedGradeable class
  *
  *  Note: there is no guarantee of the values of properties not relevant to the gradeable type
  *
@@ -375,9 +375,13 @@ class Gradeable extends AbstractModel {
                 }
             }
         } else {
-            // The only check if its not an electronic gradeable
-            if (Utils::compareNullableGt($ta_view_start_date, $grade_released_date)) {
-                $errors['grade_released_date'] = 'Grades Released Date must be later than the TA Beta Testing Date';
+
+            // TA beta testing date <= manual grading open date <= grades released
+            if (Utils::compareNullableGt($ta_view_start_date, $grade_start_date)) {
+                $errors['ta_view_start_date'] = 'TA Beta Testing date must be before the Grading Open Date';
+            }
+            if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
+                $errors['grade_released_date'] = 'Grades Released Date must be later than the Grading Open Date';
             }
         }
 

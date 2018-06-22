@@ -2790,7 +2790,7 @@ AND gc_id IN (
               g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $params = [
                 $gradeable->getId(),
