@@ -80,6 +80,7 @@ class PlagiarismController extends AbstractController {
                 unset($gradeable_ids_titles[$i]);
             }
         }
+
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismForm', $gradeable_ids_titles, $prior_term_gradeables);
