@@ -61,6 +61,7 @@ class GradedGradeable extends AbstractModel {
         $this->setOverallComment($details['overall_comment']);
         $this->setUserViewedDate($details['user_viewed_date']);
         $this->setActiveVersion($details['active_version']);
+        $this->modified = false;
     }
 
     public function toArray() {
@@ -179,6 +180,7 @@ class GradedGradeable extends AbstractModel {
         } else {
             $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
         }
+        $this->modified = true;
     }
 
     /**
@@ -203,6 +205,7 @@ class GradedGradeable extends AbstractModel {
         } else {
             throw new \InvalidArgumentException('Active version must be a non-negative integer');
         }
+        $this->modified = true;
     }
 
     /* Intentionally Unimplemented accessor methods */

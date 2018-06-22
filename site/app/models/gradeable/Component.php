@@ -82,6 +82,7 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
+        $this->modified = false;
     }
 
     /**
@@ -205,6 +206,7 @@ class Component extends AbstractModel {
         foreach (self::point_properties as $property) {
             $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
         }
+        $this->modified = true;
     }
 
     /**

@@ -41,6 +41,7 @@ class Mark extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setOrder($details['order']);
         $this->setPublish($details['publish']);
+        $this->modified = false;
     }
 
     /**
@@ -90,5 +91,6 @@ class Mark extends AbstractModel {
         } else {
             throw new \InvalidArgumentException('Mark points must be a number!');
         }
+        $this->modified = true;
     }
 }

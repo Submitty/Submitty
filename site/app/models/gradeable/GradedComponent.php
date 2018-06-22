@@ -84,6 +84,7 @@ class GradedComponent extends AbstractModel {
         if (isset($details['score'])) {
             $this->setScore($details['score']);
         }
+        $this->modified = false;
     }
 
     public function toArray() {

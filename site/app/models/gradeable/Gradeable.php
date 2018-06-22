@@ -184,6 +184,7 @@ class Gradeable extends AbstractModel {
 
         // Set dates last
         $this->setDates($details);
+        $this->modified = false;
     }
 
     const date_properties = [
@@ -423,6 +424,7 @@ class Gradeable extends AbstractModel {
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
         }
+        $this->modified = true;
     }
 
     /** @internal */
@@ -491,6 +493,7 @@ class Gradeable extends AbstractModel {
             throw new \InvalidArgumentException('Gradeable title must not be blank');
         }
         $this->title = strval($title);
+        $this->modified = true;
     }
 
     /**
@@ -519,6 +522,7 @@ class Gradeable extends AbstractModel {
         } else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
         }
+        $this->modified = true;
     }
 
     /**
@@ -531,6 +535,7 @@ class Gradeable extends AbstractModel {
         } else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
         }
+        $this->modified = true;
     }
 
     /**
@@ -543,6 +548,7 @@ class Gradeable extends AbstractModel {
         } else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
         }
+        $this->modified = true;
     }
 
     /**
@@ -567,6 +573,7 @@ class Gradeable extends AbstractModel {
             throw new \InvalidArgumentException('Autograding configuration file path cannot be blank');
         }
         $this->autograding_config_path = strval($path);
+        $this->modified = true;
     }
 
     /**
