@@ -87,12 +87,9 @@ class HomeworkView extends AbstractView {
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
-
         $active_version = $gradeable->getActiveVersion();
 
-        $info = "";
         $error = false;
-
         $messages = [];
 
         // ------------------------------------------------------------
