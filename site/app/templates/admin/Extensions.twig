@@ -3,6 +3,7 @@
     <h2>Excused Absence Extensions</h2>
     <form id="excusedAbsenceForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="option" value="-1" />
         <div class="panel">
             <div class="option">
                 <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
@@ -44,3 +45,4 @@
         source: {{ student_full|raw }}
     });
 </script>
+{% include('admin/users/MoreExtensions.twig')%}
