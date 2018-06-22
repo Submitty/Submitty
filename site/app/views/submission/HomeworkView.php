@@ -184,7 +184,7 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/LateDayMessage.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/LateDayMessage.twig", [
             "messages" => $messages,
             "error" => $error
         ]);
@@ -285,7 +285,7 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/SubmitBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/SubmitBox.twig", [
             "gradeable" => $gradeable,
             "student_page" => $student_page,
             "students_full" => $students_full,
@@ -335,7 +335,7 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/BulkUploadBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/BulkUploadBox.twig", [
             "gradeable" => $gradeable,
             "count_array" => $count_array,
             "files" => $files,
@@ -347,7 +347,7 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderNoSubmissionBox(Gradeable $gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("submission/NoSubmissionBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/NoSubmissionBox.twig", [
             "gradeable" => $gradeable
         ]);
     }
@@ -393,7 +393,7 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/CurrentVersionBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", [
             "gradeable" => $gradeable,
             "current_version" => $current_version,
             "can_download" => $can_download,
@@ -410,7 +410,7 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderTAResultsBox(Gradeable $gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("submission/TAResultsBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/TAResultsBox.twig", [
             "gradeable" => $gradeable
         ]);
     }
@@ -420,7 +420,7 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderRegradeBox(Gradeable $gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("submission/RegradeBox.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/RegradeBox.twig", [
             "gradeable" => $gradeable
         ]);
     }
