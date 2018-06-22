@@ -383,6 +383,16 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        if ($gradeable->getActiveVersion() !== 0 || $gradeable->getCurrentVersionNumber() !== 0) {
+            $active_same_as_graded = true;
+            foreach ($gradeable->getComponents() as $component) {
+                if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
+                    $active_same_as_graded = false;
+                    break;
+                }
+            }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("submission/CurrentVersionBox.twig", [
             "gradeable" => $gradeable,
             "current_version" => $current_version,
@@ -391,6 +401,7 @@ class HomeworkView extends AbstractView {
             "results" => $results,
             "show_testcases" => $show_testcases,
             "canViewWholeGradeable" => $canViewWholeGradeable,
+            "active_same_as_graded" => $active_same_as_graded,
         ]);
     }
 

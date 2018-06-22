@@ -344,7 +344,10 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else if(!$this->core->getQueries()->existsThread($thread_id)) {
-            $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exists.");
+            $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
+            $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);

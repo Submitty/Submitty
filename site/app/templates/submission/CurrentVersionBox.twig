@@ -62,12 +62,17 @@
         </script>
     {% endif %}
 
-    <div class="sub">
+    <div class="sub submission-message">
         {% if gradeable.getActiveVersion() == 0 and gradeable.getCurrentVersionNumber() == 0 %}
             <p class="red-message">
                 Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
                 This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
                 You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
+            </p>
+        {% elseif not active_same_as_graded %}
+            <p class="red-message">
+                Note: The version you have selected to be graded is not the version graded by the instructor/TAs.<br />
+                If the graded version does not match your selected version, a zero will be recorded in the gradebook.
             </p>
         {% elseif gradeable.getActiveVersion() > 0 and gradeable.getActiveVersion() == current_version.getVersion() %}
             <p class="green-message">
