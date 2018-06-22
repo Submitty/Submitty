@@ -804,10 +804,6 @@ HTML;
                 break;
             }
         }
-        $return = <<<HTML
-      <div class = "sub">
-        <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
-HTML;
         $is_disabled = "";
         $action = "";
         $url = "";
@@ -832,9 +828,6 @@ HTML;
                     'gradeable_id' => $gradeable->getId(),
                     'student_id' => $gradeable->getUser()->getId()
                 ));
-                $return .= <<<HTML
-
-HTML;
                 $deleteMode = true;
             } else {
                 $is_disabled = "disabled";
@@ -856,63 +849,14 @@ HTML;
             ));
             $deleteMode = false;
         }
-        if (!$deleteMode) {
-            $return .= <<<HTML
-          <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
-HTML;
-        } else {
-            $return .= <<<HTML
-          <div style="float:right">
-            <form method="POST" action="{$url}" id="deleteRequest">
-              <button class = "btn {$class}" type = "submit">$message</button>
-            </form>
-          </div>
-HTML;
-        }
-        $return .= <<<HTML
-        <div class="modal" id="modal-container">
-          <div class="modal-content" id="regradeBox">
-            <h3>Request Regrade</h3>
-            <hr>
-            <p class = "red-message">Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p>
-            <br style = "margin-bottom: 10px;">
-            <form id="requestRegradeForm" method="POST" action="{$url}">
-              <div style="text-align: center;">
-                <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
-                placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
-                <br style = "margin-bottom: 10px;">
-                <input type="submit" value="Submit" class="btn btn-default" style="margin: 15px;">
-                <input type="button" id = "cancelRegrade" value="Cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <script type = "text/javascript">
-        $("#deleteRequest").submit(function(event) {
-          $.ajax({
-            type: "POST",
-            url: $(this).attr("action"),
-            data: $(this).serialize(), 
-            success: function(data){
-               window.location.reload();
-            }
-          });
-          event.preventDefault();
-        });
-        var regradeBox = document.getElementById("regradeBox");
-        var modal =document.getElementById("modal-container");
-        function showPopUp(){
-            regradeBox.style.display = "block";
-            modal.style.display = "block";
-        }  
-        function hidePopUp(){
-            regradeBox.style.display = "none";
-            modal.style.display = "none";
-        }; 
-      </script>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("submission/regrade/RequestForm.twig", [
+            "is_disabled" => $is_disabled,
+            "action" => $action,
+            "url" => $url,
+            "class" => $class,
+            "message" => $message,
+            "can_delete" => !$deleteMode,
+        ]);
     }
 
     /**
