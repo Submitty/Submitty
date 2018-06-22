@@ -42,7 +42,7 @@ class HomeworkView extends AbstractView {
         }
         $all_directories = $gradeable->getUploadsFiles();
         if ($this->core->getUser()->accessAdmin() && count($all_directories) > 0) {
-            $return .= $this->renderBulkForm($gradeable);
+            $return .= $this->renderBulkUploadBox($gradeable);
         }
 
         /*
@@ -55,12 +55,12 @@ class HomeworkView extends AbstractView {
          */
 
         if ($gradeable->getSubmissionCount() === 0) {
-            $return .= $this->renderNoSubmission($gradeable);
+            $return .= $this->renderNoSubmissionBox($gradeable);
         } else {
-            $return .= $this->renderSubmissionChoice($gradeable, $canViewWholeGradeable);
+            $return .= $this->renderCurrentVersionBox($gradeable, $canViewWholeGradeable);
         }
         if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
-            $return .= $this->renderTAResults($gradeable);
+            $return .= $this->renderTAResultsBox($gradeable);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
             $return .= <<<HTML
@@ -682,7 +682,7 @@ HTML;
      * @param Gradeable $gradeable
      * @return string
      */
-    private function renderBulkForm(Gradeable $gradeable): string {
+    private function renderBulkUploadBox(Gradeable $gradeable): string {
         $all_directories = $gradeable->getUploadsFiles();
 
         $files = [];
@@ -718,7 +718,7 @@ HTML;
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/BulkUploadForm.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/BulkUploadBox.twig", [
             "gradeable" => $gradeable,
             "count_array" => $count_array,
             "files" => $files,
@@ -729,8 +729,8 @@ HTML;
      * @param Gradeable $gradeable
      * @return string
      */
-    private function renderNoSubmission(Gradeable $gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("submission/NoSubmission.twig", [
+    private function renderNoSubmissionBox(Gradeable $gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("submission/NoSubmissionBox.twig", [
             "gradeable" => $gradeable
         ]);
     }
@@ -740,7 +740,7 @@ HTML;
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    private function renderSubmissionChoice(Gradeable $gradeable, bool $canViewWholeGradeable): string {
+    private function renderCurrentVersionBox(Gradeable $gradeable, bool $canViewWholeGradeable): string {
         $current_version = $gradeable->getCurrentVersion();
 
         // if not active version and student cannot see any more than active version
@@ -766,7 +766,7 @@ HTML;
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("submission/SubmissionChoice.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("submission/CurrentVersionBox.twig", [
             "gradeable" => $gradeable,
             "current_version" => $current_version,
             "can_download" => $can_download,
@@ -781,8 +781,8 @@ HTML;
      * @param Gradeable $gradeable
      * @return string
      */
-    private function renderTAResults(Gradeable $gradeable): string {
-        return $this->core->getOutput()->renderTwigTemplate("submission/TAResults.twig", [
+    private function renderTAResultsBox(Gradeable $gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("submission/TAResultsBox.twig", [
             "gradeable" => $gradeable
         ]);
     }

@@ -88,6 +88,6 @@
     </div>
 
     {% if gradeable.getActiveVersion() != 0 or gradeable.getCurrentVersionNumber() != 0 %}
-        {% include 'submission/SubmissionResults.twig' %}
+        {% include 'submission/CurrentVersionResults.twig' %}
     {% endif %}
 </div>
