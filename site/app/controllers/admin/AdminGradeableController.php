@@ -579,56 +579,18 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        // Assert the format/data is correct
-        $errors = [];
         if (!isset($details['graders'])) {
-            return ['graders', 'Blank Submission!'];
+            return ['graders' => 'Blank Submission!'];
         }
 
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-
-        // Get the valid graders for this assignment
-        $valid_graders = [];
-        foreach ($this->core->getQueries()->getGradersByUserType() as $level => $graders) {
-            if($level > $gradeable->getMinGradingGroup()) {
-                continue;
-            }
-            $valid_graders = array_merge($valid_graders, $graders);
+        try {
+            $gradeable->setRotatingGraderSections($details['graders']);
+        } catch(\Exception $exception) {
+            return ['graders' => $exception];
         }
 
-        foreach ($details['graders'] as $name => $sections) {
-
-            if (!in_array($name, $valid_graders)) {
-                $errors[$name] = 'Invalid grader id for this gradeable!';
-                continue;
-            }
-            foreach ($sections as $section) {
-                if (!is_numeric($section)) {
-                    $errors[$name] = 'Sections must be integers!';
-                    break;
-                }
-                $i_val = (int)$section;
-                if ($i_val < 1) {
-                    $errors[$name] = 'Sections must be 1 or higher!';
-                    break;
-                }
-                if ($i_val > $num_sections) {
-                    $errors[$name] = 'Sections must not exceed section count';
-                    break;
-                }
-            }
-        }
-        if (count($errors) > 0)
-            return $errors;
-        if ($gradeable->isGradeByRegistration() === false) {
-            try {
-                $this->core->getQueries()->setupRotatingSections($details['graders'], $gradeable->getId());
-            } catch (\Exception $e) {
-                $errors['db'] = "Query Failed: {$e}";
-            }
-        }
-
-        return $errors;
+        $this->core->getQueries()->updateGradeable($gradeable);
+        return [];
     }
 
     private function createGradeableRequest() {
