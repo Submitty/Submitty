@@ -116,7 +116,7 @@ function readCookies(){
     var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
+    var editMode = document.cookie.replace(/(?:(?:^|.*;\s*)editMode\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     (output_top) ? $("#autograding_results").css("top", output_top):{};
     (output_left) ? $("#autograding_results").css("left", output_left):{};
     (output_width) ? $("#autograding_results").css("width", output_width):{};
@@ -151,8 +151,8 @@ function readCookies(){
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
 
     (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
-
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
+    //document.getElementById("EditModeButton").checked=editMode;
     if (autoscroll == "on") {
         onAjaxInit = function() {
             $('#title-'+opened_mark).click();
@@ -229,7 +229,7 @@ function updateCookies(){
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
-
+    document.cookie = "editMode=" + $("#editModeEnabled") + "; path=/;";
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
         overwrite = "on";

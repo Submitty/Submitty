@@ -169,8 +169,6 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, error
 }
 
 function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync, successCallback, errorCallback) {
-    console.log("Adding new mark");
-    console.log(id);
     id = (id ? id : -1);
     note = (note ? note : "");
     points = (points ? points : 0);
@@ -198,22 +196,6 @@ function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync
                 console.error("Something went wrong with adding a mark...");
                 alert("There was an error with adding a mark. Please refresh the page and try agian.");
             }
-        })
-}
-function ajaxDeleteMark(gradeable_id, user_id, question_id, mark) {
-    console.log("CHECK");
-    $.ajax({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
-            async: true,
-            data: {
-                'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : question_id,
-                'mark' : mark
-            },
-            success: function(data) {
-            },
         })
 }
 function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback, errorCallback) {
@@ -260,11 +242,10 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
 }
 
 function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
-    console.log("trying to save");
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
-        async: true,
+        async: sync,
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id,
@@ -372,17 +353,13 @@ function updateMarksOnPage(c_index) {
         });
     }
     var ids= [];
-    console.log("IDS");
     for(var idIndex=0; idIndex<component.marks.length; idIndex++){
         ids.push(component.marks[idIndex].id);
-        console.log(component.marks[idIndex].id);
     }
-    console.log("ENDIDs");
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
         data = JSON.parse(data);
-        console.log(data);
         // If nothing has changed, then don't update
         if (!haveMarksChanged(c_index, data)){
             return;
@@ -410,48 +387,36 @@ function updateMarksOnPage(c_index) {
             getComponent(c_index).comment = note;
         }
         // Add all marks back
-        console.log("updating");
         for (var m_index = ids.length-1; m_index >= 0; m_index--) {
-            console.log(ids[m_index]);
             var is_publish = data['data'][m_index]['is_publish'] == 't';
             var id         = data['data'][m_index]['id'];
             var hasMark    = data['data'][m_index]['has_mark'];
             var score      = data['data'][m_index]['score'];
             var note       = data['data'][m_index]['note'];
-                console.log(id);
-                console.log(note);
-                getMark(c_index, ids[m_index]).id = id;
-                if(getMark(c_index, ids[m_index])==null){
-                  /*  getMark(c_index, id).publish = is_publish;
-                    getMark(c_index, id).has = hasMark;
-                    getMark(c_index, id).score = score;
-                    getMark(c_index, id).name = note;*/
-                }
-                else{
-                console.log(getMark(c_index, ids[m_index]).id);
+            getMark(c_index, ids[m_index]).id = id;
+            if(getMark(c_index, ids[m_index])!=null){
                 getMark(c_index, ids[m_index]).publish = is_publish;
                 getMark(c_index, ids[m_index]).has = hasMark;
                 getMark(c_index, ids[m_index]).score = score;
                 getMark(c_index, ids[m_index]).name = note;
+            }
+            parent.prepend(getMarkView(c_index, ids[m_index], id, m_index, editModeEnabled));
+            if((editModeEnabled==null || editModeEnabled==false)){
+                var current_mark = $('#mark_id-'+c_index+'-'+id);
+                current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
+                current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
+                $('#marks-extra-'+c_index)[0].style.display="none";
+                if(points == "None Selected"){
+                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
+                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
                 }
-                parent.prepend(getMarkView(c_index, ids[m_index], id, m_index, editModeEnabled));
-                if((editModeEnabled==null || editModeEnabled==false)){
-                    var current_mark = $('#mark_id-'+c_index+'-'+id);
-                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
-                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('disabled', true);
-                    $('#marks-extra-'+c_index)[0].style.display="none";
-                    if(points == "None Selected"){
-                        current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
-                        current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #E9EFEF");
-                    }
-                    else{
-                        current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
-                        current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
-                    }
+                else{
+                    current_mark.find('textarea[name=mark_text_'+c_index+'_'+id+']').attr('style', "width:90%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
+                    current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('style', "width:50%; resize:none; cursor: default; border:none; outline: none; background-color: #f9f9f9");
                 }
+            }
         }
     });
-    console.log("done updating");
 }
 
 
@@ -464,7 +429,7 @@ function updateGeneralComment() {
     });
 }
 
-function addMark(me, num, sync, successCallback, errorCallback) {
+function addMark(me, c_index, sync, successCallback, errorCallback) {
     // Hide all other (potentially) open popups
     $('.popup-form').css('display', 'none');
     
@@ -485,75 +450,45 @@ function addMark(me, num, sync, successCallback, errorCallback) {
         } else {
             $('#mark-creation-popup').css('display', 'none');
             var max=-1;
-            for(var j=0; j<getComponent(num).marks.length; j++){
-                if(max<parseInt(getComponent(num).marks[j].id)){
-                    max=parseInt(getComponent(num).marks[j].id);
+            for(var j=0; j<getComponent(c_index).marks.length; j++){
+                if(max<parseInt(getComponent(c_index).marks[j].id)){
+                    max=parseInt(getComponent(c_index).marks[j].id);
                 }
             }
-            var parent = $('#marks-parent-'+num);
+            var parent = $('#marks-parent-'+c_index);
             var id2     = ""+(max+1); 
-            console.log("LOOKING FOR");
-            console.log(id2);
-            var x      = $('tr[name=mark_'+num+']').length;
-            parent.append(getMarkView(num, id2, id2, 1, editModeEnabled));
-            getComponent(num).marks.push({
+            var x      = $('tr[name=mark_'+c_index+']').length;
+            parent.append(getMarkView(c_index, id2, id2, 1, editModeEnabled));
+            getComponent(c_index).marks.push({
                 id: id2,
                 name: note,
                 points: points,
                 publish: false,
                 has: false
             });
-           /* grading_data.gradeable.components[num-1].marks.push({
-                id: id2,
-                name: note,
-                points: points,
-                publish: false,
-                has: false
-            });*/
-            for(var i=0; i<getComponent(num).marks.length; i++){
-                console.log(getComponent(num).marks[i].id);
-                console.log("IDs above\n");
-            }
-            console.log("IN ADD LOOP");
-        var mark_data = new Array(getComponent(num).marks.length);
-        for(var i=0; i<getComponent(num).marks.length; i++){
-            var current_mark_id=grading_data.gradeable.components[num-1].marks[i].id;
-            /*if(getMark(c_index, current_mark_id)==null){
-                console.log("NULLLL");
-                grading_data.gradeable.components[c_index-1].marks.splice(i, 1);
-                getComponent(c_index).marks.splice(i, 1);
-                var current_row = $(getMark(c_index, current_mark_id).parentElement.parentElement);
-                current_row.remove();
-            }*/
-           // else{
-            console.log(getMark(num, getMark(num, current_mark_id).id).name);
-            console.log(getMark(num, getMark(num, current_mark_id).id).points);
-            console.log(getMark(num, getMark(num, current_mark_id).id).has);
-            console.log(getMark(num, getMark(num, current_mark_id).id).id);
-            mark_data[i] = {
-                    points  : getMark(num, getMark(num, current_mark_id).id).points,
-                    note    : getMark(num, getMark(num, current_mark_id).id).name,
-                    selected: getMark(num, getMark(num, current_mark_id).id).has,
-                    order   : getMark(num, getMark(num, current_mark_id).id).order,
-                    id      : getMark(num, current_mark_id).id
-                };
-           // }
-        }
-    console.log("OUT OF ADD LOOP");
-        //    ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(num), id2, note, points, false, successCallback, errorCallback);
-        ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(num).id, getComponent(num).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(num).marks.length, false, function(data) {
-    data = JSON.parse(data);
-    console.log(data);
-});
-         saveMark(num, false);
-  //  updateMarksOnPage(num);
-  //  closeMark(num);
-    //openMark(num);
-            //updateMarksOnPage(num);
-         window.location.reload();
-          //  toggleEditMode();
-         //   openMark(me);
-            // Add new mark and then update
+            updateCookies();
+            var mark_data = new Array(getComponent(c_index).marks.length);
+            for(var i=0; i<getComponent(c_index).marks.length; i++){
+                var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
+                mark_data[i] = {
+                        points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
+                        note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
+                        selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
+                        order   : getMark(c_index, getMark(c_index, current_mark_id).id).order,
+                        id      : getMark(c_index, current_mark_id).id
+                    };
+                }
+            ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
+            data = JSON.parse(data);
+            // console.log(data);
+            });
+            ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
+            data = JSON.parse(data);
+            //console.log(data);
+            });
+            saveMark(c_index, false);
+            window.location.reload();
+         //   openMark(c_index);
         }
     };
 }
@@ -561,67 +496,22 @@ function addMark(me, num, sync, successCallback, errorCallback) {
 // TODO: this
 function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback) {
     var parent = $('#marks-parent-'+c_index);
-    console.log("ID1");
-    console.log(last_num);
     var index=-1;
-    console.log("in loop");
     for(var i=0; i<getComponent(c_index).marks.length; i++){
-        console.log(getComponent(c_index).marks[i].id);
         if(getComponent(c_index).marks[i].id==last_num){
             index=i;
-       //     break;
+            break;
         }
     }
     var mark=getComponent(c_index).marks[index];
-    console.log("out of loop");
     getComponent(c_index).marks.splice(index, 1);
-    //grading_data.gradeable.components[c_index - 1].marks.splice(index, 1);
     var current_row = $(me.parentElement.parentElement);
     current_row.remove();
-    console.log("loop2 in");
-    for(var i=0; i<getComponent(c_index).marks.length; i++){
-        console.log(getComponent(c_index).marks[i].id);
-    }
-    console.log("loop2 out");
     var last_row = $('[name=mark_'+c_index+']').last().attr('id');
-    var totalD = -1;
-    if (last_row == null) {
-        totalD = -1;
-    } 
-    else {
-        totalD = parseInt($('[name=mark_'+c_index+']').last().attr('id').split('-')[2]);
-    }
-
-    //updates the remaining marks's info
-    /*for (var m_index = index + 1; m_index <= totalD; m_index++) {
-        var new_num = m_index-1;
-        console.log("substiting");
-        console.log(new_num);
-        console.log(m_index);
-      /*  var current_mark = $('#mark_id-'+c_index+'-'+m_index);
-        current_mark.find('input[name=mark_points_'+c_index+'_'+m_index+']').attr('name', 'mark_points_'+c_index+'_'+new_num);
-        current_mark.find('textarea[name=mark_text_'+c_index+'_'+m_index+']').attr('name', 'mark_text_'+c_index+'_'+new_num);
-        current_mark.find('i[name=mark_icon_'+c_index+'_'+m_index+']').attr('name', 'mark_icon_'+c_index+'_'+new_num);
-        current_mark.find('span[id=mark_info_id-'+c_index+'-'+m_index+']').attr('id', 'mark_info_id-'+c_index+'-'+new_num);
-        current_mark.attr('id', 'mark_id-'+c_index+'-'+new_num);
-    }*/
     var mark_data = new Array(getComponent(c_index).marks.length);
     parent.empty();
-    console.log("IN DELETE LOOP");
     for(var i=0; i<getComponent(c_index).marks.length; i++){
         var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        /*if(getMark(c_index, current_mark_id)==null){
-            console.log("NULLLL");
-            grading_data.gradeable.components[c_index-1].marks.splice(i, 1);
-            getComponent(c_index).marks.splice(i, 1);
-            var current_row = $(getMark(c_index, current_mark_id).parentElement.parentElement);
-            current_row.remove();
-        }*/
-       // else{
-        console.log(getMark(c_index, getMark(c_index, current_mark_id).id).name);
-        console.log(getMark(c_index, getMark(c_index, current_mark_id).id).points);
-        console.log(getMark(c_index, getMark(c_index, current_mark_id).id).has);
-        console.log(getMark(c_index, getMark(c_index, current_mark_id).id).id);
         mark_data[i] = {
                 points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
                 note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
@@ -629,25 +519,18 @@ function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback)
                 order   : getMark(c_index, getMark(c_index, current_mark_id).id).order,
                 id      : getMark(c_index, current_mark_id).id
             };
-            parent.append(getMarkView(c_index, current_mark_id, current_mark_id, 1, editModeEnabled));
-       // }
+        parent.append(getMarkView(c_index, current_mark_id, current_mark_id, 1, editModeEnabled));
     }
-    console.log("OUT OF DELETE LOOP");
     me.has=false;
     ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
-    data = JSON.parse(data);
-    console.log(data);
+        data = JSON.parse(data);
 });
     ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
         data = JSON.parse(data);
-        console.log(data);
+        //console.log(data);
     });
-   // ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks[index]);
    saveMark(c_index, false);
- //  updateMarksOnPage(c_index);
-  // closeMark(c_index);
-   // openMark(c_index);
- //  window.location.reload();
+   openMark(c_index);
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -1168,7 +1051,6 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     var all_false  = true;
     var arr_length = mark_data.length
     for (var m_index = 0; m_index < arr_length; m_index++) {
-        console.log(mark_data[m_index].id);
         if (mark_data[m_index].selected === true) {
             all_false = false;
             
@@ -1226,7 +1108,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     gradedByElement.hide();
     savingElement.show();
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, sync, function(data) {
+    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(data) {
         data = JSON.parse(data);
         if (all_false === true) {
             //We've reset
