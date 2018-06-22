@@ -62,6 +62,16 @@ class HomeworkView extends AbstractView {
         if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
             $return .= $this->renderTAResults($gradeable);
         }
+        if ($this->core->getConfig()->isRegradeEnabled()) {
+            $return .= <<<HTML
+      <div class="content"> 
+HTML;
+            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+        $return .= <<<HTML
+  </div>
+HTML;
+        }
         return $return;
     }
 
@@ -771,6 +781,16 @@ HTML;
      * @param Gradeable $gradeable
      * @return string
      */
+    private function renderTAResults(Gradeable $gradeable): string {
+        return $this->core->getOutput()->renderTwigTemplate("submission/TAResults.twig", [
+            "gradeable" => $gradeable
+        ]);
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @return string
+     */
     public function showRequestForm(Gradeable $gradeable): string {
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
@@ -970,45 +990,6 @@ HTML;
           });
         </script>
       </div>
-HTML;
-        return $return;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return string
-     */
-    private function renderTAResults(Gradeable $gradeable): string {
-        $return = "";
-
-        // If the student does not submit anything, the only message will be "No submissions for this assignment."
-        $return .= <<<HTML
-<div class="content">
-HTML;
-        if ($gradeable->beenTAgraded()) {
-            $return .= <<<HTML
-    <h3 class="label">TA / Instructor grade</h3>
-HTML;
-            $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults', $gradeable);
-            $return .= <<<HTML
-HTML;
-        } else {
-            $return .= <<<HTML
-                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
-HTML;
-        }
-        $return .= <<<HTML
-            </div>
-HTML;
-        if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= <<<HTML
-      <div class="content"> 
-HTML;
-            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-            $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-        }
-        $return .= <<<HTML
-  </div>
 HTML;
         return $return;
     }
