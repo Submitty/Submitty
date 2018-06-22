@@ -848,8 +848,11 @@ table .instructor .two-options{
 
 .btn-nav {
     width:100%;
-    padding: 0px !important; 
-    padding-top: 10px !important; 
+}
+
+.btn-nav-submit, .btn-nav-grade {
+    padding: 0px !important;
+    padding-top: 10px !important;
     padding-bottom: 10px !important;
 }
 
@@ -915,6 +918,8 @@ table .instructor .two-options{
     border: 1px solid #000000;
     padding: 10px;
     display: none;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 .popup-form div {
@@ -933,6 +938,13 @@ table .instructor .two-options{
 
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.fill-available {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
 }
 
 .reply-box{
@@ -995,6 +1007,20 @@ table .instructor .two-options{
 .tooltip:hover .tooltiptext {
     visibility: visible;
     opacity: 1;
+}
+
+/* from https://css-tricks.com/css3-progress-bars/ */
+.meter {
+    height: 10px;
+    position: relative;
+    background: rgb(224,224,224);
+    padding: 0px;
+}
+.meter > span {
+    display: block;
+    height: 100%;
+    background-color: rgb(92,184,92);
+    position: relative;
 }
 
 /*

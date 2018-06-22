@@ -9,6 +9,9 @@ GENERAL_MESSAGE_ID = -2;
  * @returns Object Gradeable data
  */
 function getGradeable() {
+    if(grading_data == null){
+        return null;
+    }
     return grading_data.gradeable;
 }
 
@@ -394,7 +397,8 @@ function addMark(me, num) {
             });
 
             parent.append(getMarkView(num, x));
-
+            saveLastOpenedMark(true);
+            saveMark(id, true);
             
             // Add new mark and then update
             // ajaxAddNewMark(gradeable_id, user_id, question_id, note, points, function() {
@@ -1126,6 +1130,7 @@ function closeMark(id, save) {
 function toggleMark(id, save) {
     if (findCurrentOpenedMark() === id) {
         closeMark(id, save);
+        updateCookies();
     } else {
         openMark(id);
     }
