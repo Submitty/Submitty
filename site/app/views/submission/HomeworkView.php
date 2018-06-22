@@ -977,7 +977,25 @@ HTML;
 HTML;
             }
             else {
-                if($gradeable->getActiveVersion() > 0
+                $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+                $active_same_as_graded = true;
+                foreach($gradeable->getComponents() as $component) {
+                    if($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
+                        $active_same_as_graded = false;
+                    }
+                }
+                if(!$active_same_as_graded && $gradeable->beenTAgraded()) {
+                    $return .= <<<HTML
+    <div class="sub" id="submission_message">
+        <p class="red-message">
+            Note: The version you have selected to be graded is not the version graded by<br />
+            the instructor/TAs. If the graded version does not match your selected<br />
+            version, a zero will be recorded in the gradebook.
+        </p>
+    </div>
+HTML;
+                }
+                else if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
