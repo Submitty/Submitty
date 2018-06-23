@@ -172,27 +172,4 @@ ini_set('auto_detect_line_endings', true);
 //You can comment this out if the student feed is accessed locally.
 ini_set("allow_url_fopen", true);
 
-
-/* USER TABLE BACKUP OPTIONS ------------------------------------------------ */
-
-/* *****************************************************************************
- BACKUP TOOLS WERE WRITTEN FOR AN EARLIER VERSION OF SUBMITTY AND HAVE NOT YET
-       BEEN UPDATED TO BE COMPATIBLE WITH MORE RECENT DATABASE CHANGES.
-                 USE OF THESE TOOLS IS CURRENTLY NOT ADVISED.
-***************************************************************************** */
-
-//Folder where backup data is stored.  Backups are CSV files sorted into folders
-//by each individual Submitty course.  **THIS NEEDS TO BE SET
-define('SUBMITTY_AUTO_FEED_BACKUP', '/path/to/user_data_backups');
-
-//How many days of user data backups to retain per course.
-define('DATA_BACKUP_RECORDS_KEPT', 7);
-
-//Set to TRUE to use file encryption of backup data.
-define('ENABLE_BACKUP_ENCRYPTION', false);
-
-//Access permissions to the keyfile must be strictly maintained.  Just like with
-//accessing the CSV, the path to the key_file may also be a URL.
-define('ENCRYPTION_KEY_FILE',  '/path/to/key_file');
-
 ?>
