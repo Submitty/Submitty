@@ -349,6 +349,14 @@ HTML;
 							]);
 						$return .= <<<HTML
 					</form>
+					<script type="text/javascript">
+						$("#thread_form").submit(function() {
+							if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+								alert("At least one category must be selected.");
+								return false;
+							}
+						});
+					</script>
 				</div>
 HTML;
 			}
@@ -846,10 +854,15 @@ HTML;
 		$return = <<<HTML
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
-
+		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script> 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('#thread_post_content');
+				enableTabsInTextArea('#thread_post_content');
+				// Attachments on Create Thread
+				createArray(1);
+				var upload_area = document.getElementById("upload1");
+				upload_area.addEventListener("click", clicked_on_box, false);
+				$("#thread_form").submit(createThread);
 				$("form").areYouSure();
 			});
 		 </script>

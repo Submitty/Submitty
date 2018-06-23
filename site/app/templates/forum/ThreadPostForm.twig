@@ -41,13 +41,6 @@
     <script type="text/javascript">
     $(function() {
         refreshCategories();
-        $("#thread_form").submit(function() {
-
-            if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-                alert("At least one category must be selected.");
-                return false;
-            }
-        });
     });
     </script>
     </div>
@@ -55,12 +48,13 @@
 <div style="margin-bottom:10px;" class="form-group row">
     {% if show_attachments %}
         <span style="float:left;display:inline-block;">
-            <label id="file_input_label" class="btn btn-default" for="file_input">
-                <input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
-                Upload Attachment
-            </label>
-            <span class='label label-info' id="file_name"></span>
+            <div id="upload1" style="cursor: pointer; text-align: right;">
+                <label id="file_input_label" style="float: left;" class="btn btn-default">Upload Attachment</label>
+                <input type="file" accept="image/*" id="input_file1" style="display: none;" onchange="addFilesFromInput(1)" multiple />
+                <br>
+            </div>
         </span>
+        <br>
     {% endif %}
     <span style="display:inline-block;float:right;">
         {% if show_anon %}

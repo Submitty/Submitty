@@ -1519,7 +1519,78 @@ function checkNumFilesForumUpload(input, post_id){
         $('#messages').fadeOut();
         document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
+}
 
+function createThread() {
+    var form = $(this)[0];
+    if(!form.checkValidity()) {
+        form.reportValidity();
+        return false;
+    }
+    if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+        alert("At least one category must be selected.");
+        return false;
+    }
+
+    var formData = new FormData(form);
+    // Files selected
+    var files = [];
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return false;
+            }
+            else if (file_array[i][j].name.indexOf("\\\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return false;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return false;
+            }
+            files.push(file_array[i][j]);
+        }
+    }
+    if(files.length > 5){
+        displayError('Max file upload size is 5. Please try again.');
+        return false;
+    } else {
+        if(!checkForumFileExtensions(files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            return false;
+        }
+    }
+
+    for(var i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
+    var submit_url = $(this).attr('action');
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data){
+            try {
+                var json = JSON.parse(data);
+            } catch (err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            window.location.href = json['next_page'];
+        },
+        error: function(){
+            window.alert("Something went wrong while creating thread. Please try again.");
+        }
+    });
+    return false;
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {

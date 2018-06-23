@@ -97,25 +97,22 @@ class ForumController extends AbstractController {
             } else {
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
-
-            $this->core->redirect($url);
+            return array(-1, $url);
     }
 
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
-        if($_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
-            return 0;
+        if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
+            return array(0);
         }
         if(count($_FILES[$file_post]['tmp_name']) > 5) {
-            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
-            return -1;
+            return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
         }
         $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
         if($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])){
-            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
-            return -1;
-
-        } return $imageCheck;
+            return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
+        }
+        return array($imageCheck);
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
@@ -280,6 +277,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
+        $result = array();
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -290,37 +288,39 @@ class ForumController extends AbstractController {
         }
         if(empty($title) || empty($thread_post_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!$this->isValidCategories($categories_ids)){
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+        } else if(!$this->isValidCategories($categories_ids)){
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
-            if($hasGoodAttachment == -1){
-                return;
-            }
+            if($hasGoodAttachment[0] == -1){
+                $result['next_page'] = $hasGoodAttachment[1];
+            } else {
+                // Good Attachment
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment[0], $categories_ids);
+                $id = $result["thread_id"];
+                $post_id = $result["post_id"];
 
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment, $categories_ids);
-            $id = $result["thread_id"];
-            $post_id = $result["post_id"];
+                if($hasGoodAttachment[0] == 1) {
 
-            if($hasGoodAttachment == 1) {
+                    $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
+                    FileUtils::createDir($thread_dir);
 
-                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
-                FileUtils::createDir($thread_dir);
+                    $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                    FileUtils::createDir($post_dir);
 
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
+                    for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
+                        $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                        move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                    }
 
-                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                 }
-
+                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
-
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
+        $this->core->getOutput()->renderJson($result);
+        return $result;
     }
 
     private function search(){
@@ -348,17 +348,18 @@ class ForumController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-            if($hasGoodAttachment == -1){
+            if($hasGoodAttachment[0] == -1){
+                $this->core->redirect($hasGoodAttachment[1]);
                 return;
             }
-            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment, $parent_id);
+            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
             if(!is_dir($thread_dir)) {
                 FileUtils::createDir($thread_dir);
             }
 
-            if($hasGoodAttachment == 1) {
+            if($hasGoodAttachment[0] == 1) {
                 $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
                 FileUtils::createDir($post_dir);
                 for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
