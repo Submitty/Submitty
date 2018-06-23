@@ -8,7 +8,6 @@ from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
 
 # noinspection PyPep8Naming
@@ -95,21 +94,20 @@ class BaseTestCase(unittest.TestCase):
 
     def click_class(self, course, course_name):
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
+        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))        
 
-    def wait_for_new_header(self, new_header_text):
-        """
-        waits until the content header text matches new_header_text
-        use to wait for page to load
-        """
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format(new_header_text))))
+    # see Navigation.twig for css selectors
+    # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
+    def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
+        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[@name='{}_button']".format(gradeable_category, gradeable_id, button_name)).click()
+        # self.driver.find_element_by_css_selector("#{}_tbody #{} [name={}_button]".format(gradeable_category, gradeable_id, button_name)).click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
-    def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, new_header_text):
-        """
-        see Navigation.twig for css selectors
-        """
-        self.driver.find_element_by_css_selector("#{}_tbody #{} [name={}_button]".format(gradeable_category, gradeable_id, button_name)).click()
-        self.wait_for_new_header(new_header_text)
+    # clicks the navigation header text to 'go back' pages
+    # for homepage, selector can be gradeable list
+    def click_header_link_text(self, text, loaded_selector):
+        self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
 
     
