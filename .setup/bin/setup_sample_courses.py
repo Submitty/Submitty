@@ -831,6 +831,8 @@ class Course(object):
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
+            # makes a section be ungraded if the gradeable is not electronic
+            ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
                 submitted = False
@@ -965,7 +967,8 @@ class Course(object):
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
 
-                if gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and random.random() < 0.9:
+                if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
+                   random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
                     res = conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
                     gd_id = res.inserted_primary_key[0]
                     skip_grading = random.random()
