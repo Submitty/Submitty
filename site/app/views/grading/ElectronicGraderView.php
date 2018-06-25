@@ -799,4 +799,4 @@ HTML;
     public function popupSettings() {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
-    
+}
