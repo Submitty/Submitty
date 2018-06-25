@@ -953,8 +953,12 @@ class ElectronicGraderController extends GradingController {
                 return;
             }
         }
-
-        //save the component
+        if ($gradeable->getActiveVersion() > 0) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+      //save the component
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
