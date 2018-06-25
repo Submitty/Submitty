@@ -947,7 +947,7 @@ class SubmissionController extends AbstractController {
             }
 
             
-            if (empty($uploaded_files) && empty($previous_files) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
             
@@ -973,7 +973,7 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 
-                // if merging is being done, get all the old filenames and put them into $previous_files
+                // if merging is being done, get all the old filenames and put them into $previous_files_dst
                 // while checking for name conflicts and preventing them if clobbering is not enabled.
                 if($merge_previous) {
                     for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
