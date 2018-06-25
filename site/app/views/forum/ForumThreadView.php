@@ -858,9 +858,10 @@ HTML;
 		<script> 
 			$( document ).ready(function() {
 				enableTabsInTextArea('#thread_post_content');
+				var part = 1;
 				// Attachments on Create Thread
-				createArray(1);
-				var upload_area = document.getElementById("upload1");
+				createArray(part);
+				var upload_area = document.getElementById("upload"+part);
 				upload_area.addEventListener("click", clicked_on_box, false);
 				$("#thread_form").submit(createThread);
 				$("form").areYouSure();

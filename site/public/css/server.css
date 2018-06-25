@@ -906,6 +906,13 @@ table .instructor .two-options{
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
+.thumbnail {
+    width: 200px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
 .popup-form {
     z-index: 2000;
     position: fixed;

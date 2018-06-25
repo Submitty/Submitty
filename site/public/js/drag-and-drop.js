@@ -265,6 +265,7 @@ function addLabel(filename, filesize, part, previous){
     // create element
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
+    tmp.setAttribute("fname", filename);
     tmp.innerHTML =  filename + " " + filesize + "kb <i class='fa fa-trash-o'></i><br />";
     // styling
     tmp.children[0].onmouseover = function(e){
