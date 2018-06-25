@@ -1,4 +1,7 @@
+{% if (is_own_page is not defined or is_own_page == true) %}
 <div class="content">
+{% endif %}
+    {{ is_own_page }}
     <h3>{{ preferred_name }}'s late day usage</h3><br/>
     <p>Initial total late days allowed: {{ student_gradeables[0].getStudentAllowedLateDays() }}</p>
     {% if late_update|length != 0 %}
@@ -52,4 +55,6 @@
         {% endfor %}
         </tbody>
     </table>
+{% if (is_own_page is not defined or is_own_page == true) %}
 </div>
+{% endif %}

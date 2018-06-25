@@ -825,7 +825,8 @@ HTML;
 			"total_late_used" => $total_late_used,
 			"g_id" => $gradeable->getId(),
 			"late_update" => $late_updates,
-			"preferred_name" => $user_id
+			"preferred_name" => $user_id,
+			"is_own_page" => false
 		]);
     }
 }
