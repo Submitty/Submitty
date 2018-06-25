@@ -408,6 +408,7 @@ class DiffViewer {
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
          */
+		$max_digits = strlen((string)count($lines));
         for ($i = 0; $i < count($lines); $i++) {
         	$j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
@@ -422,7 +423,6 @@ class DiffViewer {
             }
             $html .= "<span class='line_number'>";
             $digits_at_line = strlen((string)$j);
-            $max_digits = strlen((string)count($lines));
 			for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
 				$html .= "&nbsp;";
 			}
@@ -444,8 +444,8 @@ class DiffViewer {
 						$html .= $html_no_empty;
 						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
 					} else if($option == "with_escape") {
-						$html_no_empty = $this->replaceEmptyCharWEscape($html_orig);
-						$html_no_empty_error = $this->replaceEmptyCharWEscape($html_orig_error);
+						$html_no_empty = $this->replaceEmptyCharWithEscape($html_orig);
+						$html_no_empty_error = $this->replaceEmptyCharWithEscape($html_orig_error);
 						$html .= $html_no_empty;
 						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
 					}
@@ -457,7 +457,7 @@ class DiffViewer {
 					$inner = $this->replaceEmptyChar($inner);
 				}
 				elseif ($option === 'with_escape') {
-					$inner = $this->replaceEmptyCharWEscape($inner);
+					$inner = $this->replaceEmptyCharWithEscape($inner);
 				}
 				$html .= "{$inner}</span>";
             }
@@ -510,40 +510,42 @@ class DiffViewer {
 
 	/**
 	 * @param $html the original HTML before any text transformation
+	 *
+	 * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
+	 *
 	 * @return HTML after white spaces replaced with visuals
 	 */
     private function replaceEmptyChar($html){
-    	$count = 0;
-		$return = str_replace(' ', '<span style="outline:1px blue solid;"> </span>', $html, $count);
-		if($count > 0) $this->white_spaces['space'] = '&nbsp;';
-		$count = 0;
-		$return = str_replace("\r", '<span style="outline:1px blue solid;">↵<br></span>', $return, $count);
-		if($count > 0) $this->white_spaces['carriage return'] = '↵';
-		$count = 0;
-		$return = str_replace('	', '<span style="outline:1px blue solid;">↹</span>', $return, $count);
-		if($count > 0) $this->white_spaces['tab'] = '↹';
+    	$return = $html;
+		$this->replaceUTF(' ', '&nbsp;', $return, 'space');
+		$this->replaceUTF("\r", '↵<br>', $return, 'carriage return');
+		$this->replaceUTF('\t', '↹', $return, 'tab');
 		return $return;
 	}
 
 	private function replaceEmptyCharWithEscape($html){
-		$count = 0;
-		$return = str_replace(' ', '<span style="outline:1px blue solid;"> </span>', $html,$count);
-		if($count > 0) $this->white_spaces['space'] = '&nbsp;';
-		$count = 0;
-		$return = str_replace("\r", '<span style="outline:1px blue solid;">\\r<br></span>', $return,$count);
-		if($count > 0) $this->white_spaces['carriage return'] = '\\r';
-		$count = 0;
-		$return = str_replace('	', '<span style="outline:1px blue solid;">\t</span>', $return,$count);
-		if($count > 0) $this->white_spaces['tab'] = '\\t';
+		$return = $html;
+		$this->replaceUTF(' ', '&nbsp;', $return, 'space');
+		$this->replaceUTF("\r", '\\r<br>', $return, 'carriage return');
+		$this->replaceUTF('\t', '\\t', $return, 'tab');
 		return $return;
 	}
 
-	private function replaceUTF(&$text, $which, $what, $description){
-		$count = 0;
+	/**
+	 * @param $text String
+	 * @param $what String
+	 * @param $which String(Reference)
+	 * @param $description (What is the description of this character)
+	 * @return string (The newly formed string)
+	 *
+	 * This function replaces string $text with string $what in string $which.
+	 */
+	private function replaceUTF($text, $what, &$which, $description){
+    	$count = 0;
 		$what = '<span style="outline:1px blue solid;">'.$what.'</span>';
-		$return = str_replace($which, $what, $text,$count);
-		if($count > 0) $this->white_spaces[$description] = $what;
-		return $return;
+		$which = str_replace($text, $what, $which,$count);
+		if($count > 0) $this->white_spaces[$description] = strip_tags($what);
+		return $what;
 	}
 
     /**

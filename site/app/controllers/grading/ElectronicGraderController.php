@@ -76,9 +76,9 @@ class ElectronicGraderController extends GradingController {
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
-        $option = isset($_REQUEST['option']) ? $_REQUEST['option'] : 'original';
+		$option = $_REQUEST['option'] ?? 'original';
         //There are currently two views, the view of student's code and the expected view.
-        $which = isset($_REQUEST['which']) ? $_REQUEST['which'] : 'actual';
+        $which = $which = $_REQUEST['which'] ?? 'actual';
         $autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
         foreach ($testcase->getAutochecks() as $autocheck) {
             $diff_viewer = $autocheck->getDiffViewer();
@@ -87,8 +87,6 @@ class ElectronicGraderController extends GradingController {
             }
             $autocheck_cnt -= 1;
         }
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
         $html = "";
         if($which == "actual"){
             $html .= $diff_viewer->getDisplayActual($option);
@@ -97,7 +95,8 @@ class ElectronicGraderController extends GradingController {
             $html .= $diff_viewer->getDisplayExpected($option);
         }
         $white_spaces = $diff_viewer->getWhiteSpaces();
-        echo json_encode(array("html"=>"$html", "whitespaces"=>$white_spaces));
+//		$this->core->renderJson();
+		$this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
     }
 
     private function verifyGrader($verifyAll = false){
