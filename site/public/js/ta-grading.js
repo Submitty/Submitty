@@ -12,8 +12,8 @@ $(function() {
         }
     });
     var check=document.cookie;
-    //Currently, this left statement will always be false, so the cookies will never be read (even on master)
-    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version && cookie_version != 1) {
+    //Currently, this statement will always be false, so the cookies will never be read (even on master)
+    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version) {
         //If cookie version is not the same as the current version then toggle the visibility of each
         //rubric panel then update the cookies
         deleteCookies();
