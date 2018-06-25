@@ -144,7 +144,7 @@ HTML;
 		for a specific thread, in addition to all of the threads
 		that have been created to be displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threads, $show_deleted, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -177,7 +177,7 @@ HTML;
 		}
 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('post_content');
+			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
 				$("form").areYouSure();
@@ -228,8 +228,15 @@ HTML;
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
-		
+		if($show_deleted) {
+			$show_deleted_class = "active";
+			$show_deleted_action = "alterShowDeletedStatus(0);";
+		} else {
+			$show_deleted_class = "";
+			$show_deleted_action = "alterShowDeletedStatus(1);";
+		}
 		$return .= <<<HTML
+			<a class="btn btn-primary {$show_deleted_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads" onclick="{$show_deleted_action}">Show Deleted Threads</a>
 			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 HTML;
 	}
@@ -482,7 +489,7 @@ HTML;
 					$return .= <<<HTML
             	</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
+	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -571,6 +578,9 @@ HTML;
 						}
 						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
+						}
+						if($thread["deleted"]) {
+							$class .= " deleted";
 						}
 
 						//fix legacy code
@@ -671,6 +681,9 @@ HTML;
 
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
+		}
+		if($post["deleted"]) {
+			$classes .= " deleted";
 		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
@@ -778,7 +791,7 @@ HTML;
 				$edit_button_title = "Edit post";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; color:red; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-times" aria-hidden="true"></i></a>
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-trash" aria-hidden="true"></i></a>
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
@@ -812,7 +825,7 @@ HTML;
             				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
             			</div>
 	            		<div class="form-group row">
-	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to {$visible_username} here..." required></textarea>
+	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to {$visible_username} here..." required></textarea>
 	            		</div>
 
 	            		<br/>
@@ -849,7 +862,7 @@ HTML;
 
 		<script> 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('thread_post_content');
+			    enableTabsInTextArea('#thread_post_content');
 				$("form").areYouSure();
 			});
 		 </script>

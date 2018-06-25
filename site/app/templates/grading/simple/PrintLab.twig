@@ -1,0 +1,40 @@
+Name: ________________________________________
+<span style="float:right;">
+        Date: ____________________
+        </span>
+<br />
+<b>{{ gradeable.getName() }}</b>
+<span style="float:right;">
+        Section: <b>{{ section }}</b>
+        </span>
+<br />
+<br />
+
+{% set width = 50 / checkpoints|length %}
+
+<table border="1" width="100%">
+    <tr>
+        <td style="width: 10%">User Id</td>
+        <td style="width: 20%">First Name</td>
+        <td style="width: 20%">Last Name</td>
+        {% for checkpoint in checkpoints %}
+            <td style="width: {{ width }}%">{{ checkpoint }}</td>
+        {% endfor %}
+    </tr>
+    {% for student in students %}
+        <tr style="background-color: {{ loop.index0 % 2 == 0 ? "white" : "lightgrey" }}">
+            <td>
+                {{ student.getId() }}
+            </td>
+            <td>
+                {{ student.getDisplayedFirstName() }}
+            </td>
+            <td>
+                {{ student.getLastName() }}
+            </td>
+            {% for checkpoint in checkpoints %}
+                <td></td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
