@@ -11,8 +11,9 @@ $(function() {
             deleteCookies();
         }
     });
-
-    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version) {
+    var check=document.cookie;
+    //Currently, this left statement will always be false, so the cookies will never be read (even on master)
+    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version && cookie_version != 1) {
         //If cookie version is not the same as the current version then toggle the visibility of each
         //rubric panel then update the cookies
         deleteCookies();
@@ -23,7 +24,7 @@ $(function() {
         resetModules();
         updateCookies();
     }
-    else{
+   else{
         readCookies();
         updateCookies();
         hideIfEmpty(".rubric_panel");
@@ -169,7 +170,9 @@ function readCookies(){
 
     onAjaxInit = function() {
         $('#title-'+opened_mark).click();
-
+        document.getElementById("EditModeButton").checked = true;
+        if(editMode ==="false")
+            document.getElementById("EditModeButton").checked = false;
         if (scroll_pixel > 0) {
             document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
@@ -245,7 +248,7 @@ function updateCookies(){
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
-    document.cookie = "editMode=" + $("#editModeEnabled") + "; path=/;";
+    document.cookie = "editMode=" + editModeEnabled + "; path=/;";
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
         overwrite = "on";
