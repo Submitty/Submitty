@@ -772,19 +772,9 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(Gradeable $gradeable) {
-        $return = <<<HTML
-<div id="regrade_info" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%">
-    <div class = "draggable_content">
-        <div class = "inner-container" style="padding:20px;">
-HTML;
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-        $return .= <<<HTML
-        </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+            "gradeable" => $gradeable
+        ]);
     }
 
     public function popupStudents() {
