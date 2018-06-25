@@ -1024,10 +1024,10 @@ class ElectronicGraderController extends GradingController {
             }
 
             if($mark_modified === false) {
-                if ($component->getComment() != $_POST['custom_message']) {
+                if (array_key_exists('custom_message', $_POST) && $component->getComment() != $_POST['custom_message']) {
                     $mark_modified = true;
                 }
-                if ($component->getScore() != $_POST['custom_points']) {
+                if (array_key_exists('custom_points', $_POST) && $component->getScore() != $_POST['custom_points']) {
                     $mark_modified = true;
                 }
             }
@@ -1255,7 +1255,7 @@ class ElectronicGraderController extends GradingController {
     public function getUsersThatGotTheMark() {
         $gradeable_id = $_POST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $gcm_order = $_POST['order_num'];
+        $gcm_id = $_POST['gradeable_component_mark_id'];
         $return_data = [];
         $name_info = [];
         foreach ($gradeable->getComponents() as $component) {
@@ -1263,7 +1263,7 @@ class ElectronicGraderController extends GradingController {
                 continue;
             } else {
                 foreach ($component->getMarks() as $mark) {
-                    if ($mark->getOrder() == intval($gcm_order)) {
+                    if ($mark->getId() == $gcm_id) {
                         $return_data = $this->core->getQueries()->getUsersWhoGotMark($component->getId(), $mark, $gradeable->isTeamAssignment());
                         $name_info['question_name'] = $component->getTitle();
                         $name_info['mark_note'] = $mark->getNote();

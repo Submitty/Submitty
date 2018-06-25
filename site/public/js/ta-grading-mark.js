@@ -201,14 +201,14 @@ function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync
             }
         })
 }
-function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, order_num, successCallback, errorCallback) {
+function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successCallback, errorCallback) {
     $.ajax({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
         data: {
             'gradeable_id' : gradeable_id,
             'gradeable_component_id' : gradeable_component_id,
-            'order_num' : order_num
+            'gradeable_component_mark_id' : m_id
         },
         success: function(data) {
             if (typeof(successCallback) === "function") {
@@ -271,6 +271,8 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
 }
 
 function haveMarksChanged(c_index, data) {
+    var marks = $('[name=mark_'+c_index+']');
+    var mark_notes = $('[name^=mark_text_'+c_index+']');
     var mark_scores = $('[name^=mark_points_'+c_index+']');
     var custom_mark_points = $('input[name=mark_points_custom_'+c_index+']');
     var custom_mark_text = $('textarea[name=mark_text_custom_'+c_index+']');
