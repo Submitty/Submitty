@@ -1970,7 +1970,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
 
-    var confirm = window.confirm("Are you sure you would like to "+ message +" this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be "+ message+"d. \n\nIf you are "+message+" the first post in a thread this will delete the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you are " + message + " the first post in a thread this will " + message + " the entire thread.");
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': page});
         $.ajax({
