@@ -271,8 +271,6 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
 }
 
 function haveMarksChanged(c_index, data) {
-    var marks = $('[name=mark_'+c_index+']');
-    var mark_notes = $('[name^=mark_text_'+c_index+']');
     var mark_scores = $('[name^=mark_points_'+c_index+']');
     var custom_mark_points = $('input[name=mark_points_custom_'+c_index+']');
     var custom_mark_text = $('textarea[name=mark_text_custom_'+c_index+']');

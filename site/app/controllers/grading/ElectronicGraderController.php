@@ -142,6 +142,7 @@ class ElectronicGraderController extends GradingController {
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+        $regrade_requests = $this->core->getQueries()->getNumberRegradeRequests($gradeable_id);
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -280,7 +281,7 @@ class ElectronicGraderController extends GradingController {
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests);
     }
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -1079,19 +1080,6 @@ class ElectronicGraderController extends GradingController {
                         $found = true;
                     }
                 }
-               /* if($mark==null){
-                    $mark = new GradeableComponentMark($this->core);
-                    $mark->setGcId($component->getId());
-                    $mark->setPoints($_POST['marks'][$index]['points']);
-                    $mark->setNote($_POST['marks'][$index]['note']);
-                    $mark->setOrder($_POST['marks'][$index]['order']);
-                    $mark_id = $mark->save();
-                    $mark->setId($mark_id);
-                    $_POST['marks'][$index]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                    if($all_false === false) {
-                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-                    }
-                }*/
                 if($mark!=null){
                     $mark->setId($post_mark['id']);
                     $mark->setPoints($post_mark['points']);
