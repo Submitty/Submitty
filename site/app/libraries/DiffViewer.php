@@ -73,9 +73,9 @@ class DiffViewer {
      * @var string
      */
     private $id = "id";
-	/**
-	 * @var array
-	 */
+    /**
+     * @var array
+     */
     private $white_spaces = array();
 
     /**
@@ -160,7 +160,7 @@ class DiffViewer {
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
                 }
-	        }
+            }
         }
 
         if (!file_exists($expected_file) && $expected_file != "") {
@@ -308,8 +308,8 @@ class DiffViewer {
 
     /**
      * Return the output HTML for the actual display
-	 * @param string Option for displaying. Currently only supports show empty space
-	 *
+     * @param string Option for displaying. Currently only supports show empty space
+     *
      * @return string actual html
      * @throws \Exception
      */
@@ -339,7 +339,7 @@ class DiffViewer {
      */
     public function getActualImageFilename() {
         $this->buildViewer();
-    	return $this->actual_file_image;
+        return $this->actual_file_image;
     }
 
     /**
@@ -363,7 +363,7 @@ class DiffViewer {
     /**
      * Return the HTML for the expected display
      * @param string Option for displaying. Currently only supports show empty space
-	 *
+     *
      * @return string expected html
      * @throws \Exception
      */
@@ -408,7 +408,7 @@ class DiffViewer {
          * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
          * there's a difference on that line or that the line doesn't exist.
          */
-		$max_digits = strlen((string)count($lines));
+        $max_digits = strlen((string)count($lines));
         for ($i = 0; $i < count($lines); $i++) {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
@@ -423,60 +423,60 @@ class DiffViewer {
             }
             $html .= "<span class='line_number'>";
             $digits_at_line = strlen((string)$j);
-			for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
-				$html .= "&nbsp;";
-			}
-			$html .= "{$j}</span>";
+            for ($counter = ($max_digits - $digits_at_line); $counter > 0; $counter--) {
+                $html .= "&nbsp;";
+            }
+            $html .= "{$j}</span>";
             $html .= "<span class='line_code'>";
             if (isset($this->diff[$type][$i])) {
                 // highlight the line
                 $current = 0;
                 // character highlighting
                 foreach ($this->diff[$type][$i] as $diff) {
-                	$html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
-                	$html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                	if($option == "original"){
-                		$html .= $html_orig;
-                		$html .= "<span class='highlight-char'>".$html_orig_error."</span>";
-					} else if($option == "with_unicode") {
-                		$html_no_empty = $this->replaceEmptyChar($html_orig);
-						$html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
-						$html .= $html_no_empty;
-						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
-					} else if($option == "with_escape") {
-						$html_no_empty = $this->replaceEmptyCharWithEscape($html_orig);
-						$html_no_empty_error = $this->replaceEmptyCharWithEscape($html_orig_error);
-						$html .= $html_no_empty;
-						$html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
-					}
+                    $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
+                    $html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
+                    if($option == "original"){
+                        $html .= $html_orig;
+                        $html .= "<span class='highlight-char'>".$html_orig_error."</span>";
+                    } else if($option == "with_unicode") {
+                        $html_no_empty = $this->replaceEmptyChar($html_orig);
+                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
+                        $html .= $html_no_empty;
+                        $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+                    } else if($option == "with_escape") {
+                        $html_no_empty = $this->replaceEmptyCharWithEscape($html_orig);
+                        $html_no_empty_error = $this->replaceEmptyCharWithEscape($html_orig_error);
+                        $html .= $html_no_empty;
+                        $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+                    }
                     $current = $diff[1]+1;
                 }
-				$html .= "<span class='line_code_inner'>";
-				$inner = htmlentities(substr($lines[$i], $current));
-				if ($option === 'with_unicode') {
-					$inner = $this->replaceEmptyChar($inner);
-				}
-				elseif ($option === 'with_escape') {
-					$inner = $this->replaceEmptyCharWithEscape($inner);
-				}
-				$html .= "{$inner}</span>";
+                $html .= "<span class='line_code_inner'>";
+                $inner = htmlentities(substr($lines[$i], $current));
+                if ($option === 'with_unicode') {
+                    $inner = $this->replaceEmptyChar($inner);
+                }
+                elseif ($option === 'with_escape') {
+                    $inner = $this->replaceEmptyCharWithEscape($inner);
+                }
+                $html .= "{$inner}</span>";
             }
             else {
                 if (isset($lines[$i])) {
-                	if($option == "original"){
-                		$html .= htmlentities($lines[$i]);
-					} else if($option == "with_unicode"){
-                		$html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
-					} else if($option == "with_escape"){
-						$html .= $this->replaceEmptyCharWithEscape(htmlentities($lines[$i]));
-					}
+                    if($option == "original"){
+                        $html .= htmlentities($lines[$i]);
+                    } else if($option == "with_unicode"){
+                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
+                    } else if($option == "with_escape"){
+                        $html .= $this->replaceEmptyCharWithEscape(htmlentities($lines[$i]));
+                    }
                 }
             }
-			if($option == "with_unicode"){
-				$html .= '<span style="border: 1px solid blue">&#9166;</span>';
-			} else if($option == "with_escape"){
-				$html .= '<span style="border: 1px solid blue">\\n</span>';
-			}
+            if($option == "with_unicode"){
+                $html .= '<span style="border: 1px solid blue">&#9166;</span>';
+            } else if($option == "with_escape"){
+                $html .= '<span style="border: 1px solid blue">\\n</span>';
+            }
             $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {
@@ -501,52 +501,52 @@ class DiffViewer {
     }
 
     public function getWhiteSpaces(){
-    	$return = "";
-    	foreach($this->white_spaces as $key => $value){
-			$return .= "$value" . " = " . "$key". " ";
-		}
-		return $this->white_spaces;
-	}
+        $return = "";
+        foreach($this->white_spaces as $key => $value){
+            $return .= "$value" . " = " . "$key". " ";
+        }
+        return $this->white_spaces;
+    }
 
-	/**
-	 * @param $html the original HTML before any text transformation
-	 *
-	 * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
-	 *
-	 * @return HTML after white spaces replaced with visuals
-	 */
+    /**
+     * @param $html the original HTML before any text transformation
+     *
+     * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
+     *
+     * @return HTML after white spaces replaced with visuals
+     */
     private function replaceEmptyChar($html){
-    	$return = $html;
-		$this->replaceUTF(' ', '&nbsp;', $return, 'space');
-		$this->replaceUTF("\r", '↵<br>', $return, 'carriage return');
-		$this->replaceUTF('\t', '↹', $return, 'tab');
-		return $return;
-	}
+        $return = $html;
+        $this->replaceUTF(' ', '&nbsp;', $return, 'space');
+        $this->replaceUTF("\r", '↵<br>', $return, 'carriage return');
+        $this->replaceUTF('\t', '↹', $return, 'tab');
+        return $return;
+    }
 
-	private function replaceEmptyCharWithEscape($html){
-		$return = $html;
-		$this->replaceUTF(' ', '&nbsp;', $return, 'space');
-		$this->replaceUTF("\r", '\\r<br>', $return, 'carriage return');
-		$this->replaceUTF('\t', '\\t', $return, 'tab');
-		return $return;
-	}
+    private function replaceEmptyCharWithEscape($html){
+        $return = $html;
+        $this->replaceUTF(' ', '&nbsp;', $return, 'space');
+        $this->replaceUTF("\r", '\\r<br>', $return, 'carriage return');
+        $this->replaceUTF('\t', '\\t', $return, 'tab');
+        return $return;
+    }
 
-	/**
-	 * @param $text String
-	 * @param $what String
-	 * @param $which String(Reference)
-	 * @param $description (What is the description of this character)
-	 * @return string (The newly formed string)
-	 *
-	 * This function replaces string $text with string $what in string $which.
-	 */
-	private function replaceUTF($text, $what, &$which, $description){
-    	$count = 0;
-		$what = '<span style="outline:1px blue solid;">'.$what.'</span>';
-		$which = str_replace($text, $what, $which,$count);
-		if($count > 0) $this->white_spaces[$description] = strip_tags($what);
-		return $what;
-	}
+    /**
+     * @param $text String
+     * @param $what String
+     * @param $which String(Reference)
+     * @param $description (What is the description of this character)
+     * @return string (The newly formed string)
+     *
+     * This function replaces string $text with string $what in string $which.
+     */
+    private function replaceUTF($text, $what, &$which, $description){
+        $count = 0;
+        $what = '<span style="outline:1px blue solid;">'.$what.'</span>';
+        $which = str_replace($text, $what, $which,$count);
+        if($count > 0) $this->white_spaces[$description] = strip_tags($what);
+        return $what;
+    }
 
     /**
      * Compress an array of numbers into ranges
