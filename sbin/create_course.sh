@@ -230,6 +230,9 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
 create_and_set  u=rwx,g=rxs,o=   $HWCGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/lichen
+create_and_set  u=rwx,g=rwxs,o=  $HWCRON_USER       $ta_www_group   $course_dir/lichen/config
+create_and_set  u=rwx,g=rwxs,o=  $HWCRON_USER       $ta_www_group   $course_dir/lichen/provided_code
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
