@@ -959,6 +959,7 @@ class ElectronicGraderController extends GradingController {
                 return $response;
             }
         }
+        
         if ($gradeable->getActiveVersion() <=0) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
