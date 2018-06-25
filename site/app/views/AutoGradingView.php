@@ -90,12 +90,12 @@ class AutogradingView extends AbstractView {
                 $file_path = urlencode($file_path);
                 $return .= '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
             } else {
-            		$id = "show_char_$index"."_".$autocheck_cnt;
-            		$div_id = "container_$index"."_".$autocheck_cnt;
-            		$helper_id = "white_space_helper_$index"."_".$autocheck_cnt;
-					$return .= <<<HTML
-					<div id=$helper_id></div>
-			<a id=$id class="btn btn-default" style="float:right;" onclick="changeDiffView('$div_id', '$gradeable_id', '$who_id', '$index', '$autocheck_cnt', '$helper_id')">Show white spaces</a>
+                    $id = "show_char_$index"."_".$autocheck_cnt;
+                    $div_id = "container_$index"."_".$autocheck_cnt;
+                    $helper_id = "white_space_helper_$index"."_".$autocheck_cnt;
+                    $return .= <<<HTML
+                    <div id=$helper_id></div>
+            <a id=$id class="btn btn-default" style="float:right;" onclick="changeDiffView('$div_id', '$gradeable_id', '$who_id', '$index', '$autocheck_cnt', '$helper_id')">Show white spaces</a>
 HTML;
                 $return .= <<<HTML
     <div class="box-block">

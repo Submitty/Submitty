@@ -59,9 +59,9 @@ class ElectronicGraderController extends GradingController {
             case 'verify_all':
                 $this->verifyGrader(true);
                 break;
-			case 'remove_empty':
-				return $this->ajaxRemoveEmpty();
-				break;
+            case 'remove_empty':
+                return $this->ajaxRemoveEmpty();
+                break;
             default:
                 $this->showStatus();
                 break;
@@ -76,7 +76,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
-		$option = $_REQUEST['option'] ?? 'original';
+        $option = $_REQUEST['option'] ?? 'original';
         //There are currently two views, the view of student's code and the expected view.
         $which = $which = $_REQUEST['which'] ?? 'actual';
         $autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
@@ -95,8 +95,7 @@ class ElectronicGraderController extends GradingController {
             $html .= $diff_viewer->getDisplayExpected($option);
         }
         $white_spaces = $diff_viewer->getWhiteSpaces();
-//		$this->core->renderJson();
-		$this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
+        $this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
     }
 
     private function verifyGrader($verifyAll = false){
@@ -525,11 +524,11 @@ class ElectronicGraderController extends GradingController {
             $user_id = $vals[2];
             
             if ($this->core->getQueries()->getUserById($user_id) === null) {
-            	$error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
-                continue;	
+                $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
+                continue;    
             }
             if(!array_key_exists($team_id, $new_teams_members)) {
-            	$new_teams_members[$team_id] = array();
+                $new_teams_members[$team_id] = array();
             }
             array_push($new_teams_members[$team_id], $user_id);
         }
@@ -546,8 +545,8 @@ class ElectronicGraderController extends GradingController {
         }    
 
         foreach($new_teams_members as $team_id => $members) {
-        	$leader_id = $members[0];
-        	ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader_id, $members);
+            $leader_id = $members[0];
+            ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader_id, $members);
         }
 
         $this->core->addSuccessMessage("All Teams are imported to the gradeable");
@@ -608,7 +607,7 @@ class ElectronicGraderController extends GradingController {
                 continue;
             }
             if(in_array($id, $user_ids)) {
-            	$this->core->addErrorMessage("ERROR: {$id} is already on this team");
+                $this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }
         }
