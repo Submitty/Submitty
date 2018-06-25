@@ -24,8 +24,8 @@ class PlagiarismController extends AbstractController {
             case 'get_plagiarism_ranking_for_gradeable':
                 $this->ajaxGetPlagiarismRankingForGradeable();
                 break; 
-            case 'get_user_submission':
-            	$this->ajaxGetUserSubmission();
+            case 'get_submission_concatinated':
+            	$this->ajaxGetSubmissionConcatinated();
             	break;
             case 'get_matching_users':
             	$this->ajaxGetMatchingUsers();
@@ -259,40 +259,71 @@ class PlagiarismController extends AbstractController {
     		}
     	    $return = json_encode($rankings);
         }
+        else{
+        	$return = array('error' => 'Unable to open the ranking file');
+        	$return = json_encode($return);	
+        }
     	echo($return);
     }
 
-    public function ajaxGetUserSubmission() {
+    public function ajaxGetSubmissionConcatinated() {
     	$gradeable_id = $_REQUEST['gradeable_id'];
-    	$user_id =$_REQUEST['user_id'];
-    	$version = $_REQUEST['version'];
+    	$user_id_1 =$_REQUEST['user_id_1'];
+    	$version_user_1 = $_REQUEST['version_user_1'];
+    	
         $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
         $return="";
-        $active_version = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $active_version_user_1 = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id_1)->getActiveVersion();
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
+        if(!file_exists($file_path)) {
+			$return = array('error' => 'Ranking file not exists.');
+        	$return = json_encode($return);
+        	echo($return);
+        	return;
+        }
     	$content =file_get_contents($file_path);
     	$content = trim(str_replace(array("\r", "\n"), '', $content));
     	$rankings = preg_split('/ +/', $content);
 		$rankings = array_chunk($rankings,3);
 		foreach($rankings as $ranking) {
-			if($ranking[1] == $user_id) {
+			if($ranking[1] == $user_id_1) {
 				$max_matching_version = $ranking[2];
 			}
 		}
-        if($version == "max_matching") {
-        	$version = $max_matching_version;
+        if($version_user_1 == "max_matching") {
+        	$version_user_1 = $max_matching_version;
         }
-        $all_versions = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id), array(".", "..", "user_assignment_settings.json"));
+        $all_versions_user_1 = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id_1), array(".", "..", "user_assignment_settings.json"));
 
-        $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id."/".$version."/submission.concatenated";
-
+        $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id_1."/".$version_user_1."/submission.concatenated";
+        $data="";
     	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-  			$data= array('display_code'=> htmlentities($this->getDisplayForCode($file_name)), 'code_version' => $version, 'max_matching_version' => $max_matching_version, 'active_version' => $active_version, 'all_versions' => $all_versions);
-       	    $return = json_encode($data);
+  			$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1);
         }
+        else {
+        	$return = array('error' => 'User 1 submission.concatinated for specified version not found.');
+        	$return = json_encode($return);
+        	echo($return);
+        	return;
+        }
+        if(isset($_REQUEST['user_id_2']) && !empty($_REQUEST['user_id_2']) && isset($_REQUEST['version_user_2']) && !empty($_REQUEST['version_user_2'])) {
+        	$file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$_REQUEST['user_id_2']."/".$_REQUEST['version_user_2']."/submission.concatenated";
+
+	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name));
+	        }   
+	        else {
+	        	$return = array('error' => 'User 2 submission.concatinated for matching version not found.');
+		    	$return = json_encode($return);
+		    	echo($return);
+		    	return;
+	        }	
+        }
+
+       	$return= json_encode($data);
     	echo($return);	
     }
 
@@ -314,14 +345,21 @@ class PlagiarismController extends AbstractController {
 
     public function ajaxGetMatchingUsers() {
     	$gradeable_id = $_REQUEST['gradeable_id'];
-    	$user_id =$_REQUEST['user_id'];
-    	$version = $_REQUEST['version'];
+    	$user_id =$_REQUEST['user_id_1'];
+    	$version = $_REQUEST['version_user_1'];
         $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
         $return = array();
+        $error="";
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
+        if(!file_exists($file_path)) {
+			$return = array('error' => 'Ranking file not exists.');
+        	$return = json_encode($return);
+        	echo($return);
+        	return;
+        }
     	$content =file_get_contents($file_path);
     	$content = trim(str_replace(array("\r", "\n"), '', $content));
     	$rankings = preg_split('/ +/', $content);
@@ -343,7 +381,9 @@ class PlagiarismController extends AbstractController {
 	    	foreach($content as $match) {
 	    		if($match["type"] == "match") {
 	    			foreach ($match["others"] as $match_info) {
-	    				array_push($return, array($match_info["username"],$match_info["version"]));
+	    				if(!in_array(array($match_info["username"],$match_info["version"]), $return )) {
+	    					array_push($return, array($match_info["username"],$match_info["version"]));
+	    				}
 	    			}
 	    		}
 	    	}

@@ -208,6 +208,10 @@ function setRankingForGradeable() {
             url: url,
             success: function(data) {
                 var rankings = JSON.parse(data);
+                if(rankings.error){
+                    alert(rankings.error);
+                    return;
+                }
                 var append_options='<option value="">None</option>';
                 $.each(rankings, function(i,user_ranking_info){
                     append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
@@ -227,48 +231,53 @@ function setUserSubmittedCode(changed) {
     var gradeable_id = $('[name="gradeable_id"]', form).val();
     var user_id_1 = $('[name="user_id_1"]', form2).val();
     if(user_id_1 == ""){
-        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="code_box_1"]').empty();
         $('[name="code_box_2"]').empty();
     }
     else {
-        var version = $('[name="version"]', form2).val();
-        if(changed == 'version' && version == '') {
+        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        if(changed == 'version_user_1' && version_user_1 == '') {
             $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
             $('[name="code_box_1"]').empty(); 
             $('[name="code_box_2"]').empty(); 
         }
         else {
-            if(changed == 'user_id_1' || changed =='version') {
-                if( version == '' || changed == 'user_id_1') {    
-                    version = "max_matching";                
+            if(changed == 'user_id_1' || changed =='version_user_1') {
+                if( version_user_1 == '' || changed == 'user_id_1') {    
+                    version_user_1 = "max_matching";                
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_user_submission',
-                        'gradeable_id': gradeable_id , 'user_id':user_id_1, 'version': version});
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
                 $.ajax({
                     url: url,
                     success: function(data) {
+                        console.log(data);
                         data = JSON.parse(data);
+                        if(data.error){
+                            alert(data.error);
+                            return;
+                        }
                         var append_options='<option value="">None</option>';
-                        $.each(data.all_versions, function(i,version_to_append){
-                            if(version_to_append == data.active_version && version_to_append == data.max_matching_version){
+                        $.each(data.all_versions_user_1, function(i,version_to_append){
+                            if(version_to_append == data.active_version_user_1 && version_to_append == data.max_matching_version){
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
                             }
-                            if(version_to_append == data.active_version && version_to_append != data.max_matching_version){
+                            if(version_to_append == data.active_version_user_1 && version_to_append != data.max_matching_version){
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
                             }
-                            if(version_to_append != data.active_version && version_to_append == data.max_matching_version){
+                            if(version_to_append != data.active_version_user_1 && version_to_append == data.max_matching_version){
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Max Match)</option>';
                             }
 
-                            if(version_to_append != data.active_version && version_to_append != data.max_matching_version){
+                            if(version_to_append != data.active_version_user_1 && version_to_append != data.max_matching_version){
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
                             }
                         });
-                        $('[name="version"]', form2).find('option').remove().end().append(append_options).val(data.code_version);
-                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code).text());
+                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -276,7 +285,7 @@ function setUserSubmittedCode(changed) {
                 })
 
                 var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
-                        'gradeable_id': gradeable_id , 'user_id':user_id_1, 'version': version});
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -286,6 +295,10 @@ function setUserSubmittedCode(changed) {
                         }
                         else {
                             data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
                             var append_options='<option value="">None</option>';
                             $.each(data, function(i,matching_users){
                                 append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
@@ -301,18 +314,40 @@ function setUserSubmittedCode(changed) {
             }
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form2).val()) == '') {
-                    $('[name="code_box_2"]').empty(); 
-                }
-                else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-                    var user_2_version = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_user_submission',
-                        'gradeable_id': gradeable_id , 'user_id':user_id_2, 'version': user_2_version});
+                    $('[name="code_box_2"]').empty();
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
                     $.ajax({
                         url: url,
                         success: function(data) {
                             data = JSON.parse(data);
-                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code).text());
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                        },
+                        error: function(e) {
+                            alert("Could not load submitted code, please refresh the page and try again.");
+                        }
+                    })
+
+                }
+                else {
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    $.ajax({
+                        url: url,
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");

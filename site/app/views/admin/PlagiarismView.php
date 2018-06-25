@@ -71,7 +71,7 @@ HTML;
                 <option value="">None</option>
             </select>
             Version: 
-            <select name="version">
+            <select name="version_user_1">
                 <option value="">None</option>
             </select> 
             <span style="float:right;"> User 2:
@@ -98,8 +98,8 @@ HTML;
     $('[name="user_id_1"]', form2).change(function(){
         setUserSubmittedCode('user_id_1');
     });
-    $('[name="version"]', form2).change(function(){
-        setUserSubmittedCode('version');
+    $('[name="version_user_1"]', form2).change(function(){
+        setUserSubmittedCode('version_user_1');
     });
     $('[name="user_id_2"]', form2).change(function(){
         setUserSubmittedCode('user_id_2');
