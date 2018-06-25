@@ -754,6 +754,16 @@ class Course(object):
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
+        os.system("mkdir -p {}".format(os.path.join(course_path, "lichen")))
+        os.system('chown hwcron:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'lichen')))
+        os.system('chmod g+rs-w {}'.format(os.path.join(course_path, 'lichen')))
+        os.system("mkdir -p {}".format(os.path.join(course_path, "lichen/config")))
+        os.system('chown hwcron:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'lichen/config')))
+        os.system('chmod g+rws {}'.format(os.path.join(course_path, 'lichen/config')))
+        os.system("mkdir -p {}".format(os.path.join(course_path, "lichen/provided_code")))
+        os.system('chown hwcron:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'lichen/provided_code')))
+        os.system('chmod g+rws {}'.format(os.path.join(course_path, 'lichen/provided_code')))
+        
         for gradeable in self.gradeables:
             #create_teams
             json_team_history = {}
