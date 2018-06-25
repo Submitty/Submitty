@@ -1,6 +1,7 @@
 //Used to reset users cookies
 var cookie_version = 1;
 
+var editModeEnabled = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
@@ -69,7 +70,7 @@ function eraseCookie(name) {
 function deleteCookies(){
     $.each(document.cookie.split(/; */), function(){
         var cookie = this.split("=")
-        if(!cookie[1] || cookie[1] == 'undefined'){
+        if(!cookie[1] || cookie[1] == 'undefined'){https://github.com/Submitty/Submitty/projects
             document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             document.cookie = "cookie_version=-1; path=/;";
         }
@@ -702,4 +703,23 @@ function adjustSize(name) {
     var textarea = document.getElementById(name);
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
+}
+//-----------------------------------------------------------------------------
+// Edit Mode
+function toggleEditMode(){
+    if(editModeEnabled==null){
+        editModeEnabled=false;
+    }
+    editModeEnabled=!editModeEnabled;
+    if(findCurrentOpenedMark()>0){
+        if(editModeEnabled==false){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
+        }
+        if(editModeEnabled==true){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
+        }
+        var id=findCurrentOpenedMark();
+        saveMark(id, true);
+        updateMarksOnPage(id);
+    }
 }
