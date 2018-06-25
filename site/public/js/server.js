@@ -268,7 +268,7 @@ function setUserSubmittedCode(changed) {
                             }
                         });
                         $('[name="version"]', form2).find('option').remove().end().append(append_options).val(data.code_version);
-                        $('[name="code_box_1"]').empty().append(getDisplayForCode(data.file_content));
+                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code).text());
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -312,7 +312,7 @@ function setUserSubmittedCode(changed) {
                         url: url,
                         success: function(data) {
                             data = JSON.parse(data);
-                            $('[name="code_box_2"]').empty().append(getDisplayForCode(data.file_content));
+                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code).text());
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -325,21 +325,21 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
-function getDisplayForCode(content){
-        var lines= content.split("\n"); 
-        html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
-        for (var i = 0; i < lines.length; i++) {
-            var j = i + 1;
-            html += "<div style='white-space: nowrap;'>";
-            html += "<span class='line_number'>"+ j +"</span>";
-            html += "<span class='line_code'>";
-            html += lines[i];
-            html += "</span></div>";
-        }
-        j++;
-        html += "</div></div>";
-        return html;
-    }
+// function getDisplayForCode(content){
+//     var lines= content.split("\n"); 
+//     html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
+//     for (var i = 0; i < lines.length; i++) {
+//         var j = i + 1;
+//         html += "<div style='white-space: nowrap;'>";
+//         html += "<span class='line_number'>"+ j +"</span>";
+//         html += "<span class='line_code'>";
+//         html += lines[i];
+//         html += "</span></div>";
+//     }
+//     j++;
+//     html += "</div></div>";
+//     return html;
+// }
 
 function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");

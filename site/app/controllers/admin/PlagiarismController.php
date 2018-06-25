@@ -288,13 +288,29 @@ class PlagiarismController extends AbstractController {
         $all_versions = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id), array(".", "..", "user_assignment_settings.json"));
 
         $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id."/".$version."/submission.concatenated";
- 
+
     	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-  			$data= array('file_content'=> htmlentities(file_get_contents($file_name)), 'code_version' => $version, 'max_matching_version' => $max_matching_version, 'active_version' => $active_version, 'all_versions' => $all_versions);
+  			$data= array('display_code'=> htmlentities($this->getDisplayForCode($file_name)), 'code_version' => $version, 'max_matching_version' => $max_matching_version, 'active_version' => $active_version, 'all_versions' => $all_versions);
        	    $return = json_encode($data);
         }
     	echo($return);	
     }
+
+    public function getDisplayForCode($file_name){
+    	$lines= file($file_name); 
+	    $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
+	    for ($i = 0; $i < count($lines); $i++) {
+	        $j = $i + 1;
+	        $html .= "<div style='white-space: nowrap;'>";
+	        $html .= "<span class='line_number'>". $j ."</span>";
+	        $html .= "<span class='line_code'>";
+	        $html .= $lines[$i];
+	        $html .= "</span></div>";
+	    }
+	    $j++;
+	    $html .= "</div></div>";
+	    return $html;
+	}
 
     public function ajaxGetMatchingUsers() {
     	$gradeable_id = $_REQUEST['gradeable_id'];
