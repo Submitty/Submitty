@@ -804,29 +804,29 @@ HTML;
         $student_gradeables = [];
         $status_array = [];
         $late_charged_array = [];
-		$late_updates = $this->core->getQueries()->getLateDayUpdates($user_id);
+        $late_updates = $this->core->getQueries()->getLateDayUpdates($user_id);
         $order_by = [ 
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
             $student_gradeables[] = $g;
-			if($g->getId() == $gradeable->getId()){
-				$status = $g->getLateStatus(); //Setting the background color based on the status of this assignment.
-			}
+            if($g->getId() == $gradeable->getId()){
+                $status = $g->getLateStatus(); //Setting the background color based on the status of this assignment.
+            }
             $status_array[] = $g->getLateStatus();
             $late_charged_array[] = $g->getCurrLateCharged();
         }
-		return $this->core->getOutput()->renderTwigTemplate("/LateDaysTable.twig", [
-			"user_id" => $user_id,
-			"student_gradeables" => $student_gradeables,
-			"status_array" => $status_array,
-			"late_charged_array" => $late_charged_array,
-			"total_late_used" => $total_late_used,
-			"g_id" => $gradeable->getId(),
-			"late_update" => $late_updates,
-			"preferred_name" => $user_id,
-			"is_own_page" => false
-		]);
+        return $this->core->getOutput()->renderTwigTemplate("/LateDaysTable.twig", [
+            "user_id" => $user_id,
+            "student_gradeables" => $student_gradeables,
+            "status_array" => $status_array,
+            "late_charged_array" => $late_charged_array,
+            "total_late_used" => $total_late_used,
+            "g_id" => $gradeable->getId(),
+            "late_update" => $late_updates,
+            "preferred_name" => $user_id,
+            "is_own_page" => false
+        ]);
     }
 }
