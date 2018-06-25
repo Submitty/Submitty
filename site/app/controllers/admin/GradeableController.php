@@ -14,6 +14,9 @@ class GradeableController extends AbstractController {
             case 'process_upload_config':
                 $this->process_config_upload();
                 break;
+			case 'delete_config':
+			    $this->delete_config();
+				break;
         }
     }
 
@@ -73,5 +76,12 @@ class GradeableController extends AbstractController {
         $this->core->addSuccessMessage("Gradeable config uploaded");
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
             'action' => 'upload_config')));
+    }
+
+    public function delete_config() {
+        $gradeable_using_config
+        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+
+        }
     }
 }

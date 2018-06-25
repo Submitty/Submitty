@@ -59,6 +59,10 @@
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         {% if file.files != null %}
             <div>
+                {% if indent == 1 %}
+                    <a class="fa fa-pencil"></a>
+                    <a class="fa fa-trash" href="{{core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'delete_config', 'config': file.path})}}"></a>
+                {% endif %}
                 <span id='{{ id }}-span' class='icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
                     {{ self.display_files(self, file.files, indent + 1, true) }}
