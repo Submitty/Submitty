@@ -662,7 +662,7 @@ HTML;
             }
             $status = $team_status;
         } else {
-            $return .= $this->makeTable($user->getId(), $gradeable, $status);
+            $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
         if ($status != "Good" && $status != "Late" && $status != "No submission") {
             $color = "red";
