@@ -382,10 +382,10 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                 if (data['success']) {
                     if(data['previous_submission']) { // if there is a previous submission, give the user merge options
                         $(function() {
-                            var dialog = $('<div><p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p><br>\
-                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">New Submission</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">Merge (Don\'t File Clobber)</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">Merge (File Clobber)</label></div>')
+                            var dialog = $('<div><p>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</p><br>\
+                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">only the new files</label><br>\
+                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">old files and new files -- old files with the same name will be renamed.</label><br>\
+                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">old files and new files -- old files with the same name will be overwritten.</label></div>')
                                 .dialog({
                                 open: function(event, ui) { // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
 
