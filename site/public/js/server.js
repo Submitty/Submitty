@@ -1521,18 +1521,7 @@ function checkNumFilesForumUpload(input, post_id){
     }
 }
 
-function createThread() {
-    var form = $(this)[0];
-    if(!form.checkValidity()) {
-        form.reportValidity();
-        return false;
-    }
-    if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-        alert("At least one category must be selected.");
-        return false;
-    }
-
-    var formData = new FormData(form);
+function testAndGetAttachments() {
     // Files selected
     var files = [];
     for (var i = 0; i < file_array.length; i++) {
@@ -1564,11 +1553,31 @@ function createThread() {
             return false;
         }
     }
+    return files;
+}
 
+function publishFormWithAttachments(form, test_category, error_message) {
+    if(!form[0].checkValidity()) {
+        form[0].reportValidity();
+        return false;
+    }
+    if(test_category) {
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+            alert("At least one category must be selected.");
+            return false;
+        }
+    }
+
+    var formData = new FormData(form[0]);
+
+    var files = testAndGetAttachments();
+    if(files === false) {
+        return false;
+    }
     for(var i = 0; i < files.length ; i++) {
         formData.append('file_input[]', files[i], files[i].name);
     }
-    var submit_url = $(this).attr('action');
+    var submit_url = form.attr('action');
 
     $.ajax({
         url: submit_url,
@@ -1587,13 +1596,24 @@ function createThread() {
             window.location.href = json['next_page'];
         },
         error: function(){
-            window.alert("Something went wrong while creating thread. Please try again.");
+            window.alert(error_message);
         }
     });
     return false;
 }
 
+function createThread() {
+    return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+}
+
+function publishPost() {
+    return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+}
+
 function editPost(post_id, thread_id, shouldEditThread) {
+    var form = $("#"+post_id+"-reply");
+    
+                console.log(form);
      var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
      $.ajax({
             url: url,
@@ -1615,6 +1635,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
+                console.log(form);
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
@@ -1622,7 +1643,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('thread_post_content');
+                var contentBox = form.find("[name=thread_post_content]")[0];
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;

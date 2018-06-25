@@ -329,46 +329,45 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
+        $result = array();
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
-        $post_content_tag = 'post_content';
+        $post_content_tag = 'thread_post_content';
         $file_post = 'file_input';
-        if(empty($_POST['post_content'])){
-            $post_content_tag .= ('_' . $parent_id);
-            $file_post .= ('_' . $parent_id);
-        }
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
         } else if(!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exists.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment[0] == -1){
-                $this->core->redirect($hasGoodAttachment[1]);
-                return;
-            }
-            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
-            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+                $result['next_page'] = $hasGoodAttachment[1];
+            } else {
+                $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
-            if(!is_dir($thread_dir)) {
-                FileUtils::createDir($thread_dir);
-            }
-
-            if($hasGoodAttachment[0] == 1) {
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
-                for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
-                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                if(!is_dir($thread_dir)) {
+                    FileUtils::createDir($thread_dir);
                 }
+
+                if($hasGoodAttachment[0] == 1) {
+                    $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                    FileUtils::createDir($post_dir);
+                    for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
+                        $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
+                        move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                    }
+                }
+                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id)));
         }
+        $this->core->getOutput()->renderJson($result);
+        return $result;   
     }
 
     public function alterAnnouncement($type){

@@ -1,3 +1,4 @@
+<div class="thread-post-form">
 <div class="form-group row">
     {% if show_title %}
     <span class="edit_thread">
@@ -16,9 +17,12 @@
     <div style="margin-bottom:10px;" class="form-group row">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
         <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+    {% if show_merge_thread_button and core.getUser().getGroup() <= 2 %}
+        <a class="btn btn-primary" style="position:relative;float:right;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+    {% endif %}
     </div>
     <div class="form-group row">
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:40vmin;overflow:hidden;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:40vmin;overflow:hidden;" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required></textarea>
     </div>
 <br/>
 {% endif %}
@@ -46,36 +50,49 @@
     </div>
 {% endif %}
 <div style="margin-bottom:10px;" class="form-group row">
-    {% if show_attachments %}
+    {% if attachment_box_id %}
         <span style="float:left;display:inline-block;">
-            <div id="upload1" style="cursor: pointer; text-align: right;">
+            <div class="upload_attachment_box" id="upload{{ attachment_box_id }}" style="cursor: pointer; text-align: right;">
                 <label id="file_input_label" style="float: left;" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" id="input_file1" style="display: none;" onchange="addFilesFromInput(1)" multiple />
+                <input type="file" accept="image/*" id="input_file{{ attachment_box_id }}" style="display: none;" onchange="addFilesFromInput({{ attachment_box_id }})" multiple />
                 <br>
             </div>
         </span>
         <br>
-        <script type="text/javascript">
-            $(function() {
-                $('#upload1').on('DOMNodeInserted',function(e){
-                    var part = 1;
-                    var target = $(e.target);
-                    var file_object = null;
-                    var filename = target.attr("fname");
-                    for (var j = 0; j < file_array[part-1].length; j++){
-                        if (file_array[part-1][j].name == filename) {
-                            file_object = file_array[part-1][j];
-                            break;
+
+        {% if attachment_script %}
+            {# To be executed at last attachment box #}
+            <script type="text/javascript">
+                $(function() {
+                    $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
+                        var part = get_part_number(e);
+                        var target = $(e.target);
+                        var file_object = null;
+                        var filename = target.attr("fname");
+                        for (var j = 0; j < file_array[part-1].length; j++){
+                            if (file_array[part-1][j].name == filename) {
+                                file_object = file_array[part-1][j];
+                                break;
+                            }
                         }
-                    }
-                    var image = document.createElement('img');
-                    image.src = window.URL.createObjectURL(file_object);
-                    $(image).addClass("thumbnail");
-                    target.prepend(document.createElement('br'));
-                    target.prepend(image);
+                        console.log(file_object);
+                        var image = document.createElement('div');
+                        // image.src = 
+                        $(image).addClass("thumbnail");
+                        $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
+                        target.prepend(document.createElement('br'));
+                        target.prepend(image);
+                    });
+
+                    // Attachments on Create Thread
+                    var part = "{{ attachment_box_id }}";
+                    createArray(part);
+                    $(".upload_attachment_box").each(function() {
+                        this.addEventListener("click", clicked_on_box, false);
+                    });
                 });
-            });
-        </script>
+            </script>
+        {% endif %}
     {% endif %}
     <span style="display:inline-block;float:right;">
         {% if show_anon %}
@@ -86,10 +103,13 @@
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
-                 $('#thread_post_content').val('');$('#thread_post_content').trigger('checkform.areYouSure');
+                 $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');$(this).closest('.thread-post-form').find('[name=thread_post_content]').trigger('checkform.areYouSure');
+                 console.log($(this).closest('.thread-post-form').find('[name=thread_post_content]'));
                  $('#title').val('');$('#title').trigger('checkform.areYouSure');"
                      class="btn btn-danger">Cancel</a>
         {% endif %}
         <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
     </span>
+</div>
+<br>
 </div>
