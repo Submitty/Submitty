@@ -1212,9 +1212,9 @@ function closeMark(c_index, save) {
 
 
 
-function toggleMark(id, save) {
-    if (findCurrentOpenedMark() === id) {
-        closeMark(id, save);
+function toggleMark(c_index, save) {
+    if (findCurrentOpenedMark() === c_index) {
+        closeMark(c_index, save);
         updateCookies();
     } else {
         openMark(c_index);
