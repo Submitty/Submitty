@@ -410,7 +410,7 @@ class DiffViewer {
          */
 		$max_digits = strlen((string)count($lines));
         for ($i = 0; $i < count($lines); $i++) {
-        	$j = $i + 1;
+            $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
                 $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
