@@ -93,6 +93,7 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
+    #XXX may need to sort course_file glob and user_file glob
     for course_file in glob.iglob(os.path.join(args.courses_path, '*.yml')):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
@@ -116,15 +117,16 @@ def main():
             for key in courses.keys():
                 courses[key].users.append(user)
 
-    dbg_log_suffix = "_{:%m%d%Y_%H%M%S}.pck".format(datetime.now())
-    cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/preset_users_dump'+dbg_log_suffix,'wb'))
+    #dbg_log_suffix = "_{:%m%d%Y_%H%M%S}.pck".format(datetime.now())
+    #cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/preset_users_dump'+dbg_log_suffix,'wb'))
     # To make Rainbow Grades testing possible, need to seed random to have the same users each time
     random.seed(10090542)
 
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
     extra_students = 0
-    for course_id in courses:
+    #for course_id in courses:
+    for course_id in sorted(courses.keys()):        
         course = courses[course_id]
         tmp = course.registered_students + course.unregistered_students + \
               course.no_rotating_students + \
@@ -149,7 +151,12 @@ def main():
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
+    #Sort alphabetically extra students. Shouldn't affect randomness....
+    extra_students.sort(key=lambda x: x.id)
+
     for user in extra_students:
+    #for user_id in sorted(extra_students.keys()):
+    #    user = extra_students[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
                               user_password=get_php_db_password(user.password),
@@ -172,7 +179,7 @@ def main():
             courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
-    for course_id in courses.keys():
+    for course_id in sorted(courses.keys()):
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
@@ -201,7 +208,7 @@ def main():
             course.users.append(students[key])
             key += 1
 
-    for course in courses.keys():
+    for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)
         courses[course].create()
@@ -629,10 +636,14 @@ class Course(object):
             self.make_customization = course['make_customization']
 
     def create(self):
+        # Sort users to try and determinize?
+        self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
+        self.gradeables.sort(key=lambda x: x.get_detail(self.code, "id"))
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, 'utf-8'))
+        print("{} using seed {}".format(self.code,int(m.hexdigest(), 16)))
         random.seed(int(m.hexdigest(), 16))
 
         course_group = self.code + "_tas_www"
@@ -684,7 +695,7 @@ class Course(object):
         reg_table = Table("grading_registration", metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
+            print("[{}] {} Creating user {} {} ({})...".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S%z"),self.code, user.get_detail(self.code, "firstname"),
                                                        user.get_detail(self.code, "lastname"),
                                                        user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
