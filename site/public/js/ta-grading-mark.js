@@ -9,6 +9,9 @@ GENERAL_MESSAGE_ID = -2;
  * @returns Object Gradeable data
  */
 function getGradeable() {
+    if(grading_data == null){
+        return null;
+    }
     return grading_data.gradeable;
 }
 
@@ -652,11 +655,10 @@ function calculatePercentageTotal() {
     }
 
     total = Math.max(total, 0);
-    earned = Math.max(earned, 0);
 
     updateBadge($("#grading_total"), earned, total);
     updateBadge($("#autograding_total"), autoEarned, autoTotal);
-    updateBadge($("#score_total"), (earned + autoEarned), (total + autoTotal));
+    updateBadge($("#score_total"), Math.max((earned + autoEarned),0), (total + autoTotal));
 }
 
 /**
@@ -1127,6 +1129,7 @@ function closeMark(id, save) {
 function toggleMark(id, save) {
     if (findCurrentOpenedMark() === id) {
         closeMark(id, save);
+        updateCookies();
     } else {
         openMark(id);
     }

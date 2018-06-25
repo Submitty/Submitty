@@ -262,7 +262,7 @@ HTML;
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessGrading()) {
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
                 foreach ($students as $student) {
@@ -296,9 +296,13 @@ HTML;
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
+HTML;
+                if($this->core->getUser()->accessFullGrading()) {
+                    $return .= <<<HTML
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
+                }
                 if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
@@ -733,7 +737,7 @@ HTML;
 </div>
 HTML;
         }
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessGrading()) {
 
             $all_directories = $gradeable->getUploadsFiles();
 
@@ -980,7 +984,25 @@ HTML;
 HTML;
             }
             else {
-                if($gradeable->getActiveVersion() > 0
+                $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+                $active_same_as_graded = true;
+                foreach($gradeable->getComponents() as $component) {
+                    if($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
+                        $active_same_as_graded = false;
+                    }
+                }
+                if(!$active_same_as_graded && $gradeable->beenTAgraded()) {
+                    $return .= <<<HTML
+    <div class="sub" id="submission_message">
+        <p class="red-message">
+            Note: The version you have selected to be graded is not the version graded by<br />
+            the instructor/TAs. If the graded version does not match your selected<br />
+            version, a zero will be recorded in the gradebook.
+        </p>
+    </div>
+HTML;
+                }
+                else if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
