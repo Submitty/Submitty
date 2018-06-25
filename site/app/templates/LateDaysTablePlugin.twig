@@ -36,6 +36,7 @@
     {% for gradeable in student_gradeables %}
         {% if g_id != NULL and gradeable.getId() == g_id %}
             {% set class = "class=btn-primary" %}
+            {% set id = "id = curr_status" %}
         {% endif %}
         <tr>
             <td {{ class }} style="padding:5px; border:thin solid black">{{gradeable.getName()}}</td>
@@ -43,7 +44,7 @@
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDays() != 0) ? gradeable.getLateDays() : ""}}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDayExceptions() != 0) ? gradeable.getLateDayExceptions() : ""}}</td>
-            <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{attribute(status_array, num_status)}}</td>
+            <td {{ class }} {{ id }} align="center" style="padding:5px; border:thin solid black">{{attribute(status_array, num_status)}}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(attribute(late_charged_array, num_status) != 0 ) ? attribute(late_charged_array, num_status) : ""}}</td>
         </tr>
         {% set num_status = num_status + 1 %}
