@@ -655,11 +655,10 @@ function calculatePercentageTotal() {
     }
 
     total = Math.max(total, 0);
-    earned = Math.max(earned, 0);
 
     updateBadge($("#grading_total"), earned, total);
     updateBadge($("#autograding_total"), autoEarned, autoTotal);
-    updateBadge($("#score_total"), (earned + autoEarned), (total + autoTotal));
+    updateBadge($("#score_total"), Math.max((earned + autoEarned),0), (total + autoTotal));
 }
 
 /**
