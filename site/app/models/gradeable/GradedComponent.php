@@ -191,6 +191,7 @@ class GradedComponent extends AbstractModel {
         } else {
             $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
         }
+        $this->modified = true;
     }
 
     /**
@@ -200,6 +201,7 @@ class GradedComponent extends AbstractModel {
     public function setGrader(User $grader) {
         $this->grader = $grader;
         $this->grader_id = $this->grader !== null ? $grader->getId() : '';
+        $this->modified = true;
     }
 
     /**
@@ -211,6 +213,7 @@ class GradedComponent extends AbstractModel {
         // clamp the score (no error if not in bounds)
         //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
         $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        $this->modified = true;
     }
 
     /* Intentionally Unimplemented accessor methods */
