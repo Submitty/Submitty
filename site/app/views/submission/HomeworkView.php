@@ -39,7 +39,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderSubmitBox($gradeable, $late_days_use);
         }
         $all_directories = $gradeable->getUploadsFiles();
-        if ($this->core->getUser()->accessAdmin() && count($all_directories) > 0) {
+        if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
             $return .= $this->renderBulkUploadBox($gradeable);
         }
 
@@ -201,7 +201,7 @@ class HomeworkView extends AbstractView {
         $textboxes = [];
         $old_files = [];
 
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessGrading()) {
             $students = $this->core->getQueries()->getAllUsers();
             $student_ids = array();
             foreach ($students as $student) {

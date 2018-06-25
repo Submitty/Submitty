@@ -301,7 +301,7 @@ class SubmissionController extends AbstractController {
         }
 
         // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
+        if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -338,9 +338,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-	if ($max_size < 10000000) {
-	    $max_size = 10000000;
-	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -446,6 +446,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
+        // make sure is admin
+        if (!$this->core->getUser()->accessAdmin()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
+
         $merge_previous = false;
         if(isset($_REQUEST['merge'])){
             if($_REQUEST['merge']  === "true"){
@@ -467,8 +474,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -692,6 +699,13 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
+
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
         
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
 
@@ -702,6 +716,13 @@ class SubmissionController extends AbstractController {
         }
         if (!isset($_POST['path'])) {
             return $this->uploadResult("Invalid path.", false);
+        }
+
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -779,8 +800,8 @@ class SubmissionController extends AbstractController {
         // repo_id for VCS use
         $repo_id = $_POST['repo_id'];
 
-        // make sure is admin if the two ids do not match
-        if ($original_user_id !== $user_id && !$this->core->getUser()->accessAdmin()) {
+        // make sure is full grader if the two ids do not match
+        if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -1213,7 +1234,14 @@ class SubmissionController extends AbstractController {
     }
     
     private function updateSubmissionVersion() {
-        if (isset($_REQUEST['ta'])){
+        if (isset($_REQUEST['ta'])) {
+            // make sure is full grader
+            if (!$this->core->getUser()->accessFullGrading()) {
+                $msg = "You do not have access to that page.";
+                $this->core->addErrorMessage($msg);
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                return array('error' => true, 'message' => $msg);
+            }
             $ta = $_REQUEST['ta'];
             $who = $_REQUEST['who'];
             $mylist = new GradeableList($this->core, $this->core->getQueries()->getUserById($who));

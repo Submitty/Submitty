@@ -7,13 +7,15 @@
     </div>
 
     {# Admin submission type selector #}
-    {% if core.getUser().accessAdmin() %}
+    {% if core.getUser().accessGrading() %}
         <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
             <div >
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 Normal Submission
-                <input type='radio' id="radio_student" name="submission_type">
-                Make Submission for a Student
+                {% if core.getUser().accessFullGrading() %}
+                    <input type='radio' id="radio_student" name="submission_type">
+                    Make Submission for a Student
+                {% endif %}
                 {% if gradeable.getNumParts() == 1 and not gradeable.useVcsCheckout() %}
                     <input type='radio' id="radio_bulk" name="submission_type">
                     Bulk Upload
