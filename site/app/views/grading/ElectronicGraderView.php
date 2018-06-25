@@ -485,6 +485,15 @@ class ElectronicGraderView extends AbstractView {
                     "message" => "No Submission"
                 ]);
             }
+        } else {
+            $status = $gradeable->calculateLateStatus();
+
+            if ($status != "Good" && $status != "Late") {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#F62817", // fire engine red
+                    "message" => "Late Submission"
+                ]);
+            }
         }
 
         return $return;
@@ -647,38 +656,15 @@ HTML;
                 <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
 HTML;
 
-        $status = "Good";
+        //Late day calculation
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $team_status = "Bad for all team members";
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
                 $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
-                if($status == "Good" || $status == "Late"){
-                    // As long as one person on the team has a good status, then the assignment should be graded.
-                    $team_status = "Good";
-                }
             }
-            $status = $team_status;
         } else {
             $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
-
-        $my_color = "'#F62817'"; // fire engine red
-        $my_message = "Late Submission";
-        $return .= <<<HTML
-            <b>Status:</b> <span id='status_span' style="color:green"></span><br/>
-            <script>
-                let status = $('#curr_status').html();
-                $('#status_span').html(status);
-                if(status != "Good" && status != "Late" && status != "No submission"){
-                    $('#status_span').css('color', 'red');
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                }
-            </script>
-HTML;
 
         $return .= <<<HTML
         </div>
@@ -799,4 +785,5 @@ HTML;
     public function popupSettings() {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
+
 }
