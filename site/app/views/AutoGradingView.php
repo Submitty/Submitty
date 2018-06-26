@@ -85,140 +85,87 @@ class AutoGradingView extends AbstractView {
             return "";
         }
 
-        $autocheck_cnt = 0;
-        $autocheck_len = count($testcase->getAutochecks());
+        $checks = [];
+
         foreach ($testcase->getAutochecks() as $autocheck) {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
             if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf") {
-                $file_name = preg_replace('|.*/|', '', $file_path);
+                $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
-                $return .= $this->autoRenderPdf($file_name, $file_path);
+                $checks[] = [
+                    "pdf" => true,
+                    "name" => $file_name,
+                    "path" => $file_path
+                ];
             } else {
-                $return .= <<<HTML
-    <div class="box-block">
-    <!-- Readded css here so the popups have the css -->
-HTML;
-                $title = "";
-                $return .= <<<HTML
-        <div class='diff-element'>
-HTML;
-                $display_actual = "";
+                $check = [
+                    "messages" => $autocheck->getMessages()
+                ];
+
+                $actual_title = "";
                 $actual_name = $diff_viewer->getActualFilename();
                 if ($diff_viewer->hasDisplayExpected() || $actual_name != "") {
-                    $title = "Student ";
+                    $actual_title = "Student ";
                 }
-                if ($diff_viewer->hasDisplayActual()) {
-                    $display_actual = $diff_viewer->getDisplayActual();
-                    $visible = $this->autoShouldDisplay($display_actual);
-                } else {
-                    $visible = "hidden";
-                }
-                $title .= $description;
-                $return .= <<<HTML
-             <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$index}, {$autocheck_cnt}, 0);"
-             style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
+                $actual_title .= $description;
 
-
-
-            <div id="container_{$index}_{$autocheck_cnt}_0">
-HTML;
-                foreach ($autocheck->getMessages() as $message) {
-                    $type_class = "black-message";
-                    if ($message['type'] == "information") $type_class = "blue-message";
-                    else if ($message['type'] == "success") $type_class = "green-message";
-                    else if ($message['type'] == "failure") $type_class = "red-message";
-                    else if ($message['type'] == "warning") $type_class = "yellow-message";
-                    $return .= <<<HTML
-            <span class="{$type_class}">{$message['message']}</span><br />
-HTML;
-                }
-                $myimage = $diff_viewer->getActualImageFilename();
-                if ($myimage != "") {
-                    $return .= $this->autoRenderImage($myimage);
-
+                $actual_image = $diff_viewer->getActualImageFilename();
+                if ($actual_image != "") {
+                    $check["actual"] = [
+                        "type" => "image",
+                        "title" => $actual_title,
+                        "show_popup" => false,
+                        "src" => $this->autoGetImageSrc($actual_image),
+                    ];
                 } else if ($diff_viewer->hasDisplayActual()) {
-                    $return .= <<<HTML
-            <div id=div_{$index}_{$autocheck_cnt}>
-            $display_actual
-            </div>
-HTML;
-                }
-                $return .= <<<HTML
-            </div>
-        </div>
-HTML;
-                $myExpectedimage = $diff_viewer->getExpectedImageFilename();
-                if ($myExpectedimage != "") {
-                    $return .= <<<HTML
-        <div class='diff-element'>
-        <h4>Expected {$description}</h4>
-HTML;
-                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                        $return .= <<<HTML
-            <br />
-HTML;
-                    }
-                    $return .= $this->autoRenderImage($myExpectedimage);
-                    $return .= <<<HTML
-        </div>
-HTML;
-                } elseif ($diff_viewer->hasDisplayExpected()) {
-                    $visible = $this->autoShouldDisplay($diff_viewer->getDisplayExpected());
-                    $title = "Expected ";
-                    $title .= $description;
-                    $return .= <<<HTML
-        <div class='diff-element'>
-            <h4>{$title} <span onclick="openPopUp('{$popup_css_file}', '{$title}', {$index}, {$autocheck_cnt}, 1)" style="visibility: {$visible}"> <i class="fa fa-window-restore" style="visibility: {$visible}; cursor: pointer;"></i></span></h4>
-            <div id="container_{$index}_{$autocheck_cnt}_1">
-HTML;
-                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                        $return .= <<<HTML
-                <br />
-HTML;
-                    }
-                    $return .= <<<HTML
-                    {$diff_viewer->getDisplayExpected()}
-            </div>
-        </div>
-HTML;
-                }
-                $myDifferenceImage = $diff_viewer->getDifferenceFilename();
-                if ($myDifferenceImage != "") {
-                    $return .= <<<HTML
-        <div class='diff-element'>
-                <h4>Difference {$description}</h4>
-HTML;
-                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
-                        $return .= <<<HTML
-            <br />
-HTML;
-                    }
-                    $return .= $this->autoRenderImage($myDifferenceImage);
-                    $return .= <<<HTML
-        </div>
-HTML;
+                    $check["actual"] = [
+                        "type" => "text",
+                        "title" => $actual_title,
+                        "show_popup" => $this->autoShouldDisplay($diff_viewer->getDisplayActual()),
+                        "src" => $diff_viewer->getDisplayActual(),
+                    ];
                 }
 
-                $return .= <<<HTML
-    </div>
-HTML;
-            }
-            if (++$autocheck_cnt < $autocheck_len) {
-                $return .= <<<HTML
-    <div class="clear"></div>
-HTML;
+                $expected_image = $diff_viewer->getExpectedImageFilename();
+                if ($expected_image != "") {
+                    $check["expected"] = [
+                        "type" => "image",
+                        "title" => "Expected {$description}",
+                        "show_popup" => false,
+                        "src" => $this->autoGetImageSrc($expected_image)
+                    ];
+                } elseif ($diff_viewer->hasDisplayExpected()) {
+                    $check["expected"] = [
+                        "type" => "text",
+                        "title" => "Expected {$description}",
+                        "show_popup" => $this->autoShouldDisplay($diff_viewer->getDisplayExpected()),
+                        "src" => $diff_viewer->getDisplayExpected()
+                    ];
+                }
+
+                $difference_image = $diff_viewer->getDifferenceFilename();
+                if ($difference_image != "") {
+                    $check["difference"] = [
+                        "type" => "image",
+                        "title" => "Difference {$description}",
+                        "show_popup" => "false",
+                        "src" => $this->autoGetImageSrc($difference_image)
+                    ];
+                }
+
+                $checks[] = $check;
             }
 
             $diff_viewer->destroyViewer();
-
-//         $return .= <<<HTML
-//     </div>
-// HTML;
         }
 
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
+            "checks" => $checks,
+            "index" => $index,
+            "popup_css_file" => $popup_css_file,
+        ]);
     }
 
     /**
@@ -226,7 +173,6 @@ HTML;
      * @return string
      */
     private function autoShouldDisplay(string $display): string {
-        $visible = "visible";
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
         $arr_count = count($tmp_array_string);
@@ -237,10 +183,10 @@ HTML;
             }
         }
         if (substr_count($display, 'line_number') < 10 && $less_than_30) {
-            $visible = "hidden";
+            return false;
         }
 
-        return $visible;
+        return true;
     }
 
     /**
@@ -253,22 +199,31 @@ HTML;
     }
 
     /**
-     * @param string $myimage
+     * @param string $path
      * @return array
      */
-    private function autoRenderImage(string $myimage): string {
+    private function autoRenderImage(string $path): string {
+        $src = $this->autoGetImageSrc($path);
+        if ($src !== null) {
+            return '<img src="' . $src . '" img style="border:2px solid black">';
+        }
+        return "";
+    }
+
+    /**
+     * @param string $path
+     * @return array
+     */
+    private function autoGetImageSrc(string $path): string {
         // borrowed from file-display.php
-        $content_type = FileUtils::getContentType($myimage);
+        $content_type = FileUtils::getContentType($path);
         if (substr($content_type, 0, 5) === "image") {
             // Read image path, convert to base64 encoding
-            $imageData = base64_encode(file_get_contents($myimage));
+            $imageData = base64_encode(file_get_contents($path));
             // Format the image SRC:  data:{mime};base64,{data};
-            $myimagesrc = 'data: ' . mime_content_type($myimage) . ';charset=utf-8;base64,' . $imageData;
-            // insert the sample image data
-
-            return '<img src="' . $myimagesrc . '" img style="border:2px solid black">';
+            return 'data: ' . mime_content_type($path) . ';charset=utf-8;base64,' . $imageData;
         }
-        return '';
+        return null;
     }
 
     public function showVersionChoice($gradeable, $onChange, $formatting = "") {
