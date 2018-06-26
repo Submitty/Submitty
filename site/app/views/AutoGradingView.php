@@ -192,7 +192,7 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param string $path
-     * @return array
+     * @return string
      */
     private function autoGetImageSrc(string $path): string {
         // borrowed from file-display.php
@@ -203,7 +203,7 @@ class AutoGradingView extends AbstractView {
             // Format the image SRC:  data:{mime};base64,{data};
             return 'data: ' . mime_content_type($path) . ';charset=utf-8;base64,' . $imageData;
         }
-        return null;
+        return ''; // ?
     }
 
     public function showVersionChoice($gradeable, $onChange, $formatting = "") {
