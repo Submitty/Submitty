@@ -121,7 +121,7 @@ class AutoGradingView extends AbstractView {
                     $check["actual"] = [
                         "type" => "text",
                         "title" => $actual_title,
-                        "show_popup" => $this->autoShouldDisplay($actual_display),
+                        "show_popup" => $this->autoShouldDisplayPopup($actual_display),
                         "src" => $actual_display,
                     ];
                 }
@@ -140,7 +140,7 @@ class AutoGradingView extends AbstractView {
                     $check["expected"] = [
                         "type" => "text",
                         "title" => $expected_title,
-                        "show_popup" => $this->autoShouldDisplay($expected_display),
+                        "show_popup" => $this->autoShouldDisplayPopup($expected_display),
                         "src" => $expected_display
                     ];
                 }
@@ -173,7 +173,7 @@ class AutoGradingView extends AbstractView {
      * @param string $display
      * @return string
      */
-    private function autoShouldDisplay(string $display): string {
+    private function autoShouldDisplayPopup(string $display): string {
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
         $arr_count = count($tmp_array_string);
@@ -188,27 +188,6 @@ class AutoGradingView extends AbstractView {
         }
 
         return true;
-    }
-
-    /**
-     * @param string $file_name
-     * @param string $file_path
-     * @return string
-     */
-    private function autoRenderPdf(string $file_name, string $file_path): string {
-        return "<iframe src='{$this->core->buildUrl(["component" => "misc", "page" => "display_file", "dir" => "results", "file" => $file_name, "path" => $file_path])}' width='95%' height='1200px' style='border: 0'></iframe>";
-    }
-
-    /**
-     * @param string $path
-     * @return array
-     */
-    private function autoRenderImage(string $path): string {
-        $src = $this->autoGetImageSrc($path);
-        if ($src !== null) {
-            return '<img src="' . $src . '" img style="border:2px solid black">';
-        }
-        return "";
     }
 
     /**
