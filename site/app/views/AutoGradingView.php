@@ -70,16 +70,14 @@ class AutoGradingView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param $index
-     * @param $who_id
      * @param $popup_css_file
      * @param bool $show_hidden
      * @return string
      * @throws \Exception
      */
-    public function loadAutoChecks(Gradeable $gradeable, $index, $who_id, $popup_css_file, $show_hidden = false) {
+    public function loadAutoChecks(Gradeable $gradeable, $index, $popup_css_file, $show_hidden = false) {
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$index];
-        $return = "";
 
         if ($testcase->isHidden() && !$show_hidden) {
             return "";
