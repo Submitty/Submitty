@@ -39,7 +39,8 @@
                             <div id="users_{{ index }}">
                                 <input type="text" id="bulk_user_id_{{ index }}[0]" value =""/>
                                 {% if gradeable.isTeamAssignment() %}
-                                    {% for i in 1..gradeable.getMaxTeamSize() %}
+                                    {# (size - 1) because twig loops are range inclusive #}
+                                    {% for i in 1..(gradeable.getMaxTeamSize() - 1) %}
                                         <input type="text" id="bulk_user_id_{{ index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
