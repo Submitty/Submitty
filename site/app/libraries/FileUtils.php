@@ -310,9 +310,9 @@ class FileUtils {
     }
 
     /**
-     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPERATOR constant. This
+     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPARATOR constant. This
      * works in the same way as os.path.join does in Python, making sure that we do not end up with any doubles of
-     * a seperator and that we can start the path with a seperator if we specify the first argument as starting with
+     * a separator and that we can start the path with a separator if we specify the first argument as starting with
      * it.
      *
      * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:

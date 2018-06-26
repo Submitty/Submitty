@@ -22,7 +22,7 @@ var empty_textboxes = true;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
-// initializing file_array and prevous_files
+// initializing file_array and previous_files
 function createArray(num_parts){
     if(file_array.length == 0){
         for(var i=0; i<num_parts; i++){
@@ -313,7 +313,7 @@ function moveNextInput(count) {
     var next_input = "#users_" + next_count + " :first";
     if ($(next_input).length) {
         $(next_input).focus();
-        $(next_input).select(); 
+        $(next_input).select();
 
         var inputOffset = $(next_input).offset().top;
         var inputHeight = $(next_input).height();
@@ -380,30 +380,67 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    if(data['previous_submission']){
+                    if(data['previous_submission']) { // if there is a previous submission, give the user merge options
                         $(function() {
-                            var dialog = $('<p>One or more users you are submitting for had a previous submission. Do you wish to continue?</p>').dialog({
-                                open: function(event, ui) {
-                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-                                },
-                                buttons: {
-                                    "Yes": function() {
-                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                                        dialog.dialog('close');
+                            var dialog = $('<div><p>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</p><br>\
+                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">only the new files</label><br>\
+                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">old files and new files -- old files with the same name will be renamed.</label><br>\
+                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">old files and new files -- old files with the same name will be overwritten.</label></div>')
+                                .dialog({
+                                open: function(event, ui) { // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
 
-                                    },
-                                    "No":  function() {
-                                        dialog.dialog('close');
-                                    },
-                                    "Merge":  function() {
-                                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                        dialog.dialog('close');
+                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+                                    var radio_idx;
+                                    if(localStorage.getItem("instructor-submit-option") === null) {
+                                        radio_idx = 0;
                                     }
-                                }
+                                    else {
+                                        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+                                    }
+                                    $(this).find('input:radio')[radio_idx].checked = true;
+                                    $(this).parent().find(".btn-success").focus();
+                                },
+                                buttons: [
+                                    {
+                                        text: "Submit",
+                                        class: "btn btn-success",
+                                        click: function() { // on click, make submission based on which radio input was checked
+                                            if($("#instructor-submit-option-new").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "0");
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                                            }
+                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "1");
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
+                                            }
+                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "2");
+                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true, clobber=true);
+                                            }
+                                            dialog.dialog('destroy');
+                                        }
+                                    },
+                                    {
+                                        text: "Cancel",
+                                        class: "btn btn-danger",
+                                        click: function() {
+                                            if($("#instructor-submit-option-new").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "0");
+                                            }
+                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "1");
+                                            }
+                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                                localStorage.setItem("instructor-submit-option", "2");
+                                            }
+                                            dialog.dialog('destroy');
+                                        }
+                                    }
+                                ]
                             });
                         });
                     }
-                    else{
+                    else { // if no previous submissions, no merging will be necessary
                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
                     }
                 }
@@ -431,11 +468,10 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 * @param path
 * @param count
 */
-function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false) {
-    var merge = (merge_previous ? "true" : "false");
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, "merge" : merge_previous});
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
-
+    
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -633,11 +669,12 @@ function handleBulk(gradeable_id, num_pages) {
  * @param repo_id
  * @param student_page
  * @param num_components
+ * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id});
+    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
 
     var message = "";
