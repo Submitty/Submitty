@@ -302,7 +302,7 @@ class PlagiarismController extends AbstractController {
         $data="";
     	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
     		if(isset($_REQUEST['user_id_2']) && !empty($_REQUEST['user_id_2']) && isset($_REQUEST['version_user_2']) && !empty($_REQUEST['version_user_2'])) {
-    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2 , '1');	
+    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'] , '1');	
     		}
     		else {
     			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
@@ -319,7 +319,7 @@ class PlagiarismController extends AbstractController {
         	$file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$_REQUEST['user_id_2']."/".$_REQUEST['version_user_2']."/submission.concatenated";
 
 	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'], '2');
 	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
 	        }   
 	        else {
@@ -336,23 +336,50 @@ class PlagiarismController extends AbstractController {
 
     public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
     	$color_info = array();
-    	if($user_id_2 == "" && $codebox == "1"){
-    		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
-	        if (!file_exists($file_path)) {
-	        	return $color_info;
-	        }
-	        else {
-	        	$matches = json_decode(file_get_contents($file_path), true);
-	        	$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
-	        	$tokens = json_decode(file_get_contents($file_path), true);
-		    	foreach($matches as $match) {
-		    		$start_pos =$tokens[$match["start"]-1]["char"];
-		    		$start_line= $tokens[$match["start"]-1]["line"];
-		    		$end_pos =$tokens[$match["end"]-1]["char"];
-		    		$end_line= $tokens[$match["end"]-1]["line"];
-		    		$end_value =$tokens[$match["end"]-1]["value"];
-		    		if($match["type"] == "match") {
-		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+    	
+		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
+        if (!file_exists($file_path)) {
+        	return $color_info;
+        }
+        else {
+        	$matches = json_decode(file_get_contents($file_path), true);
+        	$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
+        	$tokens_user_1 = json_decode(file_get_contents($file_path), true);
+        	if($user_id_2 != "") {
+        		$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_2."/".$version_user_2."/tokens.json";
+        		$tokens_user_2 = json_decode(file_get_contents($file_path), true);
+        	}
+	    	foreach($matches as $match) {
+	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"];
+	    		$start_line= $tokens_user_1[$match["start"]-1]["line"];
+	    		$end_pos =$tokens_user_1[$match["end"]-1]["char"];
+	    		$end_line= $tokens_user_1[$match["end"]-1]["line"];
+	    		$end_value =$tokens_user_1[$match["end"]-1]["value"];
+	    		if($match["type"] == "match") {
+	    			$orange_color = false;
+	    			if($user_id_2 != "") {
+		    			foreach($match['others'] as $other) {
+	    					if($other["username"] == $user_id_2) {
+	    						$orange_color =true;
+	    					}
+	    				}	
+	    			}
+	    			if($codebox == "1" && $orange_color) {
+	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
+			    		}
+			    		else {	
+			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
+			    		}
+			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+			    		}
+			    		else {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+			    		}
+	    			}
+	    			else if($codebox == "1" && !$orange_color) {
+	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
 			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ffff00'>";		
 			    		}
 			    		else {	
@@ -363,39 +390,59 @@ class PlagiarismController extends AbstractController {
 			    		}
 			    		else {
 			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}	
-		    		}
-		    		else if($match["type"] == "common") {
-		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {		
-			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
 			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";	
+	    			}
+	    			else if($codebox == "2" && $user_id_2 !="" && $orange_color) {
+	    				$start_pos =$tokens_user_2[$match["start"]-1]["char"];
+			    		$start_line= $tokens_user_2[$match["start"]-1]["line"];
+			    		$end_pos =$tokens_user_2[$match["end"]-1]["char"];
+			    		$end_line= $tokens_user_2[$match["end"]-1]["line"];
+			    		$end_value =$tokens_user_2[$match["end"]-1]["value"];
+	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
 			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
-		    		}
-		    		else if($match["type"] == "provided") {
-		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
-			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";	
+			    		else {	
+			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
 			    		}
 			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
 			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
 			    		}
 			    		else {
 			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}	
+			    		}
+	    			}	
+	    				
+	    		}
+	    		else if($match["type"] == "common" && $codebox == "1") {
+	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {		
+		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
 		    		}
-		    	}
-	        } 	
-    	}
+		    		else {
+		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";	
+		    		}
+		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+		    		}
+		    		else {
+		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+		    		}
+	    		}
+	    		else if($match["type"] == "provided"  && $codebox == "1") {
+	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
+		    		}
+		    		else {
+		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";	
+		    		}
+		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+		    		}
+		    		else {
+		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+		    		}	
+	    		}
+	    	}
+        } 	
     	foreach($color_info as $i=>$color_info_for_line) {
 	    	krsort($color_info[$i]);
     	}

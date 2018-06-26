@@ -254,7 +254,6 @@ function setUserSubmittedCode(changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
-                        console.log(data);
                         data = JSON.parse(data);
                         if(data.error){
                             alert(data.error);
