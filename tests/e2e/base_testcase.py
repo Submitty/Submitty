@@ -86,15 +86,30 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
-    def click_class(self, course, course_name):
-        self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
-
     def log_out(self):
         if self.logged_in:
             self.logged_in = False
             self.driver.find_element_by_id('logout').click()
             self.driver.find_element_by_id('login-guest')
+
+    def click_class(self, course, course_name):
+        self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
+        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))        
+
+    # see Navigation.twig for css selectors
+    # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
+    def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
+        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[@name='{}_button']".format(gradeable_category, gradeable_id, button_name)).click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
+
+    # clicks the navigation header text to 'go back' pages
+    # for homepage, selector can be gradeable list
+    def click_header_link_text(self, text, loaded_selector):
+        self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
+
+
+    
 
     @staticmethod
     def wait_user_input():
