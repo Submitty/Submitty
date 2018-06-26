@@ -467,7 +467,8 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                 name: note,
                 points: points,
                 publish: false,
-                has: false
+                has: false,
+                order: getComponent(c_index).marks.length
             });
             updateCookies();
             var mark_data = new Array(getComponent(c_index).marks.length);
@@ -481,16 +482,21 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                         id      : getMark(c_index, current_mark_id).id
                     };
                 }
-            ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
-            data = JSON.parse(data);
+            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, id2, note, points, false, function(data) {
+         //   data = JSON.parse(data);
             // console.log(data);
             });
-            ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
-            data = JSON.parse(data);
+           // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
+          //  data = JSON.parse(data);
+            // console.log(data);
+          //  });
+         //   ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
+        //    data = JSON.parse(data);
             //console.log(data);
-            });
+          //  });
             saveMark(c_index, false);
-            window.location.reload();
+            updateMarksOnPage(c_index);
+      //      window.location.reload();
          //   openMark(c_index);
         }
     };
@@ -528,12 +534,9 @@ function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback)
     ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
         data = JSON.parse(data);
 });
-    ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
-        data = JSON.parse(data);
-        //console.log(data);
-    });
    saveMark(c_index, false);
-   window.location.reload();
+    updateMarksOnPage(c_index);
+  // window.location.reload();
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -1112,6 +1115,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(data) {
         data = JSON.parse(data);
+        console.log(data);
         if (all_false === true) {
             //We've reset
             gradedByElement.text("Ungraded!");
