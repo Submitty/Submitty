@@ -1046,26 +1046,26 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join aggregate gradeable component data */
               LEFT JOIN (
                 SELECT
-                  array_agg(in_gcd.gc_id) as array_comp_id,
-                  array_agg(gcd_score) as array_score,
-                  array_agg(gcd_component_comment) as array_comment,
-                  array_agg(gcd_grader_id) as array_grader_id,
-                  array_agg(gcd_graded_version) as array_graded_version,
-                  array_agg(gcd_grade_time) as array_grade_time,
-                  array_agg(string_mark_id) as array_mark_id,
+                  array_to_json(array_agg(in_gcd.gc_id)) as array_comp_id,
+                  array_to_json(array_agg(gcd_score)) as array_score,
+                  array_to_json(array_agg(gcd_component_comment)) as array_comment,
+                  array_to_json(array_agg(gcd_grader_id)) as array_grader_id,
+                  array_to_json(array_agg(gcd_graded_version)) as array_graded_version,
+                  array_to_json(array_agg(gcd_grade_time)) as array_grade_time,
+                  array_to_json(array_agg(string_mark_id)) as array_mark_id,
 
-                  array_agg(ug.user_id) AS array_grader_user_id,
-                  array_agg(ug.anon_id) AS array_grader_anon_id,
-                  array_agg(ug.user_firstname) AS array_grader_user_firstname,
-                  array_agg(ug.user_preferred_firstname) AS array_grader_user_preferred_firstname,
-                  array_agg(ug.user_lastname) AS array_grader_user_lastname,
-                  array_agg(ug.user_email) AS array_grader_user_email,
-                  array_agg(ug.user_group) AS array_grader_user_group,
-                  array_agg(ug.manual_registration) AS array_grader_manual_registration,
-                  array_agg(ug.last_updated) AS array_grader_last_updated,
-                  array_agg(ug.registration_section) AS array_grader_registration_section,
-                  array_agg(ug.rotating_section) AS array_grader_rotating_section,
-                  array_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  array_to_json(array_agg(ug.user_id)) AS array_grader_user_id,
+                  array_to_json(array_agg(ug.anon_id)) AS array_grader_anon_id,
+                  array_to_json(array_agg(ug.user_firstname)) AS array_grader_user_firstname,
+                  array_to_json(array_agg(ug.user_preferred_firstname)) AS array_grader_user_preferred_firstname,
+                  array_to_json(array_agg(ug.user_lastname)) AS array_grader_user_lastname,
+                  array_to_json(array_agg(ug.user_email)) AS array_grader_user_email,
+                  array_to_json(array_agg(ug.user_group)) AS array_grader_user_group,
+                  array_to_json(array_agg(ug.manual_registration)) AS array_grader_manual_registration,
+                  array_to_json(array_agg(ug.last_updated)) AS array_grader_last_updated,
+                  array_to_json(array_agg(ug.registration_section)) AS array_grader_registration_section,
+                  array_to_json(array_agg(ug.rotating_section)) AS array_grader_rotating_section,
+                  array_to_json(array_agg(ug.grading_registration_sections)) AS array_grader_grading_registration_sections,
                   in_gcd.gd_id
                 FROM gradeable_component_data in_gcd
                   LEFT JOIN (
@@ -1099,13 +1099,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON (egv.team_id=gd.gd_team_id OR egv.user_id=gd.gd_user_id) AND egv.g_id=gd.g_id
               LEFT JOIN (
                 SELECT
-                  array_agg(in_egd.g_version) AS array_version,
-                  array_agg(in_egd.autograding_non_hidden_non_extra_credit) AS array_non_hidden_non_extra_credit,
-                  array_agg(in_egd.autograding_non_hidden_extra_credit) AS array_non_hidden_extra_credit,
-                  array_agg(in_egd.autograding_hidden_non_extra_credit) AS array_hidden_non_extra_credit,
-                  array_agg(in_egd.autograding_hidden_extra_credit) AS array_hidden_extra_credit,
-                  array_agg(in_egd.submission_time) AS array_submission_time,
-                  array_agg(in_egd.autograding_complete) AS array_autograding_complete,
+                  array_to_json(array_agg(in_egd.g_version)) AS array_version,
+                  array_to_json(array_agg(in_egd.autograding_non_hidden_non_extra_credit)) AS array_non_hidden_non_extra_credit,
+                  array_to_json(array_agg(in_egd.autograding_non_hidden_extra_credit)) AS array_non_hidden_extra_credit,
+                  array_to_json(array_agg(in_egd.autograding_hidden_non_extra_credit)) AS array_hidden_non_extra_credit,
+                  array_to_json(array_agg(in_egd.autograding_hidden_extra_credit)) AS array_hidden_extra_credit,
+                  array_to_json(array_agg(in_egd.submission_time)) AS array_submission_time,
+                  array_to_json(array_agg(in_egd.autograding_complete)) AS array_autograding_complete,
                   g_id,
                   user_id,
                   team_id
@@ -1119,7 +1119,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM users u
                 LEFT JOIN (
                   SELECT
-                    array_agg(sections_registration_id) as grading_registration_sections,
+                    array_to_json(array_agg(sections_registration_id)) as grading_registration_sections,
                     user_id
                   FROM grading_registration
                   GROUP BY user_id
@@ -1138,8 +1138,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   LEFT JOIN (
                     SELECT
                       in2_team.team_id,
-                      array_agg(in2_team.user_id) as array_user,
-                      array_agg(in2_team.state) as array_state
+                      array_to_json(array_agg(in2_team.user_id)) as array_user,
+                      array_to_json(array_agg(in2_team.state)) as array_state
                     FROM teams as in2_team
                     GROUP BY in2_team.team_id
                   ) AS in_team ON in_team.team_id=g_team.team_id
@@ -1148,14 +1148,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
 
         $constructGradedGradeable = function ($row) use ($gradeable) {
-
             // Get the submitter
             $submitter = null;
             if (isset($row['team_id'])) {
                 // Get the user data for the team
                 $users_soa = [];
-                $users_soa['user'] = $this->course_db->fromDatabaseToPHPArray($row['array_user']);
-                $users_soa['state'] = $this->course_db->fromDatabaseToPHPArray($row['array_state']);
+                $users_soa['user'] = json_decode($row['array_user']);
+                $users_soa['state'] = json_decode($row['array_state']);
 
                 // Transpose the users/states array from Structure of Arrays to Array of Structures
                 $users_aos = [];
@@ -1170,7 +1169,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $submitter = new Team($this->core, array_merge($row, ['users' => $users_aos]));
             } else {
                 if (isset($row['grading_registration_sections'])) {
-                    $row['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($row['grading_registration_sections']);
+                    $row['grading_registration_sections'] = json_decode($row['grading_registration_sections']);
                 }
                 $submitter = new User($this->core, $row);
             }
@@ -1218,7 +1217,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $db_row_split = [];
             foreach (array_merge($version_array_properties, $comp_array_properties,
                 array_map(function($elem) {return 'grader_' . $elem;}, $user_properties)) as $property) {
-                $db_row_split[$property] = $this->course_db->fromDatabaseToPHPArray($row['array_' . $property]);
+                $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
             // Create all of the GradedComponents
@@ -1236,11 +1235,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $user_array[$property] = $db_row_split['grader_' . $property][$i];
                 }
 
-                // If the registration section is not-null, then convert the sections into an array
-                if(isset($user_array['grading_registration_sections'])) {
-                    $user_array['grading_registration_sections'] = json_decode($user_array['grading_registration_sections']);
-                }
-
                 // Create the grader user
                 $grader = new User($this->core, $user_array);
 
@@ -1249,7 +1243,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $graded_gradeable,
                     $grader,
                     $db_row_split['comp_id'][$i],
-                    json_decode($db_row_split['mark_id'][$i]) ?? [],
+                    $db_row_split['mark_id'][$i] ?? [],
                     $comp_array);
             }
 
@@ -1340,32 +1334,32 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               LEFT JOIN (
                 SELECT
                   g_id as gc_g_id,
-                  array_agg(gc.gc_id) AS array_id,
-                  array_agg(gc_title) AS array_title,
-                  array_agg(gc_ta_comment) AS array_ta_comment,
-                  array_agg(gc_student_comment) AS array_student_comment,
-                  array_agg(gc_lower_clamp) AS array_lower_clamp,
-                  array_agg(gc_default) AS array_default,
-                  array_agg(gc_max_value) AS array_max_value,
-                  array_agg(gc_upper_clamp) AS array_upper_clamp,
-                  array_agg(gc_is_text) AS array_text,
-                  array_agg(gc_is_peer) AS array_peer,
-                  array_agg(gc_order) AS array_order,
-                  array_agg(gc_page) AS array_page,
-                  array_agg(array_to_json(gcm.array_id)) AS array_mark_id,
-                  array_agg(array_to_json(gcm.array_points)) AS array_mark_points,
-                  array_agg(array_to_json(gcm.array_title)) AS array_mark_title,
-                  array_agg(array_to_json(gcm.array_publish)) AS array_mark_publish,
-                  array_agg(array_to_json(gcm.array_order)) AS array_mark_order
+                  array_to_json(array_agg(gc.gc_id)) AS array_id,
+                  array_to_json(array_agg(gc_title)) AS array_title,
+                  array_to_json(array_agg(gc_ta_comment)) AS array_ta_comment,
+                  array_to_json(array_agg(gc_student_comment)) AS array_student_comment,
+                  array_to_json(array_agg(gc_lower_clamp)) AS array_lower_clamp,
+                  array_to_json(array_agg(gc_default)) AS array_default,
+                  array_to_json(array_agg(gc_max_value)) AS array_max_value,
+                  array_to_json(array_agg(gc_upper_clamp)) AS array_upper_clamp,
+                  array_to_json(array_agg(gc_is_text)) AS array_text,
+                  array_to_json(array_agg(gc_is_peer)) AS array_peer,
+                  array_to_json(array_agg(gc_order)) AS array_order,
+                  array_to_json(array_agg(gc_page)) AS array_page,
+                  array_to_json(array_agg(gcm.array_id)) AS array_mark_id,
+                  array_to_json(array_agg(gcm.array_points)) AS array_mark_points,
+                  array_to_json(array_agg(gcm.array_title)) AS array_mark_title,
+                  array_to_json(array_agg(gcm.array_publish)) AS array_mark_publish,
+                  array_to_json(array_agg(gcm.array_order)) AS array_mark_order
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
                     gc_id AS gcm_gc_id,
-                    array_agg(gcm_id) AS array_id,
-                    array_agg(gcm_points) AS array_points,
-                    array_agg(gcm_note) AS array_title,
-                    array_agg(gcm_publish) AS array_publish,
-                    array_agg(gcm_order) AS array_order
+                    array_to_json(array_agg(gcm_id)) AS array_id,
+                    array_to_json(array_agg(gcm_points)) AS array_points,
+                    array_to_json(array_agg(gcm_note)) AS array_title,
+                    array_to_json(array_agg(gcm_publish)) AS array_publish,
+                    array_to_json(array_agg(gcm_order)) AS array_order
                     FROM gradeable_component_mark
                   GROUP BY gcm_gc_id
                 ) AS gcm ON gcm.gcm_gc_id=gc.gc_id
@@ -1411,7 +1405,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Unpack the component data
             $unpacked_component_data = [];
             foreach (array_merge($component_properties, $component_mark_properties) as $property) {
-                $unpacked_component_data[$property] = $this->course_db->fromDatabaseToPHPArray($row['array_' . $property]);
+                $unpacked_component_data[$property] = json_decode($row['array_' . $property]);
             }
 
             // Specially parse the 'text' field for components since the abstract model doesn't
@@ -1436,11 +1430,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 // Unpack the mark data
                 if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $unpacked_mark_data = [];
-                    $unpacked_mark_data['id'] = json_decode($unpacked_component_data['mark_id'][$i]);
-                    $unpacked_mark_data['points'] = json_decode($unpacked_component_data['mark_points'][$i]);
-                    $unpacked_mark_data['title'] = json_decode($unpacked_component_data['mark_title'][$i]);
-                    $unpacked_mark_data['publish'] = json_decode($unpacked_component_data['mark_publish'][$i]);
-                    $unpacked_mark_data['order'] = json_decode($unpacked_component_data['mark_order'][$i]);
+                    foreach ($mark_properties as $property) {
+                        $unpacked_mark_data[$property] = $unpacked_component_data['mark_' . $property][$i];
+                    }
 
                     // If there are no marks, there will be a single 'null' element in the unpacked arrays
                     if ($unpacked_mark_data['id'][0] !== null) {
