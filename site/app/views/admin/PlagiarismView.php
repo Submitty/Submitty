@@ -78,6 +78,7 @@ HTML;
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
+                <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism();">Toggle</a>
             </span>   
         </form><br />
         <div name="code_box_1" style="float:left;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">

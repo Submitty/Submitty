@@ -359,6 +359,27 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
+function toggleUsersPlagiarism() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    var version_user_1 = $('[name="version_user_1"]', form2).val();
+
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    $('[name="user_id_1"]', form2).val(user_id_2);
+    jQuery.ajaxSetup({async:false});
+    setUserSubmittedCode('user_id_1');
+    $('[name="version_user_1"]', form2).val(version_user_2);
+    setUserSubmittedCode('version_user_1');
+    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    jQuery.ajaxSetup({async:true});
+    setUserSubmittedCode('user_id_2');
+}
+
 
 function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");
