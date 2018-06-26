@@ -9,12 +9,11 @@
 >
     <h4>
         {% for message in messages %}
-            {% if loop.index0 > 0 %}
-                <br>
-            {% endif %}
             {% if message.type == 'extension' %}
                 You have a {{ message.info.extensions }} day deadline extension for this assignment.
             {% elseif message.type == 'too_few_remain' %}
+                {# BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN #}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }}
                 after the deadline but you
                 {% if message.info.remaining == 0 %}
@@ -23,6 +22,8 @@
                     only have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }}.
                 {% endif %}
             {% elseif message.type == 'too_many_used' %}
+                {# BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT #}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }} after the deadline,
                 and you would be charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }} for this assignment,
                 {% if message.info.allowed == 0 %}
@@ -32,6 +33,8 @@
                     may be used for this assignment.
                 {% endif %}
             {% elseif message.type == 'late' %}
+                {# LATE STATUS #}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }} after the deadline,
                 and you have been charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }} for this assignment.
                 {% if message.info.remaining == 0 %}
@@ -40,16 +43,23 @@
                     You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} to use on future assignments.
                 {% endif %}
             {% elseif message.type == 'getting_zero' %}
+                {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 Your grade for this assignment will be recorded as a zero.
             {% elseif message.type == 'would_late' %}
+                {# PRINT WOULD BE HOW MANY DAYS LATE #}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 The current time is {{ message.info.late }} {{ self.day_or_days(message.info.late) }} past the due date.
             {% elseif message.type == 'would_too_few_remain' %}
+                {# SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS #}
+                {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 {% if message.info.remaining == 0 %}
                     You have no remaining late days.
                 {% else %}
                     You only have {{ message.info.remaining }} late {{ self.day_or_days(message.info.remaining) }} remaining.
                 {% endif %}
             {% elseif message.type == 'would_too_many_used' %}
+                {# SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT #}
+                {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 {% if message.info.allowed == 0 %}
                     Your instructor specified that no late days may be used for this assignment.
                 {% else %}
@@ -57,12 +67,16 @@
                     may be used for this assignment.
                 {% endif %}
             {% elseif message.type == 'would_allowed' %}
+                {# SUBMISSION NOW WOULD BE LATE #}
+                {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 If you {{ self.submit_or_resubmit(message.info.active_version) }} to this assignment now,
                 you will be charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }},
                 and have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for future assignments.
             {% elseif message.type == 'would_get_zero' %}
+                {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 If you submit to this assignment now, your grade for this assignment will be recorded as a zero.
             {% elseif message.type == 'contact_instructor' %}
+                {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Contact your instructor if you believe that this is an error or that you should be granted
                 {% if message.info.extensions == 0 %}
                     a deadline extension.
@@ -74,6 +88,14 @@
     </h4>
 </div>
 {% endif %}
+
+{% macro line_breaks(count) %}
+    {% if count > 0 %}
+        {% for i in 1..count %}
+            <br>
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
 
 {% macro day_or_days(count) -%}
     {%- spaceless %}
