@@ -11,6 +11,6 @@ PY_VERSION_3=$(pyenv versions | grep -oP "3.6.[0-9]" || pyenv versions | grep -o
 pyenv global ${PY_VERSION_3}
 
 export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
+sudo sed -e "s?secure_path=\"?secure_path=\"/home/travis/.phpenv/shims:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
 mkdir -p ~/.local/bin
 export PATH=$HOME/.local/bin:$PATH

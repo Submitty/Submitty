@@ -17,6 +17,10 @@ def parse_args():
     parser.add_argument("forms_path")
     parser.add_argument("assignment_path")
     parser.add_argument("gradeables", nargs="*", metavar="GRADEABLE")
+    parser.add_argument("--clean",dest="clean",action='store_const',const=True,default=False,
+                        help="Delete previous files and make from scratch.")
+    parser.add_argument("--no_build",dest="no_build",action='store_const',const=True,default=False,
+                        help="Do not (re-)build assignment.")
     return parser.parse_args()
 
 
@@ -26,10 +30,26 @@ def main():
     # grab the gradeables from the command line (if any)
     processed = []
 
+    # extract the semester & course from the forms_path directory
+    dirs = args.forms_path.split("/")
+    semester = dirs[len(dirs)-4]
+    course = dirs[len(dirs)-3]
 
-    #####################################
-    # OPEN ALL FILES IN THE FORMS DIRECTORIES
     with open(args.assignment_path, 'w') as outfile:
+
+        #####################################
+        # CLEANUP GRADEABLES THAT HAVE BEEN DELETED
+        # loop over all of the previously build gradeables
+        for build_dir in sorted(os.listdir(os.path.join(args.forms_path,"..","..","build"))):
+            # check to see that the corresponding form json still exists
+            test_form_path = os.path.join(args.forms_path,"form_"+build_dir+".json")
+            if not os.path.isfile(test_form_path):
+                # deletion of the form .json indicates that we should cleanup the build for that gradeable
+                print ("Gradeable form file "+test_form_path+" no longer exists.  Cleanup deleted gradeable!")
+                outfile.write("clean_homework  "                 +semester+"  "+course+"  "+build_dir+"\n")
+
+        #####################################
+        # OPEN ALL FILES IN THE FORMS DIRECTORIES
         sorted_list = sorted(os.listdir(args.forms_path))
         for filename in sorted_list:
             length = len(filename)
@@ -53,10 +73,10 @@ def main():
 
                 if len(args.gradeables) == 0 or g_id in args.gradeables:
                     config_path = obj["config_path"]
-                    dirs = args.forms_path.split("/")
-                    semester = dirs[len(dirs)-4]
-                    course = dirs[len(dirs)-3]
-                    outfile.write("build_homework  "+config_path+"  "+semester+"  "+course+"  "+g_id+"\n")
+                    if args.clean:
+                        outfile.write("clean_homework  "                 +semester+"  "+course+"  "+g_id+"\n")
+                    if not args.no_build:
+                        outfile.write("build_homework  "+config_path+"  "+semester+"  "+course+"  "+g_id+"\n")
                     processed.append(g_id)
                 else:
                     # print("SKIPPING " + g_id)

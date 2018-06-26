@@ -43,7 +43,6 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertTrue($user->accessFullGrading());
         $this->assertTrue($user->accessGrading());
         $this->assertTrue($user->isLoaded());
-        $this->assertFalse($user->isDeveloper());
     }
 
     public function testUserPreferred() {

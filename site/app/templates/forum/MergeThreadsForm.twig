@@ -1,0 +1,21 @@
+<div class="popup-form" id="merge-threads">
+    {% if merge_thread_list|length == 0 %}
+        Nothing to merge.
+        <a onclick="$('#merge-threads').css('display', 'none');" style='float: right;' class="btn btn-danger">Cancel</a>
+    {% else %}
+        <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'merge_thread'}) }}">
+            Merge current thread into
+            <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ currentThread }}" data-ays-ignore="true">
+            <select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
+                {% for thread in merge_thread_list %}
+                    <option value='{{ thread.id }}'>{{ thread.title }} ({{ thread.id }})</option>
+                {% endfor %}
+            </select>
+            <br>
+            <div  style="float: right; width: auto; margin-top: 10px;">
+                <a onclick="$('#merge-threads').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                <input class="btn btn-primary" type="submit" value="Submit" />
+            </div>
+        </form>
+    {% endif %}
+</div>

@@ -27,6 +27,8 @@ SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 JOB_ID = '~WORK~'
 
+ALL_WORKERS_JSON = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
+
 
 # ==================================================================================
 # ==================================================================================
@@ -144,12 +146,11 @@ def launch_workers(my_name, my_stats):
             processes[i].join()
 
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py terminated")
-# ==================================================================================
 
+# ==================================================================================
 def read_autograding_worker_json():
-    all_workers_json   = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
     try:
-        with open(all_workers_json, 'r') as infile:
+        with open(ALL_WORKERS_JSON, 'r') as infile:
             name_and_stats = json.load(infile)
             #grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]

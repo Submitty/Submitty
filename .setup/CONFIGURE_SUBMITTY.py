@@ -66,7 +66,7 @@ SUBMITTY_DATA_DIR = args.data_dir
 if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R_OK | os.W_OK):
     raise SystemExit('Data directory {} does not exist or is not accessible'.format(SUBMITTY_DATA_DIR))
 
-SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT_Tutorial')
+SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT','Tutorial')
 
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
@@ -134,6 +134,7 @@ SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 defaults = {'database_host': 'localhost',
             'database_user': 'hsdbu',
             'submission_url': '',
+            'submitty_supervisor': 'submitty',
             'vcs_url': '',
             'authentication_method': 1,
             'institution_name' : '',
@@ -169,7 +170,9 @@ if args.worker:
 print('Hit enter to use default in []')
 print()
 
-if not args.worker:
+if args.worker:
+    SUBMITTY_SUPERVISOR = get_input('What is the id for your submitty user?', defaults['submitty_supervisor'])
+else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
@@ -258,7 +261,9 @@ config['hwcron_user'] = HWCRON_USER
 config['hwcron_uid'] = HWCRON_UID
 config['hwcron_gid'] = HWCRON_GID    
 
-if not args.worker:
+if args.worker:
+    config['submitty_supervisor'] = SUBMITTY_SUPERVISOR
+else:
     config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
 
     config['hwphp_user'] = HWPHP_USER
@@ -354,8 +359,8 @@ if not tmp_autograding_workers_file == "":
     #remove the tmp folder
     os.removedirs(tmp_folder)
     #make sure the permissions are correct.
-    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-    os.chmod(WORKERS_JSON, 0o440)
+    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
@@ -367,14 +372,15 @@ if not args.worker:
                 "capabilities": ["default"],
                 "address": "localhost",
                 "username": "",
-                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS
+                "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
+                "enabled" : True
             }
         }
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
-    shutil.chown(WORKERS_JSON, 'root', HWCRON_GROUP)
-    os.chmod(WORKERS_JSON, 0o440)
+    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
 # Write database json
@@ -435,6 +441,8 @@ if not args.worker:
     config['hwphp_user'] = HWPHP_USER
     config['hwcgi_user'] = HWCGI_USER
     config['hwcronphp_group'] = HWCRONPHP_GROUP
+else:
+    config['submitty_supervisor'] = SUBMITTY_SUPERVISOR
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)

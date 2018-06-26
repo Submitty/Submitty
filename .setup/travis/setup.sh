@@ -28,11 +28,12 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
-sudo mkdir -p ${SUBMITTY_DATA_DIR}
-sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
+sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
+sudo mkdir -p "${SUBMITTY_DATA_DIR}"
+sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
+sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
 
-sudo ${DIR}/../bin/create_untrusted_users.py
+sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
 sudo addgroup hwcronphp
 sudo addgroup course_builders
@@ -59,7 +60,7 @@ America/New_York
 http://localhost
 http://localhost/git
 
-${AUTH_METHOD}" | sudo ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+${AUTH_METHOD}" | sudo python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -70,5 +71,13 @@ touch ${SUBMITTY_DATA_DIR}/instructors/valid
 [ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
 chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
 chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
+
+sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
+sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
+# necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
+sudo usermod -a -G travis hwphp
+
+# necessary to pass config path as submitty_repository is a symlink
+sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean

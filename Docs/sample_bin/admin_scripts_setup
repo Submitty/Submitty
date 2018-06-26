@@ -1,7 +1,7 @@
 #!/bin/bash
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 
 # Copy account maintenance scripts unless they exist
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin

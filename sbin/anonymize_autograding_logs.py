@@ -3,7 +3,7 @@
 This script will anonymize a directory of autograding logs
 
 usage example:
-python3 /usr/local/submitty/GIT_CHECKOUT_Submitty/bin/anonymize_autograding_logs.py /var/local/submitty/logs/autograding/ ~/anon_logs/ something_random
+python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/bin/anonymize_autograding_logs.py /var/local/submitty/logs/autograding/ ~/anon_logs/ something_random
 
 The final argument is a random seed/offset string to prevent simple de-anonymization.
 

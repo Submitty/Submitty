@@ -5,7 +5,6 @@ namespace app\views\submission;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\models\LateDaysCalculation;
 
 class HomeworkView extends AbstractView {
 
@@ -85,7 +84,12 @@ HTML;
           $error = true;
           if ($info != "") { $info .= "<br><br>"; }
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,"
-            . " but you only have XXX remaining late days.  Your grade for this assignment will be recorded as a zero.";
+            . " but you ";
+          if ($late_days_remaining == 0) {
+            $info .= "have no remaining late days.";
+          } else {
+            $info .= "only have {$late_days_remaining} remaining late " . $this->dayOrDays($late_days_remaining) . ".";
+          }
         }
 
         // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
@@ -95,9 +99,9 @@ HTML;
           $info .= "Your active version was submitted {$active_days_late} " . $this->dayOrDays($active_days_late) . " after the deadline,";
           $info .= " and you would be charged {$active_days_charged} late " . $this->dayOrDays($active_days_charged) . " for this assignment,";
           if ($late_days_allowed == 0) {
-            $info.= " but your instructor specified that no late days may be used for this assignment.";
+            $info.= "<br>but your instructor specified that no late days may be used for this assignment.";
           } else {
-            $info.= " but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
+            $info.= "<br>but your instructor specified that a maximum of {$late_days_allowed} late " . $this->dayOrDays($late_days_allowed) . " may be used for this assignment.";
           }
         }
 
@@ -217,11 +221,17 @@ HTML;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
-
-        $ldu = new LateDaysCalculation($this->core, $gradeable->getUser()->getId());
-        $late_days_data = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
-        $late_days_remaining = $late_days_data['remaining_days'];
-        $active_days_late = $gradeable->getActiveDaysLate();
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        $total_late_used = 0;
+        $curr_late = 0;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+            $curr_late = $g->getStudentAllowedLateDays();
+        }
+        $late_days_remaining = $curr_late-$total_late_used;
+        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
 
@@ -252,7 +262,7 @@ HTML;
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessGrading()) {
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
                 foreach ($students as $student) {
@@ -286,9 +296,13 @@ HTML;
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
+HTML;
+                if($this->core->getUser()->accessFullGrading()) {
+                    $return .= <<<HTML
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
+                }
                 if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
@@ -563,7 +577,6 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
                 }
-
                 $old_files = "";
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     foreach ($gradeable->getPreviousFiles($i) as $file) {
@@ -642,11 +655,11 @@ HTML;
 
             $return .= <<<HTML
     <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous, clobber=clobber);
                 moveNextInput(count);
             }
             
@@ -663,7 +676,9 @@ HTML;
                                 "{$gradeable->getUser()->getId()}",
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
             else {
                 handleSubmission({$late_days_use},
@@ -677,7 +692,9 @@ HTML;
                                 user_id,
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
         }
         $(function() {
@@ -707,7 +724,7 @@ HTML;
                 }
                 // no user id entered, upload for whoever is logged in
                 else if (user_id == ""){
-                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id)
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id);
                 }
                 // user id entered, need to validate first
                 else {
@@ -720,7 +737,7 @@ HTML;
 </div>
 HTML;
         }
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessGrading()) {
 
             $all_directories = $gradeable->getUploadsFiles();
 
@@ -967,7 +984,25 @@ HTML;
 HTML;
             }
             else {
-                if($gradeable->getActiveVersion() > 0
+                $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+                $active_same_as_graded = true;
+                foreach($gradeable->getComponents() as $component) {
+                    if($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
+                        $active_same_as_graded = false;
+                    }
+                }
+                if(!$active_same_as_graded && $gradeable->beenTAgraded()) {
+                    $return .= <<<HTML
+    <div class="sub" id="submission_message">
+        <p class="red-message">
+            Note: The version you have selected to be graded is not the version graded by<br />
+            the instructor/TAs. If the graded version does not match your selected<br />
+            version, a zero will be recorded in the gradebook.
+        </p>
+    </div>
+HTML;
+                }
+                else if($gradeable->getActiveVersion() > 0
                     && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub" id="submission_message">
@@ -1191,11 +1226,12 @@ HTML;
 </div>
 HTML;
     }
-        if ($gradeable->taGradesReleased()) {
+        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
+            // If the student does not submit anything, the only message will be "No submissions for this assignment."
             $return .= <<<HTML
 <div class="content">
 HTML;
-            if ($gradeable->hasGradeFile()) {
+            if ($gradeable->beenTAgraded()) {
                 $return .= <<<HTML
     <h3 class="label">TA / Instructor grade</h3>
 HTML;
@@ -1204,14 +1240,221 @@ HTML;
 HTML;
             } else {
                 $return .= <<<HTML
-    <h3 class="label">TA grade not available</h3>
+                    <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
 HTML;
             }
             $return .= <<<HTML
-</div>
+            </div>
+HTML;
+    if($this->core->getConfig()->isRegradeEnabled()){
+      $return .= <<<HTML
+      <div class="content"> 
+HTML;
+      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+      $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
+    }
+    $return .= <<<HTML
+  </div>
 HTML;
         }
-
         return $return;
+    }
+    public function showRequestForm($gradeable){
+      $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+      $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+      $existsStaffPost = false;
+      foreach ($threads as $thread) {
+        if($this->core->getQueries()->isStaffPost($thread['user_id'])){ 
+          $existsStaffPost = true;
+          break;
+        }
+      }
+      $return = <<<HTML
+      <div class = "sub">
+        <div style="float: left; width: 50%"><h3>Regrade Discussion</h3></div>
+HTML;
+        $is_disabled = "";
+        $action = "";
+        $url = "";
+        $class = "btn-default";
+        $deleteMode = false;
+        if($gradeable->getRegradeStatus() === 0){
+          $message = "Request Regrade";
+          $action = "showPopUp()";
+          $deleteMode = false;
+          $url = $this->core->buildUrl(array('component' => 'student',
+                                             'action' => 'request_regrade',
+                                             'gradeable_id' => $gradeable->getId(),
+                                             'student_id' =>$this->core->getUser()->getId()
+                                        ));
+        }else if($gradeable->getRegradeStatus() === -1){
+          if($this->core->getUser()->accessGrading()){
+            $message = "Delete Request";
+            $class = "btn-danger";
+            $is_disabled = "";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                                               'action'=> 'delete_request',
+                                               'gradeable_id' => $gradeable->getId(),
+                                               'student_id' => $gradeable->getUser()->getId()
+                                            ));
+            $return .= <<<HTML
+
+HTML;
+            $deleteMode = true;
+          }else{
+            $is_disabled = "disabled";
+            $message = "Request in Review";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                                               'action'=> 'delete_request',
+                                               'gradeable_id' => $gradeable->getId(),
+                                               'student_id' => $gradeable->getUser()->getId()
+                                            ));
+            $deleteMode = false;
+          }
+        }else{
+          $message = "Request Reviewed";
+          $is_disabled = "disabled";
+          $url = $this->core->buildUrl(array('component' => 'student',
+                                               'action'=> 'delete_request',
+                                               'gradeable_id' => $gradeable->getId(),
+                                               'student_id' => $gradeable->getUser()->getId()
+                                            ));
+          $deleteMode = false;
+        }
+        if(!$deleteMode){
+        $return .= <<<HTML
+          <div style="float:right"><button class = "btn {$class}" onclick="{$action}" {$is_disabled} >$message</button></div>
+HTML;
+        }else{
+          $return .= <<<HTML
+          <div style="float:right">
+            <form method="POST" action="{$url}" id="deleteRequest">
+              <button class = "btn {$class}" type = "submit">$message</button>
+            </form>
+          </div>
+HTML;
+        }
+        $return .= <<<HTML
+        <div class="modal" id="modal-container">
+          <div class="modal-content" id="regradeBox">
+            <h3>Request Regrade</h3>
+            <hr>
+            <p class = "red-message">Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p>
+            <br style = "margin-bottom: 10px;">
+            <form id="requestRegradeForm" method="POST" action="{$url}">
+              <div style="text-align: center;">
+                <textarea id="requestTextArea" name ="request_content" maxlength="400" style="resize: none; width: 85%; height: 200px; font-family: inherit;"
+                placeholder="Please enter a consise description of your request and indicate which areas/checkpoints need to be re-checked"></textarea>
+                <br style = "margin-bottom: 10px;">
+                <input type="submit" value="Submit" class="btn btn-default" style="margin: 15px;">
+                <input type="button" id = "cancelRegrade" value="Cancel" class="btn btn-default" onclick="hidePopUp()" style="margin: 15px;">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <script type = "text/javascript">
+        $("#deleteRequest").submit(function(event) {
+          $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: $(this).serialize(), 
+            success: function(data){
+               window.location.reload();
+            }
+          });
+          event.preventDefault();
+        });
+        var regradeBox = document.getElementById("regradeBox");
+        var modal =document.getElementById("modal-container");
+        function showPopUp(){
+            regradeBox.style.display = "block";
+            modal.style.display = "block";
+        }  
+        function hidePopUp(){
+            regradeBox.style.display = "none";
+            modal.style.display = "none";
+        }; 
+      </script>
+HTML;
+      return $return;
+    }
+    public function showRegradeDiscussion($gradeable){
+          $return = "";
+          $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+          $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
+          $user = $this->core->getUser()->getId();
+          $first = true;
+          $return = "";
+          $display_further_action=true;
+        //  echo($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId()));
+          if($this->core->getUser()->accessGrading()){
+            $replyMessage = "Reply"; 
+            $replyPlaceHolder = "Enter your reply here";
+          }
+          else{
+            if($this->core->getQueries()->getRegradeRequestStatus($gradeable->getUser()->getId(), $gradeable->getId())==0){
+              $display_further_action=false;
+            }
+            $replyMessage = "Request further TA/Instructor action"; 
+            $replyPlaceHolder = "If you believe you require more review, enter a reply here to request further TA/Instructor action...";
+          }
+          foreach ($threads as $thread) {
+            if(empty($threads)) break;
+            $class = ($this->core->getQueries()->isStaffPost($thread['user_id'])) ? "post_box important" : "post_box";
+            $id = $thread['id'];
+            $name = $this->core->getQueries()->getSubmittyUser($thread['user_id'])->getDisplayedFirstName();
+            $date = date_create($thread['timestamp']);
+            $content = $thread['content']; 
+            if($first){
+              $class .= " first_post";
+              $first = false;                                      
+            }                                      
+            $function_date = 'date_format';                                      
+            $return .= <<<HTML
+            <div style="margin-top: 20px ">                                       
+              <div class = '$class' style="padding:20px;">                                       
+                <p>{$content}</p>                                      
+                <hr>                                       
+                <div style="float:right">                                      
+                  <b>{$name}</b> &nbsp;                                       
+                {$function_date($date,"m/d/Y g:i A")}                                      
+                </div>                                       
+              </div>
+            </div>                                       
+HTML;
+          }
+        if($display_further_action){
+        $return .= <<<HTML
+        <div style="padding:20px;">
+        <form method="POST" id="replyTextForm" action="{$this->core->buildUrl(array('component' => 'student',
+                                                       'action'=> 'make_request_post',
+                                                       'regrade_id'=> $thread_id,
+                                                       'gradeable_id' => $gradeable->getId(),
+                                                       'user_id' =>$this->core->getUser()->getId()
+                                                      ))}">
+            <textarea name = "replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{$replyPlaceHolder}" id="makeRequestPost" required></textarea>
+            <input type="submit" value="{$replyMessage}" id = "submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
+            <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+        </form>
+HTML;
+        }
+        $return .= <<<HTML
+        <script type = "text/javascript">
+          $("#replyTextForm").submit(function(event) {
+            $.ajax({
+              type: "POST",
+              url: $(this).attr("action"),
+              data: $(this).serialize(), 
+              success: function(data){
+                 window.location.reload();
+              }
+            });
+            event.preventDefault();
+          });
+        </script>
+      </div>
+HTML;
+      return $return;
     }
 }

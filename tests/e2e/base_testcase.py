@@ -53,7 +53,7 @@ class BaseTestCase(unittest.TestCase):
             self.log_in()
 
     def tearDown(self):
-        self.driver.close()
+        self.driver.quit()
 
     def get(self, url):
         if url[0] != "/":

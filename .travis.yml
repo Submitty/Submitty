@@ -38,11 +38,14 @@ jobs:
         - pip3 install selenium
         - pip3 install pause
         - pip3 install tzlocal
+        - pip3 install paramiko
       script: skip
     - <<: *00-cache
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *00-cache
       php: 7.2
+      if: branch = master OR type = pull_request
 
     # Lint the codebase to ensure that the code is compliant to our system
     - &01-lint
@@ -52,8 +55,10 @@ jobs:
         - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
     - <<: *01-lint
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *01-lint
       php: 7.2
+      if: branch = master OR type = pull_request
 
     - &02-php-unit
       stage: 02 unit test
@@ -69,8 +74,10 @@ jobs:
         - popd
     - <<: *02-php-unit
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *02-php-unit
       php: 7.2
+      if: branch = master OR type = pull_request
 
     - &02-python-unit
       language: python
@@ -84,8 +91,10 @@ jobs:
         - popd
     - <<: *02-python-unit
       python: 3.5
+      if: branch = master OR type = pull_request
     - <<: *02-python-unit
       python: 3.6
+      if: branch = master OR type = pull_request
 
     - &03-e2e
       stage: 03 e2e test
@@ -134,6 +143,7 @@ jobs:
         - pip3 install python-dateutil
         - pip3 install selenium
         - pip3 install pause
+        - pip3 install paramiko
         - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
@@ -149,11 +159,10 @@ jobs:
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
         - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
         - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-        - PGPASSWORD=hsdbu psql -d submitty -h localhost -U hsdbu -f ${TRAVIS_BUILD_DIR}/site/data/submitty_db.sql
-        - sudo ./.setup/travis/autograder.sh
-        - ./.setup/travis/setup.sh
-        - sudo /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py sample
-        - sudo ./.setup/travis/setup_test_suite.sh
+        - sudo bash .setup/travis/autograder.sh
+        - bash .setup/travis/setup.sh
+        - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
+        - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
         - sudo a2enmod include rewrite actions cgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
@@ -166,8 +175,6 @@ jobs:
         - sudo chmod -R 755 /usr/local/submitty
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
-        - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
-        - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
         - sudo service apache2 restart
         - "export DISPLAY=:99.0"
         - "sh -e /etc/init.d/xvfb start"
@@ -176,17 +183,21 @@ jobs:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
     - <<: *03-e2e
       php: 7.1
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.0
       env: AUTH_METHOD=2
     - <<: *03-e2e
       php: 7.1
       env: AUTH_METHOD=2
+      if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
       env: AUTH_METHOD=2
+      if: branch = master OR type = pull_request
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
     # it
@@ -228,18 +239,20 @@ jobs:
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pip3 install paramiko
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
         - sudo chmod -R 555 /usr/local/lib/python*/
         - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
-        - sudo ./.setup/travis/autograder.sh
-        - ./.setup/travis/setup.sh
-        - sudo ./.setup/travis/setup_test_suite.sh
+        - sudo bash ./.setup/travis/autograder.sh
+        - bash ./.setup/travis/setup.sh
+        - sudo bash ./.setup/travis/setup_test_suite.sh
       script:
-        - sudo /usr/local/submitty/test_suite/integrationTests/run.py
+        - sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
       env: CLANG_VER="6.0.0"
+      if: branch = master OR type = pull_request
 
 notifications:
   email: false

@@ -17,13 +17,22 @@ import json
 def build_one(data):
     semester = data["semester"]
     course = data["course"]
-    gradeable = data["gradeable"]
 
+    # construct the paths for this course
     build_script = "/var/local/submitty/courses/" + semester + "/" + course + "/BUILD_" + course + ".sh"
     build_output = "/var/local/submitty/courses/" + semester + "/" + course + "/build_script_output.txt"
 
+    # construct the command line to build/rebuild/clean/delete the gradeable
+    build_args = [build_script]
+    if "gradeable" in data:
+        build_args.append(data["gradeable"])
+    if "clean" in data:
+        build_args.append("--clean")
+    if "no_build" in data:
+        build_args.append("--no_build")
+
     with open(build_output, "w") as open_file:
-        subprocess.call([build_script, gradeable], stdout=open_file, stderr=open_file)
+        subprocess.call(build_args, stdout=open_file, stderr=open_file)
 
 
 # ------------------------------------------------------------------------

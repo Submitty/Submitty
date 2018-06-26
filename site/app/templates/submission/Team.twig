@@ -1,0 +1,147 @@
+{# Current team box #}
+<div class="content">
+    <h2>Manage Team For: {{ gradeable.getName() }}</h2>
+    {# Team lock message #}
+    {% if lock %}
+        {% if team %}
+            <p class="red-message">
+                Teams are now locked for this assignment.<br>
+                Contact your instructor to make changes to your team.
+            </p><br />
+        {% else %}
+            <p class="red-message">
+                Teams are now locked for this assignment.<br>
+                You can create a new team of 1 or accept an invitation sent before teams were locked.<br>
+                Contact your instructor to make further changes to your team.
+            </p><br />
+        {% endif %}
+    {% endif %}
+    {# /Team lock message #}
+
+    {% if team %}
+        {# Top content box, has team #}
+        <h3>Your Team:</h3> <br />
+
+        {# List team members #}
+        {% for teammate in members %}
+            <span>&emsp;{{ teammate.getDisplayedFirstName() }} {{ teammate.getLastName() }} ({{ teammate.getId() }}) - {{ teammate.getEmail() }}</span> <br />
+        {% endfor %}
+
+        {# Team invitations status #}
+        {% if team.getInvitations()|length != 0 %}
+            <br />
+            <h3>Pending Invitations:</h3> <br />
+
+            {% for invited in team.getInvitations() %}
+                {% if lock %}
+                    <span>&emsp;{{ invited }}</span> <br />
+                {% else %}
+                    <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'cancel'}) }}" method="post">
+                        <input type="hidden" name="cancel_id" value={{ invited }} />
+                        &emsp;{{ invited }}: <input type="submit" value = "Cancel" class="btn btn-danger" />
+                    </form>
+                    <br />
+                {% endif %} {# lock #}
+            {% endfor %} {# invited in invitations #}
+        {% endif %} {# invitations.length #}
+        {# /Team invitations status #}
+
+        {# Repository status #}
+        {% if gradeable.getIsRepository() %}
+            <br />
+            <h3>To access your Team Repository:</h3>
+            <span>
+                <em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em>
+                    <br />
+                    <br />
+                <samp>git clone {{ gradeable.getRepositoryPath(team) }} SPECIFY_TARGET_DIRECTORY</samp>
+            <br />
+            </span>
+            <br />
+        {% endif %}
+        {# /Repository status #}
+
+    {% else %} {# team #}
+        {# Top content box, no team #}
+        <h4>You are not on a team.</h4> <br />
+    {% endif %} {# team #}
+</div>
+{# /Current team box #}
+
+{# Edit/create team box #}
+{% if team and not lock %}
+    {# Bottom content box, has team, teams not locked #}
+    <div class="content">
+        <h3>Invite new teammates by their user ID:</h3>
+        <br />
+        <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'invitation'}) }}" method="post">
+            <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
+            <input type="submit" value = "Invite" class="btn btn-primary" />
+        </form>
+        <br />
+        <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component' : 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'leave_team'}) }}'">Leave Team</button>
+    </div>
+{% elseif team == null %}
+    <div class="content">
+        {% if invites_received|length == 0 %}
+            <h4>You have not received any invitations.</h4> <br />
+        {% else %}
+            <h3>Invitations:</h3> <br />
+
+            {% for invite in invites_received %}
+                <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'accept'}) }}" method="post">
+                    <input type="hidden" name="team_id" value={{ invite.getId() }} />
+                    &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" class="btn btn-success" />
+                </form>
+                <br />
+            {% endfor %} {# invite in received #}
+        {% endif %} {# invites length == 0 #}
+
+        {# Create new team button #}
+        <br />
+        <button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'create_new_team'}) }}'">Create New Team </button>
+
+        {% if seeking_partner %}
+            <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'stop_seek_team'}) }}'">Stop Seeking Team/Partner </button>
+        {% else %}
+            &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'seek_team'}) }}'">Seek Team/Partner </button>
+        {% endif %}
+    </div>
+{% endif %}
+{# /Edit/create team box #}
+
+{# Users seeking team box #}
+<div class="content">
+    <div style="width:60%;">
+        <h3>Users Seeking Team/Partner:</h3><br />
+        <table class="table table-striped table-bordered persist-area">
+            <thead class="persist thead">
+            <tr>
+                <td width="3%"></td>
+                <td width="10%">First Name</td>
+                <td width="10%">Last Name</td>
+                <td width="10%">User ID</td>
+                <td width="40%">Email</td>
+            </tr>
+            </thead>
+            <tbody>
+                {% for user_details in seekers %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ user_details.getDisplayedFirstName() }}</td>
+                        <td>{{ user_details.getLastName() }}</td>
+                        <td>{{ user_details.getId() }}</td>
+                        <td>{{ user_details.getEmail() }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{# /Users seeking team box #}
+
+<script>
+    $("#invite_id").autocomplete({
+        source: {{ student_full|raw }}
+    });
+</script>

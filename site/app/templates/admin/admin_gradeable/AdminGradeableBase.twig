@@ -1,0 +1,176 @@
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="css/admin-gradeable.css"> <!-- Make sure this one is LAST -->
+<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
+
+{# Only load the realtime-updates script if we're in edit mode#}
+{% if action == 'edit' %}
+<script type="text/javascript" language="javascript" src="js/admin-gradeable-updates.js"></script>
+{% endif %}
+
+<script type="text/javascript">
+    function disableElementChildren(c, dis = true) {
+        dis ? $(c).hide() : $(c).show();
+    }
+</script>
+<div id="container-rubric" style="display:none;">
+    <div id="ajax_debug" style="display: none;"></div>
+    <div id="ajax_raw" style="display: none;"></div>
+    <form id="gradeable-form" class="form-signin" action="{{submit_url}}" 
+        method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
+
+        <div class="modal-header" style="overflow: auto;">
+            <h2 id="myModalLabel" style="float: left;">Gradeable Editor</h2>
+            <br />
+            <br />
+            <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
+            <div style="float: right" id="save_status"></div>
+        </div>
+        <br/>
+        <div id="nav-bar">
+            <text class="badge nav-bar" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
+            <text class="badge nav-bar" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
+            <text class="badge nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</text>
+            <text class="badge nav-bar" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
+            <text class="badge nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</text>
+        </div>
+        <br/>
+        <br/>
+        <div class="modal-body">
+            <div class="page-content" id="page_0_content">{{ include('admin/admin_gradeable/AdminGradeableCreate.twig')   }}</div>
+
+            {# only load the other pages if we are editing an existing gradeable #}
+            {% if action == 'edit' %}
+                <div class="page-content" id="page_1_content">{{ include('admin/admin_gradeable/AdminGradeableAuto.twig')     }}</div>
+                <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
+                <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
+                <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+            {% endif %}
+        </div>
+        <br/>
+        <div id="nav-controls">
+            <!--<button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
+            <button class="btn btn-primary" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
+            <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    var adminGradeableNavTab = 0;
+    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
+    function onChangeNavTab(tab) {
+
+        if (tab > 4 || tab < 0) {
+            alert('Invalid Navigation');
+            return;
+        }
+
+        {% if action == 'edit' %}
+            // change the url so if the user refreshes the page, they stay on the same tab
+            window.history.replaceState("", "", buildUrl({
+                'component': 'admin',
+                'page': 'admin_gradeable',
+                'action': 'edit_gradeable_page',
+                'id': $('#g_id').val(),
+                'nav_tab': tab
+            }));
+        {% endif %}
+
+        adminGradeableNavTab = tab;
+
+        $('.nav-bar').each(function () {
+            if (navItemsStatus.get(this.id.split('_')[1]) === false) {
+                $(this).hide();
+            }
+            else {
+                $(this).attr('style', '{{ action == 'new' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+            }
+        });
+
+        $('.page-content').hide();
+        $('#page_' + tab + '_content').show();
+        $('#page_' + tab + '_nav').attr('style', 'background-color: green');
+    }
+
+    function updateNavItemsStatus() {
+        if($('#radio_electronic_file').is(':checked')) {
+            navItemsStatus.set('1', true);
+            navItemsStatus.set('2', $('#yes_ta_grade').is(':checked'));
+            navItemsStatus.set('3', $('#yes_ta_grade').is(':checked'));
+        }
+        else {
+            navItemsStatus.set('1', false);
+            navItemsStatus.set('2', true);
+            navItemsStatus.set('3', true);
+        }
+        onChangeNavTab(adminGradeableNavTab);
+    }
+
+    $(document).ready(function() {
+
+        updateNavItemsStatus();
+        $('[name="g_gradeable_type"]').change(updateNavItemsStatus);
+        $('[name="eg_use_ta_grading"]').change(updateNavItemsStatus)
+
+        // Update navigation on load
+
+        {# Disable navigation on 'new' mode #}
+        {% if action == 'new' %}
+            adminGradeableNavTab = 0;
+            $('.nav-bar').each(function() {
+                $(this).attr('onClick', '');
+            });
+        {% else %}
+            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
+        {% endif %}
+
+        updateNavItemsStatus();
+
+        // TODO: below is selectively copied from previous ui.  It updates various
+        //      UI element values when other elements change.  This keeps the form
+        //      state valid/submittible since there is no server-side checking as
+        //      of now (summer 2018)
+
+        // Clamp all numeric input to be between their min and max attributes
+        $( "input" ).change(function() {
+            var max = parseFloat($(this).attr('max'));
+            var skip1 = (isNaN(max)) ? true : false;
+            var min = parseFloat($(this).attr('min'));
+            var skip2 = (isNaN(min)) ? true : false;
+            if (!skip1 && $(this).val() > max)
+            {
+                $(this).val(max);
+            }
+            else if (!skip2 && $(this).val() < min)
+            {
+                $(this).val(min);
+            }
+        });
+
+        // TODO: move this to appropriate file when peer grading
+        //      is supported
+        // $('input:radio[name="eg_peer_grading"]').change(function() {
+        //     $('.peer_input').hide();
+        //     $('#peer_averaging_scheme').hide();
+        //     if ($(this).is(':checked')) {
+        //         if($(this).val() == 'true') {
+        //             $('.peer_input').show();
+        //             $('#peer_averaging_scheme').show();
+        //             if($('#team_yes_radio').is(':checked')) {
+        //                 $('#team_yes_radio').prop('checked', false);
+        //                 $('#team_no_radio').prop('checked', true);
+        //                 $('input:radio[name="eg_team_assignment"]').trigger("change");
+        //             }
+        //         }
+        //     }
+        // });
+
+        // End copied section
+
+        // Don't show page until all settings loaded
+        $("#container-rubric").show();
+    });
+
+</script>

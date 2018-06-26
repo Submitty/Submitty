@@ -1,0 +1,102 @@
+<div class="content">
+    <div class="sub">
+        <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
+            <div class="box half">
+                <h2>About You</h2>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td><b>Username:</b> {{ user.getId() }} </td>
+                    </tr>
+                    <tr>
+                        <td><b>First Name:</b> {{ user.getDisplayedFirstName() }} </td>
+                        <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <script type="text/javascript">
+                            function userNameChange() {
+                                $('.popup-form').css('display', 'none');
+                                var form = $("#edit-username-form");
+                                form.css("display", "block");
+                                $('[name="user_name_change"]', form).val("");
+                            }
+                        </script>
+                        <div class="popup-form" id="edit-username-form">
+                            <h2>Specify Preferred First Name</h2>
+                            <p>{{ changeNameText }}</p>
+                            <p>&emsp;</p>
+                            <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
+                                <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                                <div>
+                                    <input type="text" name="user_name_change" />
+                                </div>
+                                <div style="float: right; width: auto; margin-top: 10px">
+                                    <a onclick="$('#edit-username-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                                    <input class="btn btn-primary" type="submit" value="Submit" />
+                                </div>
+                            </form>
+                        </div>
+                    </tr>
+                    <tr>
+                        <td><b>Last Name:</b> {{ user.getLastName() }} </td>
+                    </tr>
+                    {% if showChangePassword %}
+                        <tr>
+                            <td><b>Change Password</b></td>
+                            <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                            <script type="text/javascript">
+                                function passwordChange() {
+                                    $('.popup-form').css('display', 'none');
+                                    var form = $("#change-password-form");
+                                    form.css("display", "block");
+                                    $('[name="new_password"]', form).val("");
+                                    $('[name="confirm_new_password"]', form).val("");
+                                }
+                            </script>
+                            <div class="popup-form" id="change-password-form">
+                                <h2>Change password</h2>
+                                <p>Add your message here.</p>
+                                <p>&emsp;</p>
+                                <form method="post" action="{{ core.buildUrl({'page': 'change_password'}) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                                    <div>
+                                        Password: <input type="password" name="new_password"/>
+                                        Confirm: <input type="password" name="confirm_new_password"/>
+                                        <a onclick="$('#change-password-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                                        <input class="btn btn-primary" type="submit" value="Submit" />
+                                    </div>
+                                </form>
+                            </div>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="box half">
+                <h2>Your Courses</h2>
+                <table width='95%'>
+                    <tbody>
+                    {% for rank in ranks %}
+                        <tr>
+                            <td colspan="8">
+                                <h3>{{ rank.title }}</h3>
+                            </td>
+                        </tr>
+                        {% for course in rank.courses %}
+                            <tr>
+                                <td style="width:85%" colspan="30">
+                                    <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{{ core.buildUrl({'component': 'navigation', 'course': course.getTitle(), 'semester': course.getSemester()}) }}">
+                                        {{ course.getSemester() }} {{ course.getTitle() }}
+                                        {% if course.getDisplayName() != "" %}
+                                            {{ course.getDisplayName() }}
+                                        {% endif %}
+                                        {{ user.accessAdmin() }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
