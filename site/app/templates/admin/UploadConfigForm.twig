@@ -97,8 +97,6 @@
                 <div class="file-viewer"><a onclick='openFrame("{{ url }}", "{{ id }}", "{{ file.name }}")'>
                     <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ url }}")'>(Popout)</a>
                 </div>
-                <div id="json_editor" style="width: 400px; height: 400px;"></div>
-                {#<a class="btn-primary" name="Update file">#}
                 <div id="file_viewer_{{ id }}" style='margin-left: {{ neg_margin_left }}px'></div>
             </div>
         {% endif %}
