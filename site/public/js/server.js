@@ -1612,10 +1612,8 @@ function publishPost() {
 
 function editPost(post_id, thread_id, shouldEditThread) {
     var form = $("#"+post_id+"-reply");
-    
-                console.log(form);
-     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
-     $.ajax({
+    var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+    $.ajax({
             url: url,
             type: "POST",
             data: {
@@ -1635,7 +1633,6 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
-                console.log(form);
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;

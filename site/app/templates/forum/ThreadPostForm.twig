@@ -76,7 +76,6 @@
                                 break;
                             }
                         }
-                        console.log(file_object);
                         var image = document.createElement('div');
                         $(image).addClass("thumbnail");
                         $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
@@ -103,7 +102,6 @@
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
                  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');$(this).closest('.thread-post-form').find('[name=thread_post_content]').trigger('checkform.areYouSure');
-                 console.log($(this).closest('.thread-post-form').find('[name=thread_post_content]'));
                  $('#title').val('');$('#title').trigger('checkform.areYouSure');"
                      class="btn btn-danger">Cancel</a>
         {% endif %}
