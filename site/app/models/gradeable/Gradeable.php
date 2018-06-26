@@ -99,6 +99,7 @@ class Gradeable extends AbstractModel {
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
     private $rotating_grader_sections = null;
+    private $rotating_grader_sections_modified = false;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -463,13 +464,8 @@ class Gradeable extends AbstractModel {
      */
     public function getRotatingGraderSections() {
         if($this->rotating_grader_sections === null) {
-            $modified_old = $this->modified;
             $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
-
-            // Reset modified flag if we weren't already modified yet
-            if($modified_old === false) {
-                $this->modified = false;
-            }
+            $this->rotating_grader_sections_modified = false;
         }
         return $this->rotating_grader_sections;
     }
@@ -655,7 +651,6 @@ class Gradeable extends AbstractModel {
      * @param array $rotating_grader_sections An array (indexed by grader id) of arrays of section numbers
      */
     public function setRotatingGraderSections($rotating_grader_sections) {
-
         // Number of total rotating sections
         $num_sections = $this->core->getQueries()->getNumberRotatingSections();
 
@@ -678,7 +673,7 @@ class Gradeable extends AbstractModel {
             }
         }
         $this->rotating_grader_sections = $parsed_graders_sections;
-        $this->modified = true;
+        $this->rotating_grader_sections_modified = true;
     }
 
     /**
@@ -763,5 +758,13 @@ class Gradeable extends AbstractModel {
      */
     public function canDelete() {
         return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
+    }
+
+    /**
+     * Gets whether the rotating grader sections were modified
+     * @return bool
+     */
+    public function isRotatingGraderSectionsModified() {
+        return $this->rotating_grader_sections_modified;
     }
 }

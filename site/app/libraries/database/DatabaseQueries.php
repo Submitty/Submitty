@@ -2740,6 +2740,9 @@ AND gc_id IN (
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
+        // Make sure to create the rotating sections
+        $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
+
         // Also make sure to create components
         $this->updateGradeableComponents($gradeable);
     }
@@ -2857,7 +2860,9 @@ AND gc_id IN (
             }
 
             // Save the rotating sections
-            $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
+            if ($gradeable->isRotatingGraderSectionsModified()) {
+                $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
+            }
         }
 
         // Also make sure to update components
