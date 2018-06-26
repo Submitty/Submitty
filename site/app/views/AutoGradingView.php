@@ -105,13 +105,13 @@ class AutoGradingView extends AbstractView {
                 ];
 
                 $actual_title = "";
-                $actual_name = $diff_viewer->getActualFilename();
-                if ($diff_viewer->hasDisplayExpected() || $actual_name != "") {
+                if ($diff_viewer->hasDisplayExpected() || $diff_viewer->getActualFilename() != "") {
                     $actual_title = "Student ";
                 }
                 $actual_title .= $description;
 
                 $actual_image = $diff_viewer->getActualImageFilename();
+                $actual_display = $diff_viewer->getDisplayActual();
                 if ($actual_image != "") {
                     $check["actual"] = [
                         "type" => "image",
@@ -123,34 +123,37 @@ class AutoGradingView extends AbstractView {
                     $check["actual"] = [
                         "type" => "text",
                         "title" => $actual_title,
-                        "show_popup" => $this->autoShouldDisplay($diff_viewer->getDisplayActual()),
-                        "src" => $diff_viewer->getDisplayActual(),
+                        "show_popup" => $this->autoShouldDisplay($actual_display),
+                        "src" => $actual_display,
                     ];
                 }
 
                 $expected_image = $diff_viewer->getExpectedImageFilename();
+                $expected_display = $diff_viewer->getDisplayExpected();
+                $expected_title = "Expected {$description}";
                 if ($expected_image != "") {
                     $check["expected"] = [
                         "type" => "image",
-                        "title" => "Expected {$description}",
+                        "title" => $expected_title,
                         "show_popup" => false,
                         "src" => $this->autoGetImageSrc($expected_image)
                     ];
-                } elseif ($diff_viewer->hasDisplayExpected()) {
+                } else if ($diff_viewer->hasDisplayExpected()) {
                     $check["expected"] = [
                         "type" => "text",
-                        "title" => "Expected {$description}",
-                        "show_popup" => $this->autoShouldDisplay($diff_viewer->getDisplayExpected()),
-                        "src" => $diff_viewer->getDisplayExpected()
+                        "title" => $expected_title,
+                        "show_popup" => $this->autoShouldDisplay($expected_display),
+                        "src" => $expected_display
                     ];
                 }
 
                 $difference_image = $diff_viewer->getDifferenceFilename();
+                $difference_title = "Difference {$description}";
                 if ($difference_image != "") {
                     $check["difference"] = [
                         "type" => "image",
-                        "title" => "Difference {$description}",
-                        "show_popup" => "false",
+                        "title" => $difference_title,
+                        "show_popup" => false,
                         "src" => $this->autoGetImageSrc($difference_image)
                     ];
                 }
