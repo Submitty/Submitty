@@ -6,9 +6,11 @@ use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\AdminGradeable;
 use app\models\Gradeable;
+use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\AutogradingVersion;
+use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
@@ -930,6 +932,26 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
+     * Converts the result of array_to_string(*, ',') into a php
+     *  array using the provided conversion function
+     * @param string|mixed $str string array of values, or single value from database
+     * @param callback $parser A method to parse a string representation of the object (i.e. 'intval')
+     * @return array A php-array representation of the provided array string
+     */
+    private static function parseShallowCommaSeparatedArrayString($str, $parser) {
+        if(gettype($str) === 'string') {
+            // i.e. "3,4,5,6" => [3,4,5,6]
+            return array_map(
+                    function($elem) use($parser) { return $parser($elem); },
+                    explode(',', trim($str, '"'))
+                );
+        } else {
+            // i.e. 4 => [4]
+            return [$str];
+        }
+    }
+
+    /**
      * Gets all GradedGradeable's associated with a Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: if the gradeable is a team gradeable, use the $teams parameter,
@@ -1236,17 +1258,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
                 // If the registration section is not-null, then convert the sections into an array
                 if(isset($user_array['grading_registration_sections'])) {
-                    if(gettype($user_array['grading_registration_sections']) === 'string') {
-                        // i.e. "3,4,5,6" => [3,4,5,6]
-                        $user_array['grading_registration_sections'] =
-                            array_map(
-                                function($elem) { return intval($elem); },
-                                explode(',', trim($user_array['grading_registration_sections'], '"'))
-                            );
-                    } else {
-                        // i.e. 4 => [4]
-                        $user_array['grading_registration_sections'] = [$user_array['grading_registration_sections']];
-                    }
+                    $user_array['grading_registration_sections'] = self::parseShallowCommaSeparatedArrayString($user_array['grading_registration_sections'],
+                        function ($value) {
+                            return intval($value);
+                        }
+                    );
                 }
 
                 // Create the grader user
@@ -1285,6 +1301,216 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 array_values($teams)
             ),
             $constructGradedGradeable);
+    }
+
+    /**
+     * Gets all Gradeable instances for the given ids (or all if id is null)
+     * @param string[]|null $ids ids of the gradeables to retrieve
+     * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     */
+    public function getGradeableConfigs($ids) {
+        if($ids === null) {
+            $ids = [];
+        }
+
+        // Generate the selector statement
+        $selector = '';
+        if(count($ids) > 0) {
+            $place_holders = implode(',', array_fill(0, count($ids), '?'));
+            $selector = "WHERE g.g_id IN ($place_holders)";
+        }
+
+        // First, get the gradeable data
+        $query = "
+            SELECT
+              g.g_id AS id,
+              g_title AS title,
+              g_instructions_url AS instructions_url,
+              g_overall_ta_instructions AS ta_instructions,
+              g_gradeable_type AS type,
+              g_grade_by_registration AS grade_by_registration,
+              g_ta_view_start_date AS ta_view_start_date,
+              g_grade_start_date AS grade_start_date,
+              g_grade_released_date AS grade_released_date,
+              g_grade_locked_date AS grade_locked_date,
+              g_min_grading_group AS min_grading_group,
+              g_syllabus_bucket AS syllabus_bucket,
+              eg.*,
+              gc.*
+            FROM gradeable g
+              LEFT JOIN (
+                SELECT
+                  g_id AS eg_g_id,
+                  eg_config_path AS autograding_config_path,
+                  eg_is_repository AS vcs,
+                  eg_subdirectory AS vcs_subdirectory,
+                  eg_team_assignment AS team_assignment,
+                  eg_max_team_size AS team_size_max,
+                  eg_team_lock_date AS team_lock_date,
+                  eg_use_ta_grading AS ta_grading,
+                  eg_student_view AS student_view,
+                  eg_student_submit AS student_submit,
+                  eg_student_download AS student_download,
+                  eg_student_any_version AS student_download_any_version,
+                  eg_peer_grading AS peer_grading,
+                  eg_peer_grade_set AS peer_grade_set,
+                  eg_submission_open_date AS submission_open_date,
+                  eg_submission_due_date AS submission_due_date,
+                  eg_late_days AS late_days,
+                  eg_allow_late_submission AS late_submission_allowed,
+                  eg_precision AS precision
+                FROM electronic_gradeable
+              ) AS eg ON g.g_id=eg.eg_g_id
+              LEFT JOIN (
+                SELECT
+                  g_id as gc_g_id,
+                  array_agg(gc.gc_id) AS array_id,
+                  array_agg(gc_title) AS array_title,
+                  array_agg(gc_ta_comment) AS array_ta_comment,
+                  array_agg(gc_student_comment) AS array_student_comment,
+                  array_agg(gc_lower_clamp) AS array_lower_clamp,
+                  array_agg(gc_default) AS array_default,
+                  array_agg(gc_max_value) AS array_max_value,
+                  array_agg(gc_upper_clamp) AS array_upper_clamp,
+                  array_agg(gc_is_text) AS array_text,
+                  array_agg(gc_is_peer) AS array_peer,
+                  array_agg(gc_order) AS array_order,
+                  array_agg(gc_page) AS array_page,
+                  array_agg(array_to_string(gcm.array_id, ',')) AS array_mark_id,
+                  array_agg(array_to_string(gcm.array_points, ',')) AS array_mark_points,
+                  array_agg(array_to_string(gcm.array_title, ',')) AS array_mark_title,
+                  array_agg(array_to_string(gcm.array_publish, ',')) AS array_mark_publish,
+                  array_agg(array_to_string(gcm.array_order, ',')) AS array_mark_order
+                FROM gradeable_component gc
+                LEFT JOIN (
+                  SELECT
+                    gc_id AS gcm_gc_id,
+                    array_agg(gcm_id) AS array_id,
+                    array_agg(gcm_points) AS array_points,
+                    array_agg(gcm_note) AS array_title,
+                    array_agg(gcm_publish) AS array_publish,
+                    array_agg(gcm_order) AS array_order
+                    FROM gradeable_component_mark
+                  GROUP BY gcm_gc_id
+                ) AS gcm ON gcm.gcm_gc_id=gc.gc_id
+                GROUP BY g_id
+              ) AS gc ON gc.gc_g_id=g.g_id
+             $selector
+             ORDER BY g.g_id";
+
+        $gradeable_constructor = function($row) {
+            if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
+                throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
+            }
+
+            // Finally, create the gradeable
+            $gradeable = new \app\models\gradeable\Gradeable($this->core, $row, []);
+
+            // Construct the components
+            $component_properties = [
+                'id',
+                'title',
+                'ta_comment',
+                'student_comment',
+                'lower_clamp',
+                'default',
+                'max_value',
+                'upper_clamp',
+                'text',
+                'peer',
+                'order',
+                'page'
+            ];
+            $mark_properties = [
+                'id',
+                'points',
+                'title',
+                'publish',
+                'order'
+            ];
+            $component_mark_properties = array_map(function ($value) {
+                return 'mark_' . $value;
+            }, $mark_properties);
+
+            // Unpack the component data
+            $unpacked_component_data = [];
+            foreach (array_merge($component_properties, $component_mark_properties) as $property) {
+                $unpacked_component_data[$property] = $this->course_db->fromDatabaseToPHPArray($row['array_' . $property]);
+            }
+
+            // Basic parser functions
+            $intval = function ($value) {
+                return intval($value);
+            };
+            $floatval = function ($value) {
+                return floatval($value);
+            };
+            $identity = function ($value) {
+                return $value;
+            };
+            $boolval = function ($value) {
+                return $value === 't';
+            };
+
+            // Specially parse the 'text' field for components since the abstract model doesn't
+            //  parse "t" as `true` in the magic setters
+            $unpacked_component_data['text'] = array_map($boolval, $unpacked_component_data['text']);
+
+            // Create the components
+            $components = [];
+            for($i = 0; $i < count($unpacked_component_data['id']); ++$i) {
+
+                // Transpose a single component at a time
+                $component_data = [];
+                foreach($component_properties as $property) {
+                    $component_data[$property] = $unpacked_component_data[$property][$i];
+                }
+
+                // Create the component instance
+                $component = new Component($this->core, $gradeable, $component_data, []);
+
+                // Unpack the mark data
+                if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                    $unpacked_mark_data = [];
+                    $unpacked_mark_data['id'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_id'][$i], $intval);
+                    $unpacked_mark_data['points'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_points'][$i], $floatval);
+                    $unpacked_mark_data['title'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_title'][$i], $identity);
+                    $unpacked_mark_data['publish'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_publish'][$i], $boolval);
+                    $unpacked_mark_data['order'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_order'][$i], $intval);
+
+                    // If there are no marks, there will be a single 'null' element in the unpacked arrays
+                    if($unpacked_mark_data['id'][0] !== null) {
+                        // Create the marks
+                        $marks = [];
+                        for ($j = 0; $j < count($unpacked_mark_data['id']); ++$j) {
+                            // Transpose a single mark at a time
+                            $mark_data = [];
+                            foreach ($mark_properties as $property) {
+                                $mark_data[$property] = $unpacked_mark_data[$property][$j];
+                            }
+
+                            // Create the mark instance
+                            $marks[] = new Mark($this->core, $component, $mark_data);
+                        }
+                        $component->setMarks($marks);
+                    }
+                }
+
+                $components[] = $component;
+            }
+
+            // Set the components
+            $gradeable->setComponents($components);
+
+            // Set the rotating sections data
+            $gradeable->setRotatingGraderSections($this->getGradersForAllRotatingSections($gradeable->getId()));
+
+            return $gradeable;
+        };
+
+        return $this->course_db->queryIterator($query,
+            $ids,
+            $gradeable_constructor);
     }
 }
 
