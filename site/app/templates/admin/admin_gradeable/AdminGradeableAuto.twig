@@ -19,6 +19,13 @@
                 <option value="/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config">test_notes_upload_3page</option>
             </select>
         </div>
+        <div id="div_uploaded_configs" style="display: none">
+            <select id="select_uploaded_configs" style="width: 250px;">
+                {% for path in all_uploaded_paths %}
+                    <option value="{{ path }}">{{ path }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <br />
         <div id="div_provide_full_path">
             <input style='width: 83%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" disabled/>

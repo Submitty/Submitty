@@ -2,6 +2,7 @@
 
 namespace app\views\admin;
 
+use app\libraries\FileUtils;
 use app\models\GradeableComponent;
 use app\views\AbstractView;
 use app\models\AdminGradeable;
@@ -72,6 +73,12 @@ class AdminGradeableView extends AbstractView {
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
         }
 
+        $configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        $all_configs = FileUtils::getAllFiles($configs_dir);
+        $all_uploaded_paths = array();
+        foreach($all_configs as $file){
+            $all_uploaded_paths[] = $file['path'];
+        }
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
@@ -84,7 +91,9 @@ class AdminGradeableView extends AbstractView {
             "course"          => $_GET['course'],
 
             // Graders Page Specific
-            "all_graders"    => $graders
+            "all_graders"    => $graders,
+            //All the uploaded config paths
+            "all_uploaded_paths"      => $all_uploaded_paths
         ]);
     }
     
