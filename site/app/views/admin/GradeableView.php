@@ -6,7 +6,7 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class GradeableView extends AbstractView {
-    public function uploadConfigForm($target_dir, $all_files) {
+    public function uploadConfigForm($target_dir, $all_files, $inuse_config) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $build_script_output_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/build_script_output.txt";
@@ -24,6 +24,7 @@ class GradeableView extends AbstractView {
             "course" => $course,
             "build_script_output_file" => $build_script_output_file,
             "contents" => $contents,
+            "inuse_config" => $inuse_config
         ]);
     }
 }
