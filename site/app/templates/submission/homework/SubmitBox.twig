@@ -207,11 +207,11 @@
 </div>
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, path, count, merge_previous=merge_previous);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, path, count, merge_previous=merge_previous, clobber=clobber);
             moveNextInput(count);
         }
 
@@ -228,7 +228,10 @@
                 "{{ gradeable.getUser().getId() }}",
                 repo_id,
                 {{ student_page ? "true" : "false" }},
-                {{ gradeable.getComponents()|length }});
+                {{ gradeable.getComponents()|length }},
+                merge_previous=merge_previous,
+                clobber=clobber
+            );
         }
         else {
             handleSubmission({{ late_days_use }},
@@ -242,7 +245,10 @@
                 user_id,
                 repo_id,
                 {{ student_page ? "true" : "false" }},
-                {{ gradeable.getComponents()|length }});
+                {{ gradeable.getComponents()|length }},
+                merge_previous=merge_previous,
+                clobber=clobber
+            );
         }
     }
     $(function() {
@@ -272,7 +278,7 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ gradeable.getHighestVersion() }}, false, "", "", repo_id)
+                makeSubmission(user_id, {{ gradeable.getHighestVersion() }}, false, "", "", repo_id);
             }
             // user id entered, need to validate first
             else {
