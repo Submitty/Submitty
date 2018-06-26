@@ -907,8 +907,8 @@ table .instructor .two-options{
 }
 
 .thumbnail {
-    width: 200px;
-    height: 200px;
+    width: 100px;
+    height: 100px;
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
