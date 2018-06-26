@@ -909,6 +909,8 @@ table .instructor .two-options{
 .thumbnail {
     width: 200px;
     height: 200px;
+    background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
     border-radius: 5px;
     border: 1px solid #ddd;

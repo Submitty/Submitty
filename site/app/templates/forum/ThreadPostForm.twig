@@ -51,9 +51,9 @@
 {% endif %}
 <div style="margin-bottom:10px;" class="form-group row">
     {% if attachment_box_id %}
-        <span style="float:left;display:inline-block;">
-            <div class="upload_attachment_box" id="upload{{ attachment_box_id }}" style="cursor: pointer; text-align: right;">
-                <label id="file_input_label" style="float: left;" class="btn btn-default">Upload Attachment</label>
+        <span style="display:inline-block;">
+            <div class="upload_attachment_box" id="upload{{ attachment_box_id }}" style="cursor: pointer;">
+                <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
                 <input type="file" accept="image/*" id="input_file{{ attachment_box_id }}" style="display: none;" onchange="addFilesFromInput({{ attachment_box_id }})" multiple />
                 <br>
             </div>
@@ -77,10 +77,8 @@
                         }
                         console.log(file_object);
                         var image = document.createElement('div');
-                        // image.src = 
                         $(image).addClass("thumbnail");
                         $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
-                        target.prepend(document.createElement('br'));
                         target.prepend(image);
                     });
 
