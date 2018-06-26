@@ -92,7 +92,7 @@ def main():
     if pwd.getpwuid(os.getuid()).pw_name != HWCRON_USER:
         raise SystemExit('ERROR! This script must be run by hwcron!')
 
-    os.chdir(QUEUE_DIR)
+    os.chdir(str(QUEUE_DIR))
 
     queue = multiprocessing.Queue()
     for entry in os.scandir(QUEUE_DIR):
@@ -106,7 +106,7 @@ def main():
             queue.put(name)
 
     observer = Observer()
-    observer.schedule(NewFileHandler(queue), QUEUE_DIR)
+    observer.schedule(NewFileHandler(queue), str(QUEUE_DIR))
     observer.start()
 
     try:
