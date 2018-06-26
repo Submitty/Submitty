@@ -33,7 +33,6 @@ use app\models\GradeableComponent;
  * @method \DateTime getMinGradingGroup()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
- * @method Component[] getComponents()
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
@@ -66,7 +65,6 @@ use app\models\GradeableComponent;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
- * @method array getRotatingGraderSections()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -85,8 +83,21 @@ class Gradeable extends AbstractModel {
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
+
+    /* (private) Properties calculated Just-in-time */
+
     /** @property @var bool If any manual grades have been entered for this gradeable */
-    private $has_manual_grades = false;
+    private $any_manual_grades = null;
+    /** @property @var bool If any submissions exist */
+    private $any_submissions = null;
+    /** @property @var bool If any teams have been formed */
+    private $any_teams = null;
+    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
+     *                          Array (indexed by grader id) of arrays of rotating section numbers
+     */
+    private $rotating_grader_sections = null;
+    /** @property @var Component[] An array of all of this gradeable's components */
+    private $components = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -150,14 +161,6 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
-    /** @property @var Component[] An array of all of this gradeable's components */
-    protected $components = array();
-
-    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
-     *                          Array (indexed by grader id) of arrays of rotating section numbers
-     */
-    protected $rotating_grader_sections = array();
-
     public function __construct(Core $core, $details, array $components) {
         parent::__construct($core);
 
@@ -189,9 +192,6 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
         }
 
-        // Since this property is immutable, calculate it instead of taking it as a parameter
-        $this->has_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
-
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
@@ -215,8 +215,9 @@ class Gradeable extends AbstractModel {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
-        // Serialize this even though its not mutable
-        $return['has_manual_grades'] = $this->has_manual_grades;
+        // Serialize important private JIT values
+        $return['components'] = parent::parseObject($this->getComponents());
+        $return['rotating_grader_sections'] = parent::parseObject($this->getRotatingGraderSections());
 
         return $return;
     }
@@ -233,14 +234,6 @@ class Gradeable extends AbstractModel {
             }
         }
         return null;
-    }
-
-    /**
-     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
-     * @return bool True if any manual grades exist
-     */
-    public function hasManualGrades() {
-        return $this->has_manual_grades;
     }
 
     /**
@@ -462,6 +455,34 @@ class Gradeable extends AbstractModel {
             $dates[$property] = $this->$property;
         }
         return $dates;
+    }
+
+    /**
+     * Gets the rotating section grader assignment
+     * @return array An array (indexed by user id) of arrays of section ids
+     */
+    public function getRotatingGraderSections() {
+        if($this->rotating_grader_sections === null) {
+            $modified_old = $this->modified;
+            $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
+
+            // Reset modified flag if we weren't already modified yet
+            if($modified_old === false) {
+                $this->modified = false;
+            }
+        }
+        return $this->rotating_grader_sections;
+    }
+
+    /**
+     * Gets the components for this gradeable
+     * @return Component[]
+     */
+    public function getComponents() {
+        if($this->components === null) {
+            $this->setComponents($this->core->getQueries()->getComponentConfigs($this));
+        }
+        return $this->components;
     }
 
     /** @internal */
@@ -693,5 +714,65 @@ class Gradeable extends AbstractModel {
         // If the remainder is more than half the precision away from zero, then add one
         //  times the direction from zero to the quotient.  Multiply by precision
         return ($q + (abs($r) > $this->precision / 2 ? ($r > 0 ? 1 : -1) : 0)) * $this->precision;
+    }
+
+
+
+    /**
+     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
+     * @return bool True if any manual grades exist
+     */
+    public function anyManualGrades() {
+        if($this->any_manual_grades === null) {
+            $this->any_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
+        }
+        return $this->any_manual_grades;
+    }
+
+    /**
+     * Gets if this gradeable has any submissions yet
+     * @return bool
+     */
+    public function anySubmissions() {
+        if($this->any_submissions === null) {
+            // Until we find a submission, assume there are none
+            $this->any_submissions = false;
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $semester = $this->core->getConfig()->getSemester();
+                $course = $this->core->getConfig()->getCourse();
+                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+                if (is_dir($submission_path)) {
+                    $this->any_submissions = false;
+                }
+            }
+        }
+        return $this->any_submissions;
+    }
+
+    /**
+     * Gets if this gradeable has any teams formed yet
+     * @return bool
+     */
+    public function anyTeams() {
+        if($this->any_teams === null) {
+            // Unless we find a team, assume there are none
+            $this->any_teams = false;
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                if (!empty($all_teams)) {
+                    $this->any_teams = true;
+                }
+            }
+        }
+        return $this->any_teams;
+    }
+
+    /**
+     * Used to decide whether a gradeable can be deleted or not.
+     * This means: No submissions, No manual grades entered, and No teams formed
+     * @return bool True if the gradeable can be deleted
+     */
+    public function canDelete() {
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
     }
 }
