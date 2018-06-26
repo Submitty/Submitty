@@ -94,7 +94,7 @@ def main():
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
     #XXX may need to sort course_file glob and user_file glob
-    for course_file in glob.iglob(os.path.join(args.courses_path, '*.yml')):
+    for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
@@ -102,7 +102,7 @@ def main():
 
     create_group("course_builders")
 
-    for user_file in glob.iglob(os.path.join(args.users_path, '*.yml')):
+    for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
         if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
@@ -638,7 +638,7 @@ class Course(object):
     def create(self):
         # Sort users to try and determinize?
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
-        self.gradeables.sort(key=lambda x: x.get_detail(self.code, "id"))
+        self.gradeables.sort(key=lambda x: x.id)
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
@@ -913,7 +913,8 @@ class Course(object):
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
-                                for key in gradeable.submissions:
+                                #for key in gradeable.submissions:
+                                for key in sorted(gradeable.submissions.keys()):
                                     os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                     submission = random.choice(gradeable.submissions[key])
                                     src = os.path.join(gradeable.sample_path, submission)
