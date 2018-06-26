@@ -35,20 +35,20 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
         ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
-    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show white spaces"){
+    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
-        $("#show_char_"+index+"_"+autocheck_cnt).html("Show escape characters");
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
         args['option'] = 'with_unicode'
-    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Show escape characters"){
+    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
         args['option'] = 'with_escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
-        $("#show_char_"+index+"_"+autocheck_cnt).html("Show white spaces");
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
         args['option'] = 'original'
     }
     //Insert actual and expected one at a time
