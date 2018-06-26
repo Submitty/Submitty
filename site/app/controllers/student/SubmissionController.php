@@ -74,7 +74,7 @@ class SubmissionController extends AbstractController {
         }
     }
     private function requestRegrade(){
-        $content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = $_REQUEST["request_content"];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
@@ -86,7 +86,7 @@ class SubmissionController extends AbstractController {
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        $content = htmlentities($_POST['replyTextArea'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
@@ -130,7 +130,7 @@ class SubmissionController extends AbstractController {
 
             // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+                $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
@@ -142,10 +142,9 @@ class SubmissionController extends AbstractController {
                 $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
                 $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
-                $this->core->getOutput()->disableBuffer();
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeableError', $gradeable);
+                                                           'unbuiltGradeable', $gradeable);
                     $error = true;
                 }
                 else {
@@ -164,7 +163,7 @@ class SubmissionController extends AbstractController {
             return array('id' => $gradeable_id, 'error' => $error);
         }
         else {
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }
@@ -339,9 +338,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-        if ($max_size < 10000000) {
-            $max_size = 10000000;
-        }
+    	if ($max_size < 10000000) {
+    	    $max_size = 10000000;
+    	}
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -447,19 +446,10 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
-        // make sure is admin
-        if (!$this->core->getUser()->accessAdmin()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
-        $merge_previous = false;
-        if(isset($_REQUEST['merge'])){
-            if($_REQUEST['merge']  === "true"){
-                $merge_previous = true;
-            }
-        }
+        // check for whether the item should be merged with previous submission
+        // and whether or not file clobbering should be done
+        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
+        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
     
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
@@ -571,10 +561,30 @@ class SubmissionController extends AbstractController {
             $gradeable->getId(), $path);
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
+        $uploaded_file_base_name = "upload.pdf";
 
-        // copy over the uploaded file
         if (isset($uploaded_file)) {
-            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path,"upload.pdf"))) {
+            // if we are merging in the previous submission (TODO check folder support)
+            if($merge_previous && $new_version !== 1) {
+                $old_version = $new_version - 1;
+                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
+                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
+                $files = glob($to_search);
+                foreach($files as $file) {
+                    $file_base_name = basename($file);
+                    if(!$clobber && $file_base_name === $uploaded_file_base_name) {
+                        $parts = explode(".", $file_base_name);
+                        $parts[0] .= "_version_".$old_version;
+                        $file_base_name = implode(".", $parts);
+                    }
+                    $move_here = FileUtils::joinPaths($version_path, $file_base_name);
+                    if (!@copy($file, $move_here)){
+                        return $this->uploadResult("Failed to merge previous version.", false);
+                    }
+                }
+            }
+            // copy over the uploaded file
+            if (!@copy($uploaded_file, FileUtils::joinPaths($version_path, $uploaded_file_base_name))) {
                 return $this->uploadResult("Failed to copy uploaded file {$uploaded_file} to current submission.", false);
             }
             if (!@unlink($uploaded_file)) {
@@ -583,24 +593,7 @@ class SubmissionController extends AbstractController {
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
             }
-            //if we are merging in the previous submission (TODO check folder support)
-            if($merge_previous && $new_version !== 1){
-                $old_version = $new_version -1;
-                $old_version_path = FileUtils::joinPaths($user_path, $old_version);
-                $to_search = FileUtils::joinPaths($old_version_path, "*.*");
-                $files = glob($to_search);
-                foreach($files as $file){
-                  $file_base_name = basename($file);
-                  if (strpos($file_base_name, 'version') === false) {
-                    $parts = explode(".", $file_base_name);
-                    $file_base_name = $parts[0] . "_version_" . $old_version . "." . $parts[1];    
-                  }
-                  $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                  if (!copy($file, $move_here)){
-                    return $this->uploadResult("Failed to merge previous version.", false);
-                  }
-                }
-            }
+
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
@@ -773,6 +766,11 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
+        // check for whether the item should be merged with previous submission,
+        // and whether or not file clobbering should be done.
+        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
+        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
+
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
         if ($vcs_checkout && !isset($_POST['repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
@@ -796,6 +794,7 @@ class SubmissionController extends AbstractController {
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'];
+        // the user id of the submitter ($user_id is the one being submitted for)
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
@@ -933,23 +932,26 @@ class SubmissionController extends AbstractController {
                 }
             }
     
-            $previous_files = array();
+            $previous_files_src = array();
+            $previous_files_dst = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
             if (!empty($tmp)) {
                 for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
                     if (count($tmp[$i]) > 0) {
-                        $previous_files[$i + 1] = $tmp[$i];
+                        $previous_files_src[$i + 1] = $tmp[$i];
+                        $previous_files_dst[$i + 1] = $tmp[$i];
                     }
                 }
             }
 
             
-            if (empty($uploaded_files) && empty($previous_files) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
             
-            if (count($previous_files) > 0) {
+            // $merge_previous will only be true if there is a previous submission.
+            if (count($previous_files_src) > 0 || $merge_previous) {
                 if ($gradeable->getHighestVersion() === 0) {
                     return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
@@ -969,10 +971,37 @@ class SubmissionController extends AbstractController {
                         return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
                     }
                 }
-    
+                
+                // if merging is being done, get all the old filenames and put them into $previous_files_dst
+                // while checking for name conflicts and preventing them if clobbering is not enabled.
+                if($merge_previous) {
+                    for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                        if(isset($uploaded_files[$i])) {
+                            $current_files_set = array_flip($uploaded_files[$i]["name"]);
+                            $previous_files_src[$i] = array();
+                            $previous_files_dst[$i] = array();
+                            $to_search = FileUtils::joinPaths($previous_part_path[$i], "*");
+                            $filenames = glob($to_search);
+                            $j = 0;
+                            foreach($filenames as $filename) {
+                                $file_base_name = basename($filename);
+                                $previous_files_src[$i][$j] = $file_base_name;
+                                if(!$clobber && isset($current_files_set[$file_base_name])) {
+                                    $parts = explode(".", $file_base_name);
+                                    $parts[0] .= "_version_".$gradeable->getHighestVersion();
+                                    $file_base_name = implode(".", $parts);
+                                }
+                                $previous_files_dst[$i][$j] = $file_base_name;
+                                $j++;
+                            }
+                        }
+                    }
+                }
+
+
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                    if (isset($previous_files[$i])) {
-                        foreach ($previous_files[$i] as $prev_file) {
+                    if (isset($previous_files_src[$i])) {
+                        foreach ($previous_files_src[$i] as $prev_file) {
                             $filename = FileUtils::joinPaths($previous_part_path[$i], $prev_file);
                             if (!file_exists($filename)) {
                                 $name = basename($filename);
@@ -1007,8 +1036,8 @@ class SubmissionController extends AbstractController {
                         }
                     }
                 }
-                if (isset($previous_files[$i]) && isset($previous_part_path[$i])) {
-                    foreach ($previous_files[$i] as $prev_file) {
+                if(isset($previous_part_path[$i]) && isset($previous_files_src[$i])) {
+                    foreach ($previous_files_src[$i] as $prev_file) {
                         $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
                     }
                 }
@@ -1020,12 +1049,12 @@ class SubmissionController extends AbstractController {
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 // copy selected previous submitted files
-                if (isset($previous_files[$i])){
-                    for ($j=0; $j < count($previous_files[$i]); $j++){
-                        $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files[$i][$j]);
-                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files[$i][$j]);
+                if (isset($previous_files_src[$i])){
+                    for ($j=0; $j < count($previous_files_src[$i]); $j++){
+                        $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files_src[$i][$j]);
+                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files_dst[$i][$j]);
                         if (!@copy($src, $dst)) {
-                            return $this->uploadResult("Failed to copy previously submitted file {$previous_files[$i][$j]} to current submission.", false);
+                            return $this->uploadResult("Failed to copy previously submitted file {$previous_files_src[$i][$j]} to current submission.", false);
                         }
                     }
                 }
@@ -1040,7 +1069,7 @@ class SubmissionController extends AbstractController {
                                 $zip->close();
                             }
                             else {
-                                // If the zip is an invalid zip (say we remove the last character from the zip file
+                                // If the zip is an invalid zip (say we remove the last character from the zip file)
                                 // then trying to get the status code will throw an exception and not give us a string
                                 // so we have that string hardcoded, otherwise we can just get the status string as
                                 // normal.
