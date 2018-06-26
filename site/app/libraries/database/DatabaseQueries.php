@@ -2486,7 +2486,7 @@ AND gc_id IN (
                 $ids = [$ids];
             }
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $selection_filter = "WHERE g.g_id IN {$placeholders}";
+            $selection_filter = "WHERE g.g_id IN ({$placeholders})";
         }
 
         // First, get the gradeable data
