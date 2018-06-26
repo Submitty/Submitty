@@ -68,11 +68,10 @@ class Component extends AbstractModel {
     protected $marks = array();
 
 
-    public function __construct(Core $core, Gradeable $gradeable, $details, array $marks) {
+    public function __construct(Core $core, Gradeable $gradeable, $details) {
         parent::__construct($core);
 
         $this->setGradeable($gradeable);
-        $this->setMarks($marks);
         $this->setIdInternal($details['id']);
         $this->setTitle($details['title']);
         $this->setTaComment($details['ta_comment']);

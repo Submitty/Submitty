@@ -1404,7 +1404,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
 
             // Finally, create the gradeable
-            $gradeable = new \app\models\gradeable\Gradeable($this->core, $row, []);
+            $gradeable = new \app\models\gradeable\Gradeable($this->core, $row);
 
             // Construct the components
             $component_properties = [
@@ -1467,7 +1467,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 }
 
                 // Create the component instance
-                $component = new Component($this->core, $gradeable, $component_data, []);
+                $component = new Component($this->core, $gradeable, $component_data);
 
                 // Unpack the mark data
                 if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -1501,9 +1501,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
             // Set the components
             $gradeable->setComponents($components);
-
-            // Set the rotating sections data
-            $gradeable->setRotatingGraderSections($this->getGradersForAllRotatingSections($gradeable->getId()));
 
             return $gradeable;
         };

@@ -65,6 +65,7 @@ use app\models\GradeableComponent;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
+ * @method Component[] getComponents()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -83,6 +84,8 @@ class Gradeable extends AbstractModel {
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
+    /** @property @var Component[] An array of all of this gradeable's components */
+    protected $components = [];
 
     /* (private) Properties calculated Just-in-time */
 
@@ -96,8 +99,6 @@ class Gradeable extends AbstractModel {
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
     private $rotating_grader_sections = null;
-    /** @property @var Component[] An array of all of this gradeable's components */
-    private $components = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -161,7 +162,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
-    public function __construct(Core $core, $details, array $components) {
+    public function __construct(Core $core, $details) {
         parent::__construct($core);
 
         $this->setIdInternal($details['id']);
@@ -171,7 +172,6 @@ class Gradeable extends AbstractModel {
         $this->setGradeByRegistration($details['grade_by_registration']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
-        $this->setComponents($components);
         $this->setTaInstructions($details['ta_instructions']);
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -472,17 +472,6 @@ class Gradeable extends AbstractModel {
             }
         }
         return $this->rotating_grader_sections;
-    }
-
-    /**
-     * Gets the components for this gradeable
-     * @return Component[]
-     */
-    public function getComponents() {
-        if($this->components === null) {
-            $this->setComponents($this->core->getQueries()->getComponentConfigs($this));
-        }
-        return $this->components;
     }
 
     /** @internal */
