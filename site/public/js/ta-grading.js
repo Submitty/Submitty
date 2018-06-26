@@ -1,6 +1,7 @@
 //Used to reset users cookies
 var cookie_version = 1;
-
+//Check if cookie version is/is not the same as the current version
+var versionMatch = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
@@ -9,9 +10,14 @@ $(function() {
         if(!cookie[1] || cookie[1] == 'undefined'){
             deleteCookies();
         }
+        else if(cookie[0] === "cookie_version"){
+            if(cookie[1] == cookie_version){
+                versionMatch = true;
+            }
+        }
     });
 
-    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version) {
+    if(!versionMatch) {
         //If cookie version is not the same as the current version then toggle the visibility of each
         //rubric panel then update the cookies
         deleteCookies();
