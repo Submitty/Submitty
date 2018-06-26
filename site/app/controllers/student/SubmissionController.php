@@ -74,7 +74,7 @@ class SubmissionController extends AbstractController {
         }
     }
     private function requestRegrade(){
-        $content = htmlentities($_REQUEST["request_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = $_REQUEST["request_content"];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
@@ -86,7 +86,7 @@ class SubmissionController extends AbstractController {
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        $content = htmlentities($_POST['replyTextArea'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
@@ -130,7 +130,7 @@ class SubmissionController extends AbstractController {
 
             // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+                $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
@@ -142,10 +142,9 @@ class SubmissionController extends AbstractController {
                 $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
                 $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
-                $this->core->getOutput()->disableBuffer();
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeableError', $gradeable);
+                                                           'unbuiltGradeable', $gradeable);
                     $error = true;
                 }
                 else {
@@ -164,7 +163,7 @@ class SubmissionController extends AbstractController {
             return array('id' => $gradeable_id, 'error' => $error);
         }
         else {
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }

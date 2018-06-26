@@ -777,7 +777,7 @@ HTML;
     <div class = "draggable_content">
         <div class = "inner-container" style="padding:20px;">
 HTML;
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
+        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeRequestForm', $gradeable);
         $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
         $return .= <<<HTML
         </div>
