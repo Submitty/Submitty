@@ -262,7 +262,7 @@ HTML;
         <h2 class="upperinfo-right">Due: {$gradeable->getDueDate()->format("m/d/Y{$time}")}</h2>
     </div>
 HTML;
-            if ($this->core->getUser()->accessAdmin()) {
+            if ($this->core->getUser()->accessGrading()) {
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
                 foreach ($students as $student) {
@@ -296,9 +296,13 @@ HTML;
         <div >
             <input type='radio' id="radio_normal" name="submission_type" checked="true"> 
                 Normal Submission
+HTML;
+                if($this->core->getUser()->accessFullGrading()) {
+                    $return .= <<<HTML
             <input type='radio' id="radio_student" name="submission_type">
                 Make Submission for a Student
 HTML;
+                }
                 if ($gradeable->getNumParts() == 1 && !$gradeable->useVcsCheckout()) {
                     $return .= <<<HTML
             <input type='radio' id="radio_bulk" name="submission_type">
@@ -573,7 +577,6 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 HTML;
                 }
-
                 $old_files = "";
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     foreach ($gradeable->getPreviousFiles($i) as $file) {
@@ -652,11 +655,11 @@ HTML;
 
             $return .= <<<HTML
     <script type="text/javascript">
-        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false) {
+        function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
             // submit the selected pdf
             path = decodeURIComponent(path);
             if (is_pdf) {
-                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous);
+                submitSplitItem("{$this->core->getCsrfToken()}", "{$gradeable->getId()}", user_id, path, count, merge_previous=merge_previous, clobber=clobber);
                 moveNextInput(count);
             }
             
@@ -673,7 +676,9 @@ HTML;
                                 "{$gradeable->getUser()->getId()}",
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
             else {
                 handleSubmission({$late_days_use},
@@ -687,7 +692,9 @@ HTML;
                                 user_id,
                                 repo_id,
                                 {$student_page_string},
-                                {$num_components});
+                                {$num_components},
+                                merge_previous=merge_previous,
+                                clobber=clobber);
             }
         }
         $(function() {
@@ -717,7 +724,7 @@ HTML;
                 }
                 // no user id entered, upload for whoever is logged in
                 else if (user_id == ""){
-                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id)
+                    makeSubmission(user_id, {$gradeable->getHighestVersion()}, false, "", "", repo_id);
                 }
                 // user id entered, need to validate first
                 else {
@@ -730,7 +737,7 @@ HTML;
 </div>
 HTML;
         }
-        if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessGrading()) {
 
             $all_directories = $gradeable->getUploadsFiles();
 

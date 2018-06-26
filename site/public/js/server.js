@@ -1637,6 +1637,11 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function alterShowDeletedStatus(newStatus) {
+    document.cookie = "show_deleted=" + newStatus + "; path=/;";
+    location.reload();
+}
+
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1647,7 +1652,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
             data: {
                 thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoriesId: currentCategoriesId
+                currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
                var x = JSON.parse(r).html;
