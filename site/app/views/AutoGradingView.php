@@ -6,7 +6,7 @@ use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
-class AutogradingView extends AbstractView {
+class AutoGradingView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
@@ -76,7 +76,7 @@ class AutogradingView extends AbstractView {
      * @return string
      * @throws \Exception
      */
-    public static function loadAutoChecks(Gradeable $gradeable, $index, $who_id, $popup_css_file, $show_hidden = false) {
+    public function loadAutoChecks(Gradeable $gradeable, $index, $who_id, $popup_css_file, $show_hidden = false) {
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$index];
         $return = "";
@@ -96,7 +96,7 @@ class AutogradingView extends AbstractView {
                 $url = preg_replace('/&component.*/', '', $url);
                 $file_name = preg_replace('|.*/|', '', $file_path);
                 $file_path = urlencode($file_path);
-                $return .= self::autoRenderPdf($url, $file_name, $file_path);
+                $return .= $this->autoRenderPdf($url, $file_name, $file_path);
             } else {
                 $return .= <<<HTML
     <div class="box-block">
@@ -113,7 +113,7 @@ HTML;
                 }
                 if ($diff_viewer->hasDisplayActual()) {
                     $display_actual = $diff_viewer->getDisplayActual();
-                    $visible = self::autoShouldDisplay($display_actual);
+                    $visible = $this->autoShouldDisplay($display_actual);
                 } else {
                     $visible = "hidden";
                 }
@@ -138,7 +138,7 @@ HTML;
                 }
                 $myimage = $diff_viewer->getActualImageFilename();
                 if ($myimage != "") {
-                    $return .= self::autoRenderImage($myimage);
+                    $return .= $this->autoRenderImage($myimage);
 
                 } else if ($diff_viewer->hasDisplayActual()) {
                     $return .= <<<HTML
@@ -162,12 +162,12 @@ HTML;
             <br />
 HTML;
                     }
-                    $return .= self::autoRenderImage($myExpectedimage);
+                    $return .= $this->autoRenderImage($myExpectedimage);
                     $return .= <<<HTML
         </div>
 HTML;
                 } elseif ($diff_viewer->hasDisplayExpected()) {
-                    $visible = self::autoShouldDisplay($diff_viewer->getDisplayExpected());
+                    $visible = $this->autoShouldDisplay($diff_viewer->getDisplayExpected());
                     $title = "Expected ";
                     $title .= $description;
                     $return .= <<<HTML
@@ -197,7 +197,7 @@ HTML;
             <br />
 HTML;
                     }
-                    $return .= self::autoRenderImage($myDifferenceImage);
+                    $return .= $this->autoRenderImage($myDifferenceImage);
                     $return .= <<<HTML
         </div>
 HTML;
@@ -227,7 +227,7 @@ HTML;
      * @param string $display
      * @return string
      */
-    private static function autoShouldDisplay(string $display): string {
+    private function autoShouldDisplay(string $display): string {
         $visible = "visible";
         $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
         $less_than_30 = true;
@@ -251,7 +251,7 @@ HTML;
      * @param string $file_path
      * @return string
      */
-    private static function autoRenderPdf(string $url, string $file_name, string $file_path): string {
+    private function autoRenderPdf(string $url, string $file_name, string $file_path): string {
         return '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
     }
 
@@ -259,7 +259,7 @@ HTML;
      * @param string $myimage
      * @return array
      */
-    private static function autoRenderImage(string $myimage): string {
+    private function autoRenderImage(string $myimage): string {
         // borrowed from file-display.php
         $content_type = FileUtils::getContentType($myimage);
         if (substr($content_type, 0, 5) === "image") {
