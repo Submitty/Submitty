@@ -1003,6 +1003,7 @@ HTML;
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
 					"show_post" => true,
+					"post_textarea_large" => true,
 					"post_content_placeholder" => "Enter your post here...",
 					"show_categories" => true,
 					"attachment_box_id" => 1,
