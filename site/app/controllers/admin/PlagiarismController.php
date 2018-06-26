@@ -301,7 +301,13 @@ class PlagiarismController extends AbstractController {
         $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id_1."/".$version_user_1."/submission.concatenated";
         $data="";
     	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-  			$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1);
+    		if(isset($_REQUEST['user_id_2']) && !empty($_REQUEST['user_id_2']) && isset($_REQUEST['version_user_2']) && !empty($_REQUEST['version_user_2'])) {
+    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2 , '1');	
+    		}
+    		else {
+    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
+    		}
+    		$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name, $color_info)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
         }
         else {
         	$return = array('error' => 'User 1 submission.concatinated for specified version not found.');
@@ -313,7 +319,8 @@ class PlagiarismController extends AbstractController {
         	$file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$_REQUEST['user_id_2']."/".$_REQUEST['version_user_2']."/submission.concatenated";
 
 	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name));
+	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
 	        }   
 	        else {
 	        	$return = array('error' => 'User 2 submission.concatinated for matching version not found.');
@@ -327,14 +334,110 @@ class PlagiarismController extends AbstractController {
     	echo($return);	
     }
 
-    public function getDisplayForCode($file_name){
+    public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
+    	$color_info = array();
+    	if($user_id_2 == "" && $codebox == "1"){
+    		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
+	        if (!file_exists($file_path)) {
+	        	return $color_info;
+	        }
+	        else {
+	        	$matches = json_decode(file_get_contents($file_path), true);
+	        	$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
+	        	$tokens = json_decode(file_get_contents($file_path), true);
+		    	foreach($matches as $match) {
+		    		$start_pos =$tokens[$match["start"]-1]["char"];
+		    		$start_line= $tokens[$match["start"]-1]["line"];
+		    		$end_pos =$tokens[$match["end"]-1]["char"];
+		    		$end_line= $tokens[$match["end"]-1]["line"];
+		    		$end_value =$tokens[$match["end"]-1]["value"];
+		    		if($match["type"] == "match") {
+		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ffff00'>";		
+			    		}
+			    		else {	
+			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ffff00'>";
+			    		}
+			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+			    		}
+			    		else {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+			    		}	
+		    		}
+		    		else if($match["type"] == "common") {
+		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {		
+			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
+			    		}
+			    		else {
+			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";	
+			    		}
+			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+			    		}
+			    		else {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+			    		}
+		    		}
+		    		else if($match["type"] == "provided") {
+		    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
+			    		}
+			    		else {
+			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";	
+			    		}
+			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+			    		}
+			    		else {
+			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+			    		}	
+		    		}
+		    	}
+	        } 	
+    	}
+    	foreach($color_info as $i=>$color_info_for_line) {
+	    	krsort($color_info[$i]);
+    	}
+    	return $color_info;
+    }
+
+    public function getDisplayForCode($file_name , $color_info){
     	$lines= file($file_name); 
+    	foreach($lines as $i=>$line) {
+    		$lines[$i] = rtrim($line, "\n");
+    	}
 	    $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
+	    $last_line_unmatched_span="";
+	    $present_line_unmatched_span="";
+	    
 	    for ($i = 0; $i < count($lines); $i++) {
 	        $j = $i + 1;
 	        $html .= "<div style='white-space: nowrap;'>";
 	        $html .= "<span class='line_number'>". $j ."</span>";
 	        $html .= "<span class='line_code'>";
+	        
+	        if(array_key_exists($i+1, $color_info)) {
+		        if($color_info[$i+1][max(array_keys($color_info[$i+1]))] != "</span>") {
+	    			$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
+	    			$present_line_unmatched_span = str_replace("</span>", "", $color_info[$i+1][max(array_keys($color_info[$i+1]))]);
+	    		}
+	    		else {
+	    			$present_line_unmatched_span = ""; 
+	    		}
+		        foreach ($color_info[$i+1] as $c => $color_info_for_position) {
+		    		$lines[$i] = substr_replace($lines[$i], $color_info_for_position, $c-1, 0);
+		    	}
+
+	    		if((strpos($color_info[$i+1][min(array_keys($color_info[$i+1]))],"</span>") == 0)) {
+	    			$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);	
+	    		}
+		    }
+		    else if($last_line_unmatched_span != "") {
+	    		$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
+	    		$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);	
+	    	}
+	    	$last_line_unmatched_span = $present_line_unmatched_span;
 	        $html .= $lines[$i];
 	        $html .= "</span></div>";
 	    }

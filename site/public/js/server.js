@@ -360,21 +360,6 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
-// function getDisplayForCode(content){
-//     var lines= content.split("\n"); 
-//     html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
-//     for (var i = 0; i < lines.length; i++) {
-//         var j = i + 1;
-//         html += "<div style='white-space: nowrap;'>";
-//         html += "<span class='line_number'>"+ j +"</span>";
-//         html += "<span class='line_code'>";
-//         html += lines[i];
-//         html += "</span></div>";
-//     }
-//     j++;
-//     html += "</div></div>";
-//     return html;
-// }
 
 function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");
