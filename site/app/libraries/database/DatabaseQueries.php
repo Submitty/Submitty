@@ -2696,6 +2696,9 @@ AND gc_id IN (
               gcm_order,
               gcm_publish)
             VALUES (?, ?, ?, ?, ?)", $params);
+
+        // Setup the mark with its new id
+        $mark->setIdFromDatabase($this->course_db->getLastInsertId());
     }
 
     /**
@@ -2774,6 +2777,9 @@ AND gc_id IN (
               gc_is_peer, 
               gc_page)
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+
+        // Setup the component with its new id
+        $component->setIdFromDatabase($this->course_db->getLastInsertId());
     }
 
     /**
@@ -2781,10 +2787,8 @@ AND gc_id IN (
      *  it in the database as necessary.  Note: the component must
      *  already exist in the database to add new marks
      * @param Component $component
-     * @return bool If any marks were created
      */
     private function updateComponentMarks(Component $component) {
-        $newMarks = false;
         $order = 0;
         foreach ($component->getMarks() as $mark) {
             // rectify mark order
@@ -2796,15 +2800,11 @@ AND gc_id IN (
             // New mark, so add it
             if($mark->getId() < 1) {
                 $this->createMark($mark, $component->getId());
-                $newMarks = true;
             }
             if ($mark->isModified()) {
                 $this->updateMark($mark);
             }
         }
-
-        // If any marks were new, signal this to the caller
-        return $newMarks;
     }
 
     /**
@@ -2956,7 +2956,6 @@ AND gc_id IN (
     private function updateGradeableComponents(\app\models\gradeable\Gradeable $gradeable) {
 
         // iterate through components and see if any need updating/creating
-        $invalidateComponents = false;
         $order = 0;
         foreach ($gradeable->getComponents() as $component) {
             // Rectify component order
@@ -2968,33 +2967,12 @@ AND gc_id IN (
             // New component, so add it
             if ($component->getId() < 1) {
                 $this->createComponent($component);
-                $invalidateComponents = true;
             } else {
                 $this->updateComponent($component);
             }
-        }
 
-        // If any components were new, recreate the components array
-        $components = $gradeable->getComponents();
-        if ($invalidateComponents) {
-            $new_components = $this->getGradeableComponentConfigs($gradeable);
-
-            // Transfer marks to new component instances
-            for($i = 0; $i < count($new_components); ++$i) {
-                $new_components[$i]->setMarks($components[$i]->getMarks());
-            }
-            $components = $new_components;
-        }
-
-        // Iterate through each component to update the marks
-        $invalidateMarks = false;
-        foreach ($components as $component) {
-            $invalidateMarks |= $this->updateComponentMarks($component);
-        }
-
-        // If any marks were new, recreate the components array
-        if ($invalidateMarks) {
-            $gradeable->setComponents($this->getGradeableComponentConfigs($gradeable));
+            // Then, update/create its marks
+            $this->updateComponentMarks($component);
         }
     }
 

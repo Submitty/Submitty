@@ -240,6 +240,17 @@ class Component extends AbstractModel {
         }
     }
 
+    /**
+     * Sets the id of the component.
+     *  NOTE: this should only be called from database results
+     *  to avoid reconstruction of the whole object
+     * @param int $id
+     * @internal
+     */
+    public function setIdFromDatabase($id) {
+        $this->setIdInternal($id);
+    }
+
     /** @internal */
     public function setId($id) {
         throw new \BadFunctionCallException('Cannot set Id of component');
