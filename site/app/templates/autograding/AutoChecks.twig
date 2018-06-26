@@ -10,13 +10,13 @@
         <div class="box-block">
 
             {% if check.actual %}
-                {{ self.render_diff_element(check, check.actual, 0) }}
+                {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
             {% endif %}
             {% if check.expected %}
-                {{ self.render_diff_element(check, check.expected, 1) }}
+                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
             {% endif %}
             {% if check.difference %}
-                {{ self.render_diff_element(check, check.difference, 2) }}
+                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
             {% endif %}
 
         </div>
@@ -24,19 +24,19 @@
 
 {% endfor %}
 
-{% macro render_diff_element(check, element, side) %}
+{% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
     <!-- Readded css here so the popups have the css -->
     <div class='diff-element'>
         <h4>
             {{ element.title }}
             {% if element.show_popup %}
-                <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ loop.index0 }}, {{ side }});">
+                <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});">
                     <i class="fa fa-window-restore" style="cursor: pointer;"></i>
                 </span>
             {% endif %}
         </h4>
 
-        <div id="container_{{ index }}_{{ loop.index0 }}_0">
+        <div id="container_{{ index }}_{{ check_index }}_{{ side }}">
             {% for message in check.messages %}
                 {% set type_class = "black-message" %}
                 {% if message['type'] == "information" %}
@@ -53,7 +53,7 @@
             {% if element.type == "image" %}
                 <img src="{{ element.src }}" style="border:2px solid black">
             {% elseif element.type == "text" %}
-                <div id=div_{{ index }}_{{ loop.index0 }}>
+                <div id=div_{{ index }}_{{ check_index }}>
                     {{ element.src|raw }}
                 </div>
             {% endif %}
