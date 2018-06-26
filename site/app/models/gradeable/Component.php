@@ -302,6 +302,6 @@ class Component extends AbstractModel {
     }
 
     public function getPenaltyPoints() {
-        return $this->isPenalty() ? abs($this->lower_clamp) : 0;
+        return $this->hasPenalty() ? abs($this->lower_clamp) : 0;
     }
 }
