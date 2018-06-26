@@ -520,6 +520,10 @@ function check_server(url) {
     );
 }
 
+function downloadFile(file, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+}
+
 function changeColor(div, hexColor){
     div.style.color = hexColor;
 }
@@ -1637,6 +1641,11 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function alterShowDeletedStatus(newStatus) {
+    document.cookie = "show_deleted=" + newStatus + "; path=/;";
+    location.reload();
+}
+
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1647,7 +1656,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
             data: {
                 thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoriesId: currentCategoriesId
+                currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
                var x = JSON.parse(r).html;
