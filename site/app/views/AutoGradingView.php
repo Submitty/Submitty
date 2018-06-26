@@ -7,6 +7,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class AutogradingView extends AbstractView {
+
     /**
      * @param Gradeable $gradeable
      * @param bool $show_hidden
@@ -65,7 +66,7 @@ class AutogradingView extends AbstractView {
             "has_badges" => $has_badges,
         ]);
     }
-    
+
     /**
      * @param Gradeable $gradeable
      * @param $index
@@ -95,7 +96,7 @@ class AutogradingView extends AbstractView {
                 $url = preg_replace('/&component.*/', '', $url);
                 $file_name = preg_replace('|.*/|', '', $file_path);
                 $file_path = urlencode($file_path);
-                $return .= '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
+                $return .= self::autoRenderPdf($url, $file_name, $file_path);
             } else {
                 $return .= <<<HTML
     <div class="box-block">
@@ -112,19 +113,7 @@ HTML;
                 }
                 if ($diff_viewer->hasDisplayActual()) {
                     $display_actual = $diff_viewer->getDisplayActual();
-                    $visible = "visible";
-                    $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display_actual)), "\xC2\xA0\t"));
-                    $less_than_30 = true;
-                    $arr_count = count($tmp_array_string);
-                    for ($x = 0; $x < $arr_count; $x++) {
-                        if (strlen($tmp_array_string[$x]) > 30) {
-                            $less_than_30 = false;
-                            $x = $arr_count;
-                        }
-                    }
-                    if (substr_count($display_actual, 'line_number') < 10 && $less_than_30) {
-                        $visible = "hidden";
-                    }
+                    $visible = self::autoShouldDisplay($display_actual);
                 } else {
                     $visible = "hidden";
                 }
@@ -149,17 +138,8 @@ HTML;
                 }
                 $myimage = $diff_viewer->getActualImageFilename();
                 if ($myimage != "") {
-                    // borrowed from file-display.php
-                    $content_type = FileUtils::getContentType($myimage);
-                    if (substr($content_type, 0, 5) === "image") {
-                        // Read image path, convert to base64 encoding
-                        $imageData = base64_encode(file_get_contents($myimage));
-                        // Format the image SRC:  data:{mime};base64,{data};
-                        $myimagesrc = 'data: ' . mime_content_type($myimage) . ';charset=utf-8;base64,' . $imageData;
-                        // insert the sample image data
+                    $return .= self::autoRenderImage($myimage);
 
-                        $return .= '<img src="' . $myimagesrc . '" img style="border:2px solid black">';
-                    }
                 } else if ($diff_viewer->hasDisplayActual()) {
                     $return .= <<<HTML
             <div id=div_{$index}_{$autocheck_cnt}>
@@ -182,33 +162,12 @@ HTML;
             <br />
 HTML;
                     }
-                    // borrowed from file-display.php
-                    $content_type = FileUtils::getContentType($myExpectedimage);
-                    if (substr($content_type, 0, 5) === "image") {
-                        // Read image path, convert to base64 encoding
-                        $expectedImageData = base64_encode(file_get_contents($myExpectedimage));
-                        // Format the image SRC:  data:{mime};base64,{data};
-                        $myExpectedimagesrc = 'data: ' . mime_content_type($myExpectedimage) . ';charset=utf-8;base64,' . $expectedImageData;
-                        // insert the sample image data
-                        $return .= '<img src="' . $myExpectedimagesrc . '" img style="border:2px solid black">';
-                    }
+                    $return .= self::autoRenderImage($myExpectedimage);
                     $return .= <<<HTML
         </div>
 HTML;
                 } elseif ($diff_viewer->hasDisplayExpected()) {
-                    $visible = "visible";
-                    $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($diff_viewer->getDisplayExpected())), "\xC2\xA0\t"));
-                    $less_than_30 = true;
-                    $arr_count = count($tmp_array_string);
-                    for ($x = 0; $x < $arr_count; $x++) {
-                        if (strlen($tmp_array_string[$x]) > 30) {
-                            $less_than_30 = false;
-                            $x = $arr_count;
-                        }
-                    }
-                    if (substr_count($diff_viewer->getDisplayExpected(), 'line_number') < 10 && $less_than_30) {
-                        $visible = "hidden";
-                    }
+                    $visible = self::autoShouldDisplay($diff_viewer->getDisplayExpected());
                     $title = "Expected ";
                     $title .= $description;
                     $return .= <<<HTML
@@ -238,16 +197,7 @@ HTML;
             <br />
 HTML;
                     }
-                    // borrowed from file-display.php
-                    $content_type = FileUtils::getContentType($myDifferenceImage);
-                    if (substr($content_type, 0, 5) === "image") {
-                        // Read image path, convert to base64 encoding
-                        $differenceImageData = base64_encode(file_get_contents($myDifferenceImage));
-                        // Format the image SRC:  data:{mime};base64,{data};
-                        $differenceImagesrc = 'data: ' . mime_content_type($myDifferenceImage) . ';charset=utf-8;base64,' . $differenceImageData;
-                        // insert the sample image data
-                        $return .= '<img src="' . $differenceImagesrc . '" img style="border:2px solid black">';
-                    }
+                    $return .= self::autoRenderImage($myDifferenceImage);
                     $return .= <<<HTML
         </div>
 HTML;
@@ -273,6 +223,56 @@ HTML;
         return $return;
     }
 
+    /**
+     * @param string $display
+     * @return string
+     */
+    private static function autoShouldDisplay(string $display): string {
+        $visible = "visible";
+        $tmp_array_string = explode("\n", trim(html_entity_decode(strip_tags($display)), "\xC2\xA0\t"));
+        $less_than_30 = true;
+        $arr_count = count($tmp_array_string);
+        for ($x = 0; $x < $arr_count; $x++) {
+            if (strlen($tmp_array_string[$x]) > 30) {
+                $less_than_30 = false;
+                $x = $arr_count;
+            }
+        }
+        if (substr_count($display, 'line_number') < 10 && $less_than_30) {
+            $visible = "hidden";
+        }
+
+        return $visible;
+    }
+
+    /**
+     * @param string $url
+     * @param string $file_name
+     * @param string $file_path
+     * @return string
+     */
+    private static function autoRenderPdf(string $url, string $file_name, string $file_path): string {
+        return '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
+    }
+
+    /**
+     * @param string $myimage
+     * @return array
+     */
+    private static function autoRenderImage(string $myimage): string {
+        // borrowed from file-display.php
+        $content_type = FileUtils::getContentType($myimage);
+        if (substr($content_type, 0, 5) === "image") {
+            // Read image path, convert to base64 encoding
+            $imageData = base64_encode(file_get_contents($myimage));
+            // Format the image SRC:  data:{mime};base64,{data};
+            $myimagesrc = 'data: ' . mime_content_type($myimage) . ';charset=utf-8;base64,' . $imageData;
+            // insert the sample image data
+
+            return '<img src="' . $myimagesrc . '" img style="border:2px solid black">';
+        }
+        return '';
+    }
 
     public function showVersionChoice($gradeable, $onChange, $formatting = "") {
         return $this->core->getOutput()->renderTwigTemplate("grading/VersionChoice.twig", [
