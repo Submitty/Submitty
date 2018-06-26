@@ -87,7 +87,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
 
-    /* (private) Properties calculated Just-in-time */
+    /* (private) Lazy-loaded properties */
 
     /** @property @var bool If any manual grades have been entered for this gradeable */
     private $any_manual_grades = null;
@@ -216,8 +216,7 @@ class Gradeable extends AbstractModel {
             $return[$date] = $this->$date !== null ? DateUtils::dateTimeToString($this->$date) : null;
         }
 
-        // Serialize important private JIT values
-        $return['components'] = parent::parseObject($this->getComponents());
+        // Serialize important Lazy-loaded values
         $return['rotating_grader_sections'] = parent::parseObject($this->getRotatingGraderSections());
 
         return $return;
@@ -234,7 +233,7 @@ class Gradeable extends AbstractModel {
                 return $component;
             }
         }
-        return null;
+        throw new \InvalidArgumentException('Component id did not exist in gradeable');
     }
 
     /**

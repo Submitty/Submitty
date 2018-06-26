@@ -103,10 +103,11 @@ class Component extends AbstractModel {
                 return $mark;
             }
         }
-        return null;
+        throw new \InvalidArgumentException('Component did not contain provided mark id');
     }
 
     /* Overridden setters with validation */
+
     /**
      * Sets the component's gradeable
      * @param Gradeable $gradeable A non-null gradeable
