@@ -57,30 +57,24 @@ class TestSimpleGrader(BaseTestCase):
     Writing tests this way means that all that need be done is to write templates for the different kinds of tests, and then all can be run from that
     """
 
-    def test_rotating_registration_header_text(self):
-        def template_func():
-            for tbody_elem in self.driver.find_elements_by_xpath("//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
-                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info persist-header']/td[1]")
-                self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
-
-        reg_func = self.insert_kwargs(template_func, expected_text="Students Enrolled in Registration Section")
-        rot_func = self.insert_kwargs(template_func, expected_text="Students Assigned to Rotating Section")
-        self.run_tests(reg_func, reg_func, rot_func, rot_func)
-
-    def test_header_ordering(self):
+    # tests that the headers are correct for rotating and registration gradeables, as well as the ordering
+    def test_header_text(self):
         def template_func():
             prev_section_num = None
             for tbody_elem in self.driver.find_elements_by_xpath("//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
                 td_elem = tbody_elem.find_element_by_xpath("tr[@class='info persist-header']/td[1]")
-                preceding_removed = td_elem.text.strip()[len(preceding_text)+1:]
+                # check that the header text is correct
+                self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
+                preceding_removed = td_elem.text.strip()[len(expected_text)+1:]
                 if preceding_removed != "":
                     section_num = int(preceding_removed)
                     if prev_section_num is not None:
+                        # check that the ordering is correct
                         self.assertTrue(prev_section_num < section_num)
                 prev_section_num = section_num
 
-        reg_func = self.insert_kwargs(template_func, preceding_text="Students Enrolled in Registration Section")
-        rot_func = self.insert_kwargs(template_func, preceding_text="Students Assigned to Rotating Section")
+        reg_func = self.insert_kwargs(template_func, expected_text="Students Enrolled in Registration Section")
+        rot_func = self.insert_kwargs(template_func, expected_text="Students Assigned to Rotating Section")
         self.run_tests(reg_func, reg_func, rot_func, rot_func)
 
 

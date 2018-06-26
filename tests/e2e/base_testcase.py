@@ -100,7 +100,6 @@ class BaseTestCase(unittest.TestCase):
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
     def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
         self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[@name='{}_button']".format(gradeable_category, gradeable_id, button_name)).click()
-        # self.driver.find_element_by_css_selector("#{}_tbody #{} [name={}_button]".format(gradeable_category, gradeable_id, button_name)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
     # clicks the navigation header text to 'go back' pages
