@@ -1160,7 +1160,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 // Transpose the users/states array from Structure of Arrays to Array of Structures
                 $users_aos = [];
                 for ($j = 0; $j < count($users_soa['user']); ++$j) {
-                    $users[$j] = [
+                    $users_aos[$j] = [
                         'user_id' => $users_soa['user'][$j],
                         'state' => $users_soa['state'][$j]
                     ];
