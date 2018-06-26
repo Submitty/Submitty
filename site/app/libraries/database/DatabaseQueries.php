@@ -2412,6 +2412,11 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));
     }
 
+    /**
+     * Gets a single Gradeable instance by id
+     * @param string $id The gradeable's id
+     * @return \app\models\gradeable\Gradeable
+     */
     public function getGradeableConfig($id) {
         foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
             return $gradeable;
