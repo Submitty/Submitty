@@ -932,26 +932,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
-     * Converts the result of array_to_string(*, ',') into a php
-     *  array using the provided conversion function
-     * @param string|mixed $str string array of values, or single value from database
-     * @param callback $parser A method to parse a string representation of the object (i.e. 'intval')
-     * @return array A php-array representation of the provided array string
-     */
-    private static function parseShallowCommaSeparatedArrayString($str, $parser) {
-        if(gettype($str) === 'string') {
-            // i.e. "3,4,5,6" => [3,4,5,6]
-            return array_map(
-                    function($elem) use($parser) { return $parser($elem); },
-                    explode(',', trim($str, '"'))
-                );
-        } else {
-            // i.e. 4 => [4]
-            return [$str];
-        }
-    }
-
-    /**
      * Gets all GradedGradeable's associated with a Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: if the gradeable is a team gradeable, use the $teams parameter,
@@ -1090,7 +1070,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM gradeable_component_data in_gcd
                   LEFT JOIN (
                     SELECT
-                      array_to_string(array_agg(gcm_id), ',') AS string_mark_id,
+                      array_to_json(array_agg(gcm_id)) AS string_mark_id,
                       gc_id,
                       gd_id
                     FROM gradeable_component_mark_data
@@ -1103,7 +1083,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     FROM users u
                     LEFT JOIN (
                       SELECT
-                        array_to_string(array_agg(sections_registration_id), ',', '*') as grading_registration_sections,
+                        array_to_json(array_agg(sections_registration_id)) as grading_registration_sections,
                         user_id
                       FROM grading_registration
                       GROUP BY user_id
@@ -1258,11 +1238,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
                 // If the registration section is not-null, then convert the sections into an array
                 if(isset($user_array['grading_registration_sections'])) {
-                    $user_array['grading_registration_sections'] = self::parseShallowCommaSeparatedArrayString($user_array['grading_registration_sections'],
-                        function ($value) {
-                            return intval($value);
-                        }
-                    );
+                    $user_array['grading_registration_sections'] = json_decode($user_array['grading_registration_sections']);
                 }
 
                 // Create the grader user
@@ -1273,7 +1249,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $graded_gradeable,
                     $grader,
                     $db_row_split['comp_id'][$i],
-                    explode(',', $db_row_split['mark_id'][$i]),
+                    json_decode($db_row_split['mark_id'][$i]) ?? [],
                     $comp_array);
             }
 
@@ -1376,11 +1352,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   array_agg(gc_is_peer) AS array_peer,
                   array_agg(gc_order) AS array_order,
                   array_agg(gc_page) AS array_page,
-                  array_agg(array_to_string(gcm.array_id, ',')) AS array_mark_id,
-                  array_agg(array_to_string(gcm.array_points, ',')) AS array_mark_points,
-                  array_agg(array_to_string(gcm.array_title, ',')) AS array_mark_title,
-                  array_agg(array_to_string(gcm.array_publish, ',')) AS array_mark_publish,
-                  array_agg(array_to_string(gcm.array_order, ',')) AS array_mark_order
+                  array_agg(array_to_json(gcm.array_id)) AS array_mark_id,
+                  array_agg(array_to_json(gcm.array_points)) AS array_mark_points,
+                  array_agg(array_to_json(gcm.array_title)) AS array_mark_title,
+                  array_agg(array_to_json(gcm.array_publish)) AS array_mark_publish,
+                  array_agg(array_to_json(gcm.array_order)) AS array_mark_order
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
@@ -1438,31 +1414,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $unpacked_component_data[$property] = $this->course_db->fromDatabaseToPHPArray($row['array_' . $property]);
             }
 
-            // Basic parser functions
-            $intval = function ($value) {
-                return intval($value);
-            };
-            $floatval = function ($value) {
-                return floatval($value);
-            };
-            $identity = function ($value) {
-                return $value;
-            };
-            $boolval = function ($value) {
-                return $value === 't';
-            };
-
             // Specially parse the 'text' field for components since the abstract model doesn't
             //  parse "t" as `true` in the magic setters
-            $unpacked_component_data['text'] = array_map($boolval, $unpacked_component_data['text']);
+            $unpacked_component_data['text'] = array_map(function ($value) {
+                return $value === 't';
+            }, $unpacked_component_data['text']);
 
             // Create the components
             $components = [];
-            for($i = 0; $i < count($unpacked_component_data['id']); ++$i) {
+            for ($i = 0; $i < count($unpacked_component_data['id']); ++$i) {
 
                 // Transpose a single component at a time
                 $component_data = [];
-                foreach($component_properties as $property) {
+                foreach ($component_properties as $property) {
                     $component_data[$property] = $unpacked_component_data[$property][$i];
                 }
 
@@ -1470,16 +1434,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $component = new Component($this->core, $gradeable, $component_data);
 
                 // Unpack the mark data
-                if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $unpacked_mark_data = [];
-                    $unpacked_mark_data['id'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_id'][$i], $intval);
-                    $unpacked_mark_data['points'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_points'][$i], $floatval);
-                    $unpacked_mark_data['title'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_title'][$i], $identity);
-                    $unpacked_mark_data['publish'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_publish'][$i], $boolval);
-                    $unpacked_mark_data['order'] = self::parseShallowCommaSeparatedArrayString($unpacked_component_data['mark_order'][$i], $intval);
+                    $unpacked_mark_data['id'] = json_decode($unpacked_component_data['mark_id'][$i]);
+                    $unpacked_mark_data['points'] = json_decode($unpacked_component_data['mark_points'][$i]);
+                    $unpacked_mark_data['title'] = json_decode($unpacked_component_data['mark_title'][$i]);
+                    $unpacked_mark_data['publish'] = json_decode($unpacked_component_data['mark_publish'][$i]);
+                    $unpacked_mark_data['order'] = json_decode($unpacked_component_data['mark_order'][$i]);
 
                     // If there are no marks, there will be a single 'null' element in the unpacked arrays
-                    if($unpacked_mark_data['id'][0] !== null) {
+                    if ($unpacked_mark_data['id'][0] !== null) {
                         // Create the marks
                         $marks = [];
                         for ($j = 0; $j < count($unpacked_mark_data['id']); ++$j) {
