@@ -525,7 +525,7 @@ fi
 #####################################
 # Build & Install Lichen Modules
 
-/bin/bash ${lichen_repo_dir}/install_lichen.sh
+/bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
 
 
 ################################################################################################################

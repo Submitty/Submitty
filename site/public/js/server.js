@@ -129,6 +129,13 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
 
+function extensionPopup(json){
+    $('.popup-form').css('display', 'none');
+    var form = $('#more_extension_popup');
+    form[0].outerHTML = json['popup'];
+    $('#more_extension_popup').css('display', 'block');
+}
+
 function newDownloadForm() {
     $('.popup-form').css('display', 'none');
     var form = $('#download-form');
@@ -1719,6 +1726,11 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function alterShowDeletedStatus(newStatus) {
+    document.cookie = "show_deleted=" + newStatus + "; path=/;";
+    location.reload();
+}
+
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1729,7 +1741,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
             data: {
                 thread_categories: categories_value,
                 currentThreadId: currentThreadId,
-                currentCategoriesId: currentCategoriesId
+                currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
                var x = JSON.parse(r).html;
@@ -2146,6 +2158,10 @@ function updateHomeworkExtensions(data) {
             if(json['error']){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 $('#messages').append(message);
+                return;
+            }
+            if(json['is_team']){
+                extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
