@@ -62,17 +62,6 @@
 </div>
 {% endif %}
 
-{% if has_last_build_output %}
-<div class="content">
-    <h2>Output from most recent BUILD_{{ course }}.sh</h2>
-    <br>
-    <b>{{ build_script_output_file }}</b>
-    <br>
-    <br>
-    <pre>{{ contents }}</pre>
-</div>
-{% endif %}
-
 {% macro display_files(self, files, indent, seen_root, inuse_config) %}
     {% set margin_left = 15 %}
     {% set neg_margin_left = -15 * indent %}

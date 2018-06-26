@@ -4,8 +4,26 @@
     <kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
     <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
     <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
-
-    <input style='width: 83%' type='text' id='config_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" />
+    <fieldset>
+        <input type="radio" id="default_configs" name="eg_config" value="true" checked="true" /> Default configs
+        <input type="radio" id="uploaded_configs" name="eg_config" value="false" /> Uploaded configs
+        <input type="radio" id="private_repository" name="eg_config" value="false" /> Use Private repository
+        <input type="radio" id="provide_full_path" name="eg_config" value="false" /> Provide full path
+        <div id="div_default_configs" style="display: block">
+            <select id="select_default_config" style="width: 250px;">
+                <option value="/usr/local/submitty/more_autograding_examples/upload_only/config">upload_only</option>
+                <option value="/usr/local/submitty/more_autograding_examples/iclicker_upload/config">iclicker_upload</option>
+                <option value="/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config">left_right_exam_seating</option>
+                <option value="/usr/local/submitty/more_autograding_examples/pdf_exam/config">pdf_exam</option>
+                <option value="/usr/local/submitty/more_autograding_examples/test_notes_upload/config">test_notes_upload</option>
+                <option value="/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config">test_notes_upload_3page</option>
+            </select>
+        </div>
+        <br />
+        <div id="div_provide_full_path">
+            <input style='width: 83%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" disabled/>
+        </div>
+    </fieldset>
     <br /> <br />
 
     Should students be able to view submissions?
@@ -68,6 +86,22 @@
         }
     }
 
+    function onConfigChange(){
+        if($('#default_configs').is(':checked')) {
+            $('#input_provide_full_path').prop('disabled', true);
+        } else if($('#uploaded_configs').is(':checked')){
+            $('#input_provide_full_path').prop('disabled', true);
+        } else if($('#private_repository').is(':checked')){
+            $('#input_provide_full_path').prop('disabled', true);
+        } else {
+            $('#input_provide_full_path').prop('disabled', false);
+        }
+    }
+
+    function onConfigPathChange(){
+        $('#input_provide_full_path').val($('#select_default_config').val());
+    }
+
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
@@ -95,5 +129,8 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
+
+        $('[name="eg_config"]').change(onConfigChange);
+        $('#select_default_config').change(onConfigPathChange);
     });
 </script>
