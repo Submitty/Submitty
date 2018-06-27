@@ -1115,37 +1115,34 @@ class ElectronicGraderController extends GradingController {
                 }
             }*/
             // save existing marks
-            foreach ($_POST['marks'] as $post_mark) {
-                if (isset($_POST['num_existing_marks'])) {
-                    if ($index >= $_POST['num_existing_marks']) {
-                        break;
-                    }   
-                }
-                $mark = null;
-                $found = false;
-                foreach ($component->getMarks() as $cmark) {
-                    if ($cmark->getId() == $post_mark['id']) {
-                        $mark = $cmark;
-                        break;
-                        $found = true;
+            if (array_key_exists('marks', $_POST)) {
+                foreach ($_POST['marks'] as $post_mark) {
+                    if (isset($_POST['num_existing_marks'])) {
+                        if ($index >= $_POST['num_existing_marks']) {
+                            break;
+                        }
                     }
-                }
-                if($found = false){
-                    $mark = $cmark;
-                }
-                if($mark!=null){
-                    $mark->setId($post_mark['id']);
-                    $mark->setPoints($post_mark['points']);
-                    $mark->setNote($post_mark['note']);
-                    $mark->setOrder($post_mark['order']);
-                    $mark->setHasMark($post_mark['selected'] == 'true');
-                    $mark->save();
-                    if($all_false === false) {
-                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+                    $mark = null;
+                    foreach ($component->getMarks() as $cmark) {
+                        if ($cmark->getId() == $post_mark['id']) {
+                            $mark = $cmark;
+                            break;
+                        }
                     }
-                    $index++;
-                    if($highID < $post_mark['id']){
-                        $highID = $post_mark['id'];
+                    if ($mark != null) {
+                        $mark->setId($post_mark['id']);
+                        $mark->setPoints($post_mark['points']);
+                        $mark->setNote($post_mark['note']);
+                        $mark->setOrder($post_mark['order']);
+                        $mark->setHasMark($post_mark['selected'] == 'true');
+                        $mark->save();
+                        if ($all_false === false) {
+                            $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+                        }
+                        $index++;
+                        if ($highID < $post_mark['id']) {
+                            $highID = $post_mark['id'];
+                        }
                     }
                 }
             }
@@ -1205,8 +1202,6 @@ class ElectronicGraderController extends GradingController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $note = $_POST['note'];
         $points = $_POST['points'];
-        $component = $_POST['component'];
-        $id=$_POST['component'];
         foreach ($gradeable->getComponents() as $component) {
             if(is_array($component)) {
                 if($component[0]->getId() != $_POST['gradeable_component_id']) {
@@ -1219,19 +1214,18 @@ class ElectronicGraderController extends GradingController {
             $order_counter++;
             $mark = new GradeableComponentMark($this->core);
             $mark->setGcId($component->getId());
-            $mark->setId($id);
             $mark->setPoints($points);
             $mark->setNote($note);
             $mark->setOrder($order_counter);
-            $mark->create();
+            $id = $mark->create();
+
             $marks=$component->getMarks();
             array_push($marks, $mark);
             $component->setMarks($marks);
-            echo("Checking added marks\n");
-            foreach ($component->getMarks() as $post_mark) {
-                echo($post_mark->getNote());
-            }
-            echo("Done checking added marks\n");
+
+            $response = ["id" => $id];
+            $this->core->getOutput()->renderJson($response);
+            return $response;
         }
     }
    public function deleteOneMark() {
