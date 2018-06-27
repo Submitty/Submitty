@@ -2595,8 +2595,15 @@ AND gc_id IN (
      * @param Component $component
      */
     private function updateComponentMarks(Component $component) {
+
+        // sort marks by order
+        $marks = $component->getMarks();
+        usort($marks, function(Mark $a, Mark $b) {
+            return $a->getOrder() - $b->getOrder();
+        });
+
         $order = 0;
-        foreach ($component->getMarks() as $mark) {
+        foreach ($marks as $mark) {
             // rectify mark order
             if($mark->getOrder() !== $order) {
                 $mark->setOrder($order);
@@ -2764,9 +2771,15 @@ AND gc_id IN (
      */
     private function updateGradeableComponents(\app\models\gradeable\Gradeable $gradeable) {
 
+        // sort components by order
+        $components = $gradeable->getComponents();
+        usort($components, function(Component $a, Component $b) {
+            return $a->getOrder() - $b->getOrder();
+        });
+
         // iterate through components and see if any need updating/creating
         $order = 0;
-        foreach ($gradeable->getComponents() as $component) {
+        foreach ($components as $component) {
             // Rectify component order
             if ($component->getOrder() !== $order) {
                 $component->setOrder($order);

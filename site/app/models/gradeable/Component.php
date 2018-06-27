@@ -220,12 +220,7 @@ class Component extends AbstractModel {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
-        $this->marks = $marks;
-
-        // sort by order
-        usort($this->marks, function(Mark $a, Mark $b) {
-            return $a->getOrder() - $b->getOrder();
-        });
+        $this->marks = array_values($marks);
     }
 
     /**

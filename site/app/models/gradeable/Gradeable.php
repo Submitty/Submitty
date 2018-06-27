@@ -603,12 +603,7 @@ class Gradeable extends AbstractModel {
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
-        $this->components = $components;
-
-        // sort by order
-        usort($this->components, function(Component $a, Component $b) {
-            return $a->getOrder() - $b->getOrder();
-        });
+        $this->components = array_values($components);
     }
 
     /**
