@@ -1,0 +1,6 @@
+<div class="content">
+    {% if gradeable.isTeamAssignment() and gradeable.getTeam() != null %}
+        <h3>Team: {{ gradeable.getTeam().getMemberList() }}</h3><br />
+    {% endif %}
+    <span style="font-style: italic">No submissions for this assignment.</span>
+</div>
