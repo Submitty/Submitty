@@ -1,4 +1,3 @@
-{% import _self as self %}
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
@@ -6,20 +5,10 @@
     <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
     <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
     <fieldset>
-
-        {% set default_paths = ["/usr/local/submitty/more_autograding_examples/upload_only/config",
-            "/usr/local/submitty/more_autograding_examples/iclicker_upload/config",
-            "/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config",
-            "/usr/local/submitty/more_autograding_examples/pdf_exam/config",
-            "/usr/local/submitty/more_autograding_examples/test_notes_upload/config",
-            "/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config"] %}
-
-
-
-        <input type="radio" id="default_configs" class="eg_config" value="true" {{ self.rightButton(default_paths, admin_gradeable.getEgConfigPath()) }} /> Default configs
-        <input type="radio" id="uploaded_configs" class="eg_config" value="false" {{ self.rightButton(all_uploaded_paths, admin_gradeable.getEgConfigPath()) }} /> Uploaded configs
+        <input type="radio" id="default_configs" class="eg_config" value="true" {% if which_option == 0 %} checked = "true" {% endif %}/> Default configs
+        <input type="radio" id="uploaded_configs" class="eg_config" value="false" {% if which_option == 1 %} checked = "true" {% endif %} /> Uploaded configs
         <input type="radio" id="private_repository" class="eg_config" value="false" /> Use Private repository
-        <input type="radio" id="provide_full_path" class="eg_config" value="false" {{ self.rightButton("use_full_path", admin_gradeable.getEgConfigPath()) }}/> Provide full path
+        <input type="radio" id="provide_full_path" class="eg_config" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: block">
             <select id="select_default_config" style="width: 700px;">
                 {% for path in default_paths %}
@@ -75,20 +64,6 @@
     </fieldset>
 </div>
 
-{% macro rightButton(paths, target_path, has_found) %}
-    {% if has_found == "true" %}
-
-    {% else %}
-        {% set found = false %}
-        {% for path in paths if not found %}
-            {% if path == target_path %}
-                checked = "true"
-                {% set found = true %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-{% endmacro %}
-
 <script type="text/javascript">
     var blankQuestion =
         {
@@ -121,6 +96,7 @@
             $('#div_default_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
         } else if($('#uploaded_configs').is(':checked')){
+            onConfigPathChange();
             $('.div_select_config').hide();
             $('#div_uploaded_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
