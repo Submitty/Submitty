@@ -34,7 +34,6 @@ import sys
 import configparser
 import csv
 import pdb
-import _pickle as cPickle #TODO: Remove this when done debugging, Buster
 
 from submitty_utils import dateutils
 
@@ -93,7 +92,6 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-    #XXX may need to sort course_file glob and user_file glob
     for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
@@ -117,29 +115,24 @@ def main():
             for key in courses.keys():
                 courses[key].users.append(user)
 
-    #dbg_log_suffix = "_{:%m%d%Y_%H%M%S}.pck".format(datetime.now())
-    #cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/preset_users_dump'+dbg_log_suffix,'wb'))
     # To make Rainbow Grades testing possible, need to seed random to have the same users each time
     random.seed(10090542)
 
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
     extra_students = 0
-    #for course_id in courses:
-    for course_id in sorted(courses.keys()):        
+    for course_id in sorted(courses.keys()):
         course = courses[course_id]
         tmp = course.registered_students + course.unregistered_students + \
               course.no_rotating_students + \
               course.no_registration_students
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
-    #cPickle.dump(users,open('/usr/local/submitty/GIT_CHECKOUT/Submitty/extra_students_users_dump'+dbg_log_suffix,'wb'))
 
     submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
-    #for user_id, user in users.items():
     for user_id in sorted(users.keys()):
         user = users[user_id]
         submitty_conn.execute(user_table.insert(),
@@ -155,8 +148,6 @@ def main():
     extra_students.sort(key=lambda x: x.id)
 
     for user in extra_students:
-    #for user_id in sorted(extra_students.keys()):
-    #    user = extra_students[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
                               user_password=get_php_db_password(user.password),
@@ -636,14 +627,13 @@ class Course(object):
             self.make_customization = course['make_customization']
 
     def create(self):
-        # Sort users to try and determinize?
+        # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
         self.gradeables.sort(key=lambda x: x.id)
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, 'utf-8'))
-        print("{} using seed {}".format(self.code,int(m.hexdigest(), 16)))
         random.seed(int(m.hexdigest(), 16))
 
         course_group = self.code + "_tas_www"
@@ -695,7 +685,7 @@ class Course(object):
         reg_table = Table("grading_registration", metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
-            print("[{}] {} Creating user {} {} ({})...".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S%z"),self.code, user.get_detail(self.code, "firstname"),
+            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
                                                        user.get_detail(self.code, "lastname"),
                                                        user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
@@ -913,7 +903,6 @@ class Course(object):
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
                             if isinstance(gradeable.submissions, dict):
-                                #for key in gradeable.submissions:
                                 for key in sorted(gradeable.submissions.keys()):
                                     os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                     submission = random.choice(gradeable.submissions[key])
@@ -1282,7 +1271,6 @@ class Gradeable(object):
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.id, 'utf-8'))
-        print("{} using seed {}".format(self.id,int(m.hexdigest(), 16)))
         random.seed(int(m.hexdigest(), 16))
 
         if 'g_bucket' in gradeable:
