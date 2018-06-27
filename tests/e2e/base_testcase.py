@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 
 # noinspection PyPep8Naming
@@ -94,7 +95,7 @@ class BaseTestCase(unittest.TestCase):
 
     def click_class(self, course, course_name):
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))        
+        WebDriverWait(self.driver, 10).until(EC.title_is(course_name))
 
     # see Navigation.twig for css selectors
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
@@ -108,8 +109,19 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
-
-    
+    # script taken from https://stackoverflow.com/a/11203629
+    def input_files(self, file_paths=[], target_id="upload1", drag_and_drop=False):
+        if drag_and_drop:
+            # create an input element of type files
+            self.driver.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file', multiple:'', style: 'display: none'}).appendTo('body');")
+            upload_element = self.driver.find_element_by_id("seleniumUpload")
+        else:
+            upload_element = self.driver.find_element_by_id(target_id).find_element_by_xpath("//input[@type='file']")
+        # send all the files to the element as args
+        upload_element.send_keys("\n".join(file_paths))
+        if drag_and_drop:
+            # simulate the drop event for the files
+            self.driver.execute_script("e = document.createEvent('HTMLEvents'); e.initEvent('drop', true, true); e.dataTransfer = {{files: seleniumUpload.get(0).files }}; document.getElementById('{}').dispatchEvent(e);".format(target_id))
 
     @staticmethod
     def wait_user_input():
