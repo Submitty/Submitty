@@ -14,25 +14,6 @@ Will this assignment have peer grading?
 </fieldset>
 <br />-->
 
-Is this a PDF with a page assigned to each component?
-<fieldset>
-    <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
-            {{ admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_pdf_page" name="eg_pdf_page" value="false"
-            {{ not admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> No
-
-    <br />
-
-    <div id="pdf_page">
-        <br />
-        Who will assign pages to components?
-        <input type="radio" id="no_pdf_page_student" name="eg_pdf_page_student" value="false"
-                {{ not admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Instructor
-        <input type="radio" id="yes_pdf_page_student" name="eg_pdf_page_student" value="true"
-                {{ admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Student
-    </div>
-</fieldset>
-
 Point precision:
 <input style='width: 50px' type='text' id="point_precision_id" name='eg_precision' onchange="fixPointPrecision(this);" value="{{ admin_gradeable.getEgPrecision() }}" class="float_val" />
 <br/>
@@ -40,6 +21,25 @@ Point precision:
 <div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br /><br />
 
+<div class="electronic_file" id="gradeable_rubric">
+    Is this a PDF with a page assigned to each component?
+    <fieldset>
+        <input type="radio" id="yes_pdf_page" name="eg_pdf_page" value="true"
+                {{ admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> Yes
+        <input type="radio" id="no_pdf_page" name="eg_pdf_page" value="false"
+                {{ not admin_gradeable.getEgPdfPage() ? 'checked' : '' }} /> No
+
+        <br />
+
+        <div id="pdf_page">
+            <br />
+            Who will assign pages to components?
+            <input type="radio" id="no_pdf_page_student" name="eg_pdf_page_student" value="false"
+                    {{ not admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Instructor
+            <input type="radio" id="yes_pdf_page_student" name="eg_pdf_page_student" value="true"
+                    {{ admin_gradeable.getEgPdfPageStudent() ? 'checked' : '' }} /> Student
+        </div>
+    </fieldset>
 <table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
     <thead style="background: #E1E1E1;">
     <tr>
@@ -117,7 +117,7 @@ Point precision:
                 <input type="radio" id="id_grade_by_down-{{ num }}" name="grade_by-{{ num }}" value="count_down" data-question_num="{{ num }}" onclick="onDeduction(this);" {{ not grade_up ? 'checked' : '' }}> Grade by count down
                 <br>
 
-                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getPdfStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
+                <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not admin_gradeable.getEgPdfPage() or admin_gradeable.getEgPdfPageStudent() ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
 
                 <!--
                 <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not admin_gradeable.getEgPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
@@ -149,6 +149,7 @@ Point precision:
     </tr>
     </tbody>
 </table>
+</div>
 <div style="float: right;"><input type="button" class="btn btn-primary" id="save_button" value="Save" onclick="saveRubric()"></div>
 <br/>
 
@@ -157,42 +158,30 @@ Point precision:
 
     $(document).ready(function() {
         $('input:radio[name="eg_pdf_page"]').change(function () {
-            $("input[name^='page_component']").each(function () {
-                if (this.value < 0) {
-                    this.value = 0;
-                }
-            });
-            $('.pdf_page_input').hide();
-            $('#pdf_page').hide();
-            if ($(this).is(':checked')) {
-                if ($(this).val() == 'true') {
-                    $("input[name^='page_component']").each(function () {
-                        if (this.value < 1) {
-                            this.value = 1;
-                        }
-                    });
-                    $('.pdf_page_input').show();
-                    $('#pdf_page').show();
-                }
+            if ($(this).val() === 'true') {
+                $('.pdf_page_input').show();
+                $('#pdf_page').show();
+                $('input[name^=page_component]').each(function () {
+                    if(this.value < 1) {
+                        this.value = 1;
+                    }
+                });
+            } else {
+                $('.pdf_page_input').hide();
+                $('#pdf_page').hide();
             }
         });
 
         $('input:radio[name="eg_pdf_page_student"]').change(function () {
-            $("input[name^='page_component']").each(function () {
-                if (this.value < -1) {
-                    this.value = -1;
-                }
-            });
-            $('.pdf_page_input').hide();
-            if ($(this).is(':checked')) {
-                if ($(this).val() == 'false') {
-                    $("input[name^='page_component']").each(function () {
-                        if (this.value < 1) {
-                            this.value = 1;
-                        }
-                    });
-                    $('.pdf_page_input').show();
-                }
+            if ($(this).val() == 'false') {
+                $('.pdf_page_input').show();
+                $('input[name^=page_component]').each(function () {
+                    if(this.value < 1) {
+                        this.value = 1;
+                    }
+                });
+            } else {
+                $('.pdf_page_input').hide();
             }
         });
     });
