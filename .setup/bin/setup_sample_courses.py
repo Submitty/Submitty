@@ -63,9 +63,6 @@ DB_ONLY = False
 
 NOW = dateutils.get_current_time()
 
-dbg_log_suffix = "_{:%m%d%Y_%H%M%S}.log".format(datetime.now())
-logfile = open('/usr/local/submitty/GIT_CHECKOUT/Submitty/setup_sample_'+dbg_log_suffix,'w')
-
 
 def main():
     """
@@ -227,7 +224,6 @@ def main():
 
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
-    logfile.close()
 
 def generate_random_user_id(length=15):
     return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
@@ -244,10 +240,7 @@ def generate_random_ta_comment():
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
         return original_value
-
-    r = random.random()
-    logfile.write("generate_versions_to_submit: {}\n".format(r))
-    if r < 0.3:
+    if random.random() < 0.3:
         return generate_versions_to_submit(num-1, original_value)
     else:
         return original_value-(num-1)
@@ -272,9 +265,7 @@ def generate_random_users(total, real_users):
     anon_ids = []
     with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
         for i in range(total):
-            r = random.random()
-            logfile.write("generate_random_users: {}\n".format(r))
-            if r < 0.5:
+            if random.random() < 0.5:
                 first_name = random.choice(male_names)
             else:
                 first_name = random.choice(women_names)
@@ -883,12 +874,9 @@ class Course(object):
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
-                    r1 = random.random()
-                    r2 = random.random()
-                    logfile.write("Add submission compound if {} {} ({},{})\n".format(user.id,gradeable.id,r1,r2))
                     if (gradeable.gradeable_config is not None and
-                       (gradeable.submission_due_date < NOW or r1 < 0.5)
-                       and (r2 < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+                       (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                       and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
                         # only create these directories if we're actually going to put something in them
                         if not os.path.exists(gradeable_path):
                             os.makedirs(gradeable_path)
@@ -896,17 +884,13 @@ class Course(object):
                         if not os.path.exists(submission_path):
                             os.makedirs(submission_path)
                         active_version = random.choice(range(1, versions_to_submit+1))
-                        logfile.write("Active Version choice {} {} ({})\n".format(user.id,gradeable.id,active_version))
                         if team_id is not None:
                             json_history = {"active_version": active_version, "history": [], "team_history": []}
                         else:
                             json_history = {"active_version": active_version, "history": []}
                         random_days = 1
-                        r = random.random()
-                        logfile.write("Random Days if {} {} ({})\n".format(user.id,gradeable.id,r))
-                        if r < 0.3:
+                        if random.random() < 0.3:
                             random_days = random.choice(range(-3,2))
-                            logfile.write("Random Days val {} {} ({})\n".format(user.id,gradeable.id,random_days))
                         for version in range(1, versions_to_submit+1):
                             os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                             submitted = True
@@ -933,13 +917,11 @@ class Course(object):
                                 for key in sorted(gradeable.submissions.keys()):
                                     os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                     submission = random.choice(gradeable.submissions[key])
-                                    logfile.write("Submission choice {} {} ({})\n".format(user.id,gradeable.id,submission))
                                     src = os.path.join(gradeable.sample_path, submission)
                                     dst = os.path.join(submission_path, str(version), key)
                                     create_gradeable_submission(src, dst)
                             else:
                                 submission = random.choice(gradeable.submissions)
-                                logfile.write("Submission choice {} {} ({})\n".format(user.id,gradeable.id,submission))
                                 if isinstance(submission, list):
                                     submissions = submission
                                 else:
@@ -953,9 +935,7 @@ class Course(object):
                         with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
                 if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
-                    r = random.random()
-                    logfile.write("Grading if {} {} ({})\n".format(user.id,gradeable.id,r))
-                    if gradeable.grade_released_date < NOW or (r < 0.5 and (submitted or gradeable.type !=0)):
+                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         values = {'g_id': gradeable.id, 'gd_overall_comment': 'lorem ipsum lodar'}
@@ -963,44 +943,28 @@ class Course(object):
                             values['gd_team_id'] = team_id
                         else:
                             values['gd_user_id'] = user.id
-
-                        r = random.random()
-                        logfile.write("Grading date if {} {} ({})\n".format(user.id,gradeable.id,r))
-                        if gradeable.grade_released_date < NOW and r < 0.5:
+                        if gradeable.grade_released_date < NOW and random.random() < 0.5:
                             values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                         ins = gradeable_data.insert().values(**values)
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             skip_grading = random.random()
-                            logfile.write("Skip grading {} {} ({})\n".format(user.id,gradeable.id,skip_grading))
-                            if isinstance(gradeable.components,dict):
-                                print("Gradeable {} has component dictionary".format(gradeable.id))
-                                sys.exit(-1)
                             for component in gradeable.components:
-                                r = random.random()
-                                logfile.write("Unfinished Component choice {} {} ({})\n".format(user.id,gradeable.id,r))
-                                if r < 0.01 and skip_grading < 0.3:
+                                if random.random() < 0.01 and skip_grading < 0.3:
                                     #This is used to simulate unfinished grading.
                                     # pdb.set_trace()
                                     break
-
-                                r = random.random()
-                                logfile.write("Zero score {} {} ({})\n".format(user.id,gradeable.id,r))
-                                if status == 0 or r < 0.4:
+                                if status == 0 or random.random() < 0.4:
                                     score = 0
                                 else:
-                                    r1 = random.random()
-                                    r2 = random.random()
-                                    r3 = random.random()
-                                    logfile.write("Score choices {} {} ({},{},{})\n".format(user.id,gradeable.id,r1,r2,r3))
                                     score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
-                                    if r1 < 0.1:
+                                    if random.random() < 0.1:
                                         score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
-                                    if r2 < 0.1:
+                                    if random.random() < 0.1:
                                         #custom mark takes away points
                                         score = -score
-                                    if r3 < 0.01: 
+                                    if random.random() < 0.01: 
                                         #Just for some weird number example
                                         score = -99999
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -1010,10 +974,7 @@ class Course(object):
                                 first = True
                                 first_set = False
                                 for mark in component.marks:
-                                    r1 = random.random()
-                                    r2 = random.random()
-                                    logfile.write("Mark compound if {} {} ({},{})\n".format(user.id,gradeable.id,r1,r2))
-                                    if (r1 < 0.5 and first_set == False and first == False) or r2 < 0.2:
+                                    if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
                                         conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
                                         if(first):
                                             first_set = True
@@ -1371,7 +1332,6 @@ class Gradeable(object):
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             else:
                 self.late_days = random.choice(range(0, 3))
-                logfile.write("Gradeable self latedays {} ({})\n".format(self.id,self.late_days))
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if 'eg_team_assignment' in gradeable:
