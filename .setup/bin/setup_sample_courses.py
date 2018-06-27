@@ -92,7 +92,7 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-    for course_file in glob.iglob(os.path.join(args.courses_path, '*.yml')):
+    for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
@@ -100,7 +100,7 @@ def main():
 
     create_group("course_builders")
 
-    for user_file in glob.iglob(os.path.join(args.users_path, '*.yml')):
+    for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
         if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
@@ -121,7 +121,7 @@ def main():
     # we get the max number of extra students, and then create a list that holds all of them,
     # which we then randomly choose from to add to a course
     extra_students = 0
-    for course_id in courses:
+    for course_id in sorted(courses.keys()):
         course = courses[course_id]
         tmp = course.registered_students + course.unregistered_students + \
               course.no_rotating_students + \
@@ -133,7 +133,8 @@ def main():
     submitty_conn = submitty_engine.connect()
     submitty_metadata = MetaData(bind=submitty_engine)
     user_table = Table('users', submitty_metadata, autoload=True)
-    for user_id, user in users.items():
+    for user_id in sorted(users.keys()):
+        user = users[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
                               user_password=get_php_db_password(user.password),
@@ -142,6 +143,9 @@ def main():
                               user_lastname=user.lastname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
+
+    #Sort alphabetically extra students. Shouldn't affect randomness....
+    extra_students.sort(key=lambda x: x.id)
 
     for user in extra_students:
         submitty_conn.execute(user_table.insert(),
@@ -166,7 +170,7 @@ def main():
             courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
-    for course_id in courses.keys():
+    for course_id in sorted(courses.keys()):
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
@@ -195,7 +199,7 @@ def main():
             course.users.append(students[key])
             key += 1
 
-    for course in courses.keys():
+    for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)
         courses[course].create()
@@ -622,6 +626,9 @@ class Course(object):
             self.make_customization = course['make_customization']
 
     def create(self):
+        # Sort users and gradeables in the name of determinism
+        self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
+        self.gradeables.sort(key=lambda x: x.id)
 
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
@@ -902,6 +909,7 @@ class Course(object):
 
                             with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                 open_file.write(current_time_string + "\n")
+
                             if user.id in gradeable.plagiarized_user:
                                 #If the user is in the plagirized folder, then only add those submissions
                                 src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
@@ -910,7 +918,7 @@ class Course(object):
                                 create_gradeable_submission(src, dst)
                             else:
                                 if isinstance(gradeable.submissions, dict):
-                                    for key in gradeable.submissions:
+                                    for key in sorted(gradeable.submissions.keys()):
                                         os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                         submission = random.choice(gradeable.submissions[key])
                                         src = os.path.join(gradeable.sample_path, submission)
@@ -1307,6 +1315,11 @@ class Gradeable(object):
             self.type = int(gradeable['g_type'])
             self.config_path = None
             self.sample_path = None
+
+        # To make Rainbow Grades testing possible, need to seed random
+        m = hashlib.md5()
+        m.update(bytes(self.id, 'utf-8'))
+        random.seed(int(m.hexdigest(), 16))
 
         if 'g_bucket' in gradeable:
             self.syllabus_bucket = gradeable['g_bucket']
