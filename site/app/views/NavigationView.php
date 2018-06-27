@@ -99,7 +99,7 @@ class NavigationView extends AbstractView {
             ]);
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
-                "title" => "Upload Config & Review Build Output",
+                "title" => "Upload Config",
                 "class" => "btn btn-primary"
             ]);
 
