@@ -1163,9 +1163,7 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-
         $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-
         $this->core->getOutput()->renderJson($return);
         return $return;
     }
@@ -1291,11 +1289,41 @@ class SubmissionController extends AbstractController {
         return array('error' => false, 'version' => $new_version, 'message' => $msg);
     }
 
+    private function delete_files($dir) {
+        foreach(glob($dir . '/*') as $file) {
+            if(is_dir($file)) delete_files($file); else unlink($file);
+        }
+        rmdir($dir);
+    }
+
+	// This copy all files from given dir ($src) and its subdirs into one destination folder, $dst
+	private function recursive_copy($src, $dst) {
+ 		$dir = opendir($src);
+        while(false !== ( $file = readdir($dir)) ) {
+            if (( $file != '.' ) && ( $file != '..' ) && ( $file != '__MACOSX' )) {
+                if ( is_dir($src . '/' . $file) ) {
+                    $this->recursive_copy($src . '/' . $file, $dst);
+                }
+                else {
+                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                    if ($extension === 'png') // just get all png file only
+                        copy($src . '/' . $file,$dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
+
     private function ajaxUploadImagesFiles() {
-        // if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-        //     return $this->uploadResult("Invalid CSRF token.", false);
-        // }
-        
+        if (empty($_POST)) {
+           $max_size = ini_get('post_max_size');
+           return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+        }
+
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return $this->uploadResult("Invalid CSRF token.", false);
+        }
+
         $uploaded_files = array();
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
@@ -1323,6 +1351,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("No files to be submitted.", false);
         }
 
+        $file_size = 0;
         if (isset($uploaded_files[1])) {
             $uploaded_files[1]["is_zip"] = array();
             for ($j = 0; $j < $count_item; $j++) {
@@ -1343,24 +1372,32 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        // if ($file_size > $max_size) {
-        //     return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
-        // }
+        $max_size = 10485760;
+        if ($file_size > $max_size) {
+            return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+        }
 
         // creating uploads/student_images directory
 
         $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
         if (!FileUtils::createDir($upload_img_path)) {
-            //return $this->uploadResult("Failed to make gradeable path.", false);
-            return $this->uploadResult($upload_img_path, false);
+            return $this->uploadResult("Failed to make image path.", false);
         }
+
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
                 if ($uploaded_files[1]["is_zip"][$j] === true) {
                     $zip = new \ZipArchive();
                     $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
                     if ($res === true) {
-                        $zip->extractTo($upload_img_path);
+                        //make tmp folder to store class section images
+                        $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
+                        $zip->extractTo($upload_img_path_tmp);
+
+                        $this->recursive_copy($upload_img_path_tmp, $upload_img_path);
+
+                        //delete tmp folder
+                        FileUtils::recursiveRmdir($upload_img_path_tmp);
                         $zip->close();
                     }
                     else {
@@ -1376,8 +1413,7 @@ class SubmissionController extends AbstractController {
                     if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            //return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current submission.", false);
-                            return $this->uploadResult($uploaded_files[1]["tmp_name"][$j], false);
+                            return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
                         }
                     }
                     else {
@@ -1392,7 +1428,7 @@ class SubmissionController extends AbstractController {
         }
 
 
-        return $this->uploadResult($uploaded_files[1]["name"][1], true);
+        return $this->uploadResult("Successfully uploaded!", true);
 
     }
     /**

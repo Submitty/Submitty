@@ -4,8 +4,10 @@
     <p>&emsp;</p>
     <p>
         Follow the instructions to download images of students on:<br>
-        <a href="http://submitty.org/instructor/image_scraper">Photo Scraper</a><br><br>
-        Zip up the each folder containing the images and upload the file(s).<br>
+        <a href="http://submitty.org/instructor/photo_scraper">Photo Scraper</a><br><br>
+        Upload images by zipping up multiple course sections together,<br>
+        zipping up each course section, or uploading the png image(s).<br><br>
+        Total files cannot exceed 10 mb or 10240 kb.<br>
     </p>
     <br/>
 
@@ -15,7 +17,7 @@
       <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
         <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
           <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
-          <input type="file" name="files" id="input_file1" style="display: none" onchange="addFilesFromInput(1)" multiple />
+          <input type="file" name="files" id="input_file1" style="display: none" onchange="addFilesFromInput(1,false)" multiple />
         </div>
       </div>
       <div style="float: right; width: auto">
@@ -25,9 +27,7 @@
     </form>
     <script type="text/javascript">
         function makeSubmission() {
-            {# path = decodeURIComponent(path); #}
-
-            handleDownloadImages("{$this->core->getCsrfToken()}");
+            handleDownloadImages('{{ core.getCsrfToken() }}');
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button
