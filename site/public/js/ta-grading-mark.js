@@ -409,26 +409,32 @@ function updateMarksOnPage(c_index) {
             getComponent(c_index).score = score;
             getComponent(c_index).comment = note;
         }
+        //Clear extra marks
+        getComponent(c_index).marks = [];
+
         // Add all marks back
-        for (var m_index = ids.length-1; m_index >= 0; m_index--) {
+        for (var m_index = 0; m_index < data['data'].length - 1; m_index++) {
             var is_publish = data['data'][m_index]['is_publish'] == 't';
             var id         = data['data'][m_index]['id'];
             var hasMark    = data['data'][m_index]['has_mark'];
             var score      = data['data'][m_index]['score'];
             var note       = data['data'][m_index]['note'];
+            var order      = data['data'][m_index]['order'];
 
             if (id === undefined) {
                 continue;
             }
 
-            getMark(c_index, ids[m_index]).id = id;
-            if(getMark(c_index, ids[m_index])!=null){
-                getMark(c_index, ids[m_index]).publish = is_publish;
-                getMark(c_index, ids[m_index]).has = hasMark;
-                getMark(c_index, ids[m_index]).score = score;
-                getMark(c_index, ids[m_index]).name = note;
-            }
-            parent.prepend(getMarkView(c_index, ids[m_index], id, m_index, editModeEnabled));
+            var mark = {};
+            mark.id = id;
+            mark.publish = is_publish;
+            mark.has = hasMark;
+            mark.points = score;
+            mark.name = note;
+            mark.order = order;
+            getComponent(c_index).marks.push(mark);
+
+            parent.append(getMarkView(c_index, id, id, m_index, editModeEnabled));
             if((editModeEnabled==null || editModeEnabled==false)){
                 var current_mark = $('#mark_id-'+c_index+'-'+id);
                 current_mark.find('input[name=mark_points_'+c_index+'_'+id+']').attr('disabled', true);
@@ -546,7 +552,7 @@ function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallbac
                 order   : getMark(c_index, getMark(c_index, current_mark_id).id).order,
                 id      : getMark(c_index, current_mark_id).id
             };
-        parent.append(getMarkView(c_index, current_mark_id, current_mark_id, 1, editModeEnabled));
+        parent.append(getMarkView(c_index, current_mark_id, current_mark_id, i, editModeEnabled));
     }
     ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false, function(data) {
         data = JSON.parse(data);
