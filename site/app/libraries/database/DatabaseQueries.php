@@ -2476,18 +2476,6 @@ AND gc_id IN (
         return $components;
     }
 
-//    public function getAllGradeableConfigs(){
-//        $query = "
-//            SELECT
-//                eg_config_path,
-//                g_id,
-//
-//            FROM
-//                electronic_gradeable";
-//        $this->course_db->query($query);
-//        return $this->course_db->rows();
-//    }
-
     public function getGradeableConfig($g_id) {
 
         // First, get the gradeable data
