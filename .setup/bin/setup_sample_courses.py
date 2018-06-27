@@ -1318,6 +1318,12 @@ class Gradeable(object):
             self.config_path = None
             self.sample_path = None
 
+        # To make Rainbow Grades testing possible, need to seed random
+        m = hashlib.md5()
+        m.update(bytes(self.id, 'utf-8'))
+        print("{} using seed {}".format(self.id,int(m.hexdigest(), 16)))
+        random.seed(int(m.hexdigest(), 16))
+
         if 'g_bucket' in gradeable:
             self.syllabus_bucket = gradeable['g_bucket']
 
