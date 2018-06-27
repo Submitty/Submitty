@@ -1179,8 +1179,14 @@ class Course(object):
 
         # Attempt to write the customization.json file
         try:
+            with open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w') as customization_file:
+                customization_file.write("/*\n"
+                                         "This JSON is based on the automatically generated customization for\n"
+                                         "the development course \"{}\" as of {}.\n"
+                                         "It is intended as a simple example, with additional documentation online.\n"
+                                         "*/".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
             json.dump(gradeables_json_output,
-                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w'),indent=2)
+                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'a'),indent=2)
         except EnvironmentError as e:
             print("Failed to write to customization file: {}".format(e))
 
