@@ -28,7 +28,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 class="centered">Plagiarism Detection - $assignment</h1>
+<h1 class="centered">Lichen Plagiarism Detection - $assignment</h1>
 <br>
 HTML;
         $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/index.html");
@@ -42,12 +42,12 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Plagiarism Detection</h1>
+<h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1>
 <br>
 HTML;
         $return .= <<<HTML
         <div class="nav-buttons">
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Run Lichen Plagiarism Detector</a>
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Configure Lichen Plagiarism Detection</a>
         </div><br /><br /><br />
         <form id="gradeables_with_plagiarism_result">
             Gradeables with Plagiarism Result: 
@@ -117,7 +117,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Plagiarism Form</h1>
+<h1 style="text-align: center">Lichen Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
 <br>
 HTML;
         $return .= <<<HTML
@@ -237,7 +237,7 @@ HTML;
             </div><br /><br />
             <div style="float: right; width: auto; margin-top: 5px;">
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester))}" class="btn btn-danger">Cancel</a>
-                <input class="btn btn-primary" type="submit" value="Run Lichen Plagiarism Detector" />
+                <input class="btn btn-primary" type="submit" value="Save Configuration" />
             </div><br /><br /><br />
         </form>
     </div>    

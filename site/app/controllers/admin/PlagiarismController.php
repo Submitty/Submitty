@@ -31,7 +31,7 @@ class PlagiarismController extends AbstractController {
             	$this->ajaxGetMatchingUsers();
             	break;      
             default:
-                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
+                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
                 $this->plagiarismTree();
                 break;
         }
