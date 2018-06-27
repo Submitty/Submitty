@@ -2475,7 +2475,6 @@ AND gc_id IN (
 
         return $components;
     }
-
     public function getGradeableConfig($g_id) {
 
         // First, get the gradeable data
