@@ -43,6 +43,7 @@ $(function() {
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
 
+
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
@@ -129,7 +130,6 @@ function readCookies(){
     var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    var editMode = document.cookie.replace(/(?:(?:^|.*;\s*)editMode\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     (output_top) ? $("#autograding_results").css("top", output_top):{};
     (output_left) ? $("#autograding_results").css("left", output_left):{};
     (output_width) ? $("#autograding_results").css("width", output_width):{};
@@ -175,9 +175,6 @@ function readCookies(){
 
     onAjaxInit = function() {
         $('#title-'+opened_mark).click();
-        document.getElementById("EditModeButton").checked = true;
-        if(editMode ==="false")
-            document.getElementById("EditModeButton").checked = false;
         if (scroll_pixel > 0) {
             document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
