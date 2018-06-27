@@ -407,9 +407,13 @@ class FileUtils {
      */
     public static function getGradeablesFromPriorTerm(){
         $return = array();
+
+        $filename = "/var/local/submitty/courses/gradeables_from_prior_terms.txt";
+        if (file_exists($filename)) {
         
-        $file = fopen("/var/local/submitty/courses/gradeables_from_prior_terms.txt", "r") or exit("Unable to open file!");
-        while(!feof($file)){
+          $file = fopen($filename, "r") or exit("Unable to open file!");
+
+          while(!feof($file)){
             $line = fgets($file);
             $line= trim($line," ");
             $line= explode("/",$line);
@@ -425,20 +429,20 @@ class FileUtils {
             }
             $return[$sem][$course] = $gradeables;    
             
-        }
-        fclose($file);
-        uksort($return, function($semester_a, $semester_b) {
-            $year_a = (int)substr($semester_a, 1);
-            $year_b = (int)substr($semester_b, 1);
-            if($year_a > $year_b) 
+          }
+          fclose($file);
+          uksort($return, function($semester_a, $semester_b) {
+              $year_a = (int)substr($semester_a, 1);
+              $year_b = (int)substr($semester_b, 1);
+              if($year_a > $year_b)
                 return 0;
-            else if ($year_a < $year_b)
+              else if ($year_a < $year_b)
                 return 1;
-            else {
+              else {
                 return ($semester_a[0] == 'f')? 0 : 1 ;
-            }                       
-        });
-        
+              }
+            });
+        }
         return $return;
     }
 }
