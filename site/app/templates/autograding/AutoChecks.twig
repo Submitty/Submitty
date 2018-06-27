@@ -7,6 +7,11 @@
     {% if check.pdf %}
         <iframe src="{{ core.buildUrl({"component": "misc", "page": "display_file", "dir": "results", "file": check.name, "path": check.path}) }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
+        <br>
+        <div style="height:23px; float:right;">
+            <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ who }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
+        </div>
+        <div><span style="margin-left: 20px" class="line_code" id='white_space_helper_{{ index }}'></span></div>
         <div class="box-block">
 
             {% if check.actual %}

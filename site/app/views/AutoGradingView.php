@@ -71,11 +71,12 @@ class AutoGradingView extends AbstractView {
      * @param Gradeable $gradeable
      * @param $index
      * @param $popup_css_file
+     * @param string $who
      * @param bool $show_hidden
      * @return string
      * @throws \Exception
      */
-    public function loadAutoChecks(Gradeable $gradeable, $index, $popup_css_file, $show_hidden = false) {
+    public function loadAutoChecks(Gradeable $gradeable, $index, $popup_css_file, $who, $show_hidden = false) {
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$index];
 
@@ -163,8 +164,10 @@ class AutoGradingView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
+            "gradeable" => $gradeable,
             "checks" => $checks,
             "index" => $index,
+            "who" => $who,
             "popup_css_file" => $popup_css_file,
         ]);
     }
