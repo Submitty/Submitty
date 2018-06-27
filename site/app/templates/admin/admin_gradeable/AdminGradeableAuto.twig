@@ -116,6 +116,7 @@
     function onConfigChange(){
         $('.eg_config').not(this).prop('checked', false);
         if($('#default_configs').is(':checked')) {
+            onConfigPathChange();
             $('.div_select_config').hide();
             $('#div_default_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
@@ -135,17 +136,15 @@
     function onConfigPathChange(){
         if($('#default_configs').is(':checked')) {
             $('#input_provide_full_path').val($('#select_default_config').val());
+            $('#input_provide_full_path').change();
         } else if($('#uploaded_configs').is(':checked')){
             $('#input_provide_full_path').val($('#select_uploaded_config').val());
+            $('#input_provide_full_path').change();
         } else if($('#private_repository').is(':checked')){
 
         } else {
 
         }
-    }
-
-    function selectRightRadioButton(){
-
     }
 
     function onStudentViewChange() {
@@ -175,7 +174,6 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
-        selectRightRadioButton();
         $('.eg_config').change(onConfigChange);
         $('select').change(onConfigPathChange);
     });
