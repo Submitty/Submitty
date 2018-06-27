@@ -830,6 +830,8 @@ class Course(object):
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
+            # makes a section be ungraded if the gradeable is not electronic
+            ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
                 submitted = False
@@ -975,6 +977,31 @@ class Course(object):
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+
+                if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
+                   random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
+                    res = conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
+                    gd_id = res.inserted_primary_key[0]
+                    skip_grading = random.random()
+                    for component in gradeable.components:
+                        if random.random() < 0.01 and skip_grading < 0.3:
+                            break
+                        if random.random() < 0.1:
+                            continue
+                        elif gradeable.type == 1:
+                            if random.random() < 0.2:
+                                score = 0
+                            elif random.random() < 0.05:
+                                score = 0.5
+                            else:
+                                score = 1
+                        else:
+                            score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                        grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
+                        conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                     gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
+
+
         #This segment adds the sample forum posts for the sample course only
         if(self.code == "sample"): 
             #set sample course to have forum enabled by default
