@@ -58,6 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
+ * @method array getUploadsFiles()
  * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
@@ -245,7 +246,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
     * that contains filename, file path, and the file size. */
     protected $uploads_files = array();
-
+    /** @var array|bool $result_details */
     protected $result_details;
 
     protected $in_interactive_queue = false;
@@ -1239,7 +1240,11 @@ class Gradeable extends AbstractModel {
         return $data;
     }
 
-    public function getRepositoryPath(Team $team) {
+    /**
+     * @param Team|null $team
+     * @return string
+     */
+    public function getRepositoryPath($team = null) {
         if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
             $vcs_path = $this->getSubdirectory();
         } else {
@@ -1255,7 +1260,13 @@ class Gradeable extends AbstractModel {
         $repo = str_replace('{$user_id}', $this->getUser()->getId(), $repo);
         $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
             $this->core->getConfig()->getVcsUrl(), $repo);
-        return str_replace('{$team_id}', $team->getId(), $repo);
+        if ($this->isTeamAssignment()) {
+            if ($team === null) {
+                $team = $this->getTeam();
+            }
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
     }
 
     public function canDelete() {
