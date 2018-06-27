@@ -26,6 +26,67 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
+function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+    var actual_div_name = "#" + div_name + "_0";
+    var expected_div_name = "#" + div_name + "_1";
+    var actual_div = $(actual_div_name).children()[0];
+    var expected_div = $(expected_div_name).children()[0];
+    var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+    var list_white_spaces = {};
+    $('#'+helper_id).empty();
+    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
+        list_white_spaces['newline'] = '&#9166;';
+        args['option'] = 'with_unicode'
+    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
+        list_white_spaces['newline'] = '\\n';
+        args['option'] = 'with_escape'
+    } else {
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
+        args['option'] = 'original'
+    }
+    //Insert actual and expected one at a time
+    args['which'] = 'expected';
+    var url = buildUrl(args);
+
+    $.getJSON({
+        url: url,
+        success: function(data) {
+            for(property in data.whitespaces){
+                list_white_spaces[property] = data.whitespaces[property];
+            }
+            $(expected_div).empty();
+            $(expected_div).html(data.html);
+            args['which'] = 'actual';
+            url = buildUrl(args);
+            $.getJSON({
+                url: url,
+                success: function(data) {
+                    for(property in data.whitespaces){
+                        list_white_spaces[property] = data.whitespaces[property];
+                    }
+                    for(property in list_white_spaces){
+                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    }
+                    $(actual_div).empty();
+                    $(actual_div).html(data.html);
+                },
+                error: function(e) {
+                    alert("Could not load diff, please refresh the page and try again.");}
+            });
+        },
+        error: function(e) {
+            alert("Could not load diff, please refresh the page and try again.");}
+    });
+
+}
+
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     orig_div_name = div_name
     div_name = "#" + div_name;
@@ -33,8 +94,10 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
 
     if(isVisible){
         toggleDiv(orig_div_name);
+        $("#show_char_"+index).toggle();
         $(div_name).empty();
     }else{
+        $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
 
@@ -43,7 +106,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
             success: function(data) {
                 $(div_name).empty();
                 $(div_name).html(data);
-                toggleDiv(orig_div_name); 
+                toggleDiv(orig_div_name);
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
