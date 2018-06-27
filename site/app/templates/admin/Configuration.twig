@@ -122,6 +122,14 @@
                     <div class="option-alt">Choose whether to enable a forum for this course.</div>
                 </div>
             </div>
+
+            <div class="option">
+                <div class="option-input"><input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} /></div>
+                <div class="option-desc">
+                    <div class="option-title">WORK IN PROGRESS Regrade Requests</div>
+                    <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
+                </div>
+            </div>
         </div>
         <div class="post-panel-btn">
             <button class="btn btn-primary" style="float: right" type="submit" form="configForm">

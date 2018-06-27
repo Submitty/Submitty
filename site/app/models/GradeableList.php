@@ -23,6 +23,12 @@ use app\libraries\GradeableType;
  * @method Gradeable[] getGradedGradeables()
  */
 class GradeableList extends AbstractModel {
+    const FUTURE  = 0;
+    const BETA    = 1;
+    const OPEN    = 2;
+    const CLOSED  = 3;
+    const GRADING = 4;
+    const GRADED  = 5;
 
     /** @property @var User */
     protected $user;

@@ -32,6 +32,9 @@
         {% if not peer %}
             <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
         {% endif %}
+        {% if gradeable.getRegradeStatus() != 0 %}
+            <i title="Show/Hide Regrade Information (Press X)" class="fa fa-hand-paper-o icon-header" onclick="toggleRegrade(); updateCookies();"></i>
+        {% endif %}
         <i title="Show Grading Settings" class="fa fa-wrench icon-header" onclick="showSettings();"></i>
         {# /Panel buttons #}
     </div>

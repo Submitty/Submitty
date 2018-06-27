@@ -1,0 +1,80 @@
+<div class="form-group row">
+    {% if show_title %}
+    <span class="edit_thread">
+        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
+    </span>
+    {% endif %}
+
+    {% if show_editcat and core.getUser().getGroup() <= 2 %}
+        <span style="float:right;display:inline-block;">
+        <a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
+        </span>
+    {% endif %}
+</div>
+<br/>
+{% if show_post %}
+    <div style="margin-bottom:10px;" class="form-group row">
+        <button type="button" title="Insert a link" onclick="addBBCode(1, '#thread_post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
+        <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#thread_post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+    </div>
+    <div class="form-group row">
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:40vmin;overflow:hidden;" rows="10" cols="30" placeholder="Enter your post here..." required></textarea>
+    </div>
+<br/>
+{% endif %}
+{% if show_categories %}
+    {% set categories = core.getQueries().getCategories() %}
+    <div id="category-selection-container" style="margin-bottom:10px;" class="form-group row">
+        <label for="cat" id="cat_label">Categories</label> <br>
+        {% if categories | length == 0 %}
+            <span class='category-list-no-element' style="margin-left: 1em;" >
+                No categories exists please create one.
+            </span>
+        {% endif %}
+        <div id='categories-pick-list'>
+        {% for category in core.getQueries().getCategories() %}
+            <a class="btn cat-buttons" cat-color="{{ category.color }}" style="background-color: {{ category.color }}; color: white;">{{ category.category_desc }}
+                <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
+            </a>
+        {% endfor %}
+    </div>
+    <script type="text/javascript">
+    $(function() {
+        refreshCategories();
+        $("#thread_form").submit(function() {
+
+            if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+                alert("At least one category must be selected.");
+                return false;
+            }
+        });
+    });
+    </script>
+    </div>
+{% endif %}
+<div style="margin-bottom:10px;" class="form-group row">
+    {% if show_attachments %}
+        <span style="float:left;display:inline-block;">
+            <label id="file_input_label" class="btn btn-default" for="file_input">
+                <input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
+                Upload Attachment
+            </label>
+            <span class='label label-info' id="file_name"></span>
+        </span>
+    {% endif %}
+    <span style="display:inline-block;float:right;">
+        {% if show_anon %}
+            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="thread_post_anon" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
+        {% endif %}
+        {% if show_announcement and core.getUser().getGroup() <= 2 %}
+            <label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+        {% endif %}
+        {% if show_cancel_edit_form %}
+        <a onclick="$('#edit-user-post').css('display', 'none');
+                 $('#thread_post_content').val('');$('#thread_post_content').trigger('checkform.areYouSure');
+                 $('#title').val('');$('#title').trigger('checkform.areYouSure');"
+                     class="btn btn-danger">Cancel</a>
+        {% endif %}
+        <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
+    </span>
+</div>
