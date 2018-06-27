@@ -94,11 +94,12 @@ class AutogradingView extends AbstractView {
                     $div_id = "container_$index"."_".$autocheck_cnt;
                     $helper_id = "white_space_helper_$index"."_".$autocheck_cnt;
                     $return .= <<<HTML
-                    <div><span style="margin-left: 20px" class="line_code" id=$helper_id></span></div>
-                    <div style="width: 100%; height: 23px">
+                    <br>
+                    <div style="height:23px; float:right;">
                         <a id=$id class="btn btn-default" style="float:right;" onclick="changeDiffView('$div_id', '$gradeable_id', '$who_id', '$index', '$autocheck_cnt', '$helper_id')">Visualize whitespace characters</a>
                     </div>
-                    <br>
+                    <div><span style="margin-left: 20px" class="line_code" id=$helper_id></span></div>
+
 HTML;
                 $return .= <<<HTML
     <div class="box-block">
