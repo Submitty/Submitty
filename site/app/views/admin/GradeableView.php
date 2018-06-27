@@ -7,6 +7,7 @@ use app\views\AbstractView;
 
 class GradeableView extends AbstractView {
     public function uploadConfigForm($target_dir, $all_files, $inuse_config) {
+        $this->core->getOutput()->addBreadcrumb("upload config", $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')));
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $build_script_output_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/build_script_output.txt";

@@ -29,6 +29,7 @@
                     {% endif %}
                 {% endfor %}
             </select>
+            <a class="btn btn-primary" style="margin-top: 6px" href="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'upload_config'}) }}">Upload a config</a>
         </div>
         <div class="div_select_config" id="div_repository_configs" style="display: {% if which_option == 2 %} block {% else %} none {% endif %}">
             <select id="select_repository_config" style="width: 700px;">

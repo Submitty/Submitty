@@ -18,6 +18,7 @@ class AdminGradeableView extends AbstractView {
      * The one and only...
      */
 	public function show_add_gradeable($type_of_action, AdminGradeable $admin_gradeable, $nav_tab = 0) {
+        $this->core->getOutput()->addBreadcrumb("add/edit gradeable");
 
 	    // TODO: all of this should be moved to the controller when it gets overhauled
 
