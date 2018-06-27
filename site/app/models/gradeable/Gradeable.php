@@ -604,6 +604,11 @@ class Gradeable extends AbstractModel {
             }
         }
         $this->components = array_values($components);
+
+        // sort by order
+        usort($this->components, function(Component $a, Component $b) {
+            return $a->getOrder() - $b->getOrder();
+        });
     }
 
     /**
