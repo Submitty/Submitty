@@ -69,7 +69,7 @@ class GradeableComponentMark extends AbstractModel {
             }
         }
     }
-    public function delete($gd_id, $gc_id, $gcd_grader_id) {
+    public function delete() {
         if($this->id !=null){
             return $this->core->getQueries()->deleteGradeableComponentMark($this);
         }

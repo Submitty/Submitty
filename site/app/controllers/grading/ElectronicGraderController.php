@@ -1078,42 +1078,19 @@ class ElectronicGraderController extends GradingController {
                 $debug = 'delete';
             } else {
                 //only change the component information is the mark was modified or componet and its gradeable are out of sync.
-           //     if($mark_modified === true || ($component->getGradedVersion() !== $gradeable->getActiveVersion())) {
-                    if ($component->getGrader() === null || $overwrite === "true") {
-                        $component->setGrader($this->core->getUser());
-                    }
-
-                    $version_updated = "true";
-                    $component->setGradedVersion($_POST['active_version']);
-                    $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                    $component->setComment($_POST['custom_message']);
-                    $component->setScore($_POST['custom_points']);
-                    $debug = $component->saveGradeableComponentData($gradeable->getGdId());
-            //    }
+                if ($component->getGrader() === null || $overwrite === "true") {
+                    $component->setGrader($this->core->getUser());
+                }
+                $version_updated = "true";
+                $component->setGradedVersion($_POST['active_version']);
+                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component->setComment($_POST['custom_message']);
+                $component->setScore($_POST['custom_points']);
+                $debug = $component->saveGradeableComponentData($gradeable->getGdId());
             }
 
             $index = 0;
-            $highID = -1;
             //delete marks that have been deleted
-            /*foreach($component->getMarks() as $cmark){
-                echo($cmark->getNote());
-                echo("Cmark above \n");
-                $found = false;
-                $i=0;
-                foreach ($_POST['marks'] as $post_mark) {
-                    echo($_POST['marks'][$i]['note']);
-                    echo ("Post_mark above\n");
-                    $i++;
-                    if($cmark->getId() == $post_mark["id"]){
-                        $found = true;
-                    }
-                }
-                if($found===false){
-                    echo($cmark);
-                    echo("Deleting above \n");
-                    $cmark->delete($gradeable_id, $user_id, $gradeable);
-                }
-            }*/
             // save existing marks
             if (array_key_exists('marks', $_POST)) {
                 foreach ($_POST['marks'] as $post_mark) {
@@ -1140,9 +1117,6 @@ class ElectronicGraderController extends GradingController {
                             $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                         }
                         $index++;
-                        if ($highID < $post_mark['id']) {
-                            $highID = $post_mark['id'];
-                        }
                     }
                 }
             }
@@ -1274,9 +1248,6 @@ class ElectronicGraderController extends GradingController {
                 }
             }
             foreach ($component->getMarks() as $mark) {
-            //    echo($mark->getId());
-             //   echo($mark->getNote());
-             //   echo("\n");
                 $temp_array = array();
                 $temp_array['id'] = $mark->getId();
                 $temp_array['score'] = $mark->getPoints();

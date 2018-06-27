@@ -375,10 +375,6 @@ function updateMarksOnPage(c_index) {
             disabled: true 
         });
     }
-    var ids= [];
-    for(var idIndex=0; idIndex<component.marks.length; idIndex++){
-        ids.push(component.marks[idIndex].id);
-    }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
@@ -509,24 +505,11 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 
                 getComponent(c_index).marks.push(mark);
                 parent.append(getMarkView(c_index, mark.id, mark.id, 1, editModeEnabled));
-                    // saveMark(c_index, false);
-                    // updateMarksOnPage(c_index);
             });
-           // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
-          //  data = JSON.parse(data);
-            // console.log(data);
-          //  });
-         //   ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
-        //    data = JSON.parse(data);
-            //console.log(data);
-          //  });
-      //      window.location.reload();
-         //   openMark(c_index);
         }
     };
 }
 
-// TODO: this
 function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallback) {
     var parent = $('#marks-parent-'+c_index);
     var index=-1;
@@ -538,36 +521,17 @@ function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallbac
     }
     var mark=getComponent(c_index).marks[index];
     getComponent(c_index).marks.splice(index, 1);
-   // var current_row = $(me.parentElement.parentElement);
-    //current_row.remove();
     var last_row = $('[name=mark_'+c_index+']').last().attr('id');
     var mark_data = new Array(getComponent(c_index).marks.length);
     parent.empty();
     for(var i=0; i<getComponent(c_index).marks.length; i++){
         var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        mark_data[i] = {
-                points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-                note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-                selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                order   : getMark(c_index, getMark(c_index, current_mark_id).id).order,
-                id      : getMark(c_index, current_mark_id).id
-            };
         parent.append(getMarkView(c_index, current_mark_id, current_mark_id, i, editModeEnabled));
     }
     ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false, function(data) {
         data = JSON.parse(data);
         console.log(data);
     });
-           // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
-          //  data = JSON.parse(data);
-            // console.log(data);
-          //  });
-         //   ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
-        //    data = JSON.parse(data);
-            //console.log(data);
-          //  });
-          //   saveMark(c_index, false);
-          //   updateMarksOnPage(c_index);
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
