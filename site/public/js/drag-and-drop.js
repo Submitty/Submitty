@@ -24,8 +24,6 @@ var student_without_ids = [];   // student ids for those w/o submissions
 
 // initializing file_array and prevous_files
 function createArray(num_parts){
-    console.log();
-    console.log(num_parts);
     if(file_array.length == 0){
         for(var i=0; i<num_parts; i++){
             file_array.push([]);
@@ -84,9 +82,7 @@ function get_part_number(e){
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input_file" + part).files;
-    console.log(filestream);
     for(var i=0; i<filestream.length; i++){
-        console.log(filestream[i]);
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
     $('#input_file' + part).val("");
@@ -99,7 +95,6 @@ function addFilesFromInput(part, check_duplicate_zip=true){
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(file, part){
-    console.log(file_array);
     if (previous_files != []) {
         for(var i = 0; i < previous_files[part-1].length; i++){
             if(previous_files[part-1][i] == file.name){
@@ -144,8 +139,6 @@ function isFolder(file){
 
 function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file, part);
-    console.log(file);
-    console.log(part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
@@ -801,7 +794,6 @@ function handleDownloadImages(csrf_token) {
                 return;
             }
         formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
-        console.log(file_array[i][j].name);
         }
     }
 
@@ -828,7 +820,7 @@ function handleDownloadImages(csrf_token) {
             }
         },
         error: function(data) {
-            window.location.href = return_url;
+            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
             //alert("ERROR! Please contact administrator that you could not upload image files.");
         }
     });
