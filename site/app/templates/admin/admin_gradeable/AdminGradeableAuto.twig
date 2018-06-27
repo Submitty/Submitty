@@ -9,7 +9,7 @@
         <input type="radio" id="uploaded_configs" name="eg_config" value="false" /> Uploaded configs
         <input type="radio" id="private_repository" name="eg_config" value="false" /> Use Private repository
         <input type="radio" id="provide_full_path" name="eg_config" value="false" /> Provide full path
-        <div id="div_default_configs" style="display: block">
+        <div class="div_select_config" id="div_default_configs" style="display: block">
             <select id="select_default_config" style="width: 250px;">
                 <option value="/usr/local/submitty/more_autograding_examples/upload_only/config">upload_only</option>
                 <option value="/usr/local/submitty/more_autograding_examples/iclicker_upload/config">iclicker_upload</option>
@@ -19,8 +19,8 @@
                 <option value="/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config">test_notes_upload_3page</option>
             </select>
         </div>
-        <div id="div_uploaded_configs" style="display: none">
-            <select id="select_uploaded_configs" style="width: 250px;">
+        <div class="div_select_config" id="div_uploaded_configs" style="display: none">
+            <select id="select_default_config" style="width: 250px;">
                 {% for path in all_uploaded_paths %}
                     <option value="{{ path }}">{{ path }}</option>
                 {% endfor %}
@@ -95,12 +95,18 @@
 
     function onConfigChange(){
         if($('#default_configs').is(':checked')) {
+            $('.div_select_config').hide();
+            $('#div_default_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
         } else if($('#uploaded_configs').is(':checked')){
+            $('.div_select_config').hide();
+            $('#div_uploaded_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
         } else if($('#private_repository').is(':checked')){
+            $('.div_select_config').hide();
             $('#input_provide_full_path').prop('disabled', true);
         } else {
+            $('.div_select_config').hide();
             $('#input_provide_full_path').prop('disabled', false);
         }
     }
