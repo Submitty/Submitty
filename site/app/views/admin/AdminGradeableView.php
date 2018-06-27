@@ -89,14 +89,24 @@ class AdminGradeableView extends AbstractView {
             if($path == $saved_path) $which_option = 0;
         }
 
-        $configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-        $all_configs = FileUtils::getAllFiles($configs_dir);
+        $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_paths = array();
-        foreach($all_configs as $file){
+        foreach($all_uploaded_configs as $file){
             $all_uploaded_paths[] = $file['path'];
             //If this happens then select the second radio button "Using Uploaded"
             if($file['path'] == $saved_path) $which_option = 1;
         }
+
+        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "temp_repository");
+        $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
+        $all_repository_paths = array();
+        foreach($all_repository_configs as $file){
+            $all_uploaded_paths[] = $file['path'];
+            //If this happens then select the second radio button "Use Private Repository"
+            if($file['path'] == $saved_path) $which_option = 2;
+        }
+
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
@@ -111,8 +121,9 @@ class AdminGradeableView extends AbstractView {
             // Graders Page Specific
             "all_graders"    => $graders,
             //All the uploaded config paths
+            "all_repository_paths"    => $all_repository_paths,
             "all_uploaded_paths"      => $all_uploaded_paths,
-            "default_paths"            => $default_paths,
+            "default_paths"           => $default_paths,
             "which_option"            => $which_option
         ]);
     }
