@@ -2,11 +2,22 @@ from .base_testcase import BaseTestCase
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import os
 
+
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
+
+    def create_file_paths(self, multiple=False):
+        examples_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples"))
+        file_paths = [os.path.join(examples_path,"python_simple_homework", "submissions", "infinite_loop_too_much_output.py")]
+        if multiple:
+            return file_paths + [os.path.join(examples_path,"python_simple_homework", "submissions", "part1.py")]
+        else:
+            return file_paths
 
     def make_submission(self, file_paths=[], drag_and_drop=False):
         def get_submission_count():
@@ -24,13 +35,16 @@ class TestSubmission(BaseTestCase):
         # TODO: check server files after submission
     
     def test_normal_upload(self):
-        file_paths = ["/usr/local/submitty/GIT_CHECKOUT/Submitty/more_autograding_examples/python_simple_homework/submissions/infinite_loop_too_much_output.py"]
-        self.make_submission(file_paths, False)
+        self.make_submission(self.create_file_paths())
 
     def test_drag_and_drop_upload(self):
-        file_paths = ["/usr/local/submitty/GIT_CHECKOUT/Submitty/more_autograding_examples/python_simple_homework/submissions/infinite_loop_too_much_output.py"]
-        self.make_submission(file_paths, True)
+        self.make_submission(self.create_file_paths(), True)
 
+    def test_normal_upload_multiple(self):
+        self.make_submission(self.create_file_paths(True))
+
+    def test_drag_and_drop_upload_multiple(self):
+        self.make_submission(self.create_file_paths(True), True)
 
 if __name__ == "__main__":
     import unittest
