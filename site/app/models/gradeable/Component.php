@@ -233,10 +233,10 @@ class Component extends AbstractModel {
      * @param int $id Must be a non-negative integer
      */
     private function setIdInternal($id) {
-        if (is_int($id) && $id >= 0) {
-            $this->id = $id;
+        if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
+            $this->id = intval($id);
         } else {
-            throw new \InvalidArgumentException('Component Id must be an integer >= 0');
+            throw new \InvalidArgumentException('Component Id must be a non-negative integer');
         }
     }
 

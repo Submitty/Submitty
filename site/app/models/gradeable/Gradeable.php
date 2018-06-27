@@ -585,7 +585,7 @@ class Gradeable extends AbstractModel {
      * @param int $peer_grading_set Must be at least 0
      */
     public function setPeerGradingSet($peer_grading_set) {
-        if (is_int($peer_grading_set) || ctype_digit($peer_grading_set) && intval($peer_grading_set) >= 0) {
+        if ((is_int($peer_grading_set) || ctype_digit($peer_grading_set)) && intval($peer_grading_set) >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
@@ -662,7 +662,7 @@ class Gradeable extends AbstractModel {
                 // Parse each section array into strings
                 $parsed_sections = [];
                 foreach($grader_sections as $section) {
-                    if (is_int($section) || ctype_digit($section) && intval($section) > 0 && intval($section) <= $num_sections) {
+                    if ((is_int($section) || ctype_digit($section)) && intval($section) > 0 && intval($section) <= $num_sections) {
                         $parsed_sections[] = intval($section);
                     } else {
                         throw new \InvalidArgumentException('Grading section must be a positive integer no more than the number of rotating sections!');
