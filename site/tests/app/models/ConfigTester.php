@@ -329,8 +329,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
      * @expectedExceptionMessage Invalid path for setting submitty_log_path: /invalid
      */
     public function testInvalidLogPath() {
-        $extra = array('logging_details' => array('submitty_log_path' => '/invalid'));
-        $this->createConfigFile($extra);
+     //   $extra = array('logging_details' => array('submitty_log_path' => '/invalid'));
+       // $this->createConfigFile($extra);
 
         new Config($this->core, "s17", "csci0000", $this->master);
     }
