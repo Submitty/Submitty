@@ -1046,31 +1046,31 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join aggregate gradeable component data */
               LEFT JOIN (
                 SELECT
-                  array_to_json(array_agg(in_gcd.gc_id)) as array_comp_id,
-                  array_to_json(array_agg(gcd_score)) as array_score,
-                  array_to_json(array_agg(gcd_component_comment)) as array_comment,
-                  array_to_json(array_agg(gcd_grader_id)) as array_grader_id,
-                  array_to_json(array_agg(gcd_graded_version)) as array_graded_version,
-                  array_to_json(array_agg(gcd_grade_time)) as array_grade_time,
-                  array_to_json(array_agg(string_mark_id)) as array_mark_id,
+                  json_agg(in_gcd.gc_id) as array_comp_id,
+                  json_agg(gcd_score) as array_score,
+                  json_agg(gcd_component_comment) as array_comment,
+                  json_agg(gcd_grader_id) as array_grader_id,
+                  json_agg(gcd_graded_version) as array_graded_version,
+                  json_agg(gcd_grade_time) as array_grade_time,
+                  json_agg(string_mark_id) as array_mark_id,
 
-                  array_to_json(array_agg(ug.user_id)) AS array_grader_user_id,
-                  array_to_json(array_agg(ug.anon_id)) AS array_grader_anon_id,
-                  array_to_json(array_agg(ug.user_firstname)) AS array_grader_user_firstname,
-                  array_to_json(array_agg(ug.user_preferred_firstname)) AS array_grader_user_preferred_firstname,
-                  array_to_json(array_agg(ug.user_lastname)) AS array_grader_user_lastname,
-                  array_to_json(array_agg(ug.user_email)) AS array_grader_user_email,
-                  array_to_json(array_agg(ug.user_group)) AS array_grader_user_group,
-                  array_to_json(array_agg(ug.manual_registration)) AS array_grader_manual_registration,
-                  array_to_json(array_agg(ug.last_updated)) AS array_grader_last_updated,
-                  array_to_json(array_agg(ug.registration_section)) AS array_grader_registration_section,
-                  array_to_json(array_agg(ug.rotating_section)) AS array_grader_rotating_section,
-                  array_to_json(array_agg(ug.grading_registration_sections)) AS array_grader_grading_registration_sections,
+                  json_agg(ug.user_id) AS array_grader_user_id,
+                  json_agg(ug.anon_id) AS array_grader_anon_id,
+                  json_agg(ug.user_firstname) AS array_grader_user_firstname,
+                  json_agg(ug.user_preferred_firstname) AS array_grader_user_preferred_firstname,
+                  json_agg(ug.user_lastname) AS array_grader_user_lastname,
+                  json_agg(ug.user_email) AS array_grader_user_email,
+                  json_agg(ug.user_group) AS array_grader_user_group,
+                  json_agg(ug.manual_registration) AS array_grader_manual_registration,
+                  json_agg(ug.last_updated) AS array_grader_last_updated,
+                  json_agg(ug.registration_section) AS array_grader_registration_section,
+                  json_agg(ug.rotating_section) AS array_grader_rotating_section,
+                  json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
                   in_gcd.gd_id
                 FROM gradeable_component_data in_gcd
                   LEFT JOIN (
                     SELECT
-                      array_to_json(array_agg(gcm_id)) AS string_mark_id,
+                      json_agg(gcm_id) AS string_mark_id,
                       gc_id,
                       gd_id
                     FROM gradeable_component_mark_data
@@ -1083,7 +1083,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     FROM users u
                     LEFT JOIN (
                       SELECT
-                        array_to_json(array_agg(sections_registration_id)) as grading_registration_sections,
+                        json_agg(sections_registration_id) as grading_registration_sections,
                         user_id
                       FROM grading_registration
                       GROUP BY user_id
@@ -1099,13 +1099,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON (egv.team_id=gd.gd_team_id OR egv.user_id=gd.gd_user_id) AND egv.g_id=gd.g_id
               LEFT JOIN (
                 SELECT
-                  array_to_json(array_agg(in_egd.g_version)) AS array_version,
-                  array_to_json(array_agg(in_egd.autograding_non_hidden_non_extra_credit)) AS array_non_hidden_non_extra_credit,
-                  array_to_json(array_agg(in_egd.autograding_non_hidden_extra_credit)) AS array_non_hidden_extra_credit,
-                  array_to_json(array_agg(in_egd.autograding_hidden_non_extra_credit)) AS array_hidden_non_extra_credit,
-                  array_to_json(array_agg(in_egd.autograding_hidden_extra_credit)) AS array_hidden_extra_credit,
-                  array_to_json(array_agg(in_egd.submission_time)) AS array_submission_time,
-                  array_to_json(array_agg(in_egd.autograding_complete)) AS array_autograding_complete,
+                  json_agg(in_egd.g_version) AS array_version,
+                  json_agg(in_egd.autograding_non_hidden_non_extra_credit) AS array_non_hidden_non_extra_credit,
+                  json_agg(in_egd.autograding_non_hidden_extra_credit) AS array_non_hidden_extra_credit,
+                  json_agg(in_egd.autograding_hidden_non_extra_credit) AS array_hidden_non_extra_credit,
+                  json_agg(in_egd.autograding_hidden_extra_credit) AS array_hidden_extra_credit,
+                  json_agg(in_egd.submission_time) AS array_submission_time,
+                  json_agg(in_egd.autograding_complete) AS array_autograding_complete,
                   g_id,
                   user_id,
                   team_id
@@ -1119,7 +1119,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM users u
                 LEFT JOIN (
                   SELECT
-                    array_to_json(array_agg(sections_registration_id)) as grading_registration_sections,
+                    json_agg(sections_registration_id) as grading_registration_sections,
                     user_id
                   FROM grading_registration
                   GROUP BY user_id
@@ -1138,8 +1138,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   LEFT JOIN (
                     SELECT
                       in2_team.team_id,
-                      array_to_json(array_agg(in2_team.user_id)) as array_user,
-                      array_to_json(array_agg(in2_team.state)) as array_state
+                      json_agg(in2_team.user_id) as array_user,
+                      json_agg(in2_team.state) as array_state
                     FROM teams as in2_team
                     GROUP BY in2_team.team_id
                   ) AS in_team ON in_team.team_id=g_team.team_id
@@ -1334,32 +1334,32 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               LEFT JOIN (
                 SELECT
                   g_id as gc_g_id,
-                  array_to_json(array_agg(gc.gc_id)) AS array_id,
-                  array_to_json(array_agg(gc_title)) AS array_title,
-                  array_to_json(array_agg(gc_ta_comment)) AS array_ta_comment,
-                  array_to_json(array_agg(gc_student_comment)) AS array_student_comment,
-                  array_to_json(array_agg(gc_lower_clamp)) AS array_lower_clamp,
-                  array_to_json(array_agg(gc_default)) AS array_default,
-                  array_to_json(array_agg(gc_max_value)) AS array_max_value,
-                  array_to_json(array_agg(gc_upper_clamp)) AS array_upper_clamp,
-                  array_to_json(array_agg(gc_is_text)) AS array_text,
-                  array_to_json(array_agg(gc_is_peer)) AS array_peer,
-                  array_to_json(array_agg(gc_order)) AS array_order,
-                  array_to_json(array_agg(gc_page)) AS array_page,
-                  array_to_json(array_agg(gcm.array_id)) AS array_mark_id,
-                  array_to_json(array_agg(gcm.array_points)) AS array_mark_points,
-                  array_to_json(array_agg(gcm.array_title)) AS array_mark_title,
-                  array_to_json(array_agg(gcm.array_publish)) AS array_mark_publish,
-                  array_to_json(array_agg(gcm.array_order)) AS array_mark_order
+                  json_agg(gc.gc_id) AS array_id,
+                  json_agg(gc_title) AS array_title,
+                  json_agg(gc_ta_comment) AS array_ta_comment,
+                  json_agg(gc_student_comment) AS array_student_comment,
+                  json_agg(gc_lower_clamp) AS array_lower_clamp,
+                  json_agg(gc_default) AS array_default,
+                  json_agg(gc_max_value) AS array_max_value,
+                  json_agg(gc_upper_clamp) AS array_upper_clamp,
+                  json_agg(gc_is_text) AS array_text,
+                  json_agg(gc_is_peer) AS array_peer,
+                  json_agg(gc_order) AS array_order,
+                  json_agg(gc_page) AS array_page,
+                  json_agg(gcm.array_id) AS array_mark_id,
+                  json_agg(gcm.array_points) AS array_mark_points,
+                  json_agg(gcm.array_title) AS array_mark_title,
+                  json_agg(gcm.array_publish) AS array_mark_publish,
+                  json_agg(gcm.array_order) AS array_mark_order
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
                     gc_id AS gcm_gc_id,
-                    array_to_json(array_agg(gcm_id)) AS array_id,
-                    array_to_json(array_agg(gcm_points)) AS array_points,
-                    array_to_json(array_agg(gcm_note)) AS array_title,
-                    array_to_json(array_agg(gcm_publish)) AS array_publish,
-                    array_to_json(array_agg(gcm_order)) AS array_order
+                    json_agg(gcm_id) AS array_id,
+                    json_agg(gcm_points) AS array_points,
+                    json_agg(gcm_note) AS array_title,
+                    json_agg(gcm_publish) AS array_publish,
+                    json_agg(gcm_order) AS array_order
                     FROM gradeable_component_mark
                   GROUP BY gcm_gc_id
                 ) AS gcm ON gcm.gcm_gc_id=gc.gc_id
