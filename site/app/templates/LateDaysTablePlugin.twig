@@ -35,7 +35,7 @@
     {% set num_status = 0 %}
     {% for gradeable in student_gradeables %}
         {% if g_id != NULL and gradeable.getId() == g_id %}
-            {% set class = "class=btn-primary" %}
+            {% set class = "class=blue-background" %}
             {% set id = "id = curr_status" %}
         {% endif %}
         <tr>
