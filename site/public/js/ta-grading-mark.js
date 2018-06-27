@@ -171,8 +171,7 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, error
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync, successCallback, errorCallback) {
-    id = (id ? id : -1);
+function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
@@ -185,8 +184,7 @@ function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
-                'component' : component,
-                'id' : id,
+                'gradeable_component_id' : component,
                 'note' : note,
                 'points' : points
             },
@@ -481,32 +479,27 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                 }
             }
             var parent = $('#marks-parent-'+c_index);
-            var id2     = ""+(max+1); 
             var x      = $('tr[name=mark_'+c_index+']').length;
-            parent.append(getMarkView(c_index, id2, id2, 1, editModeEnabled));
-            getComponent(c_index).marks.push({
-                id: id2,
+
+            var mark = {
                 name: note,
                 points: points,
                 publish: false,
                 has: false,
                 order: getComponent(c_index).marks.length
-            });
+            };
+
             updateCookies();
-            var mark_data = new Array(getComponent(c_index).marks.length);
-            for(var i=0; i<getComponent(c_index).marks.length; i++){
-                var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-                mark_data[i] = {
-                        points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-                        note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-                        selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                        order   : getMark(c_index, getMark(c_index, current_mark_id).id).order,
-                        id      : getMark(c_index, current_mark_id).id
-                    };
-                }
-            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, id2, note, points, false, function(data) {
+
+            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, note, points, false, function(data) {
             data = JSON.parse(data);
-             console.log(data);
+                mark.id = data.id;
+                console.log(data);
+
+                getComponent(c_index).marks.push(mark);
+                parent.append(getMarkView(c_index, mark.id, mark.id, 1, editModeEnabled));
+                saveMark(c_index, false);
+                updateMarksOnPage(c_index);
             });
            // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
           //  data = JSON.parse(data);
@@ -516,8 +509,6 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
         //    data = JSON.parse(data);
             //console.log(data);
           //  });
-            saveMark(c_index, false);
-            updateMarksOnPage(c_index);
       //      window.location.reload();
          //   openMark(c_index);
         }
