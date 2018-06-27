@@ -181,7 +181,7 @@ function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync
     $.ajax({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
-            async: true,
+            async: false,
             data: {
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
@@ -198,6 +198,28 @@ function ajaxAddNewMark(gradeable_id, user_id, component, id, note, points, sync
             error: (typeof(errorCallback) === "function") ? errorCallback : function() {
                 console.error("Something went wrong with adding a mark...");
                 alert("There was an error with adding a mark. Please refresh the page and try agian.");
+            }
+        })
+}
+function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCallback, errorCallback) {
+    $.ajax({
+            type: "POST",
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
+            async: false,
+            data: {
+                'gradeable_id' : gradeable_id,
+                'anon_id' : user_id,
+                'component' : component,
+                'mark' : mark
+            },
+            success: function(data) {
+                if (typeof(successCallback) === "function") {
+                    successCallback(data);
+                }
+            },
+            error: (typeof(errorCallback) === "function") ? errorCallback : function() {
+                console.error("Something went wrong with deleting a mark...");
+                alert("There was an error with deleting a mark. Please refresh the page and try agian.");
             }
         })
 }
@@ -483,8 +505,8 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                     };
                 }
             ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, id2, note, points, false, function(data) {
-         //   data = JSON.parse(data);
-            // console.log(data);
+            data = JSON.parse(data);
+             console.log(data);
             });
            // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
           //  data = JSON.parse(data);
@@ -503,7 +525,7 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 }
 
 // TODO: this
-function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback) {
+function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallback) {
     var parent = $('#marks-parent-'+c_index);
     var index=-1;
     for(var i=0; i<getComponent(c_index).marks.length; i++){
@@ -514,8 +536,8 @@ function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback)
     }
     var mark=getComponent(c_index).marks[index];
     getComponent(c_index).marks.splice(index, 1);
-    var current_row = $(me.parentElement.parentElement);
-    current_row.remove();
+   // var current_row = $(me.parentElement.parentElement);
+    //current_row.remove();
     var last_row = $('[name=mark_'+c_index+']').last().attr('id');
     var mark_data = new Array(getComponent(c_index).marks.length);
     parent.empty();
@@ -530,13 +552,20 @@ function deleteMark(me, c_index, last_num, sync, successCallback, errorCallback)
             };
         parent.append(getMarkView(c_index, current_mark_id, current_mark_id, 1, editModeEnabled));
     }
-    me.has=false;
-    ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
-        data = JSON.parse(data);
-});
-   saveMark(c_index, false);
-    updateMarksOnPage(c_index);
-  // window.location.reload();
+    ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark, false, function(data) {
+            data = JSON.parse(data);
+             console.log(data);
+            });
+           // ajaxSaveMarks(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, getComponent(c_index).marks.length, getGradeable().active_version, getGradeable().score, getGradeable().message, false, mark_data, getComponent(c_index).marks.length, false, function(data) {
+          //  data = JSON.parse(data);
+            // console.log(data);
+          //  });
+         //   ajaxGetMarkData(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, function(data) {
+        //    data = JSON.parse(data);
+            //console.log(data);
+          //  });
+            saveMark(c_index, false);
+            updateMarksOnPage(c_index);
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark

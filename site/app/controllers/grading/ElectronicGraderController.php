@@ -1059,13 +1059,21 @@ class ElectronicGraderController extends GradingController {
             $highID = -1;
             //delete marks that have been deleted
             /*foreach($component->getMarks() as $cmark){
+                echo($cmark->getNote());
+                echo("Cmark above \n");
                 $found = false;
+                $i=0;
                 foreach ($_POST['marks'] as $post_mark) {
-                    if($cmark->getId() === $post_mark["id"]){
+                    echo($_POST['marks'][$i]['note']);
+                    echo ("Post_mark above\n");
+                    $i++;
+                    if($cmark->getId() == $post_mark["id"]){
                         $found = true;
                     }
                 }
                 if($found===false){
+                    echo($cmark);
+                    echo("Deleting above \n");
                     $cmark->delete($gradeable_id, $user_id, $gradeable);
                 }
             }*/
@@ -1079,11 +1087,14 @@ class ElectronicGraderController extends GradingController {
                 $mark = null;
                 $found = false;
                 foreach ($component->getMarks() as $cmark) {
-                    if ($cmark->getId() === $post_mark["id"]) {
+                    if ($cmark->getId() == $post_mark['id']) {
                         $mark = $cmark;
                         break;
                         $found = true;
                     }
+                }
+                if($found = false){
+                    $mark = $cmark;
                 }
                 if($mark!=null){
                     $mark->setId($post_mark['id']);
@@ -1110,8 +1121,8 @@ class ElectronicGraderController extends GradingController {
                 $mark->setPoints($_POST['marks'][$i]['points']);
                 $mark->setNote($_POST['marks'][$i]['note']);
                 $mark->setOrder($_POST['num_mark']+1);
-                $mark->create();
-              //  $mark->save();
+               // $mark->create();
+                $mark->save();
                 $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
                 if($all_false === false) {
                     $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
@@ -1176,6 +1187,14 @@ class ElectronicGraderController extends GradingController {
             $mark->setNote($note);
             $mark->setOrder($order_counter);
             $mark->create();
+            $marks=$component->getMarks();
+            array_push($marks, $mark);
+            $component->setMarks($marks);
+            echo("Checking added marks\n");
+            foreach ($component->getMarks() as $post_mark) {
+                echo($post_mark->getNote());
+            }
+            echo("Done checking added marks\n");
         }
     }
    public function deleteOneMark() {
