@@ -5,12 +5,12 @@
     <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
     <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
     <fieldset>
-        <input type="radio" id="default_configs" name="eg_config" value="true" checked="true" /> Default configs
-        <input type="radio" id="uploaded_configs" name="eg_config" value="false" /> Uploaded configs
-        <input type="radio" id="private_repository" name="eg_config" value="false" /> Use Private repository
-        <input type="radio" id="provide_full_path" name="eg_config" value="false" /> Provide full path
+        <input type="radio" id="default_configs" class="eg_config" value="true" checked="true" /> Default configs
+        <input type="radio" id="uploaded_configs" class="eg_config" value="false" /> Uploaded configs
+        <input type="radio" id="private_repository" class="eg_config" value="false" /> Use Private repository
+        <input type="radio" id="provide_full_path" class="eg_config" value="false" /> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: block">
-            <select id="select_default_config" style="width: 250px;">
+            <select id="select_default_config" style="width: 300px;">
                 <option value="/usr/local/submitty/more_autograding_examples/upload_only/config">upload_only</option>
                 <option value="/usr/local/submitty/more_autograding_examples/iclicker_upload/config">iclicker_upload</option>
                 <option value="/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config">left_right_exam_seating</option>
@@ -20,7 +20,7 @@
             </select>
         </div>
         <div class="div_select_config" id="div_uploaded_configs" style="display: none">
-            <select id="select_default_config" style="width: 250px;">
+            <select id="select_uploaded_config" style="width: 300px;">
                 {% for path in all_uploaded_paths %}
                     <option value="{{ path }}">{{ path }}</option>
                 {% endfor %}
@@ -94,6 +94,7 @@
     }
 
     function onConfigChange(){
+        $('.eg_config').not(this).prop('checked', false);
         if($('#default_configs').is(':checked')) {
             $('.div_select_config').hide();
             $('#div_default_configs').show();
@@ -112,7 +113,15 @@
     }
 
     function onConfigPathChange(){
-        $('#input_provide_full_path').val($('#select_default_config').val());
+        if($('#default_configs').is(':checked')) {
+            $('#input_provide_full_path').val($('#select_default_config').val());
+        } else if($('#uploaded_configs').is(':checked')){
+            $('#input_provide_full_path').val($('#select_uploaded_config').val());
+        } else if($('#private_repository').is(':checked')){
+
+        } else {
+
+        }
     }
 
     function onStudentViewChange() {
@@ -143,7 +152,7 @@
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
 
-        $('[name="eg_config"]').change(onConfigChange);
-        $('#select_default_config').change(onConfigPathChange);
+        $('.eg_config').change(onConfigChange);
+        $('select').change(onConfigPathChange);
     });
 </script>
