@@ -1146,22 +1146,6 @@ class ElectronicGraderController extends GradingController {
                     }
                 }
             }
-            
-            // Create new marks
-            for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                $mark = new GradeableComponentMark($this->core);
-                $mark->setId($_POST['marks'][$i]['id']);
-                $mark->setGcId($component->getId());
-                $mark->setPoints($_POST['marks'][$i]['points']);
-                $mark->setNote($_POST['marks'][$i]['note']);
-                $mark->setOrder($_POST['num_mark']+1);
-               // $mark->create();
-                $mark->save();
-                $_POST['marks'][$i]['selected'] == 'true' ? $mark->setHasMark(true) : $mark->setHasMark(false);
-                if($all_false === false) {
-                    $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-                }
-            }
         }
         $gradeable->resetUserViewedDate();
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
@@ -1225,15 +1209,31 @@ class ElectronicGraderController extends GradingController {
 
             $response = ["id" => $id];
             $this->core->getOutput()->renderJson($response);
-            return $response;
+            return;
         }
+        $this->core->getOutput()->renderJson(["status" => "failure"]);
+        return;
     }
-   public function deleteOneMark() {
+    public function deleteOneMark() {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $mark=$_POST['mark'];
-        $mark->delete($gradeable_id, $user_id, $gradeable);
+        $gcm_id = $_POST['gradeable_component_mark_id'];
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->getId() != $_POST['gradeable_component_id']) {
+                continue;
+            } else {
+                foreach ($component->getMarks() as $mark) {
+                    if ($mark->getId() == $gcm_id) {
+                        $this->core->getQueries()->deleteGradeableComponentMark($mark);
+                        $this->core->getOutput()->renderJson(["status" => "success"]);
+                        return;
+                    }
+                }
+            }
+        }
+        $this->core->getOutput()->renderJson(["status" => "failure"]);
+        return;
     }
     public function saveGeneralComment() {
         $gradeable_id = $_POST['gradeable_id'];
