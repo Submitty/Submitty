@@ -35,8 +35,10 @@ class GradeableController extends AbstractController {
         }
         $inuse_config = array();
         foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
-            if(in_array($gradeable->getConfigPath(), $all_paths)){
-                $inuse_config[] = $gradeable->getConfigPath();
+            foreach($all_paths as $path){
+                if(strpos($gradeable->getConfigPath(), $path) !== false){
+                    $inuse_config[] = $path;
+                }
             }
         }
         $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm', $target_dir, $all_files, $inuse_config);
@@ -141,8 +143,8 @@ class GradeableController extends AbstractController {
         } else {
             $inuse_config = array();
             foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
-                if($gradeable->getConfigPath() == $config_path){
-                    $inuse_config[] = $gradeable->getId();
+                if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+                        $inuse_config[] = $gradeable->getId();
                 }
             }
         }

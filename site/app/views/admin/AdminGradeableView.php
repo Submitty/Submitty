@@ -94,7 +94,7 @@ class AdminGradeableView extends AbstractView {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_paths = array();
         foreach($all_uploaded_configs as $file){
-            $all_uploaded_paths[] = $file['path'];
+            $all_uploaded_paths[] = FileUtils::joinPaths($file['path'], "config");
             //If this happens then select the second radio button "Using Uploaded"
             if($file['path'] == $saved_path) $which_option = 1;
         }
