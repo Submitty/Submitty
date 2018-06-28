@@ -2,12 +2,14 @@ from __future__ import print_function
 from datetime import date
 import os
 import unittest
+from urllib.parse import urlencode
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from seleniumrequests import Chrome as WebDriver
 
 
 # noinspection PyPep8Naming
@@ -48,17 +50,40 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = webdriver.Chrome(options=self.options)
+        self.driver = WebDriver(options=self.options)
         if self.use_log_in:
             self.log_in()
 
     def tearDown(self):
         self.driver.quit()
 
-    def get(self, url):
+    def get(self, url=None, parts=None):
+        if url is None:
+            # Can specify parts = [('semester', 's18'), ...]
+            self.assertIsNotNone(parts)
+            url = "/index.php?" + urlencode(parts)
+
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
+
+        # Frog robot
+        self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
+
+    def post(self, url=None, parts=None, data=None):
+        # Convert url
+        if url is None:
+            # Can specify parts = [('semester', 's18'), ...]
+            self.assertIsNotNone(parts)
+            url = "/index.php?" + urlencode(parts)
+        if url[0] != "/":
+            url = "/" + url
+
+        # Convert data
+        self.assertIsNotNone(data)
+        self.assertIs(type(data), dict)
+
+        return self.driver.request('POST', url, data)
 
     def log_in(self, url=None, title="Submitty", user_id=None, user_password=None, user_name=None):
         """
