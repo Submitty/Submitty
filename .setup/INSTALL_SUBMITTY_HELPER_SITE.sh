@@ -18,6 +18,10 @@ fi
 # copy the website from the repo
 rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
+# clear old twig cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/twig"
+fi
 # create twig cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
