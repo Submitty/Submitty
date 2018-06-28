@@ -324,11 +324,10 @@ function haveMarksChanged(c_index, data) {
 
     return false;
 }
-
 /**
- * Reload marks for a component and render them in the list
- * @param num 1-indexed component index
- */
+  * Determine which order two marks should be displayed in. Used
+  * With the sortable list of marks
+*/
 function compareOrder(mark1, mark2){
     if(mark1.order>mark2.order){
         return 1;
@@ -338,6 +337,10 @@ function compareOrder(mark1, mark2){
     }
     return 0;
 }
+/**
+ * Reload marks for a component and render them in the list
+ * @param num 1-indexed component index
+ */
 function updateMarksOnPage(c_index) {
     var gradeable = getGradeable();
     var component = getComponent(c_index);
@@ -499,10 +502,8 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
             updateCookies();
 
             ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, note, points, false, function(data) {
-            data = JSON.parse(data);
+                data = JSON.parse(data);
                 mark.id = data.id;
-                console.log(data);
-
                 getComponent(c_index).marks.push(mark);
                 parent.append(getMarkView(c_index, mark.id, mark.id, 1, editModeEnabled));
             });
@@ -528,10 +529,7 @@ function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallbac
         var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
         parent.append(getMarkView(c_index, current_mark_id, current_mark_id, i, editModeEnabled));
     }
-    ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false, function(data) {
-        data = JSON.parse(data);
-        console.log(data);
-    });
+    ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false);
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -1110,7 +1108,6 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(data) {
         data = JSON.parse(data);
-        console.log(data);
         if (all_false === true) {
             //We've reset
             gradedByElement.text("Ungraded!");
