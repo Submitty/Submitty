@@ -109,20 +109,6 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
-    # script taken from https://stackoverflow.com/a/11203629
-    def input_files(self, file_paths=[], target_id="upload1", drag_and_drop=False):
-        if drag_and_drop:
-            # create an input element of type files
-            self.driver.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file', multiple:'', style: 'display: none'}).appendTo('body');")
-            upload_element = self.driver.find_element_by_id("seleniumUpload")
-        else:
-            upload_element = self.driver.find_element_by_id(target_id).find_element_by_xpath("//input[@type='file']")
-        # send all the files to the element as args
-        upload_element.send_keys("\n".join(file_paths))
-        if drag_and_drop:
-            # simulate the drop event for the files
-            self.driver.execute_script("e = document.createEvent('HTMLEvents'); e.initEvent('drop', true, true); e.dataTransfer = {{files: seleniumUpload.get(0).files }}; document.getElementById('{}').dispatchEvent(e);".format(target_id))
-
     @staticmethod
     def wait_user_input():
         """
