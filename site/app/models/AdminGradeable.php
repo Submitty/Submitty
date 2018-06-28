@@ -143,9 +143,9 @@ class AdminGradeable extends AbstractModel {
         $this->g_gradeable_type = $details['g_gradeable_type'];
         $this->g_grade_by_registration = $details['g_grade_by_registration'];
         if(!$template){
-            $this->g_ta_view_start_date = $details['g_ta_view_start_date'];
-            $this->g_grade_start_date = $details['g_grade_start_date'];
-            $this->g_grade_released_date = $details['g_grade_released_date'];
+            $this->g_ta_view_start_date = new \DateTime($details['g_ta_view_start_date']);
+            $this->g_grade_start_date = new \DateTime($details['g_grade_start_date']);
+            $this->g_grade_released_date = new \DateTime($details['g_grade_released_date']);
         }
         $this->g_min_grading_group = $details['g_min_grading_group'];
         $this->g_syllabus_bucket = $details['g_syllabus_bucket'];        
@@ -163,7 +163,7 @@ class AdminGradeable extends AbstractModel {
         //$this->eg_inherit_teams_from = $details['eg_inherit_teams_from'];
         $this->eg_max_team_size = $details['eg_max_team_size'];
         if(!$template) {
-            $this->eg_team_lock_date = $details['eg_team_lock_date'];
+            $this->eg_team_lock_date = new \DateTime($details['eg_team_lock_date']);
         }
         $this->eg_use_ta_grading = $details['eg_use_ta_grading'];
         $this->eg_student_view = $details['eg_student_view'];
@@ -172,8 +172,8 @@ class AdminGradeable extends AbstractModel {
         $this->eg_student_any_version = $details['eg_student_any_version'];
         $this->eg_peer_grading = $details['eg_peer_grading'];
         if(!$template) {
-            $this->eg_submission_open_date = $details['eg_submission_open_date'];
-            $this->eg_submission_due_date = $details['eg_submission_due_date'];
+            $this->eg_submission_open_date = new \DateTime($details['eg_submission_open_date']);
+            $this->eg_submission_due_date = new \DateTime($details['eg_submission_due_date']);
         }
         $this->eg_late_days = $details['eg_late_days'];
         $this->eg_peer_grade_set = $details['eg_peer_grade_set'];

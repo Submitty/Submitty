@@ -540,6 +540,8 @@ CREATE TABLE "thread_categories" (
 CREATE TABLE "categories_list" (
 	"category_id" serial NOT NULL,
 	"category_desc" varchar NOT NULL,
+	"rank" int,
+	"color" varchar DEFAULT '#000080' NOT NULL,
 	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 

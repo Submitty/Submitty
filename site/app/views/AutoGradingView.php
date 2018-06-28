@@ -69,6 +69,7 @@ class AutogradingView extends AbstractView {
 
     public static function loadAutoChecks(Gradeable $gradeable, $index, $who_id, $popup_css_file, $show_hidden = false) {
         $gradeable->loadResultDetails();
+        $gradeable_id = $gradeable->getId();
         $testcase = $gradeable->getTestcases()[$index];
         $return = "";
 
@@ -89,6 +90,17 @@ class AutogradingView extends AbstractView {
                 $file_path = urlencode($file_path);
                 $return .= '<iframe src=' . $url . '&component=misc&page=display_file&dir=results&file=' . $file_name . '&path=' . $file_path . ' width="95%" height="1200px" style="border: 0"></iframe>';
             } else {
+                    $id = "show_char_$index"."_".$autocheck_cnt;
+                    $div_id = "container_$index"."_".$autocheck_cnt;
+                    $helper_id = "white_space_helper_$index"."_".$autocheck_cnt;
+                    $return .= <<<HTML
+                    <br>
+                    <div style="height:23px; float:right;">
+                        <a id=$id class="btn btn-default" style="float:right;" onclick="changeDiffView('$div_id', '$gradeable_id', '$who_id', '$index', '$autocheck_cnt', '$helper_id')">Visualize whitespace characters</a>
+                    </div>
+                    <div><span style="margin-left: 20px" class="line_code" id=$helper_id></span></div>
+
+HTML;
                 $return .= <<<HTML
     <div class="box-block">
     <!-- Readded css here so the popups have the css -->
@@ -279,20 +291,24 @@ HTML;
      */
     public function showTAResults(Gradeable $gradeable) {
         $grading_complete = true;
+        $active_same_as_graded = true;
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->getGrader()) {
                 $grading_complete = false;
+            }
+            if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
+                $active_same_as_graded = false;
             }
         }
         $grader_names = array();
         //find all names of instructors who graded part(s) of this assignment that are full access grader_names
         if (!$gradeable->getPeerGrading()) {
             foreach ($gradeable->getComponents() as $component) {
-	        if ($component->getGrader() == NULL) {
-		   continue;
-		}
-	        $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
-		if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
+                if ($component->getGrader() == NULL) {
+                    continue;
+                }
+                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
             }
@@ -311,7 +327,6 @@ HTML;
                 break;
             }
         }
-
         // Todo: this is a lot of math for the view
         //add total points if both autograding and instructor grading exist
         $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
@@ -330,6 +345,7 @@ HTML;
             "graded_max" => $graded_max,
             "total_score" => $total_score,
             "total_max" => $total_max,
+            "active_same_as_graded" => $active_same_as_graded,
         ]);
     }
 }

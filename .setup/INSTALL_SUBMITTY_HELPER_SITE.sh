@@ -18,6 +18,13 @@ fi
 # copy the website from the repo
 rsync -rtz --exclude 'tests' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
+# clear old twig cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/twig"
+fi
+# create twig cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
+
 # set special user $HWPHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${HWPHP_USER}:${HWPHP_USER} {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${HWCGI_USER}:${HWCGI_USER} {} \;
@@ -52,6 +59,9 @@ done
 # "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
+
+# cache needs to be writable
+find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
 # return the course index page (only necessary when 'clean' option is used)
 if [ -f "$mytempcurrentcourses" ]; then

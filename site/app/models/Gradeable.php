@@ -58,6 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
+ * @method array getUploadsFiles()
  * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
@@ -245,7 +246,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
     * that contains filename, file path, and the file size. */
     protected $uploads_files = array();
-
+    /** @var array|bool $result_details */
     protected $result_details;
 
     protected $in_interactive_queue = false;
@@ -479,21 +480,28 @@ class Gradeable extends AbstractModel {
         }
         //If late days used - extensions applied > allowed per assignment then status is "Bad..."
         if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
-            $this->late_status = "Bad too many used for this assignment";
+            $this->late_status = "Bad (too many late days used on this assignment)";
             $late_flag = false;
         }
         // If late days used - extensions applied > allowed per term then status is "Bad..."
         // Do a max(0, ...) to protect against the case where the student's late days goes down
         // during the semester and they've already used late days
         if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
-            $this->late_status = "Bad too many used this term";
+            $this->late_status = "Bad (too many late days used this term)";
+            $late_flag = false;
+        }
+        
+        if ($this->getActiveVersion() == 0) {
+            if ($this->hasSubmitted()) {
+                $this->late_status = "Cancelled Submission";
+            }
+            else {
+                $this->late_status = "No submission";
+            }
             $late_flag = false;
         }
 
-        if (!$this->hasSubmitted()){
-            $this->late_status = "No submission";
-            $late_flag = false;
-        }
+
         //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
         //be less than 0 in cases of excess extensions. Decrement remaining late days.
         if ($late_flag) {
@@ -1232,7 +1240,11 @@ class Gradeable extends AbstractModel {
         return $data;
     }
 
-    public function getRepositoryPath(Team $team) {
+    /**
+     * @param Team|null $team
+     * @return string
+     */
+    public function getRepositoryPath($team = null) {
         if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
             $vcs_path = $this->getSubdirectory();
         } else {
@@ -1245,9 +1257,78 @@ class Gradeable extends AbstractModel {
         $repo = $vcs_path;
 
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
-        $repo = str_replace('{$user_id}', $this->core->getUser()->getId(), $repo);
+        $repo = str_replace('{$user_id}', $this->getUser()->getId(), $repo);
         $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
             $this->core->getConfig()->getVcsUrl(), $repo);
-        return str_replace('{$team_id}', $team->getId(), $repo);
+        if ($this->isTeamAssignment()) {
+            if ($team === null) {
+                $team = $this->getTeam();
+            }
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
     }
+
+    public function canDelete() {
+        if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
+            // no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+            $no_teams_flag = true;
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+            if (!empty($all_teams)) {
+                $no_teams_flag = false;
+            }
+            // no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+            $no_submission_flag = true;
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+            if (is_dir($submission_path)) {
+                $no_submission_flag = false;
+            }
+
+            return $no_submission_flag && $no_teams_flag;
+        } else if ($this->getType() == GradeableType::NUMERIC_TEXT || $this->getType() == GradeableType::CHECKPOINTS) {
+            return $this->core->getQueries()->getNumUsersGraded($this->getId()) === 0;
+        }
+
+        // Unknown type, better be safe
+        return false;
+    }
+
+    /**
+     * Calculate the late status of this gradeable, taking into account all previous gradeables
+     * @return string
+     */
+    public function calculateLateStatus($checkTeam = true, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = $this->getUser()->getId();
+        }
+
+        if ($this->isTeamAssignment() && $checkTeam) {
+            foreach ($this->getTeam()->getMembers() as $team_member) {
+                $status = $this->calculateLateStatus(false, $team_member);
+                if ($status == "Good" || $status == "Late") {
+                    // As long as one person on the team has a good status, then the assignment should be graded.
+                    return "Good";
+                }
+            }
+            return "Bad for all team members";
+        } else {
+            //Not doing a team check, do individual check
+
+            $total_late_used = 0;
+            $order_by = [
+                'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+            ];
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+                /* @var Gradeable $g */
+                $g->calculateLateDays($total_late_used);
+                if ($g->getId() == $this->getId()) {
+                    return $g->getLateStatus();
+                }
+            }
+            return "Good";
+        }
+    }
+
 }

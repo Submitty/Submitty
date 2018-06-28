@@ -68,11 +68,10 @@ class Component extends AbstractModel {
     protected $marks = array();
 
 
-    public function __construct(Core $core, Gradeable $gradeable, $details, array $marks) {
+    public function __construct(Core $core, Gradeable $gradeable, $details) {
         parent::__construct($core);
 
         $this->setGradeable($gradeable);
-        $this->setMarks($marks);
         $this->setIdInternal($details['id']);
         $this->setTitle($details['title']);
         $this->setTaComment($details['ta_comment']);
@@ -82,6 +81,7 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
+        $this->modified = false;
     }
 
     /**
@@ -103,10 +103,11 @@ class Component extends AbstractModel {
                 return $mark;
             }
         }
-        return null;
+        throw new \InvalidArgumentException('Component did not contain provided mark id');
     }
 
     /* Overridden setters with validation */
+
     /**
      * Sets the component's gradeable
      * @param Gradeable $gradeable A non-null gradeable
@@ -205,6 +206,7 @@ class Component extends AbstractModel {
         foreach (self::point_properties as $property) {
             $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
         }
+        $this->modified = true;
     }
 
     /**
@@ -218,7 +220,12 @@ class Component extends AbstractModel {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
-        $this->marks = $marks;
+        $this->marks = array_values($marks);
+
+        // sort by order
+        usort($this->marks, function(Mark $a, Mark $b) {
+            return $a->getOrder() - $b->getOrder();
+        });
     }
 
     /**
@@ -226,11 +233,22 @@ class Component extends AbstractModel {
      * @param int $id Must be a non-negative integer
      */
     private function setIdInternal($id) {
-        if (is_int($id) && $id >= 0) {
-            $this->id = $id;
+        if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
+            $this->id = intval($id);
         } else {
-            throw new \InvalidArgumentException('Component Id must be an integer >= 0');
+            throw new \InvalidArgumentException('Component Id must be a non-negative integer');
         }
+    }
+
+    /**
+     * Sets the id of the component.
+     *  NOTE: this should only be called from database results
+     *  to avoid reconstruction of the whole object
+     * @param int $id
+     * @internal
+     */
+    public function setIdFromDatabase($id) {
+        $this->setIdInternal($id);
     }
 
     /** @internal */
@@ -284,6 +302,6 @@ class Component extends AbstractModel {
     }
 
     public function getPenaltyPoints() {
-        return $this->isPenalty() ? abs($this->lower_clamp) : 0;
+        return $this->hasPenalty() ? abs($this->lower_clamp) : 0;
     }
 }
