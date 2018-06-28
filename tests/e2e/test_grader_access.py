@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import os
@@ -39,6 +40,13 @@ class TestGraderAccess(BaseTestCase):
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error()
 
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_mark_data')],
+                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
+
     def test_grading_grader(self):
         with LoginSession(self, "grader", "grader", "Tim"):
             self.click_class("sample", "SAMPLE")
@@ -64,6 +72,7 @@ class TestGraderAccess(BaseTestCase):
             self.assertTrue(os.path.isfile(downloaded_file))
             os.unlink(downloaded_file)
 
+            # Not in our section
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'aphacker')])
             self.expect_error()
@@ -71,6 +80,14 @@ class TestGraderAccess(BaseTestCase):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error()
+
+            # Not in our section
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_mark_data')],
+                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
 
     def test_grading_ta(self):
         with LoginSession(self, "ta2", "ta2", "Jack"):
@@ -109,6 +126,13 @@ class TestGraderAccess(BaseTestCase):
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error(False)
 
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_mark_data')],
+                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
+
     def test_grading_instructor(self):
         with LoginSession(self, "instructor", "instructor", "Quinn"):
             self.click_class("sample", "SAMPLE")
@@ -145,6 +169,13 @@ class TestGraderAccess(BaseTestCase):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error(False)
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_mark_data')],
+                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
 
     def expect_alert(self, expect=True, message=None, class_name="alert"):
         messages = self.driver.find_element_by_id("messages").find_elements_by_class_name(class_name)
