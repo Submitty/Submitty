@@ -35,27 +35,27 @@ sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
 
 sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
-sudo addgroup hwcronphp
-sudo addgroup course_builders
-sudo adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi hwphp
-sudo adduser hwphp shadow
-sudo adduser hwcgi shadow
-sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwphp hwcronphp
-sudo adduser hwcron hwcronphp
-sudo adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "hsdbu:hsdbu" | sudo chpasswd
+sudo addgroup submitty_daemonphp
+sudo addgroup submitty_course_builders
+sudo adduser submitty_php --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser submitty_cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser submitty_cgi submitty_php
+sudo adduser submitty_php shadow
+sudo adduser submitty_cgi shadow
+sudo adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser submitty_php submitty_daemonphp
+sudo adduser submitty_daemon submitty_daemonphp
+sudo adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo echo "submitty_dbuser:submitty_dbuser" | sudo chpasswd
 
-sudo chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
-sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
+sudo chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}
+sudo chown submitty_php:submitty_php ${SUBMITTY_DATA_DIR}
 sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
 sudo chmod 777         ${SUBMITTY_DATA_DIR}
 
 echo -e "/var/run/postgresql
-hsdbu
-hsdbu
+submitty_dbuser
+submitty_dbuser
 America/New_York
 http://localhost
 http://localhost/git
@@ -72,10 +72,10 @@ touch ${SUBMITTY_DATA_DIR}/instructors/valid
 chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
 chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
 
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
-# necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
-sudo usermod -a -G travis hwphp
+sudo bash -c 'echo "export PATH=$PATH" >> /home/submitty_php/.profile'
+sudo bash -c 'echo "export PATH=$PATH" >> /home/submitty_php/.bashrc'
+# necessary so that submitty_php has access to /home/travis/.phpenv/shims/composer
+sudo usermod -a -G travis submitty_php
 
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial

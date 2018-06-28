@@ -30,8 +30,8 @@ error_reporting(0);
 ini_set('display_errors', 0);
 
 //Database access
-define('DB_LOGIN',  'hsdbu');
-define('DB_PASSWD', 'hsdbu_pa55w0rd');
+define('DB_LOGIN',  'submitty_dbuser');
+define('DB_PASSWD', 'submitty_dbuser_pa55w0rd');
 define('DB_HOST',   'localhost');
 define('DB_NAME',   'submitty');
 

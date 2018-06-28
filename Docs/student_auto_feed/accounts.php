@@ -27,8 +27,8 @@ define('SVN_LIST', serialize( array (
 )));
 
 //Database access
-define('DB_LOGIN',  'hsdbu');
-define('DB_PASSWD', 'hsdbu_pa55w0rd');
+define('DB_LOGIN',  'submitty_dbuser');
+define('DB_PASSWD', 'submitty_dbuser_pa55w0rd');
 define('DB_HOST',   '192.168.56.101');
 
 //Location of accounts creation error log file

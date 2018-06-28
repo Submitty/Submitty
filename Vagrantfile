@@ -63,9 +63,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
-  # ideally we would use hwcron or something as the owner/group, but since that user doesn't exist
+  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
-  # which is guaranteed to exist and that during install_system.sh we add hwcron/hwphp/etc to the
+  # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'

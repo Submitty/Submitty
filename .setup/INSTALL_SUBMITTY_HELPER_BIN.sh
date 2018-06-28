@@ -11,13 +11,13 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-    HWCRON_USER=$(jq -r '.hwcron_user' ${CONF_DIR}/submitty_users.json)
-    COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
+    SUBMITTY_DAEMON_USER=$(jq -r '.submitty_daemon_user' ${CONF_DIR}/submitty_users.json)
+    SUBMITTY_COURSE_BUILDERS_GROUP=$(jq -r '.submitty_course_builders_group' ${CONF_DIR}/submitty_users.json)
 fi
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
+chown root:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
 chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 
 # copy all of the files
@@ -26,14 +26,14 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 # all course builders (instructors & head TAs) need read/execute access to these scripts
 array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py )
 for i in "${array[@]}"; do
-    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chown root:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
-# course builders & hwcron need access to these scripts
+# course builders & submitty_daemon need access to these scripts
 array=( build_homework_function.sh make_assignments_txt_file.py )
 for i in "${array[@]}"; do
-    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chown ${SUBMITTY_DAEMON_USER}:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
@@ -66,21 +66,21 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
-# hwcron only things
+# submitty_daemon only things
 array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
 for i in "${array[@]}"; do
-    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chown root:${SUBMITTY_DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-chown -R root:${HWCRON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+chown -R root:${SUBMITTY_DAEMON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
     chown -R root:${SUBMITTY_SUPERVISOR} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
-    chown -R root:${HWCRON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
+    chown -R root:${SUBMITTY_DAEMON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*

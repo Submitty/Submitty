@@ -38,7 +38,7 @@ import sys
 
 # CONFIGURATION
 DB_HOST    = 'submitty.cs.myuniversity.edu'
-DB_USER    = 'hsdbu'
+DB_USER    = 'submitty_dbuser'
 DB_PASS    = 'DB.p4ssw0rd'  # CHANGE THIS!  DO NOT USE 'DB.p4ssw0rd'
 DUMP_PATH  = '/var/local/submitty-dumps'
 

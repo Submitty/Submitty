@@ -48,7 +48,7 @@ else
     export WORKER=0
 fi
 
-COURSE_BUILDERS_GROUP=course_builders
+SUBMITTY_COURSE_BUILDERS_GROUP=submitty_course_builders
 
 #################################################################
 # DISTRO SETUP
@@ -78,16 +78,16 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # accounts, although you can also use ‘sudo su user’ to change to the
 # desired user on the local machine which works for most things.
 
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
+# The group submitty_daemonphp allows submitty_php to write the submissions, but give
+# read-only access to the submitty_daemon user.  And the submitty_daemon user writes the
+# results, and gives read-only access to the submitty_php user.
 
-addgroup hwcronphp
+addgroup submitty_daemonphp
 
-# The group course_builders allows instructors/head TAs/course
+# The group submitty_course_builders allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-addgroup ${COURSE_BUILDERS_GROUP}
+addgroup ${SUBMITTY_COURSE_BUILDERS_GROUP}
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -99,40 +99,40 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwphp hwcronphp
+    adduser submitty_php --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    adduser submitty_php submitty_daemonphp
 
-    adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwcgi hwphp
-    adduser hwcgi www-data
-    adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    # NOTE: hwcgi must be in the shadow group so that it has access to the
+    adduser submitty_cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    adduser submitty_cgi submitty_php
+    adduser submitty_cgi www-data
+    adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    # NOTE: submitty_cgi must be in the shadow group so that it has access to the
     # local passwords for pam authentication
-    adduser hwcgi shadow
+    adduser submitty_cgi shadow
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
-    # the hwphp and hwcron single user groups.  See also /etc/login.defs
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+    # the submitty_php and submitty_daemon single user groups.  See also /etc/login.defs
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/submitty_php/.profile
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/submitty_cgi/.profile
 fi
 
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and hwcron needs access to them for autograding
-adduser hwcron www-data
+adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser submitty_daemon submitty_daemonphp
+# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and submitty_daemon needs access to them for autograding
+adduser submitty_daemon www-data
 
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/submitty_daemon/.profile
 
 if [ ${VAGRANT} == 1 ]; then
 	# add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser hwphp vagrant
-    	adduser hwcgi vagrant
+    	adduser submitty_php vagrant
+    	adduser submitty_cgi vagrant
     fi
-	adduser hwcron vagrant
+	adduser submitty_daemon vagrant
 fi
 
-usermod -aG docker hwcron
+usermod -aG docker submitty_daemon
 
 pip3 install -U pip
 pip3 install python-pam
@@ -161,7 +161,7 @@ sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
-    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown submitty_cgi /usr/local/lib/python*/dist-packages/pam.py*
 fi
 
 #################################################################
@@ -177,7 +177,7 @@ HAMCREST_VER=1.3
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 
 if [ ${WORKER} == 0 ]; then
-    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
+    chown root:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
 fi
 
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -248,7 +248,7 @@ tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
+chown -R root:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 
 popd > /dev/null
@@ -451,8 +451,8 @@ else
         SUBMISSION_URL='http://192.168.56.101'
     fi
     echo -e "/var/run/postgresql
-    hsdbu
-    hsdbu
+    submitty_dbuser
+    submitty_dbuser
     America/New_York
     ${SUBMISSION_URL}
     ${GIT_URL}/git
@@ -478,8 +478,8 @@ fi
 
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    submitty_dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${submitty_dbuser_password} psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
     python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 fi
 
@@ -510,12 +510,12 @@ if [ ${WORKER} == 0 ]; then
 
     apache2ctl -t
 
-    if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
+    if ! grep -q "${SUBMITTY_COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers
-        echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
+        echo "#grant limited sudo access to members of the ${SUBMITTY_COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
+        echo "%${SUBMITTY_COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
+        echo "%${SUBMITTY_COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
+        echo "%${SUBMITTY_COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
     fi
 
 fi
@@ -533,17 +533,17 @@ if [ ${WORKER} == 0 ]; then
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown submitty_daemon:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        chown submitty_daemon:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R submitty_php:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R submitty_php:${SUBMITTY_COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
@@ -575,10 +575,10 @@ fi
 # cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
 # cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-# chown hwcron:hwcron -R /tmp/docker
+# chown submitty_daemon:submitty_daemon -R /tmp/docker
 
 # pushd /tmp/docker
-# su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+# su -c 'docker build -t ubuntu:custom -f Dockerfile .' submitty_daemon
 # popd > /dev/null
 
 

@@ -138,7 +138,7 @@ define('CSV_DELIM_CHAR', chr(9));
 
 //Properties for database access.  ***THESE NEED TO BE SET.
 define('DB_HOST',     'submitty.cs.myuniversity.edu');
-define('DB_LOGIN',    'hsdbu');
+define('DB_LOGIN',    'submitty_dbuser');
 define('DB_PASSWORD', 'DB.p4ssw0rd');
 
 /* The following constants identify what columns to read in the CSV dump. --- */

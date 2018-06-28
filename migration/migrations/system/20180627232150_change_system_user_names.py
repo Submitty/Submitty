@@ -27,6 +27,11 @@ def up():
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
 
+    os.system("mv /home/hwcron /home/submitty_daemon")
+    os.system("mv /home/hwphp /home/submitty_php")
+    os.system("mv /home/hwcgi /home/submitty_cgi")
+    os.system("mv /home/hsdbu /home/submitty_dbuser")
+    
     pass
 
 
@@ -56,5 +61,10 @@ def down():
     print ("       systemctl start php7.0-fpm.service")
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
+
+    os.system("mv /home/submitty_daemon /home/hwcron")
+    os.system("mv /home/submitty_php /home/hwphp")
+    os.system("mv /home/submitty_cgi /home/hwcgi")
+    os.system("mv /home/submitty_dbuser /home/hsdbu")
 
     pass

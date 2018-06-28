@@ -72,9 +72,9 @@ DB_HOST: Hostname of the Submitty databases.  You may use 'localhost' if
          Postgresql is on the same machine as the Submitty system.
 
 DB_USER: The username that interacts with Submitty course databases.  Typically
-         'hsdbu'
+         'submitty_dbuser'
 
-DB_PASS: The password for Submitty's database account (e.g. account 'hsdbu').
+DB_PASS: The password for Submitty's database account (e.g. account 'submitty_dbuser').
          *** Do NOT use the placeholder value of 'DB.p4ssw0rd' ***
 
 DUMP_PATH: The folder path to store the database dumps.  Course folders will

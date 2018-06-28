@@ -64,22 +64,22 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__|$SUBMITTY_TUTORIAL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_USER__|$SUBMITTY_CGI_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_USER__|$SUBMITTY_PHP_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_USER__|$SUBMITTY_DAEMON_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMONPHP_GROUP__|$SUBMITTY_DAEMONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $1
 
-    sed -i -e "s|__INSTALL__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCGI_UID__|$HWCGI_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__HWCGI_GID__|$HWCGI_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_UID__|$SUBMITTY_DAEMON_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_GID__|$SUBMITTY_DAEMON_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_UID__|$SUBMITTY_PHP_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_GID__|$SUBMITTY_PHP_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_UID__|$SUBMITTY_CGI_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_GID__|$SUBMITTY_CGI_GID|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__TIMEZONE__|$TIMEZONE|g" $1
 
@@ -183,16 +183,16 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 fi
 
-#Set up permissions on the logs directory. If in worker mode, hwphp does not exist.
+#Set up permissions on the logs directory. If in worker mode, submitty_php does not exist.
 if [ "${WORKER}" == 0 ]; then
-    chown  -R ${HWPHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
+    chown  -R ${SUBMITTY_PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 else
     chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 fi
 
-chown  -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+chown  -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
 #Set up shipper grading directories if not in worker mode.
@@ -206,13 +206,13 @@ if [ "${WORKER}" == 0 ]; then
 
     # set the permissions of these directories
 
-    #hwphp will write items to this list, hwcron will remove them
-    #FIXME: course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-    chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+    #submitty_php will write items to this list, submitty_daemon will remove them
+    #FIXME: course builders (instructors & head TAs) will write items to this todo list, submitty_daemon will remove them
+    chown  ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
-    #hwphp will write items to this list, hwcron will remove them
-    chown  ${HWCRON_USER}:${HWCRONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
+    #submitty_php will write items to this list, submitty_daemon will remove them
+    chown  ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
@@ -222,9 +222,9 @@ mkdir -p ${SUBMITTY_DATA_DIR}/tmp
 chown root:root ${SUBMITTY_DATA_DIR}/tmp
 chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 
-# tmp folder to hold files for PAM authentication. Needs to be writable by hwphp and only readable by hwcgi
+# tmp folder to hold files for PAM authentication. Needs to be writable by submitty_php and only readable by submitty_cgi
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp/pam
-chown hwphp.hwcgi ${SUBMITTY_DATA_DIR}/tmp/pam
+chown submitty_php:submitty_cgi ${SUBMITTY_DATA_DIR}/tmp/pam
 chmod 750 ${SUBMITTY_DATA_DIR}/tmp/pam
 
 ########################################################################################################################
@@ -354,7 +354,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c   ${SUBMITTY_INSTA
 # replace necessary variables
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c
 
-# SUID (Set owner User ID up on execution), allows the $HWCRON_USER
+# SUID (Set owner User ID up on execution), allows the $SUBMITTY_DAEMON_USER
 # to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
@@ -366,7 +366,7 @@ chmod 500 untrusted_execute.c
 g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 # change permissions & set suid: (must be root)
 chown root  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
-chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+chgrp $SUBMITTY_DAEMON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
@@ -395,28 +395,28 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+# GENERATE & INSTALL THE CRONTAB FILE FOR THE submitty_daemon USER
 #
 
-echo -e "Generate & install the crontab file for hwcron user"
+echo -e "Generate & install the crontab file for submitty_daemon user"
 
 # name of temporary file
-HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
+SUBMITTY_DAEMON_CRONTAB_FILE=my_submitty_daemon_crontab_file.txt
 
 # generate the file
-echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >  ${SUBMITTY_DAEMON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
-printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${HWCRON_CRONTAB_FILE}
+printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
 
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
-echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
 
-# install the crontab file for the hwcron user
-crontab  -u ${HWCRON_USER}  ${HWCRON_CRONTAB_FILE}
-rm ${HWCRON_CRONTAB_FILE}
+# install the crontab file for the submitty_daemon user
+crontab  -u ${SUBMITTY_DAEMON_USER}  ${SUBMITTY_DAEMON_CRONTAB_FILE}
+rm ${SUBMITTY_DAEMON_CRONTAB_FILE}
 
 
 ################################################################################################################
@@ -444,7 +444,7 @@ popd > /dev/null
 #fi
 
 # change permissions
-chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 # NOTE: These variables must match the same variables in install_system.sh
@@ -508,7 +508,7 @@ chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
 
 
 # change permissions
-chown -R ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 
@@ -544,7 +544,7 @@ chmod 555 /usr/lib/python*/dist-packages
 #Set up pam if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown submitty_cgi /usr/local/lib/python*/dist-packages/pam.py*
 fi
 sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
 sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
@@ -620,7 +620,7 @@ fi
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
     echo -e "\nStopping worker machine daemons"
-    sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+    sudo -H -u ${SUBMITTY_DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "\n"
 fi
 
@@ -643,8 +643,8 @@ rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
 mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${HWCRON_USER}:${HWCRON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
+chown -R ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
@@ -658,10 +658,10 @@ fi
 
 # update the autograding shipper & worker daemons
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
-chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_shipper.service
+chown -R submitty_daemon:submitty_daemon /etc/systemd/system/submitty_autograding_shipper.service
 chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
-chown -R hwcron:hwcron /etc/systemd/system/submitty_autograding_worker.service
+chown -R submitty_daemon:submitty_daemon /etc/systemd/system/submitty_autograding_worker.service
 chmod 444 /etc/systemd/system/submitty_autograding_worker.service
 
 
@@ -679,7 +679,7 @@ do
     myuser=`printf "untrusted%02d" $i`
     mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
     mkdir $mydir
-    chown hwcron:$myuser $mydir
+    chown submitty_daemon:$myuser $mydir
     chmod 770 $mydir
 done
 
@@ -797,12 +797,12 @@ else
     num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
     if [ "${num_machines}" != "1" ]; then
         # in order to update the submitty source files on the worker machines
-        # the hwcron user/group must have read access to the repo on the primary machine
-        chgrp -R ${HWCRON_GID} ${SUBMITTY_REPOSITORY}
+        # the submitty_daemon user/group must have read access to the repo on the primary machine
+        chgrp -R ${SUBMITTY_DAEMON_GID} ${SUBMITTY_REPOSITORY}
         chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
         echo -e Updating worker machines
-        sudo -H -u ${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+        sudo -H -u ${SUBMITTY_DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi
