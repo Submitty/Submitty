@@ -258,13 +258,14 @@ class DatabaseQueries {
         return $favorite_threads;
     }
 
-    private function findChildren($post_id, $thread_id, &$children){
-        $this->course_db->query("SELECT id from posts where deleted=false and parent_id=?", array($post_id));
+    private function findChildren($post_id, $thread_id, &$children, $get_deleted = false){
+        $query_delete = $get_deleted?"true":"deleted = false";
+        $this->course_db->query("SELECT id from posts where {$query_delete} and parent_id=?", array($post_id));
         $row = $this->course_db->rows();
         for($i = 0; $i < count($row); $i++){
             $child_id = $row[$i]["id"];
             array_push($children, $child_id);
-            $this->findChildren($child_id, $thread_id, $children);
+            $this->findChildren($child_id, $thread_id, $children, $get_deleted);
         }
     }
 
@@ -273,21 +274,39 @@ class DatabaseQueries {
     	return $this->course_db->rows();
     }
 
-    public function deletePost($post_id, $thread_id){
+
+    /**
+     * Set delete status for given post and all descendant
+     *
+     * If delete status of the first post in a thread is changed, it will also update thread delete status
+     *
+     * @param integer $post_id
+     * @param integer $thread_id
+     * @param integer(0/1) $newStatus - 1 implies deletion and 0 as undeletion
+     * @return boolean - Is first post of thread
+     */
+    public function setDeletePostStatus($post_id, $thread_id, $newStatus){
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
-
-        //If you delete the first post in a thread it deletes all posts in thread
-
         $parent_id = $this->course_db->rows()[0]["parent_id"];
         $children = array($post_id);
-        $this->findChildren($post_id, $thread_id, $children);
+        $get_deleted = ($newStatus?false:true);
+        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
+
+        if(!$newStatus) {
+            // On undelete, parent post must have deleted = false
+            if($parent_id!=-1) {
+                if($this->getPost($parent_id)['deleted']) {
+                    return null;
+                }
+            }
+        }
         if($parent_id == -1){
-            $this->course_db->query("UPDATE threads SET deleted = true WHERE id = ?", array($thread_id));
-            $this->course_db->query("UPDATE posts SET deleted = true WHERE thread_id = ?", array($thread_id));
+            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", array($newStatus, $thread_id));
+            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", array($newStatus, $thread_id));
             return true;
         } else {
             foreach($children as $post_id){
-                $this->course_db->query("UPDATE posts SET deleted = true WHERE id = ?", array($post_id));
+                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", array($newStatus, $post_id));
             }
         } return false;
     }

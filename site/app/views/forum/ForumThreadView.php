@@ -684,6 +684,9 @@ HTML;
 		}
 		if($post["deleted"]) {
 			$classes .= " deleted";
+			$deleted = true;
+		} else {
+			$deleted = false;
 		}
 		$offset = min(($reply_level - 1) * 30, 180);
 		
@@ -790,8 +793,17 @@ HTML;
 				$shouldEditThread = "false";
 				$edit_button_title = "Edit post";
 			}
+			if($deleted){
+				$ud_toggle_status = "false";
+				$ud_button_title = "Undelete post";
+				$ud_button_icon = "fa-undo";
+			} else {
+				$ud_toggle_status = "true";
+				$ud_button_title = "Remove post";
+				$ud_button_icon = "fa-trash";
+			}
 			$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-trash" aria-hidden="true"></i></a>
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
