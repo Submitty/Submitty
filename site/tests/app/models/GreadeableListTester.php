@@ -6,7 +6,7 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\GradeableType;
 use app\models\Config;
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
 use app\models\GradeableList;
 use app\models\User;
 use tests\BaseUnitTest;
@@ -253,7 +253,7 @@ class GreadeableListTester extends BaseUnitTest {
 
         $queries = $this->createMock(DatabaseQueries::class);
 
-        $queries->method('getAllGradeables')->willReturn($gradeables);
+        $queries->method('getGradeableConfigs')->willReturn($gradeables);
         $core->method('getQueries')->willReturn($queries);
 
         $user = $this->createMockModel(User::class);
@@ -269,23 +269,23 @@ class GreadeableListTester extends BaseUnitTest {
     /**
      * @param $id
      * @param $type
-     * @param $ta_view_date
-     * @param $open_date
-     * @param $due_date
+     * @param $ta_view_start_date
+     * @param $submission_open_date
+     * @param $submission_due_date
      * @param $grade_start_date
      * @param $grade_released_date
      * @param $ta_grading
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function mockGradeable($id, $type, $ta_view_date, $open_date, $due_date, $grade_start_date,
+    private function mockGradeable($id, $type, $ta_view_start_date, $submission_open_date, $submission_due_date, $grade_start_date,
                                    $grade_released_date, $ta_grading = true) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
         $gradeable->method('getType')->willReturn($type);
-        $gradeable->method('useTAGrading')->willReturn($ta_grading);
-        $temp = array('ta_view_date' => 'getTAViewDate', 'open_date' => 'getOpenDate',
-                      'due_date' => 'getDueDate', 'grade_start_date' => 'getGradeStartDate',
+        $gradeable->method('isTaGrading')->willReturn($ta_grading);
+        $temp = array('ta_view_start_date' => 'getTaViewStartDate', 'submission_open_date' => 'getSubmissionOpenDate',
+                      'submission_due_date' => 'getSubmissionDueDate', 'grade_start_date' => 'getGradeStartDate',
                       'grade_released_date' => 'getGradeReleasedDate');
         foreach ($temp as $return => $method) {
             $return = $$return;
