@@ -47,6 +47,7 @@ use app\libraries\Utils;
  * @method string getCourseEmail()
  * @method string getVcsUser()
  * @method string getVcsType()
+ * @method string getPrivateConfigRepository()
  */
 
 class Config extends AbstractModel {
