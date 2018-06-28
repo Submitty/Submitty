@@ -138,3 +138,50 @@ class BaseTestCase(unittest.TestCase):
         if today.month < 7:
             semester = "s" + str(today.year)[-2:]
         return semester
+
+
+class LoginSession():
+    def __init__(self, testcase, user_id=None, user_password=None, user_name=None):
+        """
+        :param BaseTestCase testcase:
+        :param user_id:
+        :param user_password:
+        :param user_name:
+        """
+        if "TEST_URL" in os.environ and os.environ['TEST_URL'] is not None:
+            self.test_url = os.environ['TEST_URL']
+        else:
+            self.test_url = BaseTestCase.TEST_URL
+
+        self.testcase = testcase
+        self.user_id = user_id if user_id is not None else BaseTestCase.USER_ID
+        self.user_name = user_name if user_name is not None else BaseTestCase.USER_NAME
+        if user_password is None and user_id is not None:
+            user_password = user_id
+        self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
+        self.logged_in = False
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.log_out()
+
+    def __enter__(self):
+        """
+        Provides a common function for logging into the site (and ensuring
+        that we're logged in)
+        :return:
+        """
+
+        self.testcase.get("/index.php")
+        self.testcase.assertIn("Submitty", self.testcase.driver.title)
+        self.testcase.driver.find_element_by_name('user_id').send_keys(self.user_id)
+        self.testcase.driver.find_element_by_name('password').send_keys(self.user_password)
+        self.testcase.driver.find_element_by_name('login').click()
+        self.testcase.assertEqual(self.user_name, self.testcase.driver.find_element_by_id("login-id").text)
+        self.logged_in = True
+
+    def log_out(self):
+        if self.logged_in:
+            self.logged_in = False
+            self.testcase.driver.find_element_by_id('logout').click()
+            self.testcase.driver.find_element_by_id('login-guest')
+
