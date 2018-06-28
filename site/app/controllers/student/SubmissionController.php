@@ -1391,13 +1391,7 @@ class SubmissionController extends AbstractController {
 
         return array('error' => false, 'version' => $new_version, 'message' => $msg);
     }
-
-    private function delete_files($dir) {
-        foreach(glob($dir . '/*') as $file) {
-            if(is_dir($file)) delete_files($file); else unlink($file);
-        }
-        rmdir($dir);
-    }
+    
 
 	// This copy all files from given dir ($src) and its subdirs into one destination folder, $dst
 	private function recursive_copy($src, $dst) {
