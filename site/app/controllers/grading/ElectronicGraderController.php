@@ -970,13 +970,19 @@ class ElectronicGraderController extends GradingController {
         if ($this->core->getUser()->getGroup() === 4) {
             if(!$gradeable->getPeerGrading()) {
                 $this->core->addErrorMessage("You do not have permission to grade this");
-                return;
+
+                $response = array('status' => 'failure');
+                $this->core->getOutput()->renderJson($response);
+                return $response;
             }
             else {
                 $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
                 if(!in_array($user_id, $user_ids_to_grade)) {
                     $this->core->addErrorMessage("You do not have permission to grade this student");
-                    return;
+
+                    $response = array('status' => 'failure');
+                    $this->core->getOutput()->renderJson($response);
+                    return $response;
                 }
             }
         }
@@ -992,7 +998,10 @@ class ElectronicGraderController extends GradingController {
             $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
             if (!in_array($user_id, $user_ids_to_grade)) {
                 $this->core->addErrorMessage("You do not have permission to grade {$user_id}");
-                return;
+
+                $response = array('status' => 'failure');
+                $this->core->getOutput()->renderJson($response);
+                return $response;
             }
         }
 
@@ -1228,7 +1237,6 @@ class ElectronicGraderController extends GradingController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $return_data = array();
-       // echo("TESTING!!");
         foreach ($gradeable->getComponents() as $question) {
             if(is_array($question)) {
                 if($question[0]->getId() != $_POST['gradeable_component_id']) {
