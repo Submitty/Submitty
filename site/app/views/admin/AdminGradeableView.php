@@ -98,8 +98,8 @@ class AdminGradeableView extends AbstractView {
             //If this happens then select the second radio button "Using Uploaded"
             if($file['path'] == $saved_path) $which_option = 1;
         }
-
-        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "temp_repository");
+        $repo_name = $this->core->getConfig()->getPrivateConfigRepository();
+        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $repo_name);
         $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
         $all_repository_paths = array();
         foreach($all_repository_configs as $file){
@@ -108,6 +108,8 @@ class AdminGradeableView extends AbstractView {
             if($file['path'] == $saved_path) $which_option = 2;
         }
 
+        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "build", $admin_gradeable->g_id, "log_cmake_output.txt");
+        $cmake_output = is_file($cmake_out_dir) ?? file_get_contents($cmake_out_dir);
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
@@ -121,11 +123,15 @@ class AdminGradeableView extends AbstractView {
 
             // Graders Page Specific
             "all_graders"    => $graders,
+            //Repository name
+            "repo_name"        => $repo_name,
             //All the uploaded config paths
             "all_repository_paths"    => $all_repository_paths,
             "all_uploaded_paths"      => $all_uploaded_paths,
             "default_paths"           => $default_paths,
-            "which_option"            => $which_option
+            "which_option"            => $which_option,
+            //build outputs
+            "cmake_output"            => json_encode($cmake_output)
         ]);
     }
     

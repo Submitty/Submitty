@@ -3,8 +3,8 @@
     <fieldset>
         <input type="radio" id="default_configs" class="eg_config" value="true" {% if which_option == 0 %} checked = "true" {% endif %}/> Default configs
         <input type="radio" id="uploaded_configs" class="eg_config" value="false" {% if which_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
-        {% if all_repository_paths | length != 0 %}
-            <input type="radio" id="private_repository" class="eg_config" value="false" {% if which_option == 1 %} checked = "true" {% endif %}/> Use Private repository
+        {% if repo_name != "" %}
+            <input type="radio" id="private_repository" class="eg_config" value="false" {% if which_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
         {% endif %}
         <input type="radio" id="provide_full_path" class="eg_config" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {% if which_option == 0 %} block {% else %} none {% endif %}">
@@ -84,6 +84,8 @@
         </div>
         <br />
     </fieldset>
+    <h3>Build log:</h3>
+    {{ cmake_output }}
 </div>
 
 <script type="text/javascript">
