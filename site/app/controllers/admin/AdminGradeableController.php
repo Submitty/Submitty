@@ -446,13 +446,7 @@ class AdminGradeableController extends AbstractController
         $component->setIsText(false);
         $peer_grading_component = (isset($details['peer_component_' . strval($x + 1)]) && $details['peer_component_' . strval($x + 1)] == 'on') ? true : false;
         $component->setIsPeer($peer_grading_component);
-        if (self::isRadioButtonTrue('eg_pdf_page_student')) {
-            $page_component = -1;
-        } else if (self::isRadioButtonTrue('eg_pdf_page')) {
-            $page_component = ($details['page_component_' . strval($x + 1)]);
-        } else {
-            $page_component = 0;
-        }
+        $page_component = $details['page_component_' . strval($x + 1)];
         $component->setPage($page_component);
     }
 
@@ -1153,19 +1147,18 @@ class AdminGradeableController extends AbstractController
 
     private function quickLink()
     {
-        $g_id = $_REQUEST['id'];
         $action = $_REQUEST['quick_link_action'];
-        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        $gradeable = $this->getAdminGradeable($_REQUEST['id']);
         if ($action === "release_grades_now") { //what happens on the quick link depends on the action
-            $gradeable->setGradeReleasedDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $gradeable->g_grade_released_date = new \DateTime('now', $this->core->getConfig()->getTimezone());
         } else if ($action === "open_ta_now") {
-            $gradeable->setTaViewDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $gradeable->g_ta_view_start_date = new \DateTime('now', $this->core->getConfig()->getTimezone());
         } else if ($action === "open_grading_now") {
-            $gradeable->setGradeStartDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $gradeable->g_grade_start_date = new \DateTime('now', $this->core->getConfig()->getTimezone());
         } else if ($action === "open_students_now") {
-            $gradeable->setOpenDate(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $gradeable->eg_submission_open_date = new \DateTime('now', $this->core->getConfig()->getTimezone());
         }
-        $gradeable->updateGradeable();
+        $this->core->getQueries()->updateGradeable($gradeable);
         $this->returnToNav();
     }
 

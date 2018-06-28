@@ -13,9 +13,7 @@ GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
-chmod -R 777 ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
 bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
-chmod -R 777 ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
@@ -29,15 +27,22 @@ Vagrant.configure(2) do |config|
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
   # Our primary development target, this is what RPI runs Submitty on
-  config.vm.define 'ubuntu', primary: true do |ubuntu|
+  config.vm.define 'ubuntu-16.04', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-16.04'
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
     ubuntu.vm.network 'private_network', ip: '192.168.56.101'
     ubuntu.vm.network 'private_network', ip: '192.168.56.102'
   end
 
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-18.04'
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432
+    ubuntu.vm.network 'private_network', ip: '192.168.56.111'
+    ubuntu.vm.network 'private_network', ip: '192.168.56.112'
+  end
+
   config.vm.define 'debian', autostart: false do |debian|
-    debian.vm.box = 'bento/debian-8.8'
+    debian.vm.box = 'bento/debian-8'
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
     debian.vm.network 'private_network', ip: '192.168.56.201'
     debian.vm.network 'private_network', ip: '192.168.56.202'
@@ -58,17 +63,22 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
+  # ideally we would use hwcron or something as the owner/group, but since that user doesn't exist
+  # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
+  # which is guaranteed to exist and that during install_system.sh we add hwcron/hwphp/etc to the
+  # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
-  group = 'root'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group
+  group = 'vagrant'
+  mount_options = %w(dmode=775 fmode=664)
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
 
   optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial)
-  for repo in optional_repos do
+  optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path,"/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options
     end
-  end
+  }
 
   config.vm.provision 'shell', inline: $script
 
