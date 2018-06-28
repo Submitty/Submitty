@@ -23,8 +23,6 @@ use app\models\User;
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
     private $component = null;
-    /** @var GradedGradeable Reference to the gradeable data */
-    private $graded_gradeable = null;
     /** @property @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
@@ -51,18 +49,16 @@ class GradedComponent extends AbstractModel {
     /**
      * GradedComponent constructor.
      * @param Core $core
-     * @param GradedGradeable $graded_gradeable The full graded gradeable associated with this component
+     * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
-     * @param int $component_id The component id associated with this grade
      * @param int[] $mark_ids The mark ids this graded component received
      * @param array $details any remaining properties
      * @throws \Exception if the 'grade_time' value in the $details array is not a valid DateTime/date-string
      */
-    public function __construct(Core $core, GradedGradeable $graded_gradeable, User $grader, $component_id, array $mark_ids, array $details) {
+    public function __construct(Core $core, Component $component, User $grader, array $mark_ids, array $details) {
         parent::__construct($core);
 
-        $this->setGradedGradeable($graded_gradeable);
-        $this->setComponent($graded_gradeable->getGradeable()->getComponent($component_id));
+        $this->setComponent($component);
         $this->setGrader($grader);
 
         // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
@@ -102,14 +98,6 @@ class GradedComponent extends AbstractModel {
      */
     public function getComponent() {
         return $this->component;
-    }
-
-    /**
-     * Gets the GradedGradeable this component belongs to
-     * @return GradedGradeable
-     */
-    public function getGradedGradeable() {
-        return $this->graded_gradeable;
     }
 
     /**

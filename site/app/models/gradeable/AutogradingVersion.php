@@ -18,9 +18,10 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * Data about and results of autograding for one submission version
+ * TODO: this should use lazy loading for per-testcase data (found in files on disk)
  *
  * @method int getVersion()
- * @method float getNonHiddenHonExtraCredit()
+ * @method float getNonHiddenNonExtraCredit()
  * @method float getNonHiddenExtraCredit()
  * @method float getHiddenNonExtraCredit()
  * @method float getHiddenExtraCredit()
@@ -48,14 +49,11 @@ class AutogradingVersion extends AbstractModel {
     /**
      * AutogradingVersion constructor.
      * @param Core $core
-     * @param GradedGradeable $graded_gradeable GradedGradeable this version data is associated with
      * @param array $details
      * @throws \Exception If \DateTime failed to parse
      */
-    public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
+    public function __construct(Core $core, array $details) {
         parent::__construct($core);
-
-        $this->setGradedGradeable($graded_gradeable);
 
         $this->setVersionInternal($details['version']);
         $this->setPointsInternal($details);
@@ -72,6 +70,10 @@ class AutogradingVersion extends AbstractModel {
         return $details;
     }
 
+    public function getNonHiddenPoints() {
+        return $this->non_hidden_non_extra_credit + $this->non_hidden_extra_credit;
+    }
+
     /**
      * Gets the graded gradeable this version data is associated with
      * @return GradedGradeable the graded gradeable this version data is associated with
@@ -81,17 +83,6 @@ class AutogradingVersion extends AbstractModel {
     }
 
     /* Overridden setters with validation */
-
-    /**
-     * Sets the internal graded gradeable reference
-     * @param GradedGradeable $graded_gradeable
-     */
-    private function setGradedGradeable(GradedGradeable $graded_gradeable) {
-        if ($graded_gradeable === null) {
-            throw new \InvalidArgumentException('Graded gradeable cannot be null');
-        }
-        $this->graded_gradeable = $graded_gradeable;
-    }
 
     /**
      * Sets the version this graded version data is for
