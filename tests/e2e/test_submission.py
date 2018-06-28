@@ -53,6 +53,13 @@ class TestSubmission(BaseTestCase):
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='{}' and count(label[@class='mylabel'])=0]".format(target_id))))
         # make sure the submission count has increased
         self.assertEqual(submission_count+1, self.get_submission_count())
+        file_names = { os.path.basename(file_path) for file_path in file_paths }
+        submitted_files_text = self.driver.find_element_by_xpath("//div[@id='container']/div[@class='content']/div[@class='sub'][2]/div[@class='box half'][1]").text
+        for submitted_file_text in submitted_files_text.split("\n"):
+            idx = submitted_file_text.rfind('(')
+            file_name = submitted_file_text[:idx-1]
+            file_names.remove(file_name)
+        self.assertEqual(0, len(file_names))
     
     def change_submission_version(self):
         # find the version selection dropdown and click
