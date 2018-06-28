@@ -2447,18 +2447,15 @@ AND gc_id IN (
     }
 
     /**
-     * Gets all GradedGradeable's associated with a Gradeable.  If
+     * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
-     *  Note: if the gradeable is a team gradeable, use the $teams parameter,
-     *      otherwise use the $users parameter.  You will not get GradeableData
-     *      for a team submission by passing team member names to $users.
-     * @param \app\models\gradeable\Gradeable $gradeable
+     *  Note: The users' teams will be included in the search
      * @param string[]|null $users The ids of the users to get data for
      * @param string[]null $teams The ids of the teams to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
+    public function getGradeableDataAll(array $gradeables, $users = null, $teams = null) {
         throw new NotImplementedException();
     }
 
