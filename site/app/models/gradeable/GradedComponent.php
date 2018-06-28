@@ -37,7 +37,7 @@ class GradedComponent extends AbstractModel {
     /** @property @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
 
-    /** @property @var float The score for this component */
+    /** @property @var float The score for this component (or custom mark point value) */
     protected $score = 0;
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
@@ -84,6 +84,7 @@ class GradedComponent extends AbstractModel {
         if (isset($details['score'])) {
             $this->setScore($details['score']);
         }
+        $this->modified = false;
     }
 
     public function toArray() {
@@ -149,19 +150,6 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
-     * Calculates the score the submitter received for this component
-     *  based on the $marks array
-     */
-    private function calculateScore() {
-        $total_points = 0.0;
-
-        foreach ($this->marks as $mark) {
-            $total_points += $mark->getPoints();
-        }
-        $this->setScore($total_points);
-    }
-
-    /**
      * Sets the marks the submitter received for this component
      * @param array $marks
      */
@@ -175,8 +163,6 @@ class GradedComponent extends AbstractModel {
         }
         $this->marks = $marks;
         $this->mark_ids = $new_mark_ids;
-
-        $this->calculateScore();
     }
 
     /**
@@ -190,6 +176,7 @@ class GradedComponent extends AbstractModel {
         } else {
             $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
         }
+        $this->modified = true;
     }
 
     /**
@@ -199,6 +186,7 @@ class GradedComponent extends AbstractModel {
     public function setGrader(User $grader) {
         $this->grader = $grader;
         $this->grader_id = $this->grader !== null ? $grader->getId() : '';
+        $this->modified = true;
     }
 
     /**
@@ -210,6 +198,7 @@ class GradedComponent extends AbstractModel {
         // clamp the score (no error if not in bounds)
         //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
         $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        $this->modified = true;
     }
 
     /* Intentionally Unimplemented accessor methods */
