@@ -2,17 +2,12 @@
 
 namespace app\controllers;
 
-use app\controllers\AbstractController;
 use app\libraries\Core;
-use app\libraries\DateUtils;
-use app\libraries\ErrorMessages;
-use app\libraries\FileUtils;
 use app\libraries\GradeableType;
-use app\libraries\Logger;
-use app\libraries\Utils;
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
 use app\models\GradeableList;
-use app\models\GradeableSection;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -75,7 +70,30 @@ class NavigationController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
+        // Get a single array of the visible gradeables
+        $visible_gradeables = [];
+        foreach($sections_to_lists as $gradeables) {
+            foreach($gradeables as $gradeable) {
+                $visible_gradeables[] = $gradeable;
+            }
+        }
+
+        // Get the user data for each gradeable
+        $graded_gradeables = [];
+        foreach($this->core->getQueries()->getGradeableDataAll($visible_gradeables, $user->getId()) as $gg) {
+            $graded_gradeables[$gg->getGradeableId()] = $gg;
+        }
+
+        // Fill any missing data with blanks
+        foreach($visible_gradeables as $gradeable) {
+            if(!isset($graded_gradeables[$gradeable->getId()])) {
+                // TODO: this makes the submitter a user if the user doesn't have a team for this gradeable
+                $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user->getId());
+                $graded_gradeables[$gradeable->getId()] = new GradedGradeable($this->core, $gradeable, new Submitter($this->core,$team ?? $user));
+            }
+        }
+
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
     
@@ -84,11 +102,12 @@ class NavigationController extends AbstractController {
      * @param Gradeable $gradeable
      * @return bool True if they are
      */
-    private function filterCanView($gradeable) {
+    private function filterCanView(Gradeable $gradeable) {
         $user = $this->core->getUser();
 
         //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE && !$gradeable->hasConfig()) {
+        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
+            !$gradeable->hasAutogradingConfig()) {
             return false;
         }
 
@@ -98,13 +117,13 @@ class NavigationController extends AbstractController {
         }
 
         // if student view false, never show
-        if (!$gradeable->getStudentView() && !$user->accessGrading()) {
+        if (!$gradeable->isStudentView() && !$user->accessGrading()) {
             return false;
         }
 
         //If we're not instructor and this is not open to TAs
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        if ($gradeable->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
+        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
             return false;
         }
 
