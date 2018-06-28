@@ -85,7 +85,12 @@
         <br />
     </fieldset>
     <h3>Build log:</h3>
-    {{ cmake_output }}
+    {% if cmake_output is null %}
+        <pre>There is currently no build output.</pre>
+    {% else %}
+        <pre>{{ cmake_output }}</pre>
+    {% endif %}
+
 </div>
 
 <script type="text/javascript">

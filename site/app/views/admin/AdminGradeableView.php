@@ -109,7 +109,7 @@ class AdminGradeableView extends AbstractView {
         }
 
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "build", $admin_gradeable->g_id, "log_cmake_output.txt");
-        $cmake_output = is_file($cmake_out_dir) ?? file_get_contents($cmake_out_dir);
+        $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
             "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
             "js_gradeables_array"=> json_encode($gradeables_array),
@@ -131,7 +131,7 @@ class AdminGradeableView extends AbstractView {
             "default_paths"           => $default_paths,
             "which_option"            => $which_option,
             //build outputs
-            "cmake_output"            => json_encode($cmake_output)
+            "cmake_output"            => htmlentities($cmake_output)
         ]);
     }
     

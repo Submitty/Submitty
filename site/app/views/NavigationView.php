@@ -515,10 +515,14 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getRebuildButton(Gradeable $gradeable) {
+        $class = "btn btn-default btn-nav";
+        if($gradeable->hasBuildError()){
+            $class = "btn btn-danger btn-nav";
+        }
         $button = new Button($this->core, [
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "class" => $class
         ]);
         return $button;
     }
