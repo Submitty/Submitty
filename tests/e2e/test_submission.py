@@ -52,6 +52,20 @@ class TestSubmission(BaseTestCase):
         # make sure the submission count has increased
         self.assertEqual(submission_count+1, self.get_submission_count())
     
+    def change_submission_version(self):
+        # find the version selection dropdown and click
+        version_select_elem = self.driver.find_element_by_xpath("//div[@class='content']/select")
+        version_select_elem.click()
+        # find an unselected version and click
+        new_version_elem = version_select_elem.find_element_by_xpath("//option[not(@selected) and not(@value='0')]")
+        new_version = new_version_elem.get_attribute("value")
+        new_version_elem.click()
+        # wait until the page reloads to change the selected version, then click the "Grade This Version" button
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected]".format(new_version))))
+        self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='version_change']").click()
+        # wait until the page reloads to change the active version, completing the test
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version))))        
+    
     def test_normal_upload(self):
         self.make_submission(self.create_file_paths())
 
@@ -68,19 +82,33 @@ class TestSubmission(BaseTestCase):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_gradeable_button("open", "open_homework", "resubmit", (By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Open Homework']"))
-        # find the version selection dropdown and click
-        version_select_elem = self.driver.find_element_by_xpath("//div[@class='content']/select")
-        version_select_elem.click()
-        # find an unselected version and click
-        new_version_elem = version_select_elem.find_element_by_xpath("//option[not(@selected) and not(@value='0')]")
-        new_version = new_version_elem.get_attribute("value")
-        new_version_elem.click()
-        # wait until the page reloads to change the selected version, then click the "Grade This Version" button
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected]".format(new_version))))
-        self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit']").click()
-        # wait until the page reloads to change the active version, completing the test
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version))))
+        # test changing the submission version
+        self.change_submission_version()
+
+    def test_cancel_submission_version(self):
+        self.log_in()
+        self.click_class("sample", "SAMPLE")
+        self.click_nav_gradeable_button("open", "open_homework", "resubmit", (By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Open Homework']"))
+        # click button and wait until page reloads to cancel version
+        self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='0' and @selected]")))
+        # change back to a valid submission version
+        self.change_submission_version()
+
 
 if __name__ == "__main__":
     import unittest
     unittest.main()
+    
+    # tester = TestSubmission("runTest")
+    # def q():
+    #     tester.driver.quit()
+    # tester.setUp()
+    # tester.log_in()
+    # tester.click_class("sample", "SAMPLE")
+    # tester.click_nav_gradeable_button("open", "open_homework", "resubmit", (By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Open Homework']"))
+    # tester.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
+    # WebDriverWait(tester.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='0' and @selected]")))
+    
+    
+    
