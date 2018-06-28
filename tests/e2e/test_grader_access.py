@@ -1,11 +1,13 @@
-from time import sleep
+from datetime import date
+
+import os
 
 from .base_testcase import BaseTestCase
 from .base_testcase import LoginSession
 
 
 class TestGraderAccess(BaseTestCase):
-    def __init__(self,testname):
+    def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
     def test_login_grading_student(self):
@@ -22,6 +24,11 @@ class TestGraderAccess(BaseTestCase):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
                             ('page', 'download_all_assigned'), ('dir', 'submissions'),
                             ('gradeable_id', 'grading_homework'), ('type', 'All')])
+            self.expect_error()
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework')])
             self.expect_error()
 
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
@@ -47,6 +54,15 @@ class TestGraderAccess(BaseTestCase):
                             ('page', 'download_all_assigned'), ('dir', 'submissions'),
                             ('gradeable_id', 'grading_homework'), ('type', 'All')])
             self.expect_error()
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework')])
+            downloaded_file = os.path.join(self.download_dir,
+                                           "grading_homework_section_students_{0:02}-{1:02}-{2:04}.zip".format(
+                                               date.today().month, date.today().day, date.today().year))
+            self.assertTrue(os.path.isfile(downloaded_file))
+            os.unlink(downloaded_file)
 
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'aphacker')])

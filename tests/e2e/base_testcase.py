@@ -25,6 +25,7 @@ class BaseTestCase(unittest.TestCase):
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
+    DOWNLOAD_DIR = "/tmp"
 
     def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
         super().__init__(testname)
@@ -40,6 +41,15 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
+
+        self.download_dir = BaseTestCase.DOWNLOAD_DIR
+        profile = {
+            'download.prompt_for_download': False,
+            'download.default_directory': self.download_dir,
+            'download.directory_upgrade': True,
+            'plugins.plugins_disabled': ['Chrome PDF Viewer']
+        }
+        self.options.add_experimental_option('prefs', profile)
         self.user_id = user_id if user_id is not None else BaseTestCase.USER_ID
         self.user_name = user_name if user_name is not None else BaseTestCase.USER_NAME
         if user_password is None and user_id is not None:
