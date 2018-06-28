@@ -1,12 +1,12 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" id="default_configs" class="eg_config" value="true" {% if which_option == 0 %} checked = "true" {% endif %}/> Default configs
-        <input type="radio" id="uploaded_configs" class="eg_config" value="false" {% if which_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
+        <input type="radio" id="default_configs" class="config_option" value="true" {% if which_option == 0 %} checked = "true" {% endif %}/> Default configs
+        <input type="radio" id="uploaded_configs" class="config_option" value="false" {% if which_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="eg_config" value="false" {% if which_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
+            <input type="radio" id="private_repository" class="config_option" value="false" {% if which_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
         {% endif %}
-        <input type="radio" id="provide_full_path" class="eg_config" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
+        <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {% if which_option == 0 %} block {% else %} none {% endif %}">
             <select id="select_default_config" style="width: 700px;">
                 {% for path in default_paths %}
@@ -118,7 +118,7 @@
     }
 
     function onConfigChange(){
-        $('.eg_config').not(this).prop('checked', false);
+        $('.config_option').not(this).prop('checked', false);
         if($('#default_configs').is(':checked')) {
             $('.div_select_config').hide();
             $('#div_default_configs').show();
@@ -147,8 +147,6 @@
         } else if($('#private_repository').is(':checked')){
             $('#input_provide_full_path').val($('#select_repository_config_config').val());
             $('#input_provide_full_path').change();
-        } else {
-
         }
     }
 
@@ -179,7 +177,7 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
-        $('.eg_config').change(onConfigChange);
-        $('select').change(onConfigPathChange);
+        $('.config_option').change(onConfigChange);
+        $('#select_default_config').change(onConfigPathChange);
     });
 </script>

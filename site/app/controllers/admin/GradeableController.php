@@ -110,8 +110,6 @@ class GradeableController extends AbstractController {
             $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
             if(rename($config_file_path, $new_dir)){
                 $this->core->addSuccessMessage("Successfully renamed file");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                    'action' => 'upload_config')));
             } else {
                 $this->core->addErrorMessage("Directory already exist, please choose another name.");
             }
@@ -125,7 +123,7 @@ class GradeableController extends AbstractController {
         if($config_path == null){
             $this->core->addErrorMessage("Selecting config failed.");
         } else {
-            if($this->rrmdir($config_path)){
+            if($this->recursive_rmdir($config_path)){
                 $this->core->addSuccessMessage("The config folder has been succesfully deleted");
             } else {
                 $this->core->addErrorMessage("Deleting config failed.");
@@ -151,13 +149,20 @@ class GradeableController extends AbstractController {
         return $this->core->getOutput()->renderJson($inuse_config);
     }
 
-    private function rrmdir($dir) {
+    /**
+     * @param $dir directory to remove
+     *
+     * This function is the same as rmdir, except it removes all the content inside as well.
+     *
+     * @return bool whether or not the dir is removed
+     */
+    private function recursive_rmdir($dir) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
                     if (is_dir($dir."/".$object))
-                        $this->rrmdir($dir."/".$object);
+                        $this->recursive_rmdir($dir."/".$object);
                     else
                         unlink($dir."/".$object);
                 }

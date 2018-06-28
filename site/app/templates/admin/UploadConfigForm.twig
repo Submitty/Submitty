@@ -36,10 +36,10 @@
     <br>&nbsp;<br>
     <link>
     <script>
-        function renameConfig(file_path){
+        function openRenamePopup(file_path){
             var url = buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'check_being_used', 'config': file_path});
             $('#alert_in_use').html('');
-            $('ol').empty();
+            $('#gradeables_using_config').empty();
             $.ajax({
                 url : url,
                 success(data){
@@ -47,12 +47,12 @@
                     if(gradeable_ids.length > 0){
                         $('#alert_in_use').html("Note: Currently these gradeables are using this config, rename at your own risk");
                         for(var i = 0; i < gradeable_ids.length; i++){
-                            $('ol').append("<li>" + gradeable_ids[i] + "</li>");
+                            $('#gradeables_using_config').append("<li>" + gradeable_ids[i] + "</li>");
                         }
                     }
                 }
             })
-            $('.popup-form').css('display', 'block');
+            $('#rename_config_popup').css('display', 'block');
             $('#curr_config_name').val(file_path);
         }
     </script>
@@ -70,7 +70,7 @@
         {% if file.files != null %}
             <div>
                 {% if indent == 1 %}
-                    <a class="fa fa-pencil" onclick="renameConfig('{{ file.path }}')"></a>
+                    <a class="fa fa-pencil" onclick="openRenamePopup('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
                         <a class="fa fa-trash" href="{{core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'delete_config', 'config': file.path})}}"></a>
                     {% endif %}
