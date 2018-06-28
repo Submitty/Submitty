@@ -18,8 +18,12 @@ class ImagesController extends AbstractController {
     }
 
     public function viewImagesPage() {
-        $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
         $user_group = $this->core->getUser()->getGroup();
+        if ($user_group === 4) { // student has no permission to view image page
+            return;
+        }
+        $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
+
         if ($user_group !== 3) //3 means limited access grader (mentor)
             $grader_sections = array();  //reset grader section to nothing so permission for every image
         $instructor_permission = ($user_group === 1);

@@ -1393,6 +1393,10 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadImagesFiles() {
+        if($this->core->getUser()->getGroup() === 4) {
+			     return $this->uploadResult("You have no permission to access this page", false);
+        }
+
         if (empty($_POST)) {
            $max_size = ini_get('post_max_size');
            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);

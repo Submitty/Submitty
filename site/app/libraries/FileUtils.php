@@ -111,8 +111,9 @@ class FileUtils {
      *
      * @param string $src
      * @param string $dst
+     * @param boolean $forceLowerCase, optional, default to true
      */
-    public static function recursiveCopy($src, $dst) {
+    public static function recursiveCopy($src, $dst, $forceLowerCase = true) {
         $iter = new \RecursiveDirectoryIterator($src);
         $files = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
@@ -123,7 +124,11 @@ class FileUtils {
             else if ($iter->isFile()) {
                 $extension = strtolower(pathinfo($iter->getFilename(), PATHINFO_EXTENSION));
                 if ($extension === 'png') { // just get all png file only
-                    copy($src . '/' . $iter->getFilename(),$dst . '/' . $iter->getFilename());
+                    $newFilename = $iter->getFilename();
+                    if (forceLowerCase) {
+                        $newFilename = strtolower($newFilename);
+                    }
+                    copy($src . '/' . $iter->getFilename(),$dst . '/' . $newFilename);
                 }
             }
             else if ($iter->isDir()) {
