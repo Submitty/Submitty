@@ -107,6 +107,8 @@ class GradeableController extends AbstractController {
         if($config_file_path == null){
             $this->core->addErrorMessage("Unable to find file");
 
+        } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+            $this->core->addErrorMessage("This action can't be completed.");
         } else {
             $new_name = $_POST['new_config_name'] ?? null;
             $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
@@ -120,10 +122,13 @@ class GradeableController extends AbstractController {
             'action' => 'upload_config')));
     }
 
-    public function delete_config() {
+    public function delete_config()
+    {
         $config_path = $_GET['config'] ?? null;
-        if($config_path == null){
+        if ($config_path == null) {
             $this->core->addErrorMessage("Selecting config failed.");
+        } else if (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+            $this->core->addErrorMessage("This action can't be completed.");
         } else {
             if($this->recursive_rmdir($config_path)){
                 $this->core->addSuccessMessage("The config folder has been succesfully deleted");

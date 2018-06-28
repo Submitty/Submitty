@@ -77,35 +77,35 @@ class AdminGradeableView extends AbstractView {
         $saved_path = $admin_gradeable->eg_config_path;
         //This helps determine which radio button to check when selecting config.
         //Default option is 3, which means the user has to specify the path.
-        $which_option = 3;
+        $which_config_option = 3;
         //These are hard coded default config options.
-        $default_paths = ["/usr/local/submitty/more_autograding_examples/upload_only/config",
+        $default_config_paths = ["/usr/local/submitty/more_autograding_examples/upload_only/config",
                           "/usr/local/submitty/more_autograding_examples/iclicker_upload/config",
                           "/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config",
                           "/usr/local/submitty/more_autograding_examples/pdf_exam/config",
                           "/usr/local/submitty/more_autograding_examples/test_notes_upload/config",
                           "/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config"];
-        foreach($default_paths as $path){
+        foreach($default_config_paths as $path){
             //If this happens then select the first radio button "Using Default"
-            if($path == $saved_path) $which_option = 0;
+            if($path == $saved_path) $which_config_option = 0;
         }
 
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
-        $all_uploaded_paths = array();
+        $all_uploaded_config_paths = array();
         foreach($all_uploaded_configs as $file){
-            $all_uploaded_paths[] = FileUtils::joinPaths($file['path'], "config");
+            $all_uploaded_config_paths[] = FileUtils::joinPaths($file['path'], "config");
             //If this happens then select the second radio button "Using Uploaded"
-            if($file['path'] == $saved_path) $which_option = 1;
+            if($file['path'] == $saved_path) $which_config_option = 1;
         }
-        $repo_name = $this->core->getConfig()->getPrivateConfigRepository();
-        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $repo_name);
+        $config_repo_name = $this->core->getConfig()->getPrivateConfigRepository();
+        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
         $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
-        $all_repository_paths = array();
+        $all_repository_config_paths = array();
         foreach($all_repository_configs as $file){
-            $all_uploaded_paths[] = $file['path'];
+            $all_repository_config_paths[] = $file['path'];
             //If this happens then select the second radio button "Use Private Repository"
-            if($file['path'] == $saved_path) $which_option = 2;
+            if($file['path'] == $saved_path) $which_config_option = 2;
         }
 
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "build", $admin_gradeable->g_id, "log_cmake_output.txt");
@@ -124,12 +124,12 @@ class AdminGradeableView extends AbstractView {
             // Graders Page Specific
             "all_graders"    => $graders,
             //Repository name
-            "repo_name"        => $repo_name,
+            "config_repo_name"        => $config_repo_name,
             //All the uploaded config paths
-            "all_repository_paths"    => $all_repository_paths,
-            "all_uploaded_paths"      => $all_uploaded_paths,
-            "default_paths"           => $default_paths,
-            "which_option"            => $which_option,
+            "all_repository_config_paths"    => $all_repository_config_paths,
+            "all_uploaded_config_paths"      => $all_uploaded_config_paths,
+            "default_config_paths"           => $default_config_paths,
+            "which_config_option"            => $which_config_option,
             //build outputs
             "cmake_output"            => htmlentities($cmake_output)
         ]);

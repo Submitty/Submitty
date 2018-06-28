@@ -9,7 +9,7 @@
         <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {% if which_option == 0 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_default_config" style="width: 700px;">
-                {% for path in default_paths %}
+                {% for path in default_config_paths %}
                     {% if which_option == 0 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
@@ -21,7 +21,7 @@
         <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_option == 1 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
                 <option value=""></option>
-                {% for path in all_uploaded_paths %}
+                {% for path in all_uploaded_config_paths %}
                     {% if which_option == 1 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
@@ -34,7 +34,7 @@
         <div class="div_select_config" id="div_repository_configs" style="display: {% if which_option == 2 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_repository_config" style="width: 700px;">
                 <option value=""></option>
-                {% for path in all_repository_paths %}
+                {% for path in all_repository_config_paths %}
                     {% if which_option == 2 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
