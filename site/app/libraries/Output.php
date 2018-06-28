@@ -48,7 +48,7 @@ class Output {
 
         $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
         $this->twig = new \Twig_Environment($this->twig_loader, [
-            'cache' => $this->core->getConfig()->isDebug() ? null : $cache_path,
+            'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->addGlobal("core", $this->core);
