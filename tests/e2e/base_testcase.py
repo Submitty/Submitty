@@ -1,8 +1,19 @@
 from __future__ import print_function
+
+import shutil
+import tempfile
 from datetime import date
 import os
 import unittest
-from urllib.parse import urlencode
+
+import sys
+
+if sys.version_info[0] == 3:
+    # noinspection PyCompatibility PyUnresolvedReferences
+    from urllib.parse import urlencode
+else:
+    # noinspection PyUnresolvedReferences
+    from urllib import urlencode
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -25,7 +36,6 @@ class BaseTestCase(unittest.TestCase):
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
-    DOWNLOAD_DIR = "/tmp"
 
     def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
         super().__init__(testname)
@@ -42,7 +52,7 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
 
-        self.download_dir = BaseTestCase.DOWNLOAD_DIR
+        self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         profile = {
             'download.prompt_for_download': False,
             'download.default_directory': self.download_dir,
@@ -66,6 +76,7 @@ class BaseTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.driver.quit()
+        shutil.rmtree(self.download_dir)
 
     def get(self, url=None, parts=None):
         if url is None:
