@@ -43,7 +43,7 @@ class Output {
     public function loadTwig() {
         $this->twig_loader = new \Twig_Loader_Filesystem(FileUtils::joinPaths(dirname(__DIR__), 'templates'));
         $this->twig = new \Twig_Environment($this->twig_loader, [
-            'cache' => false, //TODO: Use cache
+            'cache' => FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig'),
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->addGlobal("core", $this->core);
