@@ -31,6 +31,11 @@ def up():
     os.system("mv /home/hwphp /home/submitty_php")
     os.system("mv /home/hwcgi /home/submitty_cgi")
     os.system("mv /home/hsdbu /home/submitty_dbuser")
+
+
+
+    # TODO edit the variables stored by configure submitty/installation
+    
     
     pass
 
