@@ -1295,4 +1295,40 @@ class Gradeable extends AbstractModel {
         return false;
     }
 
+    /**
+     * Calculate the late status of this gradeable, taking into account all previous gradeables
+     * @return string
+     */
+    public function calculateLateStatus($checkTeam = true, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = $this->getUser()->getId();
+        }
+
+        if ($this->isTeamAssignment() && $checkTeam) {
+            foreach ($this->getTeam()->getMembers() as $team_member) {
+                $status = $this->calculateLateStatus(false, $team_member);
+                if ($status == "Good" || $status == "Late") {
+                    // As long as one person on the team has a good status, then the assignment should be graded.
+                    return "Good";
+                }
+            }
+            return "Bad for all team members";
+        } else {
+            //Not doing a team check, do individual check
+
+            $total_late_used = 0;
+            $order_by = [
+                'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+            ];
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+                /* @var Gradeable $g */
+                $g->calculateLateDays($total_late_used);
+                if ($g->getId() == $this->getId()) {
+                    return $g->getLateStatus();
+                }
+            }
+            return "Good";
+        }
+    }
+
 }
