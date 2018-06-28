@@ -336,29 +336,29 @@ HTML;
                     "merge_thread_list" => $merge_thread_list,
                     "currentThread" => $currentThread
                 ]);
-				$return .= <<<HTML
-				<div class="popup-form decent" id="edit-user-post">
-					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-					 <h3 id="edit_user_prompt"></h3>
-HTML;
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-								"show_title" => true,
-								"show_post" => true,
-								"show_categories" => true,
-								"show_attachments" => false,
-								"show_anon" => true,
-								"show_announcement" => false,
-								"show_editcat" => false,
-								"show_cancel_edit_form" => true,
-								"submit_label" => "Update Post",
-							]);
-						$return .= <<<HTML
-					</form>
-				</div>
-HTML;
 			}
+			$return .= <<<HTML
+			<div class="popup-form decent" id="edit-user-post">
+				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+				 <h3 id="edit_user_prompt"></h3>
+HTML;
+					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
+							"show_title" => true,
+							"show_post" => true,
+							"show_categories" => true,
+							"show_attachments" => false,
+							"show_anon" => true,
+							"show_announcement" => false,
+							"show_editcat" => false,
+							"show_cancel_edit_form" => true,
+							"submit_label" => "Update Post",
+						]);
+					$return .= <<<HTML
+				</form>
+			</div>
+HTML;
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
@@ -779,8 +779,12 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2){
-			$wrapped_content = json_encode($post['content']);
+		if($this->core->getUser()->getGroup() <= 2) {
+			$return .= <<<HTML
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-trash" aria-hidden="true"></i></a>
+HTML;
+		} 
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
 			$shouldEditThread = null;
 			$edit_button_title = "";
 			if($first) {
@@ -791,7 +795,6 @@ HTML;
 				$edit_button_title = "Edit post";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePost( {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-trash" aria-hidden="true"></i></a>
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
