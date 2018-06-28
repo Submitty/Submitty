@@ -13,7 +13,7 @@ use app\libraries\FileUtils;
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
-     * @param SimpleStat[] $sections
+     * @param array[] $sections
      * @param SimpleStat[] $component_averages
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
