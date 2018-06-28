@@ -123,7 +123,7 @@ def sample_rainbow_grades_test():
     try:
         shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
         shutil.copy(os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile"))
-        shutil.copy(os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", ".setup", "customization_sample.json"),
+        shutil.copy(os.path.join(script_path, "customization_sample.json"),
                     os.path.join(summary_tmp, "customization.json"))
         shutil.copy(os.path.join(repository_path, "grading", "json_syntax_checker.py"),
                     os.path.join(grading_tmp, "json_syntax_checker.py"))

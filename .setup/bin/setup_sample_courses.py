@@ -1059,7 +1059,7 @@ class Course(object):
         m.update(bytes(course_id, "utf-8"))
         random.seed(int(m.hexdigest(), 16))
 
-        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
+        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite","rainbowGrades")
         print("Generating customization_{}.json".format(course_id))
 
         gradeables = {}
@@ -1184,7 +1184,7 @@ class Course(object):
                                          "This JSON is based on the automatically generated customization for\n"
                                          "the development course \"{}\" as of {}.\n"
                                          "It is intended as a simple example, with additional documentation online.\n"
-                                         "*/".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
+                                         "*/\n".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
             json.dump(gradeables_json_output,
                       open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'a'),indent=2)
         except EnvironmentError as e:
