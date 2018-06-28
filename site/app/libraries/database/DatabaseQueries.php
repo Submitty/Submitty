@@ -1690,26 +1690,7 @@ WHERE gcm_id=?", $params);
      * @return \app\models\Team[]
      */
     public function getTeamsByGradeableId($g_id) {
-        $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section
-          FROM gradeable_teams
-          WHERE g_id=?
-          ORDER BY team_id",
-            array($g_id));
-
-        $all_teams_details = array();
-        foreach($this->course_db->rows() as $row) {
-            $all_teams_details[$row['team_id']] = $row;
-        }
-
-        $teams = array();
-        foreach($all_teams_details as $team_id => $details) {
-            $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($team_id));
-            $details['users'] = $this->course_db->rows();
-            $teams[] = new Team($this->core, $details);
-        }
-
-        return $teams;
+        throw new NotImplementedException();
     }
 
     /**
