@@ -840,6 +840,44 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $this->course_db->query($query, $vals);
     }
 
+
+    /**
+     * Return an array of Team objects for all teams on given gradeable
+     * @param string $g_id
+     * @return \app\models\Team[]
+     */
+    public function getTeamsByGradeableId($g_id) {
+        $this->course_db->query("
+          SELECT 
+            gt.team_id, 
+            registration_section, 
+            rotating_section,
+            members.array_user_id,
+            members.array_state
+          FROM gradeable_teams gt
+            LEFT JOIN (
+              SELECT
+                json_agg(t.user_id) as array_user_id,
+                json_agg(t.state) as array_state,
+                t.team_id
+              FROM teams t
+              GROUP BY t.team_id
+            ) AS members ON members.team_id=gt.team_id
+          WHERE g_id=?
+          ORDER BY team_id",
+            array($g_id));
+
+        $teams = array();
+        foreach($this->course_db->rows() as $row) {
+            $row['users'] = array_map(function ($id, $state) {
+                return ['user_id' => $id, 'state' => $state];
+            }, json_decode($row['array_user_id']), json_decode($row['array_state']));
+            $teams[] = new Team($this->core, $row);
+        }
+
+        return $teams;
+    }
+
     /**
      * Returns array of User objects for users with given User IDs
      * @param string[] $user_ids
