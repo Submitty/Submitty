@@ -61,6 +61,7 @@ class GradedGradeable extends AbstractModel {
         $this->setOverallComment($details['overall_comment']);
         $this->setUserViewedDate($details['user_viewed_date']);
         $this->setActiveVersion($details['active_version']);
+        $this->modified = false;
     }
 
     public function toArray() {
@@ -179,6 +180,7 @@ class GradedGradeable extends AbstractModel {
         } else {
             $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
         }
+        $this->modified = true;
     }
 
     /**
@@ -186,7 +188,7 @@ class GradedGradeable extends AbstractModel {
      * @param int $id
      */
     private function setIdInternal($id) {
-        if (is_int($id) || ctype_digit($id) && intval($id) >= 0) {
+        if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
         } else {
             throw new \InvalidArgumentException('Id must be a non-negative integer');
@@ -198,11 +200,12 @@ class GradedGradeable extends AbstractModel {
      * @param int $version
      */
     public function setActiveVersion($version) {
-        if (is_int($version) || ctype_digit($version) && intval($version) >= 0) {
+        if ((is_int($version) || ctype_digit($version)) && intval($version) >= 0) {
             $this->active_version = intval($version);
         } else {
             throw new \InvalidArgumentException('Active version must be a non-negative integer');
         }
+        $this->modified = true;
     }
 
     /* Intentionally Unimplemented accessor methods */
