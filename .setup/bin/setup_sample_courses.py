@@ -1105,7 +1105,9 @@ class Course(object):
         m.update(bytes(course_id, "utf-8"))
         random.seed(int(m.hexdigest(), 16))
 
-        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite","rainbowGrades")
+        # Would be great if we could install directly to test_suite, but
+        # currently the test uses "clean" which will blow away test_suite
+        customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
         print("Generating customization_{}.json".format(course_id))
 
         gradeables = {}

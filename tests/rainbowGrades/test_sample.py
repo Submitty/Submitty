@@ -91,7 +91,7 @@ def sample_rainbow_grades_test():
         if "__sample__" in f:
             error_and_cleanup(test_tmp, "sample has assignments in the grading queue."
                               " Wait for the autograder to finish and then generate new grade summary reports"
-                              "prior to re-running this test.")
+                              " prior to re-running this test.")
 
     #rainbow_path = os.path.join(repository_path, "RainbowGrades")
     if not os.path.isdir(rainbow_path):
@@ -123,7 +123,7 @@ def sample_rainbow_grades_test():
     try:
         shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
         shutil.copy(os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile"))
-        shutil.copy(os.path.join(script_path, "customization_sample.json"),
+        shutil.copy(os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", ".setup", "customization_sample.json"),
                     os.path.join(summary_tmp, "customization.json"))
         shutil.copy(os.path.join(repository_path, "grading", "json_syntax_checker.py"),
                     os.path.join(grading_tmp, "json_syntax_checker.py"))
