@@ -25,10 +25,10 @@ SUBMITTY_DATA_DIR = JSON['submitty_data_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
-SUBMITTY_PHP_USER = JSON['submitty_php_user']
-SUBMITTY_DAEMON_USER = JSON['submitty_daemon_user']
+PHP_USER = JSON['php_user']
+DAEMON_USER = JSON['daemon_user']
 
-SUBMITTY_COURSE_BUILDERS_GROUP = JSON['submitty_course_builders_group']
+COURSE_BUILDERS_GROUP = JSON['course_builders_group']
 
 
 ###########################################################################
@@ -74,7 +74,7 @@ def CheckItemBits (my_path, is_dir, my_owner, my_group, my_bits, must_exist=True
 def CheckCourseInstructorAndGroup(my_instructor, my_group):
     ret_val = True
 
-    cb_g = grp.getgrnam(SUBMITTY_COURSE_BUILDERS_GROUP)
+    cb_g = grp.getgrnam(COURSE_BUILDERS_GROUP)
     try:
         c_g = grp.getgrnam(my_group)
         try:
@@ -83,16 +83,16 @@ def CheckCourseInstructorAndGroup(my_instructor, my_group):
                 print("ERROR! "+my_instructor+" should be group "+my_group+"\n", file=sys.stderr)
                 ret_val = False
             if not my_instructor in cb_g.gr_mem:
-                print("ERROR! "+my_instructor+" should be group "+SUBMITTY_COURSE_BUILDERS_GROUP+"\n", file=sys.stderr)
+                print("ERROR! "+my_instructor+" should be group "+COURSE_BUILDERS_GROUP+"\n", file=sys.stderr)
                 ret_val = False
         except KeyError:
             print("ERROR! user "+my_instructor+" does not exist\n", file=sys.stderr)
             ret_val = False
-        if not SUBMITTY_PHP_USER in c_g.gr_mem:
+        if not PHP_USER in c_g.gr_mem:
             print("ERROR! submitty_php should be group "+my_group+"\n", file=sys.stderr)
             ret_val = False
-        if not SUBMITTY_DAEMON_USER in c_g.gr_mem:
-            print("ERROR! submitty_daemon should be group "+my_group+"\n", file=sys.stderr)
+        if not DAEMON_USER in c_g.gr_mem:
+            print("ERROR! "+DAEMON_USER+" should be group "+my_group+"\n", file=sys.stderr)
             ret_val = False
     except KeyError:
         print("ERROR! group "+my_group+" does not exist\n", file=sys.stderr)
@@ -108,7 +108,7 @@ def main():
 
     # CHECK THE INSTALLATION DIRECTORY
     global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","submitty_course_builders",0o751)
-    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root","submitty_daemon",0o550)
+    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root",DAEMON_USER,0o550)
 
 
     # CHECK THE DATA DIRECTORY
@@ -135,7 +135,7 @@ def main():
             global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
 
             global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
-            global_success &= CheckItemBits(course_path+"/config/config.ini",False,"submitty_php",c_group,0o660)
+            global_success &= CheckItemBits(course_path+"/config/config.ini",False,PHP_USER,c_group,0o660)
             global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770,must_exist=False)
             global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
@@ -146,14 +146,14 @@ def main():
             global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
 
-            global_success &= CheckItemBits(course_path+"/submissions",True,"submitty_php",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/config_upload",True,"submitty_php",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/results",True,"submitty_daemon",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/checkout",True,"submitty_daemon",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/submissions",True,PHP_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/config_upload",True,PHP_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/results",True,DAEMON_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/checkout",True,DAEMON_USER,c_group,0o750)
 
             global_success &= CheckItemBits(course_path+"/reports",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/reports/summary_html",True,c_instructor,c_group,0o770)
-            global_success &= CheckItemBits(course_path+"/reports/all_grades",True,"submitty_php",c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/reports/all_grades",True,PHP_USER,c_group,0o770)
 
 
     if not global_success:

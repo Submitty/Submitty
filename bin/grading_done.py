@@ -53,7 +53,7 @@ def main():
         for pid in pid_list:
             try:
                 proc = psutil.Process(pid)
-                if 'submitty_daemon' == proc.username():
+                if DAEMON_USER == proc.username():
                     if (len(proc.cmdline()) >= 2 and
                         proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_shipper.py")):
                         num_procs+=1

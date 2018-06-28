@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# This script is run by a cron job as the submitty_daemon user
+# This script is run by a cron job as the DAEMON_USER
 #
 # Regularly checks a queue to rebuild assignment configurations for recently modified gradeables.
 #
@@ -55,7 +55,7 @@ def build_all():
 # this script will take over
 
 # ------------------------------------------------------------------------
-# this script is intended to be run only from the cron job of user submitty_daemon
+# this script is intended to be run only from the cron job of DAEMON_USER
 def main():
     username = pwd.getpwuid(os.getuid()).pw_name
     if username != "submitty_daemon":

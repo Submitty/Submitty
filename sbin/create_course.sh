@@ -19,11 +19,11 @@ SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${CONF_DIR}/submitty.json)
 SUBMISSION_URL=$(jq -r '.submission_url' ${CONF_DIR}/submitty.json)
 
-SUBMITTY_PHP_USER=$(jq -r '.submitty_php_user' ${CONF_DIR}/submitty_users.json)
-SUBMITTY_DAEMON_USER=$(jq -r '.submitty_daemon_user' ${CONF_DIR}/submitty_users.json)
-SUBMITTY_CGI_USER=$(jq -r '.submitty_cgi_user' ${CONF_DIR}/submitty_users.json)
+PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
+DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
+CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 
-SUBMITTY_COURSE_BUILDERS_GROUP=$(jq -r '.submitty_course_builders_group' ${CONF_DIR}/submitty_users.json)
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 
 DATABASE_HOST=$(jq -r '.database_host' ${CONF_DIR}/database.json)
 DATABASE_USER=$(jq -r '.database_user' ${CONF_DIR}/database.json)
@@ -82,9 +82,9 @@ if ! getent group "$ta_www_group" >/dev/null 2>&1 ; then
 fi
 
 
-# confirm that the instructor is a member of the $SUBMITTY_COURSE_BUILDERS_GROUP
-if ! groups "$instructor" | grep -q "\b${SUBMITTY_COURSE_BUILDERS_GROUP}\b" ; then
-    echo -e "ERROR: $instructor is not in group $SUBMITTY_COURSE_BUILDERS_GROUP\n"
+# confirm that the instructor is a member of the $COURSE_BUILDERS_GROUP
+if ! groups "$instructor" | grep -q "\b${COURSE_BUILDERS_GROUP}\b" ; then
+    echo -e "ERROR: $instructor is not in group $COURSE_BUILDERS_GROUP\n"
     exit
 fi
 
@@ -94,16 +94,16 @@ if ! groups "$instructor" | grep -q "\b${ta_www_group}\b" ; then
     echo -e "ERROR: $instructor is not in group $ta_www_group\n"
     exit
 fi
-if ! groups "$SUBMITTY_PHP_USER" | grep -q "\b${ta_www_group}\b" ; then
-    echo -e "ERROR: $SUBMITTY_PHP_USER is not in group $ta_www_group\n"
+if ! groups "$PHP_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $PHP_USER is not in group $ta_www_group\n"
     exit
 fi
-if ! groups "$SUBMITTY_DAEMON_USER" | grep -q "\b${ta_www_group}\b" ; then
-    echo -e "ERROR: $SUBMITTY_DAEMON_USER is not in group $ta_www_group\n"
+if ! groups "$DAEMON_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $DAEMON_USER is not in group $ta_www_group\n"
     exit
 fi
-if ! groups "$SUBMITTY_CGI_USER" | grep -q "\b${ta_www_group}\b" ; then
-    echo -e "ERROR: $SUBMITTY_CGI_USER is not in group $ta_www_group\n"
+if ! groups "$CGI_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $CGI_USER is not in group $ta_www_group\n"
     exit
 fi
 
@@ -142,8 +142,8 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_PHP_USER__|$SUBMITTY_PHP_USER|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DAEMON_USER__|$SUBMITTY_DAEMON_USER|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__PHP_USER__|$PHP_USER|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__DAEMON_USER__|$DAEMON_USER|g" $1
 
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
@@ -170,7 +170,7 @@ fi
 
 if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
     mkdir                               $SUBMITTY_DATA_DIR/courses/$semester
-    chown root:$SUBMITTY_COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses/$semester
+    chown root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses/$semester
     chmod 751                           $SUBMITTY_DATA_DIR/courses/$semester
 fi
 
@@ -215,28 +215,28 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 
 
 # NOTE: on each student submission, files are written to these directories
-#               drwxr-s---       $SUBMITTY_PHP_USER        ta_www_group    submissions/
-#               drwxr-s---       $SUBMITTY_PHP_USER        ta_www_group    config_upload/
-#               drwxr-s---       $SUBMITTY_DAEMON_USER       ta_www_group    results/
-#               drwxr-s---       $SUBMITTY_DAEMON_USER       ta_www_group    checkout/
-#               drwxr-s---       $SUBMITTY_DAEMON_USER       ta_www_group    uploads/
-#               drwxr-s---       $SUBMITTY_PHP_USER        ta_www_group    uploads/bulk_pdf/
-#               drwxr-s---       $SUBMITTY_CGI_USER        ta_www_group    uploads/split_pdf/
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_PHP_USER        $ta_www_group   $course_dir/submissions
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_PHP_USER        $ta_www_group   $course_dir/forum_attachments
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_PHP_USER        $ta_www_group   $course_dir/config_upload
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_DAEMON_USER       $ta_www_group   $course_dir/results
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_DAEMON_USER       $ta_www_group   $course_dir/checkout
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_DAEMON_USER       $ta_www_group   $course_dir/uploads
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
-create_and_set  u=rwx,g=rxs,o=   $SUBMITTY_CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
+#               drwxr-s---       $PHP_USER        ta_www_group    submissions/
+#               drwxr-s---       $PHP_USER        ta_www_group    config_upload/
+#               drwxr-s---       $DAEMON_USER       ta_www_group    results/
+#               drwxr-s---       $DAEMON_USER       ta_www_group    checkout/
+#               drwxr-s---       $DAEMON_USER       ta_www_group    uploads/
+#               drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
+#               drwxr-s---       $CGI_USER        ta_www_group    uploads/split_pdf/
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/submissions
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/forum_attachments
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/config_upload
+create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER       $ta_www_group   $course_dir/results
+create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER       $ta_www_group   $course_dir/checkout
+create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER       $ta_www_group   $course_dir/uploads
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
+create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
 #               drwxr-s---       instructor   ta_www_group    reports/
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports/summary_html
-create_and_set  u=rwx,g=rwxs,o=   $SUBMITTY_PHP_USER   $ta_www_group   $course_dir/reports/all_grades
+create_and_set  u=rwx,g=rwxs,o=   $PHP_USER   $ta_www_group   $course_dir/reports/all_grades
 
 
 ########################################################################################################################
@@ -251,7 +251,7 @@ replace_fillin_variables $course_dir/BUILD_${course}.sh
 
 # copy the config file for TA grading & replace the variables
 cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.ini ${course_dir}/config/config.ini
-chown ${SUBMITTY_PHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
+chown ${PHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
 chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
 

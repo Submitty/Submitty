@@ -64,22 +64,22 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__|$SUBMITTY_TUTORIAL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_USER__|$SUBMITTY_CGI_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_USER__|$SUBMITTY_PHP_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_USER__|$SUBMITTY_DAEMON_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMONPHP_GROUP__|$SUBMITTY_DAEMONPHP_GROUP|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__CGI_USER__|$CGI_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__PHP_USER__|$PHP_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_USER__|$DAEMON_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DAEMONPHP_GROUP__|$DAEMONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $1
 
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_UID__|$SUBMITTY_DAEMON_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DAEMON_GID__|$SUBMITTY_DAEMON_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_UID__|$SUBMITTY_PHP_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_PHP_GID__|$SUBMITTY_PHP_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_UID__|$SUBMITTY_CGI_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_CGI_GID__|$SUBMITTY_CGI_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__PHP_UID__|$PHP_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__PHP_GID__|$PHP_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__CGI_UID__|$CGI_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__CGI_GID__|$CGI_GID|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__TIMEZONE__|$TIMEZONE|g" $1
 
@@ -185,14 +185,14 @@ fi
 
 #Set up permissions on the logs directory. If in worker mode, submitty_php does not exist.
 if [ "${WORKER}" == 0 ]; then
-    chown  -R ${SUBMITTY_PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 else
     chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
 fi
 
-chown  -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
 
 #Set up shipper grading directories if not in worker mode.
@@ -206,13 +206,13 @@ if [ "${WORKER}" == 0 ]; then
 
     # set the permissions of these directories
 
-    #submitty_php will write items to this list, submitty_daemon will remove them
-    #FIXME: course builders (instructors & head TAs) will write items to this todo list, submitty_daemon will remove them
-    chown  ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
+    # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
+    # BATCH QUEUE: course builders (instructors & head TAs) will write items to this list, DAEMON_USER will remove them
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
 
-    #submitty_php will write items to this list, submitty_daemon will remove them
-    chown  ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
+    # PHP_USER will write items to this list, DAEMON_USER will remove them
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
 fi
 
@@ -354,7 +354,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c   ${SUBMITTY_INSTA
 # replace necessary variables
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c
 
-# SUID (Set owner User ID up on execution), allows the $SUBMITTY_DAEMON_USER
+# SUID (Set owner User ID up on execution), allows the $DAEMON_USER
 # to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
@@ -366,7 +366,7 @@ chmod 500 untrusted_execute.c
 g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 # change permissions & set suid: (must be root)
 chown root  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
-chgrp $SUBMITTY_DAEMON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+chgrp $DAEMON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
@@ -395,28 +395,28 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# GENERATE & INSTALL THE CRONTAB FILE FOR THE submitty_daemon USER
+# GENERATE & INSTALL THE CRONTAB FILE FOR THE DAEMON_USER
 #
 
-echo -e "Generate & install the crontab file for submitty_daemon user"
+echo -e "Generate & install the crontab file for submitty daemon user"
 
 # name of temporary file
-SUBMITTY_DAEMON_CRONTAB_FILE=my_submitty_daemon_crontab_file.txt
+DAEMON_CRONTAB_FILE=my_daemon_crontab_file.txt
 
 # generate the file
-echo -e "\n\n"                                                                                >  ${SUBMITTY_DAEMON_CRONTAB_FILE}
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >  ${DAEMON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${DAEMON_CRONTAB_FILE}
 
 ## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
 minutes=0
-printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
+printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${DAEMON_CRONTAB_FILE}
 
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
-echo -e "\n\n"                                                                                >> ${SUBMITTY_DAEMON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${DAEMON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >> ${DAEMON_CRONTAB_FILE}
 
-# install the crontab file for the submitty_daemon user
-crontab  -u ${SUBMITTY_DAEMON_USER}  ${SUBMITTY_DAEMON_CRONTAB_FILE}
-rm ${SUBMITTY_DAEMON_CRONTAB_FILE}
+# install the crontab file for the DAEMON_USER
+crontab  -u ${DAEMON_USER}  ${DAEMON_CRONTAB_FILE}
+rm ${DAEMON_CRONTAB_FILE}
 
 
 ################################################################################################################
@@ -444,7 +444,7 @@ popd > /dev/null
 #fi
 
 # change permissions
-chown -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 # NOTE: These variables must match the same variables in install_system.sh
@@ -508,7 +508,7 @@ chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
 
 
 # change permissions
-chown -R ${SUBMITTY_DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 chmod -R 555 ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 
@@ -620,7 +620,7 @@ fi
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
     echo -e "\nStopping worker machine daemons"
-    sudo -H -u ${SUBMITTY_DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
+    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "\n"
 fi
 
@@ -643,8 +643,8 @@ rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
 # recreate the TODO and DONE folders
 mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
 mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${SUBMITTY_DAEMON_USER}:${SUBMITTY_DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
+chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
+chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
 chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
 
@@ -658,10 +658,10 @@ fi
 
 # update the autograding shipper & worker daemons
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
-chown -R submitty_daemon:submitty_daemon /etc/systemd/system/submitty_autograding_shipper.service
+chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_shipper.service
 chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
-chown -R submitty_daemon:submitty_daemon /etc/systemd/system/submitty_autograding_worker.service
+chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_worker.service
 chmod 444 /etc/systemd/system/submitty_autograding_worker.service
 
 
@@ -679,7 +679,7 @@ do
     myuser=`printf "untrusted%02d" $i`
     mydir=`printf "/var/local/submitty/autograding_tmp/untrusted%02d" $i`
     mkdir $mydir
-    chown submitty_daemon:$myuser $mydir
+    chown ${DAEMON_USER}:$myuser $mydir
     chmod 770 $mydir
 done
 
@@ -790,19 +790,19 @@ fi
 echo "Preparing to update Submitty installation on worker machines"
 if [ "${WORKER}" == 1 ]; then
     # the supervisor user/group must have write access on the worker machine
-    chgrp -R ${SUBMITTY_SUPERVISOR} ${SUBMITTY_REPOSITORY}
+    chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
     # This takes a bit of time, let's skip if there are no workers
     num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
     if [ "${num_machines}" != "1" ]; then
         # in order to update the submitty source files on the worker machines
-        # the submitty_daemon user/group must have read access to the repo on the primary machine
-        chgrp -R ${SUBMITTY_DAEMON_GID} ${SUBMITTY_REPOSITORY}
+        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
         chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
         echo -e Updating worker machines
-        sudo -H -u ${SUBMITTY_DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+        sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi
