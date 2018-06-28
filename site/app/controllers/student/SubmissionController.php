@@ -1391,25 +1391,6 @@ class SubmissionController extends AbstractController {
 
         return array('error' => false, 'version' => $new_version, 'message' => $msg);
     }
-    
-
-	// This copy all files from given dir ($src) and its subdirs into one destination folder, $dst
-	private function recursive_copy($src, $dst) {
- 		$dir = opendir($src);
-        while(false !== ( $file = readdir($dir)) ) {
-            if (( $file != '.' ) && ( $file != '..' ) && ( $file != '__MACOSX' )) {
-                if ( is_dir($src . '/' . $file) ) {
-                    $this->recursive_copy($src . '/' . $file, $dst);
-                }
-                else {
-                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                    if ($extension === 'png') // just get all png file only
-                        copy($src . '/' . $file,$dst . '/' . $file);
-                }
-            }
-        }
-        closedir($dir);
-    }
 
     private function ajaxUploadImagesFiles() {
         if (empty($_POST)) {
@@ -1491,7 +1472,7 @@ class SubmissionController extends AbstractController {
                         $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
                         $zip->extractTo($upload_img_path_tmp);
 
-                        $this->recursive_copy($upload_img_path_tmp, $upload_img_path);
+                        FileUtils::recursiveCopy($upload_img_path_tmp, $upload_img_path);
 
                         //delete tmp folder
                         FileUtils::recursiveRmdir($upload_img_path_tmp);
