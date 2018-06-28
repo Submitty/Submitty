@@ -913,7 +913,11 @@ class ElectronicGraderController extends GradingController {
         }
 
         if ($team) {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$who_id]->getLeaderId());
+            if ($teams_assoc[$who_id] === NULL) {
+                $gradeable = NULL;
+            } else {
+                $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$who_id]->getLeaderId());
+            }
         } else {
             $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         }

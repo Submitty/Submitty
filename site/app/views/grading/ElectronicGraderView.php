@@ -600,10 +600,10 @@ class ElectronicGraderView extends AbstractView {
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
-                $tables[] = $this->makeTable($team_member->getId(), $gradeable);
+                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
         } else {
-            $tables[] = $this->makeTable($user->getId(), $gradeable);
+            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
@@ -716,6 +716,7 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
 
+<<<<<<< HEAD
     private function makeTable($user_id, $gradeable){
         $return = <<<HTML
         <h3>Overall Late Day Usage for {$user_id}</h3><br/>
@@ -766,4 +767,6 @@ HTML;
 HTML;
         return $return;
     }
+=======
+>>>>>>> master
 }
