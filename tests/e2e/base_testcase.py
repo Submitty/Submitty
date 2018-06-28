@@ -100,11 +100,13 @@ class BaseTestCase(unittest.TestCase):
         if url[0] != "/":
             url = "/" + url
 
+        url = self.test_url + url
+
         # Convert data
         self.assertIsNotNone(data)
         self.assertIs(type(data), dict)
 
-        return self.driver.request('POST', url, data)
+        return self.driver.request('POST', url, data=data)
 
     def log_in(self, url=None, title="Submitty", user_id=None, user_password=None, user_name=None):
         """
