@@ -39,6 +39,21 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
 fi
 
 
+########################################################################################################################
+########################################################################################################################
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
+
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -e "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -e "Exiting INSTALL_SUBMITTY_HELPER.sh\n"
+    exit 1
+fi
+
+
+########################################################################################################################
+########################################################################################################################
 
 echo -e "\nBeginning installation of the Submitty homework submission server\n"
 
@@ -510,22 +525,7 @@ fi
 #####################################
 # Build & Install Lichen Modules
 
-lichen_repo_dir=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
-min_lichen_version=v.18.06.00
-
-pushd ${lichen_repo_dir} > /dev/null
-git merge-base --is-ancestor "${min_lichen_version}" HEAD
-if [ $? -ne 0 ]; then
-    git status
-    git log
-    echo -e "ERROR: Submitty/Lichen repository history does not contain version ${min_lichen_version}"
-    echo -e "   Run 'git fetch' to get the tags from github."
-    echo -e "   Also check to be sure your current branch is up-to-date."
-    exit 1
-fi
-popd > /dev/null
-
-${lichen_repo_dir}/install_lichen.sh
+/bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
 
 
 ################################################################################################################

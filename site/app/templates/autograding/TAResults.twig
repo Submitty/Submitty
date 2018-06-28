@@ -3,9 +3,9 @@
 {% if not gradeable.beenTAgraded() %}
     <br>
     <h3>This assignment has not been graded yet</h3>
-{% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+{% elseif not active_same_as_graded %}
     <br>
-    <h3>The version you have selected above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+    <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
 {% elseif not grading_complete %}
     <br>
     <h3>Grading not complete, please contact an instructor/grader</h3>
@@ -13,7 +13,7 @@
     <div class="sub">
         {# Overview #}
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
-            <p>Graded by: {{ grader_names|join(", ") }}</p>
+            <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
             <i>Any regrade requests are due within 7 days of posting</i>
             <p>
                 {% if gradeable.getOverallComment()|length != 0 %}
