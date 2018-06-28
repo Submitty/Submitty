@@ -2450,8 +2450,9 @@ AND gc_id IN (
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
+     * @param \app\models\gradeable\Gradeable[] The gradeables to retrieve data for
      * @param string[]|null $users The ids of the users to get data for
-     * @param string[]null $teams The ids of the teams to get data for
+     * @param string[]|null $teams The ids of the teams to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
      */
