@@ -7,9 +7,6 @@ use app\views\admin\LateDayView;
 
 class LateDaysTableView extends AbstractView {
     public function showLateTable($user_id, $g_id = NULL, $full_page) {
-        if($user_id == $this->core->getUser()->getId()) {
-            $this->core->getOutput()->addBreadcrumb("Late Days Summary", $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')));
-        }
         $student_gradeables = array();
         $status_array = array();
         $late_charged_array = array();
@@ -25,7 +22,13 @@ class LateDaysTableView extends AbstractView {
             $late_charged_array[] = $gradeable->getCurrLateCharged();
         }
         $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
-        $template = $full_page ? "/LateDaysTable.twig" : "/LateDaysTablePlugin.twig";
+        if($full_page){
+            $this->core->getOutput()->addBreadcrumb("Late Days Summary", $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')));
+            $template = "/LateDaysTable.twig";
+        } else {
+            $template = "/LateDaysTablePlugin.twig";
+        }
+
         return $this->core->getOutput()->renderTwigTemplate($template, [
             "user_id" => $user_id,
             "student_gradeables" => $student_gradeables,
