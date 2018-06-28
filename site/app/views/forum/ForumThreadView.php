@@ -794,15 +794,14 @@ HTML;
 				$edit_button_title = "Edit post";
 			}
 			if($deleted){
-				$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle(false, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Undelete post"><i class="fa fa-undo" aria-hidden="true"></i></a>
-HTML;
+				$ud_button_title = "Undelete post";
+				$ud_button_icon = "fa-undo";
 			} else {
-				$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle(true, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="Remove post"><i class="fa fa-trash" aria-hidden="true"></i></a>
-HTML;
+				$ud_button_title = "Remove post";
+				$ud_button_icon = "fa-trash";
 			}
 			$return .= <<<HTML
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({!$deleted}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 

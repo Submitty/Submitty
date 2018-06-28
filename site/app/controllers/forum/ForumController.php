@@ -397,6 +397,13 @@ class ForumController extends AbstractController {
         return $response;
     }
 
+    /**
+     * Alter content/delete/undelete post of a thread
+     *
+     * If applied on the first post of a thread, same action will be reflected on the corresponding thread
+     *
+     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     */
     public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
 
