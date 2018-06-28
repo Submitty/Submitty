@@ -10,7 +10,7 @@ class TestGraderAccess(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def test_login_grading_student(self):
+    def test_grading_student(self):
         with LoginSession(self, "student", "student", "Joe"):
             self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
@@ -39,7 +39,7 @@ class TestGraderAccess(BaseTestCase):
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error()
 
-    def test_login_grading_grader(self):
+    def test_grading_grader(self):
         with LoginSession(self, "grader", "grader", "Tim"):
             self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
@@ -71,6 +71,80 @@ class TestGraderAccess(BaseTestCase):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
             self.expect_error()
+
+    def test_grading_ta(self):
+        with LoginSession(self, "ta2", "ta2", "Jack"):
+            self.click_class("sample", "SAMPLE")
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('gradeable_id', 'grading_homework')])
+            self.expect_alert(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'details'), ('gradeable_id', 'grading_homework')])
+            self.expect_alert(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework'), ('type', 'All')])
+            downloaded_file = os.path.join(self.download_dir,
+                                           "grading_homework_all_students_{0:02}-{1:02}-{2:04}.zip".format(
+                                               date.today().month, date.today().day, date.today().year))
+            self.assertTrue(os.path.isfile(downloaded_file))
+            os.unlink(downloaded_file)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework')])
+            downloaded_file = os.path.join(self.download_dir,
+                                           "grading_homework_section_students_{0:02}-{1:02}-{2:04}.zip".format(
+                                               date.today().month, date.today().day, date.today().year))
+            self.assertTrue(os.path.isfile(downloaded_file))
+            os.unlink(downloaded_file)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'aphacker')])
+            self.expect_error(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
+            self.expect_error(False)
+
+    def test_grading_instructor(self):
+        with LoginSession(self, "instructor", "instructor", "Quinn"):
+            self.click_class("sample", "SAMPLE")
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('gradeable_id', 'grading_homework')])
+            self.expect_alert(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'details'), ('gradeable_id', 'grading_homework')])
+            self.expect_alert(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework'), ('type', 'All')])
+            downloaded_file = os.path.join(self.download_dir,
+                                           "grading_homework_all_students_{0:02}-{1:02}-{2:04}.zip".format(
+                                               date.today().month, date.today().day, date.today().year))
+            self.assertTrue(os.path.isfile(downloaded_file))
+            os.unlink(downloaded_file)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                            ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                            ('gradeable_id', 'grading_homework')])
+            downloaded_file = os.path.join(self.download_dir,
+                                           "grading_homework_section_students_{0:02}-{1:02}-{2:04}.zip".format(
+                                               date.today().month, date.today().day, date.today().year))
+            self.assertTrue(os.path.isfile(downloaded_file))
+            os.unlink(downloaded_file)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'aphacker')])
+            self.expect_error(False)
+
+            self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                            ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
+            self.expect_error(False)
 
     def expect_alert(self, expect=True, message=None, class_name="alert"):
         messages = self.driver.find_element_by_id("messages").find_elements_by_class_name(class_name)
