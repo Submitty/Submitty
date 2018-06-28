@@ -68,6 +68,24 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
+    public function checkPermissions(){
+        //This function checks if a user has the permissions to grade and assignment, and returns if that assignment 
+        //Is peer gradeable
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $peer = false;
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
+            if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
+                $peer = true;
+            }
+            else {
+                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
+        }
+        return $peer;
+    }
+
     public function ajaxRemoveEmpty(){
         //This function shows the empty spaces in the diffViewer
         //TODO: Need to add checks?
@@ -148,16 +166,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
-        $peer = false;
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
-        }
+        $peer = $this->checkPermissions();
 
         /*
          * we need number of students per section
@@ -330,16 +339,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
-        }
-
+        $peer=$this->checkPermissions();
         $students = array();
         //If we are peer grading, load in all students to be graded by this peer.
         if ($peer) {
@@ -752,16 +752,7 @@ class ElectronicGraderController extends GradingController {
     public function showGrading() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $peer = false;
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
-        }
+        $peer=$this->checkPermissions();
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
@@ -1015,7 +1006,7 @@ class ElectronicGraderController extends GradingController {
                 }
                 $found = false;
                 foreach($component as $peer) {
-                    if($peer->getGrader() === null) {
+                    if(!$peer->gethasMark()) {
                         $component = $peer;
                         $found = true;
                         break;
@@ -1052,7 +1043,7 @@ class ElectronicGraderController extends GradingController {
                 if($all_false === true && $temp_mark_selected === true) {
                     $all_false = false;
                 }
-                if($temp_mark_selected !== $mark->getHasMark()) {
+                if($temp_mark_selected !== $mark->gethasMark()) {
                     $mark_modified = true;
                 }
                 $index++;
@@ -1089,7 +1080,7 @@ class ElectronicGraderController extends GradingController {
             } else {
                 //only change the component information is the mark was modified or componet and its gradeable are out of sync.
                 if($mark_modified === true || ($component->getGradedVersion() !== $gradeable->getActiveVersion())) {
-                    if ($component->getGrader() === null || $overwrite === "true") {
+                    if ($component->getGrader()==null || $overwrite === "true") {
                         $component->setGrader($this->core->getUser());
                     }
 
@@ -1217,7 +1208,7 @@ class ElectronicGraderController extends GradingController {
                     continue;
                 }
                 foreach($question as $cmpt) {
-                    if($cmpt->getGrader() == null) {
+                    if(!$cmpt->getHasMark()) {
                         $component = $cmpt;
                         break;
                     }

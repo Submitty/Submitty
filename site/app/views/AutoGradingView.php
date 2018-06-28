@@ -304,7 +304,7 @@ HTML;
         //find all names of instructors who graded part(s) of this assignment that are full access grader_names
         if (!$gradeable->getPeerGrading()) {
             foreach ($gradeable->getComponents() as $component) {
-                if ($component->getGrader() == NULL) {
+                if (!$component->gethasMark()) {
                     continue;
                 }
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
@@ -317,7 +317,7 @@ HTML;
         }
         //get total score and max possible score
         $graded_score = $gradeable->getGradedTAPoints();
-        $graded_max = $gradeable->getTotalTANonExtraCreditPoints();
+        $graded_max = $gradeable->getTotalTAPoints();
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $has_autograding = false;
