@@ -485,6 +485,15 @@ class ElectronicGraderView extends AbstractView {
                     "message" => "No Submission"
                 ]);
             }
+        } else {
+            $status = $gradeable->calculateLateStatus();
+
+            if ($status != "Good" && $status != "Late") {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#F62817", // fire engine red
+                    "message" => "Late Submission"
+                ]);
+            }
         }
 
         return $return;
@@ -648,35 +657,13 @@ HTML;
 HTML;
 
         //Late day calculation
-        $color = "green";
-        $status = "Good";
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $team_status = "Bad for all team members";
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
-                $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
-                if($status == "Good" || $status == "Late"){
-                    // As long as one person on the team has a good status, then the assignment should be graded.
-                    $team_status = "Good";
-                }
+                $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
-            $status = $team_status;
         } else {
-            $return .= $this->makeTable($user->getId(), $gradeable, $status);
-        }
-        if ($status != "Good" && $status != "Late" && $status != "No submission") {
-            $color = "red";
-            $my_color = "'#F62817'"; // fire engine red
-            $my_message = "Late Submission";
-            $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
-HTML;
+            $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
 
         $return .= <<<HTML
@@ -799,55 +786,4 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
 
-    private function makeTable($user_id, $gradeable, &$status){
-        $return = <<<HTML
-        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                </tr>
-            </thead>
-            <tbody>
-HTML;
-        $total_late_used = 0;
-        $order_by = [ 
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
-        ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
-            $g->calculateLateDays($total_late_used);
-            $class = "";
-            if($g->getId() == $gradeable->getId()){
-                $class = "class='yellow-background'";
-                $status = $g->getLateStatus();
-            }
-            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
-            $return .= <<<HTML
-                <tr>
-                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
-                </tr>
-HTML;
-        }
-        $return .= <<<HTML
-            </tbody>
-        </table>
-HTML;
-        return $return;
-    }
 }
