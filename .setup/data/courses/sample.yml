@@ -882,6 +882,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
+  hw_extensions:
+    - student: 2
   g_id: grades_released_homework_autota
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde and TA Homework (C System Calls)

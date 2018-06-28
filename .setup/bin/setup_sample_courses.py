@@ -870,6 +870,12 @@ class Course(object):
                         versions_to_submit = len(gradeable.plagiarized_user[user.id])
                     else:    
                         versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
+                    if user.id in gradeable.hw_extensions:
+                        extension_table = Table("late_day_exceptions", metadata, autoload=True)
+                        conn.execute(extension_table.insert(),
+                                     user_id=user.id,
+                                     g_id=gradeable.id,
+                                     late_day_exceptions=None)
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
@@ -1264,6 +1270,7 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.hw_extensions = []
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1310,6 +1317,8 @@ class Gradeable(object):
                     self.sample_path = tutorial_path
                 else:
                     self.sample_path = None
+            if 'hw_extensions' in gradeable:
+                self.hw_extensions = gradeable['hw_extensions']
         else:
             self.id = gradeable['g_id']
             self.type = int(gradeable['g_type'])
@@ -1336,7 +1345,6 @@ class Gradeable(object):
 
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
-
         self.ta_view_date = dateutils.parse_datetime(gradeable['g_ta_view_start_date'])
         self.grade_start_date = dateutils.parse_datetime(gradeable['g_grade_start_date'])
         self.grade_released_date = dateutils.parse_datetime(gradeable['g_grade_released_date'])
