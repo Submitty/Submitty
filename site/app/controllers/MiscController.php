@@ -297,7 +297,9 @@ class MiscController extends AbstractController {
             $type = "all";
             $zip_file_name = $_REQUEST['gradeable_id'] . "_all_students_" . date("m-d-Y") . ".zip";
             if (!($this->core->getUser()->accessFullGrading())) {
-                throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+                $message = "You do not have access to that page.";
+                $this->core->addErrorMessage($message);
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
             }
         }
         else
