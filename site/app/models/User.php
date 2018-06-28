@@ -268,4 +268,93 @@ class User extends AbstractModel {
 			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
     	}
     }
+
+    /**
+     * Gets the percent of grading complete for a user and gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @return float The percentage of grading completed or NAN if none required
+     */
+    public function getGradingPercent(\app\models\gradeable\Gradeable $gradeable) {
+        $gradeable_id = $gradeable->getId();
+
+        //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
+        $total_users = array();
+        $no_team_users = array();
+        $graded_components = array();
+        $graders = array();
+        if ($gradeable->isGradeByRegistration()) {
+            if (!$this->accessFullGrading()) {
+                $sections = $this->getGradingRegistrationSections();
+            } else {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_registration_id'];
+                }
+            }
+            $section_key = 'registration_section';
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
+            }
+        } else {
+            if (!$this->accessFullGrading()) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->getId());
+            } else {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_rotating_id'];
+                }
+            }
+            $section_key = 'rotating_section';
+            if (count($sections) > 0) {
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
+            }
+        }
+        if (count($sections) > 0) {
+            if ($gradeable->isTeamAssignment()) {
+                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
+                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
+            } else {
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $no_team_users = array();
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            }
+        }
+
+        $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
+        $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
+        $sections = array();
+        if (count($total_users) > 0) {
+            foreach ($num_submitted as $key => $value) {
+                $sections[$key] = array(
+                    'total_components' => $value * $num_components,
+                    'graded_components' => 0,
+                    'graders' => array()
+                );
+                if ($gradeable->isTeamAssignment()) {
+                    $sections[$key]['no_team'] = $no_team_users[$key];
+                }
+                if (isset($graded_components[$key])) {
+                    // Clamp to total components if unsubmitted assignment is graded for whatever reason
+                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                }
+                if (isset($graders[$key])) {
+                    $sections[$key]['graders'] = $graders[$key];
+                }
+            }
+        }
+        $components_graded = 0;
+        $components_total = 0;
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            $components_graded += $section['graded_components'];
+            $components_total += $section['total_components'];
+        }
+        if ($components_total == 0) {
+            return NAN;
+        }
+        return floatval($components_graded) / $components_total;
+    }
 }
