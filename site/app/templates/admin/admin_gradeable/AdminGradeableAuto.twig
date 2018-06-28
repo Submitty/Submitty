@@ -1,16 +1,17 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" id="default_configs" class="config_option" value="true" {% if which_option == 0 %} checked = "true" {% endif %}/> Default configs
-        <input type="radio" id="uploaded_configs" class="config_option" value="false" {% if which_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
+        <input type="radio" id="default_configs" class="config_option" value="true" {% if which_config_option == 0 %} checked = "true" {% endif %}/> Default configs
+        <input type="radio" id="uploaded_configs" class="config_option" value="false" {% if which_config_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="config_option" value="false" {% if which_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
+            <input type="radio" id="private_repository" class="config_option" value="false" {% if which_config_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
         {% endif %}
-        <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_option == 3 %} checked = "true" {% endif %}/> Provide full path
-        <div class="div_select_config" id="div_default_configs" style="display: {% if which_option == 0 %} block {% else %} none {% endif %}">
+        <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_config_option == 3 %} checked = "true" {% endif %}/> Provide full path
+        <div class="div_select_config" id="div_default_configs" style="display: {% if which_config_option == 0 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_default_config" style="width: 700px;">
+                <option value=""></option>
                 {% for path in default_config_paths %}
-                    {% if which_option == 0 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if which_config_option == 0 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -18,11 +19,11 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_option == 1 %} block {% else %} none {% endif %}">
+        <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_config_option == 1 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_uploaded_config_paths %}
-                    {% if which_option == 1 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if which_config_option == 1 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -31,11 +32,11 @@
             </select>
             <a class="btn btn-primary" style="margin-top: 6px" href="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'upload_config'}) }}">Upload a config</a>
         </div>
-        <div class="div_select_config" id="div_repository_configs" style="display: {% if which_option == 2 %} block {% else %} none {% endif %}">
+        <div class="div_select_config" id="div_repository_configs" style="display: {% if which_config_option == 2 %} block {% else %} none {% endif %}">
             <select class="select_config_path" id="select_repository_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_repository_config_paths %}
-                    {% if which_option == 2 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if which_config_option == 2 and path == admin_gradeable.getEgConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -46,7 +47,7 @@
         <br />
         <p>Current config setting:</p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)"
-                {% if which_option != 3 %} disabled {% endif %}/>
+                {% if which_config_option != 3 %} disabled {% endif %}/>
     </fieldset>
     <br /> <br />
 
@@ -123,14 +124,17 @@
             $('.div_select_config').hide();
             $('#div_default_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
+            $("#select_default_config").val($("#select_default_config option:first").val());
         } else if($('#uploaded_configs').is(':checked')){
             $('.div_select_config').hide();
             $('#div_uploaded_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
+            $("#select_uploaded_config").val($("#select_uploaded_config option:first").val());
         } else if($('#private_repository').is(':checked')){
             $('.div_select_config').hide();
             $('#div_repository_configs').show();
             $('#input_provide_full_path').prop('disabled', true);
+            $("#select_repository_config").val($("#select_repository_config option:first").val());
         } else {
             $('.div_select_config').hide();
             $('#input_provide_full_path').prop('disabled', false);
