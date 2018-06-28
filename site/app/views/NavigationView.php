@@ -88,16 +88,19 @@ class NavigationView extends AbstractView {
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
-        // ======================================================================================
+		// ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {
-            $return .= <<<HTML
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page'))}">Images</a>
-HTML;
+			$top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                "title" => "Images",
+                "class" => "btn btn-primary"
+            ]);
         }
+		
         // ======================================================================================
-        // CREATE NEW IMAGES & GRADEABLE BUTTON -- only visible to instructors
+        // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
         // ======================================================================================
         if ($this->core->getUser()->accessAdmin()) {
             $top_buttons[] = new Button($this->core, [
@@ -123,7 +126,7 @@ HTML;
         ]);
         // ======================================================================================
         // FORUM BUTTON
-        // ======================================================================================
+        // ====================================================================================== 
 
         if ($this->core->getConfig()->isForumEnabled()) {
             $top_buttons[] = new Button($this->core, [

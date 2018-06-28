@@ -70,6 +70,16 @@ function drop(e){
     }
 }
 
+// add files dragged
+function dropWithMultipleZips(e){
+    draghandle(e);
+    var filestream= e.dataTransfer.files;
+    var part = get_part_number(e);
+    for(var i=0; i<filestream.length; i++){
+        addFileWithCheck(filestream[i], part, false); // check for folders
+    }
+}
+
 function get_part_number(e){
     if(e.target.id.substring(0, 6) == "upload"){
         return e.target.id.substring(6);
@@ -95,26 +105,22 @@ function addFilesFromInput(part, check_duplicate_zip=true){
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(file, part){
-    if (previous_files != []) {
-        for(var i = 0; i < previous_files[part-1].length; i++){
-            if(previous_files[part-1][i] == file.name){
-                return [1, i];
-            }
+    for(var i = 0; i < previous_files[part-1].length; i++){
+        if(previous_files[part-1][i] == file.name){
+            return [1, i];
         }
     }
 
-    if (file_array != []) {
-        for (var j = 0; j < file_array[part - 1].length; j++) {
-            if (file_array[part - 1][j].name == file.name) {
-                return [0, j];
-            }
+    for(var j = 0; j < file_array[part-1].length; j++){
+        if(file_array[part-1][j].name == file.name){
+            return [0, j];
         }
     }
     return [-1];
 }
 
 // add file with folder check
-function addFileWithCheck(file, part){
+function addFileWithCheck(file, part, check_duplicate_zip=true){
     // try to open file if it looks suspicious:
     // no type, or with size of a typical folder size
     if(!file.type || file.size%4096 == 0){
@@ -124,7 +130,7 @@ function addFileWithCheck(file, part){
         reader.readAsBinaryString(file);
     }
     else{
-        addFile(file, part);
+        addFile(file, part, check_duplicate_zip);
     }
 }
 
@@ -331,7 +337,7 @@ function moveNextInput(count) {
             offset = inputOffset;
         }
         var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed);
+        $('html, body').animate({scrollTop:offset}, speed); 
     }
 }
 
@@ -793,6 +799,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
             }
         },
         error: function(error) {
