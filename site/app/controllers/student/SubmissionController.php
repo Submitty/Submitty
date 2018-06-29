@@ -1393,7 +1393,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadImagesFiles() {
-        if($this->core->getUser()->getGroup() === 4) {
+        if($this->core->getUser()->getGroup() !== 1) {
 			     return $this->uploadResult("You have no permission to access this page", false);
         }
 

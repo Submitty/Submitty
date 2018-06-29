@@ -92,11 +92,14 @@ class NavigationView extends AbstractView {
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {
-			      $top_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                "title" => "Images",
-                "class" => "btn btn-primary"
-            ]);
+            $sections = $this->core->getUser()->getGradingRegistrationSections();
+                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                    $top_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                        "title" => "Images",
+                        "class" => "btn btn-primary"
+                    ]);
+                }
         }
 
         // ======================================================================================
