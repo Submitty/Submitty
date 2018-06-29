@@ -77,9 +77,13 @@ class HomeworkView extends AbstractView {
         ];
         $total_late_used = 0;
         $curr_late = 0;
+        $total_late_used_elsewhere = 0;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
             $curr_late = $g->getStudentAllowedLateDays();
+            if($g->getId() != $gradeable->getId()){
+                $g->calculateLateDays($total_late_used_elsewhere);
+            }
         }
         $late_days_remaining = $curr_late - $total_late_used;
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
@@ -104,9 +108,8 @@ class HomeworkView extends AbstractView {
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
-
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_days_remaining) {
+            if ($curr_late < $total_late_used_elsewhere + $active_days_charged ) {
                 $error = true;
                 $messages[] = ["type" => "too_few_remain", "info" => [
                     "late" => $active_days_late,
