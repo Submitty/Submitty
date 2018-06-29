@@ -130,13 +130,6 @@ class GradedComponent extends AbstractModel {
         $this->component_id = $component->getId();
     }
 
-    private function setGradedGradeable(GradedGradeable $graded_gradeable) {
-        if ($graded_gradeable === null) {
-            throw new \InvalidArgumentException('Graded gradeable cannot be null');
-        }
-        $this->graded_gradeable = $graded_gradeable;
-    }
-
     /**
      * Sets the marks the submitter received for this component
      * @param array $marks
