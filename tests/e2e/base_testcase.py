@@ -8,19 +8,18 @@ import unittest
 
 import sys
 
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from seleniumrequests import Chrome as WebDriver
+
 if sys.version_info[0] == 3:
     # noinspection PyCompatibility PyUnresolvedReferences
     from urllib.parse import urlencode
 else:
     # noinspection PyUnresolvedReferences
     from urllib import urlencode
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from seleniumrequests import Chrome as WebDriver
 
 
 # noinspection PyPep8Naming
@@ -46,11 +45,11 @@ class BaseTestCase(unittest.TestCase):
         self.driver = None
         """ :type driver: WebDriver """
         self.options = Options()
-        self.options.add_argument('--headless')
+        # self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
-        self.options.add_argument('--hide-scrollbars')
-        self.options.add_argument('--disable-gpu')
-        self.options.add_argument('--no-proxy-server')
+        # self.options.add_argument('--hide-scrollbars')
+        # self.options.add_argument('--disable-gpu')
+        # self.options.add_argument('--no-proxy-server')
 
         self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         profile = {
@@ -147,7 +146,8 @@ class BaseTestCase(unittest.TestCase):
     # see Navigation.twig for css selectors
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
     def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
-        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[@name='{}_button']".format(gradeable_category, gradeable_id, button_name)).click()
+        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[@name='{}_button']"
+                                          .format(gradeable_category, gradeable_id, button_name)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
     # clicks the navigation header text to 'go back' pages
@@ -155,9 +155,6 @@ class BaseTestCase(unittest.TestCase):
     def click_header_link_text(self, text, loaded_selector):
         self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
-
-
-    
 
     @staticmethod
     def wait_user_input():
@@ -188,7 +185,7 @@ class BaseTestCase(unittest.TestCase):
         return semester
 
 
-class LoginSession():
+class LoginSession:
     def __init__(self, testcase, user_id=None, user_password=None, user_name=None):
         """
         :param BaseTestCase testcase:
@@ -233,4 +230,3 @@ class LoginSession():
             self.testcase.driver.find_element_by_id('logout').click()
             self.testcase.driver.find_element_by_id('login-guest')
             self.logged_in = False
-
