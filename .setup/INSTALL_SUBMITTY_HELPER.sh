@@ -768,7 +768,7 @@ if [ "${WORKER}" == 0 ]; then
         shift
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
-        ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
         
         if [[ $? -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
