@@ -842,6 +842,13 @@ class Course(object):
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
+                if user.id in gradeable.hw_extensions:
+                    # This is for setting manual extensions
+                    # pdb.set_trace()
+                    conn.execute(extension_table.insert(),
+                                 user_id=user.id,
+                                 g_id=gradeable.id, 
+                                 late_day_exceptions=gradeable.hw_extensions[user.id])
                 submitted = False
                 team_id = None
                 if gradeable.team_assignment is True:
@@ -863,7 +870,6 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, team_id)
                 else: 
                     submission_path = os.path.join(gradeable_path, user.id)
-
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     if user.id in gradeable.plagiarized_user:
                         #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to 
@@ -871,13 +877,6 @@ class Course(object):
                         versions_to_submit = len(gradeable.plagiarized_user[user.id])
                     else:    
                         versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
-                    if user.id in gradeable.hw_extensions:
-                        pdb.set_trace()
-                        
-                        conn.execute(extension_table.insert(),
-                                     user_id=user.id,
-                                     g_id=gradeable.id,
-                                     late_day_exceptions=gradeable.hw_extensions[user.id])
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):

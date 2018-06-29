@@ -52,3 +52,29 @@
     {% endfor %}
     </tbody>
 </table>
+
+<script>
+    {#This script is only for generating test output for selenium.#}
+    var temp = {};
+    var counter = 0;
+    $('#late_day_table tr td').each(function(){
+        var row = parseInt(counter/7);
+        var rowname = "row"+row;
+        if(counter%7 == 0){
+            temp[rowname]=[];
+        }
+        temp[rowname].push($(this).html()   );
+        counter++;
+    });
+    var row = "["
+    for(var i in temp){
+
+        for(var j = 0; j < temp[i].length; j++){
+            row += '"' + temp[i][j] + '",';
+        }
+        row += '\n';
+    }
+    row += ']';
+    console.log(row);
+
+</script>
