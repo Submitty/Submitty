@@ -578,11 +578,11 @@ table tr.table-header {
 }
 
 .deleted {
-    background-color: #FFCCCC !important;
+    background-color: #A9A9A9 !important;
 }
 
 .deleted.active {
-    background-color: #FF9999 !important;
+    background-color: #006400 !important;
 }
 
 .important {

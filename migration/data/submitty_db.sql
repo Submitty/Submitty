@@ -117,6 +117,11 @@ CREATE TABLE users (
     last_updated timestamp(6) with time zone
 );
 
+CREATE TABLE courses_registration_sections (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section_id character varying(255) NOT NULL
+);
 
 --
 -- TOC entry 2035 (class 2606 OID 19650)
@@ -156,6 +161,10 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
 
 
+ALTER TABLE ONLY courses_registration_sections
+    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
+
+
 ALTER TABLE ONLY mapped_courses
     ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
 --
@@ -185,6 +194,10 @@ ALTER TABLE ONLY sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
+ALTER TABLE ONLY courses_registration_sections
+    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
+
+
 -- Completed on 2017-06-12 14:35:07 EDT
 
 --
@@ -192,7 +205,7 @@ ALTER TABLE ONLY sessions
 --
 
 --
--- NEW Code by pbailie, June 30 2017
+-- plpgsql functions and triggers
 --
 
 CREATE EXTENSION IF NOT EXISTS dblink;
@@ -261,7 +274,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
+-- TRIGGER function to INSERT registration sections to course DB, as needed.
+$$
+DECLARE
+  registration_row RECORD;
+  db_conn VARCHAR;
+  query_string TEXT;
+BEGIN
+  FOR registration_row IN SELECT semester, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
+    db_conn := format('dbname=submitty_%s_%s', registration_row.semester, registration_row.course);
+    query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+      RAISE EXCEPTION 'dblink_query set as NULL';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+  END LOOP;
+
+  -- All done.
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
 -- Updates can happen in either users and/or courses_users.
 CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
 CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
+CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();
