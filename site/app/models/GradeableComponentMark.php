@@ -50,13 +50,11 @@ class GradeableComponentMark extends AbstractModel {
     }
 
     public function save() {
-        if($this->id === null) {
-            return $this->core->getQueries()->createGradeableComponentMark($this);
-        } else {
-            $this->core->getQueries()->updateGradeableComponentMark($this);
-        }
+        $this->core->getQueries()->updateGradeableComponentMark($this);
     }
-
+    public function create(){
+        return $this->core->getQueries()->createGradeableComponentMark($this);
+    }
     // should change get gradeables to also bring in grader_id because that is part of the identifying information
     public function saveGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id) {
         if($this->modified) {
@@ -71,7 +69,11 @@ class GradeableComponentMark extends AbstractModel {
             }
         }
     }
-
+    public function delete() {
+        if($this->id !=null){
+            return $this->core->getQueries()->deleteGradeableComponentMark($this);
+        }
+    }
     public function setNote($temp_note) {
         $this->note = urlencode($temp_note);
     }
