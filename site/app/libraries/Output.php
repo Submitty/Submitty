@@ -27,7 +27,9 @@ class Output {
     
     private $start_time;
 
+    /** @var \Twig_Environment $twig */
     private $twig = null;
+    /** @var \Twig_LoaderInterface $twig */
     private $twig_loader = null;
 
     /**
@@ -41,9 +43,12 @@ class Output {
     }
 
     public function loadTwig() {
-        $this->twig_loader = new \Twig_Loader_Filesystem(FileUtils::joinPaths(dirname(__DIR__), 'templates'));
+        $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
+        $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+
+        $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
         $this->twig = new \Twig_Environment($this->twig_loader, [
-            'cache' => false, //TODO: Use cache
+            'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->addGlobal("core", $this->core);

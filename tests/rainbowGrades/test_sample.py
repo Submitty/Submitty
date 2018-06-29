@@ -16,7 +16,8 @@ from datetime import datetime
 # Get paths required for testing
 repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
 script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
-runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "to_be_graded_batch")
+runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "to_be_graded_queue")
+rainbow_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "GIT_CHECKOUT", "RainbowGrades")
 
 
 def get_current_semester():
@@ -90,9 +91,9 @@ def sample_rainbow_grades_test():
         if "__sample__" in f:
             error_and_cleanup(test_tmp, "sample has assignments in the grading queue."
                               " Wait for the autograder to finish and then generate new grade summary reports"
-                              "prior to re-running this test.")
+                              " prior to re-running this test.")
 
-    rainbow_path = os.path.join(repository_path, "RainbowGrades")
+    #rainbow_path = os.path.join(repository_path, "RainbowGrades")
     if not os.path.isdir(rainbow_path):
         error_and_cleanup(test_tmp, "Couldn't find Rainbow Grades source code")
 
@@ -111,9 +112,10 @@ def sample_rainbow_grades_test():
     print("Copying Rainbow Grades code from Submitty to RainbowGrades")
     try:
         for f in os.listdir(rainbow_path):
-            shutil.copy(os.path.join(rainbow_path, f), rainbow_tmp)
+            if os.path.isfile(os.path.join(rainbow_path,f)):
+                shutil.copy(os.path.join(rainbow_path, f), rainbow_tmp)
     except Exception as e:
-        print("Rainbow PAth: {} Rainbow tmp: {}".format(rainbow_path,rainbow_tmp))
+        print("Rainbow Path: {} Rainbow tmp: {}".format(rainbow_path,rainbow_tmp))
         error_and_cleanup(test_tmp, "{}".format(e))
 
     # Copy non-standard files over
@@ -227,7 +229,7 @@ def sample_rainbow_grades_test():
 
     print("Checking summary files against expected summaries.")
     # Verify that a valid copy of output.html was sent to all_students_summary_html
-    make_output = make_output.splitlines()
+    make_output = make_output.decode().splitlines()
     make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
     make_output = make_output.split('/')
     make_output = make_output[-1]  # Get the name of the output.html file since it uses the date

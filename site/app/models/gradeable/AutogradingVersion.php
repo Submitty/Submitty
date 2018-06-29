@@ -98,7 +98,7 @@ class AutogradingVersion extends AbstractModel {
      * @param int|string $version
      */
     private function setVersionInternal($version) {
-        if (is_int($version) || ctype_digit($version) && intval($version) >= 0) {
+        if ((is_int($version) || ctype_digit($version)) && intval($version) >= 0) {
             $this->version = intval($version);
         } else {
             throw new \InvalidArgumentException('Version number must be a non-negative integer');

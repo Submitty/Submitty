@@ -496,15 +496,6 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/instructors
-    mkdir -p ${SUBMITTY_DATA_DIR}/bin
-    touch ${SUBMITTY_DATA_DIR}/instructors/authlist
-    touch ${SUBMITTY_DATA_DIR}/instructors/valid
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
-    chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
-    chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
-
     sudo mkdir -p /usr/lib/cgi-bin
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
