@@ -8,7 +8,7 @@
                     <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
                 {% endif %}
                 {# /Verify all button #}
-
+                <span> <input id='EditModeButton' type='checkbox' value='Enable Editing Mode' onclick='toggleEditMode(); updateCookies()'/> Enable Editing Mode</span>
                 {# Checkboxes #}
                 {% if peer %}
                     <span> <input type='hidden' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();"/></span>
