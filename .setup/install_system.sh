@@ -264,7 +264,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
