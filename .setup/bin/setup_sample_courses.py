@@ -741,6 +741,7 @@ class Course(object):
         gradeable_teams_table = Table("gradeable_teams", metadata, autoload=True)
         teams_table = Table("teams", metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
+        extension_table = Table("late_day_exceptions", metadata, autoload=True)
         for gradeable in self.gradeables:
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
@@ -871,11 +872,12 @@ class Course(object):
                     else:    
                         versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
                     if user.id in gradeable.hw_extensions:
-                        extension_table = Table("late_day_exceptions", metadata, autoload=True)
+                        pdb.set_trace()
+                        
                         conn.execute(extension_table.insert(),
                                      user_id=user.id,
                                      g_id=gradeable.id,
-                                     late_day_exceptions=None)
+                                     late_day_exceptions=gradeable.hw_extensions[user.id])
                     if (gradeable.gradeable_config is not None and
                        (gradeable.submission_due_date < NOW or random.random() < 0.5)
                        and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
@@ -920,7 +922,6 @@ class Course(object):
                                 #If the user is in the plagirized folder, then only add those submissions
                                 src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
                                 dst = os.path.join(submission_path, str(version))
-                                # pdb.set_trace()
                                 create_gradeable_submission(src, dst)
                             else:
                                 if isinstance(gradeable.submissions, dict):
@@ -1270,7 +1271,7 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
-        self.hw_extensions = []
+        self.hw_extensions = {}
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1302,7 +1303,6 @@ class Gradeable(object):
             examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'eg_lichen_sample_path' in gradeable:
-                # pdb.set_trace()
                 self.lichen_sample_path = gradeable['eg_lichen_sample_path']
                 if 'eg_plagiarized_users' in gradeable:
                     for user in gradeable['eg_plagiarized_users']:
@@ -1318,7 +1318,9 @@ class Gradeable(object):
                 else:
                     self.sample_path = None
             if 'hw_extensions' in gradeable:
-                self.hw_extensions = gradeable['hw_extensions']
+                for student in gradeable['hw_extensions']:
+                    extension = student.split()
+                    self.hw_extensions[extension[0]] = extension[1]
         else:
             self.id = gradeable['g_id']
             self.type = int(gradeable['g_type'])
