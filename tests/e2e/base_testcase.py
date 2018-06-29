@@ -45,11 +45,11 @@ class BaseTestCase(unittest.TestCase):
         self.driver = None
         """ :type driver: WebDriver """
         self.options = Options()
-        # self.options.add_argument('--headless')
+        self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
-        # self.options.add_argument('--hide-scrollbars')
-        # self.options.add_argument('--disable-gpu')
-        # self.options.add_argument('--no-proxy-server')
+        self.options.add_argument('--hide-scrollbars')
+        self.options.add_argument('--disable-gpu')
+        self.options.add_argument('--no-proxy-server')
 
         self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
         profile = {
