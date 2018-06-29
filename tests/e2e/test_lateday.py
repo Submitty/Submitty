@@ -30,10 +30,10 @@ class TestLateDays(BaseTestCase):
         #Drag in a random file and see if the popup displays correctly
         # open_gradeables = self.driver.find_element_by_xpath("//tbody[contains(text(),'Course Settings')]")
         if user_id == "lakinh":
-            self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format("Grading Team Homework")))
+            self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//h2[@class='upperinfo-left']"))
             assert self.driver.find_element_by_id('late_day_banner')
             assert self.driver.find_element_by_id('late_day_banner').value_of_css_property("background-color") == "rgba(217, 83, 79, 1)"
-            # print(late_banner)
+            self.click_nav_gradeable_button("graded", 'grades_released_homework', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
         pass
 
 
