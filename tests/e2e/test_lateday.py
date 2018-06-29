@@ -29,6 +29,11 @@ class TestLateDays(BaseTestCase):
         #Also checks if the show late info button displays correctly
         #Drag in a random file and see if the popup displays correctly
         # open_gradeables = self.driver.find_element_by_xpath("//tbody[contains(text(),'Course Settings')]")
+        if user_id == "lakinh":
+            self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format("Grading Team Homework")))
+            assert self.driver.find_element_by_id('late_day_banner')
+            assert self.driver.find_element_by_id('late_day_banner').value_of_css_property("background-color") == "rgba(217, 83, 79, 1)"
+            # print(late_banner)
         pass
 
 
@@ -103,11 +108,10 @@ class TestLateDays(BaseTestCase):
             # print(col.text + " " + table_info[counter])
             assert col.text == table_info[counter]
             counter+=1
-        self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
+        self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
         return table_info
 
     def get_info_from_table(self, table, gradeable_name, which_col):
-        pdb.set_trace()
         #Get info for a particular cell
         for i in range(0, len(table), 7):
             if table[i] == gradeable_name:
