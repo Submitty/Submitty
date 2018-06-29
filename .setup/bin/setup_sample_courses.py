@@ -74,7 +74,7 @@ def main():
     DB_ONLY = args.db_only
     if not os.path.isdir(SUBMITTY_DATA_DIR):
         raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
-    for directory in ["courses", "instructors"]:
+    for directory in ["courses"]:
         if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
             raise SystemError("The following directory does not exist: " + os.path.join(
                 SUBMITTY_DATA_DIR, directory))
@@ -541,8 +541,6 @@ class User(object):
                 self._create_ssh()
         if self.group <= 1:
             add_to_group("course_builders", self.id)
-            with open(os.path.join(SUBMITTY_DATA_DIR, "instructors", "valid"), "a") as open_file:
-                open_file.write(self.id + "\n")
         if self.sudo:
             add_to_group("sudo", self.id)
 
