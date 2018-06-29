@@ -1,5 +1,21 @@
 import os
+import json
 
+def change_key(my_json, old_key, new_key):
+    if old_key in my_json:
+        # store the value
+        val = my_json[old_key]
+        # delete the old key/value pair
+        del my_json[old_key]
+        # error checking
+        if new_key in my_json:
+            print ("ERROR: new_key "+new_key+" is already in the dictionary")
+        # re-add the value with the new key
+        my_json[new_key] = val
+    else:
+        print ("ERROR: old_key "+old_key+" is not in the dictionary")
+
+        
 def up():
 
     # stop all jobs that are using hwphp and hwcron
@@ -35,7 +51,10 @@ def up():
 
 
     # TODO edit the variables stored by configure submitty/installation
-    
+    with open ("/usr/local/submitty/config/submitty_users.py","r") as open_file:
+        my_json = json.load(open_file)
+
+    change_key(my_json,"hwcron_uid","daemon_uid")
     
     pass
 
