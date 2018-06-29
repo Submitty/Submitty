@@ -20,6 +20,17 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+
+# USERS / GROUPS
+DAEMON_USER=submitty_daemon
+DAEMON_GROUP=submitty_daemon
+PHP_USER=submitty_php
+PHP_GROUP=submitty_php
+CGI_USER=submitty_cgi
+CGI_GROUP=submitty_cgi
+
+DAEMONPHP_GROUP=submitty_daemonphp
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -102,19 +113,17 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser ${PHP_USER} ${DAEMONPHP_GROUP}
-
-    adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser ${CGI_USER} ${PHP_GROUP}
-    adduser ${CGI_USER} www-data
-
+    adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
+    usermod -a -G www-data "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #adduser ${DB_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
-    adduser ${CGI_USER} shadow
+    usermod -a -G shadow "${CGI_USER}"
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
     # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
@@ -122,23 +131,23 @@ if [ ${WORKER} == 0 ]; then
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-adduser ${DAEMON_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser ${DAEMON_USER} ${DAEMONPHP_GROUP}
+adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 # The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
-adduser ${DAEMON_USER} www-data
+usermod -a -G www-data "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
 if [ ${VAGRANT} == 1 ]; then
-	# add these users so that they can write to .vagrant/logs folder
+    # add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser ${PHP_USER} vagrant
-    	adduser ${CGI_USER} vagrant
+        usermod -a -G vagrant "${PHP_USER}"
+        usermod -a -G vagrant "${CGI_USER}"
     fi
-	adduser ${DAEMON_USER} vagrant
+    usermod -a -G vagrant "${DAEMON_USER}"
 fi
 
-usermod -aG docker ${DAEMON_GROUP}
+usermod -a G docker "${DAEMON_GROUP}"
 
 pip3 install -U pip
 pip3 install python-pam
