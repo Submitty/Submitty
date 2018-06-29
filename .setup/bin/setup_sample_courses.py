@@ -1131,9 +1131,13 @@ class Course(object):
         # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
         bucket_no = 0
 
-        for bucket,g_list in gradeables.items():
+        #for bucket,g_list in gradeables.items():
+        for bucket in sorted(gradeables.keys()):
+            g_list = gradeables[bucket]
             bucket_json = {"type": bucket, "count": len(g_list), "percent": 0.01*gradeables_percentages[bucket_no],
                            "ids" : []}
+
+            g_list.sort(key=lambda x: x.id)
 
             # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
             for gradeable in g_list:
