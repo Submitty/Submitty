@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'undelete_post':
+                $this->alterPost(2);
+                break;
             case 'search_threads':
                 $this->search();
                 break;
@@ -408,59 +411,71 @@ class ForumController extends AbstractController {
         return false;
     }
 
+    /**
+     * Alter content/delete/undelete post of a thread
+     *
+     * If applied on the first post of a thread, same action will be reflected on the corresponding thread
+     *
+     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     */
     public function alterPost($modifyType){
         if($modifyType == 0) { //delete post or thread
             if(!($this->core->getUser()->getGroup() <= 2)) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
-                return;
+                $error = "You do not have permissions to do that.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $response;
             }
             $thread_id = $_POST["thread_id"];
             $post_id = $_POST["post_id"];
             $type = "";
-            if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+            if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
             } else {
                 $type = "post";
             }
-            $this->core->getOutput()->renderJson(array('type' => $type));
+            $this->core->getOutput()->renderJson($response = array('type' => $type));
+            return $response;
+        } else if($modifyType == 2) { //undelete post or thread
+            if(!($this->core->getUser()->getGroup() <= 2)) {
+                $error = "You do not have permissions to do that.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $response;
+            }
+            $thread_id = $_POST["thread_id"];
+            $post_id = $_POST["post_id"];
+            $type = "";
+            $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
+            if(is_null($result)) {
+                $error = "Parent post must be undeleted first.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+            } else {
+                /// We want to reload same thread again, in both case (thread/post undelete)
+                $type = "post";
+                $this->core->getOutput()->renderJson($response = array('type' => $type));
+            }
+            return $response;
         } else if($modifyType == 1) { //edit post or thread
             $post_id = $_POST["edit_post_id"];
-            // Author of first post and thread must be same
             if(!($this->checkPostEditAccess($post_id))) {
                 $this->core->addErrorMessage("You do not have permissions to do that.");
                 return;
             }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+             // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
             } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
                 $type = is_null($status_edit_thread)?"Post":"Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
-                    $this->core->addSuccessMessage("{$type} updated successfully.");       
+                    $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
                 } else {
-                    $this->core->addErrorMessage("{$type} updation failed. Please try again.");       
-                }
-            } else {
-                if($status_edit_thread && $status_edit_post) {
-                    $this->core->addSuccessMessage("Thread and post updated successfully.");       
-                } else {
-                    $type = $status_edit_thread?"Thread":"Post";
-                    $type_opposite = $status_edit_thread?"Post":"Thread";
-                    if($status_edit_thread || $status_edit_post) {
-                        //$type is true
-                        $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
-                    } else {
-                        $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");       
-                    }
+                    $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");       
                 }
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
-        $response = array('type' => $type);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
     }
 
     private function editThread(){
