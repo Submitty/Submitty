@@ -70,6 +70,7 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.driver = WebDriver(options=self.options)
+        self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
 
@@ -183,6 +184,14 @@ class BaseTestCase(unittest.TestCase):
         if today.month < 7:
             semester = "s" + str(today.year)[-2:]
         return semester
+
+    # https://stackoverflow.com/a/47366981/214063
+    def enable_download_in_headless_chrome(self, download_dir):
+        # add missing support for chrome "send_command"  to selenium webdriver
+        self.driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+        command_result = self.driver.execute("send_command", params)
 
 
 class LoginSession:
