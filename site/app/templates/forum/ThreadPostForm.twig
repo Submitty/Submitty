@@ -67,6 +67,9 @@
                 $(function() {
                     $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
                         var part = get_part_number(e);
+                        if(isNaN(parseInt(part))) {
+                            return;
+                        }
                         var target = $(e.target);
                         var file_object = null;
                         var filename = target.attr("fname");
