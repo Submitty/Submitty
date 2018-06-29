@@ -173,8 +173,8 @@ class ElectronicGraderController extends GradingController {
         $sections = array();
         $total_users = array();
         $component_averages = array();
-        $autograded_average = array();
-        $overall_average = array();
+        $autograded_average = null;
+        $overall_average = null;
         $num_submitted = array();
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
@@ -187,8 +187,8 @@ class ElectronicGraderController extends GradingController {
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
             $component_averages = array();
-            $autograded_average = array();
-            $overall_average = array();
+            $autograded_average = null;
+            $overall_average = null;
             $section_key='registration_section';
         }
         else if ($gradeable->isGradeByRegistration()) {
