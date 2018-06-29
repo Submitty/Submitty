@@ -1080,7 +1080,7 @@ class ElectronicGraderController extends GradingController {
             } else {
                 //only change the component information is the mark was modified or componet and its gradeable are out of sync.
                 if($mark_modified === true || ($component->getGradedVersion() !== $gradeable->getActiveVersion())) {
-                    if ($component->getGrader()==null || $overwrite === "true") {
+                    if ($component->getGrader() === null || $overwrite === "true") {
                         $component->setGrader($this->core->getUser());
                     }
 
