@@ -50,7 +50,7 @@ fi
 
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
-DATABASE_PASSWORD=submitty_dbuser_password
+DATABASE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -118,7 +118,7 @@ if [ ${WORKER} == 0 ]; then
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
     # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/submitty_php/.profile
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
@@ -132,7 +132,7 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${D
 if [ ${VAGRANT} == 1 ]; then
 	# add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser submitty_php vagrant
+    	adduser ${PHP_USER} vagrant
     	adduser ${CGI_USER} vagrant
     fi
 	adduser ${DAEMON_USER} vagrant
@@ -547,9 +547,9 @@ if [ ${WORKER} == 0 ]; then
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R submitty_php:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R submitty_php:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database

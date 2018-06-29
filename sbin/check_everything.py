@@ -89,7 +89,7 @@ def CheckCourseInstructorAndGroup(my_instructor, my_group):
             print("ERROR! user "+my_instructor+" does not exist\n", file=sys.stderr)
             ret_val = False
         if not PHP_USER in c_g.gr_mem:
-            print("ERROR! submitty_php should be group "+my_group+"\n", file=sys.stderr)
+            print("ERROR! "+PHP_USER+" should be group "+my_group+"\n", file=sys.stderr)
             ret_val = False
         if not DAEMON_USER in c_g.gr_mem:
             print("ERROR! "+DAEMON_USER+" should be group "+my_group+"\n", file=sys.stderr)

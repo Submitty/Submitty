@@ -183,7 +183,7 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
 fi
 
-#Set up permissions on the logs directory. If in worker mode, submitty_php does not exist.
+#Set up permissions on the logs directory. If in worker mode, PHP_USER does not exist.
 if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
@@ -222,9 +222,9 @@ mkdir -p ${SUBMITTY_DATA_DIR}/tmp
 chown root:root ${SUBMITTY_DATA_DIR}/tmp
 chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 
-# tmp folder to hold files for PAM authentication. Needs to be writable by submitty_php and only readable by submitty_cgi
+# tmp folder to hold files for PAM authentication. Needs to be writable by PHP_USER and only readable by CGI_USER
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp/pam
-chown submitty_php:submitty_cgi ${SUBMITTY_DATA_DIR}/tmp/pam
+chown ${PHP_USER}:${CGI_USER} ${SUBMITTY_DATA_DIR}/tmp/pam
 chmod 750 ${SUBMITTY_DATA_DIR}/tmp/pam
 
 ########################################################################################################################
@@ -544,7 +544,7 @@ chmod 555 /usr/lib/python*/dist-packages
 #Set up pam if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-    sudo chown submitty_cgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 fi
 sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
 sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth

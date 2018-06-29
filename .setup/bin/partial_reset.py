@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 This does a more partial reset of the system compared to reset_system.py, primarily not wiping
-various changes like removing DB users, all created users (including system ones like submitty_php,
-submitty_cgi, etc.), removing networking stuff, etc.
+various changes like removing DB users, all created users (including system ones like PHP_USER, 
+CGI_USER, etc.), removing networking stuff, etc.
 
 This script acts more like the inverse of "setup_sample_courses.py" so that we could only run
 these two scripts in opposition and not end up in a corrupted system state. This gives us a

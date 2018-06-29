@@ -37,19 +37,19 @@ sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
 sudo addgroup submitty_daemonphp
 sudo addgroup submitty_course_builders
-sudo adduser submitty_php --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser submitty_cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser submitty_cgi submitty_php
-sudo adduser submitty_php shadow
-sudo adduser submitty_cgi shadow
+sudo adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser ${CGI_USER} ${PHP_GROUP}
+sudo adduser ${PHP_USER} shadow
+sudo adduser ${CGI_USER} shadow
 sudo adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser submitty_php submitty_daemonphp
+sudo adduser ${PHP_USER} submitty_daemonphp
 sudo adduser submitty_daemon submitty_daemonphp
 sudo adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo echo "submitty_dbuser:submitty_dbuser" | sudo chpasswd
 
-sudo chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}
-sudo chown submitty_php:submitty_php ${SUBMITTY_DATA_DIR}
+sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
+sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
 sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
 sudo chmod 777         ${SUBMITTY_DATA_DIR}
 
@@ -72,10 +72,10 @@ touch ${SUBMITTY_DATA_DIR}/instructors/valid
 chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
 chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
 
-sudo bash -c 'echo "export PATH=$PATH" >> /home/submitty_php/.profile'
-sudo bash -c 'echo "export PATH=$PATH" >> /home/submitty_php/.bashrc'
-# necessary so that submitty_php has access to /home/travis/.phpenv/shims/composer
-sudo usermod -a -G travis submitty_php
+sudo bash -c 'echo "export PATH=$PATH" >> /home/${PHP_USER}/.profile'
+sudo bash -c 'echo "export PATH=$PATH" >> /home/${PHP_USER}/.bashrc'
+# necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
+sudo usermod -a -G travis ${PHP_USER}
 
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial

@@ -151,7 +151,7 @@ def main():
 
     os.system('pkill -u submitty_daemon')
     os.system('crontab -u submitty_daemon -r')
-    for user in ["submitty_cgi", "submitty_php", "submitty_daemon", "submitty_dbuser"]:
+    for user in ["submitty_cgi", "submitty_php", "submitty_daemon"]:
         delete_user(user)
 
     groups = ["submitty_daemonphp", "submitty_course_builders"]
