@@ -11,7 +11,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\AutogradingVersion;
+use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
@@ -1354,7 +1354,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         $version_array[$property] = $db_row_split[$property][$i];
                     }
 
-                    $version = new AutogradingVersion($this->core, $graded_gradeable, $version_array);
+                    $version = new AutoGradedVersion($this->core, $graded_gradeable, $version_array);
                     $graded_versions[$version->getVersion()] = $version;
                 }
                 $auto_graded_gradeable->setAutogradingVersions($graded_versions);

@@ -17,15 +17,15 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * @method int getActiveVersion()
- * @method AutogradingVersion[] getAutogradingVersions()
+ * @method AutoGradedVersion[] getAutoGradedVersions()
  */
 class AutoGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
     private $graded_gradeable = null;
     /** @property @var int The active submission version for electronic gradeables */
     protected $active_version = 0;
-    /** @property @var AutogradingVersion[] The graded versions for electronic gradeables */
-    protected $autograding_versions = array();
+    /** @property @var AutoGradedVersion[] The graded versions for electronic gradeables */
+    protected $auto_graded_versions = array();
 
     /**
      * AutoGradedGradeable constructor.
@@ -60,8 +60,8 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets the AutogradingVersion instance for the active version
-     * @return AutogradingVersion
+     * Gets the AutoGradedVersion instance for the active version
+     * @return AutoGradedVersion
      */
     public function getActiveVersionInstance() {
         return $this->autograding_versions[$this->active_version];
@@ -82,11 +82,11 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of autograding versions for this gradeable data
-     * @param AutogradingVersion[] $autograding_versions
+     * @param AutoGradedVersion[] $autograding_versions
      */
     public function setAutogradingVersions(array $autograding_versions) {
         foreach ($autograding_versions as $autograding_version) {
-            if (!($autograding_version instanceof AutogradingVersion)) {
+            if (!($autograding_version instanceof AutoGradedVersion)) {
                 throw new \InvalidArgumentException('Autograding version array contained invalid type');
             }
         }

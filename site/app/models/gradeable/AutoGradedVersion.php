@@ -11,10 +11,11 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 use app\models\AbstractModel;
 
 /**
- * Class AutogradingVersion
+ * Class AutoGradedVersion
  * @package app\models\gradeable
  *
  * Data about and results of autograding for one submission version
@@ -28,10 +29,10 @@ use app\models\AbstractModel;
  * @method \DateTime getSubmissionTime()
  * @method isAutogradingComplete()
  */
-class AutogradingVersion extends AbstractModel {
+class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
     private $graded_gradeable = null;
-    /** @property @var int The submission version for this AutogradingVersion */
+    /** @property @var int The submission version for this AutoGradedVersion */
     protected $version = 0;
     /** @property @var float The number of "normal" points */
     protected $non_hidden_non_extra_credit = 0;
@@ -46,8 +47,14 @@ class AutogradingVersion extends AbstractModel {
     /** @property @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
 
+    /** @property @var AutoGradedTestcase[] The testcases for this version (lazy loaded)  */
+    private $graded_testcases = null;
+
+    private $meta_files = null;
+    private $files = null;
+
     /**
-     * AutogradingVersion constructor.
+     * AutoGradedVersion constructor.
      * @param Core $core
      * @param GradedGradeable $graded_gradeable
      * @param array $details
@@ -73,6 +80,39 @@ class AutogradingVersion extends AbstractModel {
         $details['submission_time'] = DateUtils::dateTimeToString($this->submission_time);
 
         return $details;
+    }
+
+                $this->meta_files[$file] = $details;
+        }
+    }
+
+        $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+
+        //  TODO: what do we want to do with submission files?  We should lazy load them like everything else, but from a different function
+        }
+        }
+                    $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
+                        "wait_time" => "UNKNOWN");
+                }
+                $this->result_details = array_merge($this->result_details, $last_results_timestamp);
+                $this->result_details['num_autogrades'] = count($history);
+                $this->early_total = 0;
+                for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
+                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
+                    $pts = $this->testcases[$i]->getPointsAwarded();
+                    if ( in_array ($i+1,$this->early_submission_test_cases) ) {
+                        $this->early_total += $pts;
+                    }
+                }
+            }
+        }
+    }
+
+    public function getTestcases() {
+        if($this->graded_testcases === null) {
+            $this->graded_testcases  =$this->loadTestcases();
+        }
+        return $this->graded_testcases;
     }
 
     public function getNonHiddenPoints() {
