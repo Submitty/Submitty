@@ -11,8 +11,8 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-    PHP_USER=$(jq -r '.submitty_php_user' ${CONF_DIR}/submitty_users.json)
-    CGI_USER=$(jq -r '.submitty_cgi_user' ${CONF_DIR}/submitty_users.json)
+    PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
+    CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 fi
 
 # copy the website from the repo
