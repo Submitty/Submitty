@@ -222,7 +222,7 @@ def noop(_):
 
 
 def run_migration(connection, migration, environment, args):
-    print("  {}".format(migration['id']))
+    print("  {}{}".format(migration['id'], ' (FAKE)' if args.fake else ''))
     if not args.fake:
         call_func(getattr(migration['module'], args.direction, noop), connection, environment, args)
     status = 1 if args.direction == 'up' else 0
