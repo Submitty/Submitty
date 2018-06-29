@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'undelete_post':
+                $this->alterPost(2);
+                break;
             case 'search_threads':
                 $this->search();
                 break;
@@ -394,6 +397,13 @@ class ForumController extends AbstractController {
         return $response;
     }
 
+    /**
+     * Alter content/delete/undelete post of a thread
+     *
+     * If applied on the first post of a thread, same action will be reflected on the corresponding thread
+     *
+     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     */
     public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
 
@@ -401,12 +411,26 @@ class ForumController extends AbstractController {
                 $thread_id = $_POST["thread_id"];
                 $post_id = $_POST["post_id"];
                 $type = "";
-                if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                     $type = "thread";
                 } else {
                     $type = "post";
                 }
                 $this->core->getOutput()->renderJson(array('type' => $type));
+            } else if($modifyType == 2) { //undelete post or thread
+                $thread_id = $_POST["thread_id"];
+                $post_id = $_POST["post_id"];
+                $type = "";
+                $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
+                if(is_null($result)) {
+                    $error = "Parent post must be undeleted first.";
+                    $this->core->getOutput()->renderJson(array('error' => $error));
+                    return;
+                } else {
+                    /// We want to reload same thread again, in both case (thread/post undelete)
+                    $type = "post";
+                    $this->core->getOutput()->renderJson(array('type' => $type));
+                }
             } else if($modifyType == 1) { //edit post or thread
                 $status_edit_thread = $this->editThread();
                 $status_edit_post   = $this->editPost();
