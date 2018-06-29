@@ -122,13 +122,21 @@ class GradeableController extends AbstractController {
             'action' => 'upload_config')));
     }
 
-    public function delete_config()
-    {
+    public function delete_config(){
         $config_path = $_GET['config'] ?? null;
+        $in_use = false;
+        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+            if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+                $in_use = true;
+                break;
+            }
+        }
         if ($config_path == null) {
             $this->core->addErrorMessage("Selecting config failed.");
         } else if (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
+        } else if ($in_use){
+            $this->core->addErrorMessage("This config is currently in use.");
         } else {
             if($this->recursive_rmdir($config_path)){
                 $this->core->addSuccessMessage("The config folder has been succesfully deleted");

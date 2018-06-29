@@ -94,9 +94,9 @@ class AdminGradeableView extends AbstractView {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach($all_uploaded_configs as $file){
-            $all_uploaded_config_paths[] = FileUtils::joinPaths($file['path'], "config");
+            $all_uploaded_config_paths[] = $file['path'];
             //If this happens then select the second radio button "Using Uploaded"
-            if(FileUtils::joinPaths($file['path'], "config") == $saved_path) $which_config_option = 1;
+            if($file['path'] == $saved_path) $which_config_option = 1;
         }
         $config_repo_name = $this->core->getConfig()->getPrivateConfigRepository();
         $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
