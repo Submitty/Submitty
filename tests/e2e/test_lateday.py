@@ -16,7 +16,7 @@ class TestLateDays(BaseTestCase):
         #Third, click on each gradeable and see if the correct info (banners, popups, etc) displays correctly
         #Fourth, log out and login as another user
         late_info = self.load_and_test_table('lakinh')
-        self.check_student_late_gradeable_view('lakinh', late_info)
+        self.check_student_late_gradeable_view('lakinh')
         super().log_out()
         super().log_in(user_id='bauchg', user_password='bauchg', user_name='Gwen')
         self.load_and_test_table('bauchg')
@@ -24,7 +24,7 @@ class TestLateDays(BaseTestCase):
         super().log_in(user_id='stracm', user_password='stracm', user_name='Malvina')
         self.load_and_test_table('stracm')
 
-    def check_student_late_gradeable_view(self, user_id, late_info):
+    def check_student_late_gradeable_view(self, user_id):
         #Check on each button and check if the banner displays the correct info
         #Also checks if the show late info button displays correctly
         #Drag in a random file and see if the popup displays correctly
@@ -34,6 +34,7 @@ class TestLateDays(BaseTestCase):
 
     def load_and_test_table(self, user_id):
         #Test the late days table using given infomation, compares the rows and column of three users
+        #Will return back to the course page after testing
         self.driver.find_element_by_id(self.get_current_semester() + '_sample').click()
         self.driver.find_element_by_xpath("//a[contains(text(),'Show my late days information')]").click()
         assert 'page=view_late_table' in self.driver.current_url
@@ -102,6 +103,7 @@ class TestLateDays(BaseTestCase):
             # print(col.text + " " + table_info[counter])
             assert col.text == table_info[counter]
             counter+=1
+        self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
         return table_info
 
     def get_info_from_table(self, table, gradeable_name, which_col):
