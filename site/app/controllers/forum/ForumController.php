@@ -455,6 +455,7 @@ class ForumController extends AbstractController {
             }
             return $response;
         } else if($modifyType == 1) { //edit post or thread
+            $thread_id = $_POST["edit_thread_id"];
             $post_id = $_POST["edit_post_id"];
             if(!($this->checkPostEditAccess($post_id))) {
                 $this->core->addErrorMessage("You do not have permissions to do that.");
@@ -471,7 +472,7 @@ class ForumController extends AbstractController {
                     //$type is true
                     $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
                 } else {
-                    $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");       
+                    $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
                 }
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));

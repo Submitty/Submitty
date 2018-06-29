@@ -795,7 +795,7 @@ HTML;
 			$return .= <<<HTML
 			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
-		} 
+		}
 		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
 			$shouldEditThread = null;
 			$edit_button_title = "";

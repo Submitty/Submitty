@@ -2074,7 +2074,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
