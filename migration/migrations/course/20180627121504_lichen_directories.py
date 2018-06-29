@@ -1,11 +1,7 @@
 import os
 import grp
 
-def up(conn):
-
-    # FIXME HACK UNTIL these variables are passed along
-    semester="s18"
-    course="sample"
+def up(conn, semester, course):
 
     course_dir          = os.path.join("/var/local/submitty/courses",semester,course)
     lichen_dir          = os.path.join(course_dir,"lichen")
@@ -13,9 +9,9 @@ def up(conn):
     lichen_provided_dir = os.path.join(lichen_dir,"provided_code")
 
     # create the directories
-    os.system("mkdir -p "+lichen_dir)
-    os.system("mkdir -p "+lichen_config_dir)
-    os.system("mkdir -p "+lichen_provided_dir)
+    os.makedirs(lichen_dir, exist_ok=True)
+    os.makedirs(lichen_config_dir, exist_ok=True)
+    os.makedirs(lichen_provided_dir, exist_ok=True)
 
     # get course group
     stat_info = os.stat(course_dir)
@@ -31,5 +27,5 @@ def up(conn):
     pass
 
 
-def down(conn):
+def down(conn, semester, course):
     pass
