@@ -47,6 +47,17 @@ class TestGraderAccess(BaseTestCase):
         # This should give us the homepage, so json parse should fail
         self.assertRaises(Exception, json.loads, post.text)
 
+        post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                ('page', 'electronic'), ('action', 'get_gradeable_comment')],
+                         data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker'})
+        self.assertRaises(Exception, json.loads, post.text)
+
+        post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                ('page', 'electronic'), ('action', 'get_marked_users')],
+                         data={'gradeable_id': 'grading_homework', 'gradeable_component_id': '30',
+                               'order_num': '1'})
+        self.assertRaises(Exception, json.loads, post.text)
+
     def test_grading_student(self):
         with LoginSession(self, "student", "student", "Joe"):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
@@ -79,6 +90,21 @@ class TestGraderAccess(BaseTestCase):
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
                              data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
                                    'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_gradeable_comment')],
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_marked_users')],
+                             data={'gradeable_id': 'grading_homework', 'gradeable_component_id': '30',
+                                   'order_num': '1'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "failure")
@@ -121,6 +147,21 @@ class TestGraderAccess(BaseTestCase):
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
                              data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
                                    'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_gradeable_comment')],
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "failure")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_marked_users')],
+                             data={'gradeable_id': 'grading_homework', 'gradeable_component_id': '30',
+                                   'order_num': '1'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "failure")
@@ -169,6 +210,21 @@ class TestGraderAccess(BaseTestCase):
             response = json.loads(post.text)
             self.assertEqual(response['status'], "success")
 
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_gradeable_comment')],
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_marked_users')],
+                             data={'gradeable_id': 'grading_homework', 'gradeable_component_id': '30',
+                                   'order_num': '1'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
+
     def test_grading_instructor(self):
         with LoginSession(self, "instructor", "instructor", "Quinn"):
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
@@ -209,6 +265,21 @@ class TestGraderAccess(BaseTestCase):
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
                              data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
                                    'gradeable_component_id': '30'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_gradeable_comment')],
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker'})
+
+            response = json.loads(post.text)
+            self.assertEqual(response['status'], "success")
+
+            post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                    ('page', 'electronic'), ('action', 'get_marked_users')],
+                             data={'gradeable_id': 'grading_homework', 'gradeable_component_id': '30',
+                                   'order_num': '1'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "success")
