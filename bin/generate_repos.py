@@ -23,7 +23,7 @@ DATABASE_PASS = JSON['database_password']
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     JSON = json.load(open_file)
-VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs')
+VCS_FOLDER = os.path.join(JSON['submitty_data_dir'], 'vcs', 'git')
 
 def create_folder(folder):
     if not os.path.isdir(folder):
