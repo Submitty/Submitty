@@ -91,6 +91,14 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the graded gradeable instance this Ta grade belongs to
+     * @return GradedGradeable
+     */
+    public function getGradedGradeable() {
+        return $this->graded_gradeable;
+    }
+
+    /**
      * Gets the percent of points the student has earned of the
      *  components that have been graded
      * @param bool $clamp True to clamp the result to 1.0
