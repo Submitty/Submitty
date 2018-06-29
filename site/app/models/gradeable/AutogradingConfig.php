@@ -47,7 +47,7 @@ class AutogradingConfig extends AbstractModel {
 
     /** @property @var array TODO: */
     private $textboxes = [];
-    /** @property @var GradeableTestcase[] TODO: */
+    /** @property @var AutogradingTestcase[] TODO: */
     private $testcases = [];
 
     /* Properties if early submission incentive enabled */
