@@ -195,7 +195,7 @@ class ReportController extends AbstractController {
 
                 if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                     $marks = [];
-                    if ($component->gethasMark()) {
+                    if ($component->getHasMarks()) {
                         foreach ($component->getMarks() as $mark) {
                             if ($mark->getHasMark()) {
                                 $marks[] = ['points' => $mark->getPoints(), 'note' => $mark->getNote()];

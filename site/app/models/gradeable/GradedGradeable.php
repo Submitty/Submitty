@@ -76,7 +76,7 @@ class GradedGradeable extends AbstractModel {
         $details['graders'] = [];
         foreach ($this->graded_components as $graded_components) {
             foreach($graded_components as $graded_component) {
-                if ($graded_component->gethasMark()) {
+                if ($graded_component->getHasMarks()) {
                     // Only set once if multiple components have the same grader
                     if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
                         $details['graders'][$graded_component->getGrader()->getId()] = $graded_component->getGrader()->toArray();

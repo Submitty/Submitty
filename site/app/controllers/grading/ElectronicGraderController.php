@@ -1006,7 +1006,7 @@ class ElectronicGraderController extends GradingController {
                 }
                 $found = false;
                 foreach($component as $peer) {
-                    if(!$peer->gethasMark()) {
+                    if(!$peer->getHasMarks()) {
                         $component = $peer;
                         $found = true;
                         break;
@@ -1043,7 +1043,7 @@ class ElectronicGraderController extends GradingController {
                 if($all_false === true && $temp_mark_selected === true) {
                     $all_false = false;
                 }
-                if($temp_mark_selected !== $mark->gethasMark()) {
+                if($temp_mark_selected !== $mark->getHasMark()) {
                     $mark_modified = true;
                 }
                 $index++;
@@ -1208,7 +1208,7 @@ class ElectronicGraderController extends GradingController {
                     continue;
                 }
                 foreach($question as $cmpt) {
-                    if(!$cmpt->getHasMark()) {
+                    if(!$cmpt->getHasMarks()) {
                         $component = $cmpt;
                         break;
                     }

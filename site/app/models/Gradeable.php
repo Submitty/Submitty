@@ -904,7 +904,7 @@ class Gradeable extends AbstractModel {
             if(is_array($component)) {
                 foreach($component as $cmpt) {
                     // if no peers have graded this component or this peer graded this component
-                    if((!$cmpt->gethasMark() && !$cmpt->getHasGrade()) || ($cmpt->getGrader()->getId() == $this->core->getUser()->getId())) {
+                    if((!$cmpt->getHasMarks() && !$cmpt->getHasGrade()) || ($cmpt->getGrader()->getId() == $this->core->getUser()->getId())) {
                         $points += $cmpt->getGradedTAPoints();
                         break;
                     }
@@ -1166,12 +1166,12 @@ class Gradeable extends AbstractModel {
         foreach($this->components as $cmpt) {
             if(is_array($cmpt)) {
                 foreach($cmpt as $peer) {
-                    if($peer->gethasMark() && $peer->getGrader()->getId() == $grader_id) {
+                    if($peer->getHasMarks() && $peer->getGrader()->getId() == $grader_id) {
                         $return[] = $peer;
                     }
                 }
             }
-            else if($cmpt->gethasMark() && $cmpt->getGrader()->getId() == $grader_id) {
+            else if($cmpt->getHasMarks() && $cmpt->getGrader()->getId() == $grader_id) {
                 $return[] = $cmpt;
             }
         }

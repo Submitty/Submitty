@@ -175,7 +175,7 @@
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component.getScore() }}"
-                {% if component.gethasMark() %}
+                {% if component.getHasMarks() %}
                     data-grader="{{ component.getGrader().getId() }}"
                 {% endif %}
                 {% if component.getGradeTime() != null %}
@@ -207,7 +207,7 @@
                         id="cell-{{ index }}-{{ col }}"
                         data-id="{{  component.getId() }}"
                         value="{{  component.getScore() }}"
-                        {% if component.gethasMark() %}
+                        {% if component.getHasMarks() %}
                             data-grader="{{ component.getGrader().getId() }}"
                         {% endif %}
                         {% if component.getGradeTime() != null %}
