@@ -229,7 +229,8 @@ class LoginSession():
 
     def log_out(self):
         if self.logged_in:
-            self.logged_in = False
+            self.testcase.get("/index.php")
             self.testcase.driver.find_element_by_id('logout').click()
             self.testcase.driver.find_element_by_id('login-guest')
+            self.logged_in = False
 

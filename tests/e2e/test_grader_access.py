@@ -41,7 +41,8 @@ class TestGraderAccess(BaseTestCase):
 
         post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
                                 ('page', 'electronic'), ('action', 'get_mark_data')],
-                  data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+                         data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
+                               'gradeable_component_id': '30'})
 
         # This should give us the homepage, so json parse should fail
         self.assertRaises(Exception, json.loads, post.text)
@@ -76,7 +77,8 @@ class TestGraderAccess(BaseTestCase):
 
             post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
-                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
+                                   'gradeable_component_id': '30'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "failure")
@@ -117,7 +119,8 @@ class TestGraderAccess(BaseTestCase):
             # Not in our section
             post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
-                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
+                                   'gradeable_component_id': '30'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "failure")
@@ -160,7 +163,8 @@ class TestGraderAccess(BaseTestCase):
 
             post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
-                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
+                                   'gradeable_component_id': '30'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "success")
@@ -203,7 +207,8 @@ class TestGraderAccess(BaseTestCase):
 
             post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
                                     ('page', 'electronic'), ('action', 'get_mark_data')],
-                      data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+                             data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker',
+                                   'gradeable_component_id': '30'})
 
             response = json.loads(post.text)
             self.assertEqual(response['status'], "success")
@@ -231,4 +236,5 @@ class TestGraderAccess(BaseTestCase):
 
 if __name__ == "__main__":
     import unittest
+
     unittest.main()
