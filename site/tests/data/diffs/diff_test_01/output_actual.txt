@@ -1,15 +1,15 @@
 <div class='diff-container'><div class='diff-code'>
-	<div><span class='line_number'>1</span><span class='line_code'>proper name ==&gt; Brad</span></div>
-	<div><span class='line_number'>2</span><span class='line_code'>emotion ==&gt; happy</span></div>
-	<div><span class='line_number'>3</span><span class='line_code'>verb ==&gt; eat</span></div>
-	<div><span class='line_number'>4</span><span class='line_code'>adjective ==&gt; silly</span></div>
-	<div><span class='line_number'>5</span><span class='line_code'>noun ==&gt; mouse</span></div>
+	<div><span class='line_number'>&nbsp;1</span><span class='line_code'>proper name ==&gt; Brad</span></div>
+	<div><span class='line_number'>&nbsp;2</span><span class='line_code'>emotion ==&gt; happy</span></div>
+	<div><span class='line_number'>&nbsp;3</span><span class='line_code'>verb ==&gt; eat</span></div>
+	<div><span class='line_number'>&nbsp;4</span><span class='line_code'>adjective ==&gt; silly</span></div>
+	<div><span class='line_number'>&nbsp;5</span><span class='line_code'>noun ==&gt; mouse</span></div>
 	<div class='highlight' id='id_actual_0'>
-	<div class='bad'><span class='line_number'>6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>sill</span><span class='line_code_inner'>y</span></span></div>
+	<div class='bad'><span class='line_number'>&nbsp;6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>sill</span><span class='line_code_inner'>y</span></span></div>
 	</div>
-	<div><span class='line_number'>7</span><span class='line_code'>noun ==&gt; computer</span></div>
-	<div><span class='line_number'>8</span><span class='line_code'>adjective ==&gt; cute</span></div>
-	<div><span class='line_number'>9</span><span class='line_code'>Look, Brad ...</span></div>
+	<div><span class='line_number'>&nbsp;7</span><span class='line_code'>noun ==&gt; computer</span></div>
+	<div><span class='line_number'>&nbsp;8</span><span class='line_code'>adjective ==&gt; cute</span></div>
+	<div><span class='line_number'>&nbsp;9</span><span class='line_code'>Look, Brad ...</span></div>
 	<div><span class='line_number'>10</span><span class='line_code'>  I can see you're really happy about this ...</span></div>
 	<div><span class='line_number'>11</span><span class='line_code'>  I honestly think you ought to eat calmly ...</span></div>
 	<div><span class='line_number'>12</span><span class='line_code'>  take a silly mouse and think things over ...</span></div>
