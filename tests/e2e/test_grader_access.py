@@ -11,9 +11,43 @@ class TestGraderAccess(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
+    def test_grading_nologin(self):
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                        ('gradeable_id', 'grading_homework')])
+        # This is true if we're on the homepage
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                        ('action', 'details'), ('gradeable_id', 'grading_homework')])
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                        ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                        ('gradeable_id', 'grading_homework'), ('type', 'All')])
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'misc'),
+                        ('page', 'download_all_assigned'), ('dir', 'submissions'),
+                        ('gradeable_id', 'grading_homework')])
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                        ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'aphacker')])
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
+                        ('action', 'grade'), ('gradeable_id', 'grading_homework'), ('who_id', 'instructor')])
+        self.assertEqual(1, len(self.driver.find_elements_by_name("stay_logged_in")))
+
+        post = self.post(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'),
+                                ('page', 'electronic'), ('action', 'get_mark_data')],
+                  data={'gradeable_id': 'grading_homework', 'anon_id': 'aphacker', 'gradeable_component_id': '30'})
+
+        # This should give us the homepage, so json parse should fail
+        self.assertRaises(Exception, json.loads, post.text)
+
     def test_grading_student(self):
         with LoginSession(self, "student", "student", "Joe"):
-            self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('gradeable_id', 'grading_homework')])
             self.expect_error()
@@ -49,7 +83,6 @@ class TestGraderAccess(BaseTestCase):
 
     def test_grading_grader(self):
         with LoginSession(self, "grader", "grader", "Tim"):
-            self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('gradeable_id', 'grading_homework')])
             self.expect_alert(False)
@@ -91,7 +124,6 @@ class TestGraderAccess(BaseTestCase):
 
     def test_grading_ta(self):
         with LoginSession(self, "ta2", "ta2", "Jack"):
-            self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('gradeable_id', 'grading_homework')])
             self.expect_alert(False)
@@ -135,7 +167,6 @@ class TestGraderAccess(BaseTestCase):
 
     def test_grading_instructor(self):
         with LoginSession(self, "instructor", "instructor", "Quinn"):
-            self.click_class("sample", "SAMPLE")
             self.get(parts=[('semester', 's18'), ('course', 'sample'), ('component', 'grading'), ('page', 'electronic'),
                             ('gradeable_id', 'grading_homework')])
             self.expect_alert(False)
