@@ -44,7 +44,7 @@ class BaseTestCase(unittest.TestCase):
         else:
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
-        """ :type driver: webdriver.Chrome """
+        """ :type driver: WebDriver """
         self.options = Options()
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
