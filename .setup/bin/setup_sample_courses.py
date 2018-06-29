@@ -74,7 +74,7 @@ def main():
     DB_ONLY = args.db_only
     if not os.path.isdir(SUBMITTY_DATA_DIR):
         raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
-    for directory in ["courses", "instructors"]:
+    for directory in ["courses"]:
         if not os.path.isdir(os.path.join(SUBMITTY_DATA_DIR, directory)):
             raise SystemError("The following directory does not exist: " + os.path.join(
                 SUBMITTY_DATA_DIR, directory))
@@ -540,9 +540,13 @@ class User(object):
             else:
                 self._create_ssh()
         if self.group <= 1:
+<<<<<<< HEAD
             add_to_group("submitty_course_builders", self.id)
             with open(os.path.join(SUBMITTY_DATA_DIR, "instructors", "valid"), "a") as open_file:
                 open_file.write(self.id + "\n")
+=======
+            add_to_group("course_builders", self.id)
+>>>>>>> c4a723d3d15f4ebfea6547a86585e8fb02e8d22c
         if self.sudo:
             add_to_group("sudo", self.id)
 
@@ -1105,6 +1109,8 @@ class Course(object):
         m.update(bytes(course_id, "utf-8"))
         random.seed(int(m.hexdigest(), 16))
 
+        # Would be great if we could install directly to test_suite, but
+        # currently the test uses "clean" which will blow away test_suite
         customization_path = os.path.join(SUBMITTY_INSTALL_DIR, ".setup")
         print("Generating customization_{}.json".format(course_id))
 
@@ -1129,9 +1135,13 @@ class Course(object):
         # Compute totals and write out each syllabus bucket in the "gradeables" field of customization.json
         bucket_no = 0
 
-        for bucket,g_list in gradeables.items():
+        #for bucket,g_list in gradeables.items():
+        for bucket in sorted(gradeables.keys()):
+            g_list = gradeables[bucket]
             bucket_json = {"type": bucket, "count": len(g_list), "percent": 0.01*gradeables_percentages[bucket_no],
                            "ids" : []}
+
+            g_list.sort(key=lambda x: x.id)
 
             # Manually total up the non-penalty non-extra-credit max scores, and decide which gradeables are 'released'
             for gradeable in g_list:
@@ -1225,8 +1235,14 @@ class Course(object):
 
         # Attempt to write the customization.json file
         try:
+            with open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w') as customization_file:
+                customization_file.write("/*\n"
+                                         "This JSON is based on the automatically generated customization for\n"
+                                         "the development course \"{}\" as of {}.\n"
+                                         "It is intended as a simple example, with additional documentation online.\n"
+                                         "*/\n".format(course_id,NOW.strftime("%Y-%m-%d %H:%M:%S%z")))
             json.dump(gradeables_json_output,
-                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'w'),indent=2)
+                      open(os.path.join(customization_path, "customization_" + course_id + ".json"), 'a'),indent=2)
         except EnvironmentError as e:
             print("Failed to write to customization file: {}".format(e))
 
