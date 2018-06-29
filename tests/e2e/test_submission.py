@@ -18,7 +18,7 @@ class TestSubmission(BaseTestCase):
         self.click_class("sample", "SAMPLE")
         self.click_nav_gradeable_button(gradeable_category, gradeable_id, button_name, loaded_selector)
 
-    def create_file_paths2(self, multiple=False, autograding=False):
+    def create_file_paths(self, multiple=False, autograding=False):
         examples_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples"))
         if autograding:
             file_paths = [os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame.cpp")]
