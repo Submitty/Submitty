@@ -9,7 +9,6 @@ import os
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-
 class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
@@ -19,12 +18,12 @@ class TestSubmission(BaseTestCase):
         self.click_class("sample", "SAMPLE")
         self.click_nav_gradeable_button(gradeable_category, gradeable_id, button_name, loaded_selector)
 
-    def create_file_paths(self, multiple=False, autograding=False):
+    def create_file_paths2(self, multiple=False, autograding=False):
         examples_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples"))
         if autograding:
-            file_paths = [os.path.join(examples_path, "cpp_hidden", "submissions", "frame.cpp")]
+            file_paths = [os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame.cpp")]
             if multiple:
-                return file_paths + [os.path.join(examples_path, "cpp_hidden", "submissions", "frame_buggy.cpp")]
+                return file_paths + [os.path.join(examples_path, "cpp_hidden_tests", "submissions", "frame_buggy.cpp")]
             else:
                 return file_paths
         else:
