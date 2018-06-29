@@ -222,6 +222,9 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $HWCRON_USER       ta_www_group    uploads/
 #               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/bulk_pdf/
 #               drwxr-s---       $HWCGI_USER        ta_www_group    uploads/split_pdf/
+#               drwxr-s---       $HWCRON_USER       ta_www_group    lichen/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    lichen/config
+#               drwxr-s---       $HWPHP_USER        ta_www_group    lichen/provided_code
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/forum_attachments
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/config_upload
@@ -230,6 +233,9 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
 create_and_set  u=rwx,g=rxs,o=   $HWCGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/lichen
+create_and_set  u=rwx,g=rwxs,o=  $HWPHP_USER        $ta_www_group   $course_dir/lichen/config
+create_and_set  u=rwx,g=rwxs,o=  $HWPHP_USER        $ta_www_group   $course_dir/lichen/provided_code
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
