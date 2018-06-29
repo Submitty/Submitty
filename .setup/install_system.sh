@@ -372,15 +372,19 @@ if [ ${WORKER} == 0 ]; then
     # POSTGRES SETUP
     #################
     if [ ${VAGRANT} == 1 ]; then
-    	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-    	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
-    	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
-    	echo "Creating PostgreSQL users"
-    	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
-    	echo "Finished creating PostgreSQL users"
+        PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
+        if [ ! -d /etc/postgresql/${PG_VERSION}/pg_hba.conf ]; then
+            # PG 10.x stopped putting the minor version in the folder name
+            PG_VERSION="$(psql -V | grep -o '[0-9]{1,}')"
+        fi
+        cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
+        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+        echo "Creating PostgreSQL users"
+        su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
+        echo "Finished creating PostgreSQL users"
 
-    	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-    	service postgresql restart
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        service postgresql restart
     fi
 fi
 
