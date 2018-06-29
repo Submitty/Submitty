@@ -83,7 +83,7 @@
                     <b>Statistics for Completely Graded Assignments: </b>
                     <br/>
                     <div style="margin-left: 20px">
-                        {% if overall_average.getCount() == 0 %}
+                        {% if overall_average == null or overall_average.getCount() == 0 %}
                             No assignments have been completely graded yet.
                         {% else %}
                             Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
@@ -97,7 +97,7 @@
                         <b>Statistics for Auto-Grading: </b>
                         <br/>
                         <div style="margin-left: 20px">
-                            {% if autograded_average.getCount() == 0 %}
+                            {% if autograded_average == null or autograded_average.getCount() == 0 %}
                                 No assignments have been submitted yet.
                             {% else %}
                                 Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ autograded_percentage }}%)<br/>

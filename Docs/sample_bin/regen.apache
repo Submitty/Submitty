@@ -1,5 +1,0 @@
-cat /root/bin/top.txt > /etc/apache2/sites-available/test-svn-ssl.conf
-/root/bin/gen.middle >> /etc/apache2/sites-available/test-svn-ssl.conf
-cat /root/bin/bottom.txt >> /etc/apache2/sites-available/test-svn-ssl.conf
-apache2ctl -t
-echo "Type '/usr/submitty/reload.apache' to reload with the new config."

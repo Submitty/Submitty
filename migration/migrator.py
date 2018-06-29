@@ -16,7 +16,7 @@ import sys
 
 import psycopg2
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 DIR_PATH = Path(__file__).parent.resolve()
 MIGRATIONS_PATH = DIR_PATH / 'migrations'
 ENVIRONMENTS = ['master', 'system', 'course']
@@ -30,7 +30,7 @@ def parse_args():
     required = False if default_config is not None else True
     parser.add_argument('-c', '--config', dest='config_path', type=str, required=required, default=default_config)
     parser.add_argument('-e', '--environment', dest='environments', choices=ENVIRONMENTS, action='append')
-    parser.add_argument('--course', nargs=2, metavar=('semester', 'course'), default=None)
+    parser.add_argument('--course', dest='choose_course', nargs=2, metavar=('semester', 'course'), default=None)
 
     subparsers = parser.add_subparsers(metavar='command', dest='command')
     subparsers.required = True
@@ -71,13 +71,20 @@ def create(args):
         raise ValueError("Name '{}' contains invalid character '{}'".format(filename, check.group(0)))
     filename += '.py'
     for environment in args.environments:
+        parameters = []
+        if environment in ['course', 'master']:
+            parameters.append('conn')
+        if environment == 'course':
+            parameters.append('semester')
+            parameters.append('course')
+        parameters = ', '.join(parameters)
         with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file:
             open_file.write("""def up({0}):
     pass
 
 
 def down({0}):
-    pass""".format("" if environment == 'system' else 'conn'))
+    pass""".format(', '.join(parameters)))
 
 
 def migrate(args):
@@ -99,6 +106,8 @@ def handle_migration(args):
         database = json.load(open_file)
 
     for environment in args.environments:
+        args.course = None
+        args.semester = None
         if environment in ['master', 'system']:
             params = {
                 'dbname': 'submitty',
@@ -120,14 +129,18 @@ def handle_migration(args):
 
             for semester in os.listdir(os.path.join(config['submitty_data_dir'], 'courses')):
                 for course in os.listdir(os.path.join(config['submitty_data_dir'], 'courses', semester)):
-                    if args.course is None or [semester, course] == args.course:
+                    if args.choose_course is None or [semester, course] == args.choose_course:
+                        args.semester = semester
+                        args.course = course
                         print("Running {} migrations for {}.{}...".format(args.direction, semester, course))
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
                         try:
                             with psycopg2.connect(**params) as connection:
                                 migrate_environment(connection, environment, args)
                         except psycopg2.OperationalError:
-                            print ("Submitty Database Migration Warning:  Database does not exist for semester=", semester, " course=",course)
+                            print("Submitty Database Migration Warning:  Database does not exist for "
+                                  "semester={} course={}".format(semester, course))
+
 
 def migrate_environment(connection, environment, args):
     # Get the migration table and if it doesn't exist, then we have to create it
@@ -187,18 +200,21 @@ def remove_migration(connection, migration, environment, args):
     file_path = Path(args.install_dir, 'migrations', environment, migration['id'] + '.py')
     if file_path.exists():
         module = load_migration_module(migration['id'], file_path)
-        call_func(getattr(module, 'down', noop), connection, environment)
+        call_func(getattr(module, 'down', noop), connection, environment, args)
         file_path.unlink()
     with connection.cursor() as cursor:
         cursor.execute('DELETE FROM migrations_{} WHERE id=%s'.format(environment), (migration['id'],))
     connection.commit()
 
 
-def call_func(func, connection, environment):
-    if environment == 'system':
-        func()
-    else:
-        func(connection)
+def call_func(func, connection, environment, args):
+    parameters = []
+    if environment in ['course', 'master']:
+        parameters.append(connection)
+    if environment == 'course':
+        parameters.append(args.semester)
+        parameters.append(args.course)
+    func(*parameters)
 
 
 def noop(_):
@@ -206,9 +222,9 @@ def noop(_):
 
 
 def run_migration(connection, migration, environment, args):
-    print("  {}".format(migration['id']))
+    print("  {}{}".format(migration['id'], ' (FAKE)' if args.fake else ''))
     if not args.fake:
-        call_func(getattr(migration['module'], args.direction, noop), connection, environment)
+        call_func(getattr(migration['module'], args.direction, noop), connection, environment, args)
     status = 1 if args.direction == 'up' else 0
     with connection.cursor() as cursor:
         if migration['db']:
