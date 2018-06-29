@@ -236,6 +236,270 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function addMorePriorTermGradeable(prior_term_gradeables) {
+    var form = $("#run-plagiarism-form");
+    var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
+    var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
+    $.each(prior_term_gradeables, function(sem,courses_gradeables){
+        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
+    });
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>'; 
+    $('[name="prev_gradeable_div"]', form).append(to_append);
+    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
+    $("select", form).change(function(){
+        var select_element_name = $(this).attr("name");
+        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+    });
+}
+
+function setRankingForGradeable() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    if(gradeable_id == ""){
+        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+        $('[name="code_box_2"]').empty();
+    }
+    else {
+        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
+                'gradeable_id': gradeable_id});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                var rankings = JSON.parse(data);
+                if(rankings.error){
+                    alert(rankings.error);
+                    return;
+                }
+                var append_options='<option value="">None</option>';
+                $.each(rankings, function(i,user_ranking_info){
+                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
+                });
+                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
+            },
+            error: function(e) {
+                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
+            }
+        })
+    }    
+}
+
+function setUserSubmittedCode(changed) {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    if(user_id_1 == ""){
+        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+        $('[name="code_box_2"]').empty();
+    }
+    else {
+        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        if(changed == 'version_user_1' && version_user_1 == '') {
+            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="code_box_1"]').empty(); 
+            $('[name="code_box_2"]').empty(); 
+        }
+        else {
+            if(changed == 'user_id_1' || changed =='version_user_1') {
+                if( version_user_1 == '' || changed == 'user_id_1') {    
+                    version_user_1 = "max_matching";                
+                }
+
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                $.ajax({
+                    url: url,
+                    success: function(data) {
+                        data = JSON.parse(data);
+                        if(data.error){
+                            alert(data.error);
+                            return;
+                        }
+                        var append_options='<option value="">None</option>';
+                        $.each(data.all_versions_user_1, function(i,version_to_append){
+                            if(version_to_append == data.active_version_user_1 && version_to_append == data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
+                            }
+                            if(version_to_append == data.active_version_user_1 && version_to_append != data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
+                            }
+                            if(version_to_append != data.active_version_user_1 && version_to_append == data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Max Match)</option>';
+                            }
+
+                            if(version_to_append != data.active_version_user_1 && version_to_append != data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
+                            }
+                        });
+                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                    },
+                    error: function(e) {
+                        alert("Could not load submitted code, please refresh the page and try again.");
+                    }
+                })
+
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                $.ajax({
+                    url: url,
+                    success: function(data) {
+                        if(data == "no_match_for_this_version") {
+                            var append_options='<option value="">None</option>';
+                            $('[name="code_box_2"]').empty(); 
+                        }
+                        else {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            var append_options='<option value="">None</option>';
+                            $.each(data, function(i,matching_users){
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
+                            });
+                        }
+                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                    },
+                    error: function(e) {
+                        alert("Could not load submitted code, please refresh the page and try again.");
+                    }
+                })
+                $('[name="code_box_2"]').empty();
+            }
+            if (changed == 'user_id_2') {
+                if (($('[name="user_id_2"]', form2).val()) == '') {
+                    $('[name="code_box_2"]').empty();
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
+                    $.ajax({
+                        url: url,
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                        },
+                        error: function(e) {
+                            alert("Could not load submitted code, please refresh the page and try again.");
+                        }
+                    })
+
+                }
+                else {
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    $.ajax({
+                        url: url,
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
+                        },
+                        error: function(e) {
+                            alert("Could not load submitted code, please refresh the page and try again.");
+                        }
+                    })
+                        
+                }
+            }    
+        }    
+    }   
+}
+
+function toggleUsersPlagiarism() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    var version_user_1 = $('[name="version_user_1"]', form2).val();
+
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    $('[name="user_id_1"]', form2).val(user_id_2);
+    jQuery.ajaxSetup({async:false});
+    setUserSubmittedCode('user_id_1');
+    $('[name="version_user_1"]', form2).val(version_user_2);
+    setUserSubmittedCode('version_user_1');
+    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    jQuery.ajaxSetup({async:true});
+    setUserSubmittedCode('user_id_2');
+}
+
+
+function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+    var form = $("#run-plagiarism-form");
+    if(select_element_name == "language") {
+        if ($('[name="language"]', form).val() == "python") {
+            $('[name="sequence_length"]', form).val('1');
+        } 
+        else if ($('[name="language"]', form).val() == "cpp") {
+            $('[name="sequence_length"]', form).val('2');
+        }
+        else if ($('[name="language"]', form).val() == "java") {
+            $('[name="sequence_length"]', form).val('3');
+        }
+        else if ($('[name="language"]', form).val() == "plaintext") {
+            $('[name="sequence_length"]', form).val('4');
+        }
+    }
+    else if(select_element_name.substring(0, 9) == "prev_sem_") {
+        var i = select_element_name.substring(9);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_sem != '') {
+            var append_options = '';
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        append_options += '<option value="'+ course +'">'+ course +'</option>';
+                    });     
+                }
+            });
+            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        }
+    }
+    else if(select_element_name.substring(0, 12) == "prev_course_") {
+        var i = select_element_name.substring(12);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_course != '') {
+            var append_options = '';
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        if(selected_course == course) {
+                            $.each(gradeables, function (index, gradeable) {
+                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
+                            });    
+                        }
+                    });     
+                }
+            });
+            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        } 
+    }
+}
+
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
