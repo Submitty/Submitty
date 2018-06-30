@@ -58,7 +58,7 @@ class GlobalView extends AbstractView {
                     ];
                     $navURLs[] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
-                        "title" => "Plagiarism Detection"
+                        "title" => "Lichen Plagiarism Detection [WIP]"
                     ];
                 }
             }

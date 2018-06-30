@@ -540,13 +540,7 @@ class User(object):
             else:
                 self._create_ssh()
         if self.group <= 1:
-<<<<<<< HEAD
             add_to_group("submitty_course_builders", self.id)
-            with open(os.path.join(SUBMITTY_DATA_DIR, "instructors", "valid"), "a") as open_file:
-                open_file.write(self.id + "\n")
-=======
-            add_to_group("course_builders", self.id)
->>>>>>> c4a723d3d15f4ebfea6547a86585e8fb02e8d22c
         if self.sudo:
             add_to_group("sudo", self.id)
 
@@ -764,6 +758,7 @@ class Course(object):
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
+
         for gradeable in self.gradeables:
             #create_teams
             json_team_history = {}
