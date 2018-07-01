@@ -830,7 +830,7 @@ HTML;
 						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 							"show_post" => true,
 							"post_content_placeholder" => "Enter your reply to {$visible_username} here...",
-							"show_merge_thread_button" => true,
+							"show_merge_thread_button" => false,
 							"attachment_box_id" => $attachment_box_id,
 							"show_anon" => true,
 							"submit_label" => "Submit Reply to {$visible_username}",
