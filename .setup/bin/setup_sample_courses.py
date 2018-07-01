@@ -758,6 +758,7 @@ class Course(object):
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
+        
         for gradeable in self.gradeables:
             #create_teams
             json_team_history = {}
