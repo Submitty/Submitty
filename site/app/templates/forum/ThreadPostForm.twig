@@ -59,7 +59,7 @@
         <span style="display:inline-block;">
             <div class="upload_attachment_box" id="upload{{ post_box_id }}" style="cursor: pointer;">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});" multiple />
+                <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
             </div>
         </span>

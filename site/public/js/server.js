@@ -1859,7 +1859,7 @@ function checkNumFilesForumUpload(input, post_id){
     }
 }
 
-function testAndGetAttachments(post_box_id) {
+function testAndGetAttachments(post_box_id, dynamic_check) {
     var index = post_box_id - 1;
     // Files selected
     var files = [];
@@ -1882,7 +1882,11 @@ function testAndGetAttachments(post_box_id) {
         files.push(file_array[index][j]);
     }
     if(files.length > 5){
-        displayError('Max file upload size is 5. Please try again.');
+        if(dynamic_check) {
+            displayError('Max file upload size is 5. Please remove attachments accordingly.');
+        } else {
+            displayError('Max file upload size is 5. Please try again.');
+        }
         return false;
     } else {
         if(!checkForumFileExtensions(files)){
@@ -1907,7 +1911,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
     var post_box_id = form.find(".thread-post-form").attr("post_box_id");
     var formData = new FormData(form[0]);
 
-    var files = testAndGetAttachments(post_box_id);
+    var files = testAndGetAttachments(post_box_id, false);
     if(files === false) {
         return false;
     }
