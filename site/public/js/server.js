@@ -1859,28 +1859,27 @@ function checkNumFilesForumUpload(input, post_id){
     }
 }
 
-function testAndGetAttachments() {
+function testAndGetAttachments(post_box_id) {
+    var index = post_box_id - 1;
     // Files selected
     var files = [];
-    for (var i = 0; i < file_array.length; i++) {
-        for (var j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") != -1 ||
-                file_array[i][j].name.indexOf("\"") != -1) {
-                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
-                return false;
-            }
-            else if (file_array[i][j].name.indexOf("\\\\") != -1 ||
-                file_array[i][j].name.indexOf("/") != -1) {
-                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
-                return false;
-            }
-            else if (file_array[i][j].name.indexOf("<") != -1 ||
-                file_array[i][j].name.indexOf(">") != -1) {
-                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
-                return false;
-            }
-            files.push(file_array[i][j]);
+    for (var j = 0; j < file_array[index].length; j++) {
+        if (file_array[index][j].name.indexOf("'") != -1 ||
+            file_array[index][j].name.indexOf("\"") != -1) {
+            alert("ERROR! You may not use quotes in your filename: " + file_array[index][j].name);
+            return false;
         }
+        else if (file_array[index][j].name.indexOf("\\\\") != -1 ||
+            file_array[index][j].name.indexOf("/") != -1) {
+            alert("ERROR! You may not use a slash in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        else if (file_array[index][j].name.indexOf("<") != -1 ||
+            file_array[index][j].name.indexOf(">") != -1) {
+            alert("ERROR! You may not use angle brackets in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        files.push(file_array[index][j]);
     }
     if(files.length > 5){
         displayError('Max file upload size is 5. Please try again.');
@@ -1905,10 +1904,10 @@ function publishFormWithAttachments(form, test_category, error_message) {
             return false;
         }
     }
-
+    var post_box_id = form.find(".thread-post-form").attr("post_box_id");
     var formData = new FormData(form[0]);
 
-    var files = testAndGetAttachments();
+    var files = testAndGetAttachments(post_box_id);
     if(files === false) {
         return false;
     }

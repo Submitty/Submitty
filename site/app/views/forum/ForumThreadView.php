@@ -487,12 +487,12 @@ HTML;
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
 HTML;
-						$GLOBALS['attachment_box_id'] = $attachment_box_id = isset($GLOBALS['attachment_box_id'])?$GLOBALS['attachment_box_id']+1:1;
+						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
 						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 							"show_post" => true,
 							"post_content_placeholder" => "Enter your reply to all here...",
 							"show_merge_thread_button" => true,
-							"attachment_box_id" => $attachment_box_id,
+							"post_box_id" => $post_box_id,
 							"attachment_script" => true,
 							"show_anon" => true,
 							"submit_label" => "Submit Reply to All",
@@ -826,12 +826,12 @@ HTML;
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
 HTML;
-	            		$GLOBALS['attachment_box_id'] = $attachment_box_id = isset($GLOBALS['attachment_box_id'])?$GLOBALS['attachment_box_id']+1:1;
+	            		$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
 						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 							"show_post" => true,
 							"post_content_placeholder" => "Enter your reply to {$visible_username} here...",
 							"show_merge_thread_button" => false,
-							"attachment_box_id" => $attachment_box_id,
+							"post_box_id" => $post_box_id,
 							"show_anon" => true,
 							"submit_label" => "Submit Reply to {$visible_username}",
 						]);
@@ -1031,7 +1031,7 @@ HTML;
 					"post_textarea_large" => true,
 					"post_content_placeholder" => "Enter your post here...",
 					"show_categories" => true,
-					"attachment_box_id" => 1,
+					"post_box_id" => 1,
 					"attachment_script" => true,
 					"show_anon" => true,
 					"show_announcement" => true,

@@ -1,4 +1,8 @@
-<div class="thread-post-form">
+<div class="thread-post-form"
+    {% if post_box_id %}
+        post_box_id="{{ post_box_id }}"
+    {% endif %}
+>
 <div class="form-group row">
     {% if show_title %}
     <span class="edit_thread">
@@ -51,11 +55,11 @@
     </div>
 {% endif %}
 <div style="margin-bottom:10px;" class="form-group row">
-    {% if attachment_box_id %}
+    {% if post_box_id %}
         <span style="display:inline-block;">
-            <div class="upload_attachment_box" id="upload{{ attachment_box_id }}" style="cursor: pointer;">
+            <div class="upload_attachment_box" id="upload{{ post_box_id }}" style="cursor: pointer;">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" id="input_file{{ attachment_box_id }}" style="display: none;" onchange="addFilesFromInput({{ attachment_box_id }})" multiple />
+                <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});" multiple />
                 <br>
             </div>
         </span>
@@ -86,7 +90,7 @@
                     });
 
                     // Attachments on Create Thread
-                    var part = "{{ attachment_box_id }}";
+                    var part = "{{ post_box_id }}";
                     createArray(part);
                     $(".upload_attachment_box").each(function() {
                         this.addEventListener("click", clicked_on_box, false);
