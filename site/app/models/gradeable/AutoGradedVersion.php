@@ -9,6 +9,7 @@
 namespace app\models\gradeable;
 
 
+use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -47,10 +48,17 @@ class AutoGradedVersion extends AbstractModel {
     /** @property @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
 
-    /** @property @var AutoGradedTestcase[] The testcases for this version (lazy loaded)  */
+    /** @property @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
     private $graded_testcases = null;
+    /** @property @var float The number of early submission incentive points this version is worth */
+    private $early_incentive_points = 0.0;
 
+    /** @property @var string[] An array of the names of all meta files in submission directory */
     private $meta_files = null;
+    /** @property @var array[] An array indexed by part number of array of file paths
+     *      Note: paths are relative to part directory
+     *      Note: 0'th part contains all files, flattened
+     */
     private $files = null;
 
     /**
@@ -82,16 +90,17 @@ class AutoGradedVersion extends AbstractModel {
         return $details;
     }
 
-    private function loadAutogradingFiles() {
+    /**
+     * Loads information about all files submitted for this version
+     */
+    private function loadSubmissionFiles() {
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
         $course_path = $this->core->getConfig()->getCoursePath();
+        $config = $gradeable->getAutogradingConfig();
 
         // Get the path to load files from (based on submission type)
-        $dir = 'submissions';
-        if ($gradeable->isVcs()) {
-            $dir = 'checkout';
-        }
+        $dir = $gradeable->isVcs() ? 'checkout' : 'submissions';
         $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
 
         // Now load all files in the directory, flattening the results
@@ -100,76 +109,128 @@ class AutoGradedVersion extends AbstractModel {
             if (substr(basename($file), 0, 1) === '.') {
                 $this->meta_files[$file] = $details;
             } else {
-                $this->files[$file] = $details;
+                $this->files[0][$file] = $details;
+            }
+        }
+
+        // A second time, look through the folder, but now split up based on part number
+        foreach ($config->getPartNames() as $i => $name) {
+            foreach ($submitted_files as $file => $details) {
+                $dir_name = "part{$i}/";
+                if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
+                    $this->files[$i][substr($file, strlen($dir_name), null)] = $details;
+                }
             }
         }
     }
 
-    private function loadGradedTestcases() {
+    /**
+     * Loads AutoGradedTestcase instances for all testcases in this Gradeable
+     */
+    private function loadTestcases() {
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
         $course_path = $this->core->getConfig()->getCoursePath();
+        $config = $gradeable->getAutogradingConfig();
 
         $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
 
-        // TODO :ended here
-        //  TODO: what do we want to do with submission files?  We should lazy load them like everything else, but from a different function
-        //      This Function should only load score data (rename this method too)
-        //
-        //
-        //
-
-        $result_files = FileUtils::getAllFiles($path, array(), true);
+        // Load files produced by autograding
+        $result_files = FileUtils::getAllFiles($path, [], true);
         $result_file_info = [];
         foreach ($result_files as $file => $details) {
             $result_file_info[$file] = $details;
         }
 
-        if ($this->getNumParts() > 1) {
-            for ($i = 1; $i <= $this->getNumParts(); $i++) {
-                $this->previous_files[$i] = array();
-                foreach ($this->submitted_files as $file => $details) {
-                    if (substr($file, 0, strlen("part{$i}/")) === "part{$i}/") {
-                        $this->previous_files[$i][$file] = $details;
-                    }
-                }
-            }
-        }
-        else {
-            $this->previous_files[1] = $this->submitted_files;
+        // Load file that contains numeric results
+        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'results.json'));
+        if ($result_details === false) {
+            throw new FileNotFoundException('Could not find results file for autograding version');
         }
 
-        if ($this->current_version > 0) {
-            $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results.json"));
-            if ($this->result_details !== false) {
-                $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "history.json"));
-                if ($history !== false) {
-                    $last_results_timestamp = $history[count($history) - 1];
-                } else {
-                    $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
-                        "wait_time" => "UNKNOWN");
-                }
-                $this->result_details = array_merge($this->result_details, $last_results_timestamp);
-                $this->result_details['num_autogrades'] = count($history);
-                $this->early_total = 0;
-                for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
-                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
-                    $pts = $this->testcases[$i]->getPointsAwarded();
-                    if ( in_array ($i+1,$this->early_submission_test_cases) ) {
-                        $this->early_total += $pts;
-                    }
-                }
+        // Load the historical results (for early submission incentive)
+        $history = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'history.json'));
+        if ($history !== false) {
+            $last_results_timestamp = $history[count($history) - 1];
+        } else {
+            $last_results_timestamp = [
+                'submission_time' => 'UNKNOWN',
+                'grade_time' => 'UNKNOWN',
+                'wait_time' => 'UNKNOWN'
+            ];
+        }
+
+        // Load the testcase results (and calculate early incentive points)
+        $result_details = array_merge($result_details, $last_results_timestamp);
+        $result_details['num_autogrades'] = count($history);
+        foreach ($config->getTestcases() as $testcase) {
+            if (!isset($result_details['testcases'][$testcase->getIndex()])) {
+                // TODO: Autograding results file was incomplete.  This is a big problem, but how should
+                // TODO:   we handle this error
+            }
+            $graded_testcase = new AutoGradedTestcase(
+                $this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+            $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+
+            if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+                $this->early_incentive_points += $graded_testcase->getPoints();
             }
         }
     }
 
+    /**
+     * Gets All of the graded testcases for this version
+     * @return AutoGradedTestcase[]
+     */
     public function getTestcases() {
-        if($this->graded_testcases === null) {
-            $this->graded_testcases  =$this->loadTestcases();
+        if ($this->graded_testcases === null) {
+            $this->loadTestcases();
         }
         return $this->graded_testcases;
     }
 
+    public function getEarlyIncentivePoints() {
+        if($this->graded_gradeable === null) {
+            $this->loadTestcases();
+        }
+        return $this->early_incentive_points;
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all submitted files
+     * @return array
+     */
+    public function getFiles() {
+        return $this->getPartFiles(0);
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for the given part
+     * @param int $part The submission box the file was uploaded with
+     * @return array
+     */
+    public function getPartFiles($part = 1) {
+        if($this->files === null) {
+            $this->loadSubmissionFiles();
+        }
+        return $this->files[$part];
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all meta files uploaded (i.e. Mac '._' files)
+     * @return array
+     */
+    public function getMetaFiles() {
+        if($this->files === null) {
+            $this->loadSubmissionFiles();
+        }
+        return $this->meta_files;
+    }
+
+    /**
+     * Gets the total number of non-hidden points the submitter earned for this version
+     * @return int
+     */
     public function getNonHiddenPoints() {
         return $this->non_hidden_non_extra_credit + $this->non_hidden_extra_credit;
     }
