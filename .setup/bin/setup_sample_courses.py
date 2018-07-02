@@ -660,17 +660,17 @@ class Course(object):
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
         self.conn = engine.connect()
-        metadata = MetaData(bind=engine)
+        self.metadata = MetaData(bind=engine)
         print("(connection made, metadata bound)...")
         print("Creating registration sections ", end="")
-        table = Table("sections_registration", metadata, autoload=True)
+        table = Table("sections_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
             self.conn.execute(table.insert(), sections_registration_id=str(section))
 
         print("Creating rotating sections ", end="")
-        table = Table("sections_rotating", metadata, autoload=True)
+        table = Table("sections_rotating", self.metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections+1):
             print("Create section {}".format(section))
@@ -678,8 +678,8 @@ class Course(object):
 
         print("Create users ", end="")
         submitty_users = Table("courses_users", submitty_metadata, autoload=True)
-        users_table = Table("users", metadata, autoload=True)
-        reg_table = Table("grading_registration", metadata, autoload=True)
+        users_table = Table("users", self.metadata, autoload=True)
+        reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
             print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
@@ -726,18 +726,16 @@ class Course(object):
                     add_to_group(self.code + "_archive", user.id)
                 if user.get_detail(self.code, "group") <= 2:
                     add_to_group(self.code + "_tas_www", user.id)
-        gradeable_table = Table("gradeable", metadata, autoload=True)
-        electronic_table = Table("electronic_gradeable", metadata, autoload=True)
-        reg_table = Table("grading_rotating", metadata, autoload=True)
-        component_table = Table('gradeable_component', metadata, autoload=True)
-        mark_table = Table('gradeable_component_mark', metadata, autoload=True)
-        gradeable_data = Table("gradeable_data", metadata, autoload=True)
-        gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
-        gradeable_component_mark_data = Table('gradeable_component_mark_data', metadata, autoload=True)
-        electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
-        electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
-        gradeable_teams_table = Table("gradeable_teams", metadata, autoload=True)
-        teams_table = Table("teams", metadata, autoload=True)
+        gradeable_table = Table("gradeable", self.metadata, autoload=True)
+        electronic_table = Table("electronic_gradeable", self.metadata, autoload=True)
+        reg_table = Table("grading_rotating", self.metadata, autoload=True)
+        component_table = Table('gradeable_component', self.metadata, autoload=True)
+        mark_table = Table('gradeable_component_mark', self.metadata, autoload=True)
+        gradeable_data = Table("gradeable_data", self.metadata, autoload=True)
+        gradeable_component_data = Table("gradeable_component_data", self.metadata, autoload=True)
+        gradeable_component_mark_data = Table('gradeable_component_mark_data', self.metadata, autoload=True)
+        electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
+        electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
             gradeable.create(self.conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
@@ -761,70 +759,8 @@ class Course(object):
         
         for gradeable in self.gradeables:
             #create_teams
-            json_team_history = {}
             if gradeable.team_assignment is True:
-                ucounter = 0
-                for user in self.users:
-                    #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
-                    #example: 00001_aphacker
-                    unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-                    team_in_other_gradeable = select([gradeable_teams_table]).where(
-                        gradeable_teams_table.c['team_id'] == unique_team_id)
-                    res = self.conn.execute(team_in_other_gradeable)
-                    num = res.rowcount                        
-                    while num is not 0:
-                        ucounter+=1
-                        unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-                        team_in_other_gradeable = select([gradeable_teams_table]).where(
-                        gradeable_teams_table.c['team_id'] == unique_team_id)
-                        res = self.conn.execute(team_in_other_gradeable)
-                        num = res.rowcount
-                    res.close()
-                    reg_section = user.get_detail(self.code, "registration_section")
-                    if reg_section is None:
-                        continue
-                    #The teams are created based on the order of the users. As soon as the number of teamates
-                    #exceeds the max team size, then a new team will be created within the same registration section
-                    print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
-                    #adding json data for team history                     
-                    teams_registration = select([gradeable_teams_table]).where(
-                        (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
-                        (gradeable_teams_table.c['g_id'] == gradeable.id))
-                    res = self.conn.execute(teams_registration)
-                    added = False
-                    if res.rowcount != 0:
-                        #If the registration has a team already, join it
-                        for team_in_section in res:  
-                            members_in_team = select([teams_table]).where(
-                                teams_table.c['team_id'] == team_in_section['team_id'])
-                            res = self.conn.execute(members_in_team)
-                            if res.rowcount < gradeable.max_team_size:                        
-                                self.conn.execute(teams_table.insert(),
-                                            team_id=team_in_section['team_id'], 
-                                            user_id=user.get_detail(self.code, "id"),
-                                            state=1)
-                                json_team_history[team_in_section['team_id']].append({"action": "admin_create",
-                                                                     "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                                     "admin_user": "instructor",
-                                                                     "added_user": user.get_detail(self.code, "id")})
-                                added = True
-                    if not added:
-                        #if the team the user tried to join is full, make a new team
-                        self.conn.execute(gradeable_teams_table.insert(),
-                                     team_id=unique_team_id,
-                                     g_id=gradeable.id,
-                                     registration_section=str(reg_section),
-                                     rotation_section=None)
-                        self.conn.execute(teams_table.insert(),
-                                     team_id=unique_team_id, 
-                                     user_id=user.get_detail(self.code, "id"),
-                                     state=1)
-                        json_team_history[unique_team_id] =  [{"action": "admin_create",
-                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                             "admin_user": "instructor",
-                                                             "first_user": user.get_detail(self.code, "id")}]
-                        ucounter+=1
-                    res.close()
+                json_team_history = self.make_sample_teams()
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
@@ -1018,10 +954,10 @@ class Course(object):
             with open(os.path.join(course_path, "config", "config.ini"), 'w') as configfile:
                 config.write(configfile)
             f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
-            forum_threads = Table("threads", metadata, autoload=True)
-            forum_posts = Table("posts", metadata, autoload=True)
-            forum_cat_list = Table("categories_list", metadata, autoload=True)
-            forum_thread_cat = Table("thread_categories", metadata, autoload=True)
+            forum_threads = Table("threads", self.metadata, autoload=True)
+            forum_posts = Table("posts", self.metadata, autoload=True)
+            forum_cat_list = Table("categories_list", self.metadata, autoload=True)
+            forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
 
             for catData in f_data[2]:
                 self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
@@ -1081,6 +1017,74 @@ class Course(object):
             if(len(line) > 1):
                 forum_data.append(l)
         return forum_data
+
+    def make_sample_teams(self):
+        json_team_history = {}
+        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
+        teams_table = Table("teams", self.metadata, autoload=True)
+        ucounter = 0
+        for user in self.users:
+            #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
+            #example: 00001_aphacker
+            unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            team_in_other_gradeable = select([gradeable_teams_table]).where(
+            gradeable_teams_table.c['team_id'] == unique_team_id)
+            res = self.conn.execute(team_in_other_gradeable)
+            num = res.rowcount                        
+            while num is not 0:
+                ucounter+=1
+                unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+                team_in_other_gradeable = select([gradeable_teams_table]).where(
+                gradeable_teams_table.c['team_id'] == unique_team_id)
+                res = self.conn.execute(team_in_other_gradeable)
+                num = res.rowcount
+            res.close()
+            reg_section = user.get_detail(self.code, "registration_section")
+            if reg_section is None:
+                continue
+            #The teams are created based on the order of the users. As soon as the number of teamates
+            #exceeds the max team size, then a new team will be created within the same registration section
+            print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
+            #adding json data for team history                     
+            teams_registration = select([gradeable_teams_table]).where(
+                (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
+                (gradeable_teams_table.c['g_id'] == gradeable.id))
+            res = self.conn.execute(teams_registration)
+            added = False
+            if res.rowcount != 0:
+                #If the registration has a team already, join it
+                for team_in_section in res:  
+                    members_in_team = select([teams_table]).where(
+                        teams_table.c['team_id'] == team_in_section['team_id'])
+                    res = self.conn.execute(members_in_team)
+                    if res.rowcount < gradeable.max_team_size:                        
+                        self.conn.execute(teams_table.insert(),
+                                    team_id=team_in_section['team_id'], 
+                                    user_id=user.get_detail(self.code, "id"),
+                                    state=1)
+                        json_team_history[team_in_section['team_id']].append({"action": "admin_create",
+                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                             "admin_user": "instructor",
+                                                             "added_user": user.get_detail(self.code, "id")})
+                        added = True
+            if not added:
+                #if the team the user tried to join is full, make a new team
+                self.conn.execute(gradeable_teams_table.insert(),
+                             team_id=unique_team_id,
+                             g_id=gradeable.id,
+                             registration_section=str(reg_section),
+                             rotation_section=None)
+                self.conn.execute(teams_table.insert(),
+                             team_id=unique_team_id, 
+                             user_id=user.get_detail(self.code, "id"),
+                             state=1)
+                json_team_history[unique_team_id] =  [{"action": "admin_create",
+                                                       "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                       "admin_user": "instructor",
+                                                       "first_user": user.get_detail(self.code, "id")}]
+                ucounter+=1
+            res.close()
+        return json_team_history
 
     def make_course_json(self):
         """
