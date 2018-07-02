@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -72,11 +73,14 @@ class GradedComponent extends AbstractModel {
         $this->setGradedVersion($details['graded_version']);
         $this->setGradeTime($details['grade_time']);
 
-        // Make sure the loaded score overrides the calculated
-        //  score if it exists / there aren't any marks
-        if (isset($details['score'])) {
-            $this->setScore($details['score']);
+        // assign the default score if its not electronic (or rather not a custom mark)
+        if($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE){
+            $score = $details['score'] ?? 0;
+        } else {
+            $score = $details['score'] ?? $component->getDefault();
         }
+        $this->setScore($score);
+
         $this->modified = false;
     }
 
@@ -183,14 +187,18 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
-     * Sets the score the submitter received for this component, clamped to be
-     *  between the lower and upper clamp of the associated component
+     * Sets the score the submitter received for this component--clamped or custom mark--not clamped
      * @param float $score
      */
     public function setScore($score) {
-        // clamp the score (no error if not in bounds)
-        //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
-        $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        if($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+            $this->score = $score;
+        } else {
+            // clamp the score (no error if not in bounds)
+            //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
+            $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        }
+        $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
         $this->modified = true;
     }
 
