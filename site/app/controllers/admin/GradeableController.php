@@ -109,6 +109,8 @@ class GradeableController extends AbstractController {
 
         } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
+        } else if (preg_match('/\s/',$config_file_path)) {
+            $this->core->addErrorMessage("The file name cannot contain space.");
         } else {
             $new_name = $_POST['new_config_name'] ?? null;
             $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
