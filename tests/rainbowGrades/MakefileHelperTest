@@ -1,3 +1,7 @@
+.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean src_clean remove_json_comments
+
+default: overall
+
 # =============================================================================
 # This is the helper Makefile
 
@@ -22,23 +26,33 @@ endif
 
 GRADING_DIRECTORY := $(RAINBOW_GRADES_DIRECTORY)/../grading
 
+
+nlohmann_json_dir=${RAINBOW_GRADES_DIRECTORY}/../vendor/nlohmann/json
+
+${nlohmann_json_dir}:
+	mkdir -p ${nlohmann_json_dir}
+	wget https://github.com/nlohmann/json/releases/download/v3.1.2/include.zip -O ${RAINBOW_GRADES_DIRECTORY}/../vendor/nlohmann_json.zip
+	unzip -o ${RAINBOW_GRADES_DIRECTORY}/../vendor/nlohmann_json.zip -d ${nlohmann_json_dir}
+
+
+# Grab this file from the main Submitty repo
+json_syntax_checker.py = ${RAINBOW_GRADES_DIRECTORY}/../misc_tools/json_syntax_checker.py
+${json_syntax_checker.py}:
+	mkdir -p ${RAINBOW_GRADES_DIRECTORY}/../misc_tools/
+	wget https://raw.githubusercontent.com/Submitty/Submitty/master/grading/json_syntax_checker.py -O ${json_syntax_checker.py}
+
+
 # =============================================================================
-
-.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean remove_json_comments
-
-default: overall
 
 pull:
 	mkdir -p raw_data/
 	rsync -azPq ${REPORTS_DIRECTORY}/all_grades/ raw_data/
-
 
 push:
 	rsync -azPq individual_summary_html/* ${REPORTS_DIRECTORY}/summary_html/
 
 flags = -g
 memory_debug : memory_flags = -m32
-
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -53,38 +67,43 @@ ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
     flags = -g -std=c++11
 endif
 
+json_include = -I${nlohmann_json_dir}/include/
+
 
 remove_json_comments: customization.json
 	cpp -xc++ $< | sed -e '/^#/d' > customization_no_comments.json
-	python $(GRADING_DIRECTORY)/json_syntax_checker.py customization_no_comments.json
+	python3 ${json_syntax_checker.py} customization_no_comments.json
+	grep '{"file":' customization_no_comments.json > iclicker_file_list.txt || true
+	python3 ${RAINBOW_GRADES_DIRECTORY}/parsexml.py iclicker_file_list.txt
 
-compile:  remove_json_comments
-	g++ -Wall ${flags} ${memory_flags} \
-		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
-		${RAINBOW_GRADES_DIRECTORY}/benchmark.cpp \
-		-g -o process_grades.out
-	mkdir -p individual_summary_html/
-	mkdir -p all_students_summary_html/
+process_grades.out: \
+	${RAINBOW_GRADES_DIRECTORY}/main.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/output.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/table.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/student.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
+	${RAINBOW_GRADES_DIRECTORY}/benchmark.cpp
+	g++ -Wall ${flags} ${memory_flags} ${json_include} $^ -g -o $@
 
+individual_summary_html all_students_summary_html:
+	mkdir -p $@
 
-
-
+compile: remove_json_comments process_grades.out individual_summary_html all_students_summary_html
 
 clean:
-	rm process_grades.out
+	rm -f process_grades.out
+
+src_clean: clean
+	rm -f ${json_syntax_checker.py}
+	rm -rf ${nlohmann_json_dir}
 
 all: pull overall push
-
 
 # =============================================================================
 # the different sorting orders & details of tables
 
-overall: compile
+overall: ${nlohmann_json_dir} ${json_syntax_checker.py} compile
 	./process_grades.out by_overall
 
 memory_debug: compile
@@ -117,6 +136,9 @@ exam: compile
 
 reading: compile
 	./process_grades.out by_reading
+
+worksheet: compile
+	./process_grades.out by_worksheet
 
 project: compile
 	./process_grades.out by_project
