@@ -70,7 +70,9 @@ class GlobalView extends AbstractView {
             "js" => $js,
             "pageTitle" => $pageTitle,
             "navURLs" => $navURLs,
-            "breadcrumbs" => $breadcrumbs
+            "breadcrumbs" => $breadcrumbs,
+            "base_url" => $this->core->getConfig()->getBaseUrl(),
+            "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
      }
 
