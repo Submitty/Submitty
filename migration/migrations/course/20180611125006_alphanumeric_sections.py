@@ -1,4 +1,4 @@
-def up(conn, semester, course):
+def up(config, conn, semester, course):
     with conn.cursor() as cursor:
         # drop foreign key contraints as the foreign keys also store type of columns in their definitions
         cursor.execute("ALTER TABLE ONLY grading_registration DROP CONSTRAINT grading_registration_sections_registration_id_fkey")
@@ -19,7 +19,7 @@ def up(conn, semester, course):
         cursor.execute("ALTER TABLE ONLY gradeable_teams ADD CONSTRAINT gradeable_teams_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id)")
 
 
-def down(conn, semester, course):
+def down(config, conn, semester, course):
     with conn.cursor() as cursor:
         # drop foreign key contraints while we typecast the columns
         cursor.execute("ALTER TABLE ONLY gradeable_teams DROP CONSTRAINT gradeable_teams_registration_section_fkey")

@@ -160,6 +160,7 @@ fi
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
+    mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
@@ -181,6 +182,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
     chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
+    chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs/git
+    chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
 #Set up permissions on the logs directory. If in worker mode, hwphp does not exist.
