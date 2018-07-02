@@ -253,7 +253,7 @@ function removeLabel(filename, part){
     var dropzone = document.getElementById("upload" + part);
     var labels = dropzone.getElementsByClassName("mylabel");
     for(var i = 0 ; i < labels.length; i++){
-        if(labels[i].innerHTML.substring(0, filename.length) == filename){
+        if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
             label_array[part-1].splice(i, 1);
             break;
@@ -265,6 +265,7 @@ function addLabel(filename, filesize, part, previous){
     // create element
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
+    tmp.setAttribute("fname", filename);
     tmp.innerHTML =  filename + " " + filesize + "kb <i class='fa fa-trash-o'></i><br />";
     // styling
     tmp.children[0].onmouseover = function(e){

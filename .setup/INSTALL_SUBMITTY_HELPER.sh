@@ -160,6 +160,7 @@ fi
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
+    mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
@@ -181,6 +182,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
     chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
+    chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs/git
+    chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
 #Set up permissions on the logs directory. If in worker mode, hwphp does not exist.
@@ -434,9 +437,6 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
         do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
     done
-
-    # We may revise this later, when we use a binary of the common ast tool
-    git pull origin master
 
     echo ${ST_VERSION} > VERSION
 fi
@@ -771,7 +771,7 @@ if [ "${WORKER}" == 0 ]; then
         shift
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
-        ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
+        python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
         
         if [[ $? -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
