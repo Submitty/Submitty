@@ -215,11 +215,7 @@ class TaGradedGradeable extends AbstractModel {
                 }
 
             // Index by component id
-            if(isset($graded_components_by_id[$graded_component->getComponentId()])) {
-                $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
-            } else {
-                $graded_components_by_id[$graded_component->getComponentId()] = [$graded_component];
-            }
+            $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
         }
         $this->graded_components = $graded_components_by_id;
     }
