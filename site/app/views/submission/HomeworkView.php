@@ -446,9 +446,9 @@ class HomeworkView extends AbstractView {
                     'student_id' => $gradeable->getUser()->getId()
                 ));
             } else {
-                $btn_type = "pending";
+                $btn_type = "addPost";
                 $url = $this->core->buildUrl(array('component' => 'student',
-                    'action' => 'delete_request',
+                    'action' => 'make_request_post',
                     'gradeable_id' => $gradeable->getId(),
                     'student_id' => $gradeable->getUser()->getId()
                 ));
@@ -461,9 +461,14 @@ class HomeworkView extends AbstractView {
                 'student_id' => $gradeable->getUser()->getId()
             ));
         }
-        return $this->core->getOutput()->renderTwigTemplate("submission/regrade/RequestForm.twig", [
+      /*  return $this->core->getOutput()->renderTwigTemplate("submission/regrade/RequestForm.twig", [
             "btn_type" => $btn_type,
             "url" => $url,
+        ]);*/
+return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
+            "posts" => $posts,
+            "gradeable" => $gradeable,
+            "thread_id" => $thread_id
         ]);
     }
 
@@ -472,7 +477,44 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showRegradeDiscussion(Gradeable $gradeable): string {
+                if ($gradeable->getRegradeStatus() === 0) {
+            $btn_type = "request";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                'action' => 'request_regrade',
+                'gradeable_id' => $gradeable->getId(),
+                'student_id' => $this->core->getUser()->getId()
+            ));
+            $action = 'request_regrade';
+        } else if ($gradeable->getRegradeStatus() === -1) {
+            if ($this->core->getUser()->accessGrading()) {
+                $btn_type = "delete";
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'action' => 'delete_request',
+                    'gradeable_id' => $gradeable->getId(),
+                    'student_id' => $gradeable->getUser()->getId()
+                ));
+                $action = 'delete_request';
+            } else {
+                echo("want to make additional post");
+                $btn_type = "addPost";
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'action' => 'make_request_post',
+                    'gradeable_id' => $gradeable->getId(),
+                    'student_id' => $gradeable->getUser()->getId()
+                ));
+                $action = 'make_request_post';
+            }
+        } else {
+            $btn_type = "completed";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                'gradeable_id' => $gradeable->getId(),
+                'student_id' => $gradeable->getUser()->getId()
+            ));
+            $action = 'request_regrade';
+        }
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
+        echo("thread id\n");
+        echo($thread_id);
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
 
         $posts = [];
@@ -483,15 +525,21 @@ class HomeworkView extends AbstractView {
             $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
             $content = $thread['content'];
-
+            echo("THREAD!");
             $posts[] = [
                 "is_staff" => $is_staff,
                 "date" => date_format($date, "m/d/Y g:i A"),
                 "name" => $name,
-                "content" => $content,
+                "content" => $content
             ];
+
         }
+        echo("Post length is");
+        echo(sizeof($posts));
         return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
+            "btn_type" => $btn_type,
+            "url" => $url,
+            "action" => $action,
             "posts" => $posts,
             "gradeable" => $gradeable,
             "thread_id" => $thread_id

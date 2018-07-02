@@ -1,5 +1,5 @@
 {% for post in posts %}
-    <div style="margin-top: 20px ">
+    <div style="margin-top: 20px;">
         <div class='{{ is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
             <p>{{ post.content }}</p>
             <hr>

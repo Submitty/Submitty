@@ -74,7 +74,7 @@ class SubmissionController extends AbstractController {
         }
     }
     private function requestRegrade(){
-        $content = $_REQUEST["request_content"];
+        $content = $_POST['replyTextArea'];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
@@ -86,10 +86,11 @@ class SubmissionController extends AbstractController {
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
+        echo($regrade_id);
         $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
+        $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
         if($this->core->getQueries()->isStaffPost($user_id)){
             $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
         }else{
