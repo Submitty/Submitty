@@ -52,6 +52,36 @@ if [ $? -eq 1 ]; then
 fi
 
 
+################################################################################################################
+################################################################################################################
+# REMEMBER IF THE SHIPPER & WORKER ARE ACTIVE BEFORE INSTALLATION BEGINS
+# Note: We will stop & restart the shipper & worker at the end of this script.
+#       But it may be necessary to stop the the shipper & worker as part of the migration.
+systemctl is-active --quiet submitty_autograding_shipper
+is_shipper_active_before=$?
+systemctl is-active --quiet submitty_autograding_worker
+is_worker_active_before=$?
+
+echo "SHIPPER WORKER " $is_shipper_active_before $is_worker_active_before
+
+################################################################################################################
+################################################################################################################
+# RUN THE SYSTEM AND DATABASE MIGRATIONS
+
+if [ ${WORKER} == 0 ]; then
+    echo -e 'Running the DB migrations'
+
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
+
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
+    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
+
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+fi
+
+
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -370,21 +400,6 @@ chgrp $DAEMON_USER  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 chmod 4550  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
 popd > /dev/null
 
-################################################################################################################
-################################################################################################################
-# Run THE DB MIGRATIONS
-
-if [ ${WORKER} == 0 ]; then
-    echo -e 'Running the DB migrations'
-
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
-
-    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
-    chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
-    chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
-
-    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
-fi
 
 ################################################################################################################
 ################################################################################################################
@@ -562,8 +577,8 @@ echo -e "\nCompleted installation of the Submitty homework submission server\n"
 #############################################################
 # stop the shipper daemon (if it's running)
 systemctl is-active --quiet submitty_autograding_shipper
-is_shipper_active_before=$?
-if [[ "$is_shipper_active_before" == "0" ]]; then
+is_shipper_active_now=$?
+if [[ "$is_shipper_active_now" == "0" ]]; then
     systemctl stop submitty_autograding_shipper
     echo -e "Stopped Submitty Grading Shipper Daemon\n"
 fi
@@ -575,13 +590,11 @@ if [[ "$is_active_tmp" == "0" ]]; then
 fi
 
 
-
-
 #############################################################
 # stop the worker daemon (if it's running)
 systemctl is-active --quiet submitty_autograding_worker
-is_worker_active_before=$?
-if [[ "$is_worker_active_before" == "0" ]]; then
+is_worker_active_now=$?
+if [[ "$is_worker_active_now" == "0" ]]; then
     systemctl stop submitty_autograding_worker
     echo -e "Stopped Submitty Grading Worker Daemon\n"
 fi
@@ -592,27 +605,6 @@ if [[ "$is_active_tmp" == "0" ]]; then
     exit 1
 fi
 
-#############################################################
-# NOTE: This section is to cleanup the old scheduler -- and this code should eventually be removed
-# BEGIN TO BE DELETED
-# stop the old scheduler (if it's running)
-systemctl is-active --quiet submitty_grading_scheduler
-is_scheduler_active=$?
-if [[ "$is_scheduler_active" == "0" ]]; then
-    systemctl stop submitty_grading_scheduler
-    echo -e "WARNING: Stopped Deprecated Submitty Grading Scheduler Daemon\n"
-    # launch the shipper & worker daemons on relaunch
-    is_shipper_active_before=0
-    is_worker_active_before=0
-    echo -e "WARNING: Will launch replacement Submitty Autograding Shipper & Worker Daemon\n"
-fi
-systemctl is-active --quiet submitty_grading_scheduler
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop deprecated submitty grading scheduler daemon\n"
-    exit 1
-fi
-# END TO BE DELETED
 
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons

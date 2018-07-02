@@ -54,9 +54,12 @@ def up():
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
 
-    shutil.move("/home/hwcron","/home/submitty_daemon")
-    shutil.move("/home/hwphp","/home/submitty_php")
-    shutil.move("/home/hwcgi","/home/submitty_cgi")
+    if os.path.exists("/home/hwcron"):
+        shutil.move("/home/hwcron","/home/submitty_daemon")
+    if os.path.exists("/home/hwphp"):
+        shutil.move("/home/hwphp","/home/submitty_php")
+    if os.path.exists("/home/hwcgi"):
+        shutil.move("/home/hwcgi","/home/submitty_cgi")
 
     # edit the variables stored by configure submitty/installation
     with open (submitty_users_filename,"r") as open_file:
@@ -110,9 +113,12 @@ def down():
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
 
-    shutil.move("/home/submitty_daemon","/home/hwcron")
-    shutil.move("/home/submitty_php","/home/hwphp")
-    shutil.move("/home/submitty_cgi","/home/hwcgi")
+    if os.path.exists("/home/submitty_daemon"):
+        shutil.move("/home/submitty_daemon","/home/hwcron")
+    if os.path.exists("/home/submitty_php"):
+        shutil.move("/home/submitty_php","/home/hwphp")
+    if os.path.exists("/home/submitty_cgi"):
+        shutil.move("/home/submitty_cgi","/home/hwcgi")
 
     # edit the variables stored by configure submitty/installation
     with open (submitty_users_filename,"r") as open_file:
