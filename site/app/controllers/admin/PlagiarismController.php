@@ -358,9 +358,10 @@ class PlagiarismController extends AbstractController {
 	    		if($match["type"] == "match") {
 	    			$orange_color = false;
 	    			if($user_id_2 != "") {
-		    			foreach($match['others'] as $other) {
+		    			foreach($match['others'] as $i=>$other) {
 	    					if($other["username"] == $user_id_2) {
 	    						$orange_color =true;
+                                $user_2_index_in_others=$i;
 	    					}
 	    				}	
 	    			}
@@ -393,23 +394,25 @@ class PlagiarismController extends AbstractController {
 			    		}
 	    			}
 	    			else if($codebox == "2" && $user_id_2 !="" && $orange_color) {
-	    				$start_pos =$tokens_user_2[$match["start"]-1]["char"];
-			    		$start_line= $tokens_user_2[$match["start"]-1]["line"];
-			    		$end_pos =$tokens_user_2[$match["end"]-1]["char"];
-			    		$end_line= $tokens_user_2[$match["end"]-1]["line"];
-			    		$end_value =$tokens_user_2[$match["end"]-1]["value"];
-	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
-			    		}
-			    		else {	
-			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
-			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
+                        foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+    	    				$start_pos =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"];
+    			    		$start_line= $tokens_user_2[$user_2_matchingposition["start"]-1]["line"];
+    			    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
+    			    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
+    			    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
+    	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+    			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
+    			    		}
+    			    		else {	
+    			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
+    			    		}
+    			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+    			    		}
+    			    		else {
+    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+    			    		}
+                        }    
 	    			}	
 	    				
 	    		}
