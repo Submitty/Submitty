@@ -21,7 +21,7 @@ use app\models\AbstractModel;
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
- * @method array getGradedComponents()
+ * @method array[] getGradedComponents()
  */
 class TaGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
@@ -32,7 +32,7 @@ class TaGradedGradeable extends AbstractModel {
     protected $overall_comment = "";
     /** @property @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
-    /** @property @var GradedComponent[][] The an array of arrays of GradedComponents, indexed by component id */
+    /** @property @var array[] The an array of arrays of GradedComponents, indexed by component id */
     protected $graded_components = array();
 
 
@@ -67,6 +67,7 @@ class TaGradedGradeable extends AbstractModel {
         //  the graded gradeable instead of each component so if one grader  grades
         //  multiple components, their information only gets sent once
         $details['graders'] = [];
+        /** @var GradedComponent[] $graded_components */
         foreach ($this->graded_components as $graded_components) {
             foreach($graded_components as $graded_component) {
                 if ($graded_component->getGrader() !== null) {
@@ -190,7 +191,7 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of graded components for this gradeable data
-     * @param GradedComponent[][]|GradedComponent[] $graded_components
+     * @param array[]|GradedComponent[] $graded_components
      */
     public function setGradedComponents(array $graded_components) {
 
