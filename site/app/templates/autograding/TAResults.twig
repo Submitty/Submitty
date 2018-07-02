@@ -39,29 +39,27 @@
 
         {# Component boxes #}
         {% for component in gradeable.getComponents() %}
-            {% if component is not iterable %}
-                {# Todo: This is heinous #}
-                {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
+            {# Todo: This is heinous #}
+            {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
 
-                <div class="box">
-                    <div class="box-title">
-                        {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
-                        <h4>{{ component.getTitle() }}
-                            {# Grader only shows up if they are not peer and full access #}
-                            {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
-                                <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
-                            {% endif %}
-                        </h4>
-                        <div style="float:left; word-break: break-word;">
-                            <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
-                            <p>
-                                {# Todo: move this out of the model #}
-                                <span class="gradeable_comment">{{ component.getGradedTAComments('<br>', true, gradeable, false)|raw }}</span>
-                            </p>
-                        </div>
+            <div class="box">
+                <div class="box-title">
+                    {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
+                    <h4>{{ component.getTitle() }}
+                        {# Grader only shows up if they are not peer and full access #}
+                        {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
+                            <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                        {% endif %}
+                    </h4>
+                    <div style="float:left; word-break: break-word;">
+                        <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
+                        <p>
+                            {# Todo: move this out of the model #}
+                            <span class="gradeable_comment">{{ component.getGradedTAComments('<br>', true, gradeable, false)|raw }}</span>
+                        </p>
                     </div>
                 </div>
-            {% endif %}
+            </div>
         {% endfor %}
         {# /Component boxes #}
 
