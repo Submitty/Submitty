@@ -372,10 +372,10 @@ if [ ${WORKER} == 0 ]; then
     # POSTGRES SETUP
     #################
     if [ ${VAGRANT} == 1 ]; then
-        PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-        if [ ! -d /etc/postgresql/${PG_VERSION}/pg_hba.conf ]; then
+        PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}.[0-9]{1,}' | head -1)"
+        if [ ! -d "/etc/postgresql/${PG_VERSION}/pg_hba.conf" ]; then
             # PG 10.x stopped putting the minor version in the folder name
-            PG_VERSION="$(psql -V | grep -o '[0-9]{1,}')"
+            PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
         fi
         cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
