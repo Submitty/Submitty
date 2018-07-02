@@ -148,11 +148,11 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(self, action, gradeable, section, row, index, components_numeric) %}
-    {% set sytle = "" %}
-    {% if row.getUser().accessGrading() %}
-        {% set sytle = "style='background: #7bd0f7;'" %}
-    {% endif %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}" {{ style }}>
+    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}"
+        {% if student.accessGrading() %}
+            style='background: #7bd0f7;'
+        {% endif %}
+    >
         <td class="">{{ index + 1 }}</td>
         <td class="">{{ row.getUser().getRegistrationSection() }}</td>
         <td class="cell-all" style="text-align: left">{{ row.getUser().getId() }}</td>
