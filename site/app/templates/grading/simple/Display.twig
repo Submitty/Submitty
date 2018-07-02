@@ -139,6 +139,11 @@
             {% endfor %}
         {% endif %}
     </table>
+    <script>
+        $(function() {
+            setupSimpleGrading("{{ action }}");
+        });
+    </script>
 </div>
 
 {# Render one student's row in the table #}

@@ -1,6 +1,6 @@
-def up():
+def up(config):
     pass
 
 
-def down():
+def down(config):
     pass
