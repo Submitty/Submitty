@@ -76,7 +76,7 @@ def up(config):
     change_key(my_json,"hwcron_gid","daemon_gid")
     change_key(my_json,"hwcron_user","daemon_user")
     change_value(my_json,"daemon_user","submitty_daemon")
-    change_value(my_json,"course_builders","submitty_course_builders")
+    change_value(my_json,"course_builders_group","submitty_course_builders")
     change_key(my_json,"hwphp_uid","php_uid")
     change_key(my_json,"hwphp_gid","php_gid")
     change_key(my_json,"hwphp_user","php_user")
