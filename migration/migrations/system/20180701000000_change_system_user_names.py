@@ -4,10 +4,6 @@ import shutil
 import grp
 from pathlib import Path
 
-submitty_users_filename = Path(config.submitty['submitty_install_dir'], 'vcs', 'submitty_users.json')
-submitty_users_filename_tmp = Path(config.submitty['submitty_install_dir'], 'vcs', 'submitty_users_tmp.json')
-killall_path = Path(config.submitty['submitty_install_dir'], 'sbin', 'killall.py')
-
 def change_key(my_json, old_key, new_key):
     if old_key in my_json:
         # store the value
@@ -32,13 +28,20 @@ def change_value(my_json, old_key, new_value):
         
 def up(config):
 
+    submitty_users_filename = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users.json'))
+    submitty_users_filename_tmp = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users_tmp.json'))
+    killall_path = Path(config.submitty['submitty_install_dir'], 'sbin', 'killall.py')
+    INSTALL_SUBMITTY_filename = str(Path(config.submitty['submitty_install_dir'], '.setup', 'INSTALL_SUBMITTY.sh'))
+    
+    print ("my path",killall_path)
+    
     # stop all jobs that are using hwphp and hwcron
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop apache2.service")
     os.system("systemctl stop php7.0-fpm.service")
     os.system("su -c 'crontab -r' hwcron")
-    os.system("su -c "+killall_path+" hwcron")
+    os.system("su -c '"+str(killall_path)+"' hwcron")
 
     # change the usernames
     os.system("usermod -l submitty_php hwphp")
@@ -66,7 +69,6 @@ def up(config):
     # edit the variables stored by configure submitty/installation
     with open (submitty_users_filename,"r") as open_file:
         my_json = json.load(open_file)
-    
     change_key(my_json,"hwcron_uid","daemon_uid")
     change_key(my_json,"hwcron_gid","daemon_gid")
     change_key(my_json,"hwcron_user","daemon_user")
@@ -86,10 +88,28 @@ def up(config):
     shutil.move(submitty_users_filename_tmp,submitty_users_filename)
     os.chmod(submitty_users_filename, 0o440)
     os.chown(submitty_users_filename, os.getuid(), grp.getgrnam('submitty_daemonphp').gr_gid)
+
+    os.chmod(INSTALL_SUBMITTY_filename, 0o700)
+    os.system("sed -i -e \"s|'course_builders'|'submitty_course_builders'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWCRON_USER='hwcron'|DAEMON_USER='submitty_daemon'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWCRON_UID|DAEMON_UID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWCRON_GID|DAEMON_GID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWPHP_USER='hwphp'|PHP_USER='submitty_php'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWPHP_UID|PHP_UID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWPHP_GID|PHP_GID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWCGI_USER='hwcgi'|CGI_USER='submitty_cgi'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|HWCRONPHP_GROUP='hwcronphp'|DAEMONPHP_GROUP='submitty_daemonphp'|g\" "+INSTALL_SUBMITTY_filename)
+    os.chmod(INSTALL_SUBMITTY_filename, 0o500)
+    
     pass
 
 
 def down(config):
+
+    submitty_users_filename = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users.json'))
+    submitty_users_filename_tmp = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users_tmp.json'))
+    killall_path = Path(config.submitty['submitty_install_dir'], 'sbin', 'killall.py')
+    INSTALL_SUBMITTY_filename = str(Path(config.submitty['submitty_install_dir'], '.setup', 'INSTALL_SUBMITTY.sh'))
 
     # stop all jobs that are using submitty_php and submitty_daemon
     os.system("systemctl stop submitty_autograding_worker")
@@ -97,8 +117,8 @@ def down(config):
     os.system("systemctl stop apache2.service")
     os.system("systemctl stop php7.0-fpm.service")
     os.system("su -c 'crontab -r' submitty_daemon")
-    os.system("su -c "+killall_path+" submitty_daemon")
-
+    os.system("su -c '"+str(killall_path)+"' submitty_daemon")
+        
     # change the usernames
     os.system("usermod -l hwphp submitty_php")
     os.system("usermod -l hwcgi submitty_cgi")
@@ -145,5 +165,17 @@ def down(config):
     shutil.move(submitty_users_filename_tmp,submitty_users_filename)
     os.chmod(submitty_users_filename, 0o440)
     os.chown(submitty_users_filename, os.getuid(), grp.getgrnam('hwcronphp').gr_gid)
+
+    os.chmod(INSTALL_SUBMITTY_filename, 0o700)
+    os.system("sed -i -e \"s|'submitty_course_builders'|'course_builders'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|DAEMON_USER='submitty_daemon'|HWCRON_USER='hwcron'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|DAEMON_UID|HWCRON_UID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|DAEMON_GID|HWCRON_GID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|PHP_USER='submitty_php'|HWPHP_USER='hwphp'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|PHP_UID|HWPHP_UID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|PHP_GID|HWPHP_GID|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|CGI_USER='submitty_cgi'|HWCGI_USER='hwcgi'|g\" "+INSTALL_SUBMITTY_filename)
+    os.system("sed -i -e \"s|DAEMONPHP_GROUP='submitty_daemonphp'|HWCRONPHP_GROUP='hwcronphp'|g\" "+INSTALL_SUBMITTY_filename)
+    os.chmod(INSTALL_SUBMITTY_filename, 0o500)
     
     pass
