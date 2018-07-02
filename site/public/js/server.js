@@ -2548,6 +2548,16 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+function toggleRegradeRequests(){
+    var element = document.getElementById("regradeBox");
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
+    }
+    else {
+        element.style.display = 'block';
+    }
+    
+}
 
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript

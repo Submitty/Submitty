@@ -32,8 +32,9 @@
         </div>
     </div>
 {% endfor %}
-{% if action == 'make_regrade_post' %}
+{% if action == 'make_request_post' %}
 <div style="padding:20px;">
+    <i class="fas fa-hourglass"></i>
     <form method="POST" id="replyTextForm" action="{{ core.buildUrl({'component': 'student',
             'action': 'make_request_post',
             'regrade_id': thread_id,
@@ -41,15 +42,17 @@
             'user_id': core.getUser().getId()
         }) }}">
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
-        <input type="submit" value="{{ message }}" class="btn btn-default" style="margin-top: 15px; float: right">
+        <input type="submit" value="Submit Additional Information" class="btn btn-default" style="margin-top: 15px; float: right">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
     </form>
 </div>
+{$ elseif btn_type == "completed"}
+
 {% else %}
 <div style="padding:20px;">
     <form method="POST" id="replyTextForm" action="{{ url }}">
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
-        <input type="submit" value="{{ message }}" class="btn btn-default" style="margin-top: 15px; float: right">
+        <input type="submit" value="Submit Regrade Request" class="btn btn-default" style="margin-top: 15px; float: right">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
     </form>
 </div>
