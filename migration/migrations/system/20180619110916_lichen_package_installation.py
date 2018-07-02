@@ -1,7 +1,7 @@
 import os
 
-def up():
 
+def up(config):
     # c/c++ tokenizer
     os.system("sudo apt-get -qqy install python-clang-3.8")
     os.system("sudo pip install clang")
@@ -18,5 +18,5 @@ def up():
     pass
 
 
-def down():
+def down(config):
     pass
