@@ -147,7 +147,7 @@ class TestLateDays(BaseTestCase):
         cols = table_id.find_elements(By.TAG_NAME, "td")
         counter = 0
         for col in cols:
-            # print(col.text + " " + table_info[counter])
+            print(col.text + " " + table_info[counter])
             assert col.text == table_info[counter]
             counter+=1
         self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
