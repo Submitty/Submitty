@@ -778,4 +778,30 @@ class Gradeable extends AbstractModel {
     public function isRotatingGraderSectionsModified() {
         return $this->rotating_grader_sections_modified;
     }
+
+    /**
+     * Gets if this gradeable is pdf-upload
+     * @return bool
+     */
+    public function isPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() !== 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets if the students assign pages to components
+     * @return bool
+     */
+    public function isStudentPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() === -1) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -82,15 +82,70 @@ class AutoGradedVersion extends AbstractModel {
         return $details;
     }
 
+    private function loadAutogradingFiles() {
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+
+        // Get the path to load files from (based on submission type)
+        $dir = 'submissions';
+        if ($gradeable->isVcs()) {
+            $dir = 'checkout';
+        }
+        $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
+
+        // Now load all files in the directory, flattening the results
+        $submitted_files = FileUtils::getAllFiles($path, array(), true);
+        foreach ($submitted_files as $file => $details) {
+            if (substr(basename($file), 0, 1) === '.') {
                 $this->meta_files[$file] = $details;
+            } else {
+                $this->files[$file] = $details;
+            }
         }
     }
 
+    private function loadGradedTestcases() {
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+
         $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
 
+        // TODO :ended here
         //  TODO: what do we want to do with submission files?  We should lazy load them like everything else, but from a different function
+        //      This Function should only load score data (rename this method too)
+        //
+        //
+        //
+
+        $result_files = FileUtils::getAllFiles($path, array(), true);
+        $result_file_info = [];
+        foreach ($result_files as $file => $details) {
+            $result_file_info[$file] = $details;
         }
+
+        if ($this->getNumParts() > 1) {
+            for ($i = 1; $i <= $this->getNumParts(); $i++) {
+                $this->previous_files[$i] = array();
+                foreach ($this->submitted_files as $file => $details) {
+                    if (substr($file, 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $this->previous_files[$i][$file] = $details;
+                    }
+                }
+            }
         }
+        else {
+            $this->previous_files[1] = $this->submitted_files;
+        }
+
+        if ($this->current_version > 0) {
+            $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "results.json"));
+            if ($this->result_details !== false) {
+                $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current_version, "history.json"));
+                if ($history !== false) {
+                    $last_results_timestamp = $history[count($history) - 1];
+                } else {
                     $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
                         "wait_time" => "UNKNOWN");
                 }

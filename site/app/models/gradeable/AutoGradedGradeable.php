@@ -26,6 +26,7 @@ class AutoGradedGradeable extends AbstractModel {
     protected $active_version = 0;
     /** @property @var AutoGradedVersion[] The graded versions for electronic gradeables */
     protected $auto_graded_versions = array();
+    protected $queue_status;
 
     /**
      * AutoGradedGradeable constructor.
@@ -58,6 +59,117 @@ class AutoGradedGradeable extends AbstractModel {
 
         return $details;
     }
+
+    private function loadQueueStatus() {
+        $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_queue";
+
+        // FIXME: batch queue has gone away!
+        $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
+
+        $user_id = $this->user->getId();
+        if ($this->team_assignment) {
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $user_id);
+            if ($team !== null) {
+                $user_id = $team->getId();
+            }
+        }
+
+        $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
+            $this->core->getConfig()->getCourse(), $this->id,
+            $user_id, $this->current_version));
+        $grading_queue_file = "GRADING_".$queue_file;
+
+        $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
+        $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
+        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grading_queue_file);
+        $this->grading_batch_queue = file_exists($batch_queue."/".$grading_queue_file);
+
+        $queue_count = 0;
+        $grading_count = 0;
+        if($this->in_interactive_queue === true) {
+            $files = scandir($interactive_queue);
+            $f = array();
+            $times = array();
+            foreach($files as $file) {
+                if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".") && !in_array($file, $f)) {
+                    $f[] = $file;
+                    $times[] = filemtime($interactive_queue.'/'.$file);
+                }
+            }
+            array_multisort($times,SORT_DESC,$f); //Sorted By Descending Here
+
+            foreach($f as $file) {
+                if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".")) {
+                    if(strpos($file, "GRADING_") !== false) {
+                        $grading_count = $grading_count + 1;
+                    }
+                    else {
+                        $queue_count = $queue_count + 1;
+                        if($file === $queue_file) {
+                            $this->interactive_queue_position = $queue_count;
+                        }
+                    }
+                }
+            }
+
+            /* Note:  Once permissions to access batch queue from interactive queue has been sorted, then can add in
+                      the code below to count the full total of submissions being graded across both queues */
+            /*$files = @scandir($batch_queue);
+            // Count the number being graded in the batch queue to get total of submissions currently being graded
+            foreach($files as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
+                }
+            }*/
+
+            $this->interactive_queue_total = $queue_count;
+            $this->grading_total = $grading_count;
+        }
+        else if($this->in_batch_queue === true) {
+            $files = scandir($batch_queue);
+            $f = array();
+            $times = array();
+            foreach($files as $file){
+                if(is_file($batch_queue.'/'.$file)){
+                    $f[] = $file;
+                    $times[] = filemtime($batch_queue.'/'.$file);
+                }
+            }
+            array_multisort($times,SORT_DESC,$f); //Sort By Descending Here
+
+            foreach($f as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
+                }
+                else {
+                    $queue_count = $queue_count + 1;
+                    if($file === $queue_file) {
+                        $this->batch_queue_position = $queue_count;
+                    }
+                }
+            }
+
+            /* Note:  Once permissions to access interactive queue from batch queue has been sorted, then can add in
+                      the code below to count the full total of submissions being graded across both queues */
+            /* $files = @scandir($interactive_queue);
+            // Count the number being graded in the batch queue to get total of submissions currently being graded
+            foreach($files as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
+                }
+            }*/
+            $this->batch_queue_total = $queue_count;
+            $this->grading_total = $grading_count;
+        }
+        if($this->in_interactive_queue === false && $this->in_batch_queue === false) {
+            $this->interactive_queue_position = 0;
+            $this->interactive_queue_total = 0;
+            $this->batch_queue_position = 0;
+            $this->batch_queue_total = 0;
+            $this->grading_total = 0;
+        }
+    }
+
 
     /**
      * Gets the AutoGradedVersion instance for the active version
