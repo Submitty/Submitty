@@ -486,6 +486,11 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($return_url);
         }
 
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Only admins can edit teams");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
             $this->core->redirect($return_url);
@@ -558,6 +563,11 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function exportTeams() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("You do not have permission to do that.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $nl = "\n";
