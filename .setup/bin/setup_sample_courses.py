@@ -760,7 +760,7 @@ class Course(object):
         for gradeable in self.gradeables:
             #create_teams
             if gradeable.team_assignment is True:
-                json_team_history = self.make_sample_teams()
+                json_team_history = self.make_sample_teams(gradeable)
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
@@ -1018,7 +1018,7 @@ class Course(object):
                 forum_data.append(l)
         return forum_data
 
-    def make_sample_teams(self):
+    def make_sample_teams(self, gradeable):
         json_team_history = {}
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
