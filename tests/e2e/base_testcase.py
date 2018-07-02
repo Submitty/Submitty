@@ -6,11 +6,9 @@ from datetime import date
 import os
 import unittest
 
-import sys
-
 from urllib.parse import urlencode
 
-from selenium.webdriver import Chrome as WebDriver
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -65,7 +63,7 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = WebDriver(options=self.options)
+        self.driver = webdriver.Chrome(options=self.options)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
