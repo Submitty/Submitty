@@ -51,9 +51,9 @@ class TaGradedGradeable extends AbstractModel {
         }
         $this->graded_gradeable = $graded_gradeable;
 
-        $this->setIdInternal($details['id']);
         $this->setOverallComment($details['overall_comment']);
         $this->setUserViewedDate($details['user_viewed_date']);
+        $this->setIdFromDatabase($details['id'] ?? 0);
         $this->modified = false;
     }
 
@@ -178,15 +178,18 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the id of this grade data
+     * Sets the id of this grade data (used from database methods)
      * @param int $id
+     * @internal
      */
-    private function setIdInternal($id) {
+    public function setIdFromDatabase($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
         } else {
             throw new \InvalidArgumentException('Id must be a non-negative integer');
         }
+        // Reset the modified flag since this gets called once saved to db or constructor
+        $this->modified = false;
     }
 
     /**
