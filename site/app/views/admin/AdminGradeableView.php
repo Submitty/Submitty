@@ -23,6 +23,7 @@ class AdminGradeableView extends AbstractView {
         $action           = "new"; //decides how the page's data is displayed
         $submit_text      = "Submit";
         $label_message    = "";
+        $modal_title      = "Create New Gradeable";
         $gradeables_array = array();
 
         // Make sure the dates are strings
@@ -67,6 +68,7 @@ class AdminGradeableView extends AbstractView {
 
         // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
+            $modal_title = "Editing Gradeable: <i>$admin_gradeable->g_title</i>";
             $action        = "edit";
             $submit_text   = "Save Changes";
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
@@ -82,6 +84,7 @@ class AdminGradeableView extends AbstractView {
             "nav_tab"         => $nav_tab,
             "semester"        => $_GET['semester'],
             "course"          => $_GET['course'],
+            "modal_title"     => $modal_title,
 
             // Graders Page Specific
             "all_graders"    => $graders
