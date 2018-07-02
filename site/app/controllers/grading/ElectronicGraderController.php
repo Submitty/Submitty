@@ -1125,12 +1125,6 @@ class ElectronicGraderController extends GradingController {
         $who_id = $_REQUEST['who_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
 
-        if (!$this->canIGradeThis($gradeable)) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
-        }
-
         $index = $_REQUEST['index'];
 
         //Turns off the header and footer so that it isn't displayed in the testcase output
