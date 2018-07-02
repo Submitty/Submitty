@@ -1,6 +1,8 @@
 import tempfile
 import os
 import urllib
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from .base_testcase import BaseTestCase
@@ -37,9 +39,12 @@ class TestForum(BaseTestCase):
             assert False
         assert 'page=view_thread' in self.driver.current_url
 
-    def upload_attachment(self, suffix):
+    def wait_after_ajax(self):
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
+
+    def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
-        self.driver.find_element_by_id("file_input{}".format(suffix)).send_keys(tfname)
+        upload_button.send_keys(tfname)
         return os.path.basename(tfname)
 
     def select_categories(self, categories_list):
@@ -57,9 +62,10 @@ class TestForum(BaseTestCase):
         self.switch_to_page_create_thread()
         self.driver.find_element_by_id("title").send_keys(title)
         self.driver.find_element_by_id("thread_post_content").send_keys(first_post)
+        upload_button = self.driver.find_element_by_xpath("//input[@type='file']")
         self.select_categories(categories_list)
         if upload_attachment:
-            attachment_file = self.upload_attachment("")
+            attachment_file = self.upload_attachment(upload_button)
         self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
@@ -67,6 +73,8 @@ class TestForum(BaseTestCase):
             self.switch_to_page_view_thread()
             assert not self.thread_exists(title)
             return None
+        self.wait_after_ajax()
+        assert 'page=view_thread' in self.driver.current_url
         return attachment_file
 
     def thread_exists(self, title):
@@ -97,25 +105,22 @@ class TestForum(BaseTestCase):
         attachment_file = None
         post = self.find_posts(post_content)[0]
         post_id = post.get_attribute("id")
+        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1] #Last One
+        text_area = edit_form.find_element(By.XPATH, ".//textarea")
+        upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
+        submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
         if first_post:
-            text_area_name = "post_content"
             assert "first_post" in post.get_attribute("class")
         else:
-            text_area_name = "post_content_{}".format(post_id)
             assert "first_post" not in post.get_attribute("class")
-        if not self.driver.find_element_by_name(text_area_name).is_displayed():
+        if not text_area.is_displayed():
             post.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Reply')]").click()
-        assert self.driver.find_element_by_name(text_area_name).is_displayed()
-        self.driver.find_element_by_name(text_area_name).send_keys(newcontent)
-        if first_post:
-            if upload_attachment:
-                attachment_file = self.upload_attachment("")
-            self.driver.find_element_by_xpath("//input[contains(@value,'Submit Reply to All')]").click()
-        else:
-            if upload_attachment:
-                attachment_file = self.upload_attachment("_"+post_id)
-            self.driver.find_element_by_id("{}-reply".format(post_id)
-                ).find_element(By.XPATH, ".//input[@type='submit']").click()
+        assert text_area.is_displayed()
+        text_area.send_keys(newcontent)
+        if upload_attachment:
+            attachment_file = self.upload_attachment(upload_button)
+        submit_button.click()
+        self.wait_after_ajax()
         # Test existence only
         self.find_posts(newcontent, must_exists = True, check_attachment = attachment_file)
         return attachment_file

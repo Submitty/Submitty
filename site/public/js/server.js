@@ -1857,12 +1857,104 @@ function checkNumFilesForumUpload(input, post_id){
         $('#messages').fadeOut();
         document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
+}
 
+function testAndGetAttachments(post_box_id, dynamic_check) {
+    var index = post_box_id - 1;
+    // Files selected
+    var files = [];
+    for (var j = 0; j < file_array[index].length; j++) {
+        if (file_array[index][j].name.indexOf("'") != -1 ||
+            file_array[index][j].name.indexOf("\"") != -1) {
+            alert("ERROR! You may not use quotes in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        else if (file_array[index][j].name.indexOf("\\\\") != -1 ||
+            file_array[index][j].name.indexOf("/") != -1) {
+            alert("ERROR! You may not use a slash in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        else if (file_array[index][j].name.indexOf("<") != -1 ||
+            file_array[index][j].name.indexOf(">") != -1) {
+            alert("ERROR! You may not use angle brackets in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        files.push(file_array[index][j]);
+    }
+    if(files.length > 5){
+        if(dynamic_check) {
+            displayError('Max file upload size is 5. Please remove attachments accordingly.');
+        } else {
+            displayError('Max file upload size is 5. Please try again.');
+        }
+        return false;
+    } else {
+        if(!checkForumFileExtensions(files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            return false;
+        }
+    }
+    return files;
+}
+
+function publishFormWithAttachments(form, test_category, error_message) {
+    if(!form[0].checkValidity()) {
+        form[0].reportValidity();
+        return false;
+    }
+    if(test_category) {
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+            alert("At least one category must be selected.");
+            return false;
+        }
+    }
+    var post_box_id = form.find(".thread-post-form").attr("post_box_id");
+    var formData = new FormData(form[0]);
+
+    var files = testAndGetAttachments(post_box_id, false);
+    if(files === false) {
+        return false;
+    }
+    for(var i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
+    var submit_url = form.attr('action');
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data){
+            try {
+                var json = JSON.parse(data);
+            } catch (err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            window.location.href = json['next_page'];
+        },
+        error: function(){
+            window.alert(error_message);
+        }
+    });
+    return false;
+}
+
+function createThread() {
+    return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+}
+
+function publishPost() {
+    return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
-     $.ajax({
+    var form = $("#"+post_id+"-reply");
+    var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+    $.ajax({
             url: url,
             type: "POST",
             data: {
@@ -1889,7 +1981,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('thread_post_content');
+                var contentBox = form.find("[name=thread_post_content]")[0];
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
