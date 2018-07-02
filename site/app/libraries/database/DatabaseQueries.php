@@ -2939,7 +2939,7 @@ AND gc_id IN (
               gcm_id)
             VALUES (?, ?, ?, ?)";
 
-        foreach($mark_ids as $mark_id) {
+        foreach ($mark_ids as $mark_id) {
             $param[3] = $mark_id;
             $this->course_db->query($query, $param);
         }
@@ -2979,7 +2979,7 @@ AND gc_id IN (
      * @param GradedComponent $graded_component
      */
     private function updateGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component) {
-        if($graded_component->isModified()) {
+        if ($graded_component->isModified()) {
             $params = [
                 $graded_component->getScore(),
                 $graded_component->getComment(),

@@ -74,7 +74,7 @@ class GradedComponent extends AbstractModel {
         $this->setGradeTime($details['grade_time'] ?? new \DateTime());
 
         // assign the default score if its not electronic (or rather not a custom mark)
-        if($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE){
+        if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $score = $details['score'] ?? 0;
         } else {
             $score = $details['score'] ?? $component->getDefault();
@@ -139,7 +139,7 @@ class GradedComponent extends AbstractModel {
         // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
         //  effectively filter out any of the invalid values in $mark_ids
         $marks = [];
-        $actual_ids =[];
+        $actual_ids = [];
         foreach ($this->component->getMarks() as $mark) {
             if (in_array($mark->getId(), $mark_ids)) {
                 $marks[] = $mark;
@@ -191,7 +191,7 @@ class GradedComponent extends AbstractModel {
      * @param float $score
      */
     public function setScore($score) {
-        if($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+        if ($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->score = $score;
         } else {
             // clamp the score (no error if not in bounds)
