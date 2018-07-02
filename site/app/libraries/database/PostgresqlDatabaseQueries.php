@@ -1336,11 +1336,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $grader = new User($this->core, $user_array);
 
                     // Create the component
-                    $graded_components[] = new GradedComponent($this->core,
+                    $graded_component = new GradedComponent($this->core,
                         $gradeable->getComponent($db_row_split['comp_id'][$i]),
                         $grader,
-                        $db_row_split['mark_id'][$i] ?? [],
                         $comp_array);
+                    $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
+                    $graded_components[] = $graded_component;
                 }
                 $ta_graded_gradeable->setGradedComponents($graded_components);
             }

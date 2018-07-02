@@ -19,6 +19,9 @@ use app\models\User;
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
+ * @method int[] getMarkIds()
+ * @method int[]|null getDbMarkIds()
+ * @method bool isMarksModified()
  */
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
@@ -34,6 +37,11 @@ class GradedComponent extends AbstractModel {
 
     /** @property @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
+    /** @property @var int[]|null The mark ids the submitter received for this component as reflected in the db */
+    protected $db_mark_ids = null;
+
+    /** @property @var bool True if the marks array was modified after construction */
+    protected $marks_modified = false;
 
     /** @property @var float The score for this component (or custom mark point value) */
     protected $score = 0;
@@ -51,25 +59,14 @@ class GradedComponent extends AbstractModel {
      * @param Core $core
      * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
-     * @param int[] $mark_ids The mark ids this graded component received
      * @param array $details any remaining properties
      * @throws \Exception if the 'grade_time' value in the $details array is not a valid DateTime/date-string
      */
-    public function __construct(Core $core, Component $component, User $grader, array $mark_ids, array $details) {
+    public function __construct(Core $core, Component $component, User $grader, array $details) {
         parent::__construct($core);
 
         $this->setComponent($component);
         $this->setGrader($grader);
-
-        // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
-        //  effectively filter out any of the invalid values in $mark_ids
-        $mark_objects = [];
-        foreach($this->component->getMarks() as $mark) {
-            if(in_array($mark->getId(), $mark_ids)) {
-                $mark_objects[] = $mark;
-            }
-        }
-        $this->setMarks($mark_objects);
 
         $this->setComment($details['comment']);
         $this->setGradedVersion($details['graded_version']);
@@ -132,18 +129,33 @@ class GradedComponent extends AbstractModel {
 
     /**
      * Sets the marks the submitter received for this component
-     * @param array $marks
+     * @param int[] $mark_ids
      */
-    public function setMarks(array $marks) {
-        $new_mark_ids = [];
-        foreach ($marks as $mark) {
-            if (!($mark instanceof Mark)) {
-                throw new \InvalidArgumentException('Object in marks array was not a mark');
+    public function setMarkIds(array $mark_ids) {
+        // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
+        //  effectively filter out any of the invalid values in $mark_ids
+        $marks = [];
+        $actual_ids =[];
+        foreach ($this->component->getMarks() as $mark) {
+            if (in_array($mark->getId(), $mark_ids)) {
+                $marks[] = $mark;
+                $actual_ids[] = $mark->getId();
             }
-            $new_mark_ids[] = $mark->getId();
         }
         $this->marks = $marks;
-        $this->mark_ids = $new_mark_ids;
+        $this->mark_ids = $actual_ids;
+        $this->marks_modified = true;
+    }
+
+    /**
+     * Called from the db methods to load the mark ids the submitter received
+     * @param int[] $db_mark_ids
+     * @internal
+     */
+    public function setMarkIdsFromDb(array $db_mark_ids) {
+        $this->setMarkIds($db_mark_ids);
+        $this->db_mark_ids = $db_mark_ids;
+        $this->marks_modified = false;
     }
 
     /**
@@ -195,7 +207,7 @@ class GradedComponent extends AbstractModel {
     }
 
     /** @internal */
-    public function setMarkIds() {
-        throw new \BadFunctionCallException('Cannot set mark ids');
+    public function setDbMarkIds() {
+        throw new \BadFunctionCallException('Cannot set db mark ids');
     }
 }
