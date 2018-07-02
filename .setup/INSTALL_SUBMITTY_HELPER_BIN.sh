@@ -12,9 +12,10 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
     DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
-    DAEMON_GROUP=$(jq -r '.daemon_group' ${CONF_DIR}/submitty_users.json)
     COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
 fi
+
+DAEMON_GROUP=${DAEMON_USER}
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
@@ -70,17 +71,19 @@ chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 # DAEMON_USER only things
 array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
 for i in "${array[@]}"; do
-    chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chown root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-chown -R root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
+    echo 'do b chown'
     chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
+    echo 'do a chown' "${DAEMON_GROUP}" "thing"
     chown -R root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
