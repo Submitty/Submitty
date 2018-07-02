@@ -1,12 +1,10 @@
 {% import 'functions/Badge.twig' as Badge %}
 
-{% if num_visible_testcases > 1 %}
-    <script type="text/javascript">
-        $(document).ready(function() {
-            loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
-        });
-    </script>
-{% endif %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
+    });
+</script>
 
 {% if num_visible_testcases > 1 %}
     {% if show_hidden_breakdown %}
