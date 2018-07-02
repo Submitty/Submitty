@@ -8,11 +8,11 @@ abstract class GradeableType{
     const NUMERIC_TEXT    = 2;
     
     /**
-     * @param GradeableType $type
+     * @param int|\app\libraries\GradeableType $type
      *
      * @return string
      */
-    public static function typeToString(GradeableType $type) {
+    public static function typeToString($type) {
         switch($type) {
             case static::ELECTRONIC_FILE:
                 return "Electronic File";

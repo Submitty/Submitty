@@ -1,0 +1,27 @@
+<div class="popup-form" id="class-list-form">
+    <h2>Upload Classlist</h2>
+    <p>&emsp;</p>
+    <p>
+        Format your class list as an .xlsx or .csv file with {{ use_database ? 7 : 6 }} columns:<br>
+        &emsp;username, first name, last name, email, registration section, {{ use_database ? "password, " : "" }}preferred first name<br>
+    </p>
+    <p>&emsp;</p>
+    <p>
+        Preferred first name is optional.<br>
+        Registration section can be null.<br>
+        Do not use a header row.<br>
+    </p>
+    <br />
+    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_class_list'}) }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
+        <br />
+        <div>
+            <input type="file" name="upload" accept=".xlsx, .csv">
+        </div>
+        <div style="float: right; width: auto">
+            <a onclick="$('#class-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Submit" />
+        </div>
+    </form>
+</div>

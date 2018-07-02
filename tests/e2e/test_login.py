@@ -1,4 +1,4 @@
-from e2e.base_testcase import BaseTestCase
+from .base_testcase import BaseTestCase
 
 
 class TestLogin(BaseTestCase):

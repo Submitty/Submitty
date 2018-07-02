@@ -16,7 +16,7 @@ fi
 # PATHS
 SOURCE="${BASH_SOURCE[0]}"
 CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
@@ -25,13 +25,19 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 #################
 
 if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
-  echo "Non-interactive vagrant script..."
-  export VAGRANT=1
-  export DEBIAN_FRONTEND=noninteractive
-  shift
+    echo "Non-interactive vagrant script..."
+    export VAGRANT=1
+    export DEBIAN_FRONTEND=noninteractive
+    shift
+
+    # Setting it up to allow SSH as root by default
+    mkdir -m 700 /root/.ssh
+    cp /home/vagrant/.ssh/authorized_keys /root/.ssh
+
+    sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 else
-  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
-  export VAGRANT=0
+    #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
+    export VAGRANT=0
 fi
 
 if [ "$1" == "--worker" ] || [ "$2" == "--worker" ]; then
@@ -61,16 +67,10 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
-# BUILD CLANG SETUP
-#################
-
-#python3 ${SUBMITTY_REPOSITORY}/.setup/clangInstall.py
-
-#################################################################
 # USERS SETUP
 #################
 
-${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
+python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 
 # Special users and groups needed to run Submitty
 #
@@ -149,10 +149,18 @@ pip3 install xlsx2csv
 pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
+pip3 install PyPDF2
+
+# for Lichen / Plagiarism Detection
+pip3 install parso
+
+# (yes, we need to run Python2 for clang tokenizer)
+pip install clang
+pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
     sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
@@ -193,13 +201,12 @@ echo "Getting emma..."
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
 EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/releases/download/${EMMA_VER}/emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}
 rm emma-${EMMA_VER}.zip
 rm index.html* > /dev/null 2>&1
-
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -234,8 +241,6 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
-
-
 DRMEM_TAG=release_2.0.0_rc2
 DRMEM_VER=2.0.0-RC2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
@@ -254,7 +259,14 @@ popd > /dev/null
 
 #Set up website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
+    PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+
+    # install composer which is needed for the website
+    curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    rm -f /tmp/composer-setup.php
+
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -279,9 +291,33 @@ if [ ${WORKER} == 0 ]; then
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
     	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+
+        # Enable xdebug support for debugging
+        phpenmod xdebug
+
+        # In case you reprovision without wiping the drive, don't paste this twice
+        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+        then
+            # Tell it to send requests to our host on port 9000 (PhpStorm default)
+            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+[xdebug]
+xdebug.remote_enable=1
+xdebug.remote_port=9000
+xdebug.remote_host=10.0.2.2
+EOF
+        fi
+
+        if [ -z $(grep 'xdebug\.profiler_enable_trigger' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+        then
+            # Allow remote profiling and upload outputs to the shared folder
+            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+xdebug.profiler_enable_trigger=1
+xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+EOF
+        fi
     fi
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
@@ -294,12 +330,12 @@ if [ ${WORKER} == 0 ]; then
     # you’ll need to increase both upload_max_filesize and
     # post_max_filesize
 
-    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -321,7 +357,7 @@ if [ ${WORKER} == 0 ]; then
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
-    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
+    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/${PHP_VERSION}/fpm/php.ini
 fi
 
 # create directories and fix permissions
@@ -329,7 +365,6 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 #Set up database and copy down the tutorial repo if not in worker mode
 if [ ${WORKER} == 0 ]; then
-
     # create a list of valid userids and put them in /var/local/submitty/instructors
     # one way to create your list is by listing all of the userids in /home
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -339,51 +374,71 @@ if [ ${WORKER} == 0 ]; then
     # POSTGRES SETUP
     #################
     if [ ${VAGRANT} == 1 ]; then
-    	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-    	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
-    	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
-    	echo "Creating PostgreSQL users"
-    	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
-    	echo "Finished creating PostgreSQL users"
+        PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}.[0-9]{1,}' | head -1)"
+        if [ ! -d "/etc/postgresql/${PG_VERSION}/pg_hba.conf" ]; then
+            # PG 10.x stopped putting the minor version in the folder name
+            PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
+        fi
+        cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
+        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+        echo "Creating PostgreSQL users"
+        su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
+        echo "Finished creating PostgreSQL users"
 
-    	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-    	service postgresql restart
-    fi
-
-
-    #################################################################
-    # CLONE THE TUTORIAL REPO
-    #################
-
-    # grab the tutorial repo, which includes a number of curated example
-    # assignment configurations
-
-    if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        git pull
-        popd
-    else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
-        # remember to change this version in .setup/travis/autograder.sh too
-        git checkout v0.94
-        popd
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        service postgresql restart
     fi
 fi
+
+
 
 #################################################################
-# ANALYSIS TOOLS SETUP
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    git pull
-    popd
-else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting install_system.sh"
+    exit 1
 fi
 
 
+#################################################################
+# BUILD CLANG SETUP
+#################
+
+# NOTE: These variables must match the same variables in INSTALL_SUBMITTY_HELPER.sh
+clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
+clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
+# note, we are not running 'ninja install', so this path is unused.
+clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
+ 
+# skip if this is a re-run
+if [ ! -d "${clangsrc}" ]; then
+    echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
+
+    mkdir -p ${clangsrc}
+
+    # checkout the clang sources
+    git clone --depth 1 http://llvm.org/git/llvm.git ${clangsrc}/llvm
+    git clone --depth 1 http://llvm.org/git/clang.git ${clangsrc}/llvm/tools/clang
+    git clone --depth 1 http://llvm.org/git/clang-tools-extra.git ${clangsrc}/llvm/tools/clang/tools/extra/
+
+    # initial cmake for llvm tools (might take a bit of time)
+    mkdir -p ${clangbuild}
+    pushd ${clangbuild}
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    popd > /dev/null
+
+    # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
+    echo 'add_subdirectory(ASTMatcher)' >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+    echo 'add_subdirectory(UnionTool)'  >> ${clangsrc}/llvm/tools/clang/tools/extra/CMakeLists.txt
+
+    echo 'DONE PREPARING CLANG INSTALLATION'
+fi
+    
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -392,7 +447,7 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo  Running configure submitty in worker mode
-    ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
@@ -407,15 +462,34 @@ else
     ${SUBMISSION_URL}
     ${GIT_URL}/git
 
-    1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
-        ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
 
+if [ ${WORKER} == 1 ]; then
+   #Add the submitty user to /etc/sudoers if in worker mode.
+    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
+        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+    fi
+fi
+
+# Create and setup database for non-workers
+if [ ${WORKER} == 0 ]; then
+    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+fi
+
 echo Beginning Install Submitty Script
-source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 
 # (re)start the submitty grading scheduler daemon
@@ -427,53 +501,49 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-
-    mkdir -p ${SUBMITTY_DATA_DIR}/instructors
-    mkdir -p ${SUBMITTY_DATA_DIR}/bin
-    touch ${SUBMITTY_DATA_DIR}/instructors/authlist
-    touch ${SUBMITTY_DATA_DIR}/instructors/valid
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
-    chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
-    chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
-
     sudo mkdir -p /usr/lib/cgi-bin
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
     apache2ctl -t
 
-    hsdbu_password=`cat /usr/local/submitty/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
+        echo "" >> /etc/sudoers
+        echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
+    fi
 
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    PGPASSWORD=${hsdbu_password} psql -d submitty -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/submitty_db.sql
 fi
 
 if [ ${WORKER} == 0 ]; then
     if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
-        echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
+        echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
-        DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+        VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 
         rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/logs/autograding
+        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:course_builders ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
 
         #################################################################
         # SET CSV FIELDS (for classlist upload data)
@@ -483,7 +553,7 @@ if [ ${WORKER} == 0 ]; then
 
         # Other Universities will need to rerun /bin/setcsvfields to match their
         # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 
@@ -505,7 +575,7 @@ fi
 
 # pushd /tmp/docker
 # su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
-# popd
+# popd > /dev/null
 
 
 #################################################################
@@ -513,7 +583,7 @@ fi
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
-    service php7.0-fpm restart
+    service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
 

@@ -58,6 +58,7 @@ use app\libraries\Utils;
  * @method bool getGradeByRegistration()
  * @method array getSubmittedFiles()
  * @method array getVcsFiles()
+ * @method array getUploadsFiles()
  * @method GradeableTestcase[] getTestcases()
  * @method bool getIsRepository()
  * @method string getSubdirectory()
@@ -85,6 +86,7 @@ use app\libraries\Utils;
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
+ * @method int getRegradeStatus()
  */
 class Gradeable extends AbstractModel {
     
@@ -105,6 +107,9 @@ class Gradeable extends AbstractModel {
     
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
+
+    /** @property @var string Which gradeable to inherit teams from */
+    // protected $inherit_teams_from = "";
 
     /** @property @var int maximum allowed team size */
     protected $max_team_size = 0;
@@ -241,11 +246,8 @@ class Gradeable extends AbstractModel {
     /** @property @var Array of all split pdfsuploads. Each key is a filename and then each element is an array
     * that contains filename, file path, and the file size. */
     protected $uploads_files = array();
-
+    /** @var array|bool $result_details */
     protected $result_details;
-
-    /** @property @var string */
-    protected $grade_file = null;
 
     protected $in_interactive_queue = false;
     protected $grading_interactive_queue = false;
@@ -310,6 +312,12 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $student_allowed_late_days = 0;
 
+    /** @property @var str */
+    protected $late_status = "Good";    
+
+    /** @property @var int */
+    protected $curr_late_charged = 0;
+
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
         if(!isset($details['g_id'])) {
@@ -347,8 +355,10 @@ class Gradeable extends AbstractModel {
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
+            //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
@@ -459,6 +469,46 @@ class Gradeable extends AbstractModel {
         // Is it past when the TA grades should be released
         $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
         $this->bucket = $details['g_syllabus_bucket'];
+    }
+
+    public function calculateLateDays(&$total_late_days = 0){
+        $late_flag = false;
+
+        if ($this->late_days - $this->late_day_exceptions > 0) {
+            $this->late_status = "Late";
+            $late_flag = true;
+        }
+        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
+        if ($this->late_days - $this->late_day_exceptions > $this->allowed_late_days) {
+            $this->late_status = "Bad (too many late days used on this assignment)";
+            $late_flag = false;
+        }
+        // If late days used - extensions applied > allowed per term then status is "Bad..."
+        // Do a max(0, ...) to protect against the case where the student's late days goes down
+        // during the semester and they've already used late days
+        if ($this->late_days - $this->late_day_exceptions > max(0,  $this->student_allowed_late_days - $total_late_days)) {
+            $this->late_status = "Bad (too many late days used this term)";
+            $late_flag = false;
+        }
+        
+        if ($this->getActiveVersion() == 0) {
+            if ($this->hasSubmitted()) {
+                $this->late_status = "Cancelled Submission";
+            }
+            else {
+                $this->late_status = "No submission";
+            }
+            $late_flag = false;
+        }
+
+
+        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
+        //be less than 0 in cases of excess extensions. Decrement remaining late days.
+        if ($late_flag) {
+            $this->curr_late_charged = $this->late_days - $this->late_day_exceptions;
+            $this->curr_late_charged = ($this->curr_late_charged < 0) ? 0 : $this->curr_late_charged;
+            $total_late_days += $this->curr_late_charged;
+        }
     }
 
     /**
@@ -577,12 +627,12 @@ class Gradeable extends AbstractModel {
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
                                           $this->core->getConfig()->getCourse(), $this->id,
                                           $user_id, $this->current_version));
-        $grade_file = "GRADING_".$queue_file;
+        $grading_queue_file = "GRADING_".$queue_file;
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
         $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
-        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grade_file);
-        $this->grading_batch_queue = file_exists($batch_queue."/".$grade_file);
+        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grading_queue_file);
+        $this->grading_batch_queue = file_exists($batch_queue."/".$grading_queue_file);
 
         $queue_count = 0;
         $grading_count = 0;
@@ -788,11 +838,6 @@ class Gradeable extends AbstractModel {
                 }
             }
         }
-
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getId()."/".$user_id.".txt";
-        if (is_file($grade_file)) {
-            $this->grade_file = htmlentities(file_get_contents($grade_file));
-        }
     }
 
     public function isTeamAssignment() {
@@ -930,10 +975,6 @@ class Gradeable extends AbstractModel {
         return $this->been_tagraded;
     }
 
-    public function hasGradeFile() {
-        return $this->grade_file !== null;
-    }
-
     public function useTAGrading() {
         return $this->ta_grading;
     }
@@ -974,13 +1015,19 @@ class Gradeable extends AbstractModel {
         $this->core->getQueries()->updateUserViewedDate($this);
     }
 
-    public function updateGradeable() {
-        $this->core->getQueries()->updateGradeable($this);
+    public function resetUserViewedDate() {
+        $this->core->getQueries()->resetUserViewedDate($this);
     }
 
     public function getActiveDaysLate() {
-        $extended_due_date = clone $this->due_date;
-        $return =  DateUtils::calculateDayDiff($extended_due_date->add(new \DateInterval("PT5M")), $this->submission_time);
+        $return =  DateUtils::calculateDayDiff($this->due_date, $this->submission_time);
+        if ($return < 0) {
+            $return = 0;
+        }
+        return $return;
+    }
+    public function getWouldBeDaysLate() {
+        $return =  DateUtils::calculateDayDiff($this->due_date, null);
         if ($return < 0) {
             $return = 0;
         }
@@ -1132,4 +1179,156 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Does not contain submission-specific data like comments or which marks are selected.
+     * @return array
+     */
+    public function getStaticData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getStaticData();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this gradeable and its various components and their marks.
+     * Contains submission-specific data like comments and which marks are selected.
+     * @return array
+     */
+    public function getGradedData() {
+        $data = [
+            "id" => $this->id,
+            "gd_id" => $this->gd_id,
+            "name" => $this->name,
+            "precision" => $this->point_precision,
+            "active_version" => $this->active_version,
+            "user_id" => $this->user->getAnonId(),
+            "overall_comment" => $this->overall_comment,
+            "graded_autograder_points" => $this->getGradedAutograderPoints(),
+            "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
+            "graded_ta_points" => $this->getGradedTAPoints(),
+            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "components" => []
+        ];
+
+        foreach ($this->getComponents() as $comp) {
+            //Ignore components like this
+            if ($comp->getOrder() == -1) {
+                continue;
+            }
+
+            $data["components"][] = $comp->getGradedData();
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param Team|null $team
+     * @return string
+     */
+    public function getRepositoryPath($team = null) {
+        if (strpos($this->getSubdirectory(), '://') !== false || substr($this->getSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $this->getUser()->getId(), $repo);
+        $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
+            $this->core->getConfig()->getVcsUrl(), $repo);
+        if ($this->isTeamAssignment()) {
+            if ($team === null) {
+                $team = $this->getTeam();
+            }
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
+    }
+
+    public function canDelete() {
+        if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
+            // no_team_flag is true if there are no teams else false. Note deleting a gradeable is not allowed is no_team_flag is false.
+            $no_teams_flag = true;
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+            if (!empty($all_teams)) {
+                $no_teams_flag = false;
+            }
+            // no_submission_flag is true if there are no submissions for assignement else false. Note deleting a gradeable is not allowed is no_submission_flag is false.
+            $no_submission_flag = true;
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+            if (is_dir($submission_path)) {
+                $no_submission_flag = false;
+            }
+
+            return $no_submission_flag && $no_teams_flag;
+        } else if ($this->getType() == GradeableType::NUMERIC_TEXT || $this->getType() == GradeableType::CHECKPOINTS) {
+            return $this->core->getQueries()->getNumUsersGraded($this->getId()) === 0;
+        }
+
+        // Unknown type, better be safe
+        return false;
+    }
+
+    /**
+     * Calculate the late status of this gradeable, taking into account all previous gradeables
+     * @return string
+     */
+    public function calculateLateStatus($checkTeam = true, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = $this->getUser()->getId();
+        }
+
+        if ($this->isTeamAssignment() && $checkTeam) {
+            foreach ($this->getTeam()->getMembers() as $team_member) {
+                $status = $this->calculateLateStatus(false, $team_member);
+                if ($status == "Good" || $status == "Late") {
+                    // As long as one person on the team has a good status, then the assignment should be graded.
+                    return "Good";
+                }
+            }
+            return "Bad for all team members";
+        } else {
+            //Not doing a team check, do individual check
+
+            $total_late_used = 0;
+            $order_by = [
+                'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+            ];
+            foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+                /* @var Gradeable $g */
+                $g->calculateLateDays($total_late_used);
+                if ($g->getId() == $this->getId()) {
+                    return $g->getLateStatus();
+                }
+            }
+            return "Good";
+        }
+    }
+
 }

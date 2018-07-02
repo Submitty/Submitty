@@ -39,7 +39,7 @@ class IniParser {
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");
         }
 
-        $parsed = @parse_ini_file($filename, true, INI_SCANNER_RAW);
+        $parsed = @parse_ini_file($filename, true);
         if ($parsed === false) {
             $e = error_get_last();
             $basename = basename($filename);
@@ -139,7 +139,7 @@ class IniParser {
     private static function addElement(&$to_write, $key, $value) {
         $to_write .= "{$key}=";
         if (is_string($value)) {
-            $to_write .= "\"{$value}\"\n";
+            $to_write .= self::escapeValueString($value) . "\n";
         }
         else {
             if (is_bool($value)) {
@@ -149,10 +149,17 @@ class IniParser {
                 $to_write .= "null\n";
             }
             else {
-                $to_write .= "{$value}\n";
+                $to_write .= self::escapeValueString($value) . "\n";
             }
         }
     }
+
+    private static function escapeValueString($value) {
+        $value = str_replace(["\\", "\""], ["\\\\", "\\\""], $value);
+
+        return '"' . $value . '"';
+    }
+
     /**
      * Given an array, we test if it might be a section header or just an array
      * within the

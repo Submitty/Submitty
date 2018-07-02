@@ -1,0 +1,18 @@
+{% if label_message != '' %}
+    <h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
+{% endif %}
+{% if admin_gradeable.getGGradeableType() == 0 %}
+    {{ include('admin/admin_gradeable/rubric/ElectronicFileRubric.twig')   }}
+{% else %}
+    What overall instructions should be provided to the TA?:<br />
+    <!--NOTE: "textarea" contents (space between <textarea> and </textarea>") should not have any extra characters
+                    (that's why the '>' is on the next line)-->
+    <textarea rows="4" cols="200" name="g_overall_ta_instructions" placeholder="(Optional)" style="width: 500px;"
+    >{{ admin_gradeable.getGOverallTaInstructions() }}</textarea>
+    <br /><br />
+    {% if admin_gradeable.getGGradeableType() == 1 %}
+        {{ include('admin/admin_gradeable/rubric/CheckpointsRubric.twig')   }}
+    {% else %}
+        {{ include('admin/admin_gradeable/rubric/NumericRubric.twig')   }}
+    {% endif %}
+{% endif %}

@@ -2,6 +2,7 @@
 
 namespace app\libraries;
 use app\exceptions\OutputException;
+use app\models\Breadcrumb;
 
 /**
  * Class Output
@@ -25,7 +26,12 @@ class Output {
     private $use_footer = true;
     
     private $start_time;
-    
+
+    /** @var \Twig_Environment $twig */
+    private $twig = null;
+    /** @var \Twig_LoaderInterface $twig */
+    private $twig_loader = null;
+
     /**
      * @var Core
      */
@@ -34,6 +40,21 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+    }
+
+    public function loadTwig() {
+        $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
+        $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+
+        $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
+        $this->twig = new \Twig_Environment($this->twig_loader, [
+            'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
+            'debug' => $this->core->getConfig()->isDebug()
+        ]);
+        $this->twig->addGlobal("core", $this->core);
+        $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
+            return call_user_func_array('self::renderTemplate', $args);
+        }, ["is_safe" => ["html"]]));
     }
 
     public function setInternalResources() {
@@ -117,6 +138,35 @@ class Output {
     }
 
     /**
+     * Render a Twig template from the templates directory
+     * @param string $filename Template file basename, file should be in site/app/templates
+     * @param array $context Associative array of variables to pass into the Twig renderer
+     * @return string Rendered page content
+     */
+    public function renderTwigTemplate($filename, $context = []) {
+        try {
+            return $this->twig->render($filename, $context);
+        } catch (\Twig_Error $e) {
+            throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
+        }
+    }
+
+    /**
+     * Render a Twig template from the templates directory and immediately output the
+     * rendered page.
+     * @see renderOutput() The same idea except for Twig
+     * @param string $filename Template file basename, file should be in site/app/templates
+     * @param array $context Associative array of variables to pass into the Twig renderer
+     */
+    public function renderTwigOutput($filename, $context = []) {
+        if ($this->buffer_output) {
+            $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
+        } else {
+            echo $this->renderTwigTemplate($filename, $context);
+        }
+    }
+
+    /**
      * Returns the requested view, initializing it if it's never been called before.
      * All views inheriet from BaseView which make them be a singleton and have the
      * getInstance method.
@@ -145,7 +195,7 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', implode(' > ', $this->breadcrumbs), $this->css, $this->js);
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
         }
         else {
             return '';
@@ -260,27 +310,6 @@ class Output {
     }
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
-        if ($url !== null && $url !== "") {
-            if(!$icon){
-                if ($top === true) {
-                    $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
-                }
-                else {
-                    $string = "<a href='{$url}'>{$string}</a>";
-                }
-            }
-            else {
-                $string = '<a class="external" href="'.$url.'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
-            }   
-        }
-        if(empty($url) && empty($string)) {
-            return;
-        }
-        if($icon){
-            $this->breadcrumbs[count($this->breadcrumbs)-1].= $string;
-        }
-        else {
-           $this->breadcrumbs[] = $string;
-        }
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
     }
 }

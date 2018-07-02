@@ -1,0 +1,92 @@
+{# Render a whole badge for a component #}
+{# @var int  earned       Points earned #}
+{# @var int  max          Maximum points possible #}
+{# @var bool extra_credit If this is an extra credit component #}
+{% macro render(earned, max, extra_credit) %}
+    {% import _self as self %}
+
+    {% set show = self.should_show(earned, max, extra_credit) == "true" %}
+    {% if show %}
+        {% set background = self.get_style(earned, max, extra_credit) %}
+        {% set text = self.format_value(earned, max, extra_credit) %}
+
+        <span class="badge {{ background }}">{{ text }}</span>
+    {% else %}
+        <div class="no-badge"></div>
+    {% endif %}
+{% endmacro %}
+
+{# Get badge css class based on points earned vs max possible #}
+{# @var int  earned       Points earned #}
+{# @var int  max          Maximum points possible #}
+{# @var bool extra_credit If this is an extra credit component #}
+{%- macro get_style(earned, max, extra_credit) -%}
+    {%- spaceless -%}
+        {# Color rules: #}
+        {# Green is 100% or higher (for EC) #}
+        {# Yellow is 51-99% #}
+        {# Red is 0-50% or lower (for penalty) #}
+        {# EC is gray if you didn't get any points #}
+        {% if extra_credit %}
+            {% if earned == 0 %}
+                gray-background
+            {% else %}
+                green-background
+            {% endif %}
+        {% elseif earned < 0 %}
+            {% if earned < 0.5 * max %}
+                red-background
+            {% else %}
+                yellow-background
+            {% endif %}
+        {% else %}
+            {% if earned >= max %}
+                green-background
+            {% elseif earned > max * 0.5 %}
+                yellow-background
+            {% else %}
+                red-background
+            {% endif %}
+        {% endif %}
+    {%- endspaceless -%}
+{%- endmacro -%}
+
+{# Format the display text for a badge #}
+{# @var int  earned       Points earned #}
+{# @var int  max          Maximum points possible #}
+{# @var bool extra_credit If this is an extra credit component #}
+{%- macro format_value(earned, max, extra_credit) -%}
+    {%- spaceless -%}
+        {# Extra credit: +earned #}
+        {# Regular credit: earned / max #}
+        {% if extra_credit %}
+            +{{ earned }}
+        {% elseif earned < 0 %}
+            &minus;{{ earned|abs }} / {{ max }}
+        {% else %}
+            {{ earned }} / {{ max }}
+        {% endif %}
+    {%- endspaceless -%}
+{%- endmacro -%}
+
+{# Should a badge show #}
+{# @var int  earned       Points earned #}
+{# @var int  max          Maximum points possible #}
+{# @var bool extra_credit If this is an extra credit component #}
+{%- macro should_show(earned, max, extra_credit) -%}
+    {%- spaceless -%}
+        {% if extra_credit %}
+            {# EC always shows, because even +0 is good information #}
+            true
+        {% elseif max > 0 %}
+            {# Normal case always shows #}
+            true
+        {% elseif max < 0 %}
+            {# Negaitve points only show if you got it #}
+            {{ earned < 0 }}
+        {% else %}
+            {# Otherwise it's worth zero points, don't show #}
+            false
+        {% endif %}
+    {%- endspaceless -%}
+{%- endmacro -%}

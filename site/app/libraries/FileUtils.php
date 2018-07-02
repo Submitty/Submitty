@@ -310,9 +310,9 @@ class FileUtils {
     }
 
     /**
-     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPERATOR constant. This
+     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPARATOR constant. This
      * works in the same way as os.path.join does in Python, making sure that we do not end up with any doubles of
-     * a seperator and that we can start the path with a seperator if we specify the first argument as starting with
+     * a separator and that we can start the path with a separator if we specify the first argument as starting with
      * it.
      *
      * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:
@@ -395,8 +395,56 @@ class FileUtils {
                 break;
             default:
                 $content_type = 'text/x-sh';
-                break;
+                break;$gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         }
         return $content_type;
     }
+
+    /**
+     * This function returns a array consisting of all semesters, and within each semester, there will be courses for that semester, and
+     * within each course , there will be list of all gradeable ids for that course
+     * @return array $return
+     */
+    public static function getGradeablesFromPriorTerm(){
+        $return = array();
+
+        $filename = "/var/local/submitty/courses/gradeables_from_prior_terms.txt";
+        if (file_exists($filename)) {
+        
+          $file = fopen($filename, "r") or exit("Unable to open file!");
+
+          while(!feof($file)){
+            $line = fgets($file);
+            $line= trim($line," ");
+            $line= explode("/",$line);
+            $sem = $line[5];
+            $course = $line[6];
+            $gradeables= array();
+            while(!feof($file)){
+                $line = fgets($file);
+                if(trim(trim($line," "),"\n") == "") {
+                    break;
+                }
+                array_push($gradeables, trim(trim($line," "),"\n"));
+            }
+            $return[$sem][$course] = $gradeables;    
+            
+          }
+          fclose($file);
+          uksort($return, function($semester_a, $semester_b) {
+              $year_a = (int)substr($semester_a, 1);
+              $year_b = (int)substr($semester_b, 1);
+              if($year_a > $year_b)
+                return 0;
+              else if ($year_a < $year_b)
+                return 1;
+              else {
+                return ($semester_a[0] == 'f')? 0 : 1 ;
+              }
+            });
+        }
+        return $return;
+    }
 }
+
+

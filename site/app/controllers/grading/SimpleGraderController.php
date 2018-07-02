@@ -4,8 +4,9 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\models\User;
+use app\controllers\GradingController;
 
-class SimpleGraderController extends AbstractController  {
+class SimpleGraderController extends GradingController  {
     public function run() {
         if(!$this->core->getUser()->accessGrading()) {
             $this->core->getOutput()->showError("This account doesn't have access to grading");

@@ -1,0 +1,99 @@
+<div class="electronic_file">
+    <b>Full path to the directory containing the autograding config.json file:</b><br>
+    See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
+    <kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
+    <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
+    <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
+
+    <input style='width: 83%' type='text' id='config_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" />
+    <br /> <br />
+
+    Should students be able to view submissions?
+    <fieldset>
+        <input type="radio" id="yes_student_view" name="eg_student_view" value="true"
+                {{ admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> Yes
+        <input type="radio" id="no_student_view" name="eg_student_view" value="false"
+                {{ not admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+        (Select 'No' during grading of a bulk upload pdf quiz/exam.)
+
+        <div id="student_submit_download_view">
+
+            <br />
+            Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
+            <input type="radio" id="yes_student_submit" name="eg_student_submit" value="true"
+                    {{ admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_submit" name="eg_student_submit" value="false"
+                    {{ not admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> No
+            <br /> <br />
+
+            Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+            <input type="radio" id="yes_student_download" name="eg_student_download" value="true"
+                    {{ admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_download" name="eg_student_download" value="false"
+                    {{ not admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> No
+            <br /> <br />
+
+            Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+            <input type="radio" id="yes_student_any_version" name="eg_student_any_version" value="true"
+                    {{ admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Any version
+            <input type="radio" id="no_student_any_version" name="eg_student_any_version" value="false"
+                    {{ not admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Active version only
+
+        </div>
+        <br />
+    </fieldset>
+</div>
+
+<script type="text/javascript">
+    var blankQuestion =
+        {
+            'id': 'NEW',
+            'title': '',
+            'ta_comment': '',
+            'student_comment': ''
+        };
+
+    function onPdfChange() {
+        if($('#yes_pdf_page').is(':checked')) {
+            // $('#pdf_page').show();
+            // $('.pdf_page_input').show();
+            disableElementChildren('#pdf_page', false);
+            disableElementChildren('.pdf_page_input', $('#yes_pdf_page_student').is(':checked'));
+        }
+        else {
+            // $('#pdf_page').hide();
+            // $('.pdf_page_input').hide();
+            disableElementChildren('#pdf_page', true);
+            disableElementChildren('.pdf_page_input', true);
+        }
+    }
+
+    function onStudentViewChange() {
+        if($('#yes_student_view').is(':checked')) {
+            //$('#student_submit_download_view').show();
+            disableElementChildren('#student_submit_download_view', false);
+        }
+        else {
+            // $('#student_submit_download_view').hide();
+            disableElementChildren('#student_submit_download_view', true);
+            $('#no_student_submit').prop('checked', true);
+            $('#no_student_download').prop('checked',true);
+            $('#yes_student_any_version').prop('checked',true);
+            $('#student_submit_download_view').hide();
+        }
+    }
+
+    $(document).ready(function() {
+
+        // Hide PDF settings if not in use
+        onPdfChange();
+        $('[name="eg_pdf_page"]').change(onPdfChange);
+
+        // Hide PDF pages in Rubric if students assign them
+        $('[name="eg_pdf_page_student"]').change(onPdfChange);
+
+        // Only show the settings if the setting is enabled
+        onStudentViewChange();
+        $('[name="eg_student_view"]').change(onStudentViewChange);
+    });
+</script>

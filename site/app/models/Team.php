@@ -96,6 +96,17 @@ class Team extends AbstractModel {
     }
 
     /**
+     * Get the user id of the leader of the team
+     * @return string|null
+     */
+    public function getLeaderId() {
+        if (count($this->getMembers()) === 0) {
+            return null;
+        }
+        return $this->getMembers()[0];
+    }
+
+    /**
      * Get whether or not a given user is on the team
      * @param string $user_id
      * @return bool

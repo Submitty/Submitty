@@ -1,10 +1,11 @@
 var siteUrl = undefined;
 var csrfToken = undefined;
 
-function setSiteDetails(url, setCsrfToken) {
-    siteUrl = url;
-    csrfToken = setCsrfToken;
-}
+window.addEventListener("load", function() {
+  for (const elem in document.body.dataset) {
+    window[elem] = document.body.dataset[elem];
+  }
+});
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -16,15 +17,106 @@ function setSiteDetails(url, setCsrfToken) {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    var url = siteUrl;
     var constructed = "";
     for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
     }
-    return url + constructed;
+    return document.body.dataset.siteUrl + constructed;
 }
+
+function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+    var actual_div_name = "#" + div_name + "_0";
+    var expected_div_name = "#" + div_name + "_1";
+    var actual_div = $(actual_div_name).children()[0];
+    var expected_div = $(expected_div_name).children()[0];
+    var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+    var list_white_spaces = {};
+    $('#'+helper_id).empty();
+    if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
+        list_white_spaces['newline'] = '&#9166;';
+        args['option'] = 'with_unicode'
+    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
+        list_white_spaces['newline'] = '\\n';
+        args['option'] = 'with_escape'
+    } else {
+        $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
+        $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
+        $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
+        args['option'] = 'original'
+    }
+    //Insert actual and expected one at a time
+    args['which'] = 'expected';
+    var url = buildUrl(args);
+
+    $.getJSON({
+        url: url,
+        success: function(data) {
+            for(property in data.whitespaces){
+                list_white_spaces[property] = data.whitespaces[property];
+            }
+            $(expected_div).empty();
+            $(expected_div).html(data.html);
+            args['which'] = 'actual';
+            url = buildUrl(args);
+            $.getJSON({
+                url: url,
+                success: function(data) {
+                    for(property in data.whitespaces){
+                        list_white_spaces[property] = data.whitespaces[property];
+                    }
+                    for(property in list_white_spaces){
+                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    }
+                    $(actual_div).empty();
+                    $(actual_div).html(data.html);
+                },
+                error: function(e) {
+                    alert("Could not load diff, please refresh the page and try again.");}
+            });
+        },
+        error: function(e) {
+            alert("Could not load diff, please refresh the page and try again.");}
+    });
+
+}
+
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
+    orig_div_name = div_name
+    div_name = "#" + div_name;
+    var isVisible = $( div_name ).is( " :visible" );
+
+    if(isVisible){
+        toggleDiv(orig_div_name);
+        $("#show_char_"+index).toggle();
+        $(div_name).empty();
+    }else{
+        $("#show_char_"+index).toggle();
+        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                $(div_name).empty();
+                $(div_name).html(data);
+                toggleDiv(orig_div_name);
+            },
+            error: function(e) {
+                alert("Could not load diff, please refresh the page and try again.");
+            }
+        })
+    }
+}
+
+
+
 
 /**
  *
@@ -100,6 +192,26 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
 
+function extensionPopup(json){
+    $('.popup-form').css('display', 'none');
+    var form = $('#more_extension_popup');
+    form[0].outerHTML = json['popup'];
+    $('#more_extension_popup').css('display', 'block');
+}
+
+function newDownloadForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $('#download-form');
+    form.css('display', 'block');
+    $("#download-form input:checkbox").each(function() {
+        if ($(this).val() === 'NULL') {
+            $(this).prop('checked', false);
+        } else {
+            $(this).prop('checked', true);
+        }
+    });
+}
+
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#grader-list-form");
@@ -115,14 +227,423 @@ function newClassListForm() {
     $('[name="upload"]', form).val(null);
 }
 
-function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, members, max_members) {
+function newDeleteGradeableForm(form_action, gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-gradeable-form");
+    $('[name="delete-gradeable-message"]', form).html('');
+    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
+function addMorePriorTermGradeable(prior_term_gradeables) {
+    var form = $("#run-plagiarism-form");
+    var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
+    var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
+    $.each(prior_term_gradeables, function(sem,courses_gradeables){
+        to_append += '<option value="'+ sem +'">'+ sem +'</option>';
+    });
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>'; 
+    $('[name="prev_gradeable_div"]', form).append(to_append);
+    $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
+    $("select", form).change(function(){
+        var select_element_name = $(this).attr("name");
+        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+    });
+}
+
+function setRankingForGradeable() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    if(gradeable_id == ""){
+        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+        $('[name="code_box_2"]').empty();
+    }
+    else {
+        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
+                'gradeable_id': gradeable_id});
+
+        $.ajax({
+            url: url,
+            success: function(data) {
+                var rankings = JSON.parse(data);
+                if(rankings.error){
+                    alert(rankings.error);
+                    return;
+                }
+                var append_options='<option value="">None</option>';
+                $.each(rankings, function(i,user_ranking_info){
+                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
+                });
+                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
+            },
+            error: function(e) {
+                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
+            }
+        })
+    }    
+}
+
+function setUserSubmittedCode(changed) {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    if(user_id_1 == ""){
+        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="code_box_1"]').empty();
+        $('[name="code_box_2"]').empty();
+    }
+    else {
+        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        if(changed == 'version_user_1' && version_user_1 == '') {
+            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="code_box_1"]').empty(); 
+            $('[name="code_box_2"]').empty(); 
+        }
+        else {
+            if(changed == 'user_id_1' || changed =='version_user_1') {
+                if( version_user_1 == '' || changed == 'user_id_1') {    
+                    version_user_1 = "max_matching";                
+                }
+
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                $.ajax({
+                    url: url,
+                    success: function(data) {
+                        data = JSON.parse(data);
+                        if(data.error){
+                            alert(data.error);
+                            return;
+                        }
+                        var append_options='<option value="">None</option>';
+                        $.each(data.all_versions_user_1, function(i,version_to_append){
+                            if(version_to_append == data.active_version_user_1 && version_to_append == data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
+                            }
+                            if(version_to_append == data.active_version_user_1 && version_to_append != data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
+                            }
+                            if(version_to_append != data.active_version_user_1 && version_to_append == data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Max Match)</option>';
+                            }
+
+                            if(version_to_append != data.active_version_user_1 && version_to_append != data.max_matching_version){
+                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
+                            }
+                        });
+                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                    },
+                    error: function(e) {
+                        alert("Could not load submitted code, please refresh the page and try again.");
+                    }
+                })
+
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                $.ajax({
+                    url: url,
+                    success: function(data) {
+                        if(data == "no_match_for_this_version") {
+                            var append_options='<option value="">None</option>';
+                            $('[name="code_box_2"]').empty(); 
+                        }
+                        else {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            var append_options='<option value="">None</option>';
+                            $.each(data, function(i,matching_users){
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
+                            });
+                        }
+                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                    },
+                    error: function(e) {
+                        alert("Could not load submitted code, please refresh the page and try again.");
+                    }
+                })
+                $('[name="code_box_2"]').empty();
+            }
+            if (changed == 'user_id_2') {
+                if (($('[name="user_id_2"]', form2).val()) == '') {
+                    $('[name="code_box_2"]').empty();
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
+                    $.ajax({
+                        url: url,
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                        },
+                        error: function(e) {
+                            alert("Could not load submitted code, please refresh the page and try again.");
+                        }
+                    })
+
+                }
+                else {
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    $.ajax({
+                        url: url,
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            if(data.error){
+                                alert(data.error);
+                                return;
+                            }
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
+                        },
+                        error: function(e) {
+                            alert("Could not load submitted code, please refresh the page and try again.");
+                        }
+                    })
+                        
+                }
+            }    
+        }    
+    }   
+}
+
+function toggleUsersPlagiarism() {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    var version_user_1 = $('[name="version_user_1"]', form2).val();
+
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    $('[name="user_id_1"]', form2).val(user_id_2);
+    jQuery.ajaxSetup({async:false});
+    setUserSubmittedCode('user_id_1');
+    $('[name="version_user_1"]', form2).val(version_user_2);
+    setUserSubmittedCode('version_user_1');
+    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    jQuery.ajaxSetup({async:true});
+    setUserSubmittedCode('user_id_2');
+}
+
+
+function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+    var form = $("#run-plagiarism-form");
+    if(select_element_name == "language") {
+        if ($('[name="language"]', form).val() == "python") {
+            $('[name="sequence_length"]', form).val('1');
+        } 
+        else if ($('[name="language"]', form).val() == "cpp") {
+            $('[name="sequence_length"]', form).val('2');
+        }
+        else if ($('[name="language"]', form).val() == "java") {
+            $('[name="sequence_length"]', form).val('3');
+        }
+        else if ($('[name="language"]', form).val() == "plaintext") {
+            $('[name="sequence_length"]', form).val('4');
+        }
+    }
+    else if(select_element_name.substring(0, 9) == "prev_sem_") {
+        var i = select_element_name.substring(9);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_sem != '') {
+            var append_options = '';
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        append_options += '<option value="'+ course +'">'+ course +'</option>';
+                    });     
+                }
+            });
+            $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        }
+    }
+    else if(select_element_name.substring(0, 12) == "prev_course_") {
+        var i = select_element_name.substring(12);
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
+        $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        if(selected_course != '') {
+            var append_options = '';
+            $.each(prior_term_gradeables, function(sem,courses_gradeables){
+                if(selected_sem == sem) {
+                    $.each(courses_gradeables, function(course,gradeables){
+                        if(selected_course == course) {
+                            $.each(gradeables, function (index, gradeable) {
+                                append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
+                            });    
+                        }
+                    });     
+                }
+            });
+            $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
+        } 
+    }
+}
+
+function copyToClipboard(code) {
+    var download_info = JSON.parse($('#download_info_json_id').val());
+    var required_emails = [];
+    
+    $('#download-form input:checkbox').each(function() {
+        if ($(this).is(':checked')) {
+            var thisVal = $(this).val();
+
+            if (thisVal === 'instructor') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === 'Instructor') {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else if (thisVal === 'full_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === 'Full Access Grader (Grad TA)') {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else if (thisVal === 'limited_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (download_info[i].group === "Limited Access Grader (Mentor)") {
+                        required_emails.push(download_info[i].email);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (code === 'user') {
+                        if (download_info[i].reg_section === thisVal) {
+                            required_emails.push(download_info[i].email);
+                        }
+                    }
+                    else if (code === 'grader') {
+                        if (download_info[i].reg_section === 'All') {
+                            required_emails.push(download_info[i].email);
+                        }
+
+                        if ($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) {
+                            required_emails.push(download_info[i].email);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    required_emails = $.unique(required_emails);
+    var temp_element = $("<textarea></textarea>").text(required_emails.join(','));
+    $(document.body).append(temp_element);
+    temp_element.select();
+    document.execCommand('copy');
+    temp_element.remove();
+    setTimeout(function() {
+        $('#copybuttonid').prop('value', 'Copied');
+    }, 0);
+    setTimeout(function() {
+        $('#copybuttonid').prop('value', 'Copy Emails to Clipboard');
+    }, 1000);
+}
+
+function downloadCSV(code) {
+    var download_info = JSON.parse($('#download_info_json_id').val());
+    var csv_data = 'First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+    var required_user_id = [];
+
+    $('#download-form input:checkbox').each(function() {
+        if ($(this).is(':checked')) {
+            var thisVal = $(this).val();
+
+            if (thisVal === 'instructor') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else if (thisVal === 'full_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else if (thisVal === 'limited_access_grader') {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        required_user_id.push(download_info[i].user_id);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < download_info.length; ++i) {
+                    if (code === 'user') {
+                        if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                    }
+                    else if (code === 'grader') {
+                        if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                        if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            required_user_id.push(download_info[i].user_id);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    var temp_element = $('<a id="downloadlink"></a>');
+    var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
+    temp_element.attr('href', address);
+    temp_element.attr('download', 'submitty_user_emails.csv');
+    temp_element.css('display', 'none');
+    $(document.body).append(temp_element);
+    $('#downloadlink')[0].click();
+    $('#downloadlink').remove();
+}
+
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
 
     $('[name="new_team"]', form).val(new_team);
-    $('[name="section"] option[value="' + section + '"]', form).prop('selected', true);
-    $('[name="num_users"]', form).val(max_members);
+    $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
+    $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
+    if(new_team) {
+        $('[name="num_users"]', form).val(3);    
+    }
+    else if (!new_team) {
+        $('[name="num_users"]', form).val(members.length+2);
+    }
 
     var title_div = $("#admin-team-title");
     title_div.empty();
@@ -135,15 +656,18 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
     members_div.append('Team Member IDs:<br />');
-
+    var student_full = JSON.parse($('#student_full_id').val());
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
 
         title_div.append('Create New Team: ' + who_id);
         members_div.append('<input class="readonly" type="text" name="user_id_0" readonly="readonly" value="' + who_id + '" />');
-        for (var i = 1; i < max_members; i++) {
+        for (var i = 1; i < 3; i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
     }
     else {
@@ -155,8 +679,11 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
                 <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
         }
-        for (var i = members.length; i < max_members; i++) {
+        for (var i = members.length; i < (members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+            $('[name="user_id_'+i+'"]', form).autocomplete({
+                source: student_full
+            });
         }
         var team_history_len=user_assignment_setting_json.team_history.length;
         team_history_title_div.append('Team History: ');
@@ -169,20 +696,20 @@ function adminTeamForm(new_team, who_id, section, user_assignment_setting_json, 
                 if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
                     if(user_assignment_setting_json.team_history[j].added_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');        
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
                 else if(user_assignment_setting_json.team_history[j].action == "admin_create"){
                     if(user_assignment_setting_json.team_history[j].first_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');  
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
             }
-        }      
+        }
     }
-
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+max_members+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+    var param = (new_team ? 3 : members.length+2);
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
 }
 
@@ -190,6 +717,10 @@ function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
     $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
 }
 
 function addTeamMemberInput(old, i) {
@@ -200,6 +731,31 @@ function addTeamMemberInput(old, i) {
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
         <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
+}
+
+function addCategory(old, i) {
+    old.remove()
+    var form = $("#admin-team-form");
+    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
+    var members_div = $("#admin-team-members");
+    members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        Add More Users</span>');
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
+}
+
+function importTeamForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#import-team-form");
+    form.css("display", "block");
+    $('[name="upload_team"]', form).val(null);
 }
 
 /**
@@ -208,11 +764,19 @@ function addTeamMemberInput(old, i) {
  * useful for developers, but shouldn't be shown to normal users
  */
 function togglePageDetails() {
-    if (document.getElementById('page-info').style.visibility == 'visible') {
-        document.getElementById('page-info').style.visibility = 'hidden';
+    var element = document.getElementById('page-info');
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
     }
     else {
-        document.getElementById('page-info').style.visibility = 'visible';
+        element.style.display = 'block';
+        // Hide the box if you click outside of it
+        document.body.addEventListener('mouseup', function pageInfo(event) {
+            if (!element.contains(event.target)) {
+                element.style.display = 'none';
+                document.body.removeEventListener('mouseup', pageInfo, false);
+            }
+        });
     }
 }
 
@@ -281,6 +845,10 @@ function check_server(url) {
             }
         }
     );
+}
+
+function downloadFile(file, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
 }
 
 function changeColor(div, hexColor){
@@ -360,121 +928,6 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
-/*
-var hasNav = false;
-
-function UpdateTableHeaders() {
-    var count = 0;
-    var scrollTop = parseInt($(window).scrollTop());
-    $(".persist-area").each(function() {
-        var el = $(".persist-thead", this);
-        var height = parseFloat(el.height());
-        var offset = parseFloat(el.offset().top);
-        var floatingHeader = $(".floating-thead", this);
-        if (scrollTop > (offset - height)) {
-            if (floatingHeader.css("visibility") != "visible") {
-                var cnt = 0;
-                $("#floating-thead-0>td").each(function() {
-                    $(this).css("width", $($("#anchor-thead").children()[cnt]).width());
-                    cnt++;
-                });
-                floatingHeader.css("visibility", "visible");
-            }
-        }
-        else {
-            floatingHeader.css("visibility", "hidden");
-        }
-        $(".persist-header", this).each(function() {
-            floatingHeader = $("#floating-header-" + count);
-            el = $(this);
-            height = parseFloat(el.height());
-            offset = parseFloat(el.offset().top);
-            if (scrollTop > (offset - height)) {
-                if (floatingHeader.css("visibility") != "visible") {
-                    floatingHeader.css("visibility", "visible");
-                    var cnt = 0;
-                    $("#floating-header-" + count + ">td").each(function() {
-                        $(this).css("width", $($("#anchor-head-" + count).children()[cnt]).width());
-                        cnt++;
-                    });
-                }
-            }
-            else {
-                floatingHeader.css("visibility", "hidden");
-            }
-            count++;
-        });
-    });
-}
-
-$(function() {
-    //hasNav = $("#nav").length > 0;
-    hasNav = false; // nav doesn't float anymore so we don't have to account for it.
-    // Each persist-area can have multiple persist-headers, we need to create each one with a new z-index
-    var persist = $(".persist-area");
-    var z_index = 900;
-    var count = 0;
-    persist.each(function() {
-        var el = $(".persist-thead>tr", this);
-        el.attr('id', 'anchor-thead');
-
-        el.before(el.clone()).css({"width": el.width(), "top": "30px", "z-index": "899"}).addClass('floating-thead')
-            .attr('id', 'floating-thead-' + count);
-        $(".floating-thead", this).each(function() {
-           $(this).children().removeAttr('width');
-        });
-        $(".persist-header", this).each(function() {
-            $(this).attr('id', 'anchor-head-' + count);
-            var clone = $(this);
-            clone.before(clone.clone()).css({
-                "width": clone.width(),
-                "top": (30 + el.height()) + "px",
-                "z-index": "" + z_index
-            }).addClass("floating-header").removeClass("persist-header").attr('id', 'floating-header-' + count);
-            z_index++;
-            count++;
-        });
-    });
-
-    if (persist.length > 0) {
-        $(window).scroll(UpdateTableHeaders).trigger("scroll");
-    }
-
-    if (window.location.hash != "") {
-        if ($(window.location.hash).offset().top > 0) {
-            var minus = 60;
-            if (hasNav) {
-                minus += 30;
-            }
-            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
-        }
-    }
-
-    setTimeout(function() {
-        $('.inner-message').fadeOut();
-    }, 5000);
-});
-*/
-
-function updateCheckpointCell(elem, setFull) {
-    elem = $(elem);
-    if (!setFull && elem.data("score") === 1.0) {
-        elem.data("score", 0.5);
-        elem.css("background-color", "#88d0f4");
-        elem.css("border-right", "15px solid #f9f9f9");
-    }
-    else if (!setFull && elem.data("score") === 0.5) {
-        elem.data("score", 0);
-        elem.css("background-color", "");
-        elem.css("border-right", "15px solid #ddd");
-    }
-    else {
-        elem.data("score", 1);
-        elem.css("background-color", "#149bdf");
-        elem.css("border-right", "15px solid #f9f9f9");
-    }
-}
-
 function submitAJAX(url, data, callbackSuccess, callbackFailure) {
     $.ajax(url, {
         type: "POST",
@@ -505,126 +958,6 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
     });
 }
 
-function setupCheckboxCells() {
-    $("td[class^=cell-]").click(function() {
-        var parent = $(this).parent();
-        var elems = [];
-        var scores = {};
-        if ($(this).hasClass('cell-all')) {
-            var lastScore = null;
-            var setFull = false;
-            parent.children(".cell-grade").each(function() {
-                updateCheckpointCell(this, setFull);
-                elems.push(this);
-            });
-            parent.children(".cell-grade").each(function() {
-                if (lastScore === null) {
-                    lastScore = $(this).data("score");
-                }
-                else if (lastScore !== $(this).data("score")) {
-                    setFull = true;
-                }
-                scores[$(this).data('id')] = $(this).data('score');
-            });
-        }
-        else {
-            updateCheckpointCell(this);
-            elems.push(this);
-            scores[$(this).data('id')] = $(this).data('score');
-        }
-        
-        submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
-            {
-              'csrf_token': csrfToken,
-              'user_id': parent.data("user"),
-              'g_id': parent.data('gradeable'),
-              'scores': scores
-            },
-            function() {
-                elems.forEach(function(elem) {
-                    $(elem).animate({"border-right-width": "0px"}, 400);
-                });
-            },
-            function() {
-                elems.forEach(function(elem) {
-                    console.log(elem);
-                    $(elem).css("border-right-width", "15px");
-                    $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
-                });
-            }
-        );
-    });
-}
-
-function setupNumericTextCells() {
-  $("input[class=option-small-box]").keydown(function(key){
-    var cell=this.id.split('-');
-    // right
-    if(key.keyCode === 39){
-      if(this.selectionEnd == this.value.length){
-        $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
-      }
-    }
-    // left
-    else if(key.keyCode == 37){
-      if(this.selectionStart == 0){
-        $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
-      }
-    }
-    // up
-    else if(key.keyCode == 38){
-      $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
-
-    }
-    // down
-    else if(key.keyCode == 40){
-      $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
-    }
-  });
-
-  $("input[class=option-small-box]").change(function() {
-    var elem = this;
-    if(this.value == 0){
-      $(this).css("color", "#bbbbbb");
-    }
-    else{
-      $(this).css("color", "");
-    }
-    var scores = {};
-    var total = 0;
-    var parent = $(this).parent().parent();
-    scores[$(this).data('id')] = this.value;
-
-    $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
-      $(this).children(".option-small-box").each(function(){
-        if($(this).data('num') === true){
-          total += parseFloat(this.value);
-        }
-        if($(this).data('total') === true){
-          this.value = total;
-        }
-      });
-    });
-
-    submitAJAX(
-      buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-      {
-        'csrf_token': csrfToken,
-        'user_id': parent.data('user'),
-        'g_id': parent.data('gradeable'),
-        scores: scores
-      },
-      function() {
-        $(elem).css("background-color", "#ffffff");
-      },
-      function() {
-        $(elem).css("background-color", "#ff7777");
-      }
-    );
-  });
-}
-
 $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
@@ -636,205 +969,7 @@ $(function() {
     setTimeout(function() {
         $('.inner-message').fadeOut();
     }, 5000);
-
-    setupCheckboxCells();
-    setupNumericTextCells();
 });
-
-function setupNumericTextCells() {
-    $("input[class=option-small-box]").keydown(function(key){
-        var cell=this.id.split('-');
-        // right
-        if(key.keyCode === 39){
-            if(this.selectionEnd == this.value.length){
-                $('#cell-'+cell[1]+'-'+(++cell[2])).focus();
-            }
-        }
-        // left
-        else if(key.keyCode == 37){
-            if(this.selectionStart == 0){
-                $('#cell-'+cell[1]+'-'+(--cell[2])).focus();
-            }
-        }
-        // up
-        else if(key.keyCode == 38){
-            $('#cell-'+(--cell[1])+'-'+cell[2]).focus();
-
-        }
-        // down
-        else if(key.keyCode == 40){
-            $('#cell-'+(++cell[1])+'-'+cell[2]).focus();
-        }
-    });
-
-    $("input[class=option-small-box]").change(function() {
-        elem = this;
-        if(this.value == 0){
-            $(this).css("color", "#bbbbbb");
-        }
-        else{
-            $(this).css("color", "");
-        }
-        var scores = {};
-        var total = 0;
-        $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
-            $(this).children(".option-small-box").each(function(){
-                if($(this).data('num') === true){
-                    total += parseFloat(this.value);
-                }
-                if($(this).data('total') === true){
-                    this.value = total;
-                }
-                else{
-                    scores[$(this).data("id")] = this.value;
-                }
-            });
-        });
-
-        submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
-            {'csrf_token': csrfToken, 'user_id': $(this).parent().parent().data("user"), 'g_id': $(this).parent().parent().data('gradeable'), 'scores': scores},
-            function() {
-                $(elem).css("background-color", "#ffffff");
-            },
-            function() {
-                $(elem).css("background-color", "#ff7777");
-            }
-        );
-    });
-
-    $("input[class=csvButtonUpload]").change(function() { 
-        var confirmation = window.confirm("WARNING! \nPreviously entered data may be overwritten! " +
-        "This action is irreversible! Are you sure you want to continue?\n\n Do not include a header row in your CSV. Format CSV using one column for " +
-        "student id and one column for each field. Columns and field types must match.");
-        if (confirmation) {
-            var f = $('#csvUpload').get(0).files[0];                        
-            if(f) {
-                var reader = new FileReader();
-                reader.readAsText(f);
-                reader.onload = function(evt) {
-                    var breakOut = false; //breakOut is used to break out of the function and alert the user the format is wrong
-                    var lines = (reader.result).trim().split(/\r\n|\n/);
-                    var tempArray = lines[0].split(','); 
-                    var csvLength = tempArray.length; //gets the length of the array, all the tempArray should be the same length
-                    for (var k = 0; k < lines.length && !breakOut; k++) {                        
-                        tempArray = lines[k].split(',');
-                        breakOut = (tempArray.length === csvLength) ? false : true; //if tempArray is not the same length, break out
-                    }
-                    var textChecker = 0;
-                    var num_numeric = 0;
-                    var num_text = 0;
-                    var user_ids = [];
-                    var component_ids = [];
-                    var get_once = true;
-                    var gradeable_id = "";
-                    if (!breakOut){
-                        $('.cell-all').each(function() {
-                            user_ids.push($(this).parent().data("user"));
-                            if(get_once) {
-                                num_numeric = $(this).parent().parent().data("numnumeric");
-                                num_text = $(this).parent().parent().data("numtext");
-                                component_ids = $(this).parent().parent().data("compids");
-                                gradeable_id = $(this).parent().data("gradeable");
-                                get_once = false;
-                                if (csvLength !== 4 + num_numeric + num_text) {
-                                    breakOut = true;
-                                    return false;
-                                }
-                                var k = 3; //checks if the file has the right number of numerics
-                                tempArray = lines[0].split(','); 
-                                if(num_numeric > 0) {
-                                    for (k = 3; k < num_numeric + 4; k++) { 
-                                        if (isNaN(Number(tempArray[k]))) {
-                                            breakOut = true;
-                                            return false;                                           
-                                        }
-                                    }
-                                }
-                                    
-                                //checks if the file has the right number of texts
-                                while (k < csvLength) {
-                                    textChecker++;
-                                    k++;
-                                }
-                                if (textChecker !== num_text) {
-                                    breakOut = true;
-                                    return false;
-                                }
-                            }
-                        });
-                    }
-                    if (!breakOut){
-                        submitAJAX(
-                            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'upload_csv_numeric'}),
-                            {'csrf_token': csrfToken, 'g_id': gradeable_id, 'users': user_ids, 'component_ids' : component_ids,
-                            'num_numeric' : num_numeric, 'num_text' : num_text, 'big_file': reader.result},
-                            function(returned_data) {
-                                $('.cell-all').each(function() {
-                                    for (var x = 0; x < returned_data['data'].length; x++) {
-                                        if ($(this).parent().data("user") === returned_data['data'][x]['username']) {
-                                            var starting_index1 = 0;
-                                            var starting_index2 = 3;
-                                            var value_str = "value_";
-                                            var status_str = "status_";
-                                            var value_temp_str = "value_";
-                                            var status_temp_str = "status_";
-                                            var total = 0;
-                                            var y = starting_index1;
-                                            var z = starting_index2; //3 is the starting index of the grades in the csv
-                                            //puts all the data in the form
-                                            for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
-                                                value_temp_str = value_str + y;
-                                                status_temp_str = status_str + y;
-                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
-                                                if (returned_data['data'][x][status_temp_str] === "OK") {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff"); 
-                                                } else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
-                                                }
-
-                                                if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
-                                                } else {
-                                                    $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
-                                                }
-
-                                                total += Number($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val());
-                                            }
-                                            $('#total-'+$(this).parent().data("row")).val(total);
-                                            z++;
-                                            var counter = 0;
-                                            while (counter < num_text) {
-                                                value_temp_str = value_str + y;
-                                                status_temp_str = status_str + y;
-                                                $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2-1)).val(returned_data['data'][x][value_temp_str]);
-                                                z++;
-                                                y++;
-                                                counter++;
-                                            }
-
-                                            x = returned_data['data'].length;
-                                        }
-                                    }
-                                });
-                            },
-                            function() {
-                                alert("submission error");
-                            }
-                        );
-                    }
-
-                    if (breakOut) {
-                        alert("CVS upload failed! Format file incorrect.");
-                    }
-                }
-            }
-        } else {
-            var f = $('#csvUpload');
-            f.replaceWith(f = f.clone(true));
-        }
-    });
-}
 
 function getFileExtension(filename){
     return (filename.substring(filename.lastIndexOf(".")+1)).toLowerCase();
@@ -842,11 +977,11 @@ function getFileExtension(filename){
 
 function openPopUp(css, title, count, testcase_num, side) {
     var element_id = "container_" + count + "_" + testcase_num + "_" + side;
-    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />"
+    var elem_html = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\" />";
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open("", "_blank", "status=1,width=750,height=500");
     my_window.document.write(elem_html);
-    my_window.document.close(); 
+    my_window.document.close();
     my_window.focus();
 }
 
@@ -887,12 +1022,104 @@ function checkNumFilesForumUpload(input, post_id){
         $('#messages').fadeOut();
         document.getElementById('file_input_label' + displayPostId).style.border = "";
     }
-            
 }
 
-function editPost(post_id, thread_id) {
-     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
-     $.ajax({
+function testAndGetAttachments(post_box_id, dynamic_check) {
+    var index = post_box_id - 1;
+    // Files selected
+    var files = [];
+    for (var j = 0; j < file_array[index].length; j++) {
+        if (file_array[index][j].name.indexOf("'") != -1 ||
+            file_array[index][j].name.indexOf("\"") != -1) {
+            alert("ERROR! You may not use quotes in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        else if (file_array[index][j].name.indexOf("\\\\") != -1 ||
+            file_array[index][j].name.indexOf("/") != -1) {
+            alert("ERROR! You may not use a slash in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        else if (file_array[index][j].name.indexOf("<") != -1 ||
+            file_array[index][j].name.indexOf(">") != -1) {
+            alert("ERROR! You may not use angle brackets in your filename: " + file_array[index][j].name);
+            return false;
+        }
+        files.push(file_array[index][j]);
+    }
+    if(files.length > 5){
+        if(dynamic_check) {
+            displayError('Max file upload size is 5. Please remove attachments accordingly.');
+        } else {
+            displayError('Max file upload size is 5. Please try again.');
+        }
+        return false;
+    } else {
+        if(!checkForumFileExtensions(files)){
+            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            return false;
+        }
+    }
+    return files;
+}
+
+function publishFormWithAttachments(form, test_category, error_message) {
+    if(!form[0].checkValidity()) {
+        form[0].reportValidity();
+        return false;
+    }
+    if(test_category) {
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+            alert("At least one category must be selected.");
+            return false;
+        }
+    }
+    var post_box_id = form.find(".thread-post-form").attr("post_box_id");
+    var formData = new FormData(form[0]);
+
+    var files = testAndGetAttachments(post_box_id, false);
+    if(files === false) {
+        return false;
+    }
+    for(var i = 0; i < files.length ; i++) {
+        formData.append('file_input[]', files[i], files[i].name);
+    }
+    var submit_url = form.attr('action');
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data){
+            try {
+                var json = JSON.parse(data);
+            } catch (err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            window.location.href = json['next_page'];
+        },
+        error: function(){
+            window.alert(error_message);
+        }
+    });
+    return false;
+}
+
+function createThread() {
+    return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+}
+
+function publishPost() {
+    return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+}
+
+function editPost(post_id, thread_id, shouldEditThread) {
+    var form = $("#"+post_id+"-reply");
+    var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+    $.ajax({
             url: url,
             type: "POST",
             data: {
@@ -900,7 +1127,6 @@ function editPost(post_id, thread_id) {
                 thread_id: thread_id
             },
             success: function(data){
-                console.log(data);
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
@@ -915,17 +1141,43 @@ function editPost(post_id, thread_id) {
                 }
                 var user_id = escape(json.user);
                 var post_content = json.post;
+                var anon = json.anon;
                 var time = (new Date(json.post_time));
+                var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                var contentBox = document.getElementById('edit_post_content');
+                var contentBox = form.find("[name=thread_post_content]")[0];
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('.popup-form').css('display', 'block');
-                
+                $('#thread_post_anon').prop('checked', anon);
+                $('#edit-user-post').css('display', 'block');
+
+                $(".cat-buttons input").prop('checked', false);
+                // If first post of thread
+                if(shouldEditThread) {
+                    var thread_title = json.title;
+                    $("#title").prop('disabled', false);
+                    $(".edit_thread").show();
+                    $("#title").val(thread_title);
+                    // Categories
+                    $(".cat-buttons").removeClass('cat-selected');
+                    $.each(categories_ids, function(index, category_id) {
+                        var cat_input = $(".cat-buttons input[value="+category_id+"]");
+                        cat_input.prop('checked', true);
+                        cat_input.parent().addClass('cat-selected');
+                    });
+                    $(".cat-buttons").trigger("eventChangeCatClass");
+                    $("#thread_form").prop("ignore-cat",false);
+                    $("#category-selection-container").show();
+                } else {
+                    $("#title").prop('disabled', true);
+                    $(".edit_thread").hide();
+                    $("#thread_form").prop("ignore-cat",true);
+                    $("#category-selection-container").hide();
+                }
             },
             error: function(){
                 window.alert("Something went wrong while trying to edit the post. Please try again.");
@@ -933,26 +1185,26 @@ function editPost(post_id, thread_id) {
         });
 }
 
-function enableTabsInTextArea(id){
-    var t = document.getElementById(id);
-
-    $(t).on('input', function() {
+function enableTabsInTextArea(jQuerySelector){
+    var t = $(jQuerySelector);
+    t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
-    $(t).trigger('input');
-        t.onkeydown = function(t){
-            if(t.keyCode == 9){
-                var text = this.value;
-                var beforeCurse = this.selectionStart;
-                var afterCurse = this.selectionEnd;
-                this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
-                this.selectionStart = this.selectionEnd = beforeCurse+1;
+    t.trigger('input');
+    t.keydown(function(t){
+        if(t.keyCode == 9){
+            var text = this.value;
+            var beforeCurse = this.selectionStart;
+            var afterCurse = this.selectionEnd;
+            this.value = text.substring(0, beforeCurse) + '\t' + text.substring(afterCurse);
+            this.selectionStart = this.selectionEnd = beforeCurse+1;
+            return false;
+        }
+    });
+}
 
-                return false;
-
-            }
-        };
-
+function changeDisplayOptions(option, thread_id){
+    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
 function resetScrollPosition(id){
@@ -973,6 +1225,34 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function alterShowDeletedStatus(newStatus) {
+    document.cookie = "show_deleted=" + newStatus + "; path=/;";
+    location.reload();
+}
+
+function modifyThreadList(currentThreadId, currentCategoriesId){
+    var categories_value = $("#thread_category").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_categories: categories_value,
+                currentThreadId: currentThreadId,
+                currentCategoriesId: currentCategoriesId,
+            },
+            success: function(r){
+               var x = JSON.parse(r).html;
+               x = `${x}`;
+               $(".thread_list").html(x);
+            },
+            error: function(){
+                window.alert("Something went wrong when trying to filter. Please try again.");
+            }
+    })
+}
+
 function replyPost(post_id){
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
@@ -981,11 +1261,249 @@ function replyPost(post_id){
         $('#'+ post_id + '-reply').css('display', 'block');
     }
 }
+
+function addNewCategory(){
+    var newCategory = $("#new_category_text").val();
+    var url = buildUrl({'component': 'forum', 'page': 'add_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                newCategory: newCategory
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
+                $('#messages').append(message);
+                $('#new_category_text').val("");
+                // Create new item in #ui-category-list using dummy category
+                var category_id = json['new_id'];
+                var category_color_code = "#000080";
+                var category_desc = escapeSpecialChars(newCategory);
+                newelement = $($('#ui-category-list li')[0]).clone(true);
+                newelement.attr('id',"categorylistitem-"+category_id);
+                newelement.css('color',category_color_code);
+                newelement.find(".categorylistitem-desc span").text(category_desc);
+                newelement.find(".category-color-picker").val(category_color_code);
+                newelement.show();
+                newelement.addClass("category-sortable");
+                newcatcolorpicker = newelement.find(".category-color-picker");
+                newcatcolorpicker.css("background-color",newcatcolorpicker.val());
+                $('#ui-category-list').append(newelement);
+                $(".category-list-no-element").hide();
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    })
+}
+
+function deleteCategory(category_id, category_desc){
+    var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                deleteCategory: category_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
+                $('#messages').append(message);
+                $('#categorylistitem-'+category_id).remove();
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    })
+}
+
+function editCategory(category_id, category_desc, category_color) {
+    if(category_desc === null && category_color === null) {
+        return;
+    }
+    var data = {category_id: category_id};
+    if(category_desc !== null) {
+        data['category_desc'] = category_desc;
+    }
+    if(category_color !== null) {
+        data['category_color'] = category_color;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'edit_category'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully updated!</div>';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                if(category_color !== null) {
+                    $("#categorylistitem-"+category_id).css("color",category_color);
+                }
+                if(category_desc !== null) {
+                    $("#categorylistitem-"+category_id).find(".categorylistitem-desc span").text(category_desc);
+                }
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to add a new category. Please try again.");
+            }
+    });
+}
+
+function refreshCategories() {
+   if($('#ui-category-list').length) {
+        // Refresh cat-buttons from #ui-category-list
+
+        var data = $('#ui-category-list').sortable('serialize');
+        if(!data.trim()) {
+            return;
+        }
+        data = data.split("&");
+        var order = [];
+        for(var i = 0; i<data.length; i+=1) {
+            var category_id = parseInt(data[i].split('=')[1]);
+            var category_desc = $("#categorylistitem-"+category_id+" .categorylistitem-desc span").text().trim();
+            var category_color = $("#categorylistitem-"+category_id+" select").val();
+            order.push([category_id, category_desc, category_color]);
+        }
+
+        // Obtain current selected category
+        var selected_button = new Set();
+        var category_pick_buttons = $('.cat-buttons');
+        for(var i = 0; i<category_pick_buttons.length; i+=1) {
+            var cat_button_checkbox = $(category_pick_buttons[i]).find("input");
+            var category_id = parseInt(cat_button_checkbox.val());
+            if(cat_button_checkbox.prop("checked")) {
+                selected_button.add(category_id);
+            }
+        }
+
+        // Refresh selected categories
+        $('#categories-pick-list').empty();
+        order.forEach(function(category) {
+            var category_id = category[0];
+            var category_desc = category[1];
+            var category_color = category[2];
+            var selection_class = "";
+            if(selected_button.has(category_id)) {
+                selection_class = "cat-selected";
+            }
+            var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
+                                <input type="checkbox" name="cat[]" value="'+category_id+'">\
+                            </a>';
+            $('#categories-pick-list').append(element);
+        });
+
+        $(".cat-buttons input[type='checkbox']").each(function() {
+            if($(this).parent().hasClass("cat-selected")) {
+                $(this).prop("checked",true);
+            }
+        });
+    }
+
+    // Selectors for categories pick up
+    // If JS enabled hide checkbox
+    $("a.cat-buttons input").hide();
+
+    $(".cat-buttons").click(function() {
+        if($(this).hasClass("cat-selected")) {
+            $(this).removeClass("cat-selected");
+            $(this).find("input[type='checkbox']").prop("checked", false);
+        } else {
+            $(this).addClass("cat-selected");
+            $(this).find("input[type='checkbox']").prop("checked", true);
+        }
+        $(this).trigger("eventChangeCatClass");
+    });
+
+    $(".cat-buttons").bind("eventChangeCatClass", function(){
+        var cat_color = $(this).attr('cat-color');
+        $(this).css("border-color",cat_color);
+        if($(this).hasClass("cat-selected")) {
+            $(this).css("background-color",cat_color);
+            $(this).css("color","white");
+        } else {
+            $(this).css("background-color","white");
+            $(this).css("color",cat_color);
+        }
+    });
+    $(".cat-buttons").trigger("eventChangeCatClass");
+}
+
+function reorderCategories(){
+    var data = $('#ui-category-list').sortable('serialize');
+    var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully reordered categories.';
+                $('#messages').append(message);
+                setTimeout(function() {removeMessagePopup('theid');}, 1000);
+                refreshCategories();
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to reordering categories. Please try again.");
+            }
+    });
+}
+
 /*This function ensures that only one reply box is open at a time*/
 function hideReplies(){
     var hide_replies = document.getElementsByClassName("reply-box");
     for(var i = 0; i < hide_replies.length; i++){
-        hide_replies[i].style.display = "none"; 
+        hide_replies[i].style.display = "none";
     }
 }
 
@@ -994,7 +1512,7 @@ function addCollapsable(){
     var posts = $(".post_box").toArray();
     for(var i = 1; i < posts.length; i++){
         if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            $(posts[i]).find(".expand")[0].innerHTML = "Hide replies";
+            $(posts[i]).find(".expand")[0].innerHTML = "Hide Replies";
         } else {
             var button = $(posts[i]).find(".expand")[0];
             $(button).hide();
@@ -1006,21 +1524,21 @@ function hidePosts(text, id) {
     var currentLevel = parseInt($(text).parent().parent().attr("reply-level")); //The double parent is here because the button is in a span, which is a child of the main post.
     var selector = $(text).parent().parent().next().next();
     var counter = 0;
-    var parent_status = "Hide replies";``
-    if (text.innerHTML != "Hide replies") {
-        text.innerHTML = "Hide replies";
+    var parent_status = "Hide Replies";``
+    if (text.innerHTML != "Hide Replies") {
+        text.innerHTML = "Hide Replies";
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).show();
-            if($(selector).find(".expand")[0].innerHTML != "Hide replies"){
+            if($(selector).find(".expand")[0].innerHTML != "Hide Replies"){
                 var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
                 while(nextLvl > (currentLevel+1)){
                     selector = $(selector).next().next();
                     nextLvl = $(selector).next().next().attr("reply-level");
                 }
-            } 
+            }
             selector = $(selector).next().next();
         }
-        
+
     } else {
         while (selector.attr("reply-level") > currentLevel) {
             $(selector).hide();
@@ -1028,18 +1546,21 @@ function hidePosts(text, id) {
             counter++;
         }
         if(counter != 0){
-            text.innerHTML = "Show " + ((counter > 1) ? (counter + " replies") : "reply");
+            text.innerHTML = "Show " + ((counter > 1) ? (counter + " Replies") : "Reply");
         } else {
-            text.innerHTML = "Hide replies";
+            text.innerHTML = "Hide Replies";
         }
     }
 
 }
 
-function deletePost(thread_id, post_id, author, time){
-    var confirm = window.confirm("Are you sure you would like to delete this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be deleted. \n\nIf you are deleting the first post in a thread this will delete the entire thread.");
+function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+    var page = (isDeletion?"delete_post":"undelete_post");
+    var message = (isDeletion?"delete":"undelete");
+
+    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you are " + message + " the first post in a thread this will " + message + " the entire thread.");
     if(confirm){
-        var url = buildUrl({'component': 'forum', 'page': 'delete_post'});
+        var url = buildUrl({'component': 'forum', 'page': page});
         $.ajax({
             url: url,
             type: "POST",
@@ -1067,7 +1588,6 @@ function deletePost(thread_id, post_id, author, time){
                         new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
                     break;
 
-                    
                     case "post":
                         new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
                     break;
@@ -1078,7 +1598,7 @@ function deletePost(thread_id, post_id, author, time){
                 window.alert("Something went wrong while trying to delete post. Please try again.");
             }
         })
-    } 
+    }
 }
 
 function alterAnnouncement(thread_id, confirmString, url){
@@ -1101,6 +1621,23 @@ function alterAnnouncement(thread_id, confirmString, url){
     }
 }
 
+function pinThread(thread_id, url){
+    var url = buildUrl({'component': 'forum', 'page': url});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            thread_id: thread_id
+        },
+        success: function(data){
+            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+        },
+        error: function(){
+            window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
+        }
+    });
+}
+
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
@@ -1112,7 +1649,7 @@ function updateHomeworkExtensions(data) {
         cache: false,
         contentType: false,
         success: function(data) {
-            try { 
+            try {
                 var json = JSON.parse(data);
             } catch(err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
@@ -1122,6 +1659,10 @@ function updateHomeworkExtensions(data) {
             if(json['error']){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                 $('#messages').append(message);
+                return;
+            }
+            if(json['is_team']){
+                extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
@@ -1198,7 +1739,8 @@ function refreshOnResponseLateDays(json) {
 
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late'});
+    var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
     $.ajax({
         url: url,
         type: "POST",
@@ -1214,10 +1756,13 @@ function updateLateDays(data) {
             }
             var form = $("#load-late-days");
             refreshOnResponseLateDays(json);
+            //Reset all form elements
             $('#user_id').val(this.defaultValue);
             $('#datestamp').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
+            $('#csv_option_overwrite_all').prop('checked',true);
+            //Display confirmation message
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },
@@ -1279,3 +1824,17 @@ function escapeSpecialChars(text) {
 function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+
+// edited slightly from https://stackoverflow.com/a/40658647
+// returns a boolean value indicating whether or not the element is entirely in the viewport
+// i.e. returns false iff there is some part of the element outside the viewport
+$.fn.isInViewport = function() {                                        // jQuery method: use as $(selector).isInViewPort()
+    var elementTop = $(this).offset().top;                              // get top offset of element
+    var elementBottom = elementTop + $(this).outerHeight();             // add height to top to get bottom
+
+    var viewportTop = $(window).scrollTop();                            // get top of window
+    var viewportBottom = viewportTop + $(window).height();              // add height to get bottom
+
+    return elementTop > viewportTop && elementBottom < viewportBottom;
+};

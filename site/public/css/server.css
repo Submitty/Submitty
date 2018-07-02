@@ -95,7 +95,7 @@ select {
     font-size: 16px;
     border: 1px solid #ccc;
     height: 34px;
-    background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
+    background: #FFF;
     background-size: 20px;
 }
 
@@ -238,7 +238,6 @@ table tr.table-header {
 }
 
 #nav li {
-    border-left: 1px solid #6e6e6ecc;
     float: left;
 }
 
@@ -416,7 +415,8 @@ table tr.table-header {
 }
 
 #page-info {
-    visibility: hidden;
+    visibility: visible;
+    display: none;
     position: absolute;
     top: 40px;
     left: 40px;
@@ -577,6 +577,14 @@ table tr.table-header {
     background-color: #21C2F6;
 }
 
+.deleted {
+    background-color: #A9A9A9 !important;
+}
+
+.deleted.active {
+    background-color: #505050 !important;
+}
+
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;
@@ -629,7 +637,7 @@ table tr.table-header {
 .badge {
     float: left;
     display: inline-block;
-    width: 70px;
+    min-width: 70px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
@@ -664,6 +672,15 @@ table tr.table-header {
     background-color: #c00000;
 }
 
+.blue-background {
+    background-color: #337ab7;
+}
+
+.badge-container {
+    padding: 6px 0;
+    display: block;
+}
+
 .italics {
     font-style: italic;
     text-decoration: none;
@@ -680,6 +697,16 @@ table tr.table-header {
 .gradeable_list tr:nth-child(odd),
 .gradeable_list tr:nth-child(even) {
 /*    background-color: #E9EFEF*/
+}
+
+.gradeable_comment {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#search_wrapper{
+    background-color: #E9EFEF;
+    border-radius: 3px;
 }
 
 #forum_wrapper{
@@ -761,7 +788,6 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
-    max-height: 85px;
     
 }
 
@@ -834,9 +860,43 @@ table .instructor .two-options{
 
 .btn-nav {
     width:100%;
-    padding: 0px !important; 
-    padding-top: 10px !important; 
+}
+
+.btn-nav-submit, .btn-nav-grade {
+    padding: 0px !important;
+    padding-top: 10px !important;
     padding-bottom: 10px !important;
+}
+
+.cat-buttons:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+#ui-category-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 60%;
+}
+
+#ui-category-list li {
+    border-style: solid;
+    border-color: LightGray;
+    border-width: thin;
+    border-radius: 0.3em;
+    margin: 0.3em 0.1em 0.3em 0.1em;
+    padding: 0.2em;
+    height: 18px;
+}
+
+#ui-category-list .handle {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+#ui-category-list .handle:hover {
+ cursor: move;
 }
 
 .rainbow {
@@ -858,6 +918,16 @@ table .instructor .two-options{
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
+.thumbnail {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
 .popup-form {
     z-index: 2000;
     position: fixed;
@@ -870,6 +940,8 @@ table .instructor .two-options{
     border: 1px solid #000000;
     padding: 10px;
     display: none;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
 .popup-form div {
@@ -880,8 +952,21 @@ table .instructor .two-options{
     padding-bottom: 10px;
 }
 
+.popup-form.decent div {
+    width: initial;
+    display: block;
+    padding-right: initial;
+}
+
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.fill-available {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
 }
 
 .reply-box{
@@ -946,6 +1031,20 @@ table .instructor .two-options{
     opacity: 1;
 }
 
+/* from https://css-tricks.com/css3-progress-bars/ */
+.meter {
+    height: 10px;
+    position: relative;
+    background: rgb(224,224,224);
+    padding: 0px;
+}
+.meter > span {
+    display: block;
+    height: 100%;
+    background-color: rgb(92,184,92);
+    position: relative;
+}
+
 /*
 The styles used in the admin gradeable page
 */
@@ -964,7 +1063,65 @@ textarea.comment_display {
 end of styles used in the admin gradeable page
 */
 
+#settings-content {
+    height: 400px;
+    padding-top: 1em;
+    overflow-y: auto;
+}
+
+#hotkeys-list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hotkeys-list tr {
+    border: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+#hotkeys-list tr:nth-child(even) {
+    background-color: #eee;
+}
+
+#hotkeys-list td {
+    padding: 4px;
+}
+
+.remap-button {
+    width: 100%;
+    text-align: center;
+}
+
+
+
+
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }
 .required::-moz-placeholder { color: red; }
 .required:-ms-input-placeholder { color: red; }
+
+.modal{
+    display: none;
+    position: fixed;
+    z-index: 50;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content{
+    text-align: center;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    padding-top: 15px;
+    border: 1px solid #888;
+    width: 420px;
+    min-width: 400px;
+    border-radius: 5px;
+}

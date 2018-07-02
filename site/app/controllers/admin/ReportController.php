@@ -8,12 +8,9 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\Gradeable;
-use app\models\HWReport;
 use app\models\GradeSummary;
-use app\models\LateDaysCalculation;
 
 /*
-use app\report\HWReportView;
 use app\report\CSVReportView;
 use app\report\GradeSummaryView;
 */
@@ -25,9 +22,6 @@ class ReportController extends AbstractController {
                 break;
             case 'summary':
                 $this->generateGradeSummaries();
-                break;
-            case 'hwreport':
-                $this->generateHWReports();
                 break;
             case 'reportpage':
             default:
@@ -46,7 +40,6 @@ class ReportController extends AbstractController {
         $gradeables = $this->core->getQueries()->getGradeables(null, $student_ids);
         $results = array();
         $results['header_model'] = array('First' => 'First Name', 'Last'=> 'Last Name', 'reg_section' => 'Registration Section');
-        $ldu = new LateDaysCalculation($this->core);
         foreach($gradeables as $gradeable) {
             $student_id = $gradeable->getUser()->getId();
             if(!isset($results[$student_id])) {
@@ -75,12 +68,12 @@ class ReportController extends AbstractController {
               $total_score = $total_score + $gradeable->getGradedTAPoints();
             }
             
-            $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
             // if this assignment exceeds the allowed late day policy or
             // if the student has switched versions after the ta graded,
             // then they should receive an automatic zero for this gradeable
+            $gradeable->calculateLateDays();
             if( $is_electronic_gradeable &&
-                ( (array_key_exists('status',$late_days) && substr($late_days['status'], 0, 3) == 'Bad') ||
+                ( ($gradeable->getLateStatus() != NULL && substr($gradeable->getLateStatus(), 0, 3) == 'Bad') ||
                   ($use_ta_grading && !$gradeable->validateVersions()))) {
               $total_score = 0;
             }
@@ -151,27 +144,37 @@ class ReportController extends AbstractController {
             $entry = [
                 'id' => $gradeable->getId(),
                 'name' => $gradeable->getName(),
+                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
                 'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
-                'autograding_score' => $autograding_score,
-                'tagrading_score' => $ta_grading_score
             ];
 
-            if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
-               $entry['score'] = max(0,floatval($autograding_score) + floatval($ta_grading_score));
+            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+                $entry['score'] = max(0, $ta_grading_score);
             }
             else {
-                $entry['score'] = 0;
-                if ($gradeable->validateVersions(-1)) {
-                    $entry['note'] = 'This has not been graded yet.';
-                }
-                elseif ($gradeable->getActiveVersion() !== 0) {
-                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                }
-            }
-
-            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 $entry['overall_comment'] = $gradeable->getOverallComment();
-                $this->addLateDays($gradeable, $entry, $total_late_used);
+
+                if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
+                    $entry['score'] = max(0, $autograding_score + $ta_grading_score);
+                    $entry['autograding_score'] = $autograding_score;
+                    $entry['tagrading_score'] = $ta_grading_score;
+                    $this->addLateDays($gradeable, $entry, $total_late_used);
+                }
+                else {
+                    $entry['score'] = 0;
+                    $entry['autograding_score'] = 0;
+                    $entry['tagrading_score'] = 0;
+                    if ($gradeable->validateVersions(-1)) {
+                        $entry['note'] = 'This has not been graded yet.';
+                        // can't be late if not submitted
+                        $entry['days_late'] = 0;
+                        $entry['status'] = 'unsubmitted';
+                    }
+                    elseif ($gradeable->getActiveVersion() !== 0) {
+                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                        $this->addLateDays($gradeable, $entry, $total_late_used);
+                    }
+                }
             }
 
             $entry['components'] = [];
@@ -265,13 +268,6 @@ class ReportController extends AbstractController {
         else {
             $entry['days_late'] = 0;
         }
-    }
-    
-    public function generateHWReports() {
-        $hw_report = new HWReport($this->core);
-        $hw_report->generateAllReports();
-        $this->core->addSuccessMessage("Successfully Generated HWReports");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 }
 

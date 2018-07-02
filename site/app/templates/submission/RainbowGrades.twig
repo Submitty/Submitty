@@ -1,0 +1,8 @@
+<div class="content">
+    <h3 class="label">Grade Summary</h3>
+    {% if show_summary %}
+        {{ grade_file|raw }}
+    {% else %}
+        No grades are available...
+    {% endif %}
+</div>

@@ -22,12 +22,14 @@ class PamAuthentication extends AbstractAuthentication {
             return false;
         }
 
+        $tmp_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "tmp", "pam");
+
         do {
             $file = md5(uniqid(rand(), true));
-        } while (file_exists(FileUtils::joinPaths("/tmp", $file)));
+        } while (file_exists(FileUtils::joinPaths($tmp_path, $file)));
 
         $contents = json_encode(array('username' => $this->user_id, 'password' => $this->password));
-        if (file_put_contents(FileUtils::joinPaths("/tmp", $file), $contents) === false) {
+        if (file_put_contents(FileUtils::joinPaths($tmp_path, $file), $contents) === false) {
             throw new AuthenticationException("Could not create tmp user PAM file.");
         }
         register_shutdown_function(function() use ($file) {

@@ -1,0 +1,24 @@
+<script>
+    var editor{{ number }} = CodeMirror.fromTextArea(document.getElementById('code{{ number }}'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+
+    var lineCount = editor{{ number }}.lineCount();
+    if (lineCount === 1) {
+        editor{{ number }}.setSize("100%", (editor{{ number }}.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor{{ number }}.setSize("100%", "auto");
+    }
+    var theme = localStorage.getItem("codeDisplayStyle");
+    editor{{ number }}.setOption("theme", (theme == null || theme === "light") ? "eclipse" : "monokai");
+    editor{{ number }}.setOption("mode", "{{ type }}");
+    $("#myTab").find("a").click(function (e) {
+        e.preventDefault();
+        $(this).tab("show");
+        setTimeout(function() { editor{{ number }}.refresh(); }, 1);
+    });
+</script>

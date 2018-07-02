@@ -50,13 +50,11 @@ class GradeableComponentMark extends AbstractModel {
     }
 
     public function save() {
-        if($this->id === null) {
-            return $this->core->getQueries()->createGradeableComponentMark($this);
-        } else {
-            $this->core->getQueries()->updateGradeableComponentMark($this);
-        }
+        $this->core->getQueries()->updateGradeableComponentMark($this);
     }
-
+    public function create(){
+        return $this->core->getQueries()->createGradeableComponentMark($this);
+    }
     // should change get gradeables to also bring in grader_id because that is part of the identifying information
     public function saveGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id) {
         if($this->modified) {
@@ -71,7 +69,11 @@ class GradeableComponentMark extends AbstractModel {
             }
         }
     }
-
+    public function delete() {
+        if($this->id !=null){
+            return $this->core->getQueries()->deleteGradeableComponentMark($this);
+        }
+    }
     public function setNote($temp_note) {
         $this->note = urlencode($temp_note);
     }
@@ -83,5 +85,36 @@ class GradeableComponentMark extends AbstractModel {
 
     public function getNote() {
         return(urldecode($this->note));
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this mark.
+     * Does not contain submission-specific data like if the mark is selected.
+     * @return array
+     */
+    public function getStaticData() {
+        return [
+            "id" => $this->id,
+            "name" => $this->getNote(),
+            "order" => $this->order,
+            "points" => $this->points,
+            "publish" => $this->publish
+        ];
+    }
+
+    /**
+     * Get an associative array of all the data needed to render this mark.
+     * Contains submission-specific data like if the mark is selected.
+     * @return array
+     */
+    public function getGradedData() {
+        return [
+            "id" => $this->id,
+            "name" => $this->getNote(),
+            "order" => $this->order,
+            "points" => $this->points,
+            "publish" => $this->publish,
+            "has" => $this->has_mark
+        ];
     }
 }
