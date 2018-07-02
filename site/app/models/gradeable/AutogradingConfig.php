@@ -18,7 +18,7 @@ use app\models\GradeableTestcase;
  * @method int getMaxSubmissions()
  * @method string getRequiredCapabilities()
  * @method float getMaxPossibleGradingTime()
- * @method array getPartNames()
+ * @method string[] getPartNames()
  * @method string getEarlySubmissionMessage()
  * @method int getEarlySubmissionMinimumDaysEarly()
  * @method float getEarlySubmissionMinimumPoints()
@@ -34,20 +34,20 @@ class AutogradingConfig extends AbstractModel {
     protected $max_submission_size;
     /** @property @var int The maximum number of submissions allowed */
     protected $max_submissions;
-    /** @property @var string TODO: */
+    /** @property @var string A message to show the user above the file upload box */
     protected $assignment_message;
 
-    /** @property @var string TODO: can this be an array? */
+    /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
-    /** @property @var float The number of (TODO) allowed for autograding */
+    /** @property @var float The number of seconds allowed for autograding */
     protected $max_possible_grading_time = -1;
 
-    /** @property @var array TODO: */
+    /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
-    /** @property @var array TODO: */
+    /** @property @var SubmissionTextBox[] Text box configs for text box submissions*/
     private $textboxes = [];
-    /** @property @var AutogradingTestcase[] TODO: */
+    /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
     private $testcases = [];
 
     /* Properties if early submission incentive enabled */
@@ -79,7 +79,7 @@ class AutogradingConfig extends AbstractModel {
 
         // Was there actually a config file to read from
         if ($details === null || $details === []) {
-            return;
+            throw new \InvalidArgumentException('Provided details were blank or null');
         }
 
         $this->max_submission_size = floatval($details['max_submission_size'] ?? 0);
@@ -91,7 +91,7 @@ class AutogradingConfig extends AbstractModel {
 
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase_details) {
-                $testcase = $this->core->loadModel(AutogradingTestcase::class, $testcase_details, $idx);
+                $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
 
                 // Accumulate the points
                 if ($testcase->isHidden()) {
@@ -141,8 +141,7 @@ class AutogradingConfig extends AbstractModel {
 
         // Get textbox details
         for ($i = 0; $i < $num_textboxes; $i++) {
-            $this->textboxes[$i] = $details['textboxes'][$i];
-            // if(isset($detailes['']))
+            $this->textboxes[$i] = new SubmissionTextBox($this->core, $details['textboxes'][$i]);
         }
     }
 
@@ -165,7 +164,7 @@ class AutogradingConfig extends AbstractModel {
 
     /**
      * Gets the text boxes for this configuration
-     * @return array
+     * @return SubmissionTextBox[]
      */
     public function getTextboxes() {
         return $this->getTextboxes();
