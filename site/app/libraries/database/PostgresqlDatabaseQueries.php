@@ -715,7 +715,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets the user id, user group, and rotating sections for all graders and
      *  a given gradeable
      * @param string $gradeable_id The id of the gradeable to get users for
-     * @return array An array, indexed by user id, or arrays with 'user_id', 'user_group', 'sections' (as int[])
+     * @return array An array, indexed by user id, of arrays with 'user_id', 'user_group', 'sections' (as int[])
      */
     public function getGradersForAllRotatingSections($gradeable_id) {
         $this->course_db->query("
