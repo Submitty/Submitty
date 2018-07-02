@@ -495,7 +495,6 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
                 ));
                 $action = 'delete_request';
             } else {
-                echo("want to make additional post");
                 $btn_type = "addPost";
                 $url = $this->core->buildUrl(array('component' => 'student',
                     'action' => 'make_request_post',
@@ -513,8 +512,6 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             $action = 'request_regrade';
         }
         $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
-        echo("thread id\n");
-        echo($thread_id);
         $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
 
         $posts = [];
@@ -525,7 +522,6 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
             $date = date_create($thread['timestamp']);
             $content = $thread['content'];
-            echo("THREAD!");
             $posts[] = [
                 "is_staff" => $is_staff,
                 "date" => date_format($date, "m/d/Y g:i A"),
@@ -534,8 +530,6 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             ];
 
         }
-        echo("Post length is");
-        echo(sizeof($posts));
         return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
             "btn_type" => $btn_type,
             "url" => $url,

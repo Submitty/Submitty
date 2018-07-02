@@ -1,4 +1,4 @@
-<h3>Request Regrade</h3>
+<div><h3>Request Regrade
 {% if btn_type == "request" %}
     {% set message = "Request Regrade" %}
     {% set is_disabled = false %}
@@ -10,16 +10,19 @@
     {% set class = "btn-danger" %}
     {% set submit = true %}
 {% elseif btn_type == "pending" %}
+    <span><i class="fa fa-hourglass"></i></span>
     {% set message = "Additional Details" %}
     {% set is_disabled = true %}
     {% set class = "btn-default" %}
     {% set submit = false %}
 {% elseif btn_type == "completed" %}
+    <span><i class="fa fa-check"></i></span>
     {% set message = "Request Reviewed" %}
     {% set is_disabled = true %}
     {% set class = "btn-default" %}
     {% set submit = false %}
 {% endif %}
+</h3></div>
 {% for post in posts %}
     <div style="margin-top: 20px;">
         <div class='{{ is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
@@ -34,7 +37,6 @@
 {% endfor %}
 {% if action == 'make_request_post' %}
 <div style="padding:20px;">
-    <i class="fas fa-hourglass"></i>
     <form method="POST" id="replyTextForm" action="{{ core.buildUrl({'component': 'student',
             'action': 'make_request_post',
             'regrade_id': thread_id,
@@ -46,8 +48,6 @@
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
     </form>
 </div>
-{$ elseif btn_type == "completed"}
-
 {% else %}
 <div style="padding:20px;">
     <form method="POST" id="replyTextForm" action="{{ url }}">
