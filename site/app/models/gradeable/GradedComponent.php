@@ -69,9 +69,9 @@ class GradedComponent extends AbstractModel {
         $this->setComponent($component);
         $this->setGrader($grader);
 
-        $this->setComment($details['comment']);
-        $this->setGradedVersion($details['graded_version']);
-        $this->setGradeTime($details['grade_time']);
+        $this->setComment($details['comment'] ?? '');
+        $this->setGradedVersion($details['graded_version'] ?? 0);
+        $this->setGradeTime($details['grade_time'] ?? new \DateTime());
 
         // assign the default score if its not electronic (or rather not a custom mark)
         if($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE){
