@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use \lib\Database;
 use \lib\Functions;
 use \app\libraries\GradeableType;
@@ -1096,7 +1097,9 @@ class AdminGradeableController extends AbstractController
         $jsonProperties = [
             'gradeable_id' => $gradeable->g_id,
             'config_path' => $gradeable->eg_config_path,
-            'date_due' => $gradeable->eg_submission_due_date,
+            'date_due' => $gradeable->eg_submission_due_date instanceof DateTime
+                ? DateUtils::dateTimeToString($gradeable->eg_submission_due_date)
+                : $gradeable->eg_submission_due_date,
             'upload_type' => $gradeable->eg_is_repository ? "Repository" : "Upload File"
         ];
 
