@@ -52,6 +52,25 @@ if [ $? -eq 1 ]; then
 fi
 
 
+#############################################################
+# Re-Read variables from submitty_users.json
+# (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
+
+DAEMON_USER=$(jq -r '.daemon_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+DAEMON_UID=$(jq -r '.daemon_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+DAEMON_GID=$(jq -r '.daemon_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+PHP_UID=$(jq -r '.php_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+PHP_GID=$(jq -r '.php_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+NUM_UNTRUSTED=$(jq -r '.num_untrusted' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+NUM_GRADING_SCHEDULER_WORKERS=$(jq -r '.num_grading_scheduler_workers' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+
+
 ################################################################################################################
 ################################################################################################################
 # REMEMBER IF THE SHIPPER & WORKER ARE ACTIVE BEFORE INSTALLATION BEGINS
@@ -62,7 +81,7 @@ is_shipper_active_before=$?
 systemctl is-active --quiet submitty_autograding_worker
 is_worker_active_before=$?
 
-echo "SHIPPER WORKER " $is_shipper_active_before $is_worker_active_before
+
 
 ################################################################################################################
 ################################################################################################################
