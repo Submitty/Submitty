@@ -7,6 +7,12 @@ from selenium.webdriver.support.ui import Select
 from .base_testcase import BaseTestCase
 
 class TestLateDays(BaseTestCase):
+    """
+    In order to test the late days functionality, a few student with interesting testing data are selected. This way, we can ensure to test
+    all the possibilities on the late days table and banner.
+
+    TODO: Currently there are no tests for student with extra granted late days.
+    """
     def __init__(self,testname):
         super().__init__(testname,user_id="lakinh", user_password="lakinh", user_name="Hazel")
 
@@ -20,20 +26,56 @@ class TestLateDays(BaseTestCase):
         super().log_out()
         super().log_in(user_id='bauchg', user_password='bauchg', user_name='Gwen')
         self.load_and_test_table('bauchg')
+        self.check_student_late_gradeable_view('bauchg')
         super().log_out()
         super().log_in(user_id='stracm', user_password='stracm', user_name='Malvina')
         self.load_and_test_table('stracm')
+        self.check_student_late_gradeable_view('stracm')
 
     def check_student_late_gradeable_view(self, user_id):
         #Check on each button and check if the banner displays the correct info
         #Also checks if the show late info button displays correctly
-        #Drag in a random file and see if the popup displays correctly
-        # open_gradeables = self.driver.find_element_by_xpath("//tbody[contains(text(),'Course Settings')]")
         if user_id == "lakinh":
             self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//h2[@class='upperinfo-left']"))
-            assert self.driver.find_element_by_id('late_day_banner')
-            assert self.driver.find_element_by_id('late_day_banner').value_of_css_property("background-color") == "rgba(217, 83, 79, 1)"
+            assert self.check_banner_color('red')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
             self.click_nav_gradeable_button("graded", 'grades_released_homework', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('none')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("graded", 'grades_released_homework_autota', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('white')
+        if user_id == "bauchg":
+            self.click_nav_gradeable_button("open", 'open_homework', "resubmit", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('red')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('white')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("graded", 'grades_released_homework_onlyauto', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('white')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("graded", 'grades_released_homework_onlytaEC', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('white')
+        if user_id == "stracm":
+            self.click_nav_gradeable_button("open", 'open_homework', "resubmit", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('none')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("items_being_graded", 'grading_homework', "view submission", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('red')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("items_being_graded", 'grading_team_homework', "view submission", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('white')
+
+            self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+            self.click_nav_gradeable_button("graded", 'grades_released_homework_onlyauto', "view grade", (By.XPATH, "//h2[@class='upperinfo-left']"))
+            assert self.check_banner_color('red')
         pass
 
 
@@ -117,6 +159,22 @@ class TestLateDays(BaseTestCase):
             if table[i] == gradeable_name:
                 return table[i+which_col]
         return NULL
+    
+    def check_banner_color(self, which_color):
+        if which_color == "none":
+            assert len(self.driver.find_elements(By.ID, "late_day_banner")) == 0
+            return True
+        elif which_color == "white":
+            assert self.driver.find_element_by_id('late_day_banner')
+            assert self.driver.find_element_by_id('late_day_banner').value_of_css_property("background-color") == "rgba(233, 239, 239, 1)"
+            return True
+        elif which_color == "red":
+            assert self.driver.find_element_by_id('late_day_banner')
+            assert self.driver.find_element_by_id('late_day_banner').value_of_css_property("background-color") == "rgba(217, 83, 79, 1)"
+            return True
+        return False
+
+
 if __name__ == "__main__":
     import unittest
     unittest.main()
