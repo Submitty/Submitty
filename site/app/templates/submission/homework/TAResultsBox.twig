@@ -1,0 +1,9 @@
+{# If the student does not submit anything, the only message will be "No submissions for this assignment." #}
+<div class="content">
+    {% if gradeable.beenTAgraded() %}
+        <h3 class="label">TA / Instructor grade</h3>
+        {{ render_template('AutoGrading', 'showTAResults', gradeable) }}
+    {% else %}
+        <h3 class="label">Your assignment has not been graded, contact your TA or instructor for more information</h3>
+    {% endif %}
+</div>
