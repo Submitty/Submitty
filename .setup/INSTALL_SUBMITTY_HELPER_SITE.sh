@@ -12,7 +12,9 @@ if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
     PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
+    PHP_GROUP=$(jq -r '.php_group' ${CONF_DIR}/submitty_users.json)
     CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
+    CGI_GROUP=$CGI_USER
 fi
 
 # copy the website from the repo
@@ -26,8 +28,8 @@ fi
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/twig
 
 # set special user $PHP_USER as owner & group of all website files
-find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_USER} {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_USER} {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 
 # set these masks just for when composer to run, and then they can be set to whatever
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then

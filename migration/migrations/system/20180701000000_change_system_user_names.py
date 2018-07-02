@@ -49,6 +49,9 @@ def up(config):
     os.system("usermod -l submitty_daemon hwcron")
 
     # change the group names
+    os.system("groupmod --new-name submitty_daemon hwcron")
+    os.system("groupmod --new-name submitty_php hwphp")
+    os.system("groupmod --new-name submitty_cgi hwcgi")
     os.system("groupmod --new-name submitty_daemonphp hwcronphp")
     os.system("groupmod --new-name submitty_course_builders course_builders")
 
@@ -73,7 +76,7 @@ def up(config):
     change_key(my_json,"hwcron_gid","daemon_gid")
     change_key(my_json,"hwcron_user","daemon_user")
     change_value(my_json,"daemon_user","submitty_daemon")
-    change_value(my_json,"course_builders_group","submitty_course_builders")
+    change_value(my_json,"course_builders","submitty_course_builders")
     change_key(my_json,"hwphp_uid","php_uid")
     change_key(my_json,"hwphp_gid","php_gid")
     change_key(my_json,"hwphp_user","php_user")
@@ -125,6 +128,9 @@ def down(config):
     os.system("usermod -l hwcron submitty_daemon")
 
     # change the group names
+    os.system("groupmod --new-name hwcron submitty_daemon")
+    os.system("groupmod --new-name hwphp submitty_php")
+    os.system("groupmod --new-name hwcgi submitty_cgi")
     os.system("groupmod --new-name hwcronphp submitty_daemonphp")
     os.system("groupmod --new-name course_builders submitty_course_builders")
 
