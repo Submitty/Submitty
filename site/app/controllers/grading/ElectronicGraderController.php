@@ -1434,10 +1434,16 @@ class ElectronicGraderController extends GradingController {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
                 $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
             }
-            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
-            if (!in_array($user_id, $user_ids_to_grade)) {
-                return false;
+            //See if they are one of our users to grade
+            foreach ($users_to_grade as $user) {
+                /* @var User $user */
+                if ($user->getId() === $user_id) {
+                    //Yes
+                    return true;
+                }
             }
+            //Could not find them
+            return false;
         } else if ($this->core->getUser()->getGroup() === 2 || $this->core->getUser()->getGroup() === 1) {
             //We are TA/Instructor and are allowed to grade everyone
             return true;
