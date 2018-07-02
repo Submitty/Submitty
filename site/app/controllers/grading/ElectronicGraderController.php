@@ -1161,7 +1161,7 @@ class ElectronicGraderController extends GradingController {
         //display hidden testcases only if the user can view the entirety of this gradeable.
         if($this->canIViewThis($gradeable, $who_id)){
             $can_view_hidden = $this->canIviewThis($gradeable, $who_id, $hidden=true);
-            $return = AutogradingView::loadAutoChecks($gradeable, $index, $who_id, $popup_css, $can_view_hidden);
+            $return = $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks', $gradeable, $index, $popup_css, $who_id, $can_view_hidden);
         }
         //Returns the html to ajax.
         echo($return);
