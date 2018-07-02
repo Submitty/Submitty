@@ -78,7 +78,10 @@ class GlobalView extends AbstractView {
 
     public function footer($runtime) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
-            "runtime" => $runtime
+            "runtime" => $runtime,
+            "is_debug" => $this->core->getConfig()->isDebug(),
+            "submitty_queries" => $this->core->getSubmittyDB()->getPrintQueries(),
+            "course_queries" => $this->core->getCourseDB()->getPrintQueries(),
         ]);
     }
 
