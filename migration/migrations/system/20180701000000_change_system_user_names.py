@@ -2,9 +2,11 @@ import os
 import json
 import shutil
 import grp
+from pathlib import Path
 
-submitty_users_filename = "/usr/local/submitty/config/submitty_users.json"
-submitty_users_filename_tmp = "/usr/local/submitty/config/submitty_users_tmp.json"
+submitty_users_filename = Path(config.submitty['submitty_install_dir'], 'vcs', 'submitty_users.json')
+submitty_users_filename_tmp = Path(config.submitty['submitty_install_dir'], 'vcs', 'submitty_users_tmp.json')
+killall_path = Path(config.submitty['submitty_install_dir'], 'sbin', 'killall.py')
 
 def change_key(my_json, old_key, new_key):
     if old_key in my_json:
@@ -28,7 +30,7 @@ def change_value(my_json, old_key, new_value):
         print ("ERROR: old_key "+old_key+" is not in the dictionary")
 
         
-def up():
+def up(config):
 
     # stop all jobs that are using hwphp and hwcron
     os.system("systemctl stop submitty_autograding_worker")
@@ -36,7 +38,7 @@ def up():
     os.system("systemctl stop apache2.service")
     os.system("systemctl stop php7.0-fpm.service")
     os.system("su -c 'crontab -r' hwcron")
-    os.system("su -c '/usr/local/submitty/sbin/killall.py' hwcron")
+    os.system("su -c "+killall_path+" hwcron")
 
     # change the usernames
     os.system("usermod -l submitty_php hwphp")
@@ -87,7 +89,7 @@ def up():
     pass
 
 
-def down():
+def down(config):
 
     # stop all jobs that are using submitty_php and submitty_daemon
     os.system("systemctl stop submitty_autograding_worker")
@@ -95,7 +97,7 @@ def down():
     os.system("systemctl stop apache2.service")
     os.system("systemctl stop php7.0-fpm.service")
     os.system("su -c 'crontab -r' submitty_daemon")
-    os.system("su -c '/usr/local/submitty/sbin/killall.py' submitty_daemon")
+    os.system("su -c "+killall_path+" submitty_daemon")
 
     # change the usernames
     os.system("usermod -l hwphp submitty_php")
