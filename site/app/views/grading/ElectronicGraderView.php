@@ -15,8 +15,8 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
-     * @param SimpleStat $autograded_average
-     * @param SimpleStat $overall_average
+     * @param SimpleStat|null $autograded_average
+     * @param SimpleStat|null $overall_average
      * @param int $total_submissions
      * @param int $registered_but_not_rotating
      * @param int $rotating_but_not_registered
@@ -29,8 +29,8 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
-        SimpleStat $autograded_average,
-        SimpleStat $overall_average,
+        $autograded_average,
+        $overall_average,
         int $total_submissions,
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
@@ -158,8 +158,10 @@ class ElectronicGraderView extends AbstractView {
                         $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                     }
                 }
-                if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
-                    $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                if ($autograded_average !== null) {
+                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
+                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                    }
                 }
                 if (count($component_averages) !== 0) {
                     foreach ($component_averages as $comp) {
