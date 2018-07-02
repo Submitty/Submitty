@@ -1152,7 +1152,7 @@ class ElectronicGraderController extends GradingController {
         if (!$this->canIGradeThis($gradeable)) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
-            return $response;
+            return;
         }
 
         $note = $_POST['note'];
@@ -1189,6 +1189,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return;
+        }
+
         $gcm_id = $_POST['gradeable_component_mark_id'];
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getId() != $_POST['gradeable_component_id']) {
@@ -1214,7 +1221,7 @@ class ElectronicGraderController extends GradingController {
         if (!$this->canIGradeThis($gradeable)) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
-            return $response;
+            return;
         }
 
         $gradeable->setOverallComment($_POST['gradeable_comment']);
