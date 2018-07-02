@@ -1411,8 +1411,8 @@ class ElectronicGraderController extends GradingController {
             return false;
         }
 
-        //checks if user has permission
         if ($this->core->getUser()->getGroup() === 4) {
+            //Student group, needs to be both peer and user in their peer assignment
             if(!$gradeable->getPeerGrading()) {
                 return false;
             } else {
@@ -1422,6 +1422,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         } else if ($this->core->getUser()->getGroup() === 3) {
+            //Grader/mentor group, check if the user is in their section(s)
             if ($gradeable->isGradeByRegistration()) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
                 $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
@@ -1433,9 +1434,13 @@ class ElectronicGraderController extends GradingController {
             if (!in_array($user_id, $user_ids_to_grade)) {
                 return false;
             }
+        } else if ($this->core->getUser()->getGroup() === 2 || $this->core->getUser()->getGroup() === 1) {
+            //We are TA/Instructor and are allowed to grade everyone
+            return true;
         }
 
-        return true;
+        //Fallback in case user groups > 4 ever exist
+        return false;
     }
 }
 
