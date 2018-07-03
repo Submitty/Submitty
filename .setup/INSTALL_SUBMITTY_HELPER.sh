@@ -498,7 +498,8 @@ mkdir -p ${clangbuild}
 pushd ${clangbuild}
 # TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
 cmake .
-ninja ASTMatcher UnionTool
+# FIXME: skipping this step until we actually use it, since it's expensive
+#ninja ASTMatcher UnionTool
 popd > /dev/null
 
 cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/

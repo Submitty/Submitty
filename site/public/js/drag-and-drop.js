@@ -70,6 +70,16 @@ function drop(e){
     }
 }
 
+// add files dragged
+function dropWithMultipleZips(e){
+    draghandle(e);
+    var filestream= e.dataTransfer.files;
+    var part = get_part_number(e);
+    for(var i=0; i<filestream.length; i++){
+        addFileWithCheck(filestream[i], part, false); // check for folders
+    }
+}
+
 function get_part_number(e){
     if(e.target.id.substring(0, 6) == "upload"){
         return e.target.id.substring(6);
@@ -80,10 +90,10 @@ function get_part_number(e){
 }
 
 // copy files selected from the file browser
-function addFilesFromInput(part){
+function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input_file" + part).files;
     for(var i=0; i<filestream.length; i++){
-        addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
+        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
     $('#input_file' + part).val("");
 }
@@ -110,7 +120,7 @@ function fileExists(file, part){
 }
 
 // add file with folder check
-function addFileWithCheck(file, part){
+function addFileWithCheck(file, part, check_duplicate_zip=true){
     // try to open file if it looks suspicious:
     // no type, or with size of a typical folder size
     if(!file.type || file.size%4096 == 0){
@@ -120,7 +130,7 @@ function addFileWithCheck(file, part){
         reader.readAsBinaryString(file);
     }
     else{
-        addFile(file, part);
+        addFile(file, part, check_duplicate_zip);
     }
 }
 
@@ -133,11 +143,11 @@ function isFolder(file){
     return function(e){ alert("Upload failed: " + file.name + " might be a folder."); }
 }
 
-function addFile(file, part){
+function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file, part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
-        if(file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
+        if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
             if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
                 deleteFiles(part);
             }
@@ -796,6 +806,67 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         error: function(error) {
             $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+function handleDownloadImages(csrf_token) {
+    var image_submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_images_files'});
+    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+
+
+    // Files selected
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+        }
+    }
+
+    $.ajax({
+        url: image_submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+
+                if (data['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+            }
+        },
+        error: function(data) {
+            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+            //alert("ERROR! Please contact administrator that you could not upload image files.");
         }
     });
 }
