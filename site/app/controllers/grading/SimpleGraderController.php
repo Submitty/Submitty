@@ -2,7 +2,11 @@
 
 namespace app\controllers\grading;
 
-use app\controllers\AbstractController;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
+use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\controllers\GradingController;
 
@@ -94,7 +98,7 @@ class SimpleGraderController extends GradingController  {
             return;
         }
 
-        $gradeable = $this->core->getQueries()->getGradeable($g_id);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         
         //Turn off header/footer so that we are using simple html.
         $this->core->getOutput()->useHeader(false);
@@ -108,14 +112,17 @@ class SimpleGraderController extends GradingController  {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
         $g_id = $_REQUEST['g_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($g_id);
-        if ($gradeable === null) {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        } catch(\InvalidArgumentException $e) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $g_id);
+            return;
         }
-        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
 
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
+
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinGradingGroup()) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -172,10 +179,16 @@ class SimpleGraderController extends GradingController  {
         }
         $g_id = $_REQUEST['g_id'];
         $user_id = $_REQUEST['user_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        if($graded_gradeable === null) {
+            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $user_id));
+            $graded_gradeable->setTaGradedGradeable(new TaGradedGradeable($this->core, $graded_gradeable, []));
+        }
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
 
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+        if ($this->core->getUser()->getGroup() > $gradeable->getMinGradingGroup()) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -203,8 +216,11 @@ class SimpleGraderController extends GradingController  {
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
-                if ($component->getIsText()){
-                    $component->setComment($_POST['scores'][$component->getId()]);
+                $component_grades = $ta_graded_gradeable->getGradedComponents()[$component->getId()] ?? [];
+                $component_grade = $component_grades[0] ?? new GradedComponent($this->core, $component, $this->core->getUser(), []);
+
+                if ($component->isText()){
+                    $component_grade->setComment($_POST['scores'][$component->getId()]);
                 }
                 else {
                     if($component->getUpperClamp() < $_POST['scores'][$component->getId()] || !is_numeric($_POST['scores'][$component->getId()])){
@@ -212,15 +228,17 @@ class SimpleGraderController extends GradingController  {
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
-                    $component->setScore($_POST['scores'][$component->getId()]);
+                    $component_grade->setScore($_POST['scores'][$component->getId()]);
                 }
-                $component->setGrader($this->core->getUser());
-                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component_grade->setGrader($this->core->getUser());
+                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                
+                $component_grades[0] = [$component_grade];
             }
         }
 
-        $gradeable->setOverallComment("");
-        $gradeable->saveData();
+        $ta_graded_gradeable->setOverallComment("");
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         $response = array('status' => 'success', 'data' => null);
         $this->core->getOutput()->renderJson($response);

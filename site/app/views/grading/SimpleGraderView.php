@@ -2,7 +2,8 @@
 
 namespace app\views\grading;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\Component;
 use app\models\User;
 use app\views\AbstractView;
 
@@ -123,10 +124,9 @@ class SimpleGraderView extends AbstractView {
      */
     public function displayPrintLab(Gradeable $gradeable, string $sort_by, string $section, $students) {
         //Get the names of all of the checkpoints
-        $checkpoints = array();
-        foreach ($gradeable->getComponents() as $row) {
-            array_push($checkpoints, $row->getTitle());
-        }
+        $checkpoints = array_map(function (Component $component) {
+            return $component->getTitle();
+        }, $gradeable->getComponents());
         return $this->core->getOutput()->renderTwigTemplate("grading/simple/PrintLab.twig", [
             "gradeable" => $gradeable,
             "section" => $section,
