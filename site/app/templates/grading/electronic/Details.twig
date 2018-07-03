@@ -301,6 +301,7 @@
         {% else %}
             {%- for member in gradeable.getTeam().getMembers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
+                {# TODO: Not call core.getQueries() anywhere near a Twig file #}
                 {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
                 {{ core.getQueries().getUserById(member).getLastName() -}}
             {%- endfor -%}

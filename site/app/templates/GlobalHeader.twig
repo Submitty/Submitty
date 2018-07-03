@@ -41,7 +41,7 @@
             <h2>
                 {% if core.userLoaded() %}
                 <span id="login">
-                    Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                    Hello <span id="login-id">{{ user_first_name }}</span>
                 </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
                 {% else %}
                 <span id="login-guest">Welcome to Submitty</span>
