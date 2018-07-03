@@ -7,7 +7,7 @@ use app\libraries\database\DatabaseQueries;
 use app\libraries\GradeableType;
 use app\models\Config;
 use app\models\gradeable\Gradeable;
-use app\models\GradeableList;
+use app\models\gradeable\GradeableList;
 use app\models\User;
 use tests\BaseUnitTest;
 
