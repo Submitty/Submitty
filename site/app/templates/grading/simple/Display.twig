@@ -117,7 +117,7 @@
                             {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
-                                <a target=_blank href="{{ this.core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                <a target=_blank href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
                                     <i class="fa fa-print"></i>
                                 </a>
                             {% endif %}
