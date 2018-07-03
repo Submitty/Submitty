@@ -91,6 +91,14 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the graded gradeable instance this Ta grade belongs to
+     * @return GradedGradeable
+     */
+    public function getGradedGradeable() {
+        return $this->graded_gradeable;
+    }
+
+    /**
      * Gets the percent of points the student has earned of the
      *  components that have been graded
      * @param bool $clamp True to clamp the result to 1.0
@@ -142,20 +150,25 @@ class TaGradedGradeable extends AbstractModel {
      */
     public function getPercentGraded() {
         $components_graded = 0.0;
-        $components_total = count($this->graded_gradeable->getGradeable()->getComponents());
+        $components = $this->graded_gradeable->getGradeable()->getComponents();
         $gradeable = $this->graded_gradeable->getGradeable();
 
+        $peer_component_count = array_sum(array_map(function (Component $component) {
+            return $component->isPeer() ? 1 : 0;
+        }, $components));
+        $ta_component_count = count($components) - $peer_component_count;
+
+        // For each peer component, there will be a certain number (set in gradeable) of peer graders
+        //  For each non-peer component, there must be one grade (ta/instructor)
+        $total_graders = $peer_component_count * $gradeable->getPeerGradeSet() + $ta_component_count;
+
         // Get the number of component grades
-        foreach($this->graded_components as $graded_component) {
+        foreach ($this->graded_components as $graded_component) {
             $components_graded += count($graded_component);
         }
 
-        // TODO: how should the total number of graders be calculated for peer grading
-        // For each component, there is one TA grader and a certain number of peer graders
-        $total_graders = $components_total * ($gradeable->getPeerGradeSet() + 1);
-
         // Avoid divide-by-zero (== not a typo)
-        if($total_graders == 0) {
+        if ($total_graders == 0) {
             return NAN;
         }
 

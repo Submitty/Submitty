@@ -100,51 +100,29 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Gets the percent of the possible visible points the submitter earned
+     *  for the active version
      * @param bool $clamp True to clamp the output to 1
-     * @return float percentage (0 to 1), or NAN if no visible percent
+     * @return float percentage (0 to 1), or NAN if no visible percent or no active version
      */
     public function getVisiblePercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
-        $divisor = $this->graded_gradeable->getGradeable()->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
-        $dividend =($instance->getNonHiddenNonExtraCredit() + $instance->getNonHiddenExtraCredit());
-
-        // Avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
+        if($instance === null) {
             return NAN;
         }
-        $result = floatval($dividend) / $divisor;
-
-        if ($clamp === true && $result > 1.0) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return $instance->getVisiblePercent($clamp);
     }
 
     /**
      * Gets the percent of all possible points the submitter earned
+     *  for the active version
      * @param bool $clamp True to clamp the output to 1
-     * @return float percentage (0 to 1), or NAN if no points possible
+     * @return float percentage (0 to 1), or NAN if no points possible or no active version
      */
     public function getTotalPercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
-        $config = $this->graded_gradeable->getGradeable()->getAutogradingConfig();
-        $divisor = $config->getTotalNonHiddenNonExtraCredit() + $config->getTotalHiddenNonExtraCredit();
-        $dividend = $instance->getNonHiddenNonExtraCredit() + $instance->getNonHiddenExtraCredit() +
-            $instance->getHiddenNonExtraCredit() + $instance->getHiddenExtraCredit();
-
-        // avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
+        if($instance === null) {
             return NAN;
         }
-        $result = floatval($dividend) / $divisor;
-
-        if ($clamp === true && $result > 1.0) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return $instance->getTotalPercent($clamp);
     }
 }

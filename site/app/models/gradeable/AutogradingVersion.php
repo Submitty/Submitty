@@ -49,12 +49,17 @@ class AutogradingVersion extends AbstractModel {
     /**
      * AutogradingVersion constructor.
      * @param Core $core
+     * @param GradedGradeable $graded_gradeable
      * @param array $details
      * @throws \Exception If \DateTime failed to parse
      */
-    public function __construct(Core $core, array $details) {
+    public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
+        if ($graded_gradeable === null) {
+            throw new \InvalidArgumentException('Graded gradeable cannot be null');
+        }
+        $this->graded_gradeable = $graded_gradeable;
         $this->setVersionInternal($details['version']);
         $this->setPointsInternal($details);
         $this->setSubmissionTimeInternal($details['submission_time']);
@@ -72,6 +77,54 @@ class AutogradingVersion extends AbstractModel {
 
     public function getNonHiddenPoints() {
         return $this->non_hidden_non_extra_credit + $this->non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the percent of the possible visible points the submitter earned
+     * @param bool $clamp True to clamp the output to 1
+     * @return float percentage (0 to 1), or NAN if no visible percent
+     */
+    public function getVisiblePercent($clamp = false) {
+        $divisor = $this->graded_gradeable->getGradeable()->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+        $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit();
+
+        // Avoid divide-by-zero (== not a typo)
+        if($divisor == 0) {
+            return NAN;
+        }
+        $result = floatval($dividend) / $divisor;
+
+        if ($clamp === true && $result > 1.0) {
+            return 1.0;
+        } else if ($result < 0) {
+            return 0.0;
+        }
+        return $result;
+    }
+
+    /**
+     * Gets the percent of all possible points the submitter earned
+     * @param bool $clamp True to clamp the output to 1
+     * @return float percentage (0 to 1), or NAN if no points possible
+     */
+    public function getTotalPercent($clamp = false) {
+        $config = $this->graded_gradeable->getGradeable()->getAutogradingConfig();
+        $divisor = $config->getTotalNonHiddenNonExtraCredit() + $config->getTotalHiddenNonExtraCredit();
+        $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit() +
+            $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
+
+        // avoid divide-by-zero (== not a typo)
+        if($divisor == 0) {
+            return NAN;
+        }
+        $result = floatval($dividend) / $divisor;
+
+        if ($clamp === true && $result > 1.0) {
+            return 1.0;
+        } else if ($result < 0) {
+            return 0.0;
+        }
+        return $result;
     }
 
     /**
