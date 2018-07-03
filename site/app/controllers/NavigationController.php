@@ -7,7 +7,7 @@ use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
-use app\models\GradeableList;
+use app\models\gradeable\GradeableList;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {

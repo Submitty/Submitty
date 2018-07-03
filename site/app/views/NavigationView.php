@@ -6,7 +6,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\GradeableList;
+use app\models\gradeable\GradeableList;
 
 
 class NavigationView extends AbstractView {
