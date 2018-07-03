@@ -236,6 +236,21 @@ def generate_versions_to_submit(num=3, original_value=3):
     else:
         return original_value-(num-1)
 
+def generate_probability_space(probability_dict, default = 0):
+    """
+    This function takes in a dictionary whose key is the probability (decimal less than 1), 
+    and the value is the outcome (whatever the outcome is). 
+    """
+    probability_counter = 0
+    target_random = random.random()
+    prev_random_counter = 0
+    for key, value in sorted(probability_dict.items(), key=lambda x: random.random()):
+        probability_counter += key
+        if probability_counter >= target_random and target_random > prev_random_counter:
+            return value
+        prev_random_counter = probability_counter
+    return default
+
 def generate_random_users(total, real_users):
     """
 
@@ -896,15 +911,9 @@ class Course(object):
                                 if status == 0 or random.random() < 0.4:
                                     score = 0
                                 else:
-                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
-                                    if random.random() < 0.1:
-                                        score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
-                                    if random.random() < 0.1:
-                                        #custom mark takes away points
-                                        score = -score
-                                    if random.random() < 0.01: 
-                                        #Just for some weird number example
-                                        score = -99999
+                                    max_value_score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
+                                    uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                 self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
@@ -932,12 +941,7 @@ class Course(object):
                         if random.random() < 0.1:
                             continue
                         elif gradeable.type == 1:
-                            if random.random() < 0.2:
-                                score = 0
-                            elif random.random() < 0.05:
-                                score = 0.5
-                            else:
-                                score = 1
+                            score = generate_probability_space({0.2: 0, 0.1: 0.5}, 1)
                         else:
                             score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                         grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
