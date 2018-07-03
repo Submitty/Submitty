@@ -88,6 +88,7 @@ class SimpleGraderView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalJs('simple-grading.js');
 
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
