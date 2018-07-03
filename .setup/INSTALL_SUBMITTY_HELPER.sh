@@ -24,6 +24,10 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 WORKER=$(jq -r '.worker' ${CONF_DIR}/submitty.json)
+if [ ${WORKER} == "null" ]; then
+    WORKER=0
+fi
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -78,7 +82,7 @@ is_worker_active_before=$?
 # RUN THE SYSTEM AND DATABASE MIGRATIONS
 
 if [ ${WORKER} == 0 ]; then
-    echo -e 'Running the DB migrations'
+    echo -e 'Checking for system and database migrations'
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
 
