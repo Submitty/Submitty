@@ -2466,6 +2466,22 @@ AND gc_id IN (
     }
 
     /**
+     * Gets a single GradedGradeable associated with the provided gradeable and
+     *  user/team.  Note: The user's team for this gradeable will be retrived if provided
+     * @param Gradeable $gradeable
+     * @param $user|null The id of the user to get data for
+     * @param $team|null The id of the team to get data for
+     * @return GradedGradeable|null The GradedGradeable or null if none found
+     * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
+     */
+    public function getGradedGradeable(Gradeable $gradeable, $user, $team) {
+        foreach ($this->getGradedGradeables([$gradeable], [$user], [$team]) as $gg) {
+            return $gg;
+        }
+        return null;
+    }
+
+    /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
@@ -2475,7 +2491,7 @@ AND gc_id IN (
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradeableDataAll(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
         throw new NotImplementedException();
     }
 

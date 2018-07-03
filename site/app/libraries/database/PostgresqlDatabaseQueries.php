@@ -989,7 +989,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradeableDataAll(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
