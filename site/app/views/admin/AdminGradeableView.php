@@ -57,12 +57,7 @@ class AdminGradeableView extends AbstractView {
         //  sections to the array generated above
         foreach($admin_gradeable->getGradersAllSection() as $grader) {
             //parses the sections from string "{1, 2, 3, 4}" to a php array [1,2,3,4]
-            $sections = $grader['sections'];
-            $sections = ltrim($sections, '{');
-            $sections = rtrim($sections, '}');
-            $sections = explode(',', $sections);
-
-            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
+            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $grader['sections'];
         }
 
         // if the user is editing a gradeable instead of adding
