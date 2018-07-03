@@ -30,10 +30,12 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
-sudo mkdir -p "${SUBMITTY_DATA_DIR}"
+echo 'in travis setup, going to make data dir ' ${SUBMITTY_DATA_DIR}
+
+sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
+sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
-sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
+sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
 sudo python3 ${DIR}/../bin/create_untrusted_users.py
 

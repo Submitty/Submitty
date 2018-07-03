@@ -203,7 +203,7 @@ chmod  751                            ${SUBMITTY_INSTALL_DIR}
 ########################################################################################################################
 # if the top level DATA, COURSES, & LOGS directores do not exist, then make them
 
-echo -e "Make top level directores & set permissions"
+echo -e "Make top level SUBMITTY DATA directories & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
 
