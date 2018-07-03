@@ -20,14 +20,12 @@ def up(config, conn, semester, course):
     course_group = grp.getgrgid(course_group_id)[0]
 
     # set the owner/group/permissions
-
     os.system("chown -R hwphp:"+course_group+" "+str(lichen_dir))
     os.system("chmod -R u+rwx  "+str(lichen_dir))
     os.system("chmod -R g+rwxs "+str(lichen_dir))
     os.system("chmod -R o-rwx  "+str(lichen_dir))
 
     pass
-
 
 
 def down(conn, semester, course):
