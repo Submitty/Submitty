@@ -222,6 +222,8 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $HWCRON_USER       ta_www_group    uploads/
 #               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/bulk_pdf/
 #               drwxr-s---       $HWCGI_USER        ta_www_group    uploads/split_pdf/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/student_images/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    uploads/student_images/tmp
 #               drwxr-s---       $HWCRON_USER       ta_www_group    lichen/
 #               drwxr-s---       $HWPHP_USER        ta_www_group    lichen/config
 #               drwxr-s---       $HWPHP_USER        ta_www_group    lichen/provided_code
@@ -233,6 +235,8 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
 create_and_set  u=rwx,g=rxs,o=   $HWCGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/student_images
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $HWPHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $HWPHP_USER        $ta_www_group   $course_dir/lichen/provided_code
@@ -260,6 +264,7 @@ cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.ini ${course_dir}/config/
 chown ${HWPHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
 chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
+
 
 echo -e "Creating database ${DATABASE_NAME}\n"
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"

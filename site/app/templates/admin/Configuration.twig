@@ -116,6 +116,16 @@
             </div>
 
             <div class="option">
+                <div class="option-input">
+                    <input type="text" placeholder="Leave empty to not use private repo" name="private_config_repository" value="{{ fields['private_config_repository'] }}" />
+                </div>
+                <div class="option-desc">
+                    <div class="option-title">Private config repository name</div>
+                    <div class="option-alt">Use your own repository for storing gradeable configs. Will appear in the create/edit gradeable page</div>
+                </div>
+            </div>
+
+            <div class="option">
                 <div class="option-input"><input type="checkbox" name="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
                 <div class="option-desc">
                     <div class="option-title">Discussion Forum</div>
