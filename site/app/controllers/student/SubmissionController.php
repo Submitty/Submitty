@@ -67,6 +67,9 @@ class SubmissionController extends AbstractController {
             case 'delete_request':
                 return $this->deleteRequest();
                 break;
+            case 'change_request_status':
+                return $this->changeRequestStatus();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -86,7 +89,6 @@ class SubmissionController extends AbstractController {
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        echo($regrade_id);
         $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
@@ -111,7 +113,12 @@ class SubmissionController extends AbstractController {
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
     }
-
+    private function changeRequestStatus(){
+        $regrade_id = $_REQUEST['regrade_id'];
+        $status = $_REQUEST['status'];
+        $gradeable->setUserViewedDate(null);
+        $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
+    }
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);

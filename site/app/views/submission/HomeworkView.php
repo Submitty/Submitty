@@ -481,7 +481,7 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
      * @return string
      */
     public function showRegradeDiscussion(Gradeable $gradeable): string {
-                if ($gradeable->getRegradeStatus() === 0) {
+        if ($gradeable->getRegradeStatus() === 0) {
             $btn_type = "request";
             $url = $this->core->buildUrl(array('component' => 'student',
                 'action' => 'request_regrade',
@@ -489,24 +489,37 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
                 'student_id' => $this->core->getUser()->getId()
             ));
             $action = 'request_regrade';
-        } else if ($gradeable->getRegradeStatus() === -1) {
-            if ($this->core->getUser()->accessGrading()) {
-                $btn_type = "delete";
-                $url = $this->core->buildUrl(array('component' => 'student',
-                    'action' => 'delete_request',
-                    'gradeable_id' => $gradeable->getId(),
-                    'student_id' => $gradeable->getUser()->getId()
-                ));
-                $action = 'delete_request';
-            } else {
-                $btn_type = "addPost";
-                $url = $this->core->buildUrl(array('component' => 'student',
-                    'action' => 'make_request_post',
-                    'gradeable_id' => $gradeable->getId(),
-                    'student_id' => $gradeable->getUser()->getId()
-                ));
-                $action = 'make_request_post';
+        } 
+        else if($this->core->getUser()->accessGrading()){
+            if($gradeable->getRegradeStatus() === -1){
+                $btn_type = "admin";
+                    $url = $this->core->buildUrl(array('component' => 'student',
+                        'action' => 'make_request_post',
+                        'gradeable_id' => $gradeable->getId(),
+                        'student_id' => $gradeable->getUser()->getId(),
+                        'resolved' => false
+                    ));
+                $action = 'make_request_post_admin';
             }
+            else{
+                $btn_type = "cancel";
+                    $url = $this->core->buildUrl(array('component' => 'student',
+                        'action' => 'make_request_post',
+                        'gradeable_id' => $gradeable->getId(),
+                        'student_id' => $gradeable->getUser()->getId(),
+                        'resolved' => true
+                    ));
+                $action = 'make_request_post_admin';
+            }
+        }
+        else if ($gradeable->getRegradeStatus() === -1) {
+            $btn_type = "pending";
+            $url = $this->core->buildUrl(array('component' => 'student',
+                'action' => 'make_request_post',
+                'gradeable_id' => $gradeable->getId(),
+                'student_id' => $gradeable->getUser()->getId()
+            ));
+            $action = 'make_request_post';
         } else {
             $btn_type = "completed";
             $url = $this->core->buildUrl(array('component' => 'student',
