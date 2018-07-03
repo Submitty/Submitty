@@ -1058,7 +1058,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // Add the user selector later so the gradeable selector can be first
         if(count($selector_union_list) > 0) {
-            $selector_intersection_list[] = implode(' OR ', $selector_union_list);
+            $selector_intersection_list[] = '(' . implode(' OR ', $selector_union_list) . ')';
         }
 
         // Create the complete selector
