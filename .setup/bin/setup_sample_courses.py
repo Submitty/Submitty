@@ -642,7 +642,7 @@ class Course(object):
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
         self.gradeables.sort(key=lambda x: x.id)
-
+        self.course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, 'utf-8'))
@@ -751,25 +751,24 @@ class Course(object):
         gradeable_component_mark_data = Table('gradeable_component_mark_data', self.metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
-        course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
             gradeable.create(self.conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
-            form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
+            form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
-        if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
-            os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
+        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
+        if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
+            os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                      os.path.join(course_path, "ASSIGNMENTS.txt")))
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path,
+                                                      os.path.join(self.course_path, "ASSIGNMENTS.txt")))
+        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
-        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
+        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                     os.path.join(course_path, "test_*")))
+                                                     os.path.join(self.course_path, "test_*")))
         # On python 3, replace with os.makedirs(..., exist_ok=True)
-        os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
-        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
+        os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
+        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
         
         for gradeable in self.gradeables:
             #create_teams
@@ -783,7 +782,7 @@ class Course(object):
                     continue
             
             #creating the folder containing all the submissions
-            gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
+            gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
@@ -947,60 +946,11 @@ class Course(object):
                         grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                         self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                      gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-
-
         #This segment adds the sample forum posts for the sample course only
-        if(self.code == "sample"): 
-            #set sample course to have forum enabled by default
-            config = configparser.ConfigParser()    
-            config.read(os.path.join(course_path, "config", "config.ini"))
-            config.set("course_details", "forum_enabled", "true")
-            with open(os.path.join(course_path, "config", "config.ini"), 'w') as configfile:
-                config.write(configfile)
-            f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
-            forum_threads = Table("threads", self.metadata, autoload=True)
-            forum_posts = Table("posts", self.metadata, autoload=True)
-            forum_cat_list = Table("categories_list", self.metadata, autoload=True)
-            forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
-
-            for catData in f_data[2]:
-                self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
-
-            for thread_id, threadData in enumerate(f_data[1], start = 1):
-                self.conn.execute(forum_threads.insert(),
-                                  title=threadData[0],
-                                  created_by=threadData[1],
-                                  pinned=True if threadData[2] == "t" else False,
-                                  deleted=True if threadData[3] == "t" else False,
-                                  merged_thread_id=threadData[4],
-                                  merged_post_id=threadData[5],
-                                  is_visible=True if threadData[6] == "t" else False)
-                self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
-            counter = 1
-            for postData in f_data[0]:
-                if(postData[10] != "f" and postData[10] != ""):
-                    #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
-                    attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
-                    os.makedirs(attachment_path)
-                    os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(course_path, "forum_attachments", str(postData[0]))))
-                    copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
-                counter += 1
-                self.conn.execute(forum_posts.insert(),
-                                  thread_id=postData[0],
-                                  parent_id=postData[1],
-                                  author_user_id=postData[2],
-                                  content=postData[3],
-                                  timestamp=postData[4],
-                                  anonymous=True if postData[5] == "t" else False,
-                                  deleted=True if postData[6] == "t" else False,
-                                  endorsed_by=postData[7],
-                                  resolved = True if postData[8] == "t" else False,
-                                  type=postData[9],
-                                  has_attachment=True if postData[10] != "f" else False)
-
+        if self.code == "sample": 
+            self.add_sample_forum_data()
             print('Added forum data to sample course.') 
-        
-
+       
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
@@ -1097,6 +1047,54 @@ class Course(object):
                 ucounter+=1
             res.close()
         return json_team_history
+
+    def add_sample_forum_data(self):
+        #set sample course to have forum enabled by default
+        config = configparser.ConfigParser()    
+        config.read(os.path.join(self.course_path, "config", "config.ini"))
+        config.set("course_details", "forum_enabled", "true")
+        with open(os.path.join(self.course_path, "config", "config.ini"), 'w') as configfile:
+            config.write(configfile)
+        f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
+        forum_threads = Table("threads", self.metadata, autoload=True)
+        forum_posts = Table("posts", self.metadata, autoload=True)
+        forum_cat_list = Table("categories_list", self.metadata, autoload=True)
+        forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
+
+        for catData in f_data[2]:
+            self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
+
+        for thread_id, threadData in enumerate(f_data[1], start = 1):
+            self.conn.execute(forum_threads.insert(),
+                              title=threadData[0],
+                              created_by=threadData[1],
+                              pinned=True if threadData[2] == "t" else False,
+                              deleted=True if threadData[3] == "t" else False,
+                              merged_thread_id=threadData[4],
+                              merged_post_id=threadData[5],
+                              is_visible=True if threadData[6] == "t" else False)
+            self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
+        counter = 1
+        for postData in f_data[0]:
+            if(postData[10] != "f" and postData[10] != ""):
+                #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
+                attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
+                os.makedirs(attachment_path)
+                os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
+                copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
+            counter += 1
+            self.conn.execute(forum_posts.insert(),
+                              thread_id=postData[0],
+                              parent_id=postData[1],
+                                  author_user_id=postData[2],
+                              content=postData[3],
+                              timestamp=postData[4],
+                              anonymous=True if postData[5] == "t" else False,
+                              deleted=True if postData[6] == "t" else False,
+                              endorsed_by=postData[7],
+                              resolved = True if postData[8] == "t" else False,
+                              type=postData[9],
+                              has_attachment=True if postData[10] != "f" else False)
 
     def make_course_json(self):
         """
