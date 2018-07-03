@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ pageTitle }}</title>
+    <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
 
     {% for css_ref in css %}
@@ -24,10 +24,10 @@
     {% endfor %}
 </div>
 <div id="container">
-{% if navURLs|length > 0 %}
+{% if nav_urls|length > 0 %}
     <div id="nav">
         <ul>
-            {% for url in navURLs %}
+            {% for url in nav_urls %}
             <li>
                 <a href="{{ url.href }}">{{ url.title }}</a>
             </li>

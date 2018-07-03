@@ -68,8 +68,8 @@ class GlobalView extends AbstractView {
             "messages" => $messages,
             "css" => $css,
             "js" => $js,
-            "pageTitle" => $pageTitle,
-            "navURLs" => $navURLs,
+            "page_title" => $pageTitle,
+            "nav_urls" => $navURLs,
             "breadcrumbs" => $breadcrumbs,
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "site_url" => $this->core->getConfig()->getSiteUrl()
