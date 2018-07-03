@@ -12,6 +12,8 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
+echo ${PHP_USER}
+echo ${CGI_USER}
 
 #sudo chmod -R 755 /home/travis/build
 
