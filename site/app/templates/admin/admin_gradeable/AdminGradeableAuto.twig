@@ -1,11 +1,54 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
-    See samples here: <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty GitHub sample assignment configurations</a><br>
-    <kbd>/usr/local/submitty/more_autograding_examples/upload_only/config</kbd>  (an assignment without autograding)<br>
-    <kbd>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</kbd> (for a custom autograded homework)<br>
-    <kbd>/var/local/submitty/courses/{{ semester }}/{{ course }}/config_upload/#</kbd> (for a web uploaded configuration)<br>
-
-    <input style='width: 83%' type='text' id='config_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)" />
+    <fieldset>
+        <input type="radio" id="default_configs" class="config_option" value="true" {% if which_config_option == 0 %} checked = "true" {% endif %}/> Default configs
+        <input type="radio" id="uploaded_configs" class="config_option" value="false" {% if which_config_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
+        {% if repo_name != "" %}
+            <input type="radio" id="private_repository" class="config_option" value="false" {% if which_config_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
+        {% endif %}
+        <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_config_option == 3 %} checked = "true" {% endif %}/> Provide full path
+        <div class="div_select_config" id="div_default_configs" style="display: {% if which_config_option == 0 %} block {% else %} none {% endif %}">
+            <select class="select_config_path" id="select_default_config" style="width: 700px;">
+                <option value=""></option>
+                {% for path in default_config_paths %}
+                    {% if which_config_option == 0 and path == admin_gradeable.getEgConfigPath() %}
+                        <option value="{{ path }}" selected="selected">{{ path }}</option>
+                    {% else %}
+                        <option value="{{ path }}">{{ path }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_config_option == 1 %} block {% else %} none {% endif %}">
+            <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
+                <option value=""></option>
+                {% for path in all_uploaded_config_paths %}
+                    {% if which_config_option == 1 and path == admin_gradeable.getEgConfigPath() %}
+                        <option value="{{ path }}" selected="selected">{{ path }}</option>
+                    {% else %}
+                        <option value="{{ path }}">{{ path }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <a class="btn btn-primary" style="margin-top: 6px" href="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'upload_config'}) }}">Upload a config</a>
+        </div>
+        <div class="div_select_config" id="div_repository_configs" style="display: {% if which_config_option == 2 %} block {% else %} none {% endif %}">
+            <select class="select_config_path" id="select_repository_config" style="width: 700px;">
+                <option value=""></option>
+                {% for path in all_repository_config_paths %}
+                    {% if which_config_option == 2 and path == admin_gradeable.getEgConfigPath() %}
+                        <option value="{{ path }}" selected="selected">{{ path }}</option>
+                    {% else %}
+                        <option value="{{ path }}">{{ path }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <br />
+        <p>Current config setting:</p>
+        <input style='width: 83%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)"
+                {% if which_config_option != 3 %} disabled {% endif %}/>
+    </fieldset>
     <br /> <br />
 
     Should students be able to view submissions?
@@ -42,6 +85,13 @@
         </div>
         <br />
     </fieldset>
+    <h3>Build log:</h3>
+    {% if cmake_output is null %}
+        <pre>There is currently no build output.</pre>
+    {% else %}
+        <pre>{{ cmake_output }}</pre>
+    {% endif %}
+
 </div>
 
 <script type="text/javascript">
@@ -65,6 +115,42 @@
             // $('.pdf_page_input').hide();
             disableElementChildren('#pdf_page', true);
             disableElementChildren('.pdf_page_input', true);
+        }
+    }
+
+    function onConfigChange(){
+        $('.config_option').not(this).prop('checked', false);
+        if($('#default_configs').is(':checked')) {
+            $('.div_select_config').hide();
+            $('#div_default_configs').show();
+            $('#input_provide_full_path').prop('disabled', true);
+            $("#select_default_config").val($("#select_default_config option:first").val());
+        } else if($('#uploaded_configs').is(':checked')){
+            $('.div_select_config').hide();
+            $('#div_uploaded_configs').show();
+            $('#input_provide_full_path').prop('disabled', true);
+            $("#select_uploaded_config").val($("#select_uploaded_config option:first").val());
+        } else if($('#private_repository').is(':checked')){
+            $('.div_select_config').hide();
+            $('#div_repository_configs').show();
+            $('#input_provide_full_path').prop('disabled', true);
+            $("#select_repository_config").val($("#select_repository_config option:first").val());
+        } else {
+            $('.div_select_config').hide();
+            $('#input_provide_full_path').prop('disabled', false);
+        }
+    }
+
+    function onConfigPathChange(){
+        if($('#default_configs').is(':checked')) {
+            $('#input_provide_full_path').val($('#select_default_config').val());
+            $('#input_provide_full_path').change();
+        } else if($('#uploaded_configs').is(':checked')){
+            $('#input_provide_full_path').val($('#select_uploaded_config').val());
+            $('#input_provide_full_path').change();
+        } else if($('#private_repository').is(':checked')){
+            $('#input_provide_full_path').val($('#select_repository_config_config').val());
+            $('#input_provide_full_path').change();
         }
     }
 
@@ -95,5 +181,7 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="eg_student_view"]').change(onStudentViewChange);
+        $('.config_option').change(onConfigChange);
+        $('.select_config_path').change(onConfigPathChange);
     });
 </script>
