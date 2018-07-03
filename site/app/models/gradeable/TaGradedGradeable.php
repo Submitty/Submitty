@@ -226,13 +226,17 @@ class TaGradedGradeable extends AbstractModel {
     /**
      * Sets the date that the user viewed their grade
      * @param string|\DateTime $user_viewed_date The date or date string of when the user viewed their grade
-     * @throws \Exception if $grade_time is a string and failed to parse into a \DateTime object
+     * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
      */
     public function setUserViewedDate($user_viewed_date) {
         if ($user_viewed_date === null) {
             $this->user_viewed_date = null;
         } else {
-            $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
+            try {
+                $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
         }
         $this->modified = true;
     }

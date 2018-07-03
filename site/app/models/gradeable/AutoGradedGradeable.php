@@ -32,6 +32,7 @@ class AutoGradedGradeable extends AbstractModel {
      * @param Core $core
      * @param GradedGradeable $graded_gradeable
      * @param array $details
+     * @throws \InvalidArgumentException if any of the details are invalid or the graded gradeable is null
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);

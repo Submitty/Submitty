@@ -3,6 +3,7 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
+use app\exceptions\ValidationException;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\AdminGradeable;
@@ -987,7 +988,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @param string[]|null $users The ids of the users to get data for
      * @param string[]|null $teams The ids of the teams to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
-     * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
 
@@ -1387,6 +1388,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
+     * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfigs($ids) {
         if($ids === null) {
