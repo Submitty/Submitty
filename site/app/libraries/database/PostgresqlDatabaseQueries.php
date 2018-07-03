@@ -1072,8 +1072,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_user_id as user_id,
-              gd.gd_team_id AS team_id,
               gd.gd_overall_comment as overall_comment,
               gd.gd_user_viewed_date as user_viewed_date,
 
@@ -1113,11 +1111,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Aggregate Team User Data */
-              team.team_id as team_id,
-              team.array_user as array_user,
-              team.array_state as array_state,
+              team.team_id,
+              team.array_user,
+              team.array_state,
 
               /* User Submitter Data */
+              u.user_id,
               u.anon_id,
               u.user_firstname,
               u.user_preferred_firstname,
