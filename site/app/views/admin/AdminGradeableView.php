@@ -23,6 +23,7 @@ class AdminGradeableView extends AbstractView {
         $action           = "new"; //decides how the page's data is displayed
         $submit_text      = "Submit";
         $label_message    = "";
+        $title_prefix     = "Create New Gradeable";
         $gradeables_array = array();
 
         // Make sure the dates are strings
@@ -57,16 +58,12 @@ class AdminGradeableView extends AbstractView {
         //  sections to the array generated above
         foreach($admin_gradeable->getGradersAllSection() as $grader) {
             //parses the sections from string "{1, 2, 3, 4}" to a php array [1,2,3,4]
-            $sections = $grader['sections'];
-            $sections = ltrim($sections, '{');
-            $sections = rtrim($sections, '}');
-            $sections = explode(',', $sections);
-
-            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
+            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $grader['sections'];
         }
 
         // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
+            $title_prefix = "Editing Gradeable";
             $action        = "edit";
             $submit_text   = "Save Changes";
             $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
@@ -82,6 +79,7 @@ class AdminGradeableView extends AbstractView {
             "nav_tab"         => $nav_tab,
             "semester"        => $_GET['semester'],
             "course"          => $_GET['course'],
+            "modal_title"     => $title_prefix,
 
             // Graders Page Specific
             "all_graders"    => $graders

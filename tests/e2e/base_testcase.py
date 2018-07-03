@@ -1,7 +1,12 @@
 from __future__ import print_function
+
+import shutil
+import tempfile
 from datetime import date
 import os
 import unittest
+
+from urllib.parse import urlencode
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -38,6 +43,16 @@ class BaseTestCase(unittest.TestCase):
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-proxy-server')
+
+        self.download_dir = tempfile.mkdtemp(prefix="vagrant-submitty")
+        # https://stackoverflow.com/a/26916386/214063
+        profile = {
+            'download.prompt_for_download': False,
+            'download.default_directory': self.download_dir,
+            'download.directory_upgrade': True,
+            'plugins.plugins_disabled': ['Chrome PDF Viewer']
+        }
+        self.options.add_experimental_option('prefs', profile)
         self.user_id = user_id if user_id is not None else BaseTestCase.USER_ID
         self.user_name = user_name if user_name is not None else BaseTestCase.USER_NAME
         if user_password is None and user_id is not None:
@@ -49,16 +64,26 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.driver = webdriver.Chrome(options=self.options)
+        self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
 
     def tearDown(self):
         self.driver.quit()
+        shutil.rmtree(self.download_dir)
 
-    def get(self, url):
+    def get(self, url=None, parts=None):
+        if url is None:
+            # Can specify parts = [('semester', 's18'), ...]
+            self.assertIsNotNone(parts)
+            url = "/index.php?" + urlencode(parts)
+
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
+
+        # Frog robot
+        self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
 
     def log_in(self, url=None, title="Submitty", user_id=None, user_password=None, user_name=None):
         """
@@ -138,3 +163,11 @@ class BaseTestCase(unittest.TestCase):
         if today.month < 7:
             semester = "s" + str(today.year)[-2:]
         return semester
+
+    # https://stackoverflow.com/a/47366981/214063
+    def enable_download_in_headless_chrome(self, download_dir):
+        # add missing support for chrome "send_command"  to selenium webdriver
+        self.driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+        command_result = self.driver.execute("send_command", params)

@@ -239,6 +239,8 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+
+
 DRMEM_TAG=release_2.0.0_rc2
 DRMEM_VER=2.0.0-RC2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
@@ -257,14 +259,12 @@ popd > /dev/null
 
 #Set up website if not in worker mode
 if [ ${WORKER} == 0 ]; then
-    PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-
     # install composer which is needed for the website
     curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -294,10 +294,10 @@ if [ ${WORKER} == 0 ]; then
         phpenmod xdebug
 
         # In case you reprovision without wiping the drive, don't paste this twice
-        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/7.0/mods-available/xdebug.ini) ]
         then
             # Tell it to send requests to our host on port 9000 (PhpStorm default)
-            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+            cat << EOF >> /etc/php/7.0/mods-available/xdebug.ini
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
@@ -305,17 +305,17 @@ xdebug.remote_host=10.0.2.2
 EOF
         fi
 
-        if [ -z $(grep 'xdebug\.profiler_enable_trigger' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+        if [ -z $(grep 'xdebug\.profiler_enable_trigger' /etc/php/7.0/mods-available/xdebug.ini) ]
         then
             # Allow remote profiling and upload outputs to the shared folder
-            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+            cat << EOF >> /etc/php/7.0/mods-available/xdebug.ini
 xdebug.profiler_enable_trigger=1
 xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
         fi
     fi
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
@@ -328,12 +328,12 @@ EOF
     # you’ll need to increase both upload_max_filesize and
     # post_max_filesize
 
-    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/7.0/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -355,7 +355,7 @@ EOF
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
-    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
 fi
 
 # create directories and fix permissions
@@ -363,6 +363,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 #Set up database and copy down the tutorial repo if not in worker mode
 if [ ${WORKER} == 0 ]; then
+
     # create a list of valid userids and put them in /var/local/submitty/instructors
     # one way to create your list is by listing all of the userids in /home
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -372,19 +373,15 @@ if [ ${WORKER} == 0 ]; then
     # POSTGRES SETUP
     #################
     if [ ${VAGRANT} == 1 ]; then
-        PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}.[0-9]{1,}' | head -1)"
-        if [ ! -d "/etc/postgresql/${PG_VERSION}/pg_hba.conf" ]; then
-            # PG 10.x stopped putting the minor version in the folder name
-            PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
-        fi
-        cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
-        echo "Creating PostgreSQL users"
-        su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
-        echo "Finished creating PostgreSQL users"
+    	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
+    	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
+    	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+    	echo "Creating PostgreSQL users"
+    	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
+    	echo "Finished creating PostgreSQL users"
 
-        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-        service postgresql restart
+    	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+    	service postgresql restart
     fi
 fi
 
@@ -517,7 +514,7 @@ fi
 if [ ${WORKER} == 0 ]; then
     if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
-        echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
+        echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
         DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
         VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
@@ -581,7 +578,7 @@ fi
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
-    service php${PHP_VERSION}-fpm restart
+    service php7.0-fpm restart
     service postgresql restart
 fi
 
