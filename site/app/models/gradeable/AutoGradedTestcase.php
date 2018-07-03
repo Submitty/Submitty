@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 6/28/2018
- * Time: 4:36 PM
- */
 
 namespace app\models\gradeable;
 
@@ -46,7 +40,7 @@ class AutoGradedTestcase extends AbstractModel {
 
         // Load simple fields
         $this->view = boolval($details['view_testcase'] ?? true);
-        $this->message = Utils::prepareHtmlString($details['testcase_message' ?? '');
+        $this->message = Utils::prepareHtmlString($details['testcase_message'] ?? '');
 
         // Load the autochecks
         if (isset($details['autochecks'])) {

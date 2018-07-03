@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 6/19/2018
- * Time: 8:55 AM
- */
 
 namespace app\models\gradeable;
 
