@@ -88,6 +88,20 @@ class NavigationView extends AbstractView {
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
+	// ======================================================================================
+        // IMAGES BUTTON -- visible to limited access graders and up
+        // ======================================================================================
+        if ($this->core->getUser()->accessGrading()) {
+            $sections = $this->core->getUser()->getGradingRegistrationSections();
+                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                    $top_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                        "title" => "View Student Photos",
+                        "class" => "btn btn-primary"
+                    ]);
+                }
+        }
+
         // ======================================================================================
         // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
         // ======================================================================================
@@ -115,7 +129,7 @@ class NavigationView extends AbstractView {
         ]);
         // ======================================================================================
         // FORUM BUTTON
-        // ====================================================================================== 
+        // ======================================================================================
 
         if ($this->core->getConfig()->isForumEnabled()) {
             $top_buttons[] = new Button($this->core, [
