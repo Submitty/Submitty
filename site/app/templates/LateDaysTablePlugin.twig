@@ -43,8 +43,8 @@
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{gradeable.getAllowedLateDays()}}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDays() != 0) ? gradeable.getLateDays() : ""}}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(gradeable.getLateDayExceptions() != 0) ? gradeable.getLateDayExceptions() : ""}}</td>
-            <td {{ class }} {{ id }} align="center" style="padding:5px; border:thin solid black">{{attribute(status_array, loop.index0)}}</td>
-            <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(attribute(late_charged_array, loop.index0) != 0 ) ? attribute(late_charged_array, loop.index0) : ""}}</td>
+            <td {{ class }} {{ id }} align="center" style="padding:5px; border:thin solid black">{{status_array[loop.index0]}}</td>
+            <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{(late_charged_array[loop.index0] != 0 ) ? late_charged_array[loop.index0] : ""}}</td>
         </tr>
         {% set class = "" %}
     {% endfor %}
