@@ -752,7 +752,6 @@ class Course(object):
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                      os.path.join(course_path, "test_*")))
-
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
@@ -765,7 +764,9 @@ class Course(object):
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
                  gradeable.config_path is None):
+                #  Make sure the electronic gradeable is valid
                     continue
+            
             #creating the folder containing all the submissions
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
 
@@ -779,23 +780,22 @@ class Course(object):
                 submitted = False
                 team_id = None
                 if gradeable.team_assignment is True:
+                    #If gradeable is team assignment, then make sure to make a team_id and don't over submit
                     res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
                     ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                     temp = res.fetchall()
-
                     if len(temp) != 0:
                         team_id = temp[0][0]
+                        previous_submission = select([electronic_gradeable_version]).where(
+                            electronic_gradeable_version.c['team_id'] == team_id)
+                        res = self.conn.execute(previous_submission)
+                        if res.rowcount > 0:
+                            continue
+                        submission_path = os.path.join(gradeable_path, team_id)
                     else:
                         continue
                     res.close()
-                if team_id is not None:
-                    previous_submission = select([electronic_gradeable_version]).where(
-                                                  electronic_gradeable_version.c['team_id'] == team_id)
-                    res = self.conn.execute(previous_submission)
-                    if res.rowcount > 0:
-                        continue
-                    submission_path = os.path.join(gradeable_path, team_id)
-                else: 
+                else:
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
@@ -1019,6 +1019,14 @@ class Course(object):
         return forum_data
 
     def make_sample_teams(self, gradeable):
+        """
+        arg: any team gradeable
+
+        This function adds teams to the database and gradeable.
+
+        return: A json object filled with team information
+        """
+        assert gradeable.team_assignment
         json_team_history = {}
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
         teams_table = Table("teams", self.metadata, autoload=True)
