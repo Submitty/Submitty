@@ -12,8 +12,6 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
-echo ${PHP_USER}
-echo ${CGI_USER}
 
 #sudo chmod -R 755 /home/travis/build
 
@@ -33,7 +31,7 @@ sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.
 echo 'in travis setup, going to make data dir ' ${SUBMITTY_DATA_DIR}
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
-sudo mkdir -p ${SUBMITTY_DATA_DIR}
+sudo mkdir -p ${SUBMITTY_DATA_DIR}/courses
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
 sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
@@ -54,8 +52,8 @@ sudo echo "submitty_dbuser:submitty_dbuser" | sudo chpasswd
 
 sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
 sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
-sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
-sudo chmod 777         ${SUBMITTY_DATA_DIR}
+sudo chmod -R 777 ${SUBMITTY_INSTALL_DIR}
+sudo chmod -R 777 ${SUBMITTY_DATA_DIR}
 
 echo -e "/var/run/postgresql
 submitty_dbuser
