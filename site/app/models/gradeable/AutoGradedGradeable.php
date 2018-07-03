@@ -105,12 +105,12 @@ class AutoGradedGradeable extends AbstractModel {
      * @param bool $clamp True to clamp the output to 1
      * @return float percentage (0 to 1), or NAN if no visible percent or no active version
      */
-    public function getVisiblePercent($clamp = false) {
+    public function getNonHiddenPercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
         if($instance === null) {
             return NAN;
         }
-        return $instance->getVisiblePercent($clamp);
+        return $instance->getNonHiddenPercent($clamp);
     }
 
     /**

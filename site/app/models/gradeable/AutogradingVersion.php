@@ -84,7 +84,7 @@ class AutogradingVersion extends AbstractModel {
      * @param bool $clamp True to clamp the output to 1
      * @return float percentage (0 to 1), or NAN if no visible percent
      */
-    public function getVisiblePercent($clamp = false) {
+    public function getNonHiddenPercent($clamp = false) {
         $divisor = $this->graded_gradeable->getGradeable()->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
         $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit();
 
