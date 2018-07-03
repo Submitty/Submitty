@@ -66,8 +66,6 @@ SUBMITTY_DATA_DIR = args.data_dir
 if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R_OK | os.W_OK):
     raise SystemExit('Data directory {} does not exist or is not accessible'.format(SUBMITTY_DATA_DIR))
 
-SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT','Tutorial')
-
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 
@@ -264,8 +262,6 @@ config['daemon_gid'] = DAEMON_GID
 if args.worker:
     config['supervisor_user'] = SUPERVISOR_USER
 else:
-    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
-
     config['php_user'] = PHP_USER
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
@@ -409,7 +405,6 @@ config['autograding_log_path'] = AUTOGRADING_LOG_PATH
 config['timezone'] = tzlocal.get_localzone().zone
 
 if not args.worker:
-    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
     config['site_log_path'] = TAGRADING_LOG_PATH
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
