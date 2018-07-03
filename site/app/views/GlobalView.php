@@ -80,8 +80,8 @@ class GlobalView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getSubmittyDB()->getPrintQueries(),
-            "course_queries" => $this->core->getCourseDB()->getPrintQueries(),
+            "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
+            "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
         ]);
     }
 
