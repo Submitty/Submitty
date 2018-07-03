@@ -94,7 +94,7 @@ fi
 # Re-Read other variables from submitty_users.json
 # (eventually will remove these from the /usr/local/submitty/.setup/INSTALL_SUBMITTY.sh script)
 
-SUBMITTY_DATA_DIR=$(jq -r '.' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
 COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -160,7 +160,6 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__|$NUM_GRADING_SCHEDULER_WORKERS|g" $1
-
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
