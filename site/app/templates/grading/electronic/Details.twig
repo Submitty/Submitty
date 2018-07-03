@@ -76,7 +76,7 @@
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}
                     {% set display_section = gradeable.isGradeByRegistration() ? reg_section : rot_section %}
-                    <tr id="empty-team-row-{{ team.getId()}}">
+                    <tr id="empty-team-row-{{ team.getId() }}">
                         <td>
                             {{ loop.index }}
                         </td>
@@ -296,8 +296,8 @@
 {% macro render_column_team_members(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            {{ gradeable.getUser().getDisplayedFirstName()}}
-            {{ gradeable.getUser().getLastName()}}
+            {{ gradeable.getUser().getDisplayedFirstName() }}
+            {{ gradeable.getUser().getLastName() }}
         {% else %}
             {%- for member in gradeable.getTeam().getMembers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
