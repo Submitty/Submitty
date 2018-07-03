@@ -14,7 +14,7 @@ use app\libraries\Utils;
  *
  * @method DiffViewer getDiffViewer()
  * @method string getDescription()
- * @method String[][] getMessages()
+ * @method array[] getMessages()
  */
 class GradeableAutocheck extends AbstractModel {
     
@@ -27,7 +27,7 @@ class GradeableAutocheck extends AbstractModel {
     /** @var string Description to show for displaying the diff */
     protected $description = "";
     
-    /** @var String[][] Message to show underneath the description for a diff */
+    /** @var array[] Message to show underneath the description for a diff */
     protected $messages = array();
 
     /**

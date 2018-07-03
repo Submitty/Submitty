@@ -222,6 +222,8 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
 #               drwxr-s---       $CGI_USER        ta_www_group    uploads/split_pdf/
+#               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
+#               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
 #               drwxr-s---       $DAEMON_USER     ta_www_group    lichen/
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/config
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/provided_code
@@ -232,6 +234,8 @@ create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/re
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/checkout
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp
 create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
@@ -260,6 +264,7 @@ cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.ini ${course_dir}/config/
 chown ${PHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
 chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
+
 
 echo -e "Creating database ${DATABASE_NAME}\n"
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d postgres -c "CREATE DATABASE ${DATABASE_NAME}"

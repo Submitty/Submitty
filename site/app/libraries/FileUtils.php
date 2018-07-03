@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+use app\libraries\Utils;
 
 /**
  * Class FileUtils
@@ -25,7 +26,7 @@ class FileUtils {
     public static function getAllFiles($dir, $skip_files=array(), $flatten=false) {
 
         $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
-    
+
         // we ignore these files and folders as they're "junk" folders that are
         // not really useful in the context of our application that potentially
         // would just add a ton of additional files we wouldn't want or use
@@ -106,6 +107,42 @@ class FileUtils {
     }
 
     /**
+     * Copies all files from given dir ($src) and its subdirs into one destination folder, $dst
+     *
+     * @param string $src
+     * @param string $dst
+     * @param boolean $forceLowerCase, optional, default to true
+     */
+    public static function recursiveCopy($src, $dst, $forceLowerCase = true) {
+        $iter = new \RecursiveDirectoryIterator($src);
+        $files = array();
+        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
+            if ($iter->isDot()) {
+                $iter->next();
+                continue;
+            }
+            else if ($iter->isFile()) {
+                $extension = strtolower(pathinfo($iter->getFilename(), PATHINFO_EXTENSION));
+                if ($extension === 'png') { // just get all png file only
+                    $newFilename = $iter->getFilename();
+                    if (forceLowerCase) {
+                        $newFilename = strtolower($newFilename);
+                    }
+                    copy($src . '/' . $iter->getFilename(),$dst . '/' . $newFilename);
+                }
+            }
+            else if ($iter->isDir()) {
+                if (in_array($iter->getFilename(), array('__MACOSX'))) {
+                    $iter->next();
+                    continue;
+                }
+                FileUtils::recursiveCopy($src . '/' . $iter->getFilename(), $dst);
+            }
+            $iter->next();
+        }
+    }
+
+    /**
      * Remove all files inside of a dir, but leave the directory
      *
      * @param string $dir
@@ -182,7 +219,7 @@ class FileUtils {
         }
         return $return;
     }
-    
+
     /**
      * Given a path, return all directories in an array that are contained in that path, ignoring several
      * known names that are used for VCS, OS, or IDE systems that we can safely ignore.
@@ -231,7 +268,7 @@ class FileUtils {
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
-    
+
     /**
      * Given a file, returns its mimetype based on the file's so-called maagic bytes.
      *
@@ -246,7 +283,7 @@ class FileUtils {
         $mimetype = explode(";", $mimetype);
         return trim($mimetype[0]);
     }
-    
+
     /**
      * Given a filename of a zip, open the zip, and then read in each entry in the zip, getting its size
      * and then returning that to the user. If the file is not a zip, then the returned size should be 0.

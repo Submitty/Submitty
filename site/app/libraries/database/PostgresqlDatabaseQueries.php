@@ -711,10 +711,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return $this->course_db->rows();
     }
 
+    /**
+     * Gets the user id, user group, and rotating sections for all graders and
+     *  a given gradeable
+     * @param string $gradeable_id The id of the gradeable to get users for
+     * @return array An array, indexed by user id, of arrays with 'user_id', 'user_group', 'sections' (as int[])
+     */
     public function getGradersForAllRotatingSections($gradeable_id) {
         $this->course_db->query("
     SELECT
-        u.user_id, u.user_group, array_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
+        u.user_id, u.user_group, json_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
     FROM
         users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
     WHERE
@@ -731,7 +737,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach($rows as $row) {
-            $modified_rows[$row['user_id']] = $this->course_db->fromDatabaseToPHPArray($row['sections']);
+            $row['sections'] = json_decode($row['sections']);
+            $modified_rows[$row['user_id']] = $row;
         }
         return $modified_rows;
     }
