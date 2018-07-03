@@ -1124,7 +1124,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1166,9 +1166,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
                     $("#title").val(thread_title);
+                    $("#thread_status").val(thread_status);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1239,13 +1241,16 @@ function alterShowDeletedStatus(newStatus) {
 
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
                 thread_categories: categories_value,
+                thread_status: thread_status_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },

@@ -206,13 +206,13 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $categories_ids){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids){
 
         $this->course_db->beginTransaction();
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -232,8 +232,8 @@ class DatabaseQueries {
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
-    public function getThreadTitle($thread_id){
-        $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
+    public function getThread($thread_id){
+        $this->course_db->query("SELECT * FROM threads where id=?", array($thread_id));
         return $this->course_db->rows()[0];
     }
     public function setAnnouncement($thread_id, $onOff){
@@ -319,10 +319,10 @@ class DatabaseQueries {
         } return true;
     }
 
-    public function editThread($thread_id, $thread_title, $categories_ids) {
+    public function editThread($thread_id, $thread_title, $categories_ids, $status) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
+            $this->course_db->query("UPDATE threads SET title = ?, status = ? WHERE id = ?", array($thread_title, $status, $thread_id));
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", array($thread_id));
             foreach ($categories_ids as $category_id) {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));

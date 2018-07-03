@@ -57,6 +57,9 @@ class ForumController extends AbstractController {
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
+            case 'alter_thread_status':
+                $this->alterThreadStatus();
+                break;
             case 'get_threads':
                 $this->getThreads();
                 break;
@@ -287,6 +290,7 @@ class ForumController extends AbstractController {
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
@@ -304,7 +308,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -473,6 +477,7 @@ class ForumController extends AbstractController {
             if(!empty($_POST["title"])) {
                 $thread_id = $_POST["edit_thread_id"];
                 $thread_title = $_POST["title"];
+                $status = $_POST["thread_status"];
                 $categories_ids  = array();
                 if(!empty($_POST["cat"])) {
                     foreach ($_POST["cat"] as $category_id) {
@@ -482,7 +487,7 @@ class ForumController extends AbstractController {
                 if(!$this->isValidCategories($categories_ids)) {
                     return false;
                 }
-                return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids);
+                return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status);
             }
         }
         return null;
@@ -555,9 +560,22 @@ class ForumController extends AbstractController {
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
+        $thread_status = array_key_exists('thread_status', $_POST) && !empty($_POST["thread_status"]) ? explode("|", $_POST['thread_status']) : array();
+        foreach ($thread_status as &$status) {
+            $status = (int)$status;
+        }
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
-
+        // Filter thread list
+        if(!empty($thread_status)) {
+            $filtered = array();
+            foreach ($threads as &$thread) {
+                if(in_array($thread['status'], $thread_status)) {
+                    $filtered[] = $thread;
+                }
+            }
+            $threads = $filtered;
+        }
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
@@ -639,9 +657,10 @@ class ForumController extends AbstractController {
     }
 
     private function getThreadContent($thread_id, &$output){
-        $result = $this->core->getQueries()->getThreadTitle($thread_id);
+        $result = $this->core->getQueries()->getThread($thread_id);
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $output['thread_status'] = $result["status"];
     }
 
     public function showStats(){
@@ -673,7 +692,7 @@ class ForumController extends AbstractController {
             $date = date_create($posts[$i]["timestamp"]);
             $users[$user]["timestamps"][] = $function_date($date,"n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
-            $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
+            $users[$user]["thread_title"][] = $this->core->getQueries()->getThread($posts[$i]["thread_id"]);
 
 
         }

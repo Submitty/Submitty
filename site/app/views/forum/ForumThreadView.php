@@ -257,7 +257,7 @@ HTML;
 			<label for="thread_category"><h3>Categories</h3></label><br/>
 			<i>For no filter, unselect all categories</i><br/>
 			<center>
-			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;">
+			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;" data-ays-ignore="true">
 HTML;
 			for($i = 0; $i < count($categories); $i++){
 				$return .= <<<HTML
@@ -267,16 +267,21 @@ HTML;
 
 	$return .= <<<HTML
 				</select>
+				<select id="thread_status_select" class="form-control" multiple style="height: auto;" data-ays-ignore="true">
+		            <option value="0">Default</option>
+		            <option value="-1">Unresolved</option>
+		            <option value="1">Resolved</option>
+		        </select>
 				</center>
 				<br/>
 				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
+					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option, #thread_status_select option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
 					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
 				</div>
 
 				<script type="text/javascript">
 					$( document ).ready(function() {
-						$('#thread_category option').mousedown(function(e) {
+						$('#thread_category option, #thread_status_select option').mousedown(function(e) {
 							e.preventDefault();
 							var current_selection = $(this).prop('selected');
 							$(this).prop('selected', !current_selection);
@@ -352,6 +357,7 @@ HTML;
 								"post_content_placeholder" => "Enter your post here...",
 								"show_categories" => true,
 								"show_anon" => true,
+								"show_thread_status" => true,
 								"show_cancel_edit_form" => true,
 								"submit_label" => "Update Post",
 							]);
@@ -621,7 +627,19 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
-
+						if($thread['status'] !=0) {
+							if($thread['status'] == 1) {
+								$fa_icon = "fa-check-circle";
+								$fa_color = "green";
+							} else {
+								$fa_icon = "fa-clock-o";
+								$fa_color = "red";
+							}
+							$return .= <<<HTML
+							<i class="fa ${fa_icon}" style="position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
 						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
 							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -1034,6 +1052,7 @@ HTML;
 					"post_box_id" => 1,
 					"attachment_script" => true,
 					"show_anon" => true,
+					"show_thread_status" => true,
 					"show_announcement" => true,
 					"show_editcat" => true,
 					"submit_label" => "Submit Post",
