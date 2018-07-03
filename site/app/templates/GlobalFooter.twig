@@ -31,9 +31,20 @@
 </html>
 
 {% macro query_list(queries) %}
-    {% for query in queries %}
-        {{ loop.index }})
-        {{ query }}
-        <br>
-    {% endfor %}
+    <table>
+        <tr>
+            <th style="width: 2em"></th>
+            <th></th>
+        </tr>
+        {% for query in queries %}
+            <tr>
+                <td style="text-align: right;">
+                    {{ loop.index }}&nbsp;&nbsp;
+                </td>
+                <td>
+                    <pre style="display: inline">{{ query }}</pre>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endmacro %}
