@@ -103,6 +103,15 @@ def up(config):
     os.system("sed -i -e \"s|HWCGI_USER='hwcgi'|CGI_USER='submitty_cgi'|g\" "+INSTALL_SUBMITTY_filename)
     os.system("sed -i -e \"s|HWCRONPHP_GROUP='hwcronphp'|DAEMONPHP_GROUP='submitty_daemonphp'|g\" "+INSTALL_SUBMITTY_filename)
     os.chmod(INSTALL_SUBMITTY_filename, 0o500)
+
+
+    # repair & restart apache & phpfpm
+    APACHE_FILENAME="/etc/apache2/sites-enabled/submitty.conf"
+    os.system("sed -i -e \"s|hwcgi|submitty_cgi|g\" "+APACHE_FILENAME)
+    PHPFPM_FILENAME="/etc/php/7.0/fpm/pool.d/submitty.conf"
+    os.system("sed -i -e \"s|hwphp|submitty_php|g\" "+PHPFPM_FILENAME)
+    os.system("systemctl start apache2.service")
+    os.system("systemctl start php7.0-fpm.service")
     
     pass
 
@@ -183,5 +192,14 @@ def down(config):
     os.system("sed -i -e \"s|CGI_USER='submitty_cgi'|HWCGI_USER='hwcgi'|g\" "+INSTALL_SUBMITTY_filename)
     os.system("sed -i -e \"s|DAEMONPHP_GROUP='submitty_daemonphp'|HWCRONPHP_GROUP='hwcronphp'|g\" "+INSTALL_SUBMITTY_filename)
     os.chmod(INSTALL_SUBMITTY_filename, 0o500)
+
+    # repair & restart apache & phpfpm
+    APACHE_FILENAME="/etc/apache2/sites-enabled/submitty.conf"
+    os.system("sed -i -e \"s|submitty_cgi|hwcgi|g\" "+APACHE_FILENAME)
+    PHPFPM_FILENAME="/etc/php/7.0/fpm/pool.d/submitty.conf"
+    os.system("sed -i -e \"s|submitty_php|hwphp|g\" "+PHPFPM_FILENAME)
+    os.system("systemctl start apache2.service")
+    os.system("systemctl start php7.0-fpm.service")
+
     
     pass
