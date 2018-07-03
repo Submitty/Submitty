@@ -987,7 +987,7 @@ void TerminateProcess(float &elapsed, int childPID) {
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, 
-      const std::vector<std::string> actions,
+      const std::vector<nlohmann::json> actions,
       const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
