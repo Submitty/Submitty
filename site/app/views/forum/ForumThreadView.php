@@ -180,9 +180,14 @@ HTML;
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
-				$("form").areYouSure();
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
+				$(".edit_history_block").each(function() {
+					$(this).wrap( "<div></div>" );
+					$(this).parent().prepend("<button onclick='$(this).next().toggle();'> Show/Hide previous content </button>");
+					$(this).hide();
+				});
+				$("form").areYouSure();
 			});
 
 		</script>
@@ -705,7 +710,7 @@ HTML;
         //convert legacy htmlentities being saved in db
         $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
-
+		
         if(!empty($pre_post)){
             $post_content = $pre_post;
         }
@@ -744,8 +749,11 @@ HTML;
         if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
             $codeBracketString = "&NewLine;" . $codeBracketString;
         }
-
+        $edit_seperator_start = "&lbrack;EDIT&lowbar;BLOCK&rsqb;";
+        $edit_separator_end = "&lbrack;&sol;EDIT&lowbar;BLOCK&rsqb;";
+            
         $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		$post_content = str_replace($edit_separator_end, '</div>', str_replace($edit_seperator_start, '<div class="edit_history_block">', $post_content));
 
 		//end code segment handling
 		$return .= <<<HTML

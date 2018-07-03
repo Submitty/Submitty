@@ -751,6 +751,14 @@ table tr.table-header {
 .first_post .post_button {
 }
 
+.edit_history_block {
+    /*background-color: red;*/
+    border-color: #333;
+    border-radius: 3px;
+    border-width: thin;
+    margin-right: 5px;
+}
+
 #post_user_id {
     left:5px;
 }

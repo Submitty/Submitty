@@ -313,7 +313,9 @@ class DatabaseQueries {
 
     public function editPost($post_id, $content, $anon){
         try {
-            $this->course_db->query("UPDATE posts SET content = ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            $EDIT_SEPARATOR_START = "\n[EDIT_BLOCK]\n";
+            $EDIT_SEPARATOR_END = "\n[/EDIT_BLOCK]\n";
+            $this->course_db->query("UPDATE posts SET content =  ? || ? || content || ?, anonymous = ? where id = ?", array($content, $EDIT_SEPARATOR_START, $EDIT_SEPARATOR_END, $anon, $post_id));
         } catch(DatabaseException $dbException) {
             return false;
         } return true;
