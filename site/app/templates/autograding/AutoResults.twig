@@ -56,10 +56,10 @@
                     </div>
                 {% endif %}
                 {# /Details button #}
-
                 {# Badge #}
                 {% if testcase.hasPoints() %}
                     {% if can_view %}
+                        {{ testcase.getPoints() }}
                         {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                     {% else %}
                         <div class="badge">
@@ -70,7 +70,7 @@
                             {% endif %}
                         </div>
                     {% endif %}
-                {% elseif has_badges %}
+                {% elseif not has_badges %}
                     <div class="no-badge"></div>
                 {% endif %}
                 {# /Badge #}
