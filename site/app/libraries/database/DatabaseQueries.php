@@ -2473,13 +2473,13 @@ AND gc_id IN (
     /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
-     * @param Gradeable $gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
      * @param $user|null The id of the user to get data for
      * @param $team|null The id of the team to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeable(Gradeable $gradeable, $user, $team) {
+    public function getGradedGradeable(\app\models\gradeable\Gradeable $gradeable, $user, $team) {
         foreach ($this->getGradedGradeables([$gradeable], [$user], [$team]) as $gg) {
             return $gg;
         }
