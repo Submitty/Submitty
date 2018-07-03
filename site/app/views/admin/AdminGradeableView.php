@@ -20,10 +20,11 @@ class AdminGradeableView extends AbstractView {
 
 	    // TODO: all of this should be moved to the controller when it gets overhauled
 
-        $action               = "new"; //decides how the page's data is displayed
-        $submit_text          = "Submit";
-        $show_edit_warning    = false;
-        $gradeables_array = array();
+        $action            = "new"; //decides how the page's data is displayed
+        $submit_text       = "Submit";
+        $show_edit_warning = false;
+        $title_prefix      = "Create New Gradeable";
+        $gradeables_array  = array();
 
         // Make sure the dates are strings
         self::DateTimeToString($admin_gradeable->g_ta_view_start_date);
@@ -57,16 +58,12 @@ class AdminGradeableView extends AbstractView {
         //  sections to the array generated above
         foreach($admin_gradeable->getGradersAllSection() as $grader) {
             //parses the sections from string "{1, 2, 3, 4}" to a php array [1,2,3,4]
-            $sections = $grader['sections'];
-            $sections = ltrim($sections, '{');
-            $sections = rtrim($sections, '}');
-            $sections = explode(',', $sections);
-
-            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $sections;
+            $graders[$grader['user_group']][$grader['user_id']]['sections'] = $grader['sections'];
         }
 
         // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
+            $title_prefix      = "Editing Gradeable";
             $action            = "edit";
             $submit_text       = "Save Changes";
             $show_edit_warning = $admin_gradeable->getHasGrades();
@@ -82,6 +79,7 @@ class AdminGradeableView extends AbstractView {
             "nav_tab"             => $nav_tab,
             "semester"            => $_GET['semester'],
             "course"              => $_GET['course'],
+            "modal_title"         => $title_prefix,
 
             // Graders Page Specific
             "all_graders"         => $graders
