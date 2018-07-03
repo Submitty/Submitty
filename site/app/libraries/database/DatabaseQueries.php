@@ -3053,7 +3053,7 @@ AND gc_id IN (
      * Creates a new Ta Grade in the database along with its graded components/marks
      * @param TaGradedGradeable $ta_graded_gradeable
      */
-    public function createTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
+    private function createTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
         $submitter_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
         $is_team = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->isTeam();
         $params = [
@@ -3085,7 +3085,7 @@ AND gc_id IN (
      * Updates an existing Ta Grade in the database along with its graded components/marks
      * @param TaGradedGradeable $ta_graded_gradeable
      */
-    public function updateTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
+    private function updateTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
         // If the grade has been modified, then update its properties
         if ($ta_graded_gradeable->isModified()) {
             $params = [
@@ -3104,6 +3104,19 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+    }
+
+    /**
+     * Creates a Ta Grade in the database if it doesn't exist, otherwise it just updates it
+     * @param TaGradedGradeable $ta_graded_gradeable
+     */
+    public function saveTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
+        // Ta Grades are initialized to have an id of 0 if not loaded from the db, so use that to check
+        if($ta_graded_gradeable->getId() < 1) {
+            $this->createTaGradedGradeable($ta_graded_gradeable);
+        } else {
+            $this->updateTaGradedGradeable($ta_graded_gradeable);
+        }
     }
 
     /**
