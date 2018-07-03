@@ -11,6 +11,7 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 
 /**
@@ -130,18 +131,7 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
 
-        // Avoid divide-by-zero (== not a typo)
-        if($points_possible == 0) {
-            return NAN;
-        }
-        $result = $points_earned / $points_possible;
-
-        if ($result > 1.0 && $clamp === true) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return Utils::safeCalcPercent($points_earned, $points_possible, $clamp);
     }
 
     /**
@@ -167,13 +157,7 @@ class TaGradedGradeable extends AbstractModel {
             $components_graded += count($graded_component);
         }
 
-        // Avoid divide-by-zero (== not a typo)
-        if ($total_graders == 0) {
-            return NAN;
-        }
-
-        // Scale components graded to be between 0 and 1
-        return $components_graded / $total_graders;
+        return Utils::safeCalcPercent($components_graded, $total_graders, true);
     }
 
     /**

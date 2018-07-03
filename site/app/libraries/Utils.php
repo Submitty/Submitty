@@ -211,4 +211,28 @@ class Utils {
     public static function compareNullableGt($gtL, $gtR) {
         return $gtL !== null && $gtR !== null && $gtL > $gtR;
     }
+
+    /**
+     * Calculates a percent value (0 to 1) for the given dividend and divisor.
+     *  This method will suppress divide-by-zero warnings and just return NAN
+     * @param int $dividend The number being divided
+     * @param int $divisor The number to divide with
+     * @param bool $clamp If the result should be at most 1 (more than 100% impossible)
+     * @return float
+     */
+    public static function safeCalcPercent($dividend, $divisor, $clamp = false) {
+        if (intval($divisor) === 0) {
+            return NAN;
+        }
+
+        // Convert dividend to float so we don't truncate the quotient
+        $result = floatval($dividend) / $divisor;
+
+        if ($result > 1.0 && $clamp === true) {
+            return 1.0;
+        } else if ($result < 0.0) {
+            return 0.0;
+        }
+        return $result;
+    }
 }

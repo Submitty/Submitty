@@ -11,6 +11,7 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 
 /**
@@ -88,18 +89,7 @@ class AutogradingVersion extends AbstractModel {
         $divisor = $this->graded_gradeable->getGradeable()->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
         $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit();
 
-        // Avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
-            return NAN;
-        }
-        $result = floatval($dividend) / $divisor;
-
-        if ($clamp === true && $result > 1.0) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return Utils::safeCalcPercent($dividend, $divisor, $clamp);
     }
 
     /**
@@ -113,18 +103,7 @@ class AutogradingVersion extends AbstractModel {
         $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit() +
             $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
 
-        // avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
-            return NAN;
-        }
-        $result = floatval($dividend) / $divisor;
-
-        if ($clamp === true && $result > 1.0) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return Utils::safeCalcPercent($dividend, $divisor, $clamp);
     }
 
     /**
