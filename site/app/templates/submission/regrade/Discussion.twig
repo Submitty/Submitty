@@ -1,16 +1,16 @@
 <div><h3>Request Regrade
 {% if btn_type == "request" %}
     </h3></div>
-    <div><p class="red-message">Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p></div>
+    <div><p class="red-message">Warning: Frivolous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p></div>
     {% set message = "Request Regrade" %}
 {% elseif btn_type == "admin" %}
     <script type="text/javascript">
     toggleRegradeRequests();
     document.getElementById("ShowRegradeRequestButton").style.display = 'none'
     </script>
-    {% if resolved == true %}
-        <span><span class="fa fa-check" style="font-size: 16px;"></span>  
-        <span class="green-message">Regrade Request Has Been Reviewed</span></span>
+    {% if resolved == "true" %}
+        <span><span class="fa fa-hourglass" style="font-size: 16px;"></span> 
+        <span class="red-message">Regrade Request Awaiting Review</span></span> 
     {% else %}
         <span><span class="fa fa-hourglass" style="font-size: 16px;"></span> 
         <span class="red-message">Regrade Request Awaiting Review</span></span> 
@@ -26,7 +26,7 @@
     <span><span class="fa fa-hourglass" style="font-size: 16px;"></span> 
     <span class="red-message">Regrade Request Being Reviewed</span></span> 
     </h3></div>
-    <div><p class="red-message">Warning: Frivoulous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p></div> 
+    <div><p class="red-message">Warning: Frivolous requests may result in a grade deduction, loss of late days, or having to retake data structures!</p></div> 
     {% set message = "Additional Details" %}
     {% set button_message = "Submit Additional Information" %}
 {% elseif btn_type == "completed" %}
@@ -62,7 +62,7 @@
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-        <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Regrade Request" style="margin-top: 15px; float: right" onclick="cancelRegradeRequest({{ thread_id }});">
+        <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, 1));">
     </form>
 </div>
 {% elseif action == 'make_request_post_admin' %}
@@ -74,10 +74,10 @@
             'user_id': core.getUser().getId()
         }) }}">
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
-        <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, 1);">
+        <input type="submit" value="Respond and Resolve Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }} , 1);">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-        <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Regrade Request Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, 1);">
-        <input type="button" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, -1);">
+        <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Regrade Request Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }} , 1);">
+        <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, -1);">
     </form>
 </div>
 {% else %}

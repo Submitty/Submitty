@@ -92,11 +92,13 @@ class SubmissionController extends AbstractController {
         $content = $_POST['replyTextArea'];
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
         if($this->core->getQueries()->isStaffPost($user_id)){
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
+        //    $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
+        //    $gradeable->setUserViewedDate(null);
         }else{
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
+       //     $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
         }
     }
 
@@ -116,7 +118,9 @@ class SubmissionController extends AbstractController {
     private function changeRequestStatus(){
         $regrade_id = $_REQUEST['regrade_id'];
         $status = $_REQUEST['status'];
-        $gradeable->setUserViewedDate(null);
+       // $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+      //  $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
+      //  $gradeable->setUserViewedDate(null);
         $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
     }
     private function popUp() {
