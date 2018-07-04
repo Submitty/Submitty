@@ -42,7 +42,7 @@ class TaGradedGradeable extends AbstractModel {
      * @param Core $core
      * @param array $details A property-name-indexed array of values to construct with
      * @param GradedGradeable $graded_gradeable
-     * @throws \Exception If the 'user_viewed_date' in the $details array is an invalid DateTime/date-string
+     * @throws \InvalidArgumentException If any of the details are invalid or the graded gradeable is null
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
