@@ -79,10 +79,8 @@ chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
-    echo 'do b chown'
     chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
-    echo 'do a chown' "${DAEMON_GROUP}" "thing"
     chown -R root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils

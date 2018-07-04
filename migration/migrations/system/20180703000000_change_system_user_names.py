@@ -34,7 +34,14 @@ def up(config):
     INSTALL_SUBMITTY_filename = str(Path(config.submitty['submitty_install_dir'], '.setup', 'INSTALL_SUBMITTY.sh'))
     
     print ("my path",killall_path)
-    
+
+    # stop the old scheduler daemon, if it is still in use -- was deprecated in early Spring 2018
+    os.system("systemctl stop submitty_grading_scheduler")
+    try:
+        os.remove("/etc/systemd/system/submitty_grading_scheduler.service")
+    except OSError:
+        pass
+
     # stop all jobs that are using hwphp and hwcron
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_autograding_shipper")
