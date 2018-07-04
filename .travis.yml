@@ -131,7 +131,6 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - which composer
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
         - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
@@ -182,8 +181,6 @@ jobs:
         - sleep 3 # give xvfb some time to start
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
-        - cat /var/log/apache2/submitty.log
-        - cat /var/log/apache2/submitty-error.log
     - <<: *03-e2e
       php: 7.1
       if: branch = master OR type = pull_request
