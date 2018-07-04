@@ -116,10 +116,14 @@ def up(config):
     os.system("sed -i -e \"s|hwcgi|submitty_cgi|g\" "+APACHE_FILENAME)
     APACHE_FILENAME2="/etc/apache2/sites-enabled/submitty_http.conf"
     os.system("sed -i -e \"s|hwcgi|submitty_cgi|g\" "+APACHE_FILENAME2)
+    APACHE_FILENAME3="/etc/apache2/sites-enabled/vcs.conf"
+    os.system("sed -i -e \"s|hwcgi|submitty_cgi|g\" "+APACHE_FILENAME3)
     PHPFPM_FILENAME="/etc/php/7.0/fpm/pool.d/submitty.conf"
     os.system("sed -i -e \"s|hwphp|submitty_php|g\" "+PHPFPM_FILENAME)
     os.system("systemctl start apache2.service")
     os.system("systemctl start php7.0-fpm.service")
+
+    print ("finished migration changing system user names")
     
     pass
 
@@ -206,9 +210,13 @@ def down(config):
     os.system("sed -i -e \"s|submitty_cgi|hwcgi|g\" "+APACHE_FILENAME)
     APACHE_FILENAME2="/etc/apache2/sites-enabled/submitty_http.conf"
     os.system("sed -i -e \"s|submitty_cgi|hwcgi|g\" "+APACHE_FILENAME2)
+    APACHE_FILENAME3="/etc/apache2/sites-enabled/vcs.conf"
+    os.system("sed -i -e \"s|submitty_cgi|hwcgi|g\" "+APACHE_FILENAME3)
     PHPFPM_FILENAME="/etc/php/7.0/fpm/pool.d/submitty.conf"
     os.system("sed -i -e \"s|submitty_php|hwphp|g\" "+PHPFPM_FILENAME)
     os.system("systemctl start apache2.service")
     os.system("systemctl start php7.0-fpm.service")
+
+    print ("finished rollback of migration changing system user names")
 
     pass
