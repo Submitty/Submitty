@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 This does a more partial reset of the system compared to reset_system.py, primarily not wiping
-various changes like removing DB users, all created users (including system ones like hwphp,
-hwcgi, etc.), removing networking stuff, etc.
+various changes like removing DB users, all created users (including system ones like PHP_USER, 
+CGI_USER, etc.), removing networking stuff, etc.
 
 This script acts more like the inverse of "setup_sample_courses.py" so that we could only run
 these two scripts in opposition and not end up in a corrupted system state. This gives us a
@@ -108,13 +108,13 @@ def main():
         with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
             submitty_config_json = json.load(submitty_config)
             os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
-        os.system('psql -d postgres -U hsdbu -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
+        os.system('psql -d postgres -U submitty_dbuser -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
                   'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
                   'pid <> pg_backend_pid();"')
-        os.system("psql -U hsdbu --list | grep submitty* | awk '{print $1}' | "
-                  "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
-        os.system('psql -d postgres -U hsdbu -c "CREATE DATABASE submitty"')
-        os.system('psql -d submitty -U hsdbu -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
+        os.system("psql -U submitty_dbuser --list | grep submitty* | awk '{print $1}' | "
+                  "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
+        os.system('psql -d postgres -U submitty_dbuser -c "CREATE DATABASE submitty"')
+        os.system('psql -d submitty -U submitty_dbuser -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
