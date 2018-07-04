@@ -34,7 +34,7 @@ class GradedGradeable extends AbstractModel {
      * @param Core $core
      * @param Gradeable $gradeable The gradeable associated with this grade
      * @param Submitter $submitter The user or team who submitted for this graded gradeable
-     * @throws \Exception If the 'user_viewed_date' in the $details array is an invalid DateTime/date-string
+     * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
     public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter) {
         parent::__construct($core);

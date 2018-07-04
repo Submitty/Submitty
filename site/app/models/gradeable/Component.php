@@ -67,7 +67,14 @@ class Component extends AbstractModel {
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = array();
 
-
+    /**
+     * Component constructor.
+     * @param Core $core
+     * @param Gradeable $gradeable
+     * @param $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid, or the gradeable was null
+     * @throws ValidationException If the provided point details are incompatible
+     */
     public function __construct(Core $core, Gradeable $gradeable, $details) {
         parent::__construct($core);
 
