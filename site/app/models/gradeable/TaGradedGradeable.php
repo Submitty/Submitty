@@ -13,6 +13,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\models\User;
 
 /**
  * Class TaGradedGradeable
@@ -92,6 +93,100 @@ class TaGradedGradeable extends AbstractModel {
         return $details;
     }
 
+    /**
+     * Gets all component grades for a given component
+     * @param int $component_id The id of the component to get grades for
+     * @return GradedComponent[] An array of component grades (empty if non exist)
+     */
+    public function getGradedComponentsByComponentId($component_id) {
+        return $this->graded_components[$component_id] ?? [];
+    }
+
+    /**
+     * Used to retrieve existing graded components or generate new ones based on component
+     *  type and the provided parameters
+     * TODO: document this more.  It does what you want in most situations, but that isn't an excuse for bad docs
+     * @param Component $component The component the grade is for
+     * @param User $grader The grader for this component
+     * @param bool $generate If a new graded component should be generated if none were found
+     * @return GradedComponent|null The graded component instance or null if not found
+     * @throws \InvalidArgumentException If $grader is null and ($component is peer or $generate is true)
+     */
+    public function getGradedComponent(Component $component, User $grader, $generate = false) {
+
+        $grades_exist = isset($this->graded_components[$component->getId()]);
+        if($grader === null) {
+            // If the grader is null and its a peer component, we can't do anything useful
+            if($component->isPeer()) {
+                throw new \InvalidArgumentException('Cannot get peer graded component with null grader');
+            }
+
+            // Grades exist, not a peer component, so grab the first grade
+            if($grades_exist) {
+                return $this->graded_components[$component->getId()][0];
+            }
+
+            // If no grader is provided we can't generate a graded component
+            if($generate) {
+                throw new \InvalidArgumentException('Cannot generate graded component with null grader');
+            }
+
+            // No grades exist, not trying to generate, not peer, no grader, so can't do anything
+            return null;
+        }
+
+        //
+        // Grader not null
+        //
+
+        if($component->isPeer()) {
+            // Try to find existing graded component for this component and user...
+            /** @var GradedComponent[] $component_grades */
+            $component_grades = $this->graded_components[$component->getId()] ?? [];
+            $graded_component = null;
+            foreach ($component_grades as $component_grade) {
+                if($component_grade->getGrader()->getId() === $grader->getId()){
+                    $graded_component = $component_grade;
+                }
+            }
+
+            // ... Found one
+            if($graded_component !== null) {
+                return $graded_component;
+            }
+
+            // None found, but generate one (append to array)
+            if($generate) {
+                return $this->graded_components[$component->getId()][] =
+                    new GradedComponent($this->core, $component, $grader, []);
+            }
+
+            // None found. Don't generate one
+            return null;
+        }
+
+        //
+        // Not peer component
+        //
+
+        // Grades exist for component, so get the only one
+        if($grades_exist) {
+            /** @var GradedComponent $graded_component */
+            $graded_component = $this->graded_components[$component->getId()][0];
+            $graded_component->setGrader($grader);
+            return $graded_component;
+        }
+
+        // Grades don't exist, but generate one (at zero index of array)
+        if($generate) {
+            return $this->graded_components[$component->getId()][0] =
+                new GradedComponent($this->core, $component, $grader, []);
+        }
+
+        // Grades don't exist.  Don't generate one
+        return null;
+    }
+    
     /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
