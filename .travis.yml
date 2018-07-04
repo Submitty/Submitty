@@ -181,6 +181,8 @@ jobs:
         - sleep 3 # give xvfb some time to start
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+        - cat /var/log/apache2/submitty.log
+        - cat /var/log/apache2/submitty-error.log
     - <<: *03-e2e
       php: 7.1
       if: branch = master OR type = pull_request
