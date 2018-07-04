@@ -11,6 +11,7 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 
 /**
@@ -131,18 +132,7 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
 
-        // Avoid divide-by-zero (== not a typo)
-        if($points_possible == 0) {
-            return NAN;
-        }
-        $result = $points_earned / $points_possible;
-
-        if ($result > 1.0 && $clamp === true) {
-            return 1.0;
-        } else if ($result < 0) {
-            return 0.0;
-        }
-        return $result;
+        return Utils::safeCalcPercent($points_earned, $points_possible, $clamp);
     }
 
     /**
@@ -168,13 +158,7 @@ class TaGradedGradeable extends AbstractModel {
             $components_graded += count($graded_component);
         }
 
-        // Avoid divide-by-zero (== not a typo)
-        if ($total_graders == 0) {
-            return NAN;
-        }
-
-        // Scale components graded to be between 0 and 1
-        return $components_graded / $total_graders;
+        return Utils::safeCalcPercent($components_graded, $total_graders, true);
     }
 
     /**
@@ -226,13 +210,17 @@ class TaGradedGradeable extends AbstractModel {
     /**
      * Sets the date that the user viewed their grade
      * @param string|\DateTime $user_viewed_date The date or date string of when the user viewed their grade
-     * @throws \Exception if $grade_time is a string and failed to parse into a \DateTime object
+     * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
      */
     public function setUserViewedDate($user_viewed_date) {
         if ($user_viewed_date === null) {
             $this->user_viewed_date = null;
         } else {
-            $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
+            try {
+                $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
         }
         $this->modified = true;
     }

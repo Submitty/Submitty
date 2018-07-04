@@ -61,7 +61,7 @@ class GradedComponent extends AbstractModel {
      * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
      * @param array $details any remaining properties
-     * @throws \Exception if the 'grade_time' value in the $details array is not a valid DateTime/date-string
+     * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
     public function __construct(Core $core, Component $component, User $grader, array $details) {
         parent::__construct($core);
@@ -165,13 +165,17 @@ class GradedComponent extends AbstractModel {
     /**
      * Sets the last time this component data was changed
      * @param \DateTime|string $grade_time Either a \DateTime object, or a date-time string
-     * @throws \Exception if $grade_time is a string and failed to parse into a \DateTime object
+     * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
      */
     public function setGradeTime($grade_time) {
         if ($grade_time === null) {
             $this->grade_time = null;
         } else {
-            $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
+            try {
+                $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
         }
         $this->modified = true;
     }
