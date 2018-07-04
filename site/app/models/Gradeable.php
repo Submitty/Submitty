@@ -1033,7 +1033,15 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
-    
+
+    public function hasBuildError(){
+        $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
+        if(strpos(file_get_contents($build_file),"error") !== false) {
+            return true;
+        }
+        return false;
+    }
+
     public function validateVersions($active_check = null) {
         //active check is the gradeable version this gradeable has
         if($active_check === null) {

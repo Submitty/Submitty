@@ -113,7 +113,7 @@ class NavigationView extends AbstractView {
             ]);
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
-                "title" => "Upload Config & Review Build Output",
+                "title" => "Upload Config",
                 "class" => "btn btn-primary"
             ]);
 
@@ -529,10 +529,14 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getRebuildButton(Gradeable $gradeable) {
+        $class = "btn btn-default btn-nav";
+        if($gradeable->hasBuildError()){
+            $class = "btn btn-danger btn-nav";
+        }
         $button = new Button($this->core, [
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "class" => $class
         ]);
         return $button;
     }
