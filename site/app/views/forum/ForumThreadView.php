@@ -254,8 +254,8 @@ HTML;
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
 
 		<div id="category_wrapper" class="popup-form" style="width: 50%;">
-			<label for="thread_category"><h3>Categories</h3></label><br/>
-			<i>For no filter, unselect all categories</i><br/>
+			<label><h3>Filter by Categories/Status</h3></label><br/>
+			<i>Please unselect all options for removing filter.</i><br/>
 			<center>
 			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;" data-ays-ignore="true">
 HTML;
@@ -267,6 +267,7 @@ HTML;
 
 	$return .= <<<HTML
 				</select>
+				&nbsp;
 				<select id="thread_status_select" class="form-control" multiple style="height: auto;" data-ays-ignore="true">
 		            <option value="0">Default</option>
 		            <option value="-1">Unresolved</option>
