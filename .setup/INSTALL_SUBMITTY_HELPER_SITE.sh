@@ -39,7 +39,6 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
 fi
 
 # install composer dependencies and generate classmap
-echo ${PHP_USER}
 su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader"
 
 # TEMPORARY (until we have generalized code for generating charts in html)
