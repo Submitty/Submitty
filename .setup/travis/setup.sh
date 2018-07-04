@@ -64,10 +64,8 @@ http://localhost/git
 
 ${AUTH_METHOD}" | sudo python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-WRITE='export PATH=$PATH'
-
-sudo bash -c "echo '${WRITE}' >> /home/${PHP_USER}/.profile"
-sudo bash -c "echo '${WRITE}' >> /home/${PHP_USER}/.bashrc"
+sudo bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
+sudo bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 sudo usermod -a -G travis ${PHP_USER}
 
