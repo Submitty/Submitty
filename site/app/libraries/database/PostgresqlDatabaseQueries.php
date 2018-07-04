@@ -892,7 +892,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Returns array of User objects for users with given User IDs
      * @param string[] $user_ids
-     * @return User[]
+     * @return User[] The user objects, indexed by user id
      */
     public function getUsersById(array $user_ids) {
         if (count($user_ids) === 0) {
@@ -927,7 +927,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Return array of Team objects for teams with given Team IDs
      * @param string[] $team_ids
-     * @return Team[]
+     * @return Team[] The team objects, indexed by team id
      */
     public function getTeamsById(array $team_ids) {
         if (count($team_ids) === 0) {
