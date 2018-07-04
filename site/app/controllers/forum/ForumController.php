@@ -57,9 +57,6 @@ class ForumController extends AbstractController {
             case 'remove_announcement':
                 $this->alterAnnouncement(0);
                 break;
-            case 'alter_thread_status':
-                $this->alterThreadStatus();
-                break;
             case 'get_threads':
                 $this->getThreads();
                 break;
