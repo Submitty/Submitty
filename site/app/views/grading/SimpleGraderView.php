@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Component;
 use app\models\User;
 use app\views\AbstractView;
@@ -11,17 +12,17 @@ class SimpleGraderView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
-     * @param Gradeable[] $rows
+     * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables (potentially blanks)
      * @param array       $graders
-     *
+     * @param string $section_type
      * @return string
      */
-    public function simpleDisplay($gradeable, $rows, $graders, $section_type) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $graders, $section_type) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
         // Limited grader does not have "View All"
-        // If nothing to grade, Instuctor will see all sections
+        // If nothing to grade, Instructor will see all sections
         if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
             $view = 'all';
         } else {
@@ -36,19 +37,19 @@ class SimpleGraderView extends AbstractView {
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
 
         // Get all the names/ids from all the students
-        $student_full = array();
-        foreach ($rows as $gradeable_row) {
-            $student_full[] = array('value' => $gradeable_row->getUser()->getId(),
-                'label' => $gradeable_row->getUser()->getDisplayedFirstName() . ' ' . $gradeable_row->getUser()->getLastName() . ' <' . $gradeable_row->getUser()->getId() . '>');
-        }
-        $student_full = json_encode($student_full);
+        $student_full = json_encode(array_map(function(GradedGradeable $gg) {
+            return ['value' => $gg->getSubmitter()->getId(),
+                'label' => $gg->getSubmitter()->getUser()->getDisplayedFirstName() . ' '
+                    . $gg->getSubmitter()->getUser()->getLastName()
+                    . ' <' . $gg->getSubmitter()->getId() . '>'];
+        }, $graded_gradeables));
 
         $components_numeric = [];
         $components_text = [];
 
         $comp_ids = array();
         foreach ($gradeable->getComponents() as $component) {
-            if ($component->getIsText()) {
+            if ($component->isText()) {
                 $components_text[] = $component;
             } else {
                 $components_numeric[] = $component;
@@ -62,11 +63,11 @@ class SimpleGraderView extends AbstractView {
         $sections = array();
 
         // Iterate through every row
-        foreach ($rows as $gradeable_row) {
+        foreach ($graded_gradeables as $graded_gradeable) {
             if ($gradeable->isGradeByRegistration()) {
-                $section = $gradeable_row->getUser()->getRegistrationSection();
+                $section = $graded_gradeable->getSubmitter()->getUser()->getRegistrationSection();
             } else {
-                $section = $gradeable_row->getUser()->getRotatingSection();
+                $section = $graded_gradeable->getSubmitter()->getUser()->getRotatingSection();
             }
 
             $display_section = ($section === null) ? "NULL" : $section;
@@ -79,9 +80,9 @@ class SimpleGraderView extends AbstractView {
                     "rows" => [],
                 ];
             }
-            $sections[$section]["rows"][] = $gradeable_row;
+            $sections[$section]["rows"][] = $graded_gradeable;
 
-            if ($gradeable_row->getUser()->getRegistrationSection() != "") {
+            if ($graded_gradeable->getSubmitter()->getUser()->getRegistrationSection() != "") {
                 $num_users++;
             }
         }

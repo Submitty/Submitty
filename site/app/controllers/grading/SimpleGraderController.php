@@ -154,7 +154,7 @@ class SimpleGraderController extends GradingController  {
             $sort_key = "u.user_lastname";
         }
         if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all") && !$this->core->getUser()->accessAdmin()){
-            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $sections, $graders, $section_key);
+            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, [], $graders, $section_key);
             return;
         }
         if ((isset($_GET['view']) && $_GET['view'] === "all") || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
@@ -167,6 +167,7 @@ class SimpleGraderController extends GradingController  {
             }
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
+        // TODO: rows needs to be GradedGradeable's
         $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $graders, $section_key);
     }
