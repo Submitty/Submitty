@@ -57,7 +57,7 @@ sudo chmod -R 777 ${SUBMITTY_DATA_DIR}
 
 echo -e "/var/run/postgresql
 submitty_dbuser
-submitty_dbuser
+submitty_dbpass
 America/New_York
 http://localhost
 http://localhost/git
