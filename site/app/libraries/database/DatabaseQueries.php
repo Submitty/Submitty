@@ -2456,7 +2456,7 @@ AND gc_id IN (
     /**
      * Returns array of User objects for users with given User IDs
      * @param string[] $user_ids
-     * @return User[]
+     * @return User[] The user objects, indexed by user id
      */
     public function getUsersById(array $user_ids) {
         throw new NotImplementedException();
@@ -2465,7 +2465,7 @@ AND gc_id IN (
     /**
      * Return array of Team objects for teams with given Team IDs
      * @param string[] $team_ids
-     * @return Team[]
+     * @return Team[] The team objects, indexed by team id
      */
     public function getTeamsById(array $team_ids) {
         throw new NotImplementedException();
