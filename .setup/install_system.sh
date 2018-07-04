@@ -20,6 +20,17 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+
+# USERS / GROUPS
+DAEMON_USER=submitty_daemon
+DAEMON_GROUP=submitty_daemon
+PHP_USER=submitty_php
+PHP_GROUP=submitty_php
+CGI_USER=submitty_cgi
+CGI_GROUP=submitty_cgi
+
+DAEMONPHP_GROUP=submitty_daemonphp
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -48,7 +59,9 @@ else
     export WORKER=0
 fi
 
-COURSE_BUILDERS_GROUP=course_builders
+COURSE_BUILDERS_GROUP=submitty_course_builders
+DB_USER=submitty_dbuser
+DATABASE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -78,13 +91,14 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # accounts, although you can also use ‘sudo su user’ to change to the
 # desired user on the local machine which works for most things.
 
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
+# The group DAEMONPHP_GROUP allows the PHP_USER to write the
+# submissions, but give read-only access to the DAEMON_USER.  And the
+# DAEMON_USER writes the results, and gives read-only access to the
+# PHP_USER.
 
-addgroup hwcronphp
+addgroup ${DAEMONPHP_GROUP}
 
-# The group course_builders allows instructors/head TAs/course
+# The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
 addgroup ${COURSE_BUILDERS_GROUP}
@@ -99,40 +113,41 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwphp hwcronphp
+    adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
+    usermod -a -G www-data "${CGI_USER}"
+    # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
+    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
-    adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwcgi hwphp
-    adduser hwcgi www-data
-    adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    # NOTE: hwcgi must be in the shadow group so that it has access to the
+    # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
-    adduser hwcgi shadow
+    usermod -a -G shadow "${CGI_USER}"
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
-    # the hwphp and hwcron single user groups.  See also /etc/login.defs
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+    # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and hwcron needs access to them for autograding
-adduser hwcron www-data
+adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
+# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
+usermod -a -G www-data "${DAEMON_USER}"
 
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
 if [ ${VAGRANT} == 1 ]; then
-	# add these users so that they can write to .vagrant/logs folder
+    # add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser hwphp vagrant
-    	adduser hwcgi vagrant
+        usermod -a -G vagrant "${PHP_USER}"
+        usermod -a -G vagrant "${CGI_USER}"
     fi
-	adduser hwcron vagrant
+    usermod -a -G vagrant "${DAEMON_USER}"
 fi
 
-usermod -aG docker hwcron
+usermod -a G docker "${DAEMON_GROUP}"
 
 pip3 install -U pip
 pip3 install python-pam
@@ -161,7 +176,7 @@ sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
-    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 fi
 
 #################################################################
@@ -454,8 +469,8 @@ else
         SUBMISSION_URL='http://192.168.56.101'
     fi
     echo -e "/var/run/postgresql
-    hsdbu
-    hsdbu
+    ${DB_USER}
+    ${DATABASE_PASSWORD}
     America/New_York
     ${SUBMISSION_URL}
     ${GIT_URL}/git
@@ -469,20 +484,20 @@ fi
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
-    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+    dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty"
     python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 fi
 
@@ -527,17 +542,17 @@ if [ ${WORKER} == 0 ]; then
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
@@ -569,10 +584,10 @@ fi
 # cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
 # cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-# chown hwcron:hwcron -R /tmp/docker
+# chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
 # pushd /tmp/docker
-# su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+# su -c 'docker build -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
 # popd > /dev/null
 
 
