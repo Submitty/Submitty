@@ -179,15 +179,15 @@ class SimpleGraderController extends GradingController  {
         }
         $g_id = $_REQUEST['g_id'];
         $user_id = $_REQUEST['user_id'];
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
-        if($graded_gradeable === null) {
-            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $user_id));
-            $graded_gradeable->setTaGradedGradeable(new TaGradedGradeable($this->core, $graded_gradeable, []));
-        }
-        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
 
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinGradingGroup()) {
+        $grader = $this->core->getUser();
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null) ??
+            new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $user_id));
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable(true);
+
+        // FIXME: permission check
+        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
@@ -216,8 +216,7 @@ class SimpleGraderController extends GradingController  {
 
         foreach ($gradeable->getComponents() as $component) {
             if (isset($_POST['scores'][$component->getId()])) {
-                $component_grades = $ta_graded_gradeable->getGradedComponents()[$component->getId()] ?? [];
-                $component_grade = $component_grades[0] ?? new GradedComponent($this->core, $component, $this->core->getUser(), []);
+                $component_grade = $ta_graded_gradeable->getGradedComponent($component, $grader, true);
 
                 if ($component->isText()){
                     $component_grade->setComment($_POST['scores'][$component->getId()]);
@@ -230,10 +229,8 @@ class SimpleGraderController extends GradingController  {
                     }
                     $component_grade->setScore($_POST['scores'][$component->getId()]);
                 }
-                $component_grade->setGrader($this->core->getUser());
+                $component_grade->setGrader($grader);
                 $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                
-                $component_grades[0] = [$component_grade];
             }
         }
 
@@ -249,9 +246,13 @@ class SimpleGraderController extends GradingController  {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $grader = $this->core->getUser();
+
+        //FIXME: permission check (not reusing other permission checks)
+        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -268,7 +269,15 @@ class SimpleGraderController extends GradingController  {
             $data_array[] = $temp_array;
         }
 
-        foreach($users as $username) {
+        /** @var GradedGradeable $user_grades Indexed by submitter id*/
+        $user_grades = [];
+        /** @var GradedGradeable $grade */
+        foreach($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $grade) {
+            $user_grades[$grade->getSubmitter()->getId()] = $grade;
+        }
+
+        $user_objects = $this->core->getQueries()->getUsersById($users);
+        foreach($user_objects as $username => $user) {
             for ($j = 0; $j < $arr_length; $j++) {
                 if($username === $data_array[$j][0]) {
                     $temp_array = array();
@@ -277,16 +286,22 @@ class SimpleGraderController extends GradingController  {
                     $index2 = 3; //3 is the starting index of the grades in the csv
                     $value_str = "value_";
                     $status_str = "status_";
-                    $gradeable = $this->core->getQueries()->getGradeable($g_id, $username);
+
+                    // Get the user grade for this gradeable
+                    $graded_gradeable = $user_grades[$username] ??
+                        new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $user));
+                    $ta_graded_gradeable = $graded_gradeable ->getTaGradedGradeable(true);
+
                     //Makes an array with all the values and their status.
                     foreach ($gradeable->getComponents() as $component) {
+                        $component_grade = $ta_graded_gradeable->getGradedComponent($component, $grader, true);
+
                         $value_temp_str = $value_str . $index1;
                         $status_temp_str = $status_str . $index1;
                         if (isset($data_array[$j][$index2])) {
-                            if ($component->getIsText()){
-                                $component->setComment($data_array[$j][$index2]);
-                                $component->setGrader($this->core->getUser());
-                                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                            if ($component->isText()){
+                                $component_grade->setComment($data_array[$j][$index2]);
+                                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "OK";
                             }
@@ -295,9 +310,8 @@ class SimpleGraderController extends GradingController  {
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "ERROR";
                                 } else {
-                                    $component->setScore($data_array[$j][$index2]);
-                                    $component->setGrader($this->core->getUser());
-                                	$component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                                    $component_grade->setScore($data_array[$j][$index2]);
+                                    $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
                                     $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                     $temp_array[$status_temp_str] = "OK";
                                 }
@@ -306,16 +320,17 @@ class SimpleGraderController extends GradingController  {
                         }
                         $index1++;
                         $index2++;
+
                         //skips the index of the total points in the csv file
                         if($index1 == $num_numeric) {
                             $index2++;
                         }
                     }
 
-                    $user = $this->core->getQueries()->getUserById($username);
-                    $gradeable->setUser($user);
-                    $gradeable->setOverallComment("");
-                    $gradeable->saveData();
+                    // Reset the overall comment because we're overwriting the grade anyway
+                    $ta_graded_gradeable->setOverallComment('');
+                    $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
                     $return_data[] = $temp_array;
                     $j = $arr_length; //stops the for loop early to not waste resources
                 }
