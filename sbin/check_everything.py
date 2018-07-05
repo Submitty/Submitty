@@ -25,8 +25,8 @@ SUBMITTY_DATA_DIR = JSON['submitty_data_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
-HWPHP_USER = JSON['hwphp_user']
-HWCRON_USER = JSON['hwcron_user']
+PHP_USER = JSON['php_user']
+DAEMON_USER = JSON['daemon_user']
 
 COURSE_BUILDERS_GROUP = JSON['course_builders_group']
 
@@ -88,11 +88,11 @@ def CheckCourseInstructorAndGroup(my_instructor, my_group):
         except KeyError:
             print("ERROR! user "+my_instructor+" does not exist\n", file=sys.stderr)
             ret_val = False
-        if not HWPHP_USER in c_g.gr_mem:
-            print("ERROR! hwphp should be group "+my_group+"\n", file=sys.stderr)
+        if not PHP_USER in c_g.gr_mem:
+            print("ERROR! "+PHP_USER+" should be group "+my_group+"\n", file=sys.stderr)
             ret_val = False
-        if not HWCRON_USER in c_g.gr_mem:
-            print("ERROR! hwcron should be group "+my_group+"\n", file=sys.stderr)
+        if not DAEMON_USER in c_g.gr_mem:
+            print("ERROR! "+DAEMON_USER+" should be group "+my_group+"\n", file=sys.stderr)
             ret_val = False
     except KeyError:
         print("ERROR! group "+my_group+" does not exist\n", file=sys.stderr)
@@ -107,13 +107,13 @@ def main():
 
 
     # CHECK THE INSTALLATION DIRECTORY
-    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","course_builders",0o751)
-    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root","hwcron",0o550)
+    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR,True,"root","submitty_course_builders",0o751)
+    global_success &= CheckItemBits(SUBMITTY_INSTALL_DIR+"/bin/untrusted_execute",False,"root",DAEMON_USER,0o550)
 
 
     # CHECK THE DATA DIRECTORY
-    global_success &= CheckItemBits(SUBMITTY_DATA_DIR,True,"root","course_builders",0o751)
-    global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses",True,"root","course_builders",0o751)
+    global_success &= CheckItemBits(SUBMITTY_DATA_DIR,True,"root","submitty_course_builders",0o751)
+    global_success &= CheckItemBits(SUBMITTY_DATA_DIR+"/courses",True,"root","submitty_course_builders",0o751)
 
 
     # CHECK EACH COURSE
@@ -135,7 +135,7 @@ def main():
             global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
 
             global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
-            global_success &= CheckItemBits(course_path+"/config/config.ini",False,"hwphp",c_group,0o660)
+            global_success &= CheckItemBits(course_path+"/config/config.ini",False,PHP_USER,c_group,0o660)
             global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770,must_exist=False)
             global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
@@ -146,14 +146,14 @@ def main():
             global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
 
-            global_success &= CheckItemBits(course_path+"/submissions",True,"hwphp",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/config_upload",True,"hwphp",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/results",True,"hwcron",c_group,0o750)
-            global_success &= CheckItemBits(course_path+"/checkout",True,"hwcron",c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/submissions",True,PHP_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/config_upload",True,PHP_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/results",True,DAEMON_USER,c_group,0o750)
+            global_success &= CheckItemBits(course_path+"/checkout",True,DAEMON_USER,c_group,0o750)
 
             global_success &= CheckItemBits(course_path+"/reports",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/reports/summary_html",True,c_instructor,c_group,0o770)
-            global_success &= CheckItemBits(course_path+"/reports/all_grades",True,"hwphp",c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/reports/all_grades",True,PHP_USER,c_group,0o770)
 
 
     if not global_success:

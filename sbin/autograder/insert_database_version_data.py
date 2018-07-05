@@ -1,10 +1,11 @@
+
 """
 This file is used to put submission details about a version into the database so that it can be
 easily and efficiently used by the PHP script. This needs (in the general case) read access to the
 DATA_DIR files for a course (both in config/ and results/ directory). The script should then also
-only be readable/executable by the hwcron user as it does contain the database information and we
+only be readable/executable by the DAEMON_USER as it does contain the database information and we
 do notwant some crafty student to try and get access to it. Thus the file should be owned by
-hwcron and the permissions set to 500.
+DAEMON_USER and the permissions set to 500.
 
 Main usage of the script is:
 ./insert_database_version_data.py <semester> <course> <gradeable_id> <user_id> <version>

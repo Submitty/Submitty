@@ -2,16 +2,20 @@
 
 namespace app\libraries\database;
 
+use app\exceptions\DatabaseException;
+use app\exceptions\ValidationException;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\AdminGradeable;
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\AutogradingVersion;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
+use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
@@ -977,18 +981,28 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
-     * Gets all GradedGradeable's associated with a Gradeable.  If
+     * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
-     *  Note: if the gradeable is a team gradeable, use the $teams parameter,
-     *      otherwise use the $users parameter.  You will not get GradeableData
-     *      for a team submission by passing team member names to $users.
-     * @param \app\models\gradeable\Gradeable $gradeable
+     *  Note: The users' teams will be included in the search
+     * @param \app\models\gradeable\Gradeable[] The gradeables to retrieve data for
      * @param string[]|null $users The ids of the users to get data for
-     * @param string[]null $teams The ids of the teams to get data for
+     * @param string[]|null $teams The ids of the teams to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
-     * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradeableDataAll(\app\models\gradeable\Gradeable $gradeable, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+
+        // Get the gradeables array into a lookup table by id
+        $gradeables_by_id = [];
+        foreach($gradeables as $gradeable) {
+            if(!($gradeable instanceof \app\models\gradeable\Gradeable)) {
+                throw new \InvalidArgumentException('Gradeable array must only contain Gradeables');
+            }
+            $gradeables_by_id[$gradeable->getId()] = $gradeable;
+        }
+        if(count($gradeables_by_id) === 0) {
+            throw new \InvalidArgumentException('Gradeable array must not be blank!');
+        }
 
         // Make sure that our users/teams are arrays
         if ($users !== null) {
@@ -1006,6 +1020,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $teams = [];
         }
 
+        //
+        // Generate selector for the submitters the user wants
+        //
+
         // If both are zero-count, that indicates to get all users/teams
         $all = (count($users) === count($teams)) && count($users) === 0;
 
@@ -1016,20 +1034,44 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         if(count($users) > 0) {
             $user_placeholders = implode(',', array_fill(0, count($users), '?'));
             $selector_union_list[] = "(gd.gd_user_id IN ($user_placeholders))";
+            $selector_union_list[] = "(egd.user_id IN ($user_placeholders))";
+
+            // Get all the teams each user is on
+            $subquery = "SELECT team_id FROM teams WHERE user_id IN ($user_placeholders)";
+            $this->course_db->query($subquery, $users);
+            $teams = array_merge($teams, array_map(function ($row) {
+                return $row['team_id'];
+            }, $this->course_db->rows()));
         }
         // Teams were provided, so check that list
         if(count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
             $selector_union_list[] = "(gd.gd_team_id IN ($team_placeholders))";
+            $selector_union_list[] = "(egd.team_id IN ($team_placeholders))";
         }
-        $submitter_selector = implode(' OR ', $selector_union_list);
+
+        $selector_intersection_list = [];
+        //
+        // Generate selector for the gradeables the user wants
+        //
+        $gradeable_placeholders = implode(',', array_fill(0, count($gradeables_by_id), '?'));
+        $selector_intersection_list[] = "(gd.g_id IN ($gradeable_placeholders) OR egd.g_id IN ($gradeable_placeholders))";
+
+        // Add the user selector later so the gradeable selector can be first
+        if(count($selector_union_list) > 0) {
+            $selector_intersection_list[] = '(' . implode(' OR ', $selector_union_list) . ')';
+        }
+
+        // Create the complete selector
+        $selector = implode(' AND ', $selector_intersection_list);
 
         $query = "
             SELECT /* Select everything we retrieved */
+            
+              (CASE WHEN gd.g_id IS NULL THEN egd.g_id ELSE gd.g_id END) as g_id,
+            
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_user_id as user_id,
-              gd.gd_team_id AS team_id,
               gd.gd_overall_comment as overall_comment,
               gd.gd_user_viewed_date as user_viewed_date,
 
@@ -1069,10 +1111,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Aggregate Team User Data */
-              team.array_user as array_user,
-              team.array_state as array_state,
+              team.team_id,
+              team.array_user,
+              team.array_state,
 
               /* User Submitter Data */
+              u.user_id,
               u.anon_id,
               u.user_firstname,
               u.user_preferred_firstname,
@@ -1138,11 +1182,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS gcd ON gcd.gd_id=gd.gd_id
 
               /* Join aggregate gradeable version data */
-              LEFT JOIN (
-                SELECT *
-                FROM electronic_gradeable_version
-              ) AS egv ON (egv.team_id=gd.gd_team_id OR egv.user_id=gd.gd_user_id) AND egv.g_id=gd.g_id
-              LEFT JOIN (
+              FULL JOIN (
                 SELECT
                   json_agg(in_egd.g_version) AS array_version,
                   json_agg(in_egd.autograding_non_hidden_non_extra_credit) AS array_non_hidden_non_extra_credit,
@@ -1157,6 +1197,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable_data as in_egd
                 GROUP BY g_id, user_id, team_id
               ) AS egd ON (egd.team_id=gd.gd_team_id OR egd.user_id=gd.gd_user_id) AND egd.g_id=gd.g_id
+              LEFT JOIN (
+                SELECT *
+                FROM electronic_gradeable_version
+              ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
 
               /* Join user data */
               LEFT JOIN (
@@ -1169,7 +1213,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   FROM grading_registration
                   GROUP BY user_id
                 ) as sr ON u.user_id=sr.user_id
-              ) AS u ON u.user_id=gd.gd_user_id
+              ) AS u ON u.user_id=gd.gd_user_id OR u.user_id=egd.user_id
 
               /* Join team data */
               LEFT JOIN (
@@ -1188,11 +1232,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     FROM teams as in2_team
                     GROUP BY in2_team.team_id
                   ) AS in_team ON in_team.team_id=g_team.team_id
-              ) AS team ON team.team_id=gd.gd_team_id
-            WHERE gd.g_id=? AND ($submitter_selector)";
+              ) AS team ON team.team_id=gd.gd_team_id OR team.team_id=egd.team_id
+            WHERE $selector";
 
 
-        $constructGradedGradeable = function ($row) use ($gradeable) {
+        $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
+            $gradeable = $gradeables_by_id[$row['g_id']];
+
             // Get the submitter
             $submitter = null;
             if (isset($row['team_id'])) {
@@ -1219,8 +1265,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $submitter = new User($this->core, $row);
             }
 
-            // Create the graded gradeable instance
-            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), $row);
+            // Create the graded gradeable instances
+            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter));
+            $ta_graded_gradeable = null;
+            $auto_graded_gradeable = null;
+            if (isset($row['id'])) {
+                $ta_graded_gradeable = new TaGradedGradeable($this->core, $graded_gradeable, $row);
+                $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
+            }
+
+            // This should very rarely be false
+            if(isset($row['active_version'])) {
+                $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
+                $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
+            }
 
             $graded_components = [];
             $graded_versions = [];
@@ -1265,55 +1323,62 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
-            // Create all of the GradedComponents
-            for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
-                // Create a temporary array for each graded component instead of trying
-                //  to transpose the entire $db_row_split array
-                $comp_array = [];
-                foreach ($comp_array_properties as $property) {
-                    $comp_array[$property] = $db_row_split[$property][$i];
+            if($ta_graded_gradeable !== null) {
+                // Create all of the GradedComponents
+                for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
+                    // Create a temporary array for each graded component instead of trying
+                    //  to transpose the entire $db_row_split array
+                    $comp_array = [];
+                    foreach ($comp_array_properties as $property) {
+                        $comp_array[$property] = $db_row_split[$property][$i];
+                    }
+
+                    //  Similarly, transpose just this grader
+                    $user_array = [];
+                    foreach ($user_properties as $property) {
+                        $user_array[$property] = $db_row_split['grader_' . $property][$i];
+                    }
+
+                    // Create the grader user
+                    $grader = new User($this->core, $user_array);
+
+                    // Create the component
+                    $graded_components[] = new GradedComponent($this->core,
+                        $gradeable->getComponent($db_row_split['comp_id'][$i]),
+                        $grader,
+                        $db_row_split['mark_id'][$i] ?? [],
+                        $comp_array);
                 }
-
-                //  Similarly, transpose just this grader
-                $user_array = [];
-                foreach ($user_properties as $property) {
-                    $user_array[$property] = $db_row_split['grader_' . $property][$i];
-                }
-
-                // Create the grader user
-                $grader = new User($this->core, $user_array);
-
-                // Create the component
-                $graded_components[] = new GradedComponent($this->core,
-                    $graded_gradeable,
-                    $grader,
-                    $db_row_split['comp_id'][$i],
-                    $db_row_split['mark_id'][$i] ?? [],
-                    $comp_array);
+                $ta_graded_gradeable->setGradedComponents($graded_components);
             }
 
-            // Create all of the AutogradingVersions
-            for ($i = 0; $i < count($db_row_split['version']); ++$i) {
-                // Similarly, transpose each version
-                $version_array = [];
-                foreach ($version_array_properties as $property) {
-                    $version_array[$property] = $db_row_split[$property][$i];
-                }
+            if($auto_graded_gradeable !== null) {
+                // Create all of the AutogradingVersions
+                for ($i = 0; $i < count($db_row_split['version']); ++$i) {
+                    // Similarly, transpose each version
+                    $version_array = [];
+                    foreach ($version_array_properties as $property) {
+                        $version_array[$property] = $db_row_split[$property][$i];
+                    }
 
-                $version = new AutogradingVersion($this->core, $graded_gradeable, $version_array);
-                $graded_versions[$version->getVersion()] = $version;
+                    $version = new AutogradingVersion($this->core, $graded_gradeable, $version_array);
+                    $graded_versions[$version->getVersion()] = $version;
+                }
+                $auto_graded_gradeable->setAutogradingVersions($graded_versions);
             }
 
-            $graded_gradeable->setGradedComponents($graded_components);
-            $graded_gradeable->setAutogradingVersions($graded_versions);
             return $graded_gradeable;
         };
 
+        // TODO: reduce parameter count.  This is really excessive feeling
         return $this->course_db->queryIterator($query,
             array_merge(
-                [ $gradeable->getId() ],
-                array_values($users),
-                array_values($teams)
+                array_keys($gradeables_by_id),  // for gd lookup
+                array_keys($gradeables_by_id),  // for egd lookup
+                array_values($users),           // for gd lookup
+                array_values($users),           // for egd lookup
+                array_values($teams),           // for gd team lookup
+                array_values($teams)            // for egd team lookup
             ),
             $constructGradedGradeable);
     }
@@ -1322,6 +1387,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
+     * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfigs($ids) {
         if($ids === null) {

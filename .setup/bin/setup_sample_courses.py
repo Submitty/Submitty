@@ -46,14 +46,14 @@ import yaml
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
+SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-DB_USER = "hsdbu"
+DB_USER = "submitty_dbuser"
 with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
     submitty_config_json = json.load(submitty_config)
     DB_PASS = submitty_config_json["database_password"]
@@ -85,8 +85,8 @@ def main():
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
     print ("pausing the autograding scheduling daemon")
-    os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
-    os.system("crontab -u hwcron -r")
+    os.system("crontab -u submitty_daemon -l > /tmp/submitty_daemon_cron_backup.txt")
+    os.system("crontab -u submitty_daemon -r")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
 
@@ -98,11 +98,11 @@ def main():
             course = Course(course_json)
             courses[course.code] = course
 
-    create_group("course_builders")
+    create_group("submitty_course_builders")
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
-        if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
+        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
             continue
         user.create()
@@ -208,8 +208,8 @@ def main():
 
     # restart the autograding daemon
     print("restarting the autograding scheduling daemon")
-    os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
-    os.system("rm /tmp/hwcron_cron_backup.txt")
+    os.system("crontab -u submitty_daemon /tmp/submitty_daemon_cron_backup.txt")
+    os.system("rm /tmp/submitty_daemon_cron_backup.txt")
     os.system("systemctl restart submitty_autograding_shipper")
     os.system("systemctl restart submitty_autograding_worker")
 
@@ -555,7 +555,7 @@ class User(object):
             else:
                 self._create_ssh()
         if self.group <= 1:
-            add_to_group("course_builders", self.id)
+            add_to_group("submitty_course_builders", self.id)
         if self.sudo:
             add_to_group("sudo", self.id)
 
@@ -656,10 +656,10 @@ class Course(object):
         add_to_group(self.code, self.instructor.id)
         add_to_group(course_group, self.instructor.id)
         add_to_group(archive_group, self.instructor.id)
-        add_to_group("course_builders", self.instructor.id)
-        add_to_group(course_group, "hwphp")
-        add_to_group(course_group, "hwcron")
-        add_to_group(course_group, "hwcgi")
+        add_to_group("submitty_course_builders", self.instructor.id)
+        add_to_group(course_group, "submitty_php")
+        add_to_group(course_group, "submitty_daemon")
+        add_to_group(course_group, "submitty_cgi")
         os.system("{}/sbin/create_course.sh {} {} {} {}"
                   .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
@@ -825,7 +825,7 @@ class Course(object):
                         # only create these directories if we're actually going to put something in them
                         if not os.path.exists(gradeable_path):
                             os.makedirs(gradeable_path)
-                            os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+                            os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                         if not os.path.exists(submission_path):
                             os.makedirs(submission_path)
                         active_version = random.choice(range(1, versions_to_submit+1))
@@ -927,7 +927,7 @@ class Course(object):
                                     first = False
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
-                    os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+                    os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
 
                 if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
                    random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):

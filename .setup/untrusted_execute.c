@@ -18,7 +18,7 @@ shared library that could be manipulated):
 change permissions & set suid: (must be root)
 
     chown root untrusted_execute
-    chgrp hwcron untrusted_execute
+    chgrp DAEMON_USER untrusted_execute
     chmod 4550 untrusted_execute
 */
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -62,8 +62,8 @@ int main(int argc, char* argv[]) {
   static const uid_t FIRST_UNTRUSTED_UID = __INSTALL__FILLIN__FIRST_UNTRUSTED_UID__; /* untrusted's user id */
   static const uid_t FIRST_UNTRUSTED_GID = __INSTALL__FILLIN__FIRST_UNTRUSTED_GID__; /* untrusted's group id */
 
-  static const uid_t HWCRON_UID    = __INSTALL__FILLIN__HWCRON_UID__;    /* hwcron's user id */
-  static const uid_t HWCRON_GID    = __INSTALL__FILLIN__HWCRON_GID__;    /* hwcron's group id */
+  static const uid_t DAEMON_UID    = __INSTALL__FILLIN__DAEMON_UID__;    /* submitty_daemon's user id */
+  static const uid_t DAEMON_GID    = __INSTALL__FILLIN__DAEMON_GID__;    /* submitty_daemon's group id */
 
   if (which_untrusted < 0 || which_untrusted >= NUM_UNTRUSTED) {
     fprintf(stderr,"untrusted_execute: INVALID UNTRUSTED ID %d\n", which_untrusted);
@@ -75,9 +75,9 @@ int main(int argc, char* argv[]) {
 
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-  /* Sanity check, this program must be run by hwcron, with
+  /* Sanity check, this program must be run by submitty_daemon, with
      effective uid root (suid root bit must be set) */
-  if (geteuid() != ROOT_UID || getuid() != HWCRON_UID) {
+  if (geteuid() != ROOT_UID || getuid() != DAEMON_UID) {
     fprintf(stderr,"INTERNAL ERROR: BAD USER\n");
     fprintf(stderr,"uid:%d euid:%d",getuid(),geteuid());
     exit(1);
@@ -86,10 +86,10 @@ int main(int argc, char* argv[]) {
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /* Check the file permissions of this program
      owner of this file: root
-     group of this file: hwcron
+     group of this file: DAEMON_GROUP
      suid bit should be set
      user(root) rx
-     group(hwcron) rx
+     group(DAEMON_GROUP) rx
      other nothing
   */
   /* We assume we're on Linux! */
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
   if (stat_data.st_uid != ROOT_UID ||
-      stat_data.st_gid != HWCRON_GID) {
+      stat_data.st_gid != DAEMON_GID) {
     fprintf(stderr,"INTERNAL ERROR: file uid %d gid %d are invalid\n", stat_data.st_uid, stat_data.st_gid);
     exit(1);
   }
