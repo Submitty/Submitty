@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+                          
 
 ########################################################################################################################
 ########################################################################################################################
@@ -6,14 +7,14 @@
 
 echo -e "Copy the user scripts"
 
-if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
-    # constants are not initialized,
-    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
-    SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-    HWCRON_USER=$(jq -r '.hwcron_user' ${CONF_DIR}/submitty_users.json)
-    COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
-fi
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
+DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
+DAEMON_GROUP=${DAEMON_USER}
+
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
@@ -30,10 +31,10 @@ for i in "${array[@]}"; do
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
-# course builders & hwcron need access to these scripts
+# COURSE_BUILDERS & DAEMON_USER need access to these scripts
 array=( build_homework_function.sh make_assignments_txt_file.py )
 for i in "${array[@]}"; do
-    chown ${HWCRON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
+    chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
 done
 
@@ -66,21 +67,21 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
-# hwcron only things
+# DAEMON_USER only things
 array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
 for i in "${array[@]}"; do
-    chown root:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chown root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-chown -R root:${HWCRON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/autograder
+chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
-    chown -R root:${SUBMITTY_SUPERVISOR} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
+    chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
-    chown -R root:${HWCRON_GID} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
+    chown -R root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*

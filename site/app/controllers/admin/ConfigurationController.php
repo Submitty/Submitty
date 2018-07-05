@@ -36,8 +36,8 @@ class ConfigurationController extends AbstractController {
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
-            'private_config_repository' => $this->core->getConfig()->getPrivateConfigRepository(),
-            'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
+            'private_repository'        => $this->core->getConfig()->getPrivateRepository(),
+            'forum_enabled'             => $this->core->getConfig()->isForumEnabled(),
             'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled()
         );
 
@@ -103,12 +103,12 @@ class ConfigurationController extends AbstractController {
                 'upload_message'            => nl2br($_POST['upload_message']),
                 'keep_previous_files'       => $_POST['keep_previous_files'],
                 'display_rainbow_grades_summary' => $_POST['display_rainbow_grades_summary'],
-                'display_custom_message'      => $_POST['display_custom_message'],
-                'course_email'                => $_POST['course_email'],
+                'display_custom_message'    => $_POST['display_custom_message'],
+                'course_email'              => $_POST['course_email'],
                 'vcs_base_url'              => $_POST['vcs_base_url'],
                 'vcs_type'                  => $_POST['vcs_type'],
-                'private_config_repository' => $_POST['private_config_repository'],
-                'forum_enabled'				=> $_POST['forum_enabled'],
+                'private_repository'        => $_POST['private_repository'],
+                'forum_enabled'		    => $_POST['forum_enabled'],
                 'regrade_enabled'           => $_POST['regrade_enabled']
             )
         );
