@@ -19,6 +19,7 @@ class Access {
     const ALLOW_MENTOR                  = 1 << 2;
     const ALLOW_STUDENT                 = 1 << 3;
     const ALLOW_LOGGED_OUT              = 1 << 4;
+    const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
     const CHECK_GRADING_SECTION_MENTOR  = 1 << 6;
     const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7;
 
@@ -37,10 +38,16 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
-        $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADING_SECTION_MENTOR;
-        $this->permissions["grading.save_grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
+        $this->permissions["grading.save_grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
     }
 
+    /**
+     * Check if the currently logged in user is allowed to do an action
+     * @param string $action Name of the action (see Access::$permissions)
+     * @param array $args Any extra arguments that are required to check permissions
+     * @return bool True if they are allowed to do that action
+     */
     public function canI(string $action, $args = []) {
         if (!array_key_exists($action, $this->permissions)) {
             return false;
@@ -64,9 +71,17 @@ class Access {
             return false;
         }
 
+        /* @var Gradeable|null $gradeable */
+        $gradeable = $args["gradeable"] ?? null;
+
+        if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
+            if ($group > $gradeable->getMinimumGradingGroup()) {
+                return false;
+            }
+        }
+
         if ($group === self::USER_GROUP_MENTOR && ($checks & self::CHECK_GRADING_SECTION_MENTOR)) {
             //Check their grading section
-            $gradeable = $args["gradeable"];
             $who_id = $args["who_id"];
 
             if (!$this->checkGradingSection($gradeable, $who_id)) {
@@ -75,7 +90,6 @@ class Access {
         }
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
             //Check their grading section
-            $gradeable = $args["gradeable"];
             $who_id = $args["who_id"];
 
             if (!$this->checkPeerAssignment($gradeable, $who_id)) {
@@ -97,8 +111,7 @@ class Access {
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if(($this->core->getUser()->accessGrading()) && ($gradeable->getGradeStartDate() <= $now) &&
-            ($this->core->getUser()->getGroup() <= $gradeable->getMinimumGradingGroup())) {
+        if ($gradeable->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
             if ($gradeable->isGradeByRegistration()) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
