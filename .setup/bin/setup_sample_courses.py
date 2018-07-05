@@ -739,6 +739,7 @@ class Course(object):
         gradeable_teams_table = Table("gradeable_teams", metadata, autoload=True)
         teams_table = Table("teams", metadata, autoload=True)
         course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
+        extension_table = Table("late_day_exceptions", metadata, autoload=True)
         for gradeable in self.gradeables:
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
@@ -840,6 +841,13 @@ class Course(object):
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
             for user in self.users:
+                if user.id in gradeable.hw_extensions:
+                    # This is for setting manual extensions
+                    # pdb.set_trace()
+                    conn.execute(extension_table.insert(),
+                                 user_id=user.id,
+                                 g_id=gradeable.id, 
+                                 late_day_exceptions=gradeable.hw_extensions[user.id])
                 submitted = False
                 team_id = None
                 if gradeable.team_assignment is True:
@@ -861,7 +869,6 @@ class Course(object):
                     submission_path = os.path.join(gradeable_path, team_id)
                 else: 
                     submission_path = os.path.join(gradeable_path, user.id)
-
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
                     if user.id in gradeable.plagiarized_user:
                         #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to 
@@ -913,7 +920,6 @@ class Course(object):
                                 #If the user is in the plagirized folder, then only add those submissions
                                 src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
                                 dst = os.path.join(submission_path, str(version))
-                                # pdb.set_trace()
                                 create_gradeable_submission(src, dst)
                             else:
                                 if isinstance(gradeable.submissions, dict):
@@ -1275,6 +1281,7 @@ class Gradeable(object):
         self.max_individual_submissions = 3
         self.team_assignment = False
         self.max_team_size = 1
+        self.hw_extensions = {}
 
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
@@ -1306,7 +1313,6 @@ class Gradeable(object):
             examples_path = os.path.join(MORE_EXAMPLES_DIR, self.gradeable_config, "submissions")
             tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'eg_lichen_sample_path' in gradeable:
-                # pdb.set_trace()
                 self.lichen_sample_path = gradeable['eg_lichen_sample_path']
                 if 'eg_plagiarized_users' in gradeable:
                     for user in gradeable['eg_plagiarized_users']:
@@ -1321,6 +1327,10 @@ class Gradeable(object):
                     self.sample_path = tutorial_path
                 else:
                     self.sample_path = None
+            if 'hw_extensions' in gradeable:
+                for student in gradeable['hw_extensions']:
+                    extension = student.split()
+                    self.hw_extensions[extension[0]] = extension[1]
         else:
             self.id = gradeable['g_id']
             self.type = int(gradeable['g_type'])
@@ -1347,7 +1357,6 @@ class Gradeable(object):
 
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
-
         self.ta_view_date = dateutils.parse_datetime(gradeable['g_ta_view_start_date'])
         self.grade_start_date = dateutils.parse_datetime(gradeable['g_grade_start_date'])
         self.grade_released_date = dateutils.parse_datetime(gradeable['g_grade_released_date'])
