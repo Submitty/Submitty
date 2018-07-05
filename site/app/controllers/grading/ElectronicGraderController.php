@@ -107,6 +107,7 @@ class ElectronicGraderController extends GradingController {
             if (!$this->core->getAccess()->canI("grading.verify_all")) {
                 $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
                 return;
+            }
         } else {
             if (!$this->core->getAccess()->canI("grading.verify_grader")) {
                 $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
@@ -585,13 +586,8 @@ class ElectronicGraderController extends GradingController {
     }    
 
     public function adminTeamSubmit() {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $this->core->addErrorMessage("Invalid CSRF Token");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
-
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage("Only admins can edit teams");
+        if (!$this->core->getAccess()->canI("grading.submit_team_form")) {
+            $this->core->addErrorMessage("You do not have permission to do that.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 

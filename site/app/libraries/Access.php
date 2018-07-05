@@ -51,6 +51,7 @@ class Access {
         $this->permissions["grading.delete_one_mark"] = self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
         $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.verify_grader"] = self::ALLOW_MIN_TA;
         $this->permissions["grading.verify_all"] = self::ALLOW_MIN_TA;
     }
