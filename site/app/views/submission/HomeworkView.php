@@ -524,7 +524,8 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             $btn_type = "completed";
             $url = $this->core->buildUrl(array('component' => 'student',
                 'gradeable_id' => $gradeable->getId(),
-                'student_id' => $gradeable->getUser()->getId()
+                'student_id' => $gradeable->getUser()->getId(),
+                'action' => 'make_request_post'
             ));
             $action = 'request_regrade';
         }

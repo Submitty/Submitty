@@ -1806,7 +1806,7 @@ function deleteLateDays(user_id, datestamp) {
     return false;
 }
 function toggleRegradeRequests(){
-    var element = document.getElementById("regradeBox");
+    var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {
         element.style.display = 'none';
     }
