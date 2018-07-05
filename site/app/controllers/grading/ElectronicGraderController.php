@@ -486,8 +486,8 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($return_url);
         }
 
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage("Only admins can edit teams");
+        if (!$this->core->getAccess()->canI("grading.import_teams", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to do that.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -563,12 +563,14 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function exportTeams() {
-        if (!$this->core->getUser()->accessAdmin()) {
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+
+        if (!$this->core->getAccess()->canI("grading.export_teams", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to do that.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $nl = "\n";
         $csvdata="First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section".$nl;
