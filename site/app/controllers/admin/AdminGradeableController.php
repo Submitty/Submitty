@@ -2,10 +2,12 @@
 
 namespace app\controllers\admin;
 
+use lib\Database;
+use lib\Functions;
 use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
-use \app\libraries\GradeableType;
+use app\libraries\GradeableType;
 use app\models\AdminGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
@@ -829,9 +831,10 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Trigger a rebuild if the config changes
-        if (key_exists('autograding_config_path', $details)) {
-            $result = $this->enqueueBuild($gradeable);
+        // Trigger a rebuild if the config / due date changes
+        $trigger_rebuild = ['autograding_config_path', 'submission_due_date'];
+        if (count(array_intersect($trigger_rebuild, array_keys($details))) > 0) {
+            $result = $this->enqueueBuild($admin_gradeable);
             if ($result !== null) {
                 // TODO: what key should this get?
                 $errors['server'] = $result;
@@ -930,7 +933,8 @@ class AdminGradeableController extends AbstractController {
 
     private function rebuildAssignmentRequest() {
         $g_id = $_REQUEST['id'];
-        $result = $this->enqueueBuildFile($g_id);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $result = $this->enqueueBuild($gradeable);
         if ($result !== null) {
             die($result);
         }

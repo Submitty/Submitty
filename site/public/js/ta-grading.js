@@ -1,6 +1,9 @@
 //Used to reset users cookies
 var cookie_version = 1;
 
+var editModeEnabled = false;
+//Check if cookie version is/is not the same as the current version
+var versionMatch = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
     //Check each cookie and test for 'undefined'. If any cookie is undefined
@@ -9,9 +12,13 @@ $(function() {
         if(!cookie[1] || cookie[1] == 'undefined'){
             deleteCookies();
         }
+        else if(cookie[0] === "cookie_version"){
+            if(cookie[1] == cookie_version){
+                versionMatch = true;
+            }
+        }
     });
-
-    if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version) {
+    if(!versionMatch) {
         //If cookie version is not the same as the current version then toggle the visibility of each
         //rubric panel then update the cookies
         deleteCookies();
@@ -22,7 +29,7 @@ $(function() {
         resetModules();
         updateCookies();
     }
-    else{
+   else{
         readCookies();
         updateCookies();
         hideIfEmpty(".rubric_panel");
@@ -35,6 +42,7 @@ $(function() {
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
+
 
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
@@ -122,7 +130,6 @@ function readCookies(){
     var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
     (output_top) ? $("#autograding_results").css("top", output_top):{};
     (output_left) ? $("#autograding_results").css("left", output_left):{};
     (output_width) ? $("#autograding_results").css("width", output_width):{};
@@ -164,12 +171,10 @@ function readCookies(){
     (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper-o").removeClass("icon-selected") : $(".fa-hand-paper-o").addClass("icon-selected")) : {};
    
     (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
-
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
     onAjaxInit = function() {
         $('#title-'+opened_mark).click();
-
         if (scroll_pixel > 0) {
             document.getElementById('grading_rubric').scrollTop = scroll_pixel;
         }
@@ -245,7 +250,7 @@ function updateCookies(){
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
-
+    document.cookie = "editMode=" + editModeEnabled + "; path=/;";
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
         overwrite = "on";
@@ -702,4 +707,23 @@ function adjustSize(name) {
     var textarea = document.getElementById(name);
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
+}
+//-----------------------------------------------------------------------------
+// Edit Mode
+function toggleEditMode(){
+    if(editModeEnabled==null){
+        editModeEnabled=false;
+    }
+    editModeEnabled=!editModeEnabled;
+    if(findCurrentOpenedMark()>0){
+        if(editModeEnabled==false){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
+        }
+        if(editModeEnabled==true){
+            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
+        }
+        var id=findCurrentOpenedMark();
+        saveMark(id, true);
+        updateMarksOnPage(id);
+    }
 }

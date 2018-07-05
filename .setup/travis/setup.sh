@@ -28,54 +28,46 @@ account required pam_unix.so" > /etc/pam.d/httpd'
 sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
 sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
-sudo mkdir -p "${SUBMITTY_DATA_DIR}"
+echo 'in travis setup, going to make data dir ' ${SUBMITTY_DATA_DIR}
+
+sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
+sudo mkdir -p ${SUBMITTY_DATA_DIR}/courses
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
-sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
+sudo cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
 sudo python3 ${DIR}/../bin/create_untrusted_users.py
 
-sudo addgroup hwcronphp
-sudo addgroup course_builders
-sudo adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi hwphp
-sudo adduser hwphp shadow
-sudo adduser hwcgi shadow
-sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwphp hwcronphp
-sudo adduser hwcron hwcronphp
-sudo adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "hsdbu:hsdbu" | sudo chpasswd
+sudo addgroup submitty_daemonphp
+sudo addgroup submitty_course_builders
+sudo adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser ${CGI_USER} ${PHP_GROUP}
+sudo adduser ${PHP_USER} shadow
+sudo adduser ${CGI_USER} shadow
+sudo adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo adduser ${PHP_USER} submitty_daemonphp
+sudo adduser submitty_daemon submitty_daemonphp
+sudo adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+sudo echo "submitty_dbuser:submitty_dbuser" | sudo chpasswd
 
-sudo chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
-sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
-sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
-sudo chmod 777         ${SUBMITTY_DATA_DIR}
+sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
+sudo chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
+sudo chmod -R 777 ${SUBMITTY_INSTALL_DIR}
+sudo chmod -R 777 ${SUBMITTY_DATA_DIR}
 
 echo -e "/var/run/postgresql
-hsdbu
-hsdbu
+submitty_dbuser
+submitty_dbpass
 America/New_York
 http://localhost
 http://localhost/git
 
 ${AUTH_METHOD}" | sudo python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-
-mkdir -p ${SUBMITTY_DATA_DIR}/instructors
-mkdir -p ${SUBMITTY_DATA_DIR}/bin
-touch ${SUBMITTY_DATA_DIR}/instructors/authlist
-touch ${SUBMITTY_DATA_DIR}/instructors/valid
-[ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-[ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
-chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
-chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
-
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
-# necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
-sudo usermod -a -G travis hwphp
+sudo bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
+sudo bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
+# necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
+sudo usermod -a -G travis ${PHP_USER}
 
 # necessary to pass config path as submitty_repository is a symlink
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial

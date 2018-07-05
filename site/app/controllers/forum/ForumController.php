@@ -45,6 +45,9 @@ class ForumController extends AbstractController {
             case 'edit_post':
                 $this->alterPost(1);
                 break;
+            case 'undelete_post':
+                $this->alterPost(2);
+                break;
             case 'search_threads':
                 $this->search();
                 break;
@@ -88,6 +91,9 @@ class ForumController extends AbstractController {
         }
     }
 
+    private function showDeleted() {
+        return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
+    }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
             //Notify User
@@ -97,25 +103,22 @@ class ForumController extends AbstractController {
             } else {
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
-
-            $this->core->redirect($url);
+            return array(-1, $url);
     }
 
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
-        if($_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
-            return 0;
+        if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
+            return array(0);
         }
         if(count($_FILES[$file_post]['tmp_name']) > 5) {
-            $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
-            return -1;
+            return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
         }
         $imageCheck = Utils::checkUploadedImageFile($file_post) ? 1 : 0;
         if($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])){
-            $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
-            return -1;
-
-        } return $imageCheck;
+            return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
+        }
+        return array($imageCheck);
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
@@ -280,6 +283,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
+        $result = array();
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -290,37 +294,39 @@ class ForumController extends AbstractController {
         }
         if(empty($title) || empty($thread_post_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-        }else if(!$this->isValidCategories($categories_ids)){
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+        } else if(!$this->isValidCategories($categories_ids)){
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
-            if($hasGoodAttachment == -1){
-                return;
-            }
+            if($hasGoodAttachment[0] == -1){
+                $result['next_page'] = $hasGoodAttachment[1];
+            } else {
+                // Good Attachment
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment[0], $categories_ids);
+                $id = $result["thread_id"];
+                $post_id = $result["post_id"];
 
-            $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment, $categories_ids);
-            $id = $result["thread_id"];
-            $post_id = $result["post_id"];
+                if($hasGoodAttachment[0] == 1) {
 
-            if($hasGoodAttachment == 1) {
+                    $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
+                    FileUtils::createDir($thread_dir);
 
-                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
-                FileUtils::createDir($thread_dir);
+                    $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                    FileUtils::createDir($post_dir);
 
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
+                    for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
+                        $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
+                        move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
+                    }
 
-                for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-                    move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                 }
-
+                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
-
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id)));
+        $this->core->getOutput()->renderJson($result);
+        return $result;
     }
 
     private function search(){
@@ -329,45 +335,48 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
+        $result = array();
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
-        $post_content_tag = 'post_content';
+        $post_content_tag = 'thread_post_content';
         $file_post = 'file_input';
-        if(empty($_POST['post_content'])){
-            $post_content_tag .= ('_' . $parent_id);
-            $file_post .= ('_' . $parent_id);
-        }
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
         } else if(!$this->core->getQueries()->existsThread($thread_id)) {
-            $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exists.");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+            $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+        } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
+            $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-            if($hasGoodAttachment == -1){
-                return;
-            }
-            $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment, $parent_id);
-            $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+            if($hasGoodAttachment[0] == -1){
+                $result['next_page'] = $hasGoodAttachment[1];
+            } else {
+                $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
-            if(!is_dir($thread_dir)) {
-                FileUtils::createDir($thread_dir);
-            }
-
-            if($hasGoodAttachment == 1) {
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-                FileUtils::createDir($post_dir);
-                for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
-                    $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
-                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                if(!is_dir($thread_dir)) {
+                    FileUtils::createDir($thread_dir);
                 }
+
+                if($hasGoodAttachment[0] == 1) {
+                    $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                    FileUtils::createDir($post_dir);
+                    for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
+                        $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
+                        move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+                    }
+                }
+                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id)));
         }
+        $this->core->getOutput()->renderJson($result);
+        return $result;   
     }
 
     public function alterAnnouncement($type){
@@ -388,6 +397,13 @@ class ForumController extends AbstractController {
         return $response;
     }
 
+    /**
+     * Alter content/delete/undelete post of a thread
+     *
+     * If applied on the first post of a thread, same action will be reflected on the corresponding thread
+     *
+     * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     */
     public function alterPost($modifyType){
         if($this->core->getUser()->getGroup() <= 2){
 
@@ -395,12 +411,26 @@ class ForumController extends AbstractController {
                 $thread_id = $_POST["thread_id"];
                 $post_id = $_POST["post_id"];
                 $type = "";
-                if($this->core->getQueries()->deletePost($post_id, $thread_id)){
+                if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                     $type = "thread";
                 } else {
                     $type = "post";
                 }
                 $this->core->getOutput()->renderJson(array('type' => $type));
+            } else if($modifyType == 2) { //undelete post or thread
+                $thread_id = $_POST["thread_id"];
+                $post_id = $_POST["post_id"];
+                $type = "";
+                $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
+                if(is_null($result)) {
+                    $error = "Parent post must be undeleted first.";
+                    $this->core->getOutput()->renderJson(array('error' => $error));
+                    return;
+                } else {
+                    /// We want to reload same thread again, in both case (thread/post undelete)
+                    $type = "post";
+                    $this->core->getOutput()->renderJson(array('type' => $type));
+                }
             } else if($modifyType == 1) { //edit post or thread
                 $status_edit_thread = $this->editThread();
                 $status_edit_post   = $this->editPost();
@@ -470,14 +500,14 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted = false){
         $current_user = $this->core->getUser()->getId();
         if($this->isValidCategories($categories_ids)) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids);
-            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids);
+            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids, $show_deleted);
+            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids, $show_deleted);
         } else {
-            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory();
-            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory();
+            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory($show_deleted);
+            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory($show_deleted);
         }
         $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
 
@@ -520,12 +550,13 @@ class ForumController extends AbstractController {
 
     public function getThreads(){
 
+        $show_deleted = $this->showDeleted();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
 
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
@@ -544,7 +575,8 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
 
         $max_thread = 0;
-        $threads = $this->getSortedThreads(array($category_id), $max_thread);
+        $show_deleted = $this->showDeleted();
+        $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
 
         $current_user = $this->core->getUser()->getId();
 
@@ -556,18 +588,18 @@ class ForumController extends AbstractController {
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             if($option == "alpha"){
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'alpha');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
             } else {
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, 'tree');
+                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
             }
             
         } 
 
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
-            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1);
+            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
         
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $option, $max_thread);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $option, $max_thread);
     }
 
     private function getAllowedCategoryColor() {

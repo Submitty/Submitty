@@ -1,0 +1,49 @@
+{% for post in posts %}
+    <div style="margin-top: 20px ">
+        <div class='{{ is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
+            <p>{{ post.content }}</p>
+            <hr>
+            <div style="float:right">
+                <b>{{ post.name }}</b> &nbsp;
+                {{ post.date }}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% if core.getUser().accessGrading() %}
+    {% set reply_message = "Reply" %}
+    {% set reply_placeholder = "Enter your reply here" %}
+{% else %}
+    {% set reply_message = "Request further TA/Instructor action" %}
+    {% set reply_placeholder = "If you believe you require more review, enter a reply here to request further TA/Instructor action..." %}
+{% endif %}
+
+{% if core.getUser().accessGrading() or gradeable.getRegradeStatus() != 0 %}
+<div style="padding:20px;">
+    <form method="POST" id="replyTextForm" action="{{ core.buildUrl({'component': 'student',
+            'action': 'make_request_post',
+            'regrade_id': thread_id,
+            'gradeable_id': gradeable.getId(),
+            'user_id': core.getUser().getId()
+        }) }}">
+        <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ reply_placeholder }}" id="makeRequestPost" required></textarea>
+        <input type="submit" value="{{ reply_message }}" id="submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
+        <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+    </form>
+</div>
+{% endif %}
+
+<script type="text/javascript">
+    $("#replyTextForm").submit(function(event) {
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: $(this).serialize(),
+            success: function(data){
+                window.location.reload();
+            }
+        });
+        event.preventDefault();
+    });
+</script>

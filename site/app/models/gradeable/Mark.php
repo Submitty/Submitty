@@ -32,6 +32,13 @@ class Mark extends AbstractModel {
     /** @property @var bool If the student should be able to see this mark */
     protected $publish = false;
 
+    /**
+     * Mark constructor.
+     * @param Core $core
+     * @param Component $component
+     * @param $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid, or if the component is null
+     */
     public function __construct(Core $core, Component $component, $details) {
         parent::__construct($core);
 
@@ -69,11 +76,22 @@ class Mark extends AbstractModel {
      * @param int $id Must be a non-negative integer
      */
     private function setIdInternal($id) {
-        if (is_int($id) && $id >= 0) {
-            $this->id = $id;
+        if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
+            $this->id = intval($id);
         } else {
-            throw new \InvalidArgumentException('Mark Id must be an integer >= 0');
+            throw new \InvalidArgumentException('Mark Id must be a non-negative integer');
         }
+    }
+
+    /**
+     * Sets the id of the mark.
+     *  NOTE: this should only be called from database results
+     *  to avoid reconstruction of the whole object
+     * @param int $id
+     * @internal
+     */
+    public function setIdFromDatabase($id) {
+        $this->setIdInternal($id);
     }
 
     /** @internal */
