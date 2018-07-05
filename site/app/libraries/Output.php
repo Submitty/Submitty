@@ -190,7 +190,14 @@ class Output {
         $return .= $this->renderHeader();
         $return .= $this->output_buffer;
         $return .= $this->renderFooter();
-        return $return;
+
+        $return2 = $this->renderTwigTemplate('GlobalWrapper.twig', [
+            // "submitty_site" => str_replace("\n", "\\\n", $return)
+            // "submitty_site" => str_replace(["\"", "\n"], ["\\\"", "\\\n"], $return)
+            "submitty_site" => $return
+        ]);
+
+        return $return2;
     }
 
     private function renderHeader() {
