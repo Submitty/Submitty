@@ -36,6 +36,9 @@ class Access {
 
     public function __construct(Core $core) {
         $this->core = $core;
+
+        $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADING_SECTION_MENTOR;
+        $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
     }
 
     public function canI(string $action, $args = []) {

@@ -951,8 +951,8 @@ class ElectronicGraderController extends GradingController {
 
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        $canViewWholeGradeable = $this->canIViewThis($gradeable, $who_id);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $canViewWholeGradeable);
+        $show_hidden = $this->core->getAccess()->canI("grading.show_hidden_cases", ["gradeable" => $gradeable, "who_id" => $who_id]);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
@@ -967,42 +967,11 @@ class ElectronicGraderController extends GradingController {
         $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
-        if ($this->core->getUser()->getGroup() === 4) {
-            if(!$gradeable->getPeerGrading()) {
-                $this->core->addErrorMessage("You do not have permission to grade this");
-
-                $response = array('status' => 'failure');
-                $this->core->getOutput()->renderJson($response);
-                return $response;
-            }
-            else {
-                $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
-                if(!in_array($user_id, $user_ids_to_grade)) {
-                    $this->core->addErrorMessage("You do not have permission to grade this student");
-
-                    $response = array('status' => 'failure');
-                    $this->core->getOutput()->renderJson($response);
-                    return $response;
-                }
-            }
-        }
-        else if ($this->core->getUser()->getGroup() === 3) {
-            if ($gradeable->isGradeByRegistration()) {
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
-                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-            }
-            else {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
-            $user_ids_to_grade = array_map(function(User $user) { return $user->getId(); }, $users_to_grade);
-            if (!in_array($user_id, $user_ids_to_grade)) {
-                $this->core->addErrorMessage("You do not have permission to grade {$user_id}");
-
-                $response = array('status' => 'failure');
-                $this->core->getOutput()->renderJson($response);
-                return $response;
-            }
+        if (!$this->core->getAccess()->canI("grading.grade", ["gradeable" => $gradeable, "who_id" => $user_id])) {
+            $this->core->addErrorMessage("You do not have permission to grade this");
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
         }
 
         if ($gradeable->getActiveVersion() <= 0) {
