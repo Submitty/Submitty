@@ -24,7 +24,7 @@ SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
 # ==================================================================================
