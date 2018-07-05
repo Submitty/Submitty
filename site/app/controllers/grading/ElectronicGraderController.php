@@ -961,7 +961,7 @@ class ElectronicGraderController extends GradingController {
 
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        $show_hidden = $this->core->getAccess()->canI("grading.show_hidden_cases", ["gradeable" => $gradeable, "who_id" => $who_id]);
+        $show_hidden = $this->core->getAccess()->canI("grading.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
@@ -977,7 +977,7 @@ class ElectronicGraderController extends GradingController {
         $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.save_grade", ["gradeable" => $gradeable, "who_id" => $user_id])) {
+        if (!$this->core->getAccess()->canI("grading.save_component", ["gradeable" => $gradeable])) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
@@ -1218,7 +1218,7 @@ class ElectronicGraderController extends GradingController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
 
-        if (!$this->canIGradeThis($gradeable)) {
+        if (!$this->core->getAccess()->canI("grading.save_general_comment", ["gradeable" => $gradeable])) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return;

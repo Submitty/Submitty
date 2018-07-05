@@ -39,7 +39,8 @@ class Access {
         $this->core = $core;
 
         $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
-        $this->permissions["grading.save_grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.save_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
     }
 
     /**
@@ -82,17 +83,13 @@ class Access {
 
         if ($group === self::USER_GROUP_MENTOR && ($checks & self::CHECK_GRADING_SECTION_MENTOR)) {
             //Check their grading section
-            $who_id = $args["who_id"];
-
-            if (!$this->checkGradingSection($gradeable, $who_id)) {
+            if (!$this->checkGradingSection($gradeable)) {
                 return false;
             }
         }
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
-            //Check their grading section
-            $who_id = $args["who_id"];
-
-            if (!$this->checkPeerAssignment($gradeable, $who_id)) {
+            //Check their peer assignment
+            if (!$this->checkPeerAssignment($gradeable)) {
                 return false;
             }
         }
@@ -103,10 +100,9 @@ class Access {
     /**
      * Check if a limited access grader has a user in their section
      * @param Gradeable $gradeable
-     * @param string $who_id
      * @return bool If they are
      */
-    private function checkGradingSection(Gradeable $gradeable, string $who_id) {
+    private function checkGradingSection(Gradeable $gradeable) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
@@ -124,7 +120,7 @@ class Access {
             }
             foreach($students as $student) {
                 /* @var User $student */
-                if($student->getId() === $who_id){
+                if($student->getId() === $gradeable->getUser()->getId()){
                     return true;
                 }
             }
@@ -136,15 +132,14 @@ class Access {
     /**
      * Check if a student is allowed to peer grade another
      * @param Gradeable $gradeable
-     * @param string $who_id
      * @return bool
      */
-    private function checkPeerAssignment(Gradeable $gradeable, string $who_id) {
+    private function checkPeerAssignment(Gradeable $gradeable) {
         if(!$gradeable->getPeerGrading()) {
             return false;
         } else {
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
-            return in_array($who_id, $user_ids_to_grade);
+            return in_array($gradeable->getUser()->getId(), $user_ids_to_grade);
         }
     }
 }
