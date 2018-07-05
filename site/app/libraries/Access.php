@@ -22,6 +22,7 @@ class Access {
     const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
     const CHECK_GRADING_SECTION_MENTOR  = 1 << 6;
     const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7;
+    const CHECK_HAS_SUBMISSION          = 1 << 8;
 
     //
     const ALLOW_MIN_STUDENT    = self::ALLOW_INSTRUCTOR | self::ALLOW_TA | self::ALLOW_MENTOR | self::ALLOW_STUDENT;
@@ -38,9 +39,10 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
+        $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
-        $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
-        $this->permissions["grading.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["grading.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
         $this->permissions["grading.get_mark_data"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.add_one_new_mark"] = self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
@@ -86,6 +88,12 @@ class Access {
             }
         }
 
+        if ($checks & self::CHECK_HAS_SUBMISSION) {
+            if ($gradeable->getActiveVersion() <= 0) {
+                return false;
+            }
+        }
+
         if ($group === self::USER_GROUP_MENTOR && ($checks & self::CHECK_GRADING_SECTION_MENTOR)) {
             //Check their grading section
             if (!$this->checkGradingSection($gradeable)) {
@@ -107,7 +115,7 @@ class Access {
      * @param Gradeable $gradeable
      * @return bool If they are
      */
-    private function checkGradingSection(Gradeable $gradeable) {
+    public function checkGradingSection(Gradeable $gradeable) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
@@ -139,7 +147,7 @@ class Access {
      * @param Gradeable $gradeable
      * @return bool
      */
-    private function checkPeerAssignment(Gradeable $gradeable) {
+    public function checkPeerAssignment(Gradeable $gradeable) {
         if(!$gradeable->getPeerGrading()) {
             return false;
         } else {
