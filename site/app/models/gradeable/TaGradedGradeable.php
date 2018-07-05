@@ -109,19 +109,19 @@ class TaGradedGradeable extends AbstractModel {
      *
      * Grader Null:
      *   Component not peer:
-     *     Component has grades:            => Get 0th grade
+     *     Component has grades:            => return the one TA grade
      *     Generate false:                  => return null
      *     Generate true:                   => throw InvalidArgumentException
      *   Component peer:                    => throw InvalidArgumentException
      * Grader Not Null:
      *   Component not peer:
-     *     Component has grades:            => Get the one TA grade and sets the grader
+     *     Component has grades:            => return the one TA grade and sets the grader
      *     Generate false:                  => return null
-     *     Generate true:                   => Generate new component with provided user as grader (TA)
+     *     Generate true:                   => return new component with provided user as grader (TA)
      *   Component peer:
      *     Component has grades for grader  => return that graded component
      *     Generate false:                  => return null
-     *     Generate true:                   => generate new component with provided user as grader (append)
+     *     Generate true:                   => return new component with provided user as grader (peer)
      *
      * @param Component $component The component the grade is for
      * @param User $grader The grader for this component
