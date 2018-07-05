@@ -48,6 +48,8 @@ class AdminGradeable extends AbstractModel {
     protected $num_numeric = 0;
     /** @property @var int The number of text components (if numeric/text) */
     protected $num_text = 0;
+    /** @property @var string The name of the repository that autograding configurations are stored in */
+    protected $autograding_config_repo_name = '';
 
     /** @property @var Gradeable The gradeable configuration */
     protected $gradeable = null;
@@ -56,50 +58,6 @@ class AdminGradeable extends AbstractModel {
         parent::__construct($core);
 
         $this->gradeable = $gradeable;
-
-        // Construct history array
-        $this->graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
-        foreach ($this->graders_from_usertypes as $usertype) {
-            foreach ($usertype as $grader) {
-                $this->gradeable_section_history[$grader] = [];
-            }
-        }
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
-            $this->gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
-
-            // Use the keys to remove duplicates
-            $this->rotating_gradeables[$row['g_id']] = 1;
-        }
-        $this->rotating_gradeables = array_keys($this->rotating_gradeables);
-
-        $this->num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $this->template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
-        $this->default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
-        $this->vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-
-        if ($gradeable !== null) {
-            if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-                // Count text/numeric components if that is the gradeable type
-                foreach ($gradeable->getComponents() as $component) {
-                    if ($component->isText()) {
-                        ++$this->num_text;
-                    } else {
-                        ++$this->num_numeric;
-                    }
-                }
-            } else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                // Get pdf page settings if electronic
-                foreach ($gradeable->getComponents() as $component) {
-                    if ($component->getPage() !== 0) {
-                        $this->pdf_page = true;
-                        $this->pdf_page_student = $component->getPage() === -1;
-                    }
-                    break;
-                }
-            }
-        }
-        // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
     }
 
     public function getTypeString() {

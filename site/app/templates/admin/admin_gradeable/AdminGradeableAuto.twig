@@ -4,7 +4,7 @@
         <input type="radio" id="default_configs" class="config_option" value="true" {{ which_config_option == 0 ? 'checked' : '' }}/> Default configs
         <input type="radio" id="uploaded_configs" class="config_option" value="false" {{ which_config_option == 1 ? 'checked' : '' }}/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="config_option" value="false" {{ which_config_option == 2 ? 'checked' : '' }}/> Use Private repository ({{ repo_name }})
+            <input type="radio" id="private_repository" class="config_option" value="false" {{ which_config_option == 2 ? 'checked' : '' }}/> Use Private repository ({{ admin_gradeable.getAutogradingConfigRepoName() }})
         {% endif %}
         <input type="radio" id="provide_full_path" class="config_option" value="false" {{ which_config_option == 3 ? 'checked' : '' }}/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {% if which_config_option == 0 %} block {% else %} none {% endif %}">
