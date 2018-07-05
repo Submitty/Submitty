@@ -37,10 +37,11 @@ class ConfigurationController extends AbstractController {
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
             'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
-            'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled()
+            'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled(),
+            'regrade_message'           => $this->core->getConfig()->getRegradeMessage()
         );
 
-        foreach (array('upload_message', 'course_email') as $key) {
+        foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = htmlentities($_SESSION['request'][$key]);
             }
@@ -107,7 +108,8 @@ class ConfigurationController extends AbstractController {
                 'vcs_base_url'              => $_POST['vcs_base_url'],
                 'vcs_type'                  => $_POST['vcs_type'],
                 'forum_enabled'				=> $_POST['forum_enabled'],
-                'regrade_enabled'           => $_POST['regrade_enabled']
+                'regrade_enabled'           => $_POST['regrade_enabled'],
+                'regrade_message'           => $_POST['regrade_message']
             )
         );
 

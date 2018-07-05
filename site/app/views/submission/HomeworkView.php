@@ -481,6 +481,7 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
      * @return string
      */
     public function showRegradeDiscussion(Gradeable $gradeable): string {
+        $regradeMessage = $this->core->getConfig()->getRegradeMessage();
         if ($gradeable->getRegradeStatus() === 0) {
             $btn_type = "request";
             $url = $this->core->buildUrl(array('component' => 'student',
@@ -554,7 +555,8 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             "action" => $action,
             "posts" => $posts,
             "gradeable" => $gradeable,
-            "thread_id" => $thread_id
+            "thread_id" => $thread_id,
+            "regradeMessage" => $regradeMessage
         ]);
     }
 }

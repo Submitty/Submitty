@@ -90,7 +90,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'display_custom_message' => false,
                 'course_email' => 'Please contact your TA or instructor for a regrade request.',
                 'vcs_base_url' => '',
-                'vcs_type' => 'git'
+                'vcs_type' => 'git',
+                'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days'
             )
         );
 
@@ -169,7 +170,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_base_url' => '',
             'vcs_type' => 'git',
             'modified' => false,
-            'hidden_details' => null
+            'hidden_details' => null,
+            'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days'
         );
         $actual = $config->toArray();
 
