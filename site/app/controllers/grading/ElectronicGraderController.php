@@ -977,7 +977,7 @@ class ElectronicGraderController extends GradingController {
         $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.save_component", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $gradeable])) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
