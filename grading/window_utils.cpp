@@ -450,11 +450,6 @@ void click(std::string window_name, int button){
 void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
                  int x_start, int x_end, int y_start, int y_end, bool no_clamp){
 
-  if(!no_clamp)
-  {
-    clamp(moved_mouse_x, x_start, x_end); //don't move outside of the window.
-    clamp(moved_mouse_y, y_start, y_end);
-  }
   //only move the mouse if the window exists. (get focus and mousemove.)
   if(windowExists(window_name)){
     std::string command = "wmctrl -R " + window_name + 
@@ -513,33 +508,18 @@ bool populateWindowData(std::string window_name, int& height, int& width,
 */
 bool populateClickAndDragValues(nlohmann::json action, std::string window_name, 
       int& window_left, int& window_right, int& window_top, int& window_bottom, int& mouse_button, 
-                                std::vector<int>& starting_point, std::vector<int>& destination,
                                 bool& no_clamp){
   int height, width;
   //Get the window dimensions.
   populateWindowData(window_name,height,width,window_left,window_right,window_top,window_bottom);
 
 
-  int starting_point_x = action.value("/start_x", action, 0f);
-  int starting_point_y = action.value("/start_y", action, 0f);
-  int destination_x = action.value("/end_x", action, 0f);
-  int destination_y = action.value("/end_y", action, 0f);
-
-  if (starting_point_ == end_x && start_)
-
-
-  //destination = extractIntsFromString(command);
-  // if(destination.size() == 0){
-  //   std::cout << "ERROR: The line " << command 
-  //               << " does not specify two coordinates." <<std::endl;
-  //   return false;
+  // if(command.find("no clamp") != std::string::npos){
+  //   std::cout << "Multiple windows are not yet supported. (No 'no clamp' option available)" << std::endl;
+  //   no_clamp = false;
   // }
-  
-  if(command.find("no clamp") != std::string::npos){
-    std::cout << "Multiple windows are not yet supported. (No no clamp)"
-                 << std::endl;
-    no_clamp = false;
-  }
+
+  std::string mouse_button = action.value("/mouse_button", action, "left");
 
   if(command.find("left") != std::string::npos){
     mouse_button = 1;
@@ -599,13 +579,12 @@ std::vector<float> getLineIntersectionPoint(std::vector<int> p1,
 * move again. We give a one pixel border at each side of the window and clamp 
 * using that value to avoid accidental resizing.
 */
-void clickAndDragDelta(std::string window_name, std::string command){
+void clickAndDragDelta(std::string window_name, nlohmann::json action){
   //get the values of the student's window.
   int x_start, x_end, y_start, y_end, mouse_button; 
-  std::vector<int> coords; 
   bool no_clamp = false; 
-  bool success = populateClickAndDragValues(command, window_name, x_start, 
-                      x_end, y_start, y_end, mouse_button, coords, no_clamp);
+  bool success = populateClickAndDragValues(action, window_name, x_start, 
+                      x_end, y_start, y_end, mouse_button, no_clamp);
   
   //if we can't populate the click and drag values, do nothing.
   if(!success){ 
@@ -622,12 +601,11 @@ void clickAndDragDelta(std::string window_name, std::string command){
 
   
   //delta version, 2 values movement x and movement y.
-  int amt_x_movement_remaining = coords[0];
-  int amt_y_movement_remaining = coords[1];
+  int amt_x_movement_remaining = action.value("/x_distance", action, 0);
+  int amt_y_movement_remaining = action.value("/y_distance", action, 0);
 
   //This shouldn't fail unless there isn't a mouse.
-  std::string mouse_location_string = 
-    output_of_system_command("xdotool getmouselocation"); 
+  std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
   std::vector<int> xy = extractIntsFromString(mouse_location_string);                      
   
   //if the mouse isn't detected, fail.
@@ -698,7 +676,7 @@ void clickAndDragDelta(std::string window_name, std::string command){
     * projected line.
     */
 
-    //found is just a quick short circuit to keep the code from ballooning.
+    //found is just a quick short-circuit to keep the code from ballooning.
     bool found = false; 
     if(intersection_point.size() != 0){ //TOP
       std::cout << "intersected top" << std::endl;
@@ -770,29 +748,43 @@ void clickAndDragDelta(std::string window_name, std::string command){
 * Click and drag absolute: move to a relative coordinate within the window
 * windowname, clamped.
 */
-void clickAndDragAbsolute(std::string window_name, std::string command){
+void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
    //populate the window variables. 
   int x_start, x_end, y_start, y_end, mouse_button;
-  std::vector<int> coords; 
   bool no_clamp = false; 
-  bool success = populateClickAndDragValues(command, window_name, x_start,
-                       x_end, y_start, y_end, mouse_button, coords, no_clamp);
+  bool success = populateClickAndDragValues(action, window_name, x_start,
+                       x_end, y_start, y_end, mouse_button, no_clamp);
   
   //if we couldn't populate the values, do nothing (window doesn't exist)
   if(!success){ 
-    std::cout << "Click and drag unsuccessful due to failutre to "
-                        << "populate click and drag values." << std::endl;
+    std::cout << "Click and drag unsuccessful due to failure to " << "populate click and drag values." << std::endl;
     return;
   }
 
   int start_x_position, start_y_position, end_x_position, end_y_position;
 
+  int start_x_position = action.value("/start_x", action, -1);
+  int start_y_position = action.value("/start_y", action, -1);
+
+  int end_x_position = action.value("/end_x", action, -1);
+  int end_y_position = action.value("/end_y", action, -1);
+
+  if (starting_point_x == end_x && starting_point_y == destination_y){
+    std::cout << "Error, the click and drag action did not specify movement." << std::endl;
+    return;
+  }
+
+  if(end_x_position == -1 || end_y_position == -1){
+    std::cout << "ERROR: the click and drag action must include an ending position" << std::endl;
+    return;
+  }
+  
+
+
   //get the mouse into starting position if they are specified.
-  if(coords.size() >3){ 
-    start_x_position = coords[0] + x_start;
-    start_y_position = coords[1] + y_start;
-    end_x_position   = coords[2] + x_start;
-    end_y_position   = coords[3] + y_start; 
+  if(start_x_position != -1 && start_y_position != -1){ 
+    start_x_position = start_x_position + x_start;
+    start_y_position = start_y_position + y_start;
 
     //don't move out of the window.
     clamp(start_x_position, x_start, x_end); 
@@ -800,11 +792,9 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
     mouse_move(window_name, start_x_position, start_y_position,x_start, x_end, 
                                                         y_start, y_end, false); 
   }
-  else{
-    //If there's no start pos, the first two indices of the vector are the end.
-    end_x_position = coords[0] + x_start;
-    end_y_position = coords[1] + y_start;
-  }
+  
+  end_x_position = end_x_position + x_start;
+  end_y_position = end_y_position + y_start;
   
   //clamp the end position so we don't exit the window. 
   clamp(end_x_position, x_start, x_end); 
@@ -1023,21 +1013,21 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
   //CLICK AND DRAG    
   else if(action_name == "click and drag"){ 
-    clickAndDragAbsolute(window_name,actions[actions_taken]);
+    clickAndDragAbsolute(window_name,action);
   }
   else if(action_name == "click and drag delta"){
-    clickAndDragDelta(window_name,actions[actions_taken]);
+    clickAndDragDelta(window_name,action);
   }
   //CLICK
   else if(action_name.find("click") != std::string::npos){ 
-    std::vector<int> button = extractIntsFromString(actions[actions_taken]);
-    if(actions[actions_taken].find("left") != std::string::npos){
+    std::string mouse_button = action.value("/mouse_button", action, "left");
+    if(mouse_button == "left"){
       click(window_name, 1);
     }
-    else if(actions[actions_taken].find("middle") != std::string::npos){
+    else if(mouse_button == "middle"){
       click(window_name, 2);
     }
-    else if(actions[actions_taken].find("right") != std::string::npos){
+    else if(mouse_button == "right"){
       click(window_name, 3);
     }
     else{
@@ -1046,11 +1036,8 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
   //MOUSE MOVE
   else if(action_name.find("move mouse") != std::string::npos){
-    
+    //TODO: implement later if deemed prudent.
     bool no_clamp = false;
-    if(actions[actions_taken].find("no clamp") != std::string::npos){
-      no_clamp = true;
-    }
       
     std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
 
@@ -1063,8 +1050,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
           mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
       }
       else{
-        std::cout << "No mouse move due to unsuccessful data population."
-                    << std::endl;
+        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
       }
     }
   }
