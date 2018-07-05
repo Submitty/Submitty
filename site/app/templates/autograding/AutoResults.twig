@@ -59,7 +59,6 @@
                 {# Badge #}
                 {% if testcase.hasPoints() %}
                     {% if can_view %}
-                        {{ testcase.getPoints() }}
                         {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
                     {% else %}
                         <div class="badge">
