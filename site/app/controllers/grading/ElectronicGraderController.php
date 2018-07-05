@@ -486,6 +486,11 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($return_url);
         }
 
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Only admins can edit teams");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
             $this->core->redirect($return_url);
@@ -558,6 +563,11 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function exportTeams() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("You do not have permission to do that.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $gradeable_id = $_REQUEST['gradeable_id'];
         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $nl = "\n";
@@ -968,7 +978,6 @@ class ElectronicGraderController extends GradingController {
 
         //checks if user has permission
         if (!$this->core->getAccess()->canI("grading.save_grade", ["gradeable" => $gradeable, "who_id" => $user_id])) {
-            $this->core->addErrorMessage("You do not have permission to grade this");
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
@@ -1112,12 +1121,11 @@ class ElectronicGraderController extends GradingController {
     
 
     public function ajaxGetStudentOutput() {
-
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $index = $_REQUEST['index'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
-        
+
+        $index = $_REQUEST['index'];
 
         //Turns off the header and footer so that it isn't displayed in the testcase output
         //Don't re-enable. 
@@ -1140,6 +1148,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return;
+        }
+
         $note = $_POST['note'];
         $points = $_POST['points'];
         foreach ($gradeable->getComponents() as $component) {
@@ -1174,6 +1189,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return;
+        }
+
         $gcm_id = $_POST['gradeable_component_mark_id'];
         foreach ($gradeable->getComponents() as $component) {
             if ($component->getId() != $_POST['gradeable_component_id']) {
@@ -1195,6 +1217,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return;
+        }
+
         $gradeable->setOverallComment($_POST['gradeable_comment']);
         $gradeable->saveGradeableData();
         $gradeable->resetUserViewedDate();
@@ -1205,6 +1234,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+
         $return_data = array();
         foreach ($gradeable->getComponents() as $question) {
             if(is_array($question)) {
@@ -1253,6 +1289,13 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+
+        if (!$this->canIGradeThis($gradeable)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+
         $response = array('status' => 'success', 'data' => $gradeable->getOverallComment());
         $this->core->getOutput()->renderJson($response);
         return $response;
@@ -1262,6 +1305,12 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $gcm_id = $_POST['gradeable_component_mark_id'];
+        if (!$this->canIViewThis($gradeable, null)) {
+            $response = array('status' => 'failure');
+            $this->core->getOutput()->renderJson($response);
+            return $response;
+        }
+
         $return_data = [];
         $name_info = [];
         foreach ($gradeable->getComponents() as $component) {
@@ -1352,6 +1401,57 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
+    }
+
+    /**
+     * Check if the current user is allowed to grade the given gradeable/user pair
+     * @param Gradeable|null $gradeable
+     * @return bool
+     */
+    public function canIGradeThis($gradeable): bool {
+        if ($gradeable === null) {
+            return false;
+        }
+
+        $gradeable_id = $gradeable->getId();
+        $user_id = $gradeable->getUser()->getId();
+
+        if ($this->core->getUser()->getGroup() === 4) {
+            //Student group, needs to be both peer and user in their peer assignment
+            if(!$gradeable->getPeerGrading()) {
+                return false;
+            } else {
+                $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
+                if(!in_array($user_id, $user_ids_to_grade)) {
+                    return false;
+                }
+            }
+        } else if ($this->core->getUser()->getGroup() === 3) {
+            //Grader/mentor group, check if the user is in their section(s)
+            if ($gradeable->isGradeByRegistration()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $users_to_grade = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            } else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $users_to_grade = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            //See if they are one of our users to grade
+            foreach ($users_to_grade as $user) {
+                /* @var User $user */
+                if ($user->getId() === $user_id) {
+                    //Yes
+                    return true;
+                }
+            }
+            //Could not find them
+            return false;
+        } else if ($this->core->getUser()->getGroup() === 2 || $this->core->getUser()->getGroup() === 1) {
+            //We are TA/Instructor and are allowed to grade everyone
+            return true;
+        }
+
+        //Fallback in case user groups > 4 ever exist
+        return false;
     }
 }
 
