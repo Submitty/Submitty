@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\NotImplementedException;
+use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -2420,6 +2421,8 @@ AND gc_id IN (
      * Gets a single Gradeable instance by id
      * @param string $id The gradeable's id
      * @return \app\models\gradeable\Gradeable
+     * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
+     * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfig($id) {
         foreach ($this->getGradeableConfigs([$id]) as $gradeable) {
@@ -2432,6 +2435,8 @@ AND gc_id IN (
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
+     * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfigs($ids) {
         throw new NotImplementedException();
@@ -2466,6 +2471,25 @@ AND gc_id IN (
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Gets a single GradedGradeable associated with the provided gradeable and
+     *  user/team.  Note: The user's team for this gradeable will be retrived if provided
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param $user|null The id of the user to get data for
+     * @param $team|null The id of the team to get data for
+     * @return GradedGradeable|null The GradedGradeable or null if none found
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
+     */
+    public function getGradedGradeable(\app\models\gradeable\Gradeable $gradeable, $user, $team) {
+        foreach ($this->getGradedGradeables([$gradeable], [$user], [$team]) as $gg) {
+            return $gg;
+        }
+        return null;
+    }
+
+    /**
+>>>>>>> master
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
@@ -2473,9 +2497,13 @@ AND gc_id IN (
      * @param string[]|null $users The ids of the users to get data for
      * @param string[]|null $teams The ids of the teams to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
-     * @throws \Exception If any GradedGradeable or GradedComponent fails to construct
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
+<<<<<<< HEAD
     public function getGradeableDataAll(array $gradeables, $users = null, $teams = null) {
+=======
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+>>>>>>> master
         throw new NotImplementedException();
     }
 

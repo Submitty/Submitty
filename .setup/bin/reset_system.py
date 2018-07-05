@@ -109,9 +109,9 @@ def main():
     # If we have psql cmd available, then PostgreSQL is installed so we should scrub out any
     # submitty DBs
     if cmd_exists('psql'):
-        os.environ['PGPASSWORD'] = 'hsdbu'
-        os.system("psql -h localhost -U hsdbu --list | grep submitty_* | awk '{print $1}' | "
-                  "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
+        os.environ['PGPASSWORD'] = 'submitty_dbuser'
+        os.system("psql -h localhost -U submitty_dbuser --list | grep submitty_* | awk '{print $1}' | "
+                  "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
         del os.environ['PGPASSWORD']
 
         psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
@@ -149,12 +149,12 @@ def main():
         user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
-    os.system('pkill -u hwcron')
-    os.system('crontab -u hwcron -r')
-    for user in ["hwcgi", "hwphp", "hwcron", "hsdbu"]:
+    os.system('pkill -u submitty_daemon')
+    os.system('crontab -u submitty_daemon -r')
+    for user in ["submitty_cgi", "submitty_php", "submitty_daemon"]:
         delete_user(user)
 
-    groups = ["hwcronphp", "course_builders"]
+    groups = ["submitty_daemonphp", "submitty_course_builders"]
     for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
         course = load_data_yaml(course_file)
         groups.append(course['code'])

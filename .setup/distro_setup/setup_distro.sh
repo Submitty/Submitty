@@ -63,13 +63,13 @@ ${DISTRO_LINE}
 ##                                                        ##
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
-##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
-##    hwcgi hwcron, ta, instructor, developer,            ##
-##    postgres                                            ##
+##    vagrant/vagrant, root/vagrant, submitty_dbuser,     ##
+##    submitty_php, submitty_cgi, submitty_daemon, ta,    ##
+##    instructor, developer, postgres                     ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
-##    hsdbu, postgres, root, vagrant                      ##
+##    submitty_dbuser, postgres, root, vagrant            ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##

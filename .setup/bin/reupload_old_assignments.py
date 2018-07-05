@@ -100,7 +100,7 @@ def main():
                     with open(ARCHIVED_submission_path, 'r') as old_timestamp, open(CURRENT_user_path, 'w') as new_timestamp:
                         for line in old_timestamp:
                             new_timestamp.write(line)
-                        os.system("chown -R hwphp:{} {}".format(course_group, new_timestamp))
+                        os.system("chown -R submitty_php:{} {}".format(course_group, new_timestamp))
                 continue
             #if the student's submission dir does not exist, make it.
             if not os.path.isdir(CURRENT_user_path):
@@ -113,14 +113,14 @@ def main():
                 continue
             #This permission also sets the underlying submission paths recursively.g
             print("Set permissions on the submission")
-            os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_user_path))
+            os.system("chown -R submitty_php:{} {}".format(course_group, CURRENT_user_path))
 
             #TODO: Sort the submissions so that they are guaranteed to be given in chronological (1,2,3,etc) order.
             #copy in the submission directory.
             print("Copied from\n\tSOURCE: " + ARCHIVED_submission_path +"\n\t" + "DESTINATION: " + CURRENT_submission_path)
             shutil.copytree(ARCHIVED_submission_path, CURRENT_submission_path)
             #give the appropriate permissions
-            os.system("chown -R hwphp:{} {}".format(course_group, CURRENT_submission_path))
+            os.system("chown -R submitty_php:{} {}".format(course_group, CURRENT_submission_path))
             #add each submission to the database.
             current_time_string = dateutils.write_submitty_date()
 
