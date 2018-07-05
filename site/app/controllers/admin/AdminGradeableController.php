@@ -1026,8 +1026,9 @@ class AdminGradeableController extends AbstractController
             }
         }
 
-        // Trigger a rebuild if the config changes
-        if (key_exists('eg_config_path', $details)) {
+        // Trigger a rebuild if the config / due date changes
+        $trigger_rebuild = ['eg_config_path', 'eg_submission_due_date'];
+        if (array_intersect($trigger_rebuild, array_keys($details))) {
             $result = $this->enqueueBuild($admin_gradeable);
             if ($result !== null) {
                 // TODO: what key should this get?
