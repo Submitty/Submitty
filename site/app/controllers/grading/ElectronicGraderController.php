@@ -967,7 +967,7 @@ class ElectronicGraderController extends GradingController {
         $version_updated = "false"; //if the version is updated
 
         //checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.grade", ["gradeable" => $gradeable, "who_id" => $user_id])) {
+        if (!$this->core->getAccess()->canI("grading.save_grade", ["gradeable" => $gradeable, "who_id" => $user_id])) {
             $this->core->addErrorMessage("You do not have permission to grade this");
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
