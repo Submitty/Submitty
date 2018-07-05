@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# This script is run by a cron job as the hwcron user
+# This script is run by a cron job as the DAEMON_USER
 #
 # Regularly checks a queue to rebuild assignment configurations for recently modified gradeables.
 #
@@ -55,11 +55,11 @@ def build_all():
 # this script will take over
 
 # ------------------------------------------------------------------------
-# this script is intended to be run only from the cron job of user hwcron
+# this script is intended to be run only from the cron job of DAEMON_USER
 def main():
     username = pwd.getpwuid(os.getuid()).pw_name
-    if username != "hwcron":
-        raise SystemError("ERROR!  This script must be run by hwcron")
+    if username != "submitty_daemon":
+        raise SystemError("ERROR!  This script must be run by submitty_daemon")
 
     # ensure future pushd & popd commands don't complain
     os.chdir("/var/local/submitty/to_be_built/")
