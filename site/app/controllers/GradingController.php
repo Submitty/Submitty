@@ -7,6 +7,7 @@ use app\controllers\grading\SimpleGraderController;
 use app\controllers\grading\TeamListController;
 use app\controllers\grading\ImagesController;
 use app\libraries\DateUtils;
+use app\models\Gradeable;
 
 
 class GradingController extends AbstractController {
@@ -31,11 +32,15 @@ class GradingController extends AbstractController {
     }
 
     /**
-    * Returns true only if a user is authorized to view the ENTIRETY of a gradeable.
-    *
-    * Given a gradeable, determine whether or not the current user can view it.
-    * If hidden is true, a regular users cannot view their own files.
-    */
+     * Returns true only if a user is authorized to view the ENTIRETY of a gradeable.
+     *
+     * Given a gradeable, determine whether or not the current user can view it.
+     * If hidden is true, a regular users cannot view their own files.
+     * @param Gradeable $req_gradeable
+     * @param string $who_id
+     * @param bool $hidden
+     * @return bool
+     */
     protected function canIViewThis($req_gradeable, $who_id, $hidden=False){
 
 
@@ -56,7 +61,7 @@ class GradingController extends AbstractController {
                    $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
             }
             else {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($req_gradeable->getId(),
                    $this->core->getUser()->getId());
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
             }
