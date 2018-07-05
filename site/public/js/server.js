@@ -236,6 +236,13 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function newUploadImagesForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#upload-images-form");
+    form.css("display", "block");
+    $('[name="upload"]', form).val(null);
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
     var form = $("#run-plagiarism-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
@@ -503,7 +510,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
 function copyToClipboard(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
     var required_emails = [];
-    
+
     $('#download-form input:checkbox').each(function() {
         if ($(this).is(':checked')) {
             var thisVal = $(this).val();
@@ -639,7 +646,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
     $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
     if(new_team) {
-        $('[name="num_users"]', form).val(3);    
+        $('[name="num_users"]', form).val(3);
     }
     else if (!new_team) {
         $('[name="num_users"]', form).val(members.length+2);
