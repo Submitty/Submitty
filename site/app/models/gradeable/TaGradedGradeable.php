@@ -103,9 +103,26 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Used to retrieve existing graded components or generate new ones based on component
-     *  type and the provided parameters
-     * TODO: document this more.  It does what you want in most situations, but that isn't an excuse for bad docs
+     * Used to retrieve existing graded components or generate new ones
+     * This function has fairly complex behavior to achieve a large amount of convenience.
+     * In general: If the component is peer or generate is true, don't pass a null grader
+     *
+     * Grader Null:
+     *   Component not peer:
+     *     Component has grades:            => Get 0th grade
+     *     Generate false:                  => return null
+     *     Generate true:                   => throw InvalidArgumentException
+     *   Component peer:                    => throw InvalidArgumentException
+     * Grader Not Null:
+     *   Component not peer:
+     *     Component has grades:            => Get the one TA grade and sets the grader
+     *     Generate false:                  => return null
+     *     Generate true:                   => Generate new component with provided user as grader (TA)
+     *   Component peer:
+     *     Component has grades for grader  => return that graded component
+     *     Generate false:                  => return null
+     *     Generate true:                   => generate new component with provided user as grader (append)
+     *
      * @param Component $component The component the grade is for
      * @param User $grader The grader for this component
      * @param bool $generate If a new graded component should be generated if none were found
