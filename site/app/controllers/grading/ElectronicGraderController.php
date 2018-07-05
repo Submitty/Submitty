@@ -103,9 +103,15 @@ class ElectronicGraderController extends GradingController {
 
     private function verifyGrader($verifyAll = false){
         //check that I am able to verify.
-        if(!$this->core->getUser()->accessAdmin() && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
-            return;
+        if ($verifyAll) {
+            if (!$this->core->getAccess()->canI("grading.verify_all")) {
+                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
+                return;
+        } else {
+            if (!$this->core->getAccess()->canI("grading.verify_grader")) {
+                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
+                return;
+            }
         }
 
         $gradeable_id = $_POST['gradeable_id'];
@@ -329,19 +335,14 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->addBreadcrumb('Student Index');
 
-        $peer = false;
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
+        $peer = ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4);
+        if (!$this->core->getAccess()->canI("grading.details", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $students = array();
@@ -478,11 +479,6 @@ class ElectronicGraderController extends GradingController {
 
         if ($gradeable == null) {
             $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
-            $this->core->redirect($return_url);
-        }
-
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
         }
 

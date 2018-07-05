@@ -23,6 +23,7 @@ class Access {
     const CHECK_GRADING_SECTION_MENTOR  = 1 << 6;
     const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7;
     const CHECK_HAS_SUBMISSION          = 1 << 8;
+    const CHECK_CSRF                    = 1 << 9;
 
     //
     const ALLOW_MIN_STUDENT    = self::ALLOW_INSTRUCTOR | self::ALLOW_TA | self::ALLOW_MENTOR | self::ALLOW_STUDENT;
@@ -39,6 +40,7 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
+        $this->permissions["grading.details"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_MENTOR | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
         $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
@@ -47,8 +49,10 @@ class Access {
         $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.add_one_new_mark"] = self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
         $this->permissions["grading.delete_one_mark"] = self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_MENTOR;
-        $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.verify_grader"] = self::ALLOW_MIN_TA;
+        $this->permissions["grading.verify_all"] = self::ALLOW_MIN_TA;
     }
 
     /**
@@ -78,6 +82,12 @@ class Access {
             return false;
         } else if ($group === self::USER_GROUP_INSTRUCTOR && !($checks & self::ALLOW_INSTRUCTOR)) {
             return false;
+        }
+
+        if ($checks & self::CHECK_CSRF) {
+            if ($this->core->checkCsrfToken($_POST['csrf_token'])) {
+                return false;
+            }
         }
 
         /* @var Gradeable|null $gradeable */
