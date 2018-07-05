@@ -183,6 +183,10 @@ class AutoGradedVersion extends AbstractModel {
         return $this->graded_testcases;
     }
 
+    /**
+     * Gets the number of points earned that count towards early submission incentives
+     * @return float
+     */
     public function getEarlyIncentivePoints() {
         if($this->graded_gradeable === null) {
             $this->loadTestcases();
