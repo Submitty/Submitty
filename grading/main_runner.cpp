@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
 #include "default_config.h"
 #include "execute.h"
@@ -48,6 +49,13 @@ int main(int argc, char *argv[]) {
   system("find . -type f -exec ls -sh {} +");
 
   // Run each test case and create output files
+  std::vector<std::string> required_capabilities = stringOrArrayOfStrings(config_json, "required_capabilities");
+  
+  bool windowed = false;
+  if (std::find(required_capabilities.begin(), required_capabilities.end(), "windowed") != v.end()){
+    windowed = true;
+  }
+
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
@@ -60,7 +68,7 @@ int main(int argc, char *argv[]) {
     if (my_testcase.isFileCheck()) continue;
     if (my_testcase.isCompilation()) continue;
     std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
-    std::vector<std::string> actions  = stringOrArrayOfStrings((*tc)[i],"actions");
+    std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i],"actions");
     assert (commands.size() > 0);
 
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
@@ -87,7 +95,8 @@ int main(int argc, char *argv[]) {
                             logfile,
                             my_testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json()),
-                            config_json); 
+                            config_json,
+                            windowed); 
       
     }
     
@@ -109,7 +118,8 @@ int main(int argc, char *argv[]) {
                   "/dev/null",
                   my_testcase.get_test_case_limits(),
                   config_json.value("resource_limits",nlohmann::json()),
-                  config_json);
+                  config_json,
+                  false);
           std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
         }
       }
