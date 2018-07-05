@@ -11,6 +11,7 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 
 /**
@@ -18,9 +19,10 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * Data about and results of autograding for one submission version
+ * TODO: this should use lazy loading for per-testcase data (found in files on disk)
  *
  * @method int getVersion()
- * @method float getNonHiddenHonExtraCredit()
+ * @method float getNonHiddenNonExtraCredit()
  * @method float getNonHiddenExtraCredit()
  * @method float getHiddenNonExtraCredit()
  * @method float getHiddenExtraCredit()
@@ -48,15 +50,17 @@ class AutogradingVersion extends AbstractModel {
     /**
      * AutogradingVersion constructor.
      * @param Core $core
-     * @param GradedGradeable $graded_gradeable GradedGradeable this version data is associated with
+     * @param GradedGradeable $graded_gradeable
      * @param array $details
      * @throws \Exception If \DateTime failed to parse
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        $this->setGradedGradeable($graded_gradeable);
-
+        if ($graded_gradeable === null) {
+            throw new \InvalidArgumentException('Graded gradeable cannot be null');
+        }
+        $this->graded_gradeable = $graded_gradeable;
         $this->setVersionInternal($details['version']);
         $this->setPointsInternal($details);
         $this->setSubmissionTimeInternal($details['submission_time']);
@@ -72,6 +76,36 @@ class AutogradingVersion extends AbstractModel {
         return $details;
     }
 
+    public function getNonHiddenPoints() {
+        return $this->non_hidden_non_extra_credit + $this->non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the percent of the possible visible points the submitter earned
+     * @param bool $clamp True to clamp the output to 1
+     * @return float percentage (0 to 1), or NAN if no visible percent
+     */
+    public function getNonHiddenPercent($clamp = false) {
+        $divisor = $this->graded_gradeable->getGradeable()->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+        $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit();
+
+        return Utils::safeCalcPercent($dividend, $divisor, $clamp);
+    }
+
+    /**
+     * Gets the percent of all possible points the submitter earned
+     * @param bool $clamp True to clamp the output to 1
+     * @return float percentage (0 to 1), or NAN if no points possible
+     */
+    public function getTotalPercent($clamp = false) {
+        $config = $this->graded_gradeable->getGradeable()->getAutogradingConfig();
+        $divisor = $config->getTotalNonHiddenNonExtraCredit() + $config->getTotalHiddenNonExtraCredit();
+        $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit() +
+            $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
+
+        return Utils::safeCalcPercent($dividend, $divisor, $clamp);
+    }
+
     /**
      * Gets the graded gradeable this version data is associated with
      * @return GradedGradeable the graded gradeable this version data is associated with
@@ -81,17 +115,6 @@ class AutogradingVersion extends AbstractModel {
     }
 
     /* Overridden setters with validation */
-
-    /**
-     * Sets the internal graded gradeable reference
-     * @param GradedGradeable $graded_gradeable
-     */
-    private function setGradedGradeable(GradedGradeable $graded_gradeable) {
-        if ($graded_gradeable === null) {
-            throw new \InvalidArgumentException('Graded gradeable cannot be null');
-        }
-        $this->graded_gradeable = $graded_gradeable;
-    }
 
     /**
      * Sets the version this graded version data is for

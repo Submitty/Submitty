@@ -1,0 +1,12 @@
+<div class="popup-form" id="rename_config_popup">
+    <h3>What is the new name?</h3>
+    <p id="alert_in_use"></p>
+    <ol id="gradeables_using_config" style="margin-left:30px">
+    </ol>
+    <form method="POST" enctype="multipart/form-data" action="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'rename_config'}) }}">
+        <input name="new_config_name" id="new_config_name" value="">
+        <input name="curr_config_name" type="hidden" value="" id="curr_config_name"><br><br>
+        <input type="submit" value="Submit">
+        <input type="reset" value="Cancel" onclick="$('#rename_config_popup').css('display', 'none');">
+    </form>
+</div>

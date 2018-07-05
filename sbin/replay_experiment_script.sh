@@ -16,7 +16,7 @@ test_user=INSERT_USERNAME
 rm -f /home/$(test_user)/PAPER_DATA/*.txt
 
 #list all containers
-#sudo su -c 'docker container ls' hwcron
+#sudo su -c 'docker container ls' submitty_daemon
 
 
 kill_stuff () {
@@ -24,9 +24,9 @@ kill_stuff () {
     echo 'kill stuff'
     
     # kill all containers
-    sudo su -c 'docker stop $(docker ps -aq)' hwcron
-    sudo su -c 'docker rm $(docker ps -aq)' hwcron
-    sudo su -c 'docker container ls' hwcron
+    sudo su -c 'docker stop $(docker ps -aq)' submitty_daemon
+    sudo su -c 'docker rm $(docker ps -aq)' submitty_daemon
+    sudo su -c 'docker container ls' submitty_daemon
 
     # killall performance_monitor.py
     ps -ef | grep performance_monitor.py | grep -v grep | awk '{print $2}' | xargs kill -9
@@ -57,7 +57,7 @@ run_experiment () {
     sudo service docker start
     
     echo $exp_name ' - DOCKER'
-    sudo su -c 'touch /tmp/use_docker' hwcron
+    sudo su -c 'touch /tmp/use_docker' submitty_daemon
     sudo rm  /var/local/submitty/logs/autograding/20180220.txt
     /home/$(test_user)/performance_monitor.py /home/$(test_user)/PAPER_DATA/${exp_name}_DOCKER_performance.txt $rtime &
     /usr/local/submitty/bin/regrade.py --replay "${start}" "${end}"

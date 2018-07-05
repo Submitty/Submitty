@@ -14,13 +14,34 @@ class GradeableController extends AbstractController {
             case 'process_upload_config':
                 $this->process_config_upload();
                 break;
+			case 'delete_config':
+			    $this->delete_config();
+				break;
+            case 'rename_config':
+                $this->rename_config();
+                break;
+            case 'check_being_used':
+                $this->configUsedBy();
+                break;
         }
     }
 
     public function upload_config() {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
-        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm', $target_dir, $all_files);
+        $all_paths = array();
+        foreach($all_files as $file){
+            $all_paths[] = $file['path'];
+        }
+        $inuse_config = array();
+        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+            foreach($all_paths as $path){
+                if(strpos($gradeable->getConfigPath(), $path) !== false){
+                    $inuse_config[] = $path;
+                }
+            }
+        }
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm', $target_dir, $all_files, $inuse_config);
     }
 
     public function process_config_upload() {
@@ -44,7 +65,13 @@ class GradeableController extends AbstractController {
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-        $target_dir = FileUtils::joinPaths($target_dir, count(scandir($target_dir))-1);
+        $counter = count(scandir($target_dir))-1;
+        $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        while(is_dir($try_dir)){
+            $counter++;
+            $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        }
+        $target_dir = $try_dir;
         FileUtils::createDir($target_dir);
 
         if (FileUtils::getMimeType($upload["tmp_name"]) == "application/zip") {
@@ -73,5 +100,92 @@ class GradeableController extends AbstractController {
         $this->core->addSuccessMessage("Gradeable config uploaded");
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
             'action' => 'upload_config')));
+    }
+
+    public function rename_config(){
+        $config_file_path = $_POST['curr_config_name'] ?? null;
+        if($config_file_path == null){
+            $this->core->addErrorMessage("Unable to find file");
+
+        } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+            $this->core->addErrorMessage("This action can't be completed.");
+        } else if (preg_match('/\s/',$config_file_path)) {
+            $this->core->addErrorMessage("The file name cannot contain space.");
+        } else {
+            $new_name = $_POST['new_config_name'] ?? null;
+            $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
+            if(rename($config_file_path, $new_dir)){
+                $this->core->addSuccessMessage("Successfully renamed file");
+            } else {
+                $this->core->addErrorMessage("Directory already exist, please choose another name.");
+            }
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
+            'action' => 'upload_config')));
+    }
+
+    public function delete_config(){
+        $config_path = $_GET['config'] ?? null;
+        $in_use = false;
+        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+            if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+                $in_use = true;
+                break;
+            }
+        }
+        if ($config_path == null) {
+            $this->core->addErrorMessage("Selecting config failed.");
+        } else if (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+            $this->core->addErrorMessage("This action can't be completed.");
+        } else if ($in_use){
+            $this->core->addErrorMessage("This config is currently in use.");
+        } else {
+            if($this->recursive_rmdir($config_path)){
+                $this->core->addSuccessMessage("The config folder has been succesfully deleted");
+            } else {
+                $this->core->addErrorMessage("Deleting config failed.");
+            }
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
+            'action' => 'upload_config')));
+    }
+
+    private function configUsedBy(){
+        // Returns a list of gradeables that are using this config
+        $config_path = $_GET['config'] ?? null;
+        if($config_path == null){
+            return null;
+        } else {
+            $inuse_config = array();
+            foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+                if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+                        $inuse_config[] = $gradeable->getId();
+                }
+            }
+        }
+        return $this->core->getOutput()->renderJson($inuse_config);
+    }
+
+    /**
+     * @param $dir directory to remove
+     *
+     * This function is the same as rmdir, except it removes all the content inside as well.
+     *
+     * @return bool whether or not the dir is removed
+     */
+    private function recursive_rmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (is_dir($dir."/".$object))
+                        $this->recursive_rmdir($dir."/".$object);
+                    else
+                        unlink($dir."/".$object);
+                }
+            }
+            if(!rmdir($dir)) return false;
+        }
+        return true;
     }
 }
