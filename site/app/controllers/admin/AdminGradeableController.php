@@ -1141,7 +1141,7 @@ class AdminGradeableController extends AbstractController
     private function rebuildAssignmentRequest()
     {
         $g_id = $_REQUEST['id'];
-        $result = $this->enqueueBuildFile($g_id);
+        $result = $this->enqueueBuild($this->getAdminGradeable($g_id));
         if ($result !== null) {
             die($result);
         }
