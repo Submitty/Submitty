@@ -2,7 +2,6 @@
 
 <div class="content">
     <h2>Upload Gradeable Config</h2>
-
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
@@ -35,31 +34,48 @@
     <br>
     <b>located in {{ target_dir }}</b>
     <br>&nbsp;<br>
+    <link>
+    <script>
+        function openRenamePopup(file_path){
+            var url = buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'check_being_used', 'config': file_path});
+            $('#alert_in_use').html('');
+            $('#gradeables_using_config').empty();
+            $.ajax({
+                url : url,
+                success(data){
+                    var gradeable_ids = JSON.parse(data);
+                    if(gradeable_ids.length > 0){
+                        $('#alert_in_use').html("Note: Currently these gradeables are using this config, rename at your own risk");
+                        for(var i = 0; i < gradeable_ids.length; i++){
+                            $('#gradeables_using_config').append("<li>" + gradeable_ids[i] + "</li>");
+                        }
+                    }
+                }
+            })
+            $('#rename_config_popup').css('display', 'block');
+            $('#curr_config_name').val(file_path);
+        }
+    </script>
     <ul>
-        {{ self.display_files(self, all_files, 1, false) }}
+        {{ self.display_files(self, all_files, 1, false, inuse_config) }}
     </ul>
 </div>
 {% endif %}
 
-{% if has_last_build_output %}
-<div class="content">
-    <h2>Output from most recent BUILD_{{ course }}.sh</h2>
-    <br>
-    <b>{{ build_script_output_file }}</b>
-    <br>
-    <br>
-    <pre>{{ contents }}</pre>
-</div>
-{% endif %}
-
-{% macro display_files(self, files, indent, seen_root) %}
+{% macro display_files(self, files, indent, seen_root, inuse_config) %}
     {% set margin_left = 15 %}
     {% set neg_margin_left = -15 * indent %}
     {% for name, file in files %}
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         {% if file.files != null %}
             <div>
-                <span id='{{ id }}-span' class='icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
+                {% if indent == 1 %}
+                    <a class="fa fa-pencil" onclick="openRenamePopup('{{ file.path }}')"></a>
+                    {% if file.path not in inuse_config %}
+                        <a class="fa fa-trash" href="{{core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'delete_config', 'config': file.path})}}"></a>
+                    {% endif %}
+                {% endif %}
+                <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
                     {{ self.display_files(self, file.files, indent + 1, true) }}
                 </div>
@@ -70,9 +86,10 @@
                 <div class="file-viewer"><a onclick='openFrame("{{ url }}", "{{ id }}", "{{ file.name }}")'>
                     <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ url }}")'>(Popout)</a>
                 </div>
-
                 <div id="file_viewer_{{ id }}" style='margin-left: {{ neg_margin_left }}px'></div>
             </div>
         {% endif %}
     {% endfor %}
 {% endmacro %}
+
+{% include('admin/RenameConfigPopup.twig')%}
