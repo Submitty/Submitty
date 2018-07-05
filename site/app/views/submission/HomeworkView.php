@@ -492,7 +492,7 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
         } 
         else if($this->core->getUser()->accessGrading()){
             if($gradeable->getRegradeStatus() === -1){
-                $btn_type = "admin";
+                $btn_type = "admin_open";
                     $url = $this->core->buildUrl(array('component' => 'student',
                         'action' => 'make_request_post',
                         'gradeable_id' => $gradeable->getId(),
@@ -502,7 +502,7 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
                 $action = 'make_request_post_admin';
             }
             else{
-                $btn_type = "cancel";
+                $btn_type = "admin_closed";
                     $url = $this->core->buildUrl(array('component' => 'student',
                         'action' => 'make_request_post',
                         'gradeable_id' => $gradeable->getId(),
