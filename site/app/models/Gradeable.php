@@ -283,11 +283,9 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
-    
-    protected $total_peer_grading_non_extra_credit = 0;
-    protected $total_peer_grading_extra_credit=0;
+    protected $total_tagrading_points = 0; 
+
+    protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -451,7 +449,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_non_extra_credit += $max_value;
+                    $this->total_tagrading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -920,8 +918,8 @@ class Gradeable extends AbstractModel {
         return $points;
     }
 
-    public function getTotalTANonExtraCreditPoints() {
-        return $this->total_tagrading_non_extra_credit;
+    public function getTotalTAPoints() {
+        return $this->total_tagrading_points;
     }
 
     public function getTAViewDate(){
@@ -1176,12 +1174,12 @@ class Gradeable extends AbstractModel {
         foreach($this->components as $cmpt) {
             if(is_array($cmpt)) {
                 foreach($cmpt as $peer) {
-                    if($peer->getGrader() !== null && $peer->getGrader()->getId() == $grader_id) {
+                    if($peer->getHasMarks() && $peer->getGrader()->getId() == $grader_id) {
                         $return[] = $peer;
                     }
                 }
             }
-            else if($cmpt->getGrader() !== null && $cmpt->getGrader()->getId() == $grader_id) {
+            else if($cmpt->getHasMarks() && $cmpt->getGrader()->getId() == $grader_id) {
                 $return[] = $cmpt;
             }
         }
@@ -1232,7 +1230,7 @@ class Gradeable extends AbstractModel {
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
             "graded_ta_points" => $this->getGradedTAPoints(),
-            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "total_ta_points" => $this->getTotalTAPoints(),
             "components" => []
         ];
 
