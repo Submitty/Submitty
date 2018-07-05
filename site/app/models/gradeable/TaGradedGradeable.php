@@ -48,7 +48,7 @@ class TaGradedGradeable extends AbstractModel {
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        if($graded_gradeable === null) {
+        if ($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
         $this->graded_gradeable = $graded_gradeable;
@@ -71,7 +71,7 @@ class TaGradedGradeable extends AbstractModel {
         $details['graders'] = [];
         /** @var GradedComponent[] $graded_components */
         foreach ($this->graded_components as $graded_components) {
-            foreach($graded_components as $graded_component) {
+            foreach ($graded_components as $graded_component) {
                 if ($graded_component->getGrader() !== null) {
                     // Only set once if multiple components have the same grader
                     if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
@@ -113,21 +113,20 @@ class TaGradedGradeable extends AbstractModel {
      * @throws \InvalidArgumentException If $grader is null and ($component is peer or $generate is true)
      */
     public function getGradedComponent(Component $component, User $grader, $generate = false) {
-
         $grades_exist = isset($this->graded_components[$component->getId()]);
-        if($grader === null) {
+        if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
-            if($component->isPeer()) {
+            if ($component->isPeer()) {
                 throw new \InvalidArgumentException('Cannot get peer graded component with null grader');
             }
 
             // Grades exist, not a peer component, so grab the first grade
-            if($grades_exist) {
+            if ($grades_exist) {
                 return $this->graded_components[$component->getId()][0];
             }
 
             // If no grader is provided we can't generate a graded component
-            if($generate) {
+            if ($generate) {
                 throw new \InvalidArgumentException('Cannot generate graded component with null grader');
             }
 
@@ -139,24 +138,24 @@ class TaGradedGradeable extends AbstractModel {
         // Grader not null
         //
 
-        if($component->isPeer()) {
+        if ($component->isPeer()) {
             // Try to find existing graded component for this component and user...
             /** @var GradedComponent[] $component_grades */
             $component_grades = $this->graded_components[$component->getId()] ?? [];
             $graded_component = null;
             foreach ($component_grades as $component_grade) {
-                if($component_grade->getGrader()->getId() === $grader->getId()){
+                if ($component_grade->getGrader()->getId() === $grader->getId()) {
                     $graded_component = $component_grade;
                 }
             }
 
             // ... Found one
-            if($graded_component !== null) {
+            if ($graded_component !== null) {
                 return $graded_component;
             }
 
             // None found, but generate one (append to array)
-            if($generate) {
+            if ($generate) {
                 return $this->graded_components[$component->getId()][] =
                     new GradedComponent($this->core, $component, $grader, []);
             }
@@ -170,7 +169,7 @@ class TaGradedGradeable extends AbstractModel {
         //
 
         // Grades exist for component, so get the only one
-        if($grades_exist) {
+        if ($grades_exist) {
             /** @var GradedComponent $graded_component */
             $graded_component = $this->graded_components[$component->getId()][0];
             $graded_component->setGrader($grader);
@@ -178,7 +177,7 @@ class TaGradedGradeable extends AbstractModel {
         }
 
         // Grades don't exist, but generate one (at zero index of array)
-        if($generate) {
+        if ($generate) {
             return $this->graded_components[$component->getId()][0] =
                 new GradedComponent($this->core, $component, $grader, []);
         }
@@ -186,7 +185,7 @@ class TaGradedGradeable extends AbstractModel {
         // Grades don't exist.  Don't generate one
         return null;
     }
-    
+
     /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
@@ -218,7 +217,7 @@ class TaGradedGradeable extends AbstractModel {
 
                     // TODO: how should peer grades be calculated: now its an average
                     $component_points_earned += $component_grade->getScore();
-                    foreach($component_grade->getMarks() as $mark) {
+                    foreach ($component_grade->getMarks() as $mark) {
                         $component_points_earned += $mark->getPoints();
                     }
                 }
@@ -280,8 +279,8 @@ class TaGradedGradeable extends AbstractModel {
         // Flatten the array if we are given a 2d array.  Don't trust the user to
         //  give us properly indexed components
         $graded_components_flat = [];
-        foreach($graded_components as $graded_component) {
-            if(is_array($graded_component)) {
+        foreach ($graded_components as $graded_component) {
+            if (is_array($graded_component)) {
                 $graded_components_flat = array_merge($graded_component, $graded_components_flat);
             } else {
                 $graded_components_flat[] = $graded_component;
@@ -291,7 +290,7 @@ class TaGradedGradeable extends AbstractModel {
         // Next, setup the components to index by component id
         $graded_components_by_id = [];
         foreach ($graded_components_flat as $graded_component) {
-            if($graded_components)
+            if ($graded_components)
                 if (!($graded_component instanceof GradedComponent)) {
                     throw new \InvalidArgumentException('Graded Component array contained invalid type');
                 }
@@ -326,5 +325,4 @@ class TaGradedGradeable extends AbstractModel {
     public function setId($id) {
         throw new \BadFunctionCallException('Cannot set id of gradeable data');
     }
-
 }
