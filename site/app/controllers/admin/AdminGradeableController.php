@@ -21,7 +21,7 @@ class AdminGradeableController extends AbstractController {
                 $this->createGradeableRequest();
                 break;
             case 'edit_gradeable_page':
-                $this->editPage(array_key_exists('nav_tab', $_REQUEST) ? $_REQUEST['nav_tab'] : 0);
+                $this->editGradeableRequest();
                 break;
             case 'update_gradeable':
                 $this->updateGradeableRequest();
@@ -29,14 +29,14 @@ class AdminGradeableController extends AbstractController {
             case 'update_gradeable_rubric':
                 // Other updates are happening real time,
                 //  but the rubric and the grader assignment need
-                //  to be update manually
+                //  to be updated separately
                 $this->updateRubricRequest();
                 break;
             case 'update_gradeable_graders':
                 $this->updateGradersRequest();
                 break;
             case 'upload_new_template':
-                $this->uploadNewTemplate();
+                $this->uploadNewTemplateRequest();
                 break;
             case 'quick_link':
                 $this->quickLink();
@@ -55,13 +55,26 @@ class AdminGradeableController extends AbstractController {
 
     /* Page load methods */
 
-    // Pulls data from an existing gradeable to display the 'new' page with
-    private function uploadNewTemplate() {
-        if ($_REQUEST['template_id'] === "--None--") {
+    private function uploadNewTemplateRequest() {
+        // TODO: validate existence / value of this parameter
+        if ($_GET['template_id'] === '--None--') {
             $this->newPage();
-            return;
+        } else {
+            $this->uploadNewTemplate($_GET['template_id']);
         }
-        $template_gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['template_id']);
+    }
+
+    private function editGradeableRequest() {
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
+        $this->editPage($gradeable, $_GET['semester'], $_GET['course'], $_GET['nav_tab'] ?? 0);
+    }
+
+    /**
+     * Pulls data from an existing gradeable to display the 'new' page with
+     * @param string $template_id The id of the gradeable to use as a template
+     */
+    private function uploadNewTemplate($template_id) {
+        $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
         $this->newPage($template_gradeable);
     }
 
@@ -89,9 +102,8 @@ class AdminGradeableController extends AbstractController {
     }
 
     //view the page with pulled data from the gradeable to be edited
-    private function editPage($nav_tab = 0) {
+    private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('edit gradeable');
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
 
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
@@ -200,8 +212,8 @@ class AdminGradeableController extends AbstractController {
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
-            'semester' => $_GET['semester'],
-            'course' => $_GET['course'],
+            'semester' => $semester,
+            'course' => $course,
             'date_format' => 'Y-m-d H:i:sO',
 
             // Non-Gradeable-model data
