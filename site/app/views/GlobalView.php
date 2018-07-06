@@ -25,43 +25,39 @@ class GlobalView extends AbstractView {
         }
 
         $navURLs = [];
-        if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
-            if ($this->core->getUser()->accessGrading()) {
-                if ($this->core->getUser()->accessAdmin()) {
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
-                        "title" => "Course Settings"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
-                        "title" => "Students"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
-                        "title" => "Graders"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
-                        "title" => "Setup Sections"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
-                        "title" => "Late Days Allowed"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
-                        "title" => "Excused Absence Extensions"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
-                        "title" => "Grade Summaries / CSV Report"
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
-                        "title" => "Lichen Plagiarism Detection [WIP]"
-                    ];
-                }
-            }
+        if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded() && $this->core->getUser()->accessAdmin()) {
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                "title" => "Course Settings"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
+                "title" => "Students"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
+                "title" => "Graders"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                "title" => "Setup Sections"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
+                "title" => "Late Days Allowed"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                "title" => "Excused Absence Extensions"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                "title" => "Grade Summaries / CSV Report"
+            ];
+            $navURLs[] = [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
+                "title" => "Lichen Plagiarism Detection [WIP]"
+            ];
         }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
