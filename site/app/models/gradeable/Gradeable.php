@@ -36,7 +36,6 @@ use app\models\GradeableComponent;
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
- * @method object getAutogradingConfig()
  * @method bool isVcs()
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
@@ -87,7 +86,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
 
-    /* (private) Lazy-loaded properties */
+    /* (private) Lazy-loaded Properties */
 
     /** @property @var bool If any manual grades have been entered for this gradeable */
     private $any_manual_grades = null;
@@ -100,6 +99,8 @@ class Gradeable extends AbstractModel {
      */
     private $rotating_grader_sections = null;
     private $rotating_grader_sections_modified = false;
+    /** @property @var AutogradingConfig The object that contains the autograding config data */
+    private $autograding_config = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -110,8 +111,6 @@ class Gradeable extends AbstractModel {
 
     /** @property @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
-    /** @property @var string[] The object that contains the autograding config data */
-    protected $autograding_config = null;
     /** @property @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
@@ -163,7 +162,14 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
-    public function __construct(Core $core, $details) {
+    /**
+     * Gradeable constructor.
+     * @param Core $core
+     * @param array $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid
+     * @throws ValidationException If any of the dates are incompatible or invalid
+     */
+    public function __construct(Core $core, array $details) {
         parent::__construct($core);
 
         $this->setIdInternal($details['id']);
@@ -177,7 +183,6 @@ class Gradeable extends AbstractModel {
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
-            $this->autograding_config = $this->loadAutogradingConfig();
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
@@ -218,6 +223,7 @@ class Gradeable extends AbstractModel {
 
         // Serialize important Lazy-loaded values
         $return['rotating_grader_sections'] = parent::parseObject($this->getRotatingGraderSections());
+        $return['autograding_config'] = parent::parseObject($this->getAutogradingConfig());
 
         return $return;
     }
@@ -228,8 +234,8 @@ class Gradeable extends AbstractModel {
      * @return Component|null The Component with the provided id, or null if not found
      */
     public function getComponent($component_id) {
-        foreach($this->components as $component) {
-            if($component->getId() === $component_id) {
+        foreach ($this->getComponents() as $component) {
+            if ($component->getId() === $component_id) {
                 return $component;
             }
         }
@@ -238,7 +244,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Loads the autograding config file at $this->autograding_config into an array, or null if error/not found
-     * @return array|bool|null
+     * @return AutogradingConfig|null
      */
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -246,24 +252,17 @@ class Gradeable extends AbstractModel {
         try {
             $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
                 "build_{$this->id}.json"));
+
+            // If the file could not be found, the result will be false, so don't
+            //  create the config if the file can't be found
+            if ($details !== false) {
+                return new AutogradingConfig($this->core, $details);
+            }
+            return null;
         } catch (\Exception $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
-
-        if (isset($details['max_submission_size'])) {
-            $details['max_submission_size'] = floatval($details['max_submission_size']);
-        }
-
-        if (isset($details['max_submissions'])) {
-            $details['max_submissions'] = intval($details['max_submissions']);
-        }
-
-        if (isset($details['assignment_message'])) {
-            $details['assignment_message'] = Utils::prepareHtmlString($details['assignment_message']);
-        }
-
-        return $details;
     }
 
     /**
@@ -467,6 +466,25 @@ class Gradeable extends AbstractModel {
             $this->rotating_grader_sections_modified = false;
         }
         return $this->rotating_grader_sections;
+    }
+
+    /**
+     * Gets the autograding configuration object
+     * @return AutogradingConfig
+     */
+    public function getAutogradingConfig() {
+        if($this->autograding_config === null) {
+            $this->autograding_config = $this->loadAutogradingConfig();
+        }
+        return $this->autograding_config;
+    }
+
+    /**
+     * Gets whether this gradeable has an autograding config
+     * @return bool True if it has an autograding config
+     */
+    public function hasAutogradingConfig() {
+        return $this->getAutogradingConfig() !== null;
     }
 
     /** @internal */

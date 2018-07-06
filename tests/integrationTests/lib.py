@@ -10,7 +10,7 @@ from pprint import pprint
 
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_TUTORIAL_DIR = "__INSTALL__FILLIN__SUBMITTY_TUTORIAL_DIR__"
+SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
 
 GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
 
