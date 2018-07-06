@@ -28,6 +28,8 @@ def change_value(my_json, old_key, new_value):
         
 def up(config):
 
+    submitty_filename = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty.json'))
+    submitty_filename_tmp = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_tmp.json'))
     submitty_users_filename = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users.json'))
     submitty_users_filename_tmp = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty_users_tmp.json'))
     killall_path = Path(config.submitty['submitty_install_dir'], 'sbin', 'killall.py')
@@ -77,6 +79,16 @@ def up(config):
         shutil.move("/home/hwcgi","/home/submitty_cgi")
 
     # edit the variables stored by configure submitty/installation
+    with open (submitty_filename,"r") as open_file:
+        my_json = json.load(open_file)
+    change_value(my_json,"submitty_repository","/usr/local/submitty/GIT_CHECKOUT/Submitty")
+    with open (submitty_filename_tmp,"w") as open_file:
+        json.dump(my_json,open_file,indent=4)
+    # write to another file & then remove the write permissions
+    shutil.move(submitty_filename_tmp,submitty_filename)
+    os.chmod(submitty_filename, 0o440)
+    os.chown(submitty_filename, os.getuid(), grp.getgrnam('submitty_daemonphp').gr_gid)
+
     with open (submitty_users_filename,"r") as open_file:
         my_json = json.load(open_file)
     change_key(my_json,"hwcron_uid","daemon_uid")

@@ -47,7 +47,7 @@ use app\libraries\Utils;
  * @method string getCourseEmail()
  * @method string getVcsUser()
  * @method string getVcsType()
- * @method string getPrivateConfigRepository()
+ * @method string getPrivateRepository()
  */
 
 class Config extends AbstractModel {
@@ -159,7 +159,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $vcs_type;
     /** @property @var string */
-    protected $private_config_repository;
+    protected $private_repository;
     /** @property @var array */
     protected $hidden_details;
     /** @property @var bool */
@@ -277,7 +277,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_config_repository', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -331,6 +331,11 @@ class Config extends AbstractModel {
             if (!isset($config[$section][$key]) &&
                 $key == "regrade_enabled") {
               $config[$section][$key] = false;
+            }
+            // DEFAULT FOR PRIVATE_REPOSITORY
+            if (!isset($config[$section][$key]) &&
+                $key == "private_repository") {
+              $config[$section][$key] = "";
             }
 
             if (!isset($config[$section][$key])) {
