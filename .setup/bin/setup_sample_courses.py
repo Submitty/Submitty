@@ -764,6 +764,8 @@ class Course(object):
             os.system("chmod -R g+w {}".format(self.course_path))
             os.system("su {} -c '{}'".format("submitty_daemon", os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
+            #os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
+            #                                                              "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                      os.path.join(self.course_path, "test_*")))
