@@ -1476,7 +1476,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Unpack the component data
             $unpacked_component_data = [];
             foreach (array_merge($component_properties, $component_mark_properties) as $property) {
-                $unpacked_component_data[$property] = json_decode($row['array_' . $property]);
+                $unpacked_component_data[$property] = json_decode($row['array_' . $property]) ?? [];
             }
 
             // Specially parse the 'text' field for components since the abstract model doesn't
