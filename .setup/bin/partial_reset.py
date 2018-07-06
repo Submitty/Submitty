@@ -92,8 +92,6 @@ def main():
     os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
     os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
 
-    os.system("bash {}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
-
     distro = platform.linux_distribution()[0].lower()
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         os.system("rm -rf {}/logs".format(SUBMITTY_DATA_DIR))
@@ -121,6 +119,8 @@ def main():
         migrator_script=os.path.join(SUBMITTY_REPOSITORY,'migration','migrator.py')
         os.system("python3 "+migrator_script+" migrate --fake")
         del os.environ['PGPASSWORD']
+
+    os.system("bash {}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
         user = load_data_yaml(user_file)
