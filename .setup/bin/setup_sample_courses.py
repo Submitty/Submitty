@@ -53,10 +53,10 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-DB_USER = "submitty_dbuser"
-with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
-    submitty_config_json = json.load(submitty_config)
-    DB_PASS = submitty_config_json["database_password"]
+with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
+    database_config_json = json.load(database_config)
+    DB_USER = database_config_json["database_user"]
+    DB_PASS = database_config_json["database_password"]
 
 DB_ONLY = False
 
@@ -761,7 +761,8 @@ class Course(object):
             os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                       os.path.join(self.course_path, "ASSIGNMENTS.txt")))
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
+            os.system("chmod -R g+w {}".format(self.course_path))
+            os.system("su {} -c '{}'".format("submitty_daemon", os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
