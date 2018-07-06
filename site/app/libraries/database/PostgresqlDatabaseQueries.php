@@ -6,7 +6,6 @@ use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
-use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;

@@ -2,13 +2,10 @@
 
 namespace app\controllers\admin;
 
-use lib\Database;
-use lib\Functions;
 use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\models\AdminGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
@@ -258,7 +255,7 @@ class AdminGradeableController extends AbstractController {
             'peer' => false,
             'order' => -1,
             'page' => -1
-        ], []);
+        ]);
     }
 
     private function newMark(Component $component) {
@@ -537,10 +534,6 @@ class AdminGradeableController extends AbstractController {
                 $new_marks = [];
                 $delete_marks = [];
 
-                // FIXME: delete?
-                if (is_array($comp)) {
-                    $comp = $comp[0];
-                }
                 if ($comp->getOrder() == -1) {
                     continue;
                 }
@@ -875,7 +868,7 @@ class AdminGradeableController extends AbstractController {
         ]);
 
         // Finally, construct the gradeable
-        $gradeable = new Gradeable($this->core, $gradeable_create_data, []);
+        $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Generate a blank component to make the rubric UI work properly
         $this->genBlankComponent($gradeable);
