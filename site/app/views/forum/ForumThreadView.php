@@ -363,6 +363,9 @@ HTML;
 					$return .= <<<HTML
 				</form>
 			</div>
+			<div class="popup-form decent" id="popup-post-history" style="display: block;">
+				<pre><p class="post_content" style="white-space: pre-wrap;">asd</p></pre>	
+			</div>
 HTML;
 
 			$return .= <<<HTML

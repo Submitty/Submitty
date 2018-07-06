@@ -313,10 +313,12 @@ class DatabaseQueries {
 
     public function editPost($post_id, $content, $anon){
         try {
-            $EDIT_SEPARATOR_START = "\n[EDIT_BLOCK]\n";
-            $EDIT_SEPARATOR_END = "\n[/EDIT_BLOCK]\n";
-            $this->course_db->query("UPDATE posts SET content =  ? || ? || content || ?, anonymous = ? where id = ?", array($content, $EDIT_SEPARATOR_START, $EDIT_SEPARATOR_END, $anon, $post_id));
+            $this->course_db->beginTransaction();
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, author_user_id, content, timestamp FROM posts WHERE id = ?", array($post_id));
+            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            $this->course_db->commit();
         } catch(DatabaseException $dbException) {
+            $this->course_db->rollback();
             return false;
         } return true;
     }
