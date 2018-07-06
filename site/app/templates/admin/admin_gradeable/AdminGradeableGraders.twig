@@ -9,13 +9,11 @@ Macros
         <tr class="{{ prefix }}">
             <th>{{grader}}</th>
             <td><input type="checkbox" name="{{ prefix }}_all_{{ grader }}" id="{{ prefix }}_all_{{ grader }}"
-                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", 0)'
-                       class="rotating_section_selector"/></td>
+                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", 0)'/></td>
             {% for rs in section_numbers %}
                 <td><input type="checkbox" name="grader_{{prefix}}_{{rs}}_{{grader}}"
                         id="grader_{{prefix}}_{{rs}}_{{grader}}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", {{ rs }});'
-                        class="rotating_section_selector"
                         {{ (rs in history[grader][g_id]) ? 'checked' : ''}}/></td>
             {% endfor %}
         </tr>

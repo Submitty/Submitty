@@ -69,6 +69,10 @@ $(document).ready(function () {
             saveGraders();
             return;
         }
+        // Don't save if it we're ignoring it
+        if($(this).hasClass('ignore')) {
+            return;
+        }
 
         let data = {};
         data[this.name] = $(this).val();

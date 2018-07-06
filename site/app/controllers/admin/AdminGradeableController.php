@@ -13,7 +13,7 @@ use app\libraries\FileUtils;
 
 class AdminGradeableController extends AbstractController {
     public function run() {
-        switch ($_REQUEST['action']) {
+        switch ($_GET['action']) {
             case 'view_gradeable_page':
                 $this->newPage();
                 break;
@@ -91,7 +91,7 @@ class AdminGradeableController extends AbstractController {
      * @param Gradeable $gradeable
      */
     private function newPage(Gradeable $gradeable = null) {
-        $this->core->getOutput()->addBreadcrumb("add gradeable");
+        $this->core->getOutput()->addBreadcrumb("Create gradeable");
 
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         $submit_url = $this->core->buildUrl([
@@ -105,13 +105,13 @@ class AdminGradeableController extends AbstractController {
             'gradeable' => $gradeable,
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
-            'syllabus_buckets' => $this->syllabus_buckets
+            'syllabus_buckets' => self::syllabus_buckets,
         ]);
     }
 
     //view the page with pulled data from the gradeable to be edited
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
-        $this->core->getOutput()->addBreadcrumb('edit gradeable');
+        $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
@@ -165,7 +165,7 @@ class AdminGradeableController extends AbstractController {
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
         // This helps determine which radio button to check when selecting config.
-        // Default option is 3, which means the user has to specify the path.
+        // Default option, which means the user has to specify the path.
         $config_select_mode = 'manual';
 
         // These are hard coded default config options.
@@ -216,14 +216,14 @@ class AdminGradeableController extends AbstractController {
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
-        return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
             'semester' => $semester,
             'course' => $course,
             'date_format' => 'Y-m-d H:i:sO',
-            'syllabus_buckets' => $this->syllabus_buckets,
+            'syllabus_buckets' => self::syllabus_buckets,
 
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,

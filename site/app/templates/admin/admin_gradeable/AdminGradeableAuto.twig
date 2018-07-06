@@ -1,12 +1,12 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" id="default_configs" class="config_option" value="true" {{ config_select_mode == 'defaults' ? 'checked' : '' }}/> Default configs
-        <input type="radio" id="uploaded_configs" class="config_option" value="false" {{ config_select_mode == 'uploaded' ? 'checked' : '' }}/> Uploaded configs
+        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Default configs
+        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="config_option" value="false" {{ config_select_mode == 'repo' ? 'checked' : '' }}/> Use Private repository ({{ config_repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
         {% endif %}
-        <input type="radio" id="provide_full_path" class="config_option" value="false" {{ config_select_mode == 'manual' ? 'checked' : '' }}/> Provide full path
+        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
             <select class="select_config_path" id="select_default_config" style="width: 700px;">
                 <option value=""></option>
@@ -47,7 +47,7 @@
         <br />
         <p>Current config setting:</p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
-                {{ config_select_mode != 'defaults' ? 'disabled' : '' }}/>
+                {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
     <br /> <br />
 
@@ -119,38 +119,45 @@
     }
 
     function onConfigChange(){
-        $('.config_option').not(this).prop('checked', false);
-        if($('#default_configs').is(':checked')) {
-            $('.div_select_config').hide();
+        let checked_val = $('input[name=config_option]:checked').val();
+        let manual_input = $('#input_provide_full_path');
+        $('.div_select_config').hide();
+        let input = '#input_provide_full_path';
+        if(checked_val === 'defaults') {
             $('#div_default_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_default_config").val($("#select_default_config option:first").val());
-        } else if($('#uploaded_configs').is(':checked')){
-            $('.div_select_config').hide();
+            input = "#select_default_config";
+        } else if(checked_val === 'uploaded'){
             $('#div_uploaded_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_uploaded_config").val($("#select_uploaded_config option:first").val());
-        } else if($('#private_repository').is(':checked')){
-            $('.div_select_config').hide();
+            input = "#select_uploaded_config";
+        } else if(checked_val === 'repo'){
             $('#div_repository_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_repository_config").val($("#select_repository_config option:first").val());
+            input = "#select_repository_config";
         } else {
-            $('.div_select_config').hide();
-            $('#input_provide_full_path').prop('disabled', false);
+            manual_input.prop('disabled', false);
+            return;
+        }
+        manual_input.prop('disabled', true);
+
+        // If the select box has the value, select it
+        if($(input + ' option[value="' + manual_input.val() + '"]').length > 0) {
+            $(input).val(manual_input.val());
+        } else {
+            $(input).val('');
         }
     }
 
-    function onConfigPathChange(){
-        if($('#default_configs').is(':checked')) {
-            $('#input_provide_full_path').val($('#select_default_config').val());
-            $('#input_provide_full_path').change();
-        } else if($('#uploaded_configs').is(':checked')){
-            $('#input_provide_full_path').val($('#select_uploaded_config').val());
-            $('#input_provide_full_path').change();
-        } else if($('#private_repository').is(':checked')){
-            $('#input_provide_full_path').val($('#select_repository_config_config').val());
-            $('#input_provide_full_path').change();
+    function onConfigPathChange() {
+        let checked_val = $('input[name=config_option]:checked').val();
+        let manual_input = $('#input_provide_full_path');
+        if (checked_val === 'defaults') {
+            manual_input.val($('#select_default_config').val());
+            manual_input.change();
+        } else if (checked_val === 'uploaded') {
+            manual_input.val($('#select_uploaded_config').val());
+            manual_input.change();
+        } else if (checked_val === 'repo') {
+            manual_input.val($('#select_repository_config_config').val());
+            manual_input.change();
         }
     }
 
@@ -183,11 +190,11 @@
         $('[name="student_view"]').change(onStudentViewChange);
 
         // Update the page when the radio buttons change
+        $('input:radio[name=config_option][value="{{ config_select_mode }}"]').prop('checked', true);
         onConfigChange();
         $('.config_option').change(onConfigChange);
 
-        // Update the text box when the select items change
-        onConfigPathChange();
+        // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
     });
 </script>
