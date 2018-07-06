@@ -705,7 +705,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
   ) as gu
   LEFT JOIN (
     SELECT
-      g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id
+      g_id, user_id, json_agg(sections_rotating_id) as sections_rotating_id
     FROM
       grading_rotating
     GROUP BY g_id, user_id
@@ -714,19 +714,18 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach($rows as $row) {
-            $row['sections_rotating_id'] = $this->course_db->fromDatabaseToPHPArray($row['sections_rotating_id']);
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
             $modified_rows[] = $row;
         }
         return $modified_rows;
     }
 
     /**
-     * Gets the user id, user group, and rotating sections for all graders and
-     *  a given gradeable
-     * @param string $gradeable_id The id of the gradeable to get users for
-     * @return array An array, indexed by user id, of arrays with 'user_id', 'user_group', 'sections' (as int[])
+     * Gets rotating sections of each grader for a gradeable
+     * @param $gradeable_id
+     * @return array An array (indexed by user id) of arrays of section numbers
      */
-    public function getGradersForAllRotatingSections($gradeable_id) {
+    public function getRotatingSectionsByGrader($gradeable_id) {
         $this->course_db->query("
     SELECT
         u.user_id, u.user_group, json_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
@@ -744,12 +743,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // Split arrays into php arrays
         $rows = $this->course_db->rows();
-        $modified_rows = [];
+        $sections_row = [];
         foreach($rows as $row) {
-            $row['sections'] = json_decode($row['sections']);
-            $modified_rows[$row['user_id']] = $row;
+            $sections_row[$row['user_id']] = json_decode($row['sections']);
         }
-        return $modified_rows;
+        return $sections_row;
     }
 
     public function getUsersWithLateDays() {

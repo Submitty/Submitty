@@ -1011,7 +1011,7 @@ ORDER BY rotating_section");
      * @param $gradeable_id
      * @return array An array (indexed by user id) of arrays of section numbers
      */
-    public function getGradersForAllRotatingSections($gradeable_id) {
+    public function getRotatingSectionsByGrader($gradeable_id) {
         throw new NotImplementedException();
     }
 
@@ -2804,11 +2804,11 @@ AND gc_id IN (
                       eg_peer_grade_set=?
                     WHERE g_id=?", $params);
             }
+        }
 
-            // Save the rotating sections
-            if ($gradeable->isRotatingGraderSectionsModified()) {
-                $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
-            }
+        // Save the rotating sections
+        if ($gradeable->isRotatingGraderSectionsModified()) {
+            $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
         }
 
         // Also make sure to update components
