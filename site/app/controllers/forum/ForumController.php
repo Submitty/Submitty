@@ -60,6 +60,9 @@ class ForumController extends AbstractController {
             case 'get_threads':
                 $this->getThreads();
                 break;
+            case 'get_history':
+                $this->getHistory();
+                break;
             case 'add_category':
                 $this->addNewCategory();
                 break;
@@ -474,6 +477,19 @@ class ForumController extends AbstractController {
                 } else {
                     $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
                 }
+            } else {
+                if($status_edit_thread && $status_edit_post) {
+                    $this->core->addSuccessMessage("Thread and post updated successfully.");
+                } else {
+                    $type = $status_edit_thread?"Thread":"Post";
+                    $type_opposite = $status_edit_thread?"Post":"Thread";
+                    if($status_edit_thread || $status_edit_post) {
+                        //$type is true
+                        $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
+                    } else {
+                        $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
+                    }
+                }
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -504,7 +520,8 @@ class ForumController extends AbstractController {
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
-            return $this->core->getQueries()->editPost($post_id, $new_post_content, $anon);
+            $current_user = $this->core->getUser()->getId();
+            return $this->core->getQueries()->editPost($current_user, $post_id, $new_post_content, $anon);
         }
         return null;
     }
@@ -626,6 +643,32 @@ class ForumController extends AbstractController {
 
     public function showCreateThread(){
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+    }
+
+    public function getHistory(){
+        $post_id = $_POST["post_id"];
+        $output = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $current_post = $this->core->getQueries()->getPost($post_id);
+            $older_posts = $this->core->getQueries()->getPostHistory($post_id);
+            $_post = array();
+            // Current post
+            $_post['user'] = $current_post["author_user_id"];
+            $_post['content'] = $current_post["content"];
+            $_post['post_time'] = $current_post['timestamp'];
+            $output[] = $_post;
+
+            foreach ($older_posts as $post) {
+                $_post['user'] = $post["edit_author"];
+                $_post['content'] = $post["content"];
+                $_post['post_time'] = $post['edit_timestamp'];
+                $output[] = $_post;
+            }
+        } else {
+            $output['error'] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($output);
+        return $output;
     }
 
     public function getEditPostContent(){

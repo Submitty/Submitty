@@ -338,38 +338,47 @@ HTML;
                     "merge_thread_list" => $merge_thread_list,
                     "currentThread" => $currentThread
                 ]);
-				$return .= <<<HTML
-				<div class="popup-form decent" id="edit-user-post">
-					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-					 <h3 id="edit_user_prompt"></h3>
-HTML;
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-								"show_title" => true,
-								"show_post" => true,
-								"post_content_placeholder" => "Enter your post here...",
-								"show_categories" => true,
-								"show_anon" => true,
-								"show_cancel_edit_form" => true,
-								"submit_label" => "Update Post",
-							]);
-						$return .= <<<HTML
-					</form>
-					<script type="text/javascript">
-						$("#thread_form").submit(function() {
-							if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-								alert("At least one category must be selected.");
-								return false;
-							}
-						});
-					</script>
-				</div>
-HTML;
 			}
 			$return .= <<<HTML
-			<div class="popup-form decent" id="popup-post-history" style="display: block;">
-				<pre><p class="post_content" style="white-space: pre-wrap;">asd</p></pre>	
+			<div class="popup-form decent" id="edit-user-post">
+				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+				 <h3 id="edit_user_prompt"></h3>
+HTML;
+					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
+							"show_title" => true,
+							"show_post" => true,
+							"post_content_placeholder" => "Enter your post here...",
+							"show_categories" => true,
+							"show_anon" => true,
+							"show_cancel_edit_form" => true,
+							"submit_label" => "Update Post",
+						]);
+					$return .= <<<HTML
+				</form>
+				<script type="text/javascript">
+					$("#thread_form").submit(function() {
+						if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+							alert("At least one category must be selected.");
+							return false;
+						}
+					});
+				</script>
+			</div>
+			<div class="popup-form decent">
+				<h3>Edit History
+					<a onclick="$('#popup-post-history').parent().hide();" class="btn btn-danger" style="float: right;">Close</a>
+				</h3>
+				<div id="popup-post-history">
+					<div class="post_box" style="margin-left:0px;display: none;">
+						<pre><p class="post_content" style="white-space: pre-wrap; "></p></pre>
+						<hr style="margin-bottom:3px;">
+						<span style="margin-top:8px;margin-left:10px;float:right;">
+							<h7 style="position:relative; right:5px;"></h7>
+						</span>
+					</div>
+				</div>
 			</div>
 HTML;
 
@@ -741,12 +750,6 @@ HTML;
         if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
             $codeBracketString = "&NewLine;" . $codeBracketString;
         }
-        $edit_seperator_start = "&lbrack;EDIT&lowbar;BLOCK&rsqb;";
-        $edit_separator_end = "&lbrack;&sol;EDIT&lowbar;BLOCK&rsqb;";
-            
-        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
-		$post_content = str_replace($edit_separator_end, '</div>', str_replace($edit_seperator_start, '<div class="edit_history_block">', $post_content));
-
 		//end code segment handling
 		$return .= <<<HTML
 			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
@@ -760,6 +763,11 @@ HTML;
 			} else {
 				$return .= <<<HTML
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+HTML;
+			}
+			if($this->core->getUser()->getGroup() <= 2) {
+				$return .= <<<HTML
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}

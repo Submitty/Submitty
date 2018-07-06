@@ -185,6 +185,11 @@ class DatabaseQueries {
         return $this->course_db->rows();
     }
 
+    public function getPostHistory($post_id){
+        $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", array($post_id));
+        return $this->course_db->rows();
+    }
+
     public function getDeletedPostsByUser($user){
         $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", array($user));
         return $this->course_db->rows();
@@ -312,11 +317,11 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($post_id, $content, $anon){
+    public function editPost($user, $post_id, $content, $anon){
         try {
             $this->course_db->beginTransaction();
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, author_user_id, content, timestamp FROM posts WHERE id = ?", array($post_id));
-            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            $this->course_db->query("UPDATE posts SET author_user_id = ?, content =  ?, anonymous = ?, timestamp = current_timestamp where id = ?", array($user, $content, $anon, $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();

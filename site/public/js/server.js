@@ -1124,7 +1124,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1267,6 +1267,50 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                console.log(json);
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").parent().show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    console.log(post['content']);
+                    console.log($("#popup-post-history"));
+                    box = dummy_box.clone();
+                    console.log(box);
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").text(post['content']);
+                    box.find("h7").html("<strong>"+post['user']+"</strong> "+post['post_time']);
+                    $("#popup-post-history").prepend(box);
+                }
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
