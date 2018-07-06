@@ -761,7 +761,8 @@ class Course(object):
             os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                       os.path.join(self.course_path, "ASSIGNMENTS.txt")))
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
+            os.system("chmod -R g+w {}".format(self.course_path))
+            os.system("su {} -c '{}'".format("submitty_daemon", os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,

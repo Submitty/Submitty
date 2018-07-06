@@ -91,7 +91,9 @@ def main():
     os.system("mkdir -p {}/courses".format(SUBMITTY_DATA_DIR))
     os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
     os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
+
     os.system("bash {}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
+
     distro = platform.linux_distribution()[0].lower()
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         os.system("rm -rf {}/logs".format(SUBMITTY_DATA_DIR))
@@ -116,6 +118,8 @@ def main():
                   "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
         os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
         os.system('psql -d submitty -U '+db_user+' -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
+        migrator_script=os.path.join(SUBMITTY_REPOSITORY,'migration','migrator.py')
+        os.system("python3 "+migrator_script+" migrate --fake")
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
