@@ -75,32 +75,37 @@ class AdminGradeableController extends AbstractController {
      */
     private function newPage(Gradeable $gradeable = null) {
         $this->core->getOutput()->addBreadcrumb("add gradeable");
+
+        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        $submit_url = $this->core->buildUrl([
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'upload_new_gradeable'
+        ]);
+
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'submit_url'        => $this->core->buildUrl([
-                'component' => 'admin',
-                'page'      => 'admin_gradeable',
-                'action'    => 'upload_new_gradeable'
-            ]),
-            'gradeable'       => $gradeable,
-            'action'          => $gradeable !== null ? 'template' : 'new'
+            'submit_url' => $submit_url,
+            'gradeable' => $gradeable,
+            'action' => $gradeable !== null ? 'template' : 'new',
+            'template_list' => $template_list
         ]);
     }
 
     //view the page with pulled data from the gradeable to be edited
     private function editPage($nav_tab = 0) {
+        $this->core->getOutput()->addBreadcrumb('edit gradeable');
         $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
-        //
-        //  TODO :Ended here, setup all of the AdmiNGradeable model fields here and pass to twig
-        //  TODO:   also put required fields into the 'new' page method above
-        //
 
-        // Construct history array
+        // Construct history array, first indexed by user type, then by gradeable id
+        $gradeable_section_history = [];
         $graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
         foreach ($graders_from_usertypes as $usertype) {
             foreach ($usertype as $grader) {
                 $gradeable_section_history[$grader] = [];
             }
         }
+
+        // Construct a list of rotating gradeables
         $rotating_gradeables = [];
         foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
@@ -110,97 +115,120 @@ class AdminGradeableController extends AbstractController {
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
 
-        $num_sections = $this->core->getQueries()->getNumberRotatingSections();
-        $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
+        // Get some global configuration data
+        $num_rotating_sections = $this->core->getQueries()->getNumberRotatingSections();
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
-        if ($gradeable !== null) {
-            if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-                // Count text/numeric components if that is the gradeable type
-                foreach ($gradeable->getComponents() as $component) {
-                    if ($component->isText()) {
-                        ++$num_text;
-                    } else {
-                        ++$num_numeric;
-                    }
+
+        $num_text = 0;
+        $num_numeric = 0;
+        $pdf_page = false;
+        $pdf_page_student = false;
+        if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            // Count text/numeric components if that is the gradeable type
+            foreach ($gradeable->getComponents() as $component) {
+                if ($component->isText()) {
+                    ++$num_text;
+                } else {
+                    ++$num_numeric;
                 }
-            } else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                // Get pdf page settings if electronic
-                foreach ($gradeable->getComponents() as $component) {
-                    if ($component->getPage() !== 0) {
-                        $pdf_page = true;
-                        $pdf_page_student = $component->getPage() === -1;
-                    }
-                    break;
+            }
+        } else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            // Get pdf page settings if electronic
+            foreach ($gradeable->getComponents() as $component) {
+                if ($component->getPage() !== 0) {
+                    $pdf_page = true;
+                    $pdf_page_student = $component->getPage() === -1;
                 }
+                break;
             }
         }
 
-        $saved_path = $gradeable->getAutogradingConfigPath();
-        //This helps determine which radio button to check when selecting config.
-        //Default option is 3, which means the user has to specify the path.
-        $which_config_option = 3;
-        //These are hard coded default config options.
-        $default_config_paths = ["/usr/local/submitty/more_autograding_examples/upload_only/config",
-            "/usr/local/submitty/more_autograding_examples/iclicker_upload/config",
-            "/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config",
-            "/usr/local/submitty/more_autograding_examples/pdf_exam/config",
-            "/usr/local/submitty/more_autograding_examples/test_notes_upload/config",
-            "/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config"];
-        foreach($default_config_paths as $path){
-            //If this happens then select the first radio button "Using Default"
-            if($path == $saved_path) $which_config_option = 0;
+        $saved_config_path = $gradeable->getAutogradingConfigPath();
+
+        // This helps determine which radio button to check when selecting config.
+        // Default option is 3, which means the user has to specify the path.
+        $config_select_mode = 'manual';
+
+        // These are hard coded default config options.
+        $default_config_paths = ['/usr/local/submitty/more_autograding_examples/upload_only/config',
+            '/usr/local/submitty/more_autograding_examples/iclicker_upload/config',
+            '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config',
+            '/usr/local/submitty/more_autograding_examples/pdf_exam/config',
+            '/usr/local/submitty/more_autograding_examples/test_notes_upload/config',
+            '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'];
+        foreach ($default_config_paths as $path) {
+            // If this happens then select the first radio button 'Using Default'
+            if ($path === $saved_config_path) {
+                $config_select_mode = 'defaults';
+                break;
+            }
         }
 
-        $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        // Configs uploaded to the 'Upload Gradeable Config' page
+        $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
-        foreach($all_uploaded_configs as $file){
+        foreach ($all_uploaded_configs as $file) {
             $all_uploaded_config_paths[] = $file['path'];
-            //If this happens then select the second radio button "Using Uploaded"
-            if($file['path'] == $saved_path) $which_config_option = 1;
+            // If this happens then select the second radio button 'Using Uploaded'
+            if ($file['path'] === $saved_config_path) {
+                $config_select_mode = 'uploaded';
+                break;
+            }
         }
-        $this->autograding_config_repo_name = $this->core->getConfig()->getPrivateRepository();
+
+        // Configs stored in a private repository (specified in course config)
+        $config_repo_name = $this->core->getConfig()->getPrivateRepository();
         $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
         $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
         $all_repository_config_paths = array();
-        foreach($all_repository_configs as $file){
+        foreach ($all_repository_configs as $file) {
             $all_repository_config_paths[] = $file['path'];
-            //If this happens then select the second radio button "Use Private Repository"
-            if($file['path'] == $saved_path) $which_config_option = 2;
+            // If this happens then select the third radio button 'Use Private Repository'
+            if ($file['path'] === $saved_config_path) {
+                $config_select_mode = 'repo';
+                break;
+            }
         }
 
-        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "build", $admin_gradeable->g_id, "log_cmake_output.txt");
+        // Load output from cmake build of config file
+        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
-        $label_message = ($admin_gradeable->getGradeable()->hasManualGrades()) ?
-            "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : '';
-        $this->core->getOutput()->addBreadcrumb("edit gradeable");
-
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'gradeable'       => $gradeable,
-            'label_message'   => $label_message,
-            'action'          => 'edit',
-            'nav_tab'         => $nav_tab,
-            'semester'        => $_GET['semester'],
-            'course'          => $_GET['course'],
-            'date_format'     => 'Y-m-d H:i:sO',
+            'gradeable' => $gradeable,
+            'action' => 'edit',
+            'nav_tab' => $nav_tab,
+            'semester' => $_GET['semester'],
+            'course' => $_GET['course'],
+            'date_format' => 'Y-m-d H:i:sO',
 
+            // Non-Gradeable-model data
+            'gradeable_section_history' => $gradeable_section_history,
+            'num_rotating_sections' => $num_rotating_sections,
             'rotating_gradeables' => $rotating_gradeables,
             'graders_from_usertypes' => $graders_from_usertypes,
+            //'inherit_teams_list' => $inherit_teams_list
+            'default_late_days' => $default_late_days,
+            'vcs_base_url' => $vcs_base_url,
+            'is_pdf_page' => $pdf_page,
+            'is_pdf_page_student' => $pdf_page_student,
+            'num_numeric' => $num_numeric,
+            'num_text' => $num_text,
+            'type_string' => GradeableType::typeToString($gradeable->getType()),
 
-            //All the uploaded config paths
+            // Config selection data
+            'all_repository_config_paths' => $all_repository_config_paths,
+            'all_uploaded_config_paths' => $all_uploaded_config_paths,
+            'default_config_paths' => $default_config_paths,
+            'config_select_mode' => $config_select_mode,
 
-            "all_repository_config_paths"    => $all_repository_config_paths,
-            "all_uploaded_config_paths"      => $all_uploaded_config_paths,
-            "default_config_paths"           => $default_config_paths,
-            "which_config_option"            => $which_config_option,
             //build outputs
-            "cmake_output"            => htmlentities($cmake_output)
+            'cmake_output' => htmlentities($cmake_output)
         ]);
     }
 

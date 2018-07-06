@@ -1,5 +1,8 @@
-{% if label_message != '' %}
-    <h3>{{ label_message|raw }}{{ '<br/><br/>'|raw }}</h3>
+{% if gradeable.hasManualGrades() %}
+    <h3 style='color: red;'>
+        (Grading has started! Edit Questions At Own Peril!)
+    </h3>
+    <br/><br/>
 {% endif %}
 {% if gradeable.getType() == 0 %}
     {{ include('admin/admin_gradeable/rubric/ElectronicFileRubric.twig')   }}
