@@ -67,18 +67,14 @@ class AutoGradedGradeable extends AbstractModel {
         // FIXME: batch queue has gone away!
         $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
 
-        $user_id = $this->user->getId();
-        if ($this->team_assignment) {
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $user_id);
-            if ($team !== null) {
-                $user_id = $team->getId();
-            }
-        }
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
 
         $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
-            $this->core->getConfig()->getCourse(), $this->id,
-            $user_id, $this->current_version));
+            $this->core->getConfig()->getCourse(), $this->graded_gradeable->getGradeable()->getId(),
+            $submitter_id, $this->active_version));
         $grading_queue_file = "GRADING_".$queue_file;
+
+        //TODO: STOPPED HERE
 
         $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
         $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
@@ -195,17 +191,17 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of autograding versions for this gradeable data
-     * @param AutoGradedVersion[] $autograding_versions
+     * @param AutoGradedVersion[] $auto_graded_versions
      */
-    public function setAutogradingVersions(array $autograding_versions) {
-        foreach ($autograding_versions as $autograding_version) {
-            if (!($autograding_version instanceof AutoGradedVersion)) {
+    public function setAutogradingVersions(array $auto_graded_versions) {
+        foreach ($auto_graded_versions as $auto_graded_version) {
+            if (!($auto_graded_version instanceof AutoGradedVersion)) {
                 throw new \InvalidArgumentException('Autograding version array contained invalid type');
             }
         }
-        $this->autograding_versions = [];
-        foreach ($autograding_versions as $autograding_version) {
-            $this->autograding_versions[$autograding_version->getVersion()] = $autograding_version;
+        $this->auto_graded_versions = [];
+        foreach ($auto_graded_versions as $auto_graded_version) {
+            $this->auto_graded_versions[$auto_graded_version->getVersion()] = $auto_graded_version;
         }
     }
 
