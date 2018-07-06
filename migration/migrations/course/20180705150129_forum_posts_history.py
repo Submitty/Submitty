@@ -1,4 +1,4 @@
-def up(conn):
+def up(config, conn, semester, course):
     with conn.cursor() as cursor:
         cursor.execute('CREATE TABLE forum_posts_history (\
 			"post_id" int NOT NULL,\
@@ -8,6 +8,6 @@ def up(conn):
         cursor.execute("ALTER TABLE ONLY forum_posts_history ADD CONSTRAINT forum_posts_history_post_id_fk FOREIGN KEY (post_id) REFERENCES posts(id)")
         cursor.execute("ALTER TABLE ONLY forum_posts_history ADD CONSTRAINT forum_posts_history_edit_author_fk FOREIGN KEY (edit_author) REFERENCES users(user_id)")
 
-def down(conn):
+def down(config, conn, semester, course):
     with conn.cursor() as cursor:
         cursor.execute("DROP TABLE forum_posts_history")
