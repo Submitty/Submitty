@@ -152,26 +152,24 @@
             saveRubric(false);
         });
 
-        if ($('#radio_numeric').is(':checked')) {
-            var gradeable = {{ gradeable.toArray()|json_encode|raw }};
-            $.each(gradeable.components, function(i,elem) {
-                if(i < {{ admin_gradeable.getNumNumeric() }}) {
-                    var extra_credit = false;
-                    if (elem.upper_clamp > elem.max_value){
-                        addNumeric(elem.title,elem.upper_clamp,true);
-                    }
-                    else{
-                        addNumeric(elem.title,elem.max_value,false);
-                    }
+        var gradeable = {{ gradeable.toArray()|json_encode|raw }};
+        $.each(gradeable.components, function(i,elem) {
+            if(i < {{ num_numeric }}) {
+                var extra_credit = false;
+                if (elem.upper_clamp > elem.max_value){
+                    addNumeric(elem.title,elem.upper_clamp,true);
                 }
-                else {
-                    addText(elem.title);
+                else{
+                    addNumeric(elem.title,elem.max_value,false);
                 }
-            });
-            $('#numeric_num-items').val({{ admin_gradeable.getNumNumeric() }});
-            $('#numeric_num_text_items').val({{ admin_gradeable.getNumText() }});
-            $('#numeric').show();
-            $('#grading_questions').show();
-        }
+            }
+            else {
+                addText(elem.title);
+            }
+        });
+        $('#numeric_num-items').val({{ num_numeric }});
+        $('#numeric_num_text_items').val({{ num_text }});
+        $('#numeric').show();
+        $('#grading_questions').show();
     });
 </script>

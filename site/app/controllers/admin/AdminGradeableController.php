@@ -78,6 +78,13 @@ class AdminGradeableController extends AbstractController {
         $this->newPage($template_gradeable);
     }
 
+    const syllabus_buckets = ['homework','assignment','problem-set',
+        'quiz','test','exam',
+        'exercise','lecture-exercise','reading','lab','recitation','worksheet',
+        'project',
+        'participation','note',
+        'none (for practice only)'];
+
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
@@ -97,7 +104,8 @@ class AdminGradeableController extends AbstractController {
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
             'action' => $gradeable !== null ? 'template' : 'new',
-            'template_list' => $template_list
+            'template_list' => $template_list,
+            'syllabus_buckets' => $this->syllabus_buckets
         ]);
     }
 
@@ -215,6 +223,7 @@ class AdminGradeableController extends AbstractController {
             'semester' => $semester,
             'course' => $course,
             'date_format' => 'Y-m-d H:i:sO',
+            'syllabus_buckets' => $this->syllabus_buckets,
 
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
@@ -231,13 +240,20 @@ class AdminGradeableController extends AbstractController {
             'type_string' => GradeableType::typeToString($gradeable->getType()),
 
             // Config selection data
+            'config_repo_name' => $config_repo_name,
             'all_repository_config_paths' => $all_repository_config_paths,
             'all_uploaded_config_paths' => $all_uploaded_config_paths,
             'default_config_paths' => $default_config_paths,
             'config_select_mode' => $config_select_mode,
 
             //build outputs
-            'cmake_output' => htmlentities($cmake_output)
+            'cmake_output' => htmlentities($cmake_output),
+
+            'upload_config_url' => $this->core->buildUrl([
+                'component'=> 'admin',
+                'page'=> 'gradeable',
+                'action'> 'upload_config'
+            ])
         ]);
     }
 

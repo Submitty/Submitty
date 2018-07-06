@@ -1,17 +1,17 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" id="default_configs" class="config_option" value="true" {{ which_config_option == 0 ? 'checked' : '' }}/> Default configs
-        <input type="radio" id="uploaded_configs" class="config_option" value="false" {{ which_config_option == 1 ? 'checked' : '' }}/> Uploaded configs
+        <input type="radio" id="default_configs" class="config_option" value="true" {{ config_select_mode == 'defaults' ? 'checked' : '' }}/> Default configs
+        <input type="radio" id="uploaded_configs" class="config_option" value="false" {{ config_select_mode == 'uploaded' ? 'checked' : '' }}/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="config_option" value="false" {{ which_config_option == 2 ? 'checked' : '' }}/> Use Private repository ({{ admin_gradeable.getAutogradingConfigRepoName() }})
+            <input type="radio" id="private_repository" class="config_option" value="false" {{ config_select_mode == 'repo' ? 'checked' : '' }}/> Use Private repository ({{ config_repo_name }})
         {% endif %}
-        <input type="radio" id="provide_full_path" class="config_option" value="false" {{ which_config_option == 3 ? 'checked' : '' }}/> Provide full path
-        <div class="div_select_config" id="div_default_configs" style="display: {% if which_config_option == 0 %} block {% else %} none {% endif %}">
+        <input type="radio" id="provide_full_path" class="config_option" value="false" {{ config_select_mode == 'manual' ? 'checked' : '' }}/> Provide full path
+        <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
             <select class="select_config_path" id="select_default_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in default_config_paths %}
-                    {% if which_config_option == 0 and path == gradeable.getAutogradingConfigPath() %}
+                    {% if config_select_mode == 'defaults' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -19,24 +19,24 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_config_option == 1 %} block {% else %} none {% endif %}">
+        <div class="div_select_config" id="div_uploaded_configs" style="display: block">
             <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_uploaded_config_paths %}
-                    {% if which_config_option == 1 and path == gradeable.getAutogradingConfigPath() %}
+                    {% if config_select_mode == 'uploaded' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
                     {% endif %}
                 {% endfor %}
             </select>
-            <a class="btn btn-primary" style="margin-top: 6px" href="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'upload_config'}) }}">Upload a config</a>
+            <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a config</a>
         </div>
-        <div class="div_select_config" id="div_repository_configs" style="display: {% if which_config_option == 2 %} block {% else %} none {% endif %}">
+        <div class="div_select_config" id="div_repository_configs" style="display: block">
             <select class="select_config_path" id="select_repository_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_repository_config_paths %}
-                    {% if which_config_option == 2 and path == gradeable.getAutogradingConfigPath() %}
+                    {% if config_select_mode == 'repo' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -47,7 +47,7 @@
         <br />
         <p>Current config setting:</p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
-                {{ which_config_option != 0 ? 'disabled' : '' }}/>
+                {{ config_select_mode != 'defaults' ? 'disabled' : '' }}/>
     </fieldset>
     <br /> <br />
 
@@ -181,8 +181,13 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
-        
+
+        // Update the page when the radio buttons change
+        onConfigChange();
         $('.config_option').change(onConfigChange);
+
+        // Update the text box when the select items change
+        onConfigPathChange();
         $('.select_config_path').change(onConfigPathChange);
     });
 </script>

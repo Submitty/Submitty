@@ -5,11 +5,11 @@
 {% if action == 'new' or action == 'template' %}
     <div>
         From Template: 
-        <select name="gradeable_template" style='width: 170px;' value=''>
+        <select name="gradeable_template" style='width: 170px;'>
             <option>--None--</option>
 
-            {% for template in admin_gradeable.getTemplateList() %}
-                <option {{ admin_gradeable.getGradeable().getId() == template.g_id ? 'selected' : '' }}
+            {% for template in template_list %}
+                <option {{ action != 'new' and gradeable.getId() == template.g_id ? 'selected' : '' }}
                     value="{{ template.g_id }}">{{ template.g_title }}</option>
             {% endfor %}
         </select>
@@ -45,7 +45,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <!-- Gradeable Type radio buttons (readonly in edit mode) -->
     What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
 {% else %}
-    Gradeable type: {{ admin_gradeable.getTypeString() }}
+    Gradeable type: {{ type_string }}
     <br />
 {% endif %}
 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
@@ -154,17 +154,10 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 <!-- Gradeable bucket (read/write in all modes) -->
 What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
 
-{% set valid_assignment_type = ['homework','assignment','problem-set',
-    'quiz','test','exam',
-    'exercise','lecture-exercise','reading','lab','recitation','worksheet',
-    'project',
-    'participation','note',
-    'none (for practice only)'] %}
-
 <select name="syllabus_bucket" style="width: 170px;">
-    {% for type in valid_assignment_type %}
-        <option value="{{ type }}" {{ action != 'new' and gradeable.getSyllabusBucket() == type ? 'selected' : '' }}>
-            {{ type | title }}
+    {% for bucket in syllabus_buckets %}
+        <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
+            {{ bucket | title }}
         </option>
     {% endfor %}
 </select>
@@ -339,7 +332,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
         {% if action != 'edit' %}
             var all_gradeable_ids = {{admin_gradeable.getTemplateList()|json_encode|raw}};
-            if(all_gradeable_ids.find(element => element.g_id == gradeable_id)) {
+            if(all_gradeable_ids.find(element => element.g_id === gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;
             }
