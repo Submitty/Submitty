@@ -53,10 +53,10 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-DB_USER = "submitty_dbuser"
-with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
-    submitty_config_json = json.load(submitty_config)
-    DB_PASS = submitty_config_json["database_password"]
+with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
+    database_config_json = json.load(database_config)
+    DB_USER = database_config_json["database_user"]
+    DB_PASS = database_config_json["database_password"]
 
 DB_ONLY = False
 

@@ -105,7 +105,7 @@ def main():
         os.system('mkdir {}/.vagrant/{}/logs/site_errors'.format(SUBMITTY_REPOSITORY, distro))
 
     if cmd_exists('psql'):
-        with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","database.json")) as submitty_config:
+        with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as submitty_config:
             submitty_config_json = json.load(submitty_config)
             os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
             db_user = submitty_config_json["database_user"]
