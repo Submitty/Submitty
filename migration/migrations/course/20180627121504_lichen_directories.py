@@ -4,10 +4,10 @@ from pathlib import Path
 
 
 def up(config, conn, semester, course):
-    course_dir = Path(config.submitty['submitty_data_dir'], semester, course)
-    lichen_dir = course_dir / 'lichen'
-    lichen_config_dir = lichen_dir / 'config'
-    lichen_provided_dir = lichen_dir / 'provided_code'
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    lichen_dir = Path(course_dir, 'lichen')
+    lichen_config_dir = Path(lichen_dir, 'config')
+    lichen_provided_dir = Path(lichen_dir, 'provided_code')
 
     # create the directories
     os.makedirs(str(lichen_dir), exist_ok=True)
@@ -28,5 +28,5 @@ def up(config, conn, semester, course):
     pass
 
 
-def down(conn, semester, course):
+def down(config, conn, semester, course):
     pass
