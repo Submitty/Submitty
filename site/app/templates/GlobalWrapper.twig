@@ -134,7 +134,7 @@ Academic Integrity</a><br>
 </body></html>
 
 <script type="text/javascript">
-	var doc = (self != top && window.frameElement != top) ? window.frameElement.ownerDocument : document;
+	var doc = window.frameElement != top ? window.frameElement.ownerDocument : document;
 	doc.getElementById("submitty").contentWindow.document.body.parentElement.innerHTML = "{{submitty_site|e('js')}}";
 	var currentScript = document.currentScript || document.scripts[document.scripts.length - 1];
 	currentScript.parentNode.removeChild(currentScript);
