@@ -753,50 +753,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return $modified_rows;
     }
 
-    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
-        $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
-        $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
-        $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
-        $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
-        $components = array();
-        foreach($this->course_db->rows() as $row) {
-            $components[] = new GradeableComponent($this->core, $row);
-        }
-        $admin_gradeable->setOldComponents($components);
-        foreach($components as $comp) {
-            if($comp->getOrder() == -1 && $comp->getIsPeer()) {
-                $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
-            }
-            if($comp->getPage() != 0) {
-                $admin_gradeable->setEgPdfPage(true);
-                if($comp->getPage() == -1) {
-                    $admin_gradeable->setEgPdfPageStudent(true);
-                }
-            }
-        }
-        //2 is numeric/text
-        if($admin_gradeable->getGGradeableType() == 2) {
-            $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
-                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", array($gradeable_id));
-            $num['num_numeric'] = $this->course_db->row()['cnt'];
-            $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
-                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", array($gradeable_id));
-            $num['num_text'] = $this->course_db->row()['cnt'];
-            $admin_gradeable->setNumericTextInfo($num);
-        }
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
-                    INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
-        $has_grades= $this->course_db->row()['cnt'];
-        $admin_gradeable->setHasGrades($has_grades);
-        //0 is electronic
-        if($admin_gradeable->getGGradeableType() == 0) {
-            //get the electronic file stuff
-            $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
-            $admin_gradeable->setElectronicGradeableInfo($this->course_db->row(), $template);
-        }
-        return $admin_gradeable;
-    }
-
     public function getUsersWithLateDays() {
         $this->course_db->query("
         SELECT u.user_id, user_firstname, user_preferred_firstname,
