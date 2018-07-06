@@ -1479,12 +1479,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $unpacked_component_data[$property] = json_decode($row['array_' . $property]) ?? [];
             }
 
-            // Specially parse the 'text' field for components since the abstract model doesn't
-            //  parse "t" as `true` in the magic setters
-            $unpacked_component_data['text'] = array_map(function ($value) {
-                return $value === 't';
-            }, $unpacked_component_data['text']);
-
             // Create the components
             $components = [];
             for ($i = 0; $i < count($unpacked_component_data['id']); ++$i) {
