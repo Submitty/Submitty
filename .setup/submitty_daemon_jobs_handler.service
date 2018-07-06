@@ -1,12 +1,12 @@
 [Unit]
-Description=Submitty Hwcron Jobs Handler
+Description=Submitty Daemon Jobs Handler
 Documentation=http://submitty.org
 
 [Service]
-User=hwcron
+User=submitty_daemon
 Restart=always
 Type=simple
-ExecStart=/usr/local/submitty/bin/hwcron_jobs_handler.py
+ExecStart=/usr/local/submitty/sbin/submitty_daemon_jobs_handler.py
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Job handler for hwcron. It watches ${SUBMITTY_DATA_DIR}/hwcron_job_queue for
+Job handler for the submitty daemon user. It watches
+${SUBMITTY_DATA_DIR}/submitty_daemon_job_queue for
 new files which should be structured:
 {
     "job": "string",
     ...
 }
-where the job is the name of a class within hwcron_jobs.hwcron_jobs
+where the job is the name of a class within submitty_daemon_jobs.submitty_daemon_jobs
 
 """
 import json
@@ -17,7 +18,7 @@ import multiprocessing
 from pathlib import Path
 import pwd
 
-from . import QUEUE_DIR, HWCRON_USER
+from . import QUEUE_DIR, DAEMON_USER
 from . import jobs
 
 from watchdog.observers import Observer
@@ -72,7 +73,7 @@ def process_job(job):
 
 def cleanup_job(job):
     """
-    Cleanup jobs that were in the middle of processing when hwcron_jobs_handler
+    Cleanup jobs that were in the middle of processing when submitty_daemon_jobs_handler
     was killed.
 
     :param str job:
@@ -90,8 +91,8 @@ def cleanup_job(job):
 
 
 def main():
-    if pwd.getpwuid(os.getuid()).pw_name != HWCRON_USER:
-        raise SystemExit('ERROR! This script must be run by hwcron!')
+    if pwd.getpwuid(os.getuid()).pw_name != DAEMON_USER:
+        raise SystemExit('ERROR! This script must be run by the submitty daemon user!')
 
     os.chdir(str(QUEUE_DIR))
 
