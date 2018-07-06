@@ -78,11 +78,12 @@ class AdminGradeableController extends AbstractController {
         $this->newPage($template_gradeable);
     }
 
-    const syllabus_buckets = ['homework','assignment','problem-set',
-        'quiz','test','exam',
-        'exercise','lecture-exercise','reading','lab','recitation','worksheet',
+    const syllabus_buckets = [
+        'homework', 'assignment', 'problem-set',
+        'quiz', 'test', 'exam',
+        'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
         'project',
-        'participation','note',
+        'participation', 'note',
         'none (for practice only)'];
 
     /**
@@ -250,9 +251,9 @@ class AdminGradeableController extends AbstractController {
             'cmake_output' => htmlentities($cmake_output),
 
             'upload_config_url' => $this->core->buildUrl([
-                'component'=> 'admin',
-                'page'=> 'gradeable',
-                'action'> 'upload_config'
+                'component' => 'admin',
+                'page' => 'gradeable',
+                'action' > 'upload_config'
             ])
         ]);
     }
@@ -758,7 +759,7 @@ class AdminGradeableController extends AbstractController {
 
         try {
             $gradeable->setRotatingGraderSections($details['graders']);
-        } catch(\Exception $exception) {
+        } catch (\Exception $exception) {
             return ['graders' => $exception];
         }
 
