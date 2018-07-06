@@ -114,6 +114,9 @@ class AdminGradeableController extends AbstractController {
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
+        // Serialize the components for numeric/checkpoint rubrics
+        $gradeable_components_enc = array_map(function(Component $c) {return $c->toArray(); }, $gradeable->getComponents());
+
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
         $graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
@@ -225,6 +228,7 @@ class AdminGradeableController extends AbstractController {
             'course' => $course,
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
+            'gradeable_components_enc' => json_encode($gradeable_components_enc),
 
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,

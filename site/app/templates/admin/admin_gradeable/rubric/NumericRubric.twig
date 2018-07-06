@@ -152,8 +152,8 @@
             saveRubric(false);
         });
 
-        var gradeable = {{ gradeable.toArray()|json_encode|raw }};
-        $.each(gradeable.components, function(i,elem) {
+        let components = {{ gradeable_components_enc|raw }};
+        $.each(components, function(i,elem) {
             if(i < {{ num_numeric }}) {
                 var extra_credit = false;
                 if (elem.upper_clamp > elem.max_value){
