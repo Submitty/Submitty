@@ -1285,7 +1285,6 @@ function showHistory(post_id) {
                     $('#messages').append(message);
                     return;
                 }
-                console.log(json);
                 if(json['error']){
                     var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
@@ -1296,10 +1295,7 @@ function showHistory(post_id) {
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                     var post = json[i];
-                    console.log(post['content']);
-                    console.log($("#popup-post-history"));
                     box = dummy_box.clone();
-                    console.log(box);
                     box.show();
                     box.addClass("history_box");
                     box.find(".post_content").text(post['content']);

@@ -711,7 +711,7 @@ HTML;
         //convert legacy htmlentities being saved in db
         $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
-		
+
         if(!empty($pre_post)){
             $post_content = $pre_post;
         }
@@ -750,6 +750,9 @@ HTML;
         if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
             $codeBracketString = "&NewLine;" . $codeBracketString;
         }
+
+        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+
 		//end code segment handling
 		$return .= <<<HTML
 			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
