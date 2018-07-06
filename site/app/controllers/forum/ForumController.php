@@ -414,6 +414,20 @@ class ForumController extends AbstractController {
         return false;
     }
 
+    private function checkThreadEditAccess($thread_id) {
+        if($this->core->getUser()->getGroup() <= 2){
+                // Instructor/full access ta
+                return true;
+        } else {
+            $post = $this->core->getQueries()->getThread($thread_id);
+            if($post['created_by'] === $this->core->getUser()->getId()) {
+                // Original Author
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Alter content/delete/undelete post of a thread
      *
@@ -499,6 +513,9 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
+            if(!$this->checkThreadEditAccess($thread_id)) {
+                return false;
+            }
             $thread_title = $_POST["title"];
             $categories_ids  = array();
             if(!empty($_POST["cat"])) {
@@ -691,7 +708,7 @@ class ForumController extends AbstractController {
     }
 
     private function getThreadContent($thread_id, &$output){
-        $result = $this->core->getQueries()->getThreadTitle($thread_id);
+        $result = $this->core->getQueries()->getThread($thread_id);
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
     }
