@@ -121,7 +121,6 @@ def sample_rainbow_grades_test():
     # Copy non-standard files over
     print("Copying test-specific files")
     try:
-        shutil.copy(os.path.join(script_path, "MakefileHelperTest"), os.path.join(rainbow_tmp, "MakefileHelper"))
         shutil.copy(os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile"))
         shutil.copy(os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", ".setup", "customization_sample.json"),
                     os.path.join(summary_tmp, "customization.json"))
@@ -150,7 +149,7 @@ def sample_rainbow_grades_test():
     # Use the same method a user would to pull reports from Submitty to Rainbow Grades
     print("Attempting to rsync contents")
     os.chdir(summary_tmp)
-    return_code = subprocess.call(["make", "pull"])
+    return_code = subprocess.call(["make", "pull_test"])
 
     if return_code != 0:
         error_and_cleanup(test_tmp, "Failed to rsync data (Error {})".format(return_code))

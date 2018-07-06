@@ -13,7 +13,7 @@ SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
 AUTOGRADING_WORKERS_PATH = path.join(CONFIG_PATH, 'autograding_workers.json')
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
 
 with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
     SUBMITTY_CONFIG = json.load(open_file)
@@ -62,9 +62,9 @@ def run_systemctl_command(machine, command):
 
 if __name__ == "__main__":
 
-  # verify the hwcron user is running this script
-  if not int(os.getuid()) == int(HWCRON_UID):
-      raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+  # verify the DAEMON_USER is running this script
+  if not int(os.getuid()) == int(DAEMON_UID):
+      raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
   with open(SUBMITTY_CONFIG_PATH) as infile:
       submitty_config = json.load(infile)

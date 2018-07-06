@@ -23,7 +23,7 @@
 #         If omitted, this will default to the integer 4.
 #
 #   unix_groups: [optional] when creating the user, only explicitly put them into these unix groups
-#         By default, any user that is an instructor or higher for any course is put into the "course_builders".
+#         By default, any user that is an instructor or higher for any course is put into the "submitty_course_builders".
 #         Then, they will be added to the following groups by their group level for a given course:
 #           instructors and above:
 #             <course_id>

@@ -46,14 +46,14 @@ import yaml
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
+SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
 MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples")
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-DB_USER = "hsdbu"
+DB_USER = "submitty_dbuser"
 with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
     submitty_config_json = json.load(submitty_config)
     DB_PASS = submitty_config_json["database_password"]
@@ -85,8 +85,8 @@ def main():
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
     print ("pausing the autograding scheduling daemon")
-    os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
-    os.system("crontab -u hwcron -r")
+    os.system("crontab -u submitty_daemon -l > /tmp/submitty_daemon_cron_backup.txt")
+    os.system("crontab -u submitty_daemon -r")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
 
@@ -98,11 +98,11 @@ def main():
             course = Course(course_json)
             courses[course.code] = course
 
-    create_group("course_builders")
+    create_group("submitty_course_builders")
 
     for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
         user = User(load_data_yaml(user_file))
-        if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
+        if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
             continue
         user.create()
@@ -208,8 +208,8 @@ def main():
 
     # restart the autograding daemon
     print("restarting the autograding scheduling daemon")
-    os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
-    os.system("rm /tmp/hwcron_cron_backup.txt")
+    os.system("crontab -u submitty_daemon /tmp/submitty_daemon_cron_backup.txt")
+    os.system("rm /tmp/submitty_daemon_cron_backup.txt")
     os.system("systemctl restart submitty_autograding_shipper")
     os.system("systemctl restart submitty_autograding_worker")
 
@@ -235,6 +235,21 @@ def generate_versions_to_submit(num=3, original_value=3):
         return generate_versions_to_submit(num-1, original_value)
     else:
         return original_value-(num-1)
+
+def generate_probability_space(probability_dict, default = 0):
+    """
+    This function takes in a dictionary whose key is the probability (decimal less than 1), 
+    and the value is the outcome (whatever the outcome is). 
+    """
+    probability_counter = 0
+    target_random = random.random()
+    prev_random_counter = 0
+    for key, value in sorted(probability_dict.items(), key=lambda x: random.random()):
+        probability_counter += key
+        if probability_counter >= target_random and target_random > prev_random_counter:
+            return value
+        prev_random_counter = probability_counter
+    return default
 
 def generate_random_users(total, real_users):
     """
@@ -540,7 +555,7 @@ class User(object):
             else:
                 self._create_ssh()
         if self.group <= 1:
-            add_to_group("course_builders", self.id)
+            add_to_group("submitty_course_builders", self.id)
         if self.sudo:
             add_to_group("sudo", self.id)
 
@@ -627,7 +642,7 @@ class Course(object):
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
         self.gradeables.sort(key=lambda x: x.id)
-
+        self.course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, 'utf-8'))
@@ -641,10 +656,10 @@ class Course(object):
         add_to_group(self.code, self.instructor.id)
         add_to_group(course_group, self.instructor.id)
         add_to_group(archive_group, self.instructor.id)
-        add_to_group("course_builders", self.instructor.id)
-        add_to_group(course_group, "hwphp")
-        add_to_group(course_group, "hwcron")
-        add_to_group(course_group, "hwcgi")
+        add_to_group("submitty_course_builders", self.instructor.id)
+        add_to_group(course_group, "submitty_php")
+        add_to_group(course_group, "submitty_daemon")
+        add_to_group(course_group, "submitty_cgi")
         os.system("{}/sbin/create_course.sh {} {} {} {}"
                   .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
@@ -659,27 +674,27 @@ class Course(object):
 
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
-        conn = engine.connect()
-        metadata = MetaData(bind=engine)
+        self.conn = engine.connect()
+        self.metadata = MetaData(bind=engine)
         print("(connection made, metadata bound)...")
         print("Creating registration sections ", end="")
-        table = Table("sections_registration", metadata, autoload=True)
+        table = Table("sections_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            conn.execute(table.insert(), sections_registration_id=str(section))
+            self.conn.execute(table.insert(), sections_registration_id=str(section))
 
         print("Creating rotating sections ", end="")
-        table = Table("sections_rotating", metadata, autoload=True)
+        table = Table("sections_rotating", self.metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections+1):
             print("Create section {}".format(section))
-            conn.execute(table.insert(), sections_rotating_id=section)
+            self.conn.execute(table.insert(), sections_rotating_id=section)
 
         print("Create users ", end="")
         submitty_users = Table("courses_users", submitty_metadata, autoload=True)
-        users_table = Table("users", metadata, autoload=True)
-        reg_table = Table("grading_registration", metadata, autoload=True)
+        users_table = Table("users", self.metadata, autoload=True)
+        reg_table = Table("grading_registration", self.metadata, autoload=True)
         print("(tables loaded)...")
         for user in self.users:
             print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
@@ -708,7 +723,7 @@ class Course(object):
                 users_table.c.anon_id: bindparam('anon_id')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
@@ -716,7 +731,7 @@ class Course(object):
                 except ValueError:
                     grading_registration_sections = []
                 for grading_registration_section in grading_registration_sections:
-                    conn.execute(reg_table.insert(),
+                    self.conn.execute(reg_table.insert(),
                                  user_id=user.get_detail(self.code, "id"),
                                  sections_registration_id=str(grading_registration_section))
 
@@ -726,111 +741,48 @@ class Course(object):
                     add_to_group(self.code + "_archive", user.id)
                 if user.get_detail(self.code, "group") <= 2:
                     add_to_group(self.code + "_tas_www", user.id)
-        gradeable_table = Table("gradeable", metadata, autoload=True)
-        electronic_table = Table("electronic_gradeable", metadata, autoload=True)
-        reg_table = Table("grading_rotating", metadata, autoload=True)
-        component_table = Table('gradeable_component', metadata, autoload=True)
-        mark_table = Table('gradeable_component_mark', metadata, autoload=True)
-        gradeable_data = Table("gradeable_data", metadata, autoload=True)
-        gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
-        gradeable_component_mark_data = Table('gradeable_component_mark_data', metadata, autoload=True)
-        electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
-        electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
-        gradeable_teams_table = Table("gradeable_teams", metadata, autoload=True)
-        teams_table = Table("teams", metadata, autoload=True)
-        course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
+        gradeable_table = Table("gradeable", self.metadata, autoload=True)
+        electronic_table = Table("electronic_gradeable", self.metadata, autoload=True)
+        reg_table = Table("grading_rotating", self.metadata, autoload=True)
+        component_table = Table('gradeable_component', self.metadata, autoload=True)
+        mark_table = Table('gradeable_component_mark', self.metadata, autoload=True)
+        gradeable_data = Table("gradeable_data", self.metadata, autoload=True)
+        gradeable_component_data = Table("gradeable_component_data", self.metadata, autoload=True)
+        gradeable_component_mark_data = Table('gradeable_component_mark_data', self.metadata, autoload=True)
+        electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
+        electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         for gradeable in self.gradeables:
-            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
-            form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
+            gradeable.create(self.conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
+            form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
-        if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
-            os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
+        os.system("chown -f submitty_php:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
+        if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
+            os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                      os.path.join(course_path, "ASSIGNMENTS.txt")))
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path,
+                                                      os.path.join(self.course_path, "ASSIGNMENTS.txt")))
+        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
-        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
+        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                     os.path.join(course_path, "test_*")))
-
+                                                     os.path.join(self.course_path, "test_*")))
         # On python 3, replace with os.makedirs(..., exist_ok=True)
-        os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
-        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
+        os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
+        os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
+        
         for gradeable in self.gradeables:
             #create_teams
-            json_team_history = {}
             if gradeable.team_assignment is True:
-                ucounter = 0
-                for user in self.users:
-                    #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
-                    #example: 00001_aphacker
-                    unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-                    team_in_other_gradeable = select([gradeable_teams_table]).where(
-                        gradeable_teams_table.c['team_id'] == unique_team_id)
-                    res = conn.execute(team_in_other_gradeable)
-                    num = res.rowcount                        
-                    while num is not 0:
-                        ucounter+=1
-                        unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
-                        team_in_other_gradeable = select([gradeable_teams_table]).where(
-                        gradeable_teams_table.c['team_id'] == unique_team_id)
-                        res = conn.execute(team_in_other_gradeable)
-                        num = res.rowcount
-                    res.close()
-                    reg_section = user.get_detail(self.code, "registration_section")
-                    if reg_section is None:
-                        continue
-                    #The teams are created based on the order of the users. As soon as the number of teamates
-                    #exceeds the max team size, then a new team will be created within the same registration section
-                    print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
-                    #adding json data for team history                     
-                    teams_registration = select([gradeable_teams_table]).where(
-                        (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
-                        (gradeable_teams_table.c['g_id'] == gradeable.id))
-                    res = conn.execute(teams_registration)
-                    added = False
-                    if res.rowcount != 0:
-                        #If the registration has a team already, join it
-                        for team_in_section in res:  
-                            members_in_team = select([teams_table]).where(
-                                teams_table.c['team_id'] == team_in_section['team_id'])
-                            res = conn.execute(members_in_team)
-                            if res.rowcount < gradeable.max_team_size:                        
-                                conn.execute(teams_table.insert(),
-                                            team_id=team_in_section['team_id'], 
-                                            user_id=user.get_detail(self.code, "id"),
-                                            state=1)
-                                json_team_history[team_in_section['team_id']].append({"action": "admin_create",
-                                                                     "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                                     "admin_user": "instructor",
-                                                                     "added_user": user.get_detail(self.code, "id")})
-                                added = True
-                    if not added:
-                        #if the team the user tried to join is full, make a new team
-                        conn.execute(gradeable_teams_table.insert(),
-                                     team_id=unique_team_id,
-                                     g_id=gradeable.id,
-                                     registration_section=str(reg_section),
-                                     rotation_section=None)
-                        conn.execute(teams_table.insert(),
-                                     team_id=unique_team_id, 
-                                     user_id=user.get_detail(self.code, "id"),
-                                     state=1)
-                        json_team_history[unique_team_id] =  [{"action": "admin_create",
-                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
-                                                             "admin_user": "instructor",
-                                                             "first_user": user.get_detail(self.code, "id")}]
-                        ucounter+=1
-                    res.close()
+                json_team_history = self.make_sample_teams(gradeable)
             if gradeable.type == 0 and \
                 (len(gradeable.submissions) == 0 or
                  gradeable.sample_path is None or
                  gradeable.config_path is None):
+                #  Make sure the electronic gradeable is valid
                     continue
+            
             #creating the folder containing all the submissions
-            gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
+            gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
 
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
@@ -842,23 +794,22 @@ class Course(object):
                 submitted = False
                 team_id = None
                 if gradeable.team_assignment is True:
-                    res = conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                    #If gradeable is team assignment, then make sure to make a team_id and don't over submit
+                    res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
                     ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
                     temp = res.fetchall()
-
                     if len(temp) != 0:
                         team_id = temp[0][0]
+                        previous_submission = select([electronic_gradeable_version]).where(
+                            electronic_gradeable_version.c['team_id'] == team_id)
+                        res = self.conn.execute(previous_submission)
+                        if res.rowcount > 0:
+                            continue
+                        submission_path = os.path.join(gradeable_path, team_id)
                     else:
                         continue
                     res.close()
-                if team_id is not None:
-                    previous_submission = select([electronic_gradeable_version]).where(
-                                                  electronic_gradeable_version.c['team_id'] == team_id)
-                    res = conn.execute(previous_submission)
-                    if res.rowcount > 0:
-                        continue
-                    submission_path = os.path.join(gradeable_path, team_id)
-                else: 
+                else:
                     submission_path = os.path.join(gradeable_path, user.id)
 
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
@@ -874,7 +825,7 @@ class Course(object):
                         # only create these directories if we're actually going to put something in them
                         if not os.path.exists(gradeable_path):
                             os.makedirs(gradeable_path)
-                            os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+                            os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                         if not os.path.exists(submission_path):
                             os.makedirs(submission_path)
                         active_version = random.choice(range(1, versions_to_submit+1))
@@ -891,17 +842,17 @@ class Course(object):
                             submission_count += 1
                             current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                             if team_id is not None:
-                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
+                                self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
                                              team_id=team_id, g_version=version, submission_time=current_time_string)
                                 if version == versions_to_submit:
-                                    conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
+                                    self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
                                                  team_id=team_id, active_version=active_version)
                                 json_history["team_history"] = json_team_history[team_id]
                             else:
-                                conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                             g_version=version, submission_time=current_time_string)
                                 if version == versions_to_submit:
-                                    conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                    self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                                 active_version=active_version)
                             json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})      
 
@@ -948,7 +899,7 @@ class Course(object):
                         if gradeable.grade_released_date < NOW and random.random() < 0.5:
                             values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                         ins = gradeable_data.insert().values(**values)
-                        res = conn.execute(ins)
+                        res = self.conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         if gradeable.type !=0 or gradeable.use_ta_grading:
                             skip_grading = random.random()
@@ -959,34 +910,28 @@ class Course(object):
                                 if status == 0 or random.random() < 0.4:
                                     score = 0
                                 else:
-                                    score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
-                                    if random.random() < 0.1:
-                                        score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
-                                    if random.random() < 0.1:
-                                        #custom mark takes away points
-                                        score = -score
-                                    if random.random() < 0.01: 
-                                        #Just for some weird number example
-                                        score = -99999
+                                    max_value_score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
+                                    uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                    score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                 grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                                conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                              gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
                                              gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
                                 first = True
                                 first_set = False
                                 for mark in component.marks:
                                     if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                        conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
+                                        self.conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
                                         if(first):
                                             first_set = True
                                     first = False
 
                 if gradeable.type == 0 and os.path.isdir(submission_path):
-                    os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+                    os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
 
                 if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
                    random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                    res = conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
+                    res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
                     gd_id = res.inserted_primary_key[0]
                     skip_grading = random.random()
                     for component in gradeable.components:
@@ -995,72 +940,18 @@ class Course(object):
                         if random.random() < 0.1:
                             continue
                         elif gradeable.type == 1:
-                            if random.random() < 0.2:
-                                score = 0
-                            elif random.random() < 0.05:
-                                score = 0.5
-                            else:
-                                score = 1
+                            score = generate_probability_space({0.2: 0, 0.1: 0.5}, 1)
                         else:
                             score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                         grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                        conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                        self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                      gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
-
-
         #This segment adds the sample forum posts for the sample course only
-        if(self.code == "sample"): 
-            #set sample course to have forum enabled by default
-            config = configparser.ConfigParser()    
-            config.read(os.path.join(course_path, "config", "config.ini"))
-            config.set("course_details", "forum_enabled", "true")
-            with open(os.path.join(course_path, "config", "config.ini"), 'w') as configfile:
-                config.write(configfile)
-            f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
-            forum_threads = Table("threads", metadata, autoload=True)
-            forum_posts = Table("posts", metadata, autoload=True)
-            forum_cat_list = Table("categories_list", metadata, autoload=True)
-            forum_thread_cat = Table("thread_categories", metadata, autoload=True)
-
-            for catData in f_data[2]:
-                conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
-
-            for thread_id, threadData in enumerate(f_data[1], start = 1):
-                conn.execute(forum_threads.insert(),
-                                  title=threadData[0],
-                                  created_by=threadData[1],
-                                  pinned=True if threadData[2] == "t" else False,
-                                  deleted=True if threadData[3] == "t" else False,
-                                  merged_thread_id=threadData[4],
-                                  merged_post_id=threadData[5],
-                                  is_visible=True if threadData[6] == "t" else False)
-                conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
-            counter = 1
-            for postData in f_data[0]:
-                if(postData[10] != "f" and postData[10] != ""):
-                    #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
-                    attachment_path = os.path.join(course_path, "forum_attachments", str(postData[0]), str(counter))
-                    os.makedirs(attachment_path)
-                    os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(course_path, "forum_attachments", str(postData[0]))))
-                    copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
-                counter += 1
-                conn.execute(forum_posts.insert(),
-                                  thread_id=postData[0],
-                                  parent_id=postData[1],
-                                  author_user_id=postData[2],
-                                  content=postData[3],
-                                  timestamp=postData[4],
-                                  anonymous=True if postData[5] == "t" else False,
-                                  deleted=True if postData[6] == "t" else False,
-                                  endorsed_by=postData[7],
-                                  resolved = True if postData[8] == "t" else False,
-                                  type=postData[9],
-                                  has_attachment=True if postData[10] != "f" else False)
-
+        if self.code == "sample": 
+            self.add_sample_forum_data()
             print('Added forum data to sample course.') 
-        
-
-        conn.close()
+       
+        self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
 
@@ -1080,6 +971,130 @@ class Course(object):
             if(len(line) > 1):
                 forum_data.append(l)
         return forum_data
+
+    def make_sample_teams(self, gradeable):
+        """
+        arg: any team gradeable
+
+        This function adds teams to the database and gradeable.
+
+        return: A json object filled with team information
+        """
+        assert gradeable.team_assignment
+        json_team_history = {}
+        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
+        teams_table = Table("teams", self.metadata, autoload=True)
+        ucounter = 0
+        for user in self.users:
+            #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
+            #example: 00001_aphacker
+            unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+            team_in_other_gradeable = select([gradeable_teams_table]).where(
+            gradeable_teams_table.c['team_id'] == unique_team_id)
+            res = self.conn.execute(team_in_other_gradeable)
+            num = res.rowcount                        
+            while num is not 0:
+                ucounter+=1
+                unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
+                team_in_other_gradeable = select([gradeable_teams_table]).where(
+                gradeable_teams_table.c['team_id'] == unique_team_id)
+                res = self.conn.execute(team_in_other_gradeable)
+                num = res.rowcount
+            res.close()
+            reg_section = user.get_detail(self.code, "registration_section")
+            if reg_section is None:
+                continue
+            #The teams are created based on the order of the users. As soon as the number of teamates
+            #exceeds the max team size, then a new team will be created within the same registration section
+            print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
+            #adding json data for team history                     
+            teams_registration = select([gradeable_teams_table]).where(
+                (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
+                (gradeable_teams_table.c['g_id'] == gradeable.id))
+            res = self.conn.execute(teams_registration)
+            added = False
+            if res.rowcount != 0:
+                #If the registration has a team already, join it
+                for team_in_section in res:  
+                    members_in_team = select([teams_table]).where(
+                        teams_table.c['team_id'] == team_in_section['team_id'])
+                    res = self.conn.execute(members_in_team)
+                    if res.rowcount < gradeable.max_team_size:                        
+                        self.conn.execute(teams_table.insert(),
+                                    team_id=team_in_section['team_id'], 
+                                    user_id=user.get_detail(self.code, "id"),
+                                    state=1)
+                        json_team_history[team_in_section['team_id']].append({"action": "admin_create",
+                                                             "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                             "admin_user": "instructor",
+                                                             "added_user": user.get_detail(self.code, "id")})
+                        added = True
+            if not added:
+                #if the team the user tried to join is full, make a new team
+                self.conn.execute(gradeable_teams_table.insert(),
+                             team_id=unique_team_id,
+                             g_id=gradeable.id,
+                             registration_section=str(reg_section),
+                             rotation_section=None)
+                self.conn.execute(teams_table.insert(),
+                             team_id=unique_team_id, 
+                             user_id=user.get_detail(self.code, "id"),
+                             state=1)
+                json_team_history[unique_team_id] =  [{"action": "admin_create",
+                                                       "time": dateutils.write_submitty_date(gradeable.submission_open_date),
+                                                       "admin_user": "instructor",
+                                                       "first_user": user.get_detail(self.code, "id")}]
+                ucounter+=1
+            res.close()
+        return json_team_history
+
+    def add_sample_forum_data(self):
+        #set sample course to have forum enabled by default
+        config = configparser.ConfigParser()    
+        config.read(os.path.join(self.course_path, "config", "config.ini"))
+        config.set("course_details", "forum_enabled", "true")
+        with open(os.path.join(self.course_path, "config", "config.ini"), 'w') as configfile:
+            config.write(configfile)
+        f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
+        forum_threads = Table("threads", self.metadata, autoload=True)
+        forum_posts = Table("posts", self.metadata, autoload=True)
+        forum_cat_list = Table("categories_list", self.metadata, autoload=True)
+        forum_thread_cat = Table("thread_categories", self.metadata, autoload=True)
+
+        for catData in f_data[2]:
+            self.conn.execute(forum_cat_list.insert(), category_desc=catData[0], rank=catData[1], color=catData[2])
+
+        for thread_id, threadData in enumerate(f_data[1], start = 1):
+            self.conn.execute(forum_threads.insert(),
+                              title=threadData[0],
+                              created_by=threadData[1],
+                              pinned=True if threadData[2] == "t" else False,
+                              deleted=True if threadData[3] == "t" else False,
+                              merged_thread_id=threadData[4],
+                              merged_post_id=threadData[5],
+                              is_visible=True if threadData[6] == "t" else False)
+            self.conn.execute(forum_thread_cat.insert(), thread_id=thread_id, category_id=threadData[7])
+        counter = 1
+        for postData in f_data[0]:
+            if(postData[10] != "f" and postData[10] != ""):
+                #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
+                attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
+                os.makedirs(attachment_path)
+                os.system("chown -R submitty_php:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
+                copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
+            counter += 1
+            self.conn.execute(forum_posts.insert(),
+                              thread_id=postData[0],
+                              parent_id=postData[1],
+                                  author_user_id=postData[2],
+                              content=postData[3],
+                              timestamp=postData[4],
+                              anonymous=True if postData[5] == "t" else False,
+                              deleted=True if postData[6] == "t" else False,
+                              endorsed_by=postData[7],
+                              resolved = True if postData[8] == "t" else False,
+                              type=postData[9],
+                              has_attachment=True if postData[10] != "f" else False)
 
     def make_course_json(self):
         """

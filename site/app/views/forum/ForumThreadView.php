@@ -166,6 +166,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
 		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
 
@@ -182,11 +183,7 @@ HTML;
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
-				$(".edit_history_block").each(function() {
-					$(this).wrap( "<div></div>" );
-					$(this).parent().prepend("<button onclick='$(this).next().toggle();'> Show/Hide previous content </button>");
-					$(this).hide();
-				});
+				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
 			});
 
@@ -341,28 +338,36 @@ HTML;
                     "merge_thread_list" => $merge_thread_list,
                     "currentThread" => $currentThread
                 ]);
+				$return .= <<<HTML
+				<div class="popup-form decent" id="edit-user-post">
+					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+					 <h3 id="edit_user_prompt"></h3>
+HTML;
+						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
+								"show_title" => true,
+								"show_post" => true,
+								"post_content_placeholder" => "Enter your post here...",
+								"show_categories" => true,
+								"show_anon" => true,
+								"show_cancel_edit_form" => true,
+								"submit_label" => "Update Post",
+							]);
+						$return .= <<<HTML
+					</form>
+					<script type="text/javascript">
+						$("#thread_form").submit(function() {
+							if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+								alert("At least one category must be selected.");
+								return false;
+							}
+						});
+					</script>
+				</div>
+HTML;
 			}
 			$return .= <<<HTML
-			<div class="popup-form decent" id="edit-user-post">
-				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-				 <h3 id="edit_user_prompt"></h3>
-HTML;
-					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-							"show_title" => true,
-							"show_post" => true,
-							"show_categories" => true,
-							"show_attachments" => false,
-							"show_anon" => true,
-							"show_announcement" => false,
-							"show_editcat" => false,
-							"show_cancel_edit_form" => true,
-							"submit_label" => "Update Post",
-						]);
-					$return .= <<<HTML
-				</form>
-			</div>
 			<div class="popup-form decent" id="popup-post-history" style="display: block;">
 				<pre><p class="post_content" style="white-space: pre-wrap;">asd</p></pre>	
 			</div>
@@ -481,38 +486,22 @@ HTML;
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
-					<form style="margin-right:17px;" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form style="margin-right:17px;" class="post_reply_from" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
-	            		<br/>
-	            		<div style="margin-bottom:10px;" class="form-group row">
-            		<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
 HTML;
-					if($this->core->getUser()->getGroup() <= 2){
+						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
+						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+							"show_post" => true,
+							"post_content_placeholder" => "Enter your reply to all here...",
+							"show_merge_thread_button" => true,
+							"post_box_id" => $post_box_id,
+							"attachment_script" => true,
+							"show_anon" => true,
+							"submit_label" => "Submit Reply to All",
+						]);
 						$return .= <<<HTML
-						<a class="btn btn-primary" style="position:relative;float:right;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
-HTML;
-					}
-					$return .= <<<HTML
-            	</div>
-	            		<div class="form-group row">
-	            			<textarea name="post_content" onclick="hideReplies();" id="post_content" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to all here..." required></textarea>
-	            		</div>
-
-	            		<br/>
-
-	           			<span style="float:left;display:inline-block;">
-            				<label id="file_input_label" class="btn btn-default" for="file_input">
-    						<input id="file_input" name="file_input[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this)" multiple>
-    						Upload Attachment
-							</label>
-							<span class='label label-info' id="file_name"></span>
-						</span>
-
-	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit Reply to All" class="btn btn-primary" />
-	            		</div>
 	            	</form>
 	            	<br/>
 
@@ -842,31 +831,21 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-           	<form class="reply-box" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+           	<form class="reply-box post_reply_from" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
-
-	            		<div style="margin-bottom:10px;" class="form-group row">
-            				<button type="button" title="Insert a link" onclick="addBBCode(1, '#post_content_{$post_id}')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#post_content_{$post_id}')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-            			</div>
-	            		<div class="form-group row">
-	            			<textarea name="post_content_{$post_id}" id="post_content_{$post_id}" class="post_content_reply" style="white-space: pre-wrap;resize:none;overflow:hidden;min-height:100px;width:100%;" rows="10" cols="30" placeholder="Enter your reply to {$visible_username} here..." required></textarea>
-	            		</div>
-
-	            		<br/>
-
-	           			<span style="float:left;display:inline-block;">
-            				<label id="file_input_label_{$post_id}" class="btn btn-default" for="file_input_{$post_id}">
-    						<input id="file_input_{$post_id}" name="file_input_{$post_id}[]" accept="image/*" type="file" style="display:none" onchange="checkNumFilesForumUpload(this, '{$post_id}')" multiple>
-    						Upload Attachment
-							</label>
-							<span class='label label-info' id="file_name_{$post_id}"></span>
-						</span>
-
-	            		<div style="margin-bottom:20px;float:right;" class="form-group row">
-	            			<label style="display:inline-block;" for="Anon">Anonymous (to class)?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/><input type="submit" style="display:inline-block;" name="post" value="Submit Reply to {$visible_username}" class="btn btn-primary" />
-	            		</div>
+HTML;
+	            		$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
+						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+							"show_post" => true,
+							"post_content_placeholder" => "Enter your reply to {$visible_username} here...",
+							"show_merge_thread_button" => false,
+							"post_box_id" => $post_box_id,
+							"show_anon" => true,
+							"submit_label" => "Submit Reply to {$visible_username}",
+						]);
+						$return .= <<<HTML
 	            	</form>
 HTML;
 
@@ -885,10 +864,11 @@ HTML;
 		$return = <<<HTML
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
-
+		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script> 
 			$( document ).ready(function() {
-			    enableTabsInTextArea('#thread_post_content');
+				enableTabsInTextArea("[name=thread_post_content]");
+				$("#thread_form").submit(createThread);
 				$("form").areYouSure();
 			});
 		 </script>
@@ -1058,12 +1038,14 @@ HTML;
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
 					"show_post" => true,
+					"post_textarea_large" => true,
+					"post_content_placeholder" => "Enter your post here...",
 					"show_categories" => true,
-					"show_attachments" => true,
+					"post_box_id" => 1,
+					"attachment_script" => true,
 					"show_anon" => true,
 					"show_announcement" => true,
 					"show_editcat" => true,
-					"show_cancel_edit_form" => false,
 					"submit_label" => "Submit Post",
 				]);
 			$return .= <<<HTML
