@@ -684,6 +684,10 @@ chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
 chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_worker.service
 chmod 444 /etc/systemd/system/submitty_autograding_worker.service
+# update the daemon jobs handler daemon
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_daemon_jobs_handler.service   /etc/systemd/system/submitty_daemon_jobs_handler.service
+chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_daemon_jobs_handler.service
+chmod 444 /etc/systemd/system/submitty_daemon_jobs_handler.service
 
 
 # delete the autograding tmp directories
@@ -708,8 +712,10 @@ done
 python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
-# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
-# files have changed, we should reload the units:
+# If the submitty_autograding_shipper.service,
+# submitty_autograding_worker.service, or
+# submitty_daemon_jobs_handler.service files have changed, we should
+# reload the units:
 systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
@@ -740,6 +746,8 @@ else
     echo -e "NOTE: Submitty Grading Worker Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
+
+systemctl start submitty_daemon_jobs_handler
 
 ################################################################################################################
 ################################################################################################################
