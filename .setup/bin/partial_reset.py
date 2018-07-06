@@ -105,16 +105,17 @@ def main():
         os.system('mkdir {}/.vagrant/{}/logs/site_errors'.format(SUBMITTY_REPOSITORY, distro))
 
     if cmd_exists('psql'):
-        with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
+        with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","database.json")) as submitty_config:
             submitty_config_json = json.load(submitty_config)
             os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
-        os.system('psql -d postgres -U submitty_dbuser -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
+            db_user = submitty_config_json["database_user"]
+        os.system('psql -d postgres -U '+db_user+' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
                   'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
                   'pid <> pg_backend_pid();"')
-        os.system("psql -U submitty_dbuser --list | grep submitty* | awk '{print $1}' | "
-                  "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
-        os.system('psql -d postgres -U submitty_dbuser -c "CREATE DATABASE submitty"')
-        os.system('psql -d submitty -U submitty_dbuser -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
+        os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
+                  "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
+        os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
+        os.system('psql -d submitty -U '+db_user+' -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
         del os.environ['PGPASSWORD']
 
     for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
