@@ -124,12 +124,12 @@ class TaGradedGradeable extends AbstractModel {
      *     Generate true:                   => return new component with provided user as grader (peer)
      *
      * @param Component $component The component the grade is for
-     * @param User $grader The grader for this component
+     * @param User|null $grader The grader for this component
      * @param bool $generate If a new graded component should be generated if none were found
      * @return GradedComponent|null The graded component instance or null if not found
      * @throws \InvalidArgumentException If $grader is null and ($component is peer or $generate is true)
      */
-    public function getGradedComponent(Component $component, User $grader, $generate = false) {
+    public function getOrCreateGradedComponent(Component $component, User $grader, $generate = false) {
         $grades_exist = isset($this->graded_components[$component->getId()]);
         if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
@@ -201,6 +201,19 @@ class TaGradedGradeable extends AbstractModel {
 
         // Grades don't exist.  Don't generate one
         return null;
+    }
+
+    /**
+     * Gets the graded component with the provided id and grader
+     * @param Component $component The component the grade is for
+     * @param User|null $grader The grader for this component
+     * @return GradedComponent|null
+     * @throws \InvalidArgumentException If $grader is null and $component is peer
+     */
+    public function getGradedComponent(Component $component, $grader = null) {
+        // The subset of the above function's features satisfy the
+        //  expected behavior for a normal getter
+        return $this->getOrCreateGradedComponent($component, $grader, false);
     }
 
     /**
