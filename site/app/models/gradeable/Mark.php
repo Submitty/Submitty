@@ -32,6 +32,13 @@ class Mark extends AbstractModel {
     /** @property @var bool If the student should be able to see this mark */
     protected $publish = false;
 
+    /**
+     * Mark constructor.
+     * @param Core $core
+     * @param Component $component
+     * @param $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid, or if the component is null
+     */
     public function __construct(Core $core, Component $component, $details) {
         parent::__construct($core);
 

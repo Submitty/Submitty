@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use \lib\Database;
 use \lib\Functions;
 use \app\libraries\GradeableType;
@@ -1025,8 +1026,9 @@ class AdminGradeableController extends AbstractController
             }
         }
 
-        // Trigger a rebuild if the config changes
-        if (key_exists('eg_config_path', $details)) {
+        // Trigger a rebuild if the config / due date changes
+        $trigger_rebuild = ['eg_config_path', 'eg_submission_due_date'];
+        if (array_intersect($trigger_rebuild, array_keys($details))) {
             $result = $this->enqueueBuild($admin_gradeable);
             if ($result !== null) {
                 // TODO: what key should this get?
@@ -1096,7 +1098,9 @@ class AdminGradeableController extends AbstractController
         $jsonProperties = [
             'gradeable_id' => $gradeable->g_id,
             'config_path' => $gradeable->eg_config_path,
-            'date_due' => $gradeable->eg_submission_due_date,
+            'date_due' => $gradeable->eg_submission_due_date instanceof DateTime
+                ? DateUtils::dateTimeToString($gradeable->eg_submission_due_date)
+                : $gradeable->eg_submission_due_date,
             'upload_type' => $gradeable->eg_is_repository ? "Repository" : "Upload File"
         ];
 
@@ -1138,7 +1142,7 @@ class AdminGradeableController extends AbstractController
     private function rebuildAssignmentRequest()
     {
         $g_id = $_REQUEST['id'];
-        $result = $this->enqueueBuildFile($g_id);
+        $result = $this->enqueueBuild($this->getAdminGradeable($g_id));
         if ($result !== null) {
             die($result);
         }
