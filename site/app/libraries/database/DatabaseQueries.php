@@ -2471,8 +2471,6 @@ AND gc_id IN (
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      * @param \app\models\gradeable\Gradeable $gradeable
@@ -2489,7 +2487,6 @@ AND gc_id IN (
     }
 
     /**
->>>>>>> master
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
@@ -2499,11 +2496,7 @@ AND gc_id IN (
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-<<<<<<< HEAD
-    public function getGradeableDataAll(array $gradeables, $users = null, $teams = null) {
-=======
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
->>>>>>> master
         throw new NotImplementedException();
     }
 

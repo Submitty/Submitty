@@ -3,10 +3,7 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
-<<<<<<< HEAD
-=======
 use app\exceptions\ValidationException;
->>>>>>> master
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\AdminGradeable;
