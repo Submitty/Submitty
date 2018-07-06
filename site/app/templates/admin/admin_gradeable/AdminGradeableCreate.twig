@@ -103,7 +103,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
                 value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                 <option value=''>--None--</option>
 
-                {% for parent in admin_gradeable.getInheritTeamsList() %}
+                {% for parent in inherit_teams_list %}
                     <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
                         value="{{ parent.g_id }}">{{ parent.g_title }}</option>
                 {% endfor %}
@@ -134,7 +134,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
     <div id="repository">
         <b>Path for the Version Control System (VCS) repository:</b><br />
-        VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
+        VCS base URL: <kbd>{{ vcs_base_url }}</kbd><br />
         The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
         <ul style="list-style-position: inside;">
@@ -242,7 +242,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         setVcsUrl($('#subdirectory').val());
     }
 
-    var vcs_base_url = "{{ admin_gradeable.getVcsBaseUrl() }}";
+    var vcs_base_url = "{{ vcs_base_url }}";
     function setVcsUrl(subdirectory) {
         if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
             $('#vcs_url').text(subdirectory);
@@ -331,7 +331,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
 
         {% if action != 'edit' %}
-            var all_gradeable_ids = {{admin_gradeable.getTemplateList()|json_encode|raw}};
+            var all_gradeable_ids = {{ template_list|json_encode|raw }};
             if(all_gradeable_ids.find(element => element.g_id === gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;
