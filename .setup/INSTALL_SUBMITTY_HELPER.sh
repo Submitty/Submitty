@@ -72,6 +72,8 @@ systemctl is-active --quiet submitty_autograding_shipper
 is_shipper_active_before=$?
 systemctl is-active --quiet submitty_autograding_worker
 is_worker_active_before=$?
+systemctl is-active --quiet submitty_daemon_jobs_handler
+is_jobs_handler_active_before=$?
 
 
 ################################################################################################################
@@ -747,7 +749,19 @@ else
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
 
-systemctl start submitty_daemon_jobs_handler
+# start the jobs handler daemon (if it was running)
+if [[ "$is_jobs_handler_active_before" == "0" ]]; then
+    systemctl start submitty_daemon_jobs_handler
+    systemctl is-active --quiet submitty_daemon_jobs_handler
+    is_jobs_handler_active_after=$?
+    if [[ "$is_jobs_handler_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Jobs Handler Daemon\n"
+    fi
+    echo -e "Restarted Submitty Jobs Handler Daemon\n"
+else
+    echo -e "NOTE: Submitty Jobs Handler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_daemon_jobs_handler\n"
+fi
 
 ################################################################################################################
 ################################################################################################################
