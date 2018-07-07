@@ -1269,6 +1269,27 @@ function replyPost(post_id){
     }
 }
 
+function generateCodeMirrorBlocks(element) {
+    var codeSegments = element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
 function showHistory(post_id) {
     var url = buildUrl({'component': 'forum', 'page': 'get_history'});
     $.ajax({
@@ -1298,10 +1319,11 @@ function showHistory(post_id) {
                     box = dummy_box.clone();
                     box.show();
                     box.addClass("history_box");
-                    box.find(".post_content").text(post['content']);
+                    box.find(".post_content").html(post['content']);
                     box.find("h7").html("<strong>"+post['user']+"</strong> "+post['post_time']);
                     $("#popup-post-history").prepend(box);
                 }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
             },
             error: function(){
                 window.alert("Something went wrong while trying to display post history. Please try again.");

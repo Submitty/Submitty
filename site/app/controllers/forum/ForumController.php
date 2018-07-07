@@ -671,13 +671,13 @@ class ForumController extends AbstractController {
             $_post = array();
             // Current post
             $_post['user'] = $current_post["author_user_id"];
-            $_post['content'] = $current_post["content"];
+            $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
             $_post['post_time'] = $current_post['timestamp'];
             $output[] = $_post;
 
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
-                $_post['content'] = $post["content"];
+                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['post_time'] = $post['edit_timestamp'];
                 $output[] = $_post;
             }

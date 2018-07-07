@@ -522,28 +522,11 @@ HTML;
 		}
 
 		$return .= <<<HTML
-	<script>
-		var codeSegments = document.querySelectorAll("[id=code]");
-		for (let element of codeSegments){
-			var editor0 = CodeMirror.fromTextArea(element, {
-            lineNumbers: true,
-            readOnly: true,
-            cursorHeight: 0.0,
-            lineWrapping: true
-	    });
-
-	    var lineCount = editor0.lineCount();
-	    if (lineCount == 1) {
-	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
-	    }
-	    else {
-	        editor0.setSize("100%", "auto");
-	    }
-	    editor0.setOption("theme", "eclipse");
-	    editor0.refresh(); 
-		}
-			
-	    </script>
+		<script>
+			$(function() {
+				generateCodeMirrorBlocks(document);
+			});
+		</script>
 HTML;
 
 		return $return;
@@ -661,6 +644,53 @@ HTML;
 					return $return;
 	}
 
+	public function filter_post_content($original_post_content) {
+		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+		if(!empty($pre_post)){
+			$post_content = $pre_post;
+		}
+
+		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+		$accepted_schemes = array("https", "http");
+		$pos = 0;
+		if(count($result) > 0) {
+			foreach($result[1] as $url){
+				$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+				$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+				if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+				} else {
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+				}
+				if(!empty($pre_post)){
+					$post_content = $pre_post;
+				}
+				$pre_post = "";
+				$pos++;
+			}
+		}
+		//This code is for legacy posts that had an extra \r per newline
+		if(strpos($original_post_content, "\r") !== false){
+			$post_content = str_replace("\r","", $post_content);
+		}
+
+		//end link handling
+
+		//handle converting code segments
+
+		$codeBracketString = "&lbrack;&sol;code&rsqb;";
+		if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+			$codeBracketString = "&NewLine;" . $codeBracketString;
+		}
+
+		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		return $post_content;
+	}
+
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$post_html = "";
 		$post_id = $post["id"];
@@ -709,49 +739,7 @@ HTML;
 
 
         //convert legacy htmlentities being saved in db
-        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
-
-        if(!empty($pre_post)){
-            $post_content = $pre_post;
-        }
-			
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
-        $accepted_schemes = array("https", "http");
-        $pos = 0;
-        if(count($result) > 0) {
-            foreach($result[1] as $url){
-                $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
-                $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-            	if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
-                } else {
-            		$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
-                }
-                if(!empty($pre_post)){
-                	$post_content = $pre_post;
-				} 
-				$pre_post = "";
-                $pos++;
-            }
-        }
-        //This code is for legacy posts that had an extra \r per newline
-        if(strpos($post['content'], "\r") !== false){
-            $post_content = str_replace("\r","", $post_content);
-        }
-
-        //end link handling
-
-        //handle converting code segments
-
-        $codeBracketString = "&lbrack;&sol;code&rsqb;";
-        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-            $codeBracketString = "&NewLine;" . $codeBracketString;
-        }
-
-        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+        $post_content = $this->filter_post_content($post['content']);
 
 		//end code segment handling
 		$return .= <<<HTML
