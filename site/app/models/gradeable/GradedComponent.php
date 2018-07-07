@@ -23,8 +23,6 @@ use app\models\User;
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
     private $component = null;
-    /** @var GradedGradeable Reference to the gradeable data */
-    private $graded_gradeable = null;
     /** @property @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
@@ -51,18 +49,16 @@ class GradedComponent extends AbstractModel {
     /**
      * GradedComponent constructor.
      * @param Core $core
-     * @param GradedGradeable $graded_gradeable The full graded gradeable associated with this component
+     * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
-     * @param int $component_id The component id associated with this grade
      * @param int[] $mark_ids The mark ids this graded component received
      * @param array $details any remaining properties
-     * @throws \Exception if the 'grade_time' value in the $details array is not a valid DateTime/date-string
+     * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
-    public function __construct(Core $core, GradedGradeable $graded_gradeable, User $grader, $component_id, array $mark_ids, array $details) {
+    public function __construct(Core $core, Component $component, User $grader, array $mark_ids, array $details) {
         parent::__construct($core);
 
-        $this->setGradedGradeable($graded_gradeable);
-        $this->setComponent($graded_gradeable->getGradeable()->getComponent($component_id));
+        $this->setComponent($component);
         $this->setGrader($grader);
 
         // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
@@ -105,14 +101,6 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
-     * Gets the GradedGradeable this component belongs to
-     * @return GradedGradeable
-     */
-    public function getGradedGradeable() {
-        return $this->graded_gradeable;
-    }
-
-    /**
      * Gets the user who graded this component
      * @return User
      */
@@ -142,13 +130,6 @@ class GradedComponent extends AbstractModel {
         $this->component_id = $component->getId();
     }
 
-    private function setGradedGradeable(GradedGradeable $graded_gradeable) {
-        if ($graded_gradeable === null) {
-            throw new \InvalidArgumentException('Graded gradeable cannot be null');
-        }
-        $this->graded_gradeable = $graded_gradeable;
-    }
-
     /**
      * Sets the marks the submitter received for this component
      * @param array $marks
@@ -168,13 +149,17 @@ class GradedComponent extends AbstractModel {
     /**
      * Sets the last time this component data was changed
      * @param \DateTime|string $grade_time Either a \DateTime object, or a date-time string
-     * @throws \Exception if $grade_time is a string and failed to parse into a \DateTime object
+     * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
      */
     public function setGradeTime($grade_time) {
         if ($grade_time === null) {
             $this->grade_time = null;
         } else {
-            $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
+            try {
+                $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
         }
         $this->modified = true;
     }
