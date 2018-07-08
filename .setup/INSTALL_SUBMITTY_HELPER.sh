@@ -678,7 +678,7 @@ fi
 #############################################################
 
 # update the autograding shipper & worker daemons
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.services
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
 chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_shipper.service
 chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service

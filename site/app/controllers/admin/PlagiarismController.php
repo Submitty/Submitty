@@ -362,9 +362,10 @@ class PlagiarismController extends AbstractController {
 	    		if($match["type"] == "match") {
 	    			$orange_color = false;
 	    			if($user_id_2 != "") {
-		    			foreach($match['others'] as $other) {
+		    			foreach($match['others'] as $i=>$other) {
 	    					if($other["username"] == $user_id_2) {
 	    						$orange_color =true;
+                                $user_2_index_in_others=$i;
 	    					}
 	    				}	
 	    			}
