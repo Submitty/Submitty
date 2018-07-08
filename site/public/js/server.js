@@ -490,10 +490,11 @@ function getMatchesForClickedMatch(user_1_match_start, user_1_match_end, where, 
                 $("#show-plagiarism-matches-div").empty();
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<span style="cursor: pointer;" onclick=getMatchesForClickedMatch('+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</span><br /><br />';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper"><span style="cursor: pointer;" onclick=getMatchesForClickedMatch('+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</span></div></li><br /><br />';                        
                 });
                 to_append = $.parseHTML(to_append);
-                $("#show-plagiarism-matches-div").empty().append(to_append);
+                $("#popup_to_show_matches_id ul").empty().append(to_append);
+                $('#popup_to_show_matches_id ul').css('display', 'block');
             } 
 
             else if(where == 'popup') {

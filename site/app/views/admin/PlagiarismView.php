@@ -112,16 +112,22 @@ HTML;
 
     public function plagiarismPopUpToShowMatches() {
         $return = <<<HTML
-<div style="display: none; width:30%;" class="popup-form" id="show-plagiarism-matches-popup" >
-    <center><h2>Users that match the clicked section</h2><br />
-        <div id="show-plagiarism-matches-div" style="height:400px;overflow-y: scroll;">
-        </div>
-    </center>
-    <div style="float:right; width:auto; margin-top: 10px;">
-        <a onclick="$('#show-plagiarism-matches-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>    
-</div>
+    <ul id="popup_to_show_matches_id" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;top:0px;left:0px;width:1000px" >
+    </ul>
 HTML;
+
+
+//         $return = <<<HTML
+// <div style="display: none; width:30%;" class="popup-form" id="show-plagiarism-matches-popup" >
+//     <center><h2>Users that match the clicked section</h2><br />
+//         <div id="show-plagiarism-matches-div" style="height:400px;overflow-y: scroll;">
+//         </div>
+//     </center>
+//     <div style="float:right; width:auto; margin-top: 10px;">
+//         <a onclick="$('#show-plagiarism-matches-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
+//     </div>    
+// </div>
+// HTML;
         return $return;       
     }
 
