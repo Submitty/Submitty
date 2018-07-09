@@ -25,7 +25,7 @@ class AutoGradedGradeable extends AbstractModel {
     /** @property @var int The active submission version for electronic gradeables */
     protected $active_version = 0;
     /** @property @var AutoGradedVersion[] The graded versions for electronic gradeables */
-    protected $auto_graded_versions = array();
+    protected $auto_graded_versions = [];
 
     /**
      * AutoGradedGradeable constructor.
@@ -65,7 +65,7 @@ class AutoGradedGradeable extends AbstractModel {
      * @return AutoGradedVersion
      */
     public function getActiveVersionInstance() {
-        return $this->auto_graded_versions[$this->active_version];
+        return $this->auto_graded_versions[$this->active_version] ?? null;
     }
 
     /**
