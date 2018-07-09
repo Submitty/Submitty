@@ -157,13 +157,13 @@ jobs:
         # Doing this helps chromedriver from hanging for some mysterious reason
         # https://github.com/SeleniumHQ/docker-selenium/issues/87
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
-        - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
-        - PGPASSWORD=hsdbu psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
+        - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+        - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/autograder.sh
         - bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo bash .setup/travis/setup_test_suite.sh
-        - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
+        - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
         - sudo a2enmod include rewrite actions cgi alias headers
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - sudo a2dissite 000-default
@@ -171,7 +171,7 @@ jobs:
         - sudo rm -rf /etc/apache2/sites-enabled/*
         - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
-        - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
+        - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
         - sudo chmod -R 755 /usr/local/submitty
         - sudo chmod -R 777 /usr/local/submitty/test_suite
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'

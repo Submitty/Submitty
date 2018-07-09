@@ -35,7 +35,7 @@ def main():
                 print("untrusted process: ", pid, " ", proc.username())
                 if proc.username() not in untrusted_users:
                     untrusted_users.append(proc.username())
-            elif proc.username() == 'hwcron':
+            elif proc.username() == 'submitty_daemon':
                 if '/usr/local/submitty/sbin/submitty_autograding_shipper.sh' in proc.cmdline():
                     print("grade_students instance: ", proc.cmdline())
                     commands.append(proc.cmdline())

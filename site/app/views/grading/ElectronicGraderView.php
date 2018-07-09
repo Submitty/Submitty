@@ -15,8 +15,8 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
-     * @param SimpleStat $autograded_average
-     * @param SimpleStat $overall_average
+     * @param SimpleStat|null $autograded_average
+     * @param SimpleStat|null $overall_average
      * @param int $total_submissions
      * @param int $registered_but_not_rotating
      * @param int $rotating_but_not_registered
@@ -29,8 +29,8 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
-        SimpleStat $autograded_average,
-        SimpleStat $overall_average,
+        $autograded_average,
+        $overall_average,
         int $total_submissions,
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
@@ -158,8 +158,10 @@ class ElectronicGraderView extends AbstractView {
                         $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                     }
                 }
-                if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
-                    $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                if ($autograded_average !== null) {
+                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
+                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                    }
                 }
                 if (count($component_averages) !== 0) {
                     foreach ($component_averages as $comp) {
@@ -485,6 +487,15 @@ class ElectronicGraderView extends AbstractView {
                     "message" => "No Submission"
                 ]);
             }
+        } else {
+            $status = $gradeable->calculateLateStatus();
+
+            if ($status != "Good" && $status != "Late") {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                    "color" => "#F62817", // fire engine red
+                    "message" => "Late Submission"
+                ]);
+            }
         }
 
         return $return;
@@ -565,7 +576,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable,
             "submissions" => $submissions,
             "checkout" => $checkout,
-            "results" => $results
+            "results" => $results,
+            "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
 
@@ -575,117 +587,35 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function renderInformationPanel(Gradeable $gradeable, User $user) {
-        $return = <<<HTML
+        $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
 
-<div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
-    <div class="draggable_content">
-    <span class="grading_label">Student Information</span>
-    <div class="inner-container">
-        <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
-        <div class="rubric-title">
-HTML;
-            $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
-            $formatting = "font-size: 13px;";
-            $return .= <<<HTML
-            <div style="float:right;">
-HTML;
-        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
-
-        // If viewing the active version, show cancel button, otherwise show button to switch active
-        if ($gradeable->getCurrentVersionNumber() > 0) {
-            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
-                $version = 0;
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
-            } else {
-                $version = $gradeable->getCurrentVersionNumber();
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
-            }
-            $return .= <<<HTML
-                <br/><br/>
-                <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
-                        action="{$this->core->buildUrl(array('component' => 'student',
-                'action' => 'update',
-                'gradeable_id' => $gradeable->getId(),
-                'new_version' => $version, 'ta' => true, 'who' => $who))}">
-                    <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    {$button}
-                </form>
-HTML;
-        }
-        $return .= <<<HTML
-            </div>
-            <div>
-HTML;
-
+        $team_members = [];
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $return .= <<<HTML
-                <b>Team:<br/>
-HTML;
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                $team_member = $this->core->getQueries()->getUserById($team_member);
-                $return .= <<<HTML
-                &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
-HTML;
+                $team_members[] = $this->core->getQueries()->getUserById($team_member);
             }
-        } else {
-            $return .= <<<HTML
-                <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
-HTML;
         }
 
-        $return .= <<<HTML
-                Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-                Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
-            </div>
-HTML;
-        $return .= <<<HTML
-            <form id="rubric_form">
-                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
-                <input type="hidden" name="u_id" value="{$user->getId()}" />
-                <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
-HTML;
+        $tables = [];
 
         //Late day calculation
-        $color = "green";
-        $status = "Good";
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $team_status = "Bad for all team members";
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
-                $return .= $this->makeTable($team_member->getId(), $gradeable, $status);
-                if($status == "Good" || $status == "Late"){
-                    // As long as one person on the team has a good status, then the assignment should be graded.
-                    $team_status = "Good";
-                }
+                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
-            $status = $team_status;
         } else {
-            $return .= $this->makeTable($user->getId(), $gradeable, $status);
-        }
-        if ($status != "Good" && $status != "Late" && $status != "No submission") {
-            $color = "red";
-            $my_color = "'#F62817'"; // fire engine red
-            $my_message = "Late Submission";
-            $return .= <<<HTML
-                <script>
-                    $('body').css('background', $my_color);
-                    $('#bar_wrapper').append("<div id='bar_banner' class='banner'>$my_message</div>");
-                    $('#bar_banner').css('background-color', $my_color);
-                    $('#bar_banner').css('color', 'black');
-                </script>
-                <b>Status:</b> <span style="color:{$color};">{$status}</span><br />
-HTML;
+            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
 
-        $return .= <<<HTML
-        </div>
-    </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
+            "gradeable" => $gradeable,
+            "who" => $who,
+            "on_change" => $onChange,
+            "team_members" => $team_members,
+            "tables" => $tables,
+        ]);
     }
 
     /**
@@ -772,19 +702,9 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(Gradeable $gradeable) {
-        $return = <<<HTML
-<div id="regrade_info" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%">
-    <div class = "draggable_content">
-        <div class = "inner-container" style="padding:20px;">
-HTML;
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRequestForm', $gradeable);
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-        $return .= <<<HTML
-        </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+            "gradeable" => $gradeable
+        ]);
     }
 
     public function popupStudents() {
@@ -797,57 +717,5 @@ HTML;
 
     public function popupSettings() {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
-    }
-
-    private function makeTable($user_id, $gradeable, &$status){
-        $return = <<<HTML
-        <h3>Overall Late Day Usage for {$user_id}</h3><br/>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per term</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Allowed per assignment</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Submitted days after deadline</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Extensions</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Late Days Charged</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Total Late Days Used</th>
-                    <th style="padding:5px; border:thin solid black; vertical-align:middle">Remaining Days</th>
-                </tr>
-            </thead>
-            <tbody>
-HTML;
-        $total_late_used = 0;
-        $order_by = [ 
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END' 
-        ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $g) {
-            $g->calculateLateDays($total_late_used);
-            $class = "";
-            if($g->getId() == $gradeable->getId()){
-                $class = "class='yellow-background'";
-                $status = $g->getLateStatus();
-            }
-            $remaining = max(0, $g->getStudentAllowedLateDays() - $total_late_used);
-            $return .= <<<HTML
-                <tr>
-                    <th $class style="padding:5px; border:thin solid black">{$g->getName()}</th>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getStudentAllowedLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getAllowedLateDays()}</td> 
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDays()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateDayExceptions()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getLateStatus()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$g->getCurrLateCharged()}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$total_late_used}</td>
-                    <td $class align="center" style="padding:5px; border:thin solid black">{$remaining}</td>
-                </tr>
-HTML;
-        }
-        $return .= <<<HTML
-            </tbody>
-        </table>
-HTML;
-        return $return;
     }
 }

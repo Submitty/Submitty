@@ -1,0 +1,55 @@
+<div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
+    <div class="draggable_content">
+        <span class="grading_label">Student Information</span>
+        <div class="inner-container">
+            <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
+            <div class="rubric-title">
+                <div style="float:right;">
+                    {{ render_template('AutoGrading', 'showVersionChoice', gradeable, on_change, "font-size: 13px;") }}
+
+                    {# If viewing the active version, show cancel button, otherwise show button to switch active #}
+                    {% if gradeable.getCurrentVersionNumber() > 0 %}
+                        <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
+                              action="{{ core.buildUrl({
+                                  'component': 'student',
+                                  'action': 'update',
+                                  'gradeable_id': gradeable.getId(),
+                                  'new_version': gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() ? 0 : gradeable.getCurrentVersionNumber(),
+                                  'ta': true,
+                                  'who': who
+                              }) }}">
+                            <input type='hidden' name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                            {% if gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() %}
+                                <input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">
+                            {% else %}
+                                <input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">
+                            {% endif %}
+                        </form>
+                        <br/>
+                        <br/>
+                    {% endif %}
+                </div>
+                <div>
+                    <b>
+                        {% if gradeable.isTeamAssignment() %}
+                            Team:<br/>
+
+                            {% for team_member in team_members %}
+                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getLastName() }} ({{ team_member.getId() }})<br/>
+                            {% endfor %}
+                        {% else %}
+                            {{ gradeable.getUser().getDisplayedFirstName() }} {{ gradeable.getUser().getLastName() }} ({{ gradeable.getUser().getId() }})
+                            <br/>
+                        {% endif %}
+
+                        Submission Number: {{ gradeable.getActiveVersion() }} / {{ gradeable.getHighestVersion() }}<br/>
+                        Submitted: {{ gradeable.getSubmissionTime()|date("m/d/Y H:i:s") }}<br/>
+                    </b>
+                </div>
+                {% for table in tables %}
+                    {{ table|raw }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

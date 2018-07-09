@@ -3,7 +3,7 @@ Description=Submitty Autograding Shipper
 Documentation=http://submitty.org
 
 [Service]
-User=hwcron
+User=submitty_daemon
 Restart=always
 Type=simple
 ExecStart=/usr/local/submitty/sbin/submitty_autograding_shipper.py

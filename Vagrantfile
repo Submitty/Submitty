@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'private_network', ip: '192.168.56.102'
   end
 
-  config.vm.define 'ubuntu-18.04', primary: false do |ubuntu|
+  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432
     ubuntu.vm.network 'private_network', ip: '192.168.56.111'
@@ -42,7 +42,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define 'debian', autostart: false do |debian|
-    debian.vm.box = 'bento/debian-8.8'
+    debian.vm.box = 'bento/debian-8'
     debian.vm.network 'forwarded_port', guest: 5432, host: 25432
     debian.vm.network 'private_network', ip: '192.168.56.201'
     debian.vm.network 'private_network', ip: '192.168.56.202'
@@ -63,9 +63,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
 
-  # ideally we would use hwcron or something as the owner/group, but since that user doesn't exist
+  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
-  # which is guaranteed to exist and that during install_system.sh we add hwcron/hwphp/etc to the
+  # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
