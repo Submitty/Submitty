@@ -2,6 +2,8 @@
 
 namespace app\views;
 
+use app\libraries\FileUtils;
+
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $css=array(), $js=array()) {
         $messages = [];
@@ -60,6 +62,16 @@ class GlobalView extends AbstractView {
             ];
         }
 
+        $upper_left_path = "";
+        $upper_right_path = "";
+        $lower_left_path = "";
+        if($this->core->getConfig()->getWrapperEnabled()) {
+            $site_wrapper_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "site");
+            $upper_left_path = FileUtils::joinPaths($site_wrapper_path, "upper-left.html");
+            $upper_right_path = FileUtils::joinPaths($site_wrapper_path, "upper-right.html");
+            $lower_left_path = FileUtils::joinPaths($site_wrapper_path, "lower-left.html");
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -67,7 +79,10 @@ class GlobalView extends AbstractView {
             "pageTitle" => $pageTitle,
             "navURLs" => $navURLs,
             "breadcrumbs" => $breadcrumbs,
-            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled()
+            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled(),
+            "upper_left_path" => $upper_left_path,
+            "upper_right_path" => $upper_right_path,
+            "lower_left_path" => $lower_left_path
         ]);
      }
 
