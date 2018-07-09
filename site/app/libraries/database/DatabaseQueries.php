@@ -2252,7 +2252,7 @@ AND gc_id IN (
     }
 
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
-    $query_delete = $show_deleted?"true":"deleted = false";
+      $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
@@ -2262,10 +2262,11 @@ AND gc_id IN (
           $thread_id = $announcement_id;
         }
       }
+      $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
-        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
       }
       
       $result_rows = $this->course_db->rows();

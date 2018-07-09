@@ -697,6 +697,11 @@ HTML;
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = date_create($post["timestamp"]);
+		if(!is_null($post["edit_timestamp"])) {
+			$edit_date = $function_date(date_create($post["edit_timestamp"]),"n/j g:i A");
+		} else {
+			$edit_date = null;
+		}
 		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -811,7 +816,18 @@ HTML;
 		} 
 
 		$return .= <<<HTML
-		<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
+		<h7 style="position:relative; right:5px;">
+			<strong id="post_user_id">{$visible_username}</strong>
+			{$function_date($date,"n/j g:i A")}
+HTML;
+		if(!is_null($edit_date)) {
+			$return .= <<<HTML
+			(<i>Last edit at {$edit_date}</i>)
+HTML;
+		}
+		$return .= <<<HTML
+		</h7>
+		</span>
 HTML;
 
 		if($post["has_attachment"]){
