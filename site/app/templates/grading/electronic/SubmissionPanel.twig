@@ -1,7 +1,7 @@
 {% import _self as self %}
 {% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
 
-<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%; overflow: hidden">
+<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
     <div id="directory_view" style="position:relative; float:left;">
         <div class="draggable_content">
         <span class="grading_label">Submissions and Results Browser</span>
@@ -72,12 +72,12 @@
         </script>
     </div>
     </div>
-    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%;">
+    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
         <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
-        <div id="file_viewer_full_panel" class="full_panel" style="margin-left:{{ indent * -15 }}px" data-file_name="" data-file_url=""></div>
+        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
     </div>
 </div>
 
@@ -104,7 +104,7 @@
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
-                    $('#'+iframeId).attr("height", "2000px");
+                    $('#'+iframeId).attr("height", "1200px");
                 }
             }
             iframe.addClass('open');
