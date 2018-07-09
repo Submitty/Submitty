@@ -15,6 +15,7 @@ class MiscView extends AbstractView {
             "filename" => $filename,
             "file_contents" => $file_contents,
             "mime_type" => $mime_type,
+            "base_url" => $this->core->getConfig()->getBaseUrl()
         ]);
 	}
 }

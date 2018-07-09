@@ -22,11 +22,11 @@ class AdminGradeableView extends AbstractView {
 
 	    // TODO: all of this should be moved to the controller when it gets overhauled
 
-        $action           = "new"; //decides how the page's data is displayed
-        $submit_text      = "Submit";
-        $label_message    = "";
-        $title_prefix     = "Create New Gradeable";
-        $gradeables_array = array();
+        $action            = "new"; //decides how the page's data is displayed
+        $submit_text       = "Submit";
+        $show_edit_warning = false;
+        $title_prefix      = "Create New Gradeable";
+        $gradeables_array  = array();
 
         // Make sure the dates are strings
         self::DateTimeToString($admin_gradeable->g_ta_view_start_date);
@@ -65,10 +65,10 @@ class AdminGradeableView extends AbstractView {
 
         // if the user is editing a gradeable instead of adding
         if ($type_of_action === "edit") {
-            $title_prefix = "Editing Gradeable";
-            $action        = "edit";
-            $submit_text   = "Save Changes";
-            $label_message = ($admin_gradeable->getHasGrades()) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
+            $title_prefix      = "Editing Gradeable";
+            $action            = "edit";
+            $submit_text       = "Save Changes";
+            $show_edit_warning = $admin_gradeable->getHasGrades();
         }
 
         $saved_path = $admin_gradeable->eg_config_path;
@@ -108,16 +108,16 @@ class AdminGradeableView extends AbstractView {
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "build", $admin_gradeable->g_id, "log_cmake_output.txt");
         $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
         return $this->core->getOutput()->renderTwigTemplate('admin/admin_gradeable/AdminGradeableBase.twig', [
-            "submit_url"      => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
-            "js_gradeables_array"=> json_encode($gradeables_array),
-            "admin_gradeable" => $admin_gradeable,
-            "label_message"   => $label_message,
-            "action"          => $action,
-            "submit_text"     => $submit_text,
-            "nav_tab"         => $nav_tab,
-            "semester"        => $_GET['semester'],
-            "course"          => $_GET['course'],
-            "modal_title"     => $title_prefix,
+            "submit_url"          => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'upload_' . $action . '_gradeable')),
+            "js_gradeables_array" => json_encode($gradeables_array),
+            "admin_gradeable"     => $admin_gradeable,
+            "show_edit_warning"   => $show_edit_warning,
+            "action"              => $action,
+            "submit_text"         => $submit_text,
+            "nav_tab"             => $nav_tab,
+            "semester"            => $_GET['semester'],
+            "course"              => $_GET['course'],
+            "modal_title"         => $title_prefix,
 
             // Graders Page Specific
             "all_graders"    => $graders,

@@ -329,7 +329,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
 
         {% if action == 'new' %}
-            var all_gradeable_ids = {{js_gradeables_array|raw}};
+            var all_gradeable_ids = {{ js_gradeables_array|raw }};
             if(all_gradeable_ids.find(element => element == gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;

@@ -53,10 +53,10 @@ MORE_EXAMPLES_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_example
 TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Tutorial", "examples")
 
 DB_HOST = "localhost"
-DB_USER = "submitty_dbuser"
-with open(os.path.join(SUBMITTY_INSTALL_DIR,".setup","submitty_conf.json")) as submitty_config:
-    submitty_config_json = json.load(submitty_config)
-    DB_PASS = submitty_config_json["database_password"]
+with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as database_config:
+    database_config_json = json.load(database_config)
+    DB_USER = database_config_json["database_user"]
+    DB_PASS = database_config_json["database_password"]
 
 DB_ONLY = False
 
@@ -756,19 +756,22 @@ class Course(object):
             form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("chown -f hwphp:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
+        os.system("chown -f submitty_php:{}_tas_www {}".format(self.code, os.path.join(self.course_path, "config", "form", "*")))
         if not os.path.isfile(os.path.join(self.course_path, "ASSIGNMENTS.txt")):
             os.system("touch {}".format(os.path.join(self.course_path, "ASSIGNMENTS.txt")))
             os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                       os.path.join(self.course_path, "ASSIGNMENTS.txt")))
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
+            os.system("chmod -R g+w {}".format(self.course_path))
+            os.system("su {} -c '{}'".format("submitty_daemon", os.path.join(self.course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
+            #os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(self.course_path,
+            #                                                              "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(self.course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                      os.path.join(self.course_path, "test_*")))
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
-        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
+        os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
         
         for gradeable in self.gradeables:
             #create_teams
@@ -1080,7 +1083,7 @@ class Course(object):
                 #In posts.txt, if the 10th column is f or empty, then no attachment is added. If anything else is in the column, then it will be treated as the file name.
                 attachment_path = os.path.join(self.course_path, "forum_attachments", str(postData[0]), str(counter))
                 os.makedirs(attachment_path)
-                os.system("chown -R hwphp:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
+                os.system("chown -R submitty_php:sample_tas_www {}".format(os.path.join(self.course_path, "forum_attachments", str(postData[0]))))
                 copyfile(os.path.join(SETUP_DATA_PATH, "forum", "attachments", postData[10]), os.path.join(attachment_path, postData[10]))
             counter += 1
             self.conn.execute(forum_posts.insert(),
