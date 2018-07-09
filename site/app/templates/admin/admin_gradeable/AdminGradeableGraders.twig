@@ -7,14 +7,14 @@ Macros
 {% macro display_graders(graders, prefix, section_numbers, history, g_id) %}
     {% for grader in graders %}
         <tr class="{{ prefix }}">
-            <th>{{grader}}</th>
+            <th>{{ grader }}</th>
             <td><input type="checkbox" name="{{ prefix }}_all_{{ grader }}" id="{{ prefix }}_all_{{ grader }}"
                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", 0)'/></td>
             {% for rs in section_numbers %}
-                <td><input type="checkbox" name="grader_{{prefix}}_{{rs}}_{{grader}}"
-                        id="grader_{{prefix}}_{{rs}}_{{grader}}"
+                <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader }}"
+                        id="grader_{{ prefix }}_{{ rs }}_{{ grader }}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", {{ rs }});'
-                        {{ (rs in history[grader][g_id]) ? 'checked' : ''}}/></td>
+                        {{ (rs in history[grader][g_id]) ? 'checked' : '' }}/></td>
             {% endfor %}
         </tr>
     {% endfor %}
@@ -78,12 +78,12 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         {% endif %}
         <table id="grader_assignment">
             {# Helpful debuging line.  Uncomment to view graders data #}
-            {# <tr>{{all_graders|json_encode()}}</tr> #}
+            {# <tr>{{ all_graders|json_encode() }}</tr> #}
             <tr>
                 <th />
                 <th>All</th>
                 {% for rs in section_numbers %}
-                    <th>{{rs}}</th>
+                    <th>{{ rs }}</th>
                 {% endfor %}
             </tr>
             <tr class="g1">

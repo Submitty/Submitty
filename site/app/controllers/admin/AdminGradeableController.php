@@ -241,6 +241,7 @@ class AdminGradeableController extends AbstractController {
             'num_numeric' => $num_numeric,
             'num_text' => $num_text,
             'type_string' => GradeableType::typeToString($gradeable->getType()),
+            'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
             'config_repo_name' => $config_repo_name,

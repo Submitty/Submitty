@@ -70,7 +70,9 @@ class NavigationView extends AbstractView {
     const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function noAccessCourse() {
-        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig");
+        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
+            "course_name" => $this->core->getDisplayedCourseName()
+        ]);
     }
 
     public function showGradeables($sections_to_list) {
