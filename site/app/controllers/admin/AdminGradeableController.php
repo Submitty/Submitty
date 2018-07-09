@@ -291,7 +291,7 @@ class AdminGradeableController extends AbstractController {
             'text' => false,
             'peer' => false,
             'order' => -1,
-            'page' => 0 // 0 means no page, -1 is student-assigned
+            'page' => Component::PDF_PAGE_NONE
         ]);
     }
 
@@ -377,7 +377,7 @@ class AdminGradeableController extends AbstractController {
         ]);
         $component->setText(false);
         $component->setPeer(false);
-        $component->setPage(0);
+        $component->setPage(Component::PDF_PAGE_NONE);
     }
 
     private static function parseNumeric(Component $component, $details) {
@@ -401,7 +401,7 @@ class AdminGradeableController extends AbstractController {
         ]);
         $component->setText(false);
         $component->setPeer(false);
-        $component->setPage(0);
+        $component->setPage(Component::PDF_PAGE_NONE);
     }
 
     private static function parseText(Component $component, $details) {
@@ -419,7 +419,7 @@ class AdminGradeableController extends AbstractController {
         ]);
         $component->setText(true);
         $component->setPeer(false);
-        $component->setPage(0);
+        $component->setPage(Component::PDF_PAGE_NONE);
     }
 
     private static function parseEgComponent(Component $component, $details, $x) {
