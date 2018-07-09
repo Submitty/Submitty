@@ -5,6 +5,7 @@ namespace app\libraries;
 
 
 use app\models\Gradeable;
+use app\models\GradingSection;
 use app\models\User;
 
 class Access {
@@ -176,19 +177,15 @@ class Access {
         // gradeable can be viewed by limited access graders.
         if ($gradeable->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
-            if ($gradeable->isGradeByRegistration()) {
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
-                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-            }
-            else {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
-                    $this->core->getUser()->getId());
-                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
-            foreach($students as $student) {
-                /* @var User $student */
-                if($student->getId() === $gradeable->getUser()->getId()){
-                    return true;
+            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
+
+
+            foreach ($sections as $section) {
+                /** @var GradingSection $section */
+                if ($gradeable->isTeamAssignment()) {
+                    return $section->containsTeam($gradeable->getTeam());
+                } else {
+                    return $section->containsUser($gradeable->getUser());
                 }
             }
         }
