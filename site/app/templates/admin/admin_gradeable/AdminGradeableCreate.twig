@@ -284,7 +284,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         $('[name="gradeable_template"]').change(
         function() {
             // TODO: what if this.value === ''?
-            var arrayUrlParts = [];
+            let arrayUrlParts = [];
             arrayUrlParts["component"]   = ["admin"];
             arrayUrlParts["page"]        = ["admin_gradeable"];
             arrayUrlParts["action"]      = ["upload_new_template"];
@@ -292,8 +292,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
             // Redirect user to the same page, but in the process,
             //  fetch the data from the template gradeable
-            var new_url = buildUrl(arrayUrlParts);
-            window.location.href = new_url;
+            window.location.href = buildUrl(arrayUrlParts);
         });
 
         //

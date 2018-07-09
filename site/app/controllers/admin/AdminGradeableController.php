@@ -56,17 +56,17 @@ class AdminGradeableController extends AbstractController {
     /* Page load methods */
 
     private function uploadNewTemplateRequest() {
-        // TODO: validate existence / value of this parameter
-        if ($_GET['template_id'] === '--None--') {
-            $this->newPage();
-        } else {
-            $this->uploadNewTemplate($_GET['template_id']);
-        }
+        $this->uploadNewTemplate($_GET['template_id']);
     }
 
     private function editGradeableRequest() {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
-        $this->editPage($gradeable, $_GET['semester'], $_GET['course'], $_GET['nav_tab'] ?? 0);
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
+            $this->editPage($gradeable, $_GET['semester'], $_GET['course'], $_GET['nav_tab'] ?? 0);
+        } catch(\InvalidArgumentException $e) {
+            // If the gradeable can't be found, redirect to new page
+            $this->newPage();
+        }
     }
 
     /**
@@ -74,8 +74,13 @@ class AdminGradeableController extends AbstractController {
      * @param string $template_id The id of the gradeable to use as a template
      */
     private function uploadNewTemplate($template_id) {
-        $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
-        $this->newPage($template_gradeable);
+        try {
+            $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
+            $this->newPage($template_gradeable);
+        } catch(\InvalidArgumentException $e) {
+            // If the template gradeable can't be found, redirect to new page
+            $this->newPage();
+        }
     }
 
     const syllabus_buckets = [
