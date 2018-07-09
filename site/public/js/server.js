@@ -1320,7 +1320,17 @@ function showHistory(post_id) {
                     box.show();
                     box.addClass("history_box");
                     box.find(".post_content").html(post['content']);
-                    box.find("h7").html("<strong>"+post['user']+"</strong> "+post['post_time']);
+
+                    var first_name = post['user_info']['first_name'];
+                    var last_name = post['user_info']['first_name'];
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
                     $("#popup-post-history").prepend(box);
                 }
                 generateCodeMirrorBlocks($("#popup-post-history")[0]);

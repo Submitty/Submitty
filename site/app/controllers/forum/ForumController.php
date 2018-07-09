@@ -672,6 +672,7 @@ class ForumController extends AbstractController {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['post_time'] = $post['edit_timestamp'];
+                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -680,8 +681,10 @@ class ForumController extends AbstractController {
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
                 $_post['post_time'] = $current_post['timestamp'];
+                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
+
         } else {
             $output['error'] = "You do not have permissions to do that.";
         }
