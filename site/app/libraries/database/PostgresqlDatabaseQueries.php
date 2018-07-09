@@ -1323,7 +1323,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
-            if($ta_graded_gradeable !== null) {
+            if (isset($db_row_split['comp_id'])) {
                 // Create all of the GradedComponents
                 for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
                     // Create a temporary array for each graded component instead of trying
@@ -1352,7 +1352,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $ta_graded_gradeable->setGradedComponents($graded_components);
             }
 
-            if($auto_graded_gradeable !== null) {
+            if (isset($db_row_split['version'])) {
                 // Create all of the AutogradingVersions
                 for ($i = 0; $i < count($db_row_split['version']); ++$i) {
                     // Similarly, transpose each version
