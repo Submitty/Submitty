@@ -319,9 +319,15 @@ class DatabaseQueries {
 
     public function editPost($user, $post_id, $content, $anon){
         try {
+            // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
+            // forum_posts_history will store all history state of the post(if edited at any point of time)
             $this->course_db->beginTransaction();
-            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, author_user_id, content, timestamp FROM posts WHERE id = ?", array($post_id));
-            $this->course_db->query("UPDATE posts SET author_user_id = ?, content =  ?, anonymous = ?, timestamp = current_timestamp where id = ?", array($user, $content, $anon, $post_id));
+            // Insert first version of post during first edit
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, author_user_id, content, timestamp FROM posts WHERE id = ? AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?)", array($post_id, $post_id));
+            // Update current post
+            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            // Insert latest version of post into forum_posts_history
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();

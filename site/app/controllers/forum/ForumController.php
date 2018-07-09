@@ -666,19 +666,20 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"];
         $output = array();
         if($this->core->getUser()->getGroup() <= 2){
-            $current_post = $this->core->getQueries()->getPost($post_id);
-            $older_posts = $this->core->getQueries()->getPostHistory($post_id);
             $_post = array();
-            // Current post
-            $_post['user'] = $current_post["author_user_id"];
-            $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-            $_post['post_time'] = $current_post['timestamp'];
-            $output[] = $_post;
-
+            $older_posts = $this->core->getQueries()->getPostHistory($post_id);
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['post_time'] = $post['edit_timestamp'];
+                $output[] = $_post;
+            }
+            if(count($output) == 0) {
+                $current_post = $this->core->getQueries()->getPost($post_id);
+                // Current post
+                $_post['user'] = $current_post["author_user_id"];
+                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
+                $_post['post_time'] = $current_post['timestamp'];
                 $output[] = $_post;
             }
         } else {
