@@ -429,7 +429,7 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
-function getMatchesForClickedMatch(user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
     var form = $("#gradeables_with_plagiarism_result");
     var form2 = $("#users_with_plagiarism");
     var gradeable_id = $('[name="gradeable_id"]', form).val();
@@ -467,6 +467,7 @@ function getMatchesForClickedMatch(user_1_match_start, user_1_match_end, where, 
 
             if(where == 'code_box_2') {
                 var name_span_clicked = $(span_clicked).attr('name');
+                var scroll_position=-1;
                 $('[name="code_box_2"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
@@ -481,24 +482,35 @@ function getMatchesForClickedMatch(user_1_match_start, user_1_match_end, where, 
                             $(this).css('background-color',"#FF0000");    
                         }      
                     }  
+                }); 
+                $('[name="code_box_1"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_1"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
+                        return false;
+                    } 
                 });
+                $('[name="code_box_1"]').scrollTop(scroll_position);
             }
               
             else if(where == 'code_box_1') {
-                $('.popup-form').css('display', 'none');
-                $("#show-plagiarism-matches-popup").css("display", "block");
-                $("#show-plagiarism-matches-div").empty();
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper"><span style="cursor: pointer;" onclick=getMatchesForClickedMatch('+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</span></div></li><br /><br />';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
-                $("#popup_to_show_matches_id ul").empty().append(to_append);
-                $('#popup_to_show_matches_id ul').css('display', 'block');
+                $("#popup_to_show_matches_id").empty().append(to_append);
+                var x = event.pageX;
+                var y = event.pageY; 
+                $('#popup_to_show_matches_id').css('display', 'block');
+                var width = $('#popup_to_show_matches_id').width();
+                $('#popup_to_show_matches_id').css('top', y+5);
+                $('#popup_to_show_matches_id').css('left', x-width/2.00);
+                
             } 
 
             else if(where == 'popup') {
-                $('.popup-form').css('display', 'none');
                 jQuery.ajaxSetup({async:false});
                 $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
                 setUserSubmittedCode('user_id_2');
@@ -525,6 +537,15 @@ function getMatchesForClickedMatch(user_1_match_start, user_1_match_end, where, 
                         });
                     }                    
                 });
+                $('[name="code_box_2"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_2"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
+                        return false;
+                    } 
+                });
+                $('[name="code_box_2"]').scrollTop(scroll_position);
                 jQuery.ajaxSetup({async:true});
             }   
         },

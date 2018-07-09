@@ -370,7 +370,7 @@ class PlagiarismController extends AbstractController {
 	    				}	
 	    			}
 	    			if($codebox == "1" && $orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch('.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
+                        $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
                         $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
 			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
@@ -386,7 +386,7 @@ class PlagiarismController extends AbstractController {
 			    		}
 	    			}
 	    			else if($codebox == "1" && !$orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch('.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
+                        $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
                         $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
 			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";		
@@ -408,7 +408,7 @@ class PlagiarismController extends AbstractController {
     			    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
     			    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
     			    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $onclick_function = 'getMatchesForClickedMatch('.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
+                            $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
                             $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
     	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
     			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
