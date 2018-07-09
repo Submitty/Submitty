@@ -994,13 +994,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
-        foreach($gradeables as $gradeable) {
-            if(!($gradeable instanceof \app\models\gradeable\Gradeable)) {
+        foreach ($gradeables as $gradeable) {
+            if (!($gradeable instanceof \app\models\gradeable\Gradeable)) {
                 throw new \InvalidArgumentException('Gradeable array must only contain Gradeables');
             }
             $gradeables_by_id[$gradeable->getId()] = $gradeable;
         }
-        if(count($gradeables_by_id) === 0) {
+        if (count($gradeables_by_id) === 0) {
             throw new \InvalidArgumentException('Gradeable array must not be blank!');
         }
 
@@ -1031,7 +1031,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $selector_union_list = [];
         $selector_union_list[] = strval($this->course_db->convertBoolean($all));
         // Users were provided, so check that list
-        if(count($users) > 0) {
+        if (count($users) > 0) {
             $user_placeholders = implode(',', array_fill(0, count($users), '?'));
             $selector_union_list[] = "(gd.gd_user_id IN ($user_placeholders))";
             $selector_union_list[] = "(egd.user_id IN ($user_placeholders))";
@@ -1044,7 +1044,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }, $this->course_db->rows()));
         }
         // Teams were provided, so check that list
-        if(count($teams) > 0) {
+        if (count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
             $selector_union_list[] = "(gd.gd_team_id IN ($team_placeholders))";
             $selector_union_list[] = "(egd.team_id IN ($team_placeholders))";
@@ -1058,7 +1058,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $selector_intersection_list[] = "(gd.g_id IN ($gradeable_placeholders) OR egd.g_id IN ($gradeable_placeholders))";
 
         // Add the user selector later so the gradeable selector can be first
-        if(count($selector_union_list) > 0) {
+        if (count($selector_union_list) > 0) {
             $selector_intersection_list[] = '(' . implode(' OR ', $selector_union_list) . ')';
         }
 
@@ -1275,7 +1275,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
 
             // This should very rarely be false
-            if(isset($row['active_version'])) {
+            if (isset($row['active_version'])) {
                 $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
                 $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
             }
