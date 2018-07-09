@@ -591,7 +591,10 @@ function openDiv(num) {
 
 function resizeFrame(id) {
     var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-    if (height > 500) {
+    console.log(id);
+    if(id == "file_viewer_full_panel_iframe"){
+        // document.getElementById(id).height= "500px";
+    } else if(height > 500) {
         document.getElementById(id).height= "500px";
     }
     else {
