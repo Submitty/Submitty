@@ -196,7 +196,6 @@ class AdminGradeableController extends AbstractController {
             // If this happens then select the second radio button 'Using Uploaded'
             if ($file['path'] === $saved_config_path) {
                 $config_select_mode = 'uploaded';
-                break;
             }
         }
 
@@ -210,7 +209,6 @@ class AdminGradeableController extends AbstractController {
             // If this happens then select the third radio button 'Use Private Repository'
             if ($file['path'] === $saved_config_path) {
                 $config_select_mode = 'repo';
-                break;
             }
         }
 
