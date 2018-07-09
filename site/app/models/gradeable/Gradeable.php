@@ -198,9 +198,6 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
         }
 
-        // Since this property is immutable, calculate it instead of taking it as a parameter
-        $this->has_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
-
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
@@ -243,14 +240,6 @@ class Gradeable extends AbstractModel {
             }
         }
         throw new \InvalidArgumentException('Component id did not exist in gradeable');
-    }
-
-    /**
-     * Gets if this gradeable has any manual grades (any GradedGradeables exist)
-     * @return bool True if any manual grades exist
-     */
-    public function hasManualGrades() {
-        return $this->has_manual_grades;
     }
 
     /**
