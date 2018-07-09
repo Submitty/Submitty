@@ -257,7 +257,7 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildUrl([
                 'component' => 'admin',
                 'page' => 'gradeable',
-                'action' > 'upload_config'
+                'action' => 'upload_config'
             ])
         ]);
     }
