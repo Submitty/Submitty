@@ -23,48 +23,61 @@
     {% endfor %}
 </div>
 <div id="container">
-{% if navURLs|length > 0 %}
-    <div id="nav">
-        <ul>
-            {% for url in navURLs %}
-            <li>
-                <a href="{{ url.href }}">{{ url.title }}</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
-    <div id="header">
-        <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
-        <div id="header-text">
-            <h2>
-                {% if core.userLoaded() %}
-                <span id="login">
-                    Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
-                </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
-                {% else %}
-                <span id="login-guest">Welcome to Submitty</span>
-                {% endif %}
-            </h2>
-            <h2>
-                {% for b in breadcrumbs %}
-                    {% if loop.index0 > 0 and not b.getIcon() %}
-                        &gt;
-                    {% endif %}
-                    {% if b.getUrl() != null and b.getUrl() != "" %}
-                        {% if b.getIcon() %}
-                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
-                        {% else %}
-                            {% if b.getTop() %}
-                                <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                            {% else %}
-                                <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                            {% endif %}
-                        {% endif %}
-                    {% else %}
-                        {{ b.getTitle() }}
-                    {% endif %}
-                {% endfor %}
-            </h2>
+    <div id="upper-container">
+        <div id="upper-left-container">
+            {# uploaded homepage redirect here? #}
+        </div>
+        <div id="upper-right-container">
+            {# uploaded banner can go here? #}
         </div>
     </div>
+    <div id="lower-container">
+        <div id="lower-left-container">
+            {# uploaded sidebar can go here? #}
+        </div>
+        <div id="lower-right-container">
+        {% if navURLs|length > 0 %}
+            <div id="nav">
+                <ul>
+                    {% for url in navURLs %}
+                    <li>
+                        <a href="{{ url.href }}">{{ url.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+            <div id="header">
+                <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
+                <div id="header-text">
+                    <h2>
+                        {% if core.userLoaded() %}
+                        <span id="login">
+                            Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                        </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
+                        {% else %}
+                        <span id="login-guest">Welcome to Submitty</span>
+                        {% endif %}
+                    </h2>
+                    <h2>
+                        {% for b in breadcrumbs %}
+                            {% if loop.index0 > 0 and not b.getIcon() %}
+                                &gt;
+                            {% endif %}
+                            {% if b.getUrl() != null and b.getUrl() != "" %}
+                                {% if b.getIcon() %}
+                                    <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
+                                {% else %}
+                                    {% if b.getTop() %}
+                                        <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    {% else %}
+                                        <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                {{ b.getTitle() }}
+                            {% endif %}
+                        {% endfor %}
+                    </h2>
+                </div>
+            </div>

@@ -187,8 +187,8 @@ class Output {
 
     public function getOutput() {
         if($this->core->getConfig()->getWrapperEnabled()) {
-            $this->addInternalCss("f17_csci1200_main.css");
-            $this->addInternalCss("override.css");
+            // $this->addInternalCss("f17_csci1200_main.css");
+            // $this->addInternalCss("override.css");
         }
         $return = "";
         $return .= $this->renderHeader();
@@ -197,13 +197,13 @@ class Output {
 
         if($this->core->getConfig()->getWrapperEnabled()) {
 
-            ob_start();
-            require 'template_before.php';
-            $return = ob_get_clean() . $return;
+            // ob_start();
+            // require 'template_before.php';
+            // $return = ob_get_clean() . $return;
 
-            ob_start();
-            require 'template_after.php';
-            $return .= ob_get_clean();
+            // ob_start();
+            // require 'template_after.php';
+            // $return .= ob_get_clean();
 
         }
 

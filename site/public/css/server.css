@@ -254,11 +254,6 @@ table tr.table-header {
     padding: 5px 10px;
 }
 
-#nav li a {
-    width: 100%;
-    height: 100%;
-}
-
 #nav li a:hover {
     text-decoration: none;
 }
