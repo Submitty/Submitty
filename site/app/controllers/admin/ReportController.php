@@ -29,84 +29,128 @@ class ReportController extends AbstractController {
                 break;
         }
     }
-    
+
     public function showReportPage() {
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
-    
+
+//     public function generateCSVReport() {
+//         $students = $this->core->getQueries()->getAllUsers();
+//         $student_ids = array_map(function($stu) {return $stu->getId();}, $students);
+//         $gradeables = $this->core->getQueries()->getGradeables(null, $student_ids);
+//         $results = array();
+//         $results['header_model'] = array('First' => 'First Name', 'Last'=> 'Last Name', 'reg_section' => 'Registration Section');
+//         foreach($gradeables as $gradeable) {
+//             $student_id = $gradeable->getUser()->getId();
+//             if(!isset($results[$student_id])) {
+//                 $results[$student_id] = array('First'=>$gradeable->getUser()->getDisplayedFirstName(), 'Last' => $gradeable->getUser()->getLastName(), 'reg_section' => $gradeable->getUser()->getRegistrationSection());
+//             }
+//             $g_id = $gradeable->getId();
+//             $is_electronic_gradeable = ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
+//             $use_ta_grading = !$is_electronic_gradeable || $gradeable->useTAGrading();
+//
+//             if(!isset($results['header_model'][$g_id])) {
+//               $max = 0;
+//               if ($is_electronic_gradeable) {
+//                 $max = $max + $gradeable->getTotalAutograderNonExtraCreditPoints();
+//               }
+//               if ($use_ta_grading) {
+//                 $max = $max + $gradeable->getTotalTANonExtraCreditPoints();
+//               }
+//               $results['header_model'][$g_id] = $g_id.": ".$max;
+//             }
+//
+//             $total_score = 0;
+//             if ($is_electronic_gradeable) {
+//               $total_score = $total_score + $gradeable->getGradedAutograderPoints();
+//             }
+//             if ($use_ta_grading) {
+//               $total_score = $total_score + $gradeable->getGradedTAPoints();
+//             }
+//
+//             // if this assignment exceeds the allowed late day policy or
+//             // if the student has switched versions after the ta graded,
+//             // then they should receive an automatic zero for this gradeable
+//             $gradeable->calculateLateDays();
+//             if( $is_electronic_gradeable &&
+//                 ( ($gradeable->getLateStatus() != NULL && substr($gradeable->getLateStatus(), 0, 3) == 'Bad') ||
+//                   ($use_ta_grading && !$gradeable->validateVersions()))) {
+//               $total_score = 0;
+//             }
+//
+//             $results[$student_id][$g_id] = $total_score;
+//         }
+//
+//         $nl = "\n";
+//         $csv_output = "";
+//         $filename = $this->core->getConfig()->getCourse()."CSVReport.csv";
+//         foreach($results as $id => $student) {
+//             $student_line = array();
+//             if($id === 'header_model') {
+//                 $student_line[] = "UserId";
+//             }
+//             else {
+//                 $student_line[] = $id;
+//             }
+//             $student_line[] = $student['First'];
+//             $student_line[] = $student['Last'];
+//             $student_line[] = $student['reg_section'];
+//             foreach($results['header_model'] as $grade_id => $grade) {
+//                 if($grade_id == 'First' || $grade_id == 'Last' || $grade_id == 'reg_section') {
+//                     continue;
+//                 }
+//                 $student_line[] = $student[$grade_id];
+//             }
+//             $csv_output .= implode(",",$student_line).$nl;
+//         }
+//         $this->core->getOutput()->renderFile($csv_output, $filename);
+//         return $csv_output;
+//     }
+
     public function generateCSVReport() {
-        $students = $this->core->getQueries()->getAllUsers();
-        $student_ids = array_map(function($stu) {return $stu->getId();}, $students);
-        $gradeables = $this->core->getQueries()->getGradeables(null, $student_ids);
-        $results = array();
-        $results['header_model'] = array('First' => 'First Name', 'Last'=> 'Last Name', 'reg_section' => 'Registration Section');
-        foreach($gradeables as $gradeable) {
-            $student_id = $gradeable->getUser()->getId();
-            if(!isset($results[$student_id])) {
-                $results[$student_id] = array('First'=>$gradeable->getUser()->getDisplayedFirstName(), 'Last' => $gradeable->getUser()->getLastName(), 'reg_section' => $gradeable->getUser()->getRegistrationSection());
-            }
-            $g_id = $gradeable->getId();
-            $is_electronic_gradeable = ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
-            $use_ta_grading = !$is_electronic_gradeable || $gradeable->useTAGrading();
+        $current_user = null;
+        $csv = "";
+        $order_by = [
+            'g.g_syllabus_bucket',
+            'g.g_id'
+        ];
 
-            if(!isset($results['header_model'][$g_id])) {
-              $max = 0;
-              if ($is_electronic_gradeable) {
-                $max = $max + $gradeable->getTotalAutograderNonExtraCreditPoints();
-              }
-              if ($use_ta_grading) {
-                $max = $max + $gradeable->getTotalTANonExtraCreditPoints();
-              }
-              $results['header_model'][$g_id] = $g_id.": ".$max;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
+            if ($current_user !== $gradeable->getUser()->getId()) {
+                if (!is_null($current_user)) {
+                    $csv .= implode(',', $row) . PHP_EOL;
+                }
+                $current_user = $gradeable->getUser()->getId();
+                $row = [];  //clear $row for new user record.
+                $row['User ID'] = $gradeable->getUser()->getId();
+                $row['First Name'] = (empty($gradeable->getUser()->getPreferredFirstName())) ? $gradeable->getUser()->getFirstName() : $gradeable->getUser()->getPreferredFirstName();
+                $row['Last Name'] = $gradeable->getUser()->getLastName();
+                $row['Registration Section'] = $gradeable->getUser()->getRegistrationSection();
             }
 
-            $total_score = 0;
-            if ($is_electronic_gradeable) {
-              $total_score = $total_score + $gradeable->getGradedAutograderPoints();
-            }
-            if ($use_ta_grading) {
-              $total_score = $total_score + $gradeable->getGradedTAPoints();
-            }
-            
-            // if this assignment exceeds the allowed late day policy or
-            // if the student has switched versions after the ta graded,
-            // then they should receive an automatic zero for this gradeable
-            $gradeable->calculateLateDays();
-            if( $is_electronic_gradeable &&
-                ( ($gradeable->getLateStatus() != NULL && substr($gradeable->getLateStatus(), 0, 3) == 'Bad') ||
-                  ($use_ta_grading && !$gradeable->validateVersions()))) {
-              $total_score = 0;
-            }
-
-            $results[$student_id][$g_id] = $total_score;
-        }
-        
-        $nl = "\n";
-        $csv_output = "";
-        $filename = $this->core->getConfig()->getCourse()."CSVReport.csv";
-        foreach($results as $id => $student) {
-            $student_line = array();
-            if($id === 'header_model') {
-                $student_line[] = "UserId";
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+                if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
+                    $row[$gradeable->getId()] = max(0, $gradeable->getGradedAutoGraderPoints() + $gradeable->getGradedTAPoints());
+                }
+                else {
+                    $row[$gradeable->getId()] = 0;
+                }
             }
             else {
-                $student_line[] = $id;
+                  $row[$gradeable->getId()] = max(0, $gradeable->getGradedTAPoints());
             }
-            $student_line[] = $student['First'];
-            $student_line[] = $student['Last'];
-            $student_line[] = $student['reg_section'];
-            foreach($results['header_model'] as $grade_id => $grade) {
-                if($grade_id == 'First' || $grade_id == 'Last' || $grade_id == 'reg_section') {
-                    continue;
-                }
-                $student_line[] = $student[$grade_id];
-            }
-            $csv_output .= implode(",",$student_line).$nl;
         }
-        $this->core->getOutput()->renderFile($csv_output, $filename);
-        return $csv_output;
+
+        //Push final row
+        $csv .= implode(',', $row) . PHP_EOL;
+        //Prepend header (which are the array keys of a row)
+        $csv = implode(',', array_keys($row)) . PHP_EOL . $csv;
+        //Send csv data to file download.  Filename: '{course}_CSVReport_{date/time stamp}.csv'
+        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_CSVReport_" . date("ymdHis") . ".csv");
+        return $csv;
+
     }
-    
+
     public function generateGradeSummaries() {
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $current_user = null;
@@ -212,6 +256,7 @@ class ReportController extends AbstractController {
             }
 
             $user[$bucket][] = $entry;
+            echo nl2br(str_replace(' ', '&nbsp;', print_r($user, true)));
         }
 
         file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
