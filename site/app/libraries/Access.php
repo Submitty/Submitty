@@ -96,28 +96,33 @@ class Access {
             }
         }
 
-        /* @var Gradeable|null $gradeable */
-        $gradeable = $args["gradeable"] ?? null;
-
         if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
+            /* @var Gradeable|null $gradeable */
+            $gradeable = $args["gradeable"] ?? null;
             if ($group > $gradeable->getMinimumGradingGroup()) {
                 return false;
             }
         }
 
         if ($checks & self::CHECK_HAS_SUBMISSION) {
+            /* @var Gradeable|null $gradeable */
+            $gradeable = $args["gradeable"] ?? null;
             if ($gradeable->getActiveVersion() <= 0) {
                 return false;
             }
         }
 
         if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
+            /* @var Gradeable|null $gradeable */
+            $gradeable = $args["gradeable"] ?? null;
             //Check their grading section
             if (!$this->checkGradingSection($gradeable)) {
                 return false;
             }
         }
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
+            /* @var Gradeable|null $gradeable */
+            $gradeable = $args["gradeable"] ?? null;
             //Check their peer assignment
             if (!$this->checkPeerAssignment($gradeable)) {
                 return false;
