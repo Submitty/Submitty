@@ -14,7 +14,6 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * Data about and results of autograding for one submission version
- * TODO: this should use lazy loading for per-testcase data (found in files on disk)
  *
  * @method int getVersion()
  * @method float getNonHiddenNonExtraCredit()
@@ -22,7 +21,7 @@ use app\models\AbstractModel;
  * @method float getHiddenNonExtraCredit()
  * @method float getHiddenExtraCredit()
  * @method \DateTime getSubmissionTime()
- * @method isAutogradingComplete()
+ * @method bool isAutogradingComplete()
  */
 class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
@@ -122,7 +121,7 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
-     * Loads AutoGradedTestcase instances for all testcases in this Gradeable
+     * Loads AutoGradedTestcase instances for all testcases in this Gradeable from the disk
      */
     private function loadTestcases() {
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
@@ -207,10 +206,10 @@ class AutoGradedVersion extends AbstractModel {
 
     /**
      * Gets an array of file details (indexed by file name) for the given part
-     * @param int $part The submission box the file was uploaded with
+     * @param int $part The submission box the file was uploaded with (0 for all parts)
      * @return array
      */
-    public function getPartFiles($part = 1) {
+    public function getPartFiles($part = 0) {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
