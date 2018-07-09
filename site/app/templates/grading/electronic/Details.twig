@@ -76,7 +76,7 @@
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}
                     {% set display_section = gradeable.isGradeByRegistration() ? reg_section : rot_section %}
-                    <tr id="empty-team-row-{{ team.getId()}}">
+                    <tr id="empty-team-row-{{ team.getId() }}">
                         <td>
                             {{ loop.index }}
                         </td>
@@ -99,13 +99,11 @@
 </div>
 
 {% macro render_student(self, section, gradeable, index, info, columns) %}
-    {% if gradeable.getUser().accessGrading() %}
-        {% set style = "style='background: #7bd0f7;'" %}
-    {% else %}
-        {% set style = "" %}
-    {% endif %}
-
-    <tr {{ style|raw }}>
+    <tr
+        {% if student.accessGrading() %}
+            style='background: #7bd0f7;'
+        {% endif %}
+    >
         {% for column in columns %}
             {#
                 This is basically a switch statement. It calls the function we need for
@@ -298,11 +296,12 @@
 {% macro render_column_team_members(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            {{ gradeable.getUser().getDisplayedFirstName()}}
-            {{ gradeable.getUser().getLastName()}}
+            {{ gradeable.getUser().getDisplayedFirstName() }}
+            {{ gradeable.getUser().getLastName() }}
         {% else %}
             {%- for member in gradeable.getTeam().getMembers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
+                {# TODO: Not call core.getQueries() anywhere near a Twig file #}
                 {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
                 {{ core.getQueries().getUserById(member).getLastName() -}}
             {%- endfor -%}
