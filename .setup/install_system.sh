@@ -10,7 +10,7 @@ err_message() {
                         INSTALLATION FAILURE
 
 Something has gone wrong in the installation process. If you feel
-that this is in erorr, please create an issue on our issue tracker at
+that this is in error, please create an issue on our issue tracker at
 https://github.com/Submitty/Submitty including an output of the build
 log to better help us diagnose what has gone wrong.
 #####################################################################
