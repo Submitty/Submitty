@@ -289,7 +289,8 @@ class NavigationView extends AbstractView {
             "title" => $team_button_text,
             "subtitle" => $team_display_date,
             "href" => $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team')),
-            "class" => "btn {$team_button_type} btn-nav"
+            "class" => "btn {$team_button_type} btn-nav",
+            "name" => "team-btn"
         ]);
 
         return $button;
@@ -387,7 +388,8 @@ class NavigationView extends AbstractView {
             "href" => $href,
             "progress" => $progress,
             "disabled" => $disabled,
-            "class" => "btn {$class} btn-nav btn-nav-submit"
+            "class" => "btn {$class} btn-nav btn-nav-submit",
+            "name" => "submit-btn"
         ]);
 
         return $button;
@@ -492,6 +494,7 @@ class NavigationView extends AbstractView {
             "href" => $href,
             "progress" => $progress,
             "class" => "btn btn-nav btn-nav-grade {$class}",
+            "name" => "grade-btn"
         ]);
 
         return $button;
@@ -505,7 +508,8 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "class" => "btn btn-default btn-nav",
+            "name" => "edit-btn"
         ]);
         return $button;
     }
@@ -518,7 +522,8 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "class" => "btn btn-default btn-nav",
+            "name" => "rebuild-btn"
         ]);
         return $button;
     }
@@ -534,33 +539,38 @@ class NavigationView extends AbstractView {
             $button = new Button($this->core, [
                 "title" => "RELEASE GRADES NOW",
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now')),
-                "class" => "btn btn-primary btn-nav"
+                "class" => "btn btn-primary btn-nav",
+                "name" => "quick-link-btn"
             ]);
         } else if ($list_section === GradeableList::FUTURE) {
             $button = new Button($this->core, [
                 "title" => "OPEN TO TAS NOW",
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now')),
-                "class" => "btn btn-primary btn-nav"
+                "class" => "btn btn-primary btn-nav",
+                "name" => "quick-link-btn"
             ]);
         } else if ($list_section === GradeableList::BETA) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                 $button = new Button($this->core, [
                     "title" => "OPEN NOW",
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now')),
-                    "class" => "btn btn-primary btn-nav"
+                    "class" => "btn btn-primary btn-nav",
+                    "name" => "quick-link-btn"
                 ]);
             } else {
                 $button = new Button($this->core, [
                     "title" => "OPEN TO GRADING NOW",
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
-                    "class" => "btn btn-primary btn-nav"
+                    "class" => "btn btn-primary btn-nav",
+                    "name" => "quick-link-btn"
                 ]);
             }
         } else if ($list_section === GradeableList::CLOSED) {
             $button = new Button($this->core, [
                 "title" => "OPEN TO GRADING NOW",
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
-                "class" => "btn btn-primary btn-nav"
+                "class" => "btn btn-primary btn-nav",
+                "name" => "quick-link-btn"
             ]);
         }
 

@@ -6,6 +6,12 @@ use app\libraries\Core;
 /**
  * Represents a button to display on the page
  * @package app\models
+ * @method string getTitle()
+ * @method string|null getSubtitle()
+ * @method string getHref()
+ * @method string getClass()
+ * @method bool isDisabled()
+ * @method float|null getProgress()
  */
 class Button extends AbstractModel {
     /** @var string $title */
@@ -20,6 +26,8 @@ class Button extends AbstractModel {
     protected $disabled;
     /** @var float|null $progress */
     protected $progress;
+    /** @var string|null $name */
+    protected $name;
 
     /**
      * @param Core $core
@@ -33,6 +41,10 @@ class Button extends AbstractModel {
         $this->class    = $details["class"] ?? "btn";
         $this->disabled = $details["disabled"] ?? false;
         $this->progress = $details["progress"] ?? null;
+        if ($this->progress !== null) {
+            $this->progress = floatval($this->progress);
+        }
+        $this->name = $details["name"] ?? null;
     }
 
 }
