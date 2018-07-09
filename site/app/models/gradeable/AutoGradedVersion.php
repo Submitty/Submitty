@@ -54,6 +54,15 @@ class AutoGradedVersion extends AbstractModel {
      */
     private $files = null;
 
+    /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
+     *      Note: null default value used to indicate that no queue status data has been loaded
+     */
+    private $queue_position = null;
+    /** @property @var int The total length of the grading queue */
+    private $queue_count = 0;
+    /** @property @var int The total number of items being graded */
+    private $queue_grading_count = 0;
+
     /**
      * AutoGradedVersion constructor.
      * @param Core $core
@@ -84,6 +93,71 @@ class AutoGradedVersion extends AbstractModel {
         $details['testcases'] = parent::parseObject($this->getTestcases());
 
         return $details;
+    }
+
+    /**
+     * Loads information about the status of out item in the queue, and the queue itself
+     * TODO: the queue state should be loaded globally, and accessed by each instance
+     *  independendently
+     */
+    private function loadQueueStatus() {
+        $queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'to_be_graded_queue');
+
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+
+        $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
+            $this->core->getConfig()->getCourse(), $this->graded_gradeable->getGradeable()->getId(),
+            $submitter_id, $this->version));
+        $grading_queue_file = "GRADING_" . $queue_file;
+
+        //FIXME: it would be nice to show the student which queue their assignment is in
+        //FIXME:    but this could be a pretty expensive operation
+
+        $queued = file_exists(FileUtils::joinPaths($queue_path, $queue_file));
+        if (file_exists(FileUtils::joinPaths($queue_path, $grading_queue_file))) {
+            $this->queue_position = 0;
+        }
+
+        // Get all items in queue dir
+        if ($queued === true) {
+            $all_files = scandir($queue_path);
+
+            $this->queue_grading_count = 0;
+            $queue_files = [];
+            $times = [];
+
+            // Filter the results so we only get files
+            foreach ($all_files as $file) {
+                $fqp = FileUtils::joinPaths($queue_path, $file);
+                if (is_file($fqp)) {
+                    if (strpos($file, "GRADING_") !== false) {
+                        $this->queue_grading_count++;
+                    } else {
+                        $queue_files[] = $file;
+
+                        // Also, record the last modified of each item
+                        $times[] = filemtime($fqp);
+                    }
+                }
+            }
+            $this->queue_count = count($queue_files);
+
+            // Sort files by last modified time (descending)
+            array_multisort($times, SORT_DESC, $queue_files);
+
+            // Get our position in the queue
+            $result = array_search($queue_file, $queue_files, true);
+            if($result === false) {
+                // This means our file got deleted between checking if it existed and
+                //  calling `scandir`.  Pretty unlikely... don't mislead the user, so say its not queued
+                $this->queue_position = -1;
+            } else {
+                $this->queue_position = $result;
+            }
+        } else {
+            // Not in queue
+            $this->queue_position = -1;
+        }
     }
 
     /**
@@ -225,6 +299,61 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadSubmissionFiles();
         }
         return $this->meta_files;
+    }
+
+    /**
+     * Gets if this version is in the queue to be graded
+     * @return bool
+     */
+    public function isQueued() {
+        if ($this->queue_position === null) {
+            $this->loadQueueStatus();
+        }
+        return $this->queue_position > 0;
+    }
+
+    /**
+     * Gets if this version is being graded
+     * @return bool
+     */
+    public function isGrading() {
+        if ($this->queue_position === null) {
+            $this->loadQueueStatus();
+        }
+        return $this->queue_position === 0;
+    }
+
+    /**
+     * Gets the position of this version in the queue
+     * @return int 0 if being graded, -1 if not in queue, otherwise the queue count
+     */
+    public function getQueuePosition() {
+        if($this->queue_position === null) {
+            $this->loadQueueStatus();
+        }
+        return $this->queue_position;
+    }
+
+    /**
+     * Gets the number of items in the queue
+     * @return int
+     */
+    public function getQueueCount() {
+        if($this->queue_position === null) {
+            $this->loadQueueStatus();
+        }
+        return $this->queue_count;
+    }
+
+    /**
+     * Gets the number of items being graded
+     * @return int
+     */
+    public function getQueueGradingCount() {
+        if($this->queue_position === null) {
+            $this->loadQueueStatus();
+        }
+        return $this->queue_grading_count;
     }
 
     /**
