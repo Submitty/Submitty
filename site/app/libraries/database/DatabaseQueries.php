@@ -645,6 +645,53 @@ ORDER BY {$section_key}", $params);
         return $return;
     }
 
+    public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
+        $return = array();
+        if (count($sections) > 0) {
+            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $placeholders = implode(",", array_fill(0, count($sections), "?"));
+            $params = [$g_id];
+            $params = array_merge($params, $sections);
+
+            $this->course_db->query("
+                SELECT gt.*, json_agg(t) AS users FROM gradeable_teams gt
+                LEFT JOIN teams t on gt.team_id = t.team_id
+                WHERE gt.g_id = ?
+                  AND gt.registration_section IN ($placeholders)
+                GROUP BY gt.team_id
+                ORDER BY {$orderBy}
+            ", $params);
+            foreach ($this->course_db->rows() as $row) {
+                $row["users"] = json_decode($row["users"], true);
+                $return[] = new Team($this->core, $row);
+            }
+        }
+        return $return;
+    }
+
+    public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy="rotating_section") {
+        $return = array();
+        if (count($sections) > 0) {
+            $placeholders = implode(",", array_fill(0, count($sections), "?"));
+            $params = [$g_id];
+            $params = array_merge($params, $sections);
+
+            $this->course_db->query("
+                SELECT gt.*, json_agg(t) AS users FROM gradeable_teams gt
+                LEFT JOIN teams t on gt.team_id = t.team_id
+                WHERE gt.g_id = ?
+                  AND gt.rotating_section IN ($placeholders)
+                GROUP BY gt.team_id
+                ORDER BY {$orderBy}
+            ", $params);
+            foreach ($this->course_db->rows() as $row) {
+                $row["users"] = json_decode($row["users"], true);
+                $return[] = new Team($this->core, $row);
+            }
+        }
+        return $return;
+    }
+
     public function getTotalComponentCount($g_id) {
         $this->course_db->query("SELECT count(*) AS cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         return intval($this->course_db->row()['cnt']);
