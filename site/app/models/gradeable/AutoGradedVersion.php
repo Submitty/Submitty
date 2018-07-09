@@ -277,28 +277,6 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
-     * Gets the number of items in the queue
-     * @return int
-     */
-    public function getQueueCount() {
-        if($this->queue_position === null) {
-            $this->loadQueueStatus();
-        }
-        return $this->queue_count;
-    }
-
-    /**
-     * Gets the number of items being graded
-     * @return int
-     */
-    public function getQueueGradingCount() {
-        if($this->queue_position === null) {
-            $this->loadQueueStatus();
-        }
-        return $this->queue_grading_count;
-    }
-
-    /**
      * Gets the total number of non-hidden points the submitter earned for this version
      * @return int
      */

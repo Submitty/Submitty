@@ -165,28 +165,4 @@ class AutoGradedGradeable extends AbstractModel {
         }
         return $instance->getQueuePosition();
     }
-
-    /**
-     * Gets the number of items in the queue
-     * @return int -1 if no active version
-     */
-    public function getQueueCount() {
-        $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
-            return -1;
-        }
-        return $instance->getQueueCount();
-    }
-
-    /**
-     * Gets the number of items being graded
-     * @return int -1 if no active version
-     */
-    public function getQueueGradingCount() {
-        $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
-            return -1;
-        }
-        return $instance->getQueueGradingCount();
-    }
 }
