@@ -671,7 +671,7 @@ class ForumController extends AbstractController {
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $_post['post_time'] = $post['edit_timestamp'];
+                $_post['post_time'] = date_format(date_create($post['edit_timestamp']),"n/j g:i A");
                 $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
@@ -680,7 +680,7 @@ class ForumController extends AbstractController {
                 // Current post
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $_post['post_time'] = $current_post['timestamp'];
+                $_post['post_time'] = date_format(date_create($current_post['timestamp']),"n/j g:i A");
                 $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
