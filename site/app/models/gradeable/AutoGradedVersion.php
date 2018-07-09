@@ -96,68 +96,10 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
-     * Loads information about the status of out item in the queue, and the queue itself
-     * TODO: the queue state should be loaded globally, and accessed by each instance
-     *  independendently
+     * Loads information about the status of out item in the queue
      */
     private function loadQueueStatus() {
-        $queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'to_be_graded_queue');
-
-        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
-
-        $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
-            $this->core->getConfig()->getCourse(), $this->graded_gradeable->getGradeable()->getId(),
-            $submitter_id, $this->version));
-        $grading_queue_file = "GRADING_" . $queue_file;
-
-        //FIXME: it would be nice to show the student which queue their assignment is in
-        //FIXME:    but this could be a pretty expensive operation
-
-        $queued = file_exists(FileUtils::joinPaths($queue_path, $queue_file));
-        if (file_exists(FileUtils::joinPaths($queue_path, $grading_queue_file))) {
-            $this->queue_position = 0;
-        }
-
-        // Get all items in queue dir
-        if ($queued === true) {
-            $all_files = scandir($queue_path);
-
-            $this->queue_grading_count = 0;
-            $queue_files = [];
-            $times = [];
-
-            // Filter the results so we only get files
-            foreach ($all_files as $file) {
-                $fqp = FileUtils::joinPaths($queue_path, $file);
-                if (is_file($fqp)) {
-                    if (strpos($file, "GRADING_") !== false) {
-                        $this->queue_grading_count++;
-                    } else {
-                        $queue_files[] = $file;
-
-                        // Also, record the last modified of each item
-                        $times[] = filemtime($fqp);
-                    }
-                }
-            }
-            $this->queue_count = count($queue_files);
-
-            // Sort files by last modified time (descending)
-            array_multisort($times, SORT_DESC, $queue_files);
-
-            // Get our position in the queue
-            $result = array_search($queue_file, $queue_files, true);
-            if($result === false) {
-                // This means our file got deleted between checking if it existed and
-                //  calling `scandir`.  Pretty unlikely... don't mislead the user, so say its not queued
-                $this->queue_position = -1;
-            } else {
-                $this->queue_position = $result;
-            }
-        } else {
-            // Not in queue
-            $this->queue_position = -1;
-        }
+        $this->queue_position = $this->core->getGradingQueue()->getQueueStatus($this);
     }
 
     /**
