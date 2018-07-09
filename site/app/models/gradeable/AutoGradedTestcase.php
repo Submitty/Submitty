@@ -22,9 +22,9 @@ class AutoGradedTestcase extends AbstractModel {
     private $testcase = null;
     /** @property @var float The number points the submitter earned for this testcase */
     protected $points = 0.0;
-    /** @var bool If the user can view these results */
+    /** @property @var bool If the user can view these results */
     protected $view = true;
-    /** @var string The message to show the user for this testcase */
+    /** @property @var string The message to show the user for this testcase */
     protected $message = '';
 
     /** @property @var GradeableAutocheck[] */
