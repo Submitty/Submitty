@@ -576,7 +576,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable,
             "submissions" => $submissions,
             "checkout" => $checkout,
-            "results" => $results
+            "results" => $results,
+            "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
 
