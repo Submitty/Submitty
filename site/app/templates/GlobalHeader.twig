@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ pageTitle }}</title>
-    <link rel="shortcut icon" href="{{ core.getConfig().getBaseUrl() }}img/favicon.ico" type="image/x-icon" />
+    <title>{{ page_title }}</title>
+    <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
@@ -14,7 +14,7 @@
     {% endfor %}
 </head>
 <script>var onAjaxInit;</script>
-<body data-site-url="{{ core.getConfig().getSiteUrl() }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<body data-site-url="{{ site_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <div id='messages'>
     {% for message in messages %}
     <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
@@ -24,10 +24,10 @@
     {% endfor %}
 </div>
 <div id="container">
-{% if navURLs|length > 0 %}
+{% if nav_urls|length > 0 %}
     <div id="nav">
         <ul>
-            {% for url in navURLs %}
+            {% for url in nav_urls %}
             <li>
                 <a href="{{ url.href }}">{{ url.title }}</a>
             </li>
@@ -41,7 +41,7 @@
             <h2>
                 {% if core.userLoaded() %}
                 <span id="login">
-                    Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                    Hello <span id="login-id">{{ user_first_name }}</span>
                 </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
                 {% else %}
                 <span id="login-guest">Welcome to Submitty</span>
