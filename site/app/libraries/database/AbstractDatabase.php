@@ -332,19 +332,17 @@ abstract class AbstractDatabase {
     }
 
     /**
-     * Get all queries run against the current PDO connection
+     * Get all queries run against the current PDO connection, with placeholders replaced by their values
      *
-     * @return string
+     * @return string[]
      */
     public function getPrintQueries() {
-        $c = 1;
-        $print = "";
+        $print = [];
         foreach($this->all_queries as $query) {
-            $print .= ($c++).") ";
             foreach($query[1] as $parameter) {
                 $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
             }
-            $print .= "{$query[0]}<br />";
+            $print[] = $query[0];
         }
         return $print;
     }
