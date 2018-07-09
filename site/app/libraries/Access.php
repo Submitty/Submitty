@@ -119,6 +119,9 @@ class Access {
         if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $args["gradeable"] ?? null;
+            if ($gradeable === null) {
+                return false;
+            }
             if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
                 return false;
             }
@@ -127,6 +130,9 @@ class Access {
         if ($checks & self::CHECK_HAS_SUBMISSION) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $args["gradeable"] ?? null;
+            if ($gradeable === null) {
+                return false;
+            }
             if ($gradeable->getActiveVersion() <= 0) {
                 return false;
             }
@@ -135,6 +141,9 @@ class Access {
         if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $args["gradeable"] ?? null;
+            if ($gradeable === null) {
+                return false;
+            }
             //Check their grading section
             if (!$this->checkGradingSection($gradeable)) {
                 return false;
@@ -143,6 +152,9 @@ class Access {
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $args["gradeable"] ?? null;
+            if ($gradeable === null) {
+                return false;
+            }
             //Check their peer assignment
             if (!$this->checkPeerAssignment($gradeable)) {
                 return false;
