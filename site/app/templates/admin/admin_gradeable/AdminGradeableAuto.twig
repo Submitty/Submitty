@@ -8,7 +8,7 @@
         {% endif %}
         <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Provide full path
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
-            <select class="select_config_path" id="select_default_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in default_config_paths %}
                     {% if config_select_mode == 'defaults' and path == gradeable.getAutogradingConfigPath() %}
@@ -20,7 +20,7 @@
             </select>
         </div>
         <div class="div_select_config" id="div_uploaded_configs" style="display: block">
-            <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_uploaded_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_uploaded_config_paths %}
                     {% if config_select_mode == 'uploaded' and path == gradeable.getAutogradingConfigPath() %}
@@ -33,7 +33,7 @@
             <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a config</a>
         </div>
         <div class="div_select_config" id="div_repository_configs" style="display: block">
-            <select class="select_config_path" id="select_repository_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_repository_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_repository_config_paths %}
                     {% if config_select_mode == 'repo' and path == gradeable.getAutogradingConfigPath() %}
