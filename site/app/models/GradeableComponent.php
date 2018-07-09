@@ -39,6 +39,7 @@ use app\libraries\Core;
  * @method string getComment()
  * @method void setComment(string $comment)
  * @method User getGrader()
+ * @method User getGrader2()
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
@@ -79,6 +80,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var User */
     protected $grader = null;
 
+    /** @property @var User */
+    protected $grader2 = null;
+
     /** @property @var int */
     protected $graded_version = -1;
 
@@ -100,6 +104,9 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool has the grader of this component been modified*/
     protected $grader_modified = false;
 
+    /** @property @var bool has the grader2 of this component been modified*/
+    protected $grader2_modified = false;
+
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
         if (!isset($details['gc_id'])) {
@@ -120,6 +127,7 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
+            $this->grader2 = $details['gcd_grader2'];
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
@@ -240,6 +248,14 @@ class GradeableComponent extends AbstractModel {
         $this->grader = $user;
     }
 
+    public function setGrader2(User $user) {
+        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
+            $this->grader2_modified = true;
+            $this->modified = true;
+            $this->grader2 = $user;
+        }
+    }
+
     /**
      * @raises \BadMethodCallException
      */
@@ -254,7 +270,10 @@ class GradeableComponent extends AbstractModel {
     public function saveGradeableComponentData($gd_id) {
         if ($this->modified) {
             if ($this->has_grade || $this->has_marks) {
-                $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this);
+                if($this->getGrader2()===null)
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), null, $this);
+                else
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this->getGrader2()->getId(), $this);
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
@@ -328,6 +347,7 @@ class GradeableComponent extends AbstractModel {
             "has_grade" => $this->has_grade,
             "has_marks" => $this->has_marks,
             "grader_modified" => $this->grader_modified,
+            "grader2_modified" => $this->grader2_modified,
             "marks" => []
         ];
 

@@ -100,10 +100,10 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         LOOP
           IF istext[j] THEN
           --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_grader2_id ,gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_grader2_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL, NULL);
           END IF;
         END LOOP;
 
@@ -257,6 +257,7 @@ CREATE TABLE gradeable_component_data (
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
+    gcd_grader_id2 character varying(255),
     gcd_graded_version integer,
     gcd_grade_time timestamp(6) with time zone NOT NULL
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
@@ -505,57 +506,57 @@ CREATE TABLE regrade_discussion (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"resolved" BOOLEAN NOT NULL,
-	"type" int NOT NULL,
+    "id" serial NOT NULL,
+    "thread_id" int NOT NULL,
+    "parent_id" int DEFAULT '-1',
+    "author_user_id" character varying NOT NULL,
+    "content" TEXT NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL,
+    "anonymous" BOOLEAN NOT NULL,
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "endorsed_by" varchar,
+    "resolved" BOOLEAN NOT NULL,
+    "type" int NOT NULL,
   "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+    CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
-	"id" serial NOT NULL,
-	"title" varchar NOT NULL,
-	"created_by" varchar NOT NULL,
-	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"merged_thread_id" int DEFAULT '-1',
-	"merged_post_id" int DEFAULT '-1',
-	"is_visible" BOOLEAN NOT NULL,
-	CONSTRAINT threads_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "title" varchar NOT NULL,
+    "created_by" varchar NOT NULL,
+    "pinned" BOOLEAN NOT NULL DEFAULT 'false',
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "merged_thread_id" int DEFAULT '-1',
+    "merged_post_id" int DEFAULT '-1',
+    "is_visible" BOOLEAN NOT NULL,
+    CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "thread_categories" (
-	"thread_id" int NOT NULL,
-	"category_id" int NOT NULL
+    "thread_id" int NOT NULL,
+    "category_id" int NOT NULL
 );
 
 CREATE TABLE "categories_list" (
-	"category_id" serial NOT NULL,
-	"category_desc" varchar NOT NULL,
-	"rank" int,
-	"color" varchar DEFAULT '#000080' NOT NULL,
-	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+    "category_id" serial NOT NULL,
+    "category_desc" varchar NOT NULL,
+    "rank" int,
+    "color" varchar DEFAULT '#000080' NOT NULL,
+    CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
 CREATE TABLE "student_favorites" (
-	"id" serial NOT NULL,
-	"user_id" character varying NOT NULL,
-	"thread_id" int,
-	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "user_id" character varying NOT NULL,
+    "thread_id" int,
+    CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "viewed_responses" (
-	"thread_id" int NOT NULL,
-	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+    "thread_id" int NOT NULL,
+    "user_id" character varying NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
 );
 
 

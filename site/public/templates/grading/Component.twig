@@ -29,7 +29,11 @@
                     {% if component.grader == null %}
                         Ungraded!
                     {% else %}
-                        Graded by {{ component.grader.id }}
+                        {% if component.grader2 == null %}
+                            Graded by {{ component.grader.id }}
+                        {% else %}
+                            Graded by {{ component.grader.id }} \ {{ component.grader2.id }}
+                        {% endif %}
                     {% endif %}
                 </span>
                 <span id="graded-saving-{{ c_index }}" style="display: none; font-style: italic; padding-right: 10px;">Saving...</span>
