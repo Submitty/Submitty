@@ -60,7 +60,7 @@ class AutoGradedVersion extends AbstractModel {
      * @param Core $core
      * @param GradedGradeable $graded_gradeable
      * @param array $details
-     * @throws \Exception If \DateTime failed to parse
+     * @throws \InvalidArgumentException If the submission time failed to parse
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
@@ -330,11 +330,15 @@ class AutoGradedVersion extends AbstractModel {
     /**
      * Sets the date that the submitter submitted this version
      * @param string|\DateTime $submission_time The date or date string of when the submitter submitted this version
-     * @throws \Exception if $submission_time is a string and failed to parse into a \DateTime object
+     * @throws \InvalidArgumentException if $submission_time is null or an invalid \DateTime string
      */
     private function setSubmissionTimeInternal($submission_time) {
         if ($submission_time !== null) {
-            $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
+            try {
+                $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
+            } catch(\Exception $e) {
+                throw new \InvalidArgumentException('Graded version submission time format invalid');
+            }
         } else {
             throw new \InvalidArgumentException('Graded version submission time must not be null');
         }
