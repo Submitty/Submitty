@@ -73,7 +73,9 @@
     </div>
     </div>
     <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%;">
-        <span class="grading_label" id="grading_file_name"></span>
+        <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
+        <br>
+        <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
         <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
         <div id="file_viewer_full_panel" class="full_panel" style="margin-left:{{ indent * -15 }}px" data-file_name="" data-file_url=""></div>
     </div>
@@ -103,6 +105,9 @@
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                if(iframe.hasClass("full_panel")){
+                    $('#'+iframeId).attr("height", "2000px");
+                }
             }
             iframe.addClass('open');
         }
