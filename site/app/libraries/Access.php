@@ -8,15 +8,20 @@ use app\models\Gradeable;
 use app\models\User;
 
 class Access {
-    const USER_GROUP_INSTRUCTOR = 1;
-    const USER_GROUP_TA         = 2;
-    const USER_GROUP_GRADER     = 3;
-    const USER_GROUP_STUDENT    = 4;
+    const USER_GROUP_INSTRUCTOR            = 1;
+    const USER_GROUP_FULL_ACCESS_GRADER    = 2;
+    const USER_GROUP_LIMITED_ACCESS_GRADER = 3;
+    const USER_GROUP_STUDENT               = 4;
 
-    // Bit field for various access control options
+    // Access control options
+
+    /** Allow Instructors to do this */
     const ALLOW_INSTRUCTOR              = 1 << 0;
-    const ALLOW_TA                      = 1 << 1;
-    const ALLOW_GRADER                  = 1 << 2;
+    /** Allow full access graders to do this */
+    const ALLOW_FULL_ACCESS_GRADER      = 1 << 1;
+    /** Allow limited access graders to do this */
+    const ALLOW_LIMITED_ACCESS_GRADER   = 1 << 2;
+    /** Allow students to do this */
     const ALLOW_STUDENT                 = 1 << 3;
     const ALLOW_LOGGED_OUT              = 1 << 4;
     const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
@@ -26,9 +31,9 @@ class Access {
     const CHECK_CSRF                    = 1 << 9;
 
     //
-    const ALLOW_MIN_STUDENT    = self::ALLOW_INSTRUCTOR | self::ALLOW_TA | self::ALLOW_GRADER | self::ALLOW_STUDENT;
-    const ALLOW_MIN_GRADER     = self::ALLOW_INSTRUCTOR | self::ALLOW_TA | self::ALLOW_GRADER;
-    const ALLOW_MIN_TA         = self::ALLOW_INSTRUCTOR | self::ALLOW_TA;
+    const ALLOW_MIN_STUDENT    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
+    const ALLOW_MIN_GRADER     = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
+    const ALLOW_MIN_TA         = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
     const ALLOW_MIN_INSTRUCTOR = self::ALLOW_INSTRUCTOR;
 
     /**
@@ -77,9 +82,9 @@ class Access {
         $group = $user->getGroup();
         if ($group === self::USER_GROUP_STUDENT && !($checks & self::ALLOW_STUDENT)) {
             return false;
-        } else if ($group === self::USER_GROUP_GRADER && !($checks & self::ALLOW_GRADER)) {
+        } else if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && !($checks & self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        } else if ($group === self::USER_GROUP_TA && !($checks & self::ALLOW_TA)) {
+        } else if ($group === self::USER_GROUP_FULL_ACCESS_GRADER && !($checks & self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
         } else if ($group === self::USER_GROUP_INSTRUCTOR && !($checks & self::ALLOW_INSTRUCTOR)) {
             return false;
@@ -106,7 +111,7 @@ class Access {
             }
         }
 
-        if ($group === self::USER_GROUP_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
+        if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
             //Check their grading section
             if (!$this->checkGradingSection($gradeable)) {
                 return false;
