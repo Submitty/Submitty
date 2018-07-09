@@ -285,7 +285,7 @@ class AdminGradeableController extends AbstractController {
             'text' => false,
             'peer' => false,
             'order' => -1,
-            'page' => -1
+            'page' => 0 // 0 means no page, -1 is student-assigned
         ]);
     }
 
