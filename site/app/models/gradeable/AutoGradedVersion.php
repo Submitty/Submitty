@@ -81,6 +81,9 @@ class AutoGradedVersion extends AbstractModel {
         // Make sure to convert the date into a string
         $details['submission_time'] = DateUtils::dateTimeToString($this->submission_time);
 
+        // Serialize the lazy-loaded testcase results
+        $details['testcases'] = parent::parseObject($this->getTestcases());
+
         return $details;
     }
 
