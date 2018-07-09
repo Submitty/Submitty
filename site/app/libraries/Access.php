@@ -12,6 +12,8 @@ class Access {
     const USER_GROUP_FULL_ACCESS_GRADER    = 2;
     const USER_GROUP_LIMITED_ACCESS_GRADER = 3;
     const USER_GROUP_STUDENT               = 4;
+    /** Logged out */
+    const USER_GROUP_NONE                  = 5;
 
     // Access control options
 
@@ -23,14 +25,27 @@ class Access {
     const ALLOW_LIMITED_ACCESS_GRADER   = 1 << 2;
     /** Allow students to do this */
     const ALLOW_STUDENT                 = 1 << 3;
+    /** Allow logged out users to do this */
     const ALLOW_LOGGED_OUT              = 1 << 4;
+    /** Check that the current user is at or above the minimum grading group required for a gradeable */
     const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
+    /**
+     * Check that a given user is in the current user's grading section for a gradeable
+     * Only applies to limited access graders
+     */
     const CHECK_GRADING_SECTION_GRADER  = 1 << 6;
+    /**
+     * Check that a given user is in the current user's peer grading assignment for a gradeable
+     * Only applies to students
+     */
     const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7;
+    /** Require that the given gradeable have an active version / submission */
     const CHECK_HAS_SUBMISSION          = 1 << 8;
+    /** Check that a valid CSRF token was passed in the request */
     const CHECK_CSRF                    = 1 << 9;
 
-    //
+    // Broader user group access cases since generally actions are "minimum this group"
+
     const ALLOW_MIN_STUDENT    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
     const ALLOW_MIN_GRADER     = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
     const ALLOW_MIN_TA         = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
@@ -76,10 +91,15 @@ class Access {
         //Some things may be available when there is no user
         $user = $this->core->getUser();
         if ($user === null) {
-            return !!($checks & self::ALLOW_LOGGED_OUT);
+            if (!($checks & self::ALLOW_LOGGED_OUT)) {
+                return false;
+            }
+            $group = self::USER_GROUP_NONE;
+        } else {
+            $group = $user->getGroup();
         }
+
         //Check user group first
-        $group = $user->getGroup();
         if ($group === self::USER_GROUP_STUDENT && !($checks & self::ALLOW_STUDENT)) {
             return false;
         } else if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && !($checks & self::ALLOW_LIMITED_ACCESS_GRADER)) {
@@ -91,7 +111,7 @@ class Access {
         }
 
         if ($checks & self::CHECK_CSRF) {
-            if ($this->core->checkCsrfToken($_POST['csrf_token'])) {
+            if ($this->core->checkCsrfToken()) {
                 return false;
             }
         }
@@ -99,7 +119,7 @@ class Access {
         if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $args["gradeable"] ?? null;
-            if ($group > $gradeable->getMinimumGradingGroup()) {
+            if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
                 return false;
             }
         }
@@ -170,11 +190,23 @@ class Access {
      * @return bool
      */
     public function checkPeerAssignment(Gradeable $gradeable) {
-        if(!$gradeable->getPeerGrading()) {
+        if (!$gradeable->getPeerGrading()) {
             return false;
         } else {
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
             return in_array($gradeable->getUser()->getId(), $user_ids_to_grade);
         }
+    }
+
+    /**
+     * Check that a a user group has privilege at least equal to minimum
+     * @param int $check
+     * @param int $minimum
+     * @return bool
+     */
+    public function checkGroupPrivilege(int $check, int $minimum) {
+        //Because access levels decrease as they get more powerful, this needs to be <=
+        // If groups ever become non-sequential in the future, this needs to be replaced.
+        return $check <= $minimum;
     }
 }
