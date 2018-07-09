@@ -80,7 +80,7 @@ class GradingQueue {
     /**
      * Gets the position of the provided AutoGradedVersion from the queue
      * @param AutoGradedVersion $auto_graded_version
-     * @return int The version's queue position, or 0 if being graded, or -1 of not found
+     * @return int The version's queue position, or GRADING if being graded, or NOT_QUEUED of not found
      */
     public function getQueueStatus(AutoGradedVersion $auto_graded_version) {
         $this->ensureLoadedQueue();

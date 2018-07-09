@@ -7,6 +7,7 @@ use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\GradingQueue;
 use app\models\AbstractModel;
 
 /**
@@ -251,7 +252,7 @@ class AutoGradedVersion extends AbstractModel {
         if ($this->queue_position === null) {
             $this->loadQueueStatus();
         }
-        return $this->queue_position > 0;
+        return $this->queue_position > GradingQueue::GRADING;
     }
 
     /**
@@ -262,12 +263,13 @@ class AutoGradedVersion extends AbstractModel {
         if ($this->queue_position === null) {
             $this->loadQueueStatus();
         }
-        return $this->queue_position === 0;
+        return $this->queue_position === GradingQueue::GRADING;
     }
 
     /**
      * Gets the position of this version in the queue
-     * @return int 0 if being graded, -1 if not in queue, otherwise the queue count
+     * @return int GradingQueue::GRADING if being graded, GradingQueue::NOT_QUEUED if not in queue,
+     *              otherwise the queue count
      */
     public function getQueuePosition() {
         if($this->queue_position === null) {

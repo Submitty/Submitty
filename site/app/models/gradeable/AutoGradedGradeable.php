@@ -10,6 +10,7 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
+use app\libraries\GradingQueue;
 use app\models\AbstractModel;
 
 /**
@@ -129,7 +130,6 @@ class AutoGradedGradeable extends AbstractModel {
 
     /* Queue status access methods */
 
-
     /**
      * Gets if the active version is in the queue to be graded
      * @return bool
@@ -156,12 +156,13 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Gets the position of the active version in the queue
-     * @return int 0 if being graded, -1 if not in queue, otherwise the queue count
+     * @return int GradingQueue::GRADING if being graded, GradingQueue::NOT_QUEUED if not in queue,
+     *              otherwise the queue count
      */
     public function getQueuePosition() {
         $instance = $this->getActiveVersionInstance();
         if($instance === null) {
-            return -1;
+            return GradingQueue::NOT_QUEUED;
         }
         return $instance->getQueuePosition();
     }
