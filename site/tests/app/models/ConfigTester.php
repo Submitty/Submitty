@@ -63,8 +63,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             ),
             'database_details' => array(
                 'host' => 'db_host',
-                'username' => 'db_user',
-                'password' => 'db_pass'
+                'username' => 'submitty_dbuser',
+                'password' => 'submitty_dbpass'
             ),
             'submitty_database_details' => array(
                 'dbname' => 'submitty'
@@ -116,8 +116,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
         $db_params = array(
             'host' => 'db_host',
-            'username' => 'db_user',
-            'password' => 'db_pass'
+            'username' => 'submitty_dbuser',
+            'password' => 'submitty_dbpass'
         );
         $this->assertEquals($db_params, $config->getDatabaseParams());
         $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty')), $config->getSubmittyDatabaseParams());

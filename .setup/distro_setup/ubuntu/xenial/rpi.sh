@@ -145,7 +145,7 @@ pip3 install opencv-python
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 
 
 ##################################################

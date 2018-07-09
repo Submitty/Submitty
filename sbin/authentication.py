@@ -188,7 +188,7 @@ def check_database(username, password, connection, metadata):
 
 if __name__ == "__main__":
     """
-    To test this script, you'll have to run this as www-data or hwphp or hwcgi so that when it creates the temp
+    To test this script, you'll have to run this as www-data or PHP_USER or CGI_USER so that when it creates the temp
     files, pam_check.cgi has access to them. Run it like this:
     sudo -u www-data /usr/local/submitty/bin/authentication.py
     

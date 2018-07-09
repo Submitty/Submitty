@@ -28,7 +28,7 @@ SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
@@ -150,10 +150,10 @@ def update_worker_json(name, entry):
 
 # ==================================================================================
 def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by DAEMON_USER")
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
     if which_machine == 'localhost':
         address = which_machine
@@ -237,10 +237,10 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     is_batch = "regrade" in obj and obj["regrade"]
 
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by DAEMON_USER")
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
     if which_machine == 'localhost':
         address = which_machine
@@ -486,9 +486,9 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
 # ==================================================================================
 # ==================================================================================
 def launch_shippers(worker_status_map):
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py launched")
 
     # Clean up old files from previous shipping/autograding (any
@@ -610,9 +610,9 @@ def launch_shippers(worker_status_map):
 
 # ==================================================================================
 if __name__ == "__main__":
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
     worker_status_map = update_all_foreign_autograding_workers()
     launch_shippers(worker_status_map)
