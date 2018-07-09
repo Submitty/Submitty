@@ -38,7 +38,7 @@
             {% set id = "id = curr_status" %}
         {% endif %}
         <tr>
-            <td {{ class }} style="padding:5px; border:thin solid black">={{ gradeable.getName() }}</td>
+            <td {{ class }} style="padding:5px; border:thin solid black">{{ gradeable.getName() }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ gradeable.getDueDate()|date('m/d/Y') }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ gradeable.getAllowedLateDays() }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ (gradeable.getLateDays() != 0) ? gradeable.getLateDays() : "" }}</td>
