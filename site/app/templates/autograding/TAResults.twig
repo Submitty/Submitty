@@ -1,4 +1,5 @@
 {% import 'functions/Badge.twig' as Badge %}
+{% import _self as self %}
 
 {% if not gradeable.beenTAgraded() %}
     <br>
@@ -39,29 +40,57 @@
 
         {# Component boxes #}
         {% for component in gradeable.getComponents() %}
-            {% if component is not iterable %}
-                {# Todo: This is heinous #}
-                {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
+            {# Todo: This is heinous #}
+            {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
 
-                <div class="box">
-                    <div class="box-title">
-                        {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
-                        <h4>{{ component.getTitle() }}
-                            {# Grader only shows up if they are not peer and full access #}
-                            {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
-                                <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
-                            {% endif %}
-                        </h4>
-                        <div style="float:left; word-break: break-word;">
-                            <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
-                            <p>
-                                {# Todo: move this out of the model #}
-                                <span class="gradeable_comment">{{ component.getGradedTAComments('<br>', true, gradeable, false)|raw }}</span>
-                            </p>
-                        </div>
+            <div class="box">
+                <div class="box-title">
+                    {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
+                    <h4>{{ component.getTitle() }}
+                        {# Grader only shows up if they are not peer and full access #}
+                        {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
+                            <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                        {% endif %}
+                    </h4>
+                    <div style="float:left; word-break: break-word;">
+                        <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
+                        <p>
+                            <table class="gradeable_comment">
+                                {% for mark in component.getMarks() if mark.getHasMark() or mark.getPublish() == 't' %}
+                                    <tr>
+                                        <td>
+                                            {% if mark.getHasMark() %}
+                                                <i class="fa fa-check-square-o fa-1g"></i>
+                                            {% else %}
+                                                <i class="fa fa-square-o fa-1g"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ mark.getPoints()|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ mark.getNote() }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% if component.getScore() != 0 or component.getComment() != '' %}
+                                    <tr>
+                                        <td>
+                                            <i class="fa fa-check-square-o fa-1g"></i>
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ component.getScore()|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ component.getComment() }}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </p>
                     </div>
                 </div>
-            {% endif %}
+            </div>
         {% endfor %}
         {# /Component boxes #}
 
