@@ -2924,9 +2924,21 @@ AND gc_id IN (
         }
     }
 
+    private function deleteGradedComponent(GradedComponent $graded_component) {
+        // Only the db marks need to be deleted since the others haven't been applied to the database
+        $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
+
+        $params = [
+            $graded_component->getTaGradedGradeable()->getId(),
+            $graded_component->getComponentId(),
+            $graded_component->getGrader()->getId()
+        ];
+        $query = "DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
-     *  Note: This does NOT delete components.  Any missing components will left alone
      * @param TaGradedGradeable $ta_graded_gradeable
      */
     private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
@@ -2950,6 +2962,12 @@ AND gc_id IN (
                 }
             }
         }
+
+        // Iterate through deleted graded components and see if anything should be deleted
+        foreach ($ta_graded_gradeable->getDeletedGradedComponents() as $component_grade) {
+            $this->deleteGradedComponent($component_grade);
+        }
+        $ta_graded_gradeable->clearDeletedGradedComponents();
     }
 
     /**

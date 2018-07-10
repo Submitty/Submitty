@@ -1310,7 +1310,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
                     $graded_components[] = $graded_component;
                 }
-                $ta_graded_gradeable->setGradedComponents($graded_components);
+                $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
 
             if($auto_graded_gradeable !== null) {
