@@ -3023,10 +3023,20 @@ AND gc_id IN (
     }
 
     /**
-     * Deletes an entry from the gradeable_data table with the provided data id
-     * @param int $ta_graded_gradeable_id
+     * Deletes an entry from the gradeable_data table
+     * @param TaGradedGradeable $ta_graded_gradeable
      */
-    public function deleteTaGradedGradeable($ta_graded_gradeable_id) {
-        $this->course_db->query("DELETE FROM gradeable_data WHERE gd_id=?", [$ta_graded_gradeable_id]);
+    public function deleteTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
+        $this->course_db->query("DELETE FROM gradeable_data WHERE gd_id=?", [$ta_graded_gradeable->getId()]);
+    }
+
+    /**
+     * Deletes an entry from the gradeable_data table with the provided gradeable id and user/team id
+     * @param string $gradeable_id
+     * @param int $submitter_id User or Team id
+     */
+    public function deleteTaGradedGradeableByIds($gradeable_id, $submitter_id) {
+        $this->course_db->query('DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
+            [$gradeable_id, $submitter_id, $submitter_id]);
     }
 }
