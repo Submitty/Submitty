@@ -174,7 +174,7 @@ class TaGradedGradeable extends AbstractModel {
             // None found, but generate one (append to array)
             if ($generate) {
                 return $this->graded_components[$component->getId()][] =
-                    new GradedComponent($this->core, $component, $grader, []);
+                    new GradedComponent($this->core, $this, $component, $grader, []);
             }
 
             // None found. Don't generate one
@@ -196,7 +196,7 @@ class TaGradedGradeable extends AbstractModel {
         // Grades don't exist, but generate one (at zero index of array)
         if ($generate) {
             return $this->graded_components[$component->getId()][0] =
-                new GradedComponent($this->core, $component, $grader, []);
+                new GradedComponent($this->core, $this, $component, $grader, []);
         }
 
         // Grades don't exist.  Don't generate one

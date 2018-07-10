@@ -2914,17 +2914,16 @@ AND gc_id IN (
 
     /**
      * Removes the provided mark ids from the marks assigned to a graded component
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      * @param int[] $mark_ids
      */
-    private function deleteGradedComponentMarks(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, $mark_ids) {
+    private function deleteGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
         if (count($mark_ids) === 0) {
             return;
         }
 
         $param = array_merge([
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getComponentId(),
             $graded_component->getGraderId(),
         ], $mark_ids);
@@ -2937,17 +2936,16 @@ AND gc_id IN (
 
     /**
      * Adds the provided mark ids as marks assigned to a graded component
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      * @param int[] $mark_ids
      */
-    private function createGradedComponentMarks(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, $mark_ids) {
+    private function createGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
         if (count($mark_ids) === 0) {
             return;
         }
 
         $param = [
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getComponentId(),
             $graded_component->getGraderId(),
             -1  // This value gets set on each loop iteration
@@ -2968,13 +2966,12 @@ AND gc_id IN (
 
     /**
      * Creates a new graded component in the database
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      */
-    private function createGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component) {
+    private function createGradedComponent(GradedComponent $graded_component) {
         $param = [
             $graded_component->getComponentId(),
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getScore(),
             $graded_component->getComment(),
             $graded_component->getGraderId(),
@@ -2996,17 +2993,16 @@ AND gc_id IN (
 
     /**
      * Updates an existing graded component in the database
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      */
-    private function updateGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component) {
+    private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
             $params = [
                 $graded_component->getScore(),
                 $graded_component->getComment(),
                 $graded_component->getGradedVersion(),
                 DateUtils::dateTimeToString($graded_component->getGradeTime()),
-                $ta_graded_gradeable->getId(),
+                $graded_component->getTaGradedGradeable()->getId(),
                 $graded_component->getComponentId(),
                 $graded_component->getGraderId()
             ];
@@ -3033,23 +3029,17 @@ AND gc_id IN (
             foreach ($component_grades as $component_grade) {
                 // This means the component wasn't loaded from the database, ergo its new
                 if ($component_grade->getDbMarkIds() === null) {
-                    $this->createGradedComponent($ta_graded_gradeable, $component_grade);
+                    $this->createGradedComponent($component_grade);
                 } else {
-                    $this->updateGradedComponent($ta_graded_gradeable, $component_grade);
+                    $this->updateGradedComponent($component_grade);
                 }
 
                 // If the marks have been modified, this means we need to update the entries
                 if ($component_grade->isMarksModified()) {
                     $new_marks = array_diff($component_grade->getMarkIds(), $component_grade->getDbMarkIds() ?? []);
                     $deleted_marks = array_diff($component_grade->getDbMarkIds() ?? [], $component_grade->getMarkIds());
-                    $this->deleteGradedComponentMarks(
-                        $ta_graded_gradeable,
-                        $component_grade,
-                        $deleted_marks);
-                    $this->createGradedComponentMarks(
-                        $ta_graded_gradeable,
-                        $component_grade,
-                        $new_marks);
+                    $this->deleteGradedComponentMarks($component_grade, $deleted_marks);
+                    $this->createGradedComponentMarks($component_grade, $new_marks);
                 }
             }
         }

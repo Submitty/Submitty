@@ -1344,6 +1344,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
                     // Create the component
                     $graded_component = new GradedComponent($this->core,
+                        $ta_graded_gradeable,
                         $gradeable->getComponent($db_row_split['comp_id'][$i]),
                         $grader,
                         $comp_array);
