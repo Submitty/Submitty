@@ -1,17 +1,17 @@
 <div class="electronic_file">
     <b>Full path to the directory containing the autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" id="default_configs" class="config_option" value="true" {% if which_config_option == 0 %} checked = "true" {% endif %}/> Default configs
-        <input type="radio" id="uploaded_configs" class="config_option" value="false" {% if which_config_option == 1 %} checked = "true" {% endif %}/> Uploaded configs
+        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Default configs
+        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Uploaded configs
         {% if repo_name != "" %}
-            <input type="radio" id="private_repository" class="config_option" value="false" {% if which_config_option == 2 %} checked = "true" {% endif %}/> Use Private repository ({{ repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
         {% endif %}
-        <input type="radio" id="provide_full_path" class="config_option" value="false" {% if which_config_option == 3 %} checked = "true" {% endif %}/> Provide full path
-        <div class="div_select_config" id="div_default_configs" style="display: {% if which_config_option == 0 %} block {% else %} none {% endif %}">
-            <select class="select_config_path" id="select_default_config" style="width: 700px;">
+        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Provide full path
+        <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
+            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in default_config_paths %}
-                    {% if which_config_option == 0 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if config_select_mode == 'defaults' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -19,24 +19,24 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="div_select_config" id="div_uploaded_configs" style="display: {% if which_config_option == 1 %} block {% else %} none {% endif %}">
-            <select class="select_config_path" id="select_uploaded_config" style="width: 700px;">
+        <div class="div_select_config" id="div_uploaded_configs" style="display: block">
+            <select class="select_config_path ignore" id="select_uploaded_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_uploaded_config_paths %}
-                    {% if which_config_option == 1 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if config_select_mode == 'uploaded' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
                     {% endif %}
                 {% endfor %}
             </select>
-            <a class="btn btn-primary" style="margin-top: 6px" href="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'upload_config'}) }}">Upload a config</a>
+            <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a config</a>
         </div>
-        <div class="div_select_config" id="div_repository_configs" style="display: {% if which_config_option == 2 %} block {% else %} none {% endif %}">
-            <select class="select_config_path" id="select_repository_config" style="width: 700px;">
+        <div class="div_select_config" id="div_repository_configs" style="display: block">
+            <select class="select_config_path ignore" id="select_repository_config" style="width: 700px;">
                 <option value=""></option>
                 {% for path in all_repository_config_paths %}
-                    {% if which_config_option == 2 and path == admin_gradeable.getEgConfigPath() %}
+                    {% if config_select_mode == 'repo' and path == gradeable.getAutogradingConfigPath() %}
                         <option value="{{ path }}" selected="selected">{{ path }}</option>
                     {% else %}
                         <option value="{{ path }}">{{ path }}</option>
@@ -46,41 +46,41 @@
         </div>
         <br />
         <p>Current config setting:</p>
-        <input style='width: 83%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ admin_gradeable.getEgConfigPath() }}" class="required" placeholder="(Required)"
-                {% if which_config_option != 3 %} disabled {% endif %}/>
+        <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
+                {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
-    <br /> <br />
+    <br />
 
     Should students be able to view submissions?
     <fieldset>
-        <input type="radio" id="yes_student_view" name="eg_student_view" value="true"
-                {{ admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> Yes
-        <input type="radio" id="no_student_view" name="eg_student_view" value="false"
-                {{ not admin_gradeable.getEgStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+        <input type="radio" id="yes_student_view" name="student_view" value="true"
+                {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+        <input type="radio" id="no_student_view" name="student_view" value="false"
+                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
         (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
         <div id="student_submit_download_view">
 
             <br />
             Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
-            <input type="radio" id="yes_student_submit" name="eg_student_submit" value="true"
-                    {{ admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_submit" name="eg_student_submit" value="false"
-                    {{ not admin_gradeable.getEgStudentSubmit() ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
             <br /> <br />
 
             Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_download" name="eg_student_download" value="true"
-                    {{ admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_download" name="eg_student_download" value="false"
-                    {{ not admin_gradeable.getEgStudentDownload ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_download" name="student_download" value="true"
+                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_download" name="student_download" value="false"
+                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> No
             <br /> <br />
 
             Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_any_version" name="eg_student_any_version" value="true"
-                    {{ admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Any version
-            <input type="radio" id="no_student_any_version" name="eg_student_any_version" value="false"
-                    {{ not admin_gradeable.getEgStudentAnyVersion() ? 'checked' : '' }}/> Active version only
+            <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
+                    {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
+            <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
+                    {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
 
         </div>
         <br />
@@ -89,7 +89,7 @@
     {% if cmake_output is null %}
         <pre>There is currently no build output.</pre>
     {% else %}
-        <pre>{{ cmake_output }}</pre>
+        <pre>{{ cmake_output|raw }}</pre>
     {% endif %}
 
 </div>
@@ -119,38 +119,45 @@
     }
 
     function onConfigChange(){
-        $('.config_option').not(this).prop('checked', false);
-        if($('#default_configs').is(':checked')) {
-            $('.div_select_config').hide();
+        let checked_val = $('input[name=config_option]:checked').val();
+        let manual_input = $('#input_provide_full_path');
+        $('.div_select_config').hide();
+        let input = '#input_provide_full_path';
+        if(checked_val === 'defaults') {
             $('#div_default_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_default_config").val($("#select_default_config option:first").val());
-        } else if($('#uploaded_configs').is(':checked')){
-            $('.div_select_config').hide();
+            input = "#select_default_config";
+        } else if(checked_val === 'uploaded'){
             $('#div_uploaded_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_uploaded_config").val($("#select_uploaded_config option:first").val());
-        } else if($('#private_repository').is(':checked')){
-            $('.div_select_config').hide();
+            input = "#select_uploaded_config";
+        } else if(checked_val === 'repo'){
             $('#div_repository_configs').show();
-            $('#input_provide_full_path').prop('disabled', true);
-            $("#select_repository_config").val($("#select_repository_config option:first").val());
+            input = "#select_repository_config";
         } else {
-            $('.div_select_config').hide();
-            $('#input_provide_full_path').prop('disabled', false);
+            manual_input.prop('disabled', false);
+            return;
+        }
+        manual_input.prop('disabled', true);
+
+        // If the select box has the value, select it
+        if($(input + ' option[value="' + manual_input.val() + '"]').length > 0) {
+            $(input).val(manual_input.val());
+        } else {
+            $(input).val('');
         }
     }
 
-    function onConfigPathChange(){
-        if($('#default_configs').is(':checked')) {
-            $('#input_provide_full_path').val($('#select_default_config').val());
-            $('#input_provide_full_path').change();
-        } else if($('#uploaded_configs').is(':checked')){
-            $('#input_provide_full_path').val($('#select_uploaded_config').val());
-            $('#input_provide_full_path').change();
-        } else if($('#private_repository').is(':checked')){
-            $('#input_provide_full_path').val($('#select_repository_config_config').val());
-            $('#input_provide_full_path').change();
+    function onConfigPathChange() {
+        let checked_val = $('input[name=config_option]:checked').val();
+        let manual_input = $('#input_provide_full_path');
+        if (checked_val === 'defaults') {
+            manual_input.val($('#select_default_config').val());
+            manual_input.change();
+        } else if (checked_val === 'uploaded') {
+            manual_input.val($('#select_uploaded_config').val());
+            manual_input.change();
+        } else if (checked_val === 'repo') {
+            manual_input.val($('#select_repository_config_config').val());
+            manual_input.change();
         }
     }
 
@@ -173,15 +180,21 @@
 
         // Hide PDF settings if not in use
         onPdfChange();
-        $('[name="eg_pdf_page"]').change(onPdfChange);
+        $('[name="pdf_page"]').change(onPdfChange);
 
         // Hide PDF pages in Rubric if students assign them
-        $('[name="eg_pdf_page_student"]').change(onPdfChange);
+        $('[name="pdf_page_student"]').change(onPdfChange);
 
         // Only show the settings if the setting is enabled
         onStudentViewChange();
-        $('[name="eg_student_view"]').change(onStudentViewChange);
+        $('[name="student_view"]').change(onStudentViewChange);
+
+        // Update the page when the radio buttons change
+        $('input:radio[name=config_option][value="{{ config_select_mode }}"]').prop('checked', true);
+        onConfigChange();
         $('.config_option').change(onConfigChange);
+
+        // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
     });
 </script>
