@@ -7,6 +7,7 @@ namespace app\libraries;
 use app\models\Gradeable;
 use app\models\GradingSection;
 use app\models\User;
+use InvalidArgumentException;
 
 class Access {
     const USER_GROUP_INSTRUCTOR            = 1;
@@ -74,6 +75,7 @@ class Access {
         $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.add_one_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.delete_one_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -122,8 +124,11 @@ class Access {
         }
 
         if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
+            if (!array_key_exists("gradeable", $args)) {
+                throw new InvalidArgumentException("Missing argument 'gradeable'");
+            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"] ?? null;
+            $gradeable = $args["gradeable"];
             if ($gradeable === null) {
                 return false;
             }
@@ -137,8 +142,11 @@ class Access {
         }
 
         if ($checks & self::CHECK_HAS_SUBMISSION) {
+            if (!array_key_exists("gradeable", $args)) {
+                throw new InvalidArgumentException("Missing argument 'gradeable'");
+            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"] ?? null;
+            $gradeable = $args["gradeable"];
             if ($gradeable === null) {
                 return false;
             }
@@ -148,8 +156,11 @@ class Access {
         }
 
         if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
+            if (!array_key_exists("gradeable", $args)) {
+                throw new InvalidArgumentException("Missing argument 'gradeable'");
+            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"] ?? null;
+            $gradeable = $args["gradeable"];
             if ($gradeable === null) {
                 return false;
             }
@@ -159,8 +170,11 @@ class Access {
             }
         }
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
+            if (!array_key_exists("gradeable", $args)) {
+                throw new InvalidArgumentException("Missing argument 'gradeable'");
+            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"] ?? null;
+            $gradeable = $args["gradeable"];
             if ($gradeable === null) {
                 return false;
             }
