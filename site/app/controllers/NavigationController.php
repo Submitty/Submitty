@@ -80,17 +80,8 @@ class NavigationController extends AbstractController {
 
         // Get the user data for each gradeable
         $graded_gradeables = [];
-        foreach($this->core->getQueries()->getGradeableDataAll($visible_gradeables, $user->getId()) as $gg) {
+        foreach($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
             $graded_gradeables[$gg->getGradeableId()] = $gg;
-        }
-
-        // Fill any missing data with blanks
-        foreach($visible_gradeables as $gradeable) {
-            if(!isset($graded_gradeables[$gradeable->getId()])) {
-                // TODO: this makes the submitter a user if the user doesn't have a team for this gradeable
-                $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user->getId());
-                $graded_gradeables[$gradeable->getId()] = new GradedGradeable($this->core, $gradeable, new Submitter($this->core,$team ?? $user));
-            }
         }
 
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables);
