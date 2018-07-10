@@ -80,6 +80,7 @@ class NavigationController extends AbstractController {
 
         // Get the user data for each gradeable
         $graded_gradeables = [];
+        // FIXME: Add sorting when that PR gets merged
         foreach($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
             $graded_gradeables[$gg->getGradeableId()] = $gg;
         }
