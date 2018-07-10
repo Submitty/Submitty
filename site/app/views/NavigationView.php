@@ -557,8 +557,7 @@ class NavigationView extends AbstractView {
      */
     private function getRebuildButton(Gradeable $gradeable) {
         $class = "btn btn-default btn-nav";
-        //FIXME: not in new model yet
-        if($gradeable->hasBuildError()){
+        if($gradeable->anyBuildErrors()){
             $class = "btn btn-danger btn-nav";
         }
         $button = new Button($this->core, [

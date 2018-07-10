@@ -93,6 +93,8 @@ class Gradeable extends AbstractModel {
     private $any_manual_grades = null;
     /** @property @var bool If any submissions exist */
     private $any_submissions = null;
+    /** @property @var bool If any errors occurred in the build output */
+    private $any_build_errors = null;
     /** @property @var Team[] Any teams that have been formed */
     private $teams = null;
     /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
@@ -759,6 +761,18 @@ class Gradeable extends AbstractModel {
             }
         }
         return $this->any_submissions;
+    }
+
+    /**
+     * Gets if this gradeable had any build errors during the last build attempt
+     * @return bool
+     */
+    public function anyBuildErrors() {
+        if($this->any_build_errors === null) {
+            $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
+            $this->any_build_errors = strpos(file_get_contents($build_file),"error") !== false;
+        }
+        return $this->any_build_errors;
     }
 
     /**
