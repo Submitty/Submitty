@@ -337,7 +337,7 @@ HTML;
 
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
                     "merge_thread_list" => $merge_thread_list,
-                    "currentThread" => $currentThread
+                    "current_thread" => $currentThread
                 ]);
 				$return .= <<<HTML
 				<div class="popup-form decent" id="edit-user-post">
