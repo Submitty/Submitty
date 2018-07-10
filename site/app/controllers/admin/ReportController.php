@@ -107,6 +107,7 @@ class ReportController extends AbstractController {
 //         return $csv_output;
 //     }
 
+    /** Generates and offers download of CSV grade report */
     public function generateCSVReport() {
         $current_user = null;
         $csv = "";
@@ -118,8 +119,11 @@ class ReportController extends AbstractController {
         foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
             if ($current_user !== $gradeable->getUser()->getId()) {
                 if (!is_null($current_user)) {
+                    //push row to csv data set.
                     $csv .= implode(',', $row) . PHP_EOL;
                 }
+
+                //Prepare new user record
                 $current_user = $gradeable->getUser()->getId();
                 $row = [];  //clear $row for new user record.
                 $row['User ID'] = $gradeable->getUser()->getId();
@@ -128,9 +132,18 @@ class ReportController extends AbstractController {
                 $row['Registration Section'] = $gradeable->getUser()->getRegistrationSection();
             }
 
+            //Gradeable iterator will append one gradeable score per loop pass.
+            //Scores are indexed by gradeable's ID.
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
-                    $row[$gradeable->getId()] = max(0, $gradeable->getGradedAutoGraderPoints() + $gradeable->getGradedTAPoints());
+                    if ($gradeable->getLateDays() - $gradeable->getLateDayExceptions() <= $gradeable->getAllowedLateDays()) {
+                        $row[$gradeable->getId()] = max(0, $gradeable->getGradedAutoGraderPoints() + $gradeable->getGradedTAPoints());
+                    }
+                    else {
+                        //Used late days exceeds what is allowed and available exceptions.
+                        //Therefore gradeable status is "Bad" and grade is zero.
+                        $row[$gradeable->getId()] = 0;
+                    }
                 }
                 else {
                     $row[$gradeable->getId()] = 0;
@@ -141,14 +154,13 @@ class ReportController extends AbstractController {
             }
         }
 
-        //Push final row
+        //Push final row to csv.
         $csv .= implode(',', $row) . PHP_EOL;
         //Prepend header (which are the array keys of a row)
         $csv = implode(',', array_keys($row)) . PHP_EOL . $csv;
         //Send csv data to file download.  Filename: '{course}_CSVReport_{date/time stamp}.csv'
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_CSVReport_" . date("ymdHis") . ".csv");
-        return $csv;
-
+//        return $csv;
     }
 
     public function generateGradeSummaries() {
@@ -256,7 +268,6 @@ class ReportController extends AbstractController {
             }
 
             $user[$bucket][] = $entry;
-            echo nl2br(str_replace(' ', '&nbsp;', print_r($user, true)));
         }
 
         file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
