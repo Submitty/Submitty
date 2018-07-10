@@ -752,11 +752,14 @@ class Gradeable extends AbstractModel {
             // Until we find a submission, assume there are none
             $this->any_submissions = false;
             if ($this->type === GradeableType::ELECTRONIC_FILE) {
-                $semester = $this->core->getConfig()->getSemester();
-                $course = $this->core->getConfig()->getCourse();
-                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+                $submission_path = FileUtils::joinPaths(
+                    '/var/local/submitty/courses',
+                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getCourse(),
+                    'submissions',
+                    $this->getId());
                 if (is_dir($submission_path)) {
-                    $this->any_submissions = false;
+                    $this->any_submissions = true;
                 }
             }
         }
