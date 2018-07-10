@@ -85,7 +85,7 @@ class TestSubmission(BaseTestCase):
 
         # create a set of file names and compare them to the displayed submitted files
         file_names = { os.path.basename(file_path) for file_path in file_paths }
-        submitted_files_text = self.driver.find_element_by_xpath("//div[@id='container']/div[@class='content']/div[@class='sub']/div[@class='box half'][1]").text
+        submitted_files_text = self.driver.find_element_by_xpath("//div[@class='content']/div[@class='sub']/div[@class='box half'][1]").text
         for submitted_file_text in submitted_files_text.split("\n"):
             idx = submitted_file_text.rfind('(')
             file_name = submitted_file_text[:idx-1]
@@ -97,7 +97,7 @@ class TestSubmission(BaseTestCase):
             autograding_done = False
             for i in range(6):
                 try:
-                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='container']/div[@class='content']/div[@class='sub']/div[@class='box' and div/@id='tc_0']")))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@class='sub']/div[@class='box' and div/@id='tc_0']")))
                     autograding_done = True
                 except TimeoutException as ex:
                     self.driver.refresh()
