@@ -2,14 +2,14 @@
     Combo box for choosing an existing gradeable as a template for the new one
         (Only show this option if we aren't in edit mode).
 #}
-{% if action == 'new' %}
+{% if action == 'new' or action == 'template' %}
     <div>
         From Template: 
-        <select name="gradeable_template" style='width: 170px;' value=''>
+        <select name="gradeable_template" style='width: 170px;'>
             <option>--None--</option>
 
-            {% for template in admin_gradeable.getTemplateList() %}
-                <option {{ admin_gradeable.getGId() == template.g_id ? 'selected' : '' }}
+            {% for template in template_list %}
+                <option {{ action != 'new' and gradeable.getId() == template.g_id ? 'selected' : '' }}
                     value="{{ template.g_id }}">{{ template.g_title }}</option>
             {% endfor %}
         </select>
@@ -21,61 +21,67 @@
 #}
 <!-- Gradeable Title (read/write in all modes) -->
 What is the title of this gradeable?: 
-    <input style='width: 227px' type='text' name='g_title' id='g_title' class="required"
-        value="{{ admin_gradeable.getGTitle() }}" placeholder="(Required)" required/>
+    <input style='width: 227px' type='text' name='title' id='g_title' class="required auto_save"
+        value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
 
 <br />
 
 <!-- Instruction URL (read/write in all modes) -->
 What is the URL to the assignment instructions? (shown to student) 
-    <input style='width: 227px' type='text' name='g_instructions_url'
-        value="{{ admin_gradeable.getGInstructionsUrl() }}" placeholder="(Optional)" />
+    <input style='width: 227px' type='text' name='instructions_url' class="auto_save"
+        value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
 
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
 What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
-<input style='width: 200px' type='text' name='g_id' id="g_id" class="required"
-       value="{{ admin_gradeable.getGId() }}" placeholder="(Required)" {{ action == 'edit' ? 'readonly' : 'required' }} />
+<input style='width: 200px' type='text' name='id' id="g_id" class="required"
+       value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
+        {{ action == 'edit' ? 'readonly' : 'required' }} />
 
 <br />
 
-<!-- Gradeable Type radio buttons (readonly in edit mode) -->
-What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: 
-    <input type='radio' id="radio_electronic_file" name="g_gradeable_type" value="Electronic File"
-        {{ (admin_gradeable.getGGradeableType() == 0 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Electronic File
+{% if action == 'new' or action == 'template' %}
+    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+    What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
+{% else %}
+    Gradeable type: {{ type_string }}
+    <br />
+{% endif %}
+<div style="{{ action == 'edit' ? 'display:none' : '' }}">
+    <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
+            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File
 
-    <input type='radio' id="radio_checkpoints" name="g_gradeable_type" value="Checkpoints"
-        {{ (admin_gradeable.getGGradeableType() == 1 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Checkpoints
+    <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
+            {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints
 
-    <input type='radio' id="radio_numeric" name="g_gradeable_type" value="Numeric"
-        {{ (admin_gradeable.getGGradeableType() == 2 and admin_gradeable.getGId() != '') ? 'checked' : (action == "edit" ? 'disabled' : '') }}> Numeric/Text
+    <input type='radio' id="radio_numeric" name="type" value="Numeric"
+            {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text
 
     <span id="required_type" style="color:red; display:inline;">(Required)</span>
-
-<br />
+</div>
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
     Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
     <br />
-    <input type="radio" id="yes_ta_grade" name="eg_use_ta_grading" value="true" class="bool_val rubric_questions"
-            {{ admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="eg_use_ta_grading" value="false" class="bool_val rubric_questions"
-            {{ not admin_gradeable.getEgUseTaGrading() ? 'checked' : '' }} /> No
+    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save"
+            {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save"
+            {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
     <br /><br />
 
-    {% if action == 'new' %}
+    {% if action == 'new' or action == 'template' %}
         Is this a team assignment?
     {% else %}
-        {{ admin_gradeable.getEgTeamAssignment() ? 'Team Settings:' : '' }}
+        {{ gradeable.isTeamAssignment() ? 'Team Settings:' : '' }}
     {% endif %}
-    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
-        <input type="radio" id = "team_yes_radio" name="eg_team_assignment" value="true"
-                {{ admin_gradeable.getEgTeamAssignment() ? 'checked' : '' }}> Yes
+    <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+        <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> Yes
 
-        <input type="radio" id = "team_no_radio" name="eg_team_assignment" value ="false"
-                {{ not admin_gradeable.getEgTeamAssignment() ? 'checked' :  '' }}> No
+        <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> No
     </div>
     <br />
 
@@ -83,7 +89,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     <div class="team_assignment team_yes" id="team_yes">
 
         What is the maximum team size?
-            <input style="width: 50px" name="eg_max_team_size" class="int_val" type="text" value="{{ admin_gradeable.getEgMaxTeamSize() }}"/>
+            <input style="width: 50px" name="team_size_max" class="int_val auto_save" type="text"
+                   value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
         {#Use teams from a previous gradeable:
         <!-- Inherit teams from another gradeable? -->
@@ -96,7 +103,7 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                 value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                 <option value=''>--None--</option>
 
-                {% for parent in admin_gradeable.getInheritTeamsList() %}
+                {% for parent in inherit_teams_list %}
                     <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
                         value="{{ parent.g_id }}">{{ parent.g_title }}</option>
                 {% endfor %}
@@ -109,24 +116,25 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         <br /> <br />
     </div>
 
-    {% if action == 'new' %}
+    {% if action == 'new' or action == 'template' %}
         Are students uploading files or submitting to a Version Control System (VCS) repository?
     {% else %}
-        Student Submission Format: {{ admin_gradeable.getEgIsRepository() ? 'VCS Repository' : 'Upload File(s)' }}
+        Student Submission Format: {{ gradeable.isVcs() ? 'VCS Repository' : 'Upload File(s)' }}
     {% endif %}
 
-    <div {{ action == 'edit' ? 'style="display:none"' : '' }}>
-        <input type="radio" id="upload_file_radio" name="eg_is_repository" value="false"
-                {{ not admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Upload File(s)
+    <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+        <input type="radio" id="upload_file_radio" name="vcs" value="false"
+                {{ not(action != 'new' and gradeable.isVcs()) ? 'checked ' : '' }}/> Upload File(s)
 
-        <input type="radio" id="repository_radio" name="eg_is_repository" value="true"
-                {{ admin_gradeable.getEgIsRepository() ? 'checked ' : (action == "edit" ? 'disabled' : '') }}/> Version Control System (VCS) Repository
+        <input type="radio" id="repository_radio" name="vcs" value="true"
+                {{ action != 'new' and gradeable.isVcs() ? 'checked ' : '' }}/> Version Control System (VCS) Repository
     </div>
+
     <br />
 
     <div id="repository">
         <b>Path for the Version Control System (VCS) repository:</b><br />
-        VCS base URL: <kbd>{{ admin_gradeable.getVcsBaseUrl }}</kbd><br />
+        VCS base URL: <kbd>{{ vcs_base_url }}</kbd><br />
         The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
         You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
         <ul style="list-style-position: inside;">
@@ -134,7 +142,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
             <li>user_id OR team_id OR repo_id (only use one)</li>
         </ul>
         ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
-        <input style='width: 83%' type='text' id="subdirectory" name='eg_subdirectory' value="{{ admin_gradeable.getEgSubdirectory() }}" placeholder="(Optional)"/><br />
+        <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
+               value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
         VCS URL: <kbd id="vcs_url"></kbd>
         <br />
     </div>
@@ -145,23 +154,16 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 <!-- Gradeable bucket (read/write in all modes) -->
 What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grades">syllabus category</a> does this item belong to?:
 
-{% set valid_assignment_type = ['homework','assignment','problem-set',
-    'quiz','test','exam',
-    'exercise','lecture-exercise','reading','lab','recitation','worksheet',
-    'project',
-    'participation','note',
-    'none (for practice only)'] %}
-
-<select name="g_syllabus_bucket" style="width: 170px;">
-    {% for type in valid_assignment_type %}
-        <option value="{{ type }}" {{ admin_gradeable.getGSyllabusBucket() == type ? 'selected' : '' }}>
-            {{ type | title }}
+<select name="syllabus_bucket" class="auto_save" style="width: 170px;">
+    {% for bucket in syllabus_buckets %}
+        <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
+            {{ bucket | title }}
         </option>
     {% endfor %}
 </select>
 
 <br />
-{% if action == 'new' %}
+{% if action == 'new' or action == 'template' %}
     <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create Gradeable</button>
 {% endif %}
 
@@ -240,7 +242,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         setVcsUrl($('#subdirectory').val());
     }
 
-    var vcs_base_url = "{{ admin_gradeable.getVcsBaseUrl() }}";
+    var vcs_base_url = "{{ vcs_base_url }}";
     function setVcsUrl(subdirectory) {
         if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
             $('#vcs_url').text(subdirectory);
@@ -272,7 +274,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
     $(document).ready(function() {
 
         onManualGradingChange();
-        $('[name="eg_use_ta_grading"]').change(onManualGradingChange)
+        $('[name="ta_grading"]').change(onManualGradingChange);
 
         //
         // Template Selector Box Events
@@ -282,7 +284,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         $('[name="gradeable_template"]').change(
         function() {
             // TODO: what if this.value === ''?
-            var arrayUrlParts = [];
+            let arrayUrlParts = [];
             arrayUrlParts["component"]   = ["admin"];
             arrayUrlParts["page"]        = ["admin_gradeable"];
             arrayUrlParts["action"]      = ["upload_new_template"];
@@ -290,8 +292,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
             // Redirect user to the same page, but in the process,
             //  fetch the data from the template gradeable
-            var new_url = buildUrl(arrayUrlParts);
-            window.location.href = new_url;
+            window.location.href = buildUrl(arrayUrlParts);
         });
 
         //
@@ -300,15 +301,15 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
 
         // Hide team settings if it isn't a electronic gradeable
         onGradeableTypeChange();
-        $('[name="g_gradeable_type"]').change(onGradeableTypeChange);
+        $('[name="type"]').change(onGradeableTypeChange);
 
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
-        $('[name="eg_team_assignment"]').change(onTeamAssignmentChange);
+        $('[name="team_assignment"]').change(onTeamAssignmentChange);
 
         // Only show repo settings if the gradeable is using repo upload
         onUploadTypeChange();
-        $('[name="eg_is_repository"]').change(onUploadTypeChange);
+        $('[name="vcs"]').change(onUploadTypeChange);
 
         // Upload the vcs url in real time
         onVcsSubdirChange();
@@ -328,9 +329,9 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_rainbow_grade
         var check3 = $('#radio_numeric').is(':checked');
 
 
-        {% if action == 'new' %}
-            var all_gradeable_ids = {{ js_gradeables_array|raw }};
-            if(all_gradeable_ids.find(element => element == gradeable_id)) {
+        {% if action != 'edit' %}
+            var all_gradeable_ids = {{ template_list|json_encode|raw }};
+            if(all_gradeable_ids.find(element => element.g_id === gradeable_id)) {
                 alert("Gradeable already exists");
                 return false;
             }
