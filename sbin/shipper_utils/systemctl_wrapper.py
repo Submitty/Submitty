@@ -13,7 +13,8 @@ AUTOGRADING_WORKERS_PATH = path.join(CONFIG_PATH, 'autograding_workers.json')
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
+DAEMON_USER = OPEN_JSON['daemon_user']
 
 with open(os.path.join(SUBMITTY_CONFIG_PATH)) as open_file:
     SUBMITT_CONFIG = json.load(open_file)
@@ -181,9 +182,9 @@ if __name__ == "__main__":
               as a primary machine.")
       system.exit(EXIT_CODES['failure'])
     # if we are checking the status of a daeomon on another machine, make sure we are running
-    #    as hwcron, who has the ssh keys.
-    if not int(os.getuid()) == HWCRON_UID:
-      print("ERROR: if running on another machine, this script must be run as hwcron")
+    #    as DAEMON_USER, who has the ssh keys.
+    if not int(os.getuid()) == DAEMON_UID:
+      print("ERROR: if running on another machine, this script must be run as DAEMON_USER, "+DAEMON_USER)
       sys.exit(EXIT_CODES['failure'])
     # perform_on_all_workers is a keyword that causes us to run the command on every worker machine.
     #   This is helpful for performing start all or stop all commands.

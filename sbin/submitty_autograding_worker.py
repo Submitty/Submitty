@@ -18,7 +18,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 NUM_GRADING_SCHEDULER_WORKERS_string = OPEN_JSON['num_grading_scheduler_workers']
 NUM_GRADING_SCHEDULER_WORKERS_int    = int(NUM_GRADING_SCHEDULER_WORKERS_string)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -34,10 +34,10 @@ ALL_WORKERS_JSON = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograd
 # ==================================================================================
 def worker_process(which_machine,address,which_untrusted,my_server):
 
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by hwcron")
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        grade_items_logging.log_message(JOB_ID, message="ERROR: must be run by DAEMON_USER")
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -85,9 +85,9 @@ def worker_process(which_machine,address,which_untrusted,my_server):
 def launch_workers(my_name, my_stats):
     num_workers = my_stats['num_autograding_workers']
 
-    # verify the hwcron user is running this script
-    if not int(os.getuid()) == int(HWCRON_UID):
-        raise SystemExit("ERROR: the grade_item.py script must be run by the hwcron user")
+    # verify the DAEMON_USER is running this script
+    if not int(os.getuid()) == int(DAEMON_UID):
+        raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
 
     grade_items_logging.log_message(JOB_ID, message="grade_scheduler.py launched")
 

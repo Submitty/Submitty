@@ -12,6 +12,7 @@ use \app\models\AbstractModel;
  *
  * @method string getGradeableId()
  * @method AutoGradedGradeable|null getAutoGradedGradeable()
+ * @method TaGradedGradeable|null getTaGradedGradeable()
  * @method Submitter getSubmitter()
  */
 class GradedGradeable extends AbstractModel {
@@ -70,12 +71,11 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets the TaGradedGradeable for this graded gradeable, or generates a blank
-     *  one if none exists and $generate is true
-     * @param bool $generate If a new TaGradedGradeable should be generated if one doesn't exist already
-     * @return TaGradedGradeable
+     *  one if none exists
+     * @return TaGradedGradeable|null
      */
-    public function getTaGradedGradeable($generate = false) {
-        if ($this->ta_graded_gradeable === null && $generate === true) {
+    public function getOrCreateTaGradedGradeable() {
+        if ($this->ta_graded_gradeable === null) {
             $this->ta_graded_gradeable = new TaGradedGradeable($this->core, $this, []);
         }
         return $this->ta_graded_gradeable;

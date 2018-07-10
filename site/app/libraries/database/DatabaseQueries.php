@@ -2480,8 +2480,8 @@ AND gc_id IN (
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeable(\app\models\gradeable\Gradeable $gradeable, $user, $team) {
-        foreach ($this->getGradedGradeables([$gradeable], [$user], [$team]) as $gg) {
+    public function getGradedGradeable(\app\models\gradeable\Gradeable $gradeable, $user, $team = null) {
+        foreach ($this->getGradedGradeables([$gradeable], $user, $team) as $gg) {
             return $gg;
         }
         return null;
@@ -2491,9 +2491,9 @@ AND gc_id IN (
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeables to retrieve data for
-     * @param string[]|null $users The ids of the users to get data for
-     * @param string[]|null $teams The ids of the teams to get data for
+     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param string[]|string|null $users The id(s) of the user(s) to get data for
+     * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -3022,7 +3022,8 @@ AND gc_id IN (
     }
 
     /**
-     * Update/create the components/marks for a gradeable
+     * Update/create the components/marks for a gradeable.
+     *  Note: This does NOT delete components.  Any missing components will left alone
      * @param TaGradedGradeable $ta_graded_gradeable
      */
     private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
