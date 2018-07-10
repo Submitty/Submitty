@@ -6,7 +6,6 @@ use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
-use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
@@ -706,22 +705,27 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
   ) as gu
   LEFT JOIN (
     SELECT
-      g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id
+      g_id, user_id, json_agg(sections_rotating_id) as sections_rotating_id
     FROM
       grading_rotating
     GROUP BY g_id, user_id
   ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
   ORDER BY user_group, user_id, g_grade_start_date");
-        return $this->course_db->rows();
+        $rows = $this->course_db->rows();
+        $modified_rows = [];
+        foreach($rows as $row) {
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
+            $modified_rows[] = $row;
+        }
+        return $modified_rows;
     }
 
     /**
-     * Gets the user id, user group, and rotating sections for all graders and
-     *  a given gradeable
-     * @param string $gradeable_id The id of the gradeable to get users for
-     * @return array An array, indexed by user id, of arrays with 'user_id', 'user_group', 'sections' (as int[])
+     * Gets rotating sections of each grader for a gradeable
+     * @param $gradeable_id
+     * @return array An array (indexed by user id) of arrays of section numbers
      */
-    public function getGradersForAllRotatingSections($gradeable_id) {
+    public function getRotatingSectionsByGrader($gradeable_id) {
         $this->course_db->query("
     SELECT
         u.user_id, u.user_group, json_agg(sections_rotating_id ORDER BY sections_rotating_id ASC) AS sections
@@ -739,56 +743,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // Split arrays into php arrays
         $rows = $this->course_db->rows();
-        $modified_rows = [];
+        $sections_row = [];
         foreach($rows as $row) {
-            $row['sections'] = json_decode($row['sections']);
-            $modified_rows[$row['user_id']] = $row;
+            $sections_row[$row['user_id']] = json_decode($row['sections']);
         }
-        return $modified_rows;
-    }
-
-    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
-        $this->course_db->query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
-        $admin_gradeable->setGradeableInfo($this->course_db->row(), $template);
-        $this->course_db->query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
-        $admin_gradeable->setOldComponentsJson(json_encode($this->course_db->rows()));
-        $components = array();
-        foreach($this->course_db->rows() as $row) {
-            $components[] = new GradeableComponent($this->core, $row);
-        }
-        $admin_gradeable->setOldComponents($components);
-        foreach($components as $comp) {
-            if($comp->getOrder() == -1 && $comp->getIsPeer()) {
-                $admin_gradeable->setPeerGradeCompleteScore($comp->getMaxValue());
-            }
-            if($comp->getPage() != 0) {
-                $admin_gradeable->setEgPdfPage(true);
-                if($comp->getPage() == -1) {
-                    $admin_gradeable->setEgPdfPageStudent(true);
-                }
-            }
-        }
-        //2 is numeric/text
-        if($admin_gradeable->getGGradeableType() == 2) {
-            $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
-                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", array($gradeable_id));
-            $num['num_numeric'] = $this->course_db->row()['cnt'];
-            $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
-                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", array($gradeable_id));
-            $num['num_text'] = $this->course_db->row()['cnt'];
-            $admin_gradeable->setNumericTextInfo($num);
-        }
-        $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
-                    INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
-        $has_grades= $this->course_db->row()['cnt'];
-        $admin_gradeable->setHasGrades($has_grades);
-        //0 is electronic
-        if($admin_gradeable->getGGradeableType() == 0) {
-            //get the electronic file stuff
-            $this->course_db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($gradeable_id));
-            $admin_gradeable->setElectronicGradeableInfo($this->course_db->row(), $template);
-        }
-        return $admin_gradeable;
+        return $sections_row;
     }
 
     public function getUsersWithLateDays() {
@@ -1517,14 +1476,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Unpack the component data
             $unpacked_component_data = [];
             foreach (array_merge($component_properties, $component_mark_properties) as $property) {
-                $unpacked_component_data[$property] = json_decode($row['array_' . $property]);
+                $unpacked_component_data[$property] = json_decode($row['array_' . $property]) ?? [];
             }
-
-            // Specially parse the 'text' field for components since the abstract model doesn't
-            //  parse "t" as `true` in the magic setters
-            $unpacked_component_data['text'] = array_map(function ($value) {
-                return $value === 't';
-            }, $unpacked_component_data['text']);
 
             // Create the components
             $components = [];

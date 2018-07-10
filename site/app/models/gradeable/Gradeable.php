@@ -462,7 +462,7 @@ class Gradeable extends AbstractModel {
      */
     public function getRotatingGraderSections() {
         if($this->rotating_grader_sections === null) {
-            $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
+            $this->setRotatingGraderSections($this->core->getQueries()->getRotatingSectionsByGrader($this->id));
             $this->rotating_grader_sections_modified = false;
         }
         return $this->rotating_grader_sections;
