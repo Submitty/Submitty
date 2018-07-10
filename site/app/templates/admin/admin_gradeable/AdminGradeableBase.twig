@@ -21,7 +21,7 @@
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <h2 id="myModalLabel" style="float: left;">{{ modal_title }}<span id="modal_label_title"></span></h2>
+            <h2 id="myModalLabel" style="float: left;">{{ action == 'edit' ? 'Editing Gradeable' : 'Create Gradeable' }}<span id="modal_label_title"></span></h2>
             <br />
             <br />
             <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
@@ -29,11 +29,11 @@
         </div>
         <br/>
         <div id="nav-bar">
-            <text class="badge nav-bar" id="page_0_nav" onClick="onChangeNavTab(0);">General</text>
-            <text class="badge nav-bar" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</text>
-            <text class="badge nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</text>
-            <text class="badge nav-bar" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</text>
-            <text class="badge nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</text>
+            <span class="badge nav-bar" id="page_0_nav" onClick="onChangeNavTab(0);">General</span>
+            <span class="badge nav-bar" id="page_1_nav" onClick="onChangeNavTab(1);">Auto-Grading</span>
+            <span class="badge nav-bar" id="page_2_nav" onClick="onChangeNavTab(2);">Rubric</span>
+            <span class="badge nav-bar" id="page_3_nav" onClick="onChangeNavTab(3);">Grader Assignment</span>
+            <span class="badge nav-bar" id="page_4_nav" onClick="onChangeNavTab(4);">Dates</span>
         </div>
         <br/>
         <br/>
@@ -58,8 +58,8 @@
 </div>
 <script type="text/javascript">
 
-    var adminGradeableNavTab = 0;
-    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
+    let adminGradeableNavTab = 0;
+    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
     function onChangeNavTab(tab) {
 
         if (tab > 4 || tab < 0) {
@@ -85,7 +85,7 @@
                 $(this).hide();
             }
             else {
-                $(this).attr('style', '{{ action == 'new' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+                $(this).attr('style', '{{ action != 'edit' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
             }
         });
 
@@ -96,9 +96,10 @@
 
     function updateNavItemsStatus() {
         if($('#radio_electronic_file').is(':checked')) {
+            let yesChecked = $('#yes_ta_grade').is(':checked');
             navItemsStatus.set('1', true);
-            navItemsStatus.set('2', $('#yes_ta_grade').is(':checked'));
-            navItemsStatus.set('3', $('#yes_ta_grade').is(':checked'));
+            navItemsStatus.set('2', yesChecked);
+            navItemsStatus.set('3', yesChecked);
         }
         else {
             navItemsStatus.set('1', false);
@@ -119,19 +120,19 @@
     $(document).ready(function() {
 
         updateNavItemsStatus();
-        $('[name="g_gradeable_type"]').change(updateNavItemsStatus);
-        $('[name="eg_use_ta_grading"]').change(updateNavItemsStatus)
+        $('[name="type"]').change(updateNavItemsStatus);
+        $('[name="ta_grading"]').change(updateNavItemsStatus);
 
         // Update navigation on load
 
         {# Disable navigation on 'new' mode #}
-        {% if action == 'new' %}
+        {% if action == 'edit' %}
+            adminGradeableNavTab = {{ nav_tab == -1 ? (gradeable.getType() == 0 ? 1 : 2) : nav_tab }};
+        {% else %}
             adminGradeableNavTab = 0;
             $('.nav-bar').each(function() {
                 $(this).attr('onClick', '');
             });
-        {% else %}
-            adminGradeableNavTab = {{ nav_tab == -1 ? (admin_gradeable.getGGradeableType() == 0 ? 1 : 2) : nav_tab }};
         {% endif %}
 
         updateNavItemsStatus();
@@ -148,10 +149,10 @@
 
         // Clamp all numeric input to be between their min and max attributes
         $( "input" ).change(function() {
-            var max = parseFloat($(this).attr('max'));
-            var skip1 = (isNaN(max)) ? true : false;
-            var min = parseFloat($(this).attr('min'));
-            var skip2 = (isNaN(min)) ? true : false;
+            let max = parseFloat($(this).attr('max'));
+            let skip1 = isNaN(max);
+            let min = parseFloat($(this).attr('min'));
+            let skip2 = isNaN(min);
             if (!skip1 && $(this).val() > max)
             {
                 $(this).val(max);
