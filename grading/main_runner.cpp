@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> required_capabilities = stringOrArrayOfStrings(config_json, "required_capabilities");
   
   bool windowed = false;
-  if (std::find(required_capabilities.begin(), required_capabilities.end(), "windowed") != v.end()){
+  if (std::find(required_capabilities.begin(), required_capabilities.end(), "windowed") != required_capabilities.end()){
     windowed = true;
   }
 
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
         std::string filename     = my_testcase.getMyPrefixFilename(v,i);
         assert (raw_filename != "");
         if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-          std::vector<std::string> actions;
+          std::vector<nlohmann::json> actions;
           execute("/bin/mv "+raw_filename+" "+filename,
                   actions,
                   "/dev/null",

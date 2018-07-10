@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
   std::cout << "MAIN COMPILE" << std::endl;
-  std::vector<std::string> actions;
+  std::vector<nlohmann::json> actions;
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);

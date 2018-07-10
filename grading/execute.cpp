@@ -1003,7 +1003,7 @@ int execute(const std::string &cmd,
     std::cout << "Received " << actions.size() << " actions" << std::endl; //useful debug line.
 
     for(std::vector<nlohmann::json>::const_iterator it = actions.begin(); it != actions.end(); ++it){
-      if(isWindowedAction(it)){
+      if(isWindowedAction(*it)){
         window_mode = true;
         break;
       }
@@ -1080,9 +1080,8 @@ int execute(const std::string &cmd,
           }
            //If we had a window but it no longer exists (crashed/shut)
           else if(window_mode && windowName != "" && !windowExists(windowName)){ 
-              windowName = "";  //reset it's name to nothing so we can begin searching again.
-              std::cout << "The students window shut midrun." << std::endl;
-            }
+            windowName = "";  //reset it's name to nothing so we can begin searching again.
+            std::cout << "The students window shut midrun." << std::endl;
           }
           // sleep 1/10 of a second
           wpid = waitpid(childPID, &status, WNOHANG);

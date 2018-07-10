@@ -19,6 +19,7 @@
 #include "window_utils.h"
 #include "execute.h"
 
+
 /**
 *Converts a string to a double with specified precision.
 */
@@ -519,15 +520,15 @@ bool populateClickAndDragValues(nlohmann::json action, std::string window_name,
   //   no_clamp = false;
   // }
 
-  std::string mouse_button = action.value("/mouse_button", action, "left");
+  std::string mouse_button_string = action.value("mouse_button", "left");
 
-  if(command.find("left") != std::string::npos){
+  if(mouse_button_string == "left"){
     mouse_button = 1;
   }
-  else if (command.find("middle") != std::string::npos){
+  else if (mouse_button_string == "middle"){
     mouse_button = 2;
   }
-  else if (command.find("right") != std::string::npos){
+  else if (mouse_button_string == "right"){
     mouse_button = 3;
   }
   else{ //default.
@@ -601,8 +602,8 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
 
   
   //delta version, 2 values movement x and movement y.
-  int amt_x_movement_remaining = action.value("/x_distance", action, 0);
-  int amt_y_movement_remaining = action.value("/y_distance", action, 0);
+  int amt_x_movement_remaining = action.value("x_distance", 0);
+  int amt_y_movement_remaining = action.value("y_distance", 0);
 
   //This shouldn't fail unless there isn't a mouse.
   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
@@ -656,8 +657,8 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
     float fraction_of_distance_remaining = remaining_distance_needed 
                                             / total_distance_needed; 
     //project in the direction of the move to find the end of our line segment.
-    float projected_x = mouse_x + (coords[0] * fraction_of_distance_remaining); 
-    float projected_y = mouse_y + (coords[1] * fraction_of_distance_remaining);  
+    float projected_x = mouse_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
+    float projected_y = mouse_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
 
     //we are using vectors as 2d points.
     std::vector<int> current_point, projected_point;  
@@ -761,15 +762,14 @@ void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
     return;
   }
 
-  int start_x_position, start_y_position, end_x_position, end_y_position;
 
-  int start_x_position = action.value("/start_x", action, -1);
-  int start_y_position = action.value("/start_y", action, -1);
+  int start_x_position = action.value("start_x", -1);
+  int start_y_position = action.value("start_y", -1);
 
-  int end_x_position = action.value("/end_x", action, -1);
-  int end_y_position = action.value("/end_y", action, -1);
+  int end_x_position = action.value("end_x", -1);
+  int end_y_position = action.value("end_y", -1);
 
-  if (starting_point_x == end_x && starting_point_y == destination_y){
+  if (start_x_position == end_x_position && start_y_position == end_y_position){
     std::cout << "Error, the click and drag action did not specify movement." << std::endl;
     return;
   }
@@ -904,14 +904,16 @@ void type(std::string toType, float delay, int presses, std::string window_name,
   }
 }
 
-void isWindowedAction(const nlohmann::json action){
-  std::vector<std::string> vec = stringOrArrayOfStrings(action, "action");
-  if (vec.size() == 0){
+/**
+* This function defines which actions are inherently bound for a GUI/window.
+**/
+bool isWindowedAction(const nlohmann::json action){
+  std::string action_str = action.value("action", "");
+  if (action_str == ""){
     std::cout << "ERROR: poorly formatted action (no 'action' type specified)" << std::endl;
     return false;
   }
   else{
-    std::string action_str = vec[0];
 
     if(action_str.find("screenshot") != std::string::npos){
       return true;
@@ -964,7 +966,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     return;
   }
   
-  nlohmann::json action = actions[i];
+  nlohmann::json action = actions[actions_taken];
   
   // std::vector<std::string> vec = stringOrArrayOfStrings(action, "action");
 
@@ -976,14 +978,15 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   //     std::string action_name = vec[0];
   // }
 
-  std::string action_name = action.value("/action", action, "ACTION_NOT_SPECIFIED");
+  std::string action_name = action.value("action", "ACTION_NOT_SPECIFIED");
 
   std::cout<<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
 
+  float delay_time = 0;
   //DELAY            
   if(action_name == "delay"){
-    float time_in_secs = action.value("/seconds", action, 0f);
-    delay_time = delay(time_in_secs);
+    float time_in_secs = action.value("seconds", 0);
+    float delay_time = delay(time_in_secs);
   }
   //SCREENSHOT
   else if(action_name.find("screenshot") != std::string::npos){ 
@@ -992,18 +995,19 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   //TYPE
   else if(action_name == "type"){ 
 
-    float delay_in_secs = action.value("/delay_in_seconds", action, .1f);
-    int presses = action.value("/presses", action, 1);
-    std::string string_to_type = action.value("/string", action, "");
+    float delay_in_secs = action.value("delay_in_seconds", .1);
+    int presses = action.value("presses", 1);
+    std::string string_to_type = action.value("string", "");
 
-    type(actions[actions_taken],window_name,childPID,elapsed, next_checkpoint, 
+    type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
       seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
-    
+
+
   }
   //KEY
   else if(action_name.find("key") != std::string::npos)
   {
-    std::string key_to_type = action.value("/key_combination", action, "INVALID_COMBINATION");
+    std::string key_to_type = action.value("key_combination", "INVALID_COMBINATION");
     if (key_to_type != "INVALID_COMBINATION"){
       key(key_to_type, window_name);
     }
@@ -1020,7 +1024,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
   //CLICK
   else if(action_name.find("click") != std::string::npos){ 
-    std::string mouse_button = action.value("/mouse_button", action, "left");
+    std::string mouse_button = action.value("mouse_button", "left");
     if(mouse_button == "left"){
       click(window_name, 1);
     }
@@ -1038,15 +1042,17 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   else if(action_name.find("move mouse") != std::string::npos){
     //TODO: implement later if deemed prudent.
     bool no_clamp = false;
-      
-    std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
+    
+    int moved_x = action.value("end_x", -1);
+    int moved_y = action.value("end_y", -1);
 
-    if(coordinates.size() >= 2){
+
+    if(moved_x >=0 && moved_y >= 0){
       int height, width, x_start, x_end, y_start, y_end;
       bool success = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
       if(success){
-          int moved_x = x_start + coordinates[0];
-          int moved_y = y_start + coordinates[1];
+          moved_x += x_start;
+          moved_y += y_start;
           mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
       }
       else{
