@@ -1,0 +1,14 @@
+
+#container > div {
+    float: top;
+    margin: 20px;
+    padding-right: 100%;
+    margin-right: -100%;
+}
+
+#container > div > div {
+    float : left;
+    margin: 20px;
+    padding-bottom: 100%;
+    margin-bottom: -100%;
+}

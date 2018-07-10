@@ -56,6 +56,7 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
     }
 
     public function setInternalResources() {
@@ -187,22 +188,13 @@ class Output {
     }
 
     public function getOutput() {
+        if($this->core->getConfig()->getWrapperEnabled()) {
+            $this->addInternalCss('wrapper_sections.css');
+        }
         $return = "";
         $return .= $this->renderHeader();
         $return .= $this->output_buffer;
         $return .= $this->renderFooter();
-
-        // if($this->core->getConfig()->getWrapperEnabled()) {
-            
-        //     ob_start();
-        //     require 'template_before.php';
-        //     $return = ob_get_clean() . $return;
-
-        //     ob_start();
-        //     require 'template_after.php';
-        //     $return .= ob_get_clean();
-
-        // }
 
         return $return;
     }

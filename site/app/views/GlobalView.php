@@ -62,16 +62,6 @@ class GlobalView extends AbstractView {
             ];
         }
 
-        $upper_left_path = "";
-        $upper_right_path = "";
-        $lower_left_path = "";
-        if($this->core->getConfig()->getWrapperEnabled()) {
-            $site_wrapper_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "site");
-            $upper_left_path = FileUtils::joinPaths($site_wrapper_path, "upper-left.html");
-            $upper_right_path = FileUtils::joinPaths($site_wrapper_path, "upper-right.html");
-            $lower_left_path = FileUtils::joinPaths($site_wrapper_path, "lower-left.html");
-        }
-
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -82,10 +72,7 @@ class GlobalView extends AbstractView {
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "site_url" => $this->core->getConfig()->getSiteUrl(),
-            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled(),
-            "upper_left_path" => $upper_left_path,
-            "upper_right_path" => $upper_right_path,
-            "lower_left_path" => $lower_left_path
+            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled()
         ]);
      }
 
