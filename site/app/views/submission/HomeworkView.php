@@ -24,12 +24,6 @@ class HomeworkView extends AbstractView {
      */
     public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
         $return = "";
-        // hiding entire page if user is not a grader and student cannot view
-        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
-            $message = "Students cannot view that gradeable.";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
 
