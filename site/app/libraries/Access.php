@@ -91,7 +91,7 @@ class Access {
      */
     public function canI(string $action, $args = []) {
         if (!array_key_exists($action, $this->permissions)) {
-            return false;
+            throw new InvalidArgumentException("Unknown action '$action'");
         }
         $checks = $this->permissions[$action];
 
