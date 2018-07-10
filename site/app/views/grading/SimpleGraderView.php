@@ -12,7 +12,7 @@ class SimpleGraderView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
-     * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables (potentially blanks)
+     * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables
      * @param array       $graders
      * @param string $section_type
      * @return string
@@ -36,6 +36,7 @@ class SimpleGraderView extends AbstractView {
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
 
+        // FIXME: use the database iterator for this
         // Get all the names/ids from all the students
         $student_full = json_encode(array_map(function(GradedGradeable $gg) {
             return ['value' => $gg->getSubmitter()->getId(),
@@ -118,12 +119,11 @@ class SimpleGraderView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
-     * @param string $sort_by
      * @param string $section
      * @param User[] $students
      * @return string
      */
-    public function displayPrintLab(Gradeable $gradeable, string $sort_by, string $section, $students) {
+    public function displayPrintLab(Gradeable $gradeable, string $section, $students) {
         //Get the names of all of the checkpoints
         $checkpoints = array_map(function (Component $component) {
             return $component->getTitle();

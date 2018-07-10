@@ -16,7 +16,7 @@
     {% endif %}
 
     <h2>
-        {{ gradeable.getName() }}
+        {{ gradeable.getTitle() }}
     </h2>
     <p>
         {% if gradeable.getTaInstructions() != "" %}
@@ -42,7 +42,7 @@
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <br> <br> <br>
-        <p style="float: right;">The CSV file should be formated as such: <br />
+        <p style="float: right;">The CSV file should be formatted as such: <br />
             user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
         <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
         <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
