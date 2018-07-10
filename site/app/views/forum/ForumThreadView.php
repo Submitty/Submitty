@@ -366,7 +366,7 @@ HTML;
 					});
 				</script>
 			</div>
-			<div class="popup-form decent">
+			<div class="popup-form decent posts_list no-popup-div" style="height: auto;">
 				<h3>Edit History
 					<a onclick="$('#popup-post-history').parent().hide();" class="btn btn-danger" style="float: right;">Close</a>
 				</h3>
