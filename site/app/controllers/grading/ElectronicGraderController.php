@@ -761,14 +761,8 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $peer = false;
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+            $peer = true;
         }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
@@ -877,15 +871,6 @@ class ElectronicGraderController extends GradingController {
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
         //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
 
-        if (($who_id !== "") && ($this->core->getUser()->getGroup() === 3) && !in_array($who_id, $user_ids_to_grade)) {
-            $this->core->addErrorMessage("You do not have permission to grade {$who_id}");
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
-        }
-        if($peer && !in_array($who_id, $user_ids_to_grade)) {
-            $_SESSION['messages']['error'][] = "You do not have permission to grade this student.";
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
-        }
-
         $prev_id = "";
         $next_id = "";
         $break_next = false;
@@ -903,11 +888,6 @@ class ElectronicGraderController extends GradingController {
             $prev_id = "";
             $next_id = "";
             $not_in_my_section = true;
-          }
-          else{
-             //If we are not a full access grader and the student isn't in our list, send us back to the index page.
-             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
-             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
           }
         }
         else{
@@ -930,10 +910,9 @@ class ElectronicGraderController extends GradingController {
             $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
         }
 
-        if ($gradeable === NULL){
-          //This will trigger if a full access grader attempts to specifically access a non-existant student.
-          $this->core->addErrorMessage("ERROR: The requested student does not exist.");
-          $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+        if (!$this->core->getAccess()->canI("grading.grade", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
         $gradeable->loadResultDetails();

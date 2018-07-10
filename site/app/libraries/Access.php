@@ -1,12 +1,9 @@
 <?php
 
-
 namespace app\libraries;
-
 
 use app\models\Gradeable;
 use app\models\GradingSection;
-use app\models\User;
 use InvalidArgumentException;
 
 class Access {
