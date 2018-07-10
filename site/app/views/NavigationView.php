@@ -348,7 +348,7 @@ class NavigationView extends AbstractView {
 
         //calculate the point percentage
         if($auto_graded_gradeable !== null) {
-            $points_percent = $auto_graded_gradeable->getVisiblePercent(true);
+            $points_percent = $auto_graded_gradeable->getNonHiddenPercent(true);
         }
 
 
