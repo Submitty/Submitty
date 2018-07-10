@@ -883,21 +883,19 @@ class ElectronicGraderController extends GradingController {
         $not_in_my_section = false;
         //If the student isn't in our list of students to grade.
         if($index === false){
-          //If we are a full access grader, let us access the student anyway (but don't set next and previous)
-          if($this->core->getUser()->accessFullGrading()){
+            //If we are a full access grader, let us access the student anyway (but don't set next and previous)
             $prev_id = "";
             $next_id = "";
             $not_in_my_section = true;
-          }
         }
-        else{
-          //If the student is in our list of students to grade, set next and previous index appropriately
-          if($index > 0){
-            $prev_id = $user_ids_to_grade[$index-1];
-          }
-          if($index < count($user_ids_to_grade)-1){
-              $next_id = $user_ids_to_grade[$index+1];
-          }
+        else {
+            //If the student is in our list of students to grade, set next and previous index appropriately
+            if ($index > 0) {
+                $prev_id = $user_ids_to_grade[$index - 1];
+            }
+            if ($index < count($user_ids_to_grade) - 1) {
+                $next_id = $user_ids_to_grade[$index + 1];
+            }
         }
 
         if ($team) {
