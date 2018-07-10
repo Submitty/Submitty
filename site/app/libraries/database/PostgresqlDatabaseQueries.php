@@ -943,7 +943,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Exceptional sort keys' ORDER BY phrases
      */
     const sort_keys_order_by = [
-        'registration_section' => 'SUBSTRING(u.registration_section, \'^[^0-9]*\'), COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1), SUBSTRING(u.registration_section, \'[^0-9]*$\')',
+        'registration_section' => [
+            'SUBSTRING(u.registration_section, \'^[^0-9]*\')',
+            'COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1)',
+            'SUBSTRING(u.registration_section, \'[^0-9]*$\')',
+            'SUBSTRING(team.registration_section, \'^[^0-9]*\')',
+            'COALESCE(SUBSTRING(team.registration_section, \'[0-9]+\')::INT, -1)',
+            'SUBSTRING(team.registration_section, \'[^0-9]*$\')'
+        ],
+        'rotating_section' => ['u.rotating_section', 'team.rotating_section'],
+        'is_team' => ['eg.eg_team_assignment']
     ];
     /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
@@ -952,12 +961,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
-     * @param string[]|string $sort_keys An ordered list of keys to sort by
-     * @param string $sort_dir The sort direction (either DatabaseQueries::SORT_ASC or DatabaseQueries::SORT_DESC)
+     * @param string[]|string $sort_keys An ordered list of keys to sort by (sort direction optional)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = ['user_id'], $sort_dir = DatabaseQueries::SORT_ASC) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
@@ -1027,11 +1035,23 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $selector = implode(' AND ', $selector_intersection_list);
 
 
-        // Generate the sort clause
-        $order = implode(',', array_map(function ($key) {
-                // Map any keys with special requirements to the proper statements
-                return self::sort_keys_order_by[$key] ?? $key;
-            }, $sort_keys)) . ' ' . $sort_dir;
+        // Generate the ORDER BY clause
+        $order = '';
+        if($sort_keys !== null) {
+            if (!is_array($sort_keys)) {
+                $sort_keys = [$sort_keys];
+            }
+            $order = 'ORDER BY ' . implode(',', array_map(function ($key_ext) {
+                    $split_key = explode(' ', $key_ext);
+                    $key = $split_key[0];
+                    $order = '';
+                    if (count($split_key) > 1) {
+                        $order = $split_key[1];
+                    }
+                    // Map any keys with special requirements to the proper statements and preserve specified order
+                    return implode(" $order,", self::sort_keys_order_by[$key] ?? [$key]) . " $order";
+                }, $sort_keys));
+        }
 
         $query = "
             SELECT /* Select everything we retrieved */
@@ -1219,7 +1239,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
             WHERE $selector
-            ORDER BY $order";
+            $order";
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {

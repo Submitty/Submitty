@@ -2403,12 +2403,11 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
-     * @param string[]|string $sort_keys An ordered list of keys to sort by
-     * @param string $sort_dir The sort direction (either DatabaseQueries::SORT_ASC or DatabaseQueries::SORT_DESC)
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (sort direction optional)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = ['user_id'], $sort_dir = DatabaseQueries::SORT_ASC) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
         throw new NotImplementedException();
     }
 
