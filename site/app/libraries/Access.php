@@ -124,11 +124,8 @@ class Access {
         }
 
         if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
-            if (!array_key_exists("gradeable", $args)) {
-                throw new InvalidArgumentException("Missing argument 'gradeable'");
-            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"];
+            $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
@@ -142,11 +139,8 @@ class Access {
         }
 
         if ($checks & self::CHECK_HAS_SUBMISSION) {
-            if (!array_key_exists("gradeable", $args)) {
-                throw new InvalidArgumentException("Missing argument 'gradeable'");
-            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"];
+            $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
@@ -156,11 +150,8 @@ class Access {
         }
 
         if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
-            if (!array_key_exists("gradeable", $args)) {
-                throw new InvalidArgumentException("Missing argument 'gradeable'");
-            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"];
+            $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
@@ -170,11 +161,8 @@ class Access {
             }
         }
         if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
-            if (!array_key_exists("gradeable", $args)) {
-                throw new InvalidArgumentException("Missing argument 'gradeable'");
-            }
             /* @var Gradeable|null $gradeable */
-            $gradeable = $args["gradeable"];
+            $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
@@ -185,6 +173,13 @@ class Access {
         }
 
         return true;
+    }
+
+    private function requireArg(array $args, string $name) {
+        if (!array_key_exists($name, $args)) {
+            throw new InvalidArgumentException("Missing argument '$name'");
+        }
+        return $args[$name];
     }
 
     /**
