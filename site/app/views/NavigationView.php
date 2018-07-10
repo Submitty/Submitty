@@ -167,12 +167,13 @@ class NavigationView extends AbstractView {
             foreach ($gradeable_list as $gradeable_id => $gradeable) {
                 /** @var Gradeable $gradeable */
 
+                $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
                 $render_gradeables[] = [
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeables[$gradeable->getId()], $list_section)
+                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section)
                 ];
             }
 
@@ -193,11 +194,11 @@ class NavigationView extends AbstractView {
     /**
      * Get the list of buttons to display to the user for a Gradeable
      * @param Gradeable $gradeable
-     * @param GradedGradeable $graded_gradeable
+     * @param GradedGradeable|null $graded_gradeable The graded gradeble instance, or null if no data yet
      * @param int $list_section
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $list_section): array {
+    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section): null;
@@ -317,12 +318,17 @@ class NavigationView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
-     * @param GradedGradeable $graded_gradeable
+     * @param GradedGradeable|null $graded_gradeable
      * @param int $list_section
      * @return Button|null
      */
-    private function getSubmitButton(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $list_section) {
+    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
+        $title = self::gradeableSections[$list_section]["prefix"];
+        $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
+            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
+            "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
+        $points_percent = NAN;
 
         $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         $progress = null;
@@ -339,87 +345,84 @@ class NavigationView extends AbstractView {
             return $button;
         }
 
-        // Get the graded gradeable for this gradeable
-        $points_percent = NAN;
-        /** @var TaGradedGradeable $ta_graded_gradeable */
-        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
-        /** @var AutoGradedGradeable $auto_graded_gradeable */
-        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        // This means either the user isn't on a team, or has no submissions yet
+        if($graded_gradeable !== null) {
+            /** @var TaGradedGradeable $ta_graded_gradeable */
+            $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+            /** @var AutoGradedGradeable $auto_graded_gradeable */
+            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
 
-        //calculate the point percentage
-        if($auto_graded_gradeable !== null) {
-            $points_percent = $auto_graded_gradeable->getNonHiddenPercent(true);
-        }
+            //calculate the point percentage
+            if($auto_graded_gradeable !== null) {
+                $points_percent = $auto_graded_gradeable->getNonHiddenPercent(true);
+            }
 
 
-        //If the button is autograded and has been submitted once, give a progress bar.
-        if (!is_nan($points_percent) &&  $graded_gradeable->isAutoGradingComplete() &&
-            ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)) {
-            $progress = $points_percent * 100;
-        }
+            //If the button is autograded and has been submitted once, give a progress bar.
+            if (!is_nan($points_percent) &&  $graded_gradeable->isAutoGradingComplete() &&
+                ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)) {
+                $progress = $points_percent * 100;
+            }
 
-        // Not submitted or cancelled, after submission deadline
-        if (!$graded_gradeable->isAutoGradingComplete() &&
-            ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
-            //You forgot to submit
-            $class = "btn-danger";
-        }
+            // Not submitted or cancelled, after submission deadline
+            if (!$graded_gradeable->isAutoGradingComplete() &&
+                ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
+                //You forgot to submit
+                $class = "btn-danger";
+            }
 
-        // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
-        if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-            $ta_graded_gradeable->getUserViewedDate() === null &&
-            $list_section === GradeableList::GRADED) {
-            //Graded and you haven't seen it yet
-            $class = "btn-success";
-        }
+            // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
+            if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
+                $ta_graded_gradeable->getUserViewedDate() === null &&
+                $list_section === GradeableList::GRADED) {
+                //Graded and you haven't seen it yet
+                $class = "btn-success";
+            }
 
-        // Submitted, currently after grade released date
-        if ($graded_gradeable->isAutoGradingComplete() &&
-            $list_section == GradeableList::GRADED) {
-            if ($gradeable->isTaGrading()) {
-                if (!$graded_gradeable->isTaGradingComplete()) {
-                    // Incomplete TA grading
+            // Submitted, currently after grade released date
+            if ($graded_gradeable->isAutoGradingComplete() &&
+                $list_section == GradeableList::GRADED) {
+                if ($gradeable->isTaGrading()) {
+                    if (!$graded_gradeable->isTaGradingComplete()) {
+                        // Incomplete TA grading
+                        $class = "btn-default";
+                    }
+                } else {
+                    // No TA grading
                     $class = "btn-default";
                 }
-            } else {
-                // No TA grading
+            }
+
+            if ($graded_gradeable->isAutoGradingComplete() &&
+                $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5 &&
+                $list_section == GradeableList::CLOSED) {
                 $class = "btn-default";
             }
-        }
 
-        if ($graded_gradeable->isAutoGradingComplete() &&
-            $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5 &&
-            $list_section == GradeableList::CLOSED) {
-            $class = "btn-default";
-        }
+            if ($graded_gradeable->isAutoGradingComplete() &&
+                ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
+                $display_date = "";
+            }
 
-        $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
-            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
-            "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
-
-        if ($graded_gradeable->isAutoGradingComplete() &&
-            ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
-            $display_date = "";
-        }
-
-        $title = self::gradeableSections[$list_section]["prefix"];
-        if ($gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getTeam() === null &&
-            !$this->core->getUser()->accessAdmin()) {
-            //team assignment, no team (non-admin)
-            $title = "MUST BE ON A TEAM TO SUBMIT";
-            $disabled = true;
-        } else if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
-            //if the user submitted something on time
-            $title = "RESUBMIT";
-        } else if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
-            //if the user submitted something past time
-            $title = "LATE RESUBMIT";
-        } else if (!$graded_gradeable->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
-            //to change the text to overdue submission if nothing was submitted on time
-            $title = "OVERDUE SUBMISSION";
-        } else if ($gradeable->isTaGrading() && !$graded_gradeable->isTaGradingComplete() && $list_section == GradeableList::GRADED) {
-            //when there is no TA grade and due date passed
-            $title = "TA GRADE NOT AVAILABLE";
+            if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
+                //if the user submitted something on time
+                $title = "RESUBMIT";
+            } else if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
+                //if the user submitted something past time
+                $title = "LATE RESUBMIT";
+            } else if (!$graded_gradeable->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
+                //to change the text to overdue submission if nothing was submitted on time
+                $title = "OVERDUE SUBMISSION";
+            } else if ($gradeable->isTaGrading() && !$graded_gradeable->isTaGradingComplete() && $list_section == GradeableList::GRADED) {
+                //when there is no TA grade and due date passed
+                $title = "TA GRADE NOT AVAILABLE";
+            }
+        } else {
+            if ($gradeable->isTeamAssignment() && !$this->core->getUser()->accessAdmin()) {
+                //team assignment, no team (non-admin)
+                $title = "MUST BE ON A TEAM TO SUBMIT";
+                $disabled = true;
+            }
         }
 
         $button = new Button($this->core, [
