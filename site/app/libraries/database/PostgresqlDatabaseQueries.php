@@ -943,13 +943,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeables to retrieve data for
-     * @param string[]|null $users The ids of the users to get data for
-     * @param string[]|null $teams The ids of the teams to get data for
+     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param string[]|string|null $users The id(s) of the user(s) to get data for
+     * @param string[]|string|null $teams The id(s) of the team(s) to get data for
+     * @param string[]|string $sort_keys An ordered list of keys to sort by
+     * @param string $sort_dir The sort direction (either DatabaseQueries::SORT_ASC or DatabaseQueries::SORT_DESC)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = ['u.user_id'], $sort_dir = DatabaseQueries::SORT_ASC) {
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
@@ -1017,6 +1019,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // Create the complete selector
         $selector = implode(' AND ', $selector_intersection_list);
+
+
+        // Generate the sort clause
+        $order = implode(',', $sort_keys) . $sort_dir;
 
         $query = "
             SELECT /* Select everything we retrieved */
@@ -1203,7 +1209,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 SELECT *
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
-            WHERE $selector";
+            WHERE $selector
+            ORDER BY $order";
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
