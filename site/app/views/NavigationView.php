@@ -345,7 +345,6 @@ class NavigationView extends AbstractView {
             return $button;
         }
 
-        // This means either the user isn't on a team, or has no submissions yet
         if($graded_gradeable !== null) {
             /** @var TaGradedGradeable $ta_graded_gradeable */
             $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -418,6 +417,7 @@ class NavigationView extends AbstractView {
                 $title = "TA GRADE NOT AVAILABLE";
             }
         } else {
+            // This means either the user isn't on a team, or has no submissions yet
             if ($gradeable->isTeamAssignment() && !$this->core->getUser()->accessAdmin()) {
                 //team assignment, no team (non-admin)
                 $title = "MUST BE ON A TEAM TO SUBMIT";
