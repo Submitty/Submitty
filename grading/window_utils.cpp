@@ -347,7 +347,7 @@ float delay(float sleep_time_secs){
     sleep_time_secs = abs(sleep_time_secs); 
   }
   //convert to microseconds and return. 
-  float sleep_time_micro = 1000000 * sleep_time_secs;  
+  float sleep_time_micro = 1000000 * sleep_time_secs;
   return sleep_time_micro;
 
 }
@@ -986,7 +986,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   //DELAY            
   if(action_name == "delay"){
     float time_in_secs = action.value("seconds", 0);
-    float delay_time = delay(time_in_secs);
+    delay_time = delay(time_in_secs);
   }
   //SCREENSHOT
   else if(action_name.find("screenshot") != std::string::npos){ 
@@ -1070,7 +1070,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
    //BAD COMMAND
   else{
-    std::cout << "ERROR: ill formatted command: " << actions[actions_taken] << std::endl;    
+    std::cout << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
   }
   actions_taken++;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
