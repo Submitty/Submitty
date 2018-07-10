@@ -44,8 +44,8 @@ class HomePageView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "ranks" => $ranks,
-            "changeNameText" => $changeNameText,
-            "showChangePassword" => $this->core->getAuthentication() instanceof DatabaseAuthentication
+            "change_name_text" => $changeNameText,
+            "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication
         ]);
     }
 }

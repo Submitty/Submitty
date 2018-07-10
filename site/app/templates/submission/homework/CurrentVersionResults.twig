@@ -74,11 +74,11 @@
             </p>
         {% endif %}
         <script type="text/javascript">
-            checkRefreshSubmissionPage("{{ this.core.buildUrl({'component': 'student',
+            checkRefreshSubmissionPage("{{ core.buildUrl({'component': 'student',
                 'page': 'submission',
                 'action': 'check_refresh',
                 'gradeable_id': gradeable.getId(),
-                'gradeable_version': gradeable.getCurrentVersionNumber()}) }}")
+                'gradeable_version': gradeable.getCurrentVersionNumber()})|e("js") }}")
         </script>
     {% elseif not gradeable.hasResults() %}
         <p class="red-message">

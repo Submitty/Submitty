@@ -16,4 +16,13 @@ if [ -x "$(command -v pip3)" ]; then
 fi
 
 sudo bash ${SUBMITTY_REPOSITORY}/.setup/install_system.sh --vagrant ${@}
-
+if [ $? -ne 0 ]; then
+    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
+    >&2 echo -e "
+For whatever reason, Vagrant has failed to build. If reporting
+an error to the developers, please be sure to also send the
+build log of Vagrant located at:
+.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log.
+"
+fi

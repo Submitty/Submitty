@@ -134,8 +134,11 @@ def handle_migration(args):
                 'password': args.config.database['database_password']
             }
 
-            for semester in os.listdir(os.path.join(args.config.submitty['submitty_data_dir'], 'courses')):
-                for course in os.listdir(os.path.join(args.config.submitty['submitty_data_dir'], 'courses', semester)):
+            course_dir = os.path.join(args.config.submitty['submitty_data_dir'], 'courses')
+            if not os.path.exists(course_dir):
+                print("Could not find courses directory: {}".format(course_dir))
+            for semester in os.listdir(course_dir):
+                for course in os.listdir(os.path.join(course_dir, semester)):
                     if args.choose_course is None or [semester, course] == args.choose_course:
                         args.semester = semester
                         args.course = course
