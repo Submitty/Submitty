@@ -70,7 +70,9 @@ class NavigationView extends AbstractView {
     const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function noAccessCourse() {
-        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig");
+        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
+            "course_name" => $this->core->getDisplayedCourseName()
+        ]);
     }
 
     public function showGradeables($sections_to_list) {
@@ -535,7 +537,7 @@ class NavigationView extends AbstractView {
         }
         $button = new Button($this->core, [
             "title" => "Rebuild",
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
+            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
             "class" => $class
         ]);
         return $button;

@@ -1,3 +1,6 @@
+{% import _self as self %}
+
+{# Looks weird but this is actually a continuation of GlobalHeader.twig #}
     <div id="push"></div>
 </div>
 <div id="footer">
@@ -8,21 +11,40 @@
         </a>
     </span>
 
-    {% if core.getConfig().isDebug() %}
+    {% if is_debug %}
     <a href="#" onClick="togglePageDetails();">Show Page Details</a>
     {% endif %}
 </div>
-{% if core.getConfig().isDebug() %}
+{% if is_debug %}
     <div id='page-info'>
         Runtime: {{ runtime }}<br /><br />
         <h3>Site Details</h3>
-        Total Submitty Details: {{ core.getSubmittyDB().getQueryCount() }}<br /><br />
-        Submitty Queries:<br /> {{ core.getSubmittyDB().getPrintQueries()|raw }}
+        Total Submitty Details: {{ submitty_queries|length }}<br /><br />
+        Submitty Queries:<br /> {{ self.query_list(submitty_queries) }}
 
         <h3>Course Details</h3>
-        Total Course Queries: {{ core.getCourseDB().getQueryCount() }}<br /><br />
-        Course Queries: <br /> {{ core.getCourseDB().getPrintQueries()|raw }}
+        Total Course Queries: {{ course_queries|length }}<br /><br />
+        Course Queries: <br /> {{ self.query_list(course_queries) }}
     </div>
 {% endif %}
 </body>
 </html>
+
+{% macro query_list(queries) %}
+    <table>
+        <tr>
+            <th style="width: 2em"></th>
+            <th></th>
+        </tr>
+        {% for query in queries %}
+            <tr>
+                <td style="text-align: right;">
+                    {{ loop.index }}&nbsp;&nbsp;
+                </td>
+                <td>
+                    <pre>{{ query }}</pre>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endmacro %}
