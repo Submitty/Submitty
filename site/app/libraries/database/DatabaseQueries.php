@@ -645,6 +645,40 @@ ORDER BY {$section_key}", $params);
         return $return;
     }
 
+    public function getTotalSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $where = "WHERE {$section_key} IN (";
+            foreach($sections_keys as $section) {
+                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
+                array_push($params, $section);
+            }
+            $where .= ")";
+        }
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt, {$section_key}
+            FROM gradeable_teams
+            INNER JOIN electronic_gradeable_version
+                    ON gradeable_teams.team_id = electronic_gradeable_version.team_id
+                   AND gradeable_teams.{$section_key} IS NOT NULL
+                   AND electronic_gradeable_version.active_version>0
+                   AND electronic_gradeable_version.g_id=?
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$section_key}
+        ", $params);
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+
     public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
         throw new NotImplementedException();
     }
