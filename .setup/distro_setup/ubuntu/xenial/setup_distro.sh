@@ -58,6 +58,9 @@ if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy php7.0-sqlite3 php-xdebug
 fi
 
+#Add the scrot screenshotting program
+apt-get install -qqy scrot
+
 # Add additional packages for compiling, authentication, and security,
 # and program support
 
