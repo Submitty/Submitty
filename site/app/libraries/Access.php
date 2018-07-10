@@ -4,16 +4,10 @@ namespace app\libraries;
 
 use app\models\Gradeable;
 use app\models\GradingSection;
+use app\models\User;
 use InvalidArgumentException;
 
 class Access {
-    const USER_GROUP_INSTRUCTOR            = 1;
-    const USER_GROUP_FULL_ACCESS_GRADER    = 2;
-    const USER_GROUP_LIMITED_ACCESS_GRADER = 3;
-    const USER_GROUP_STUDENT               = 4;
-    /** Logged out */
-    const USER_GROUP_NONE                  = 5;
-
     // Access control options
 
     /** Allow Instructors to do this */
@@ -102,19 +96,19 @@ class Access {
             if (!($checks & self::ALLOW_LOGGED_OUT)) {
                 return false;
             }
-            $group = self::USER_GROUP_NONE;
+            $group = User::GROUP_NONE;
         } else {
             $group = $user->getGroup();
         }
 
         //Check user group first
-        if ($group === self::USER_GROUP_STUDENT && !($checks & self::ALLOW_STUDENT)) {
+        if ($group === User::GROUP_STUDENT && !($checks & self::ALLOW_STUDENT)) {
             return false;
-        } else if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && !($checks & self::ALLOW_LIMITED_ACCESS_GRADER)) {
+        } else if ($group === User::GROUP_LIMITED_ACCESS_GRADER && !($checks & self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        } else if ($group === self::USER_GROUP_FULL_ACCESS_GRADER && !($checks & self::ALLOW_FULL_ACCESS_GRADER)) {
+        } else if ($group === User::GROUP_FULL_ACCESS_GRADER && !($checks & self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
-        } else if ($group === self::USER_GROUP_INSTRUCTOR && !($checks & self::ALLOW_INSTRUCTOR)) {
+        } else if ($group === User::GROUP_INSTRUCTOR && !($checks & self::ALLOW_INSTRUCTOR)) {
             return false;
         }
 
@@ -133,7 +127,7 @@ class Access {
             //Make sure they meet the minimum requirements
             if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
                 //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
-                if (!($group === self::USER_GROUP_STUDENT && $gradeable->getPeerGrading())) {
+                if (!($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())) {
                     return false;
                 }
             }
@@ -150,7 +144,7 @@ class Access {
             }
         }
 
-        if ($group === self::USER_GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
+        if ($group === User::GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
@@ -161,7 +155,7 @@ class Access {
                 return false;
             }
         }
-        if ($group === self::USER_GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
+        if ($group === User::GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
