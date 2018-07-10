@@ -72,7 +72,7 @@ class Access {
         $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.add_one_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.delete_one_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
-        $this->permissions["grading.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
@@ -206,9 +206,13 @@ class Access {
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
                 if ($gradeable->isTeamAssignment()) {
-                    return $section->containsTeam($gradeable->getTeam());
+                    if ($section->containsTeam($gradeable->getTeam())) {
+                        return true;
+                    }
                 } else {
-                    return $section->containsUser($gradeable->getUser());
+                    if ($section->containsUser($gradeable->getUser())) {
+                        return true;
+                    }
                 }
             }
         }
