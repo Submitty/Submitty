@@ -67,6 +67,11 @@ class Component extends AbstractModel {
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = array();
 
+    /** @var int Pass to setPage to indicate student-assigned pdf page */
+    const PDF_PAGE_STUDENT = -1;
+    /** @var int Pass to setPage to indicate no pdf page */
+    const PDF_PAGE_NONE = 0;
+
     /**
      * Component constructor.
      * @param Core $core

@@ -146,7 +146,10 @@ if os.path.isfile(CONFIGURATION_JSON):
         loaded_defaults = json.load(conf_file)
     #no need to authenticate on a worker machine (no website)
     if not args.worker:
-        loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+        if 'authentication_method' in loaded_defaults:
+            loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+        else:
+            loaded_defaults['authentication_method'] = 2
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that 
 # is not in an existing config file.)
