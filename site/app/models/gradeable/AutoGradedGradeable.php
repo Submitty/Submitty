@@ -86,7 +86,7 @@ class AutoGradedGradeable extends AbstractModel {
      * Sets the array of autograding versions for this gradeable data
      * @param AutoGradedVersion[] $auto_graded_versions
      */
-    public function setAutogradingVersions(array $auto_graded_versions) {
+    public function setAutoGradedVersions(array $auto_graded_versions) {
         foreach ($auto_graded_versions as $auto_graded_version) {
             if (!($auto_graded_version instanceof AutoGradedVersion)) {
                 throw new \InvalidArgumentException('Autograding version array contained invalid type');

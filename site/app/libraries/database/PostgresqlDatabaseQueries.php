@@ -1353,7 +1353,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
 
             if (isset($db_row_split['version'])) {
-                // Create all of the AutogradingVersions
+                // Create all of the AutoGradedVersions
                 for ($i = 0; $i < count($db_row_split['version']); ++$i) {
                     // Similarly, transpose each version
                     $version_array = [];
@@ -1364,7 +1364,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     $version = new AutoGradedVersion($this->core, $graded_gradeable, $version_array);
                     $graded_versions[$version->getVersion()] = $version;
                 }
-                $auto_graded_gradeable->setAutogradingVersions($graded_versions);
+                $auto_graded_gradeable->setAutoGradedVersions($graded_versions);
             }
 
             return $graded_gradeable;
