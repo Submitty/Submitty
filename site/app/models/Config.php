@@ -297,7 +297,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -334,6 +334,10 @@ class Config extends AbstractModel {
             if (!isset($config[$section][$key]) &&
                 $key == "regrade_enabled") {
               $config[$section][$key] = false;
+            }
+            if (!isset($config[$section][$key]) &&
+                $key == "regrade_message") {
+              $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
             }
             // DEFAULT FOR PRIVATE_REPOSITORY
             if (!isset($config[$section][$key]) &&

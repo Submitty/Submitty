@@ -97,12 +97,6 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
         $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
-        if($this->core->getQueries()->isStaffPost($user_id)){
-        //    $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
-        //    $gradeable->setUserViewedDate(null);
-        }else{
-       //     $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
-        }
     }
 
     private function deleteRequest(){
@@ -120,10 +114,20 @@ class SubmissionController extends AbstractController {
     }
     private function changeRequestStatus(){
         $regrade_id = $_REQUEST['regrade_id'];
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         $status = $_REQUEST['status'];
+        //TODO: set userViewedDate to null if the status is change to 1 to make the button green
+        if($status == 1){
+           // $this->core->getQueries()->getGradeable($gradeable_id, $student_id).setUserViewedDate(null);
+        }
        // $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
       //  $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
       //  $gradeable->setUserViewedDate(null);
+        if($this->core->getUser()->getId() !== $student_id || !$this->core->getUser()->accessFullGrading()){
+            $this->core->addErrorMessage("You do not have permission to change this request");
+            return;
+        }
         $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
     }
     private function popUp() {

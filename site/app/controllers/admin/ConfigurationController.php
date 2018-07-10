@@ -90,7 +90,8 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled', 
+            'regrade_message') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
