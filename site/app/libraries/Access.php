@@ -28,7 +28,10 @@ class Access {
     const ALLOW_STUDENT                 = 1 << 3;
     /** Allow logged out users to do this */
     const ALLOW_LOGGED_OUT              = 1 << 4;
-    /** Check that the current user is at or above the minimum grading group required for a gradeable */
+    /**
+     * Check that the current user is at or above the minimum grading group required for a gradeable
+     * If the gradeable has peer grading, this will also accept for students
+     */
     const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
     /**
      * Check that a given user is in the current user's grading section for a gradeable
@@ -61,6 +64,7 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
+        $this->permissions["grading.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.details"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -123,8 +127,12 @@ class Access {
             if ($gradeable === null) {
                 return false;
             }
+            //Make sure they meet the minimum requirements
             if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
-                return false;
+                //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
+                if (!($group === self::USER_GROUP_STUDENT && $gradeable->getPeerGrading())) {
+                    return false;
+                }
             }
         }
 

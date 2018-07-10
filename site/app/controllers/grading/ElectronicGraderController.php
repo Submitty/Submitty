@@ -156,17 +156,17 @@ class ElectronicGraderController extends GradingController {
     public function showStatus() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+
+        if ($this->core->getAccess()->canI("grading.status", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
         $peer = false;
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()) {
-            if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
-                $peer = true;
-            }
-            else {
-                $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
+        if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
+            $peer = true;
         }
 
         /*
