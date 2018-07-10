@@ -157,7 +157,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
 
-        if ($this->core->getAccess()->canI("grading.status", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.status", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
@@ -165,7 +165,7 @@ class ElectronicGraderController extends GradingController {
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
         $peer = false;
-        if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == 4)) {
+        if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
         }
 
@@ -199,7 +199,7 @@ class ElectronicGraderController extends GradingController {
             $section_key='registration_section';
         }
         else if ($gradeable->isGradeByRegistration()) {
-            if(!$this->core->getUser()->accessFullGrading()){
+            if(!$this->core->getAccess()->canI("grading.status.full")) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
             else {
@@ -216,7 +216,7 @@ class ElectronicGraderController extends GradingController {
         }
         //grading by rotating section
         else {
-            if(!$this->core->getUser()->accessFullGrading()){
+            if(!$this->core->getAccess()->canI("grading.status.full")) {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
             else {
@@ -340,11 +340,15 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
-        $peer = ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4);
+        $peer = ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
+        //Checks to see if the Grader has access to all users in the course,
+        //Will only show the sections that they are graders for if not TA or Instructor
+        $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $this->core->getAccess()->canI("grading.details.show_all");
 
         $students = array();
         //If we are peer grading, load in all students to be graded by this peer.
@@ -356,7 +360,7 @@ class ElectronicGraderController extends GradingController {
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+            if (!$show_all) {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
             }
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
@@ -365,24 +369,25 @@ class ElectronicGraderController extends GradingController {
             $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
                 $this->core->getUser()->getId());
-            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+            if (!$show_all) {
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
-        if ((isset($_GET['view']) && $_GET['view'] === "all") || ($this->core->getUser()->accessAdmin() && count($sections) === 0)) {
-            //Checks to see if the Grader has access to all users in the course,
-            //Will only show the sections that they are graders for if not TA or Instructor
-            if($this->core->getUser()->getGroup() < 3) {
-                $students = $this->core->getQueries()->getAllUsers($section_key);
-            } else {
-                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
+
+        //If there are no sections, see if we should show all instead
+        if (count($sections) === 0) {
+            $show_all = $this->core->getAccess()->canI("grading.details.show_all_no_sections");
+        }
+
+        if ($show_all) {
+            $students = $this->core->getQueries()->getAllUsers($section_key);
         }
         if(!$peer) {
             $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
         }
 
+        $show_empty_teams = $this->core->getAccess()->canI("grading.details.show_empty_teams");
         $empty_teams = array();
         if ($gradeable->isTeamAssignment()) {
             // Only give getGradeables one User ID per team
@@ -390,12 +395,10 @@ class ElectronicGraderController extends GradingController {
             foreach($all_teams as $team) {
                 $student_ids = array_diff($student_ids, $team->getMembers());
                 $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
-                if ($team->getSize() > 0 && (in_array($team_section, $sections) ||
-                                            (isset($_GET['view']) && $_GET['view'] === "all") ||
-                                            (count($sections) === 0 && $this->core->getUser()->accessAdmin()))) {
+                if ($team->getSize() > 0 && (in_array($team_section, $sections) || $show_all)) {
                     $student_ids[] = $team->getLeaderId();
                 }
-                if ($team->getSize() === 0 && $this->core->getUser()->accessAdmin()) {
+                if ($team->getSize() === 0 && $show_empty_teams) {
                     $empty_teams[] = $team;
                 }
             }
@@ -454,7 +457,7 @@ class ElectronicGraderController extends GradingController {
         $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $all_teams, $empty_teams);
 
-        if ($gradeable->isTeamAssignment() && $this->core->getUser()->accessAdmin()) {
+        if ($gradeable->isTeamAssignment() && $this->core->getAccess()->canI("grading.show_edit_teams")) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
             $key = 'sections_registration_id';
             foreach ($all_reg_sections as $i => $section) {
@@ -761,7 +764,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup()==4) {
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
 
@@ -782,7 +785,7 @@ class ElectronicGraderController extends GradingController {
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+            if ($this->core->getAccess()->canI("grading.grade.if_no_sections_exist") && $sections == null) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_registration_id'];
@@ -815,7 +818,7 @@ class ElectronicGraderController extends GradingController {
         else {
             $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-            if ($this->core->getUser()->accessAdmin() && $sections == null) {
+            if ($this->core->getAccess()->canI("grading.grade.if_no_sections_exist") && $sections == null) {
                 $sections = $this->core->getQueries()->getRotatingSections();
                 for ($i = 0; $i < count($sections); $i++) {
                     $sections[$i] = $sections[$i]['sections_rotating_id'];
@@ -932,7 +935,7 @@ class ElectronicGraderController extends GradingController {
 
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        $show_hidden = $this->core->getAccess()->canI("grading.show_hidden_cases", ["gradeable" => $gradeable]);
+        $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
@@ -1304,7 +1307,7 @@ class ElectronicGraderController extends GradingController {
     private function getStats($gradeable, &$sections, $graders=array(), $total_users=array(), $no_team_users=array(), $graded_components=array()) {
         $gradeable_id = $gradeable->getId();
         if ($gradeable->isGradeByRegistration()) {
-            if(!$this->core->getUser()->accessFullGrading()){
+            if(!$this->core->getAccess()->canI("grading.get_marked_users.full_stats")){
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
             else {
@@ -1319,7 +1322,7 @@ class ElectronicGraderController extends GradingController {
             }
         }
         else {
-            if(!$this->core->getUser()->accessFullGrading()){
+            if(!$this->core->getAccess()->canI("grading.get_marked_users.full_stats")){
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
             else {
