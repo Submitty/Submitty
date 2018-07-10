@@ -7,6 +7,8 @@ def up(config, conn, semester, course):
 			"edit_timestamp" timestamp with time zone NOT NULL)')
         cursor.execute("ALTER TABLE ONLY forum_posts_history ADD CONSTRAINT forum_posts_history_post_id_fk FOREIGN KEY (post_id) REFERENCES posts(id)")
         cursor.execute("ALTER TABLE ONLY forum_posts_history ADD CONSTRAINT forum_posts_history_edit_author_fk FOREIGN KEY (edit_author) REFERENCES users(user_id)")
+        cursor.execute("CREATE INDEX forum_posts_history_post_id_index ON forum_posts_history (post_id)")
+        cursor.execute("CREATE INDEX forum_posts_history_edit_timestamp_index ON forum_posts_history (edit_timestamp DESC)")
 
 def down(config, conn, semester, course):
     with conn.cursor() as cursor:
