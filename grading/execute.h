@@ -5,11 +5,12 @@
 
 // implemented in execute.cpp
 int execute(const std::string &cmd, 
-    const std::vector<std::string>,
-      const std::string &execute_logfile, 
+      const std::vector<nlohmann::json> actions,
+      const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
-            const nlohmann::json &assignment_limits,
-            const nlohmann::json &whole_config);
+      const nlohmann::json &assignment_limits,
+      const nlohmann::json &whole_config,
+      const bool windowed);
 
 int exec_this_command(const std::string &cmd, std::ofstream &logfile);
 
