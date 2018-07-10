@@ -18,15 +18,6 @@
                 <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
             </td>
         </tr>
-
-        <tr class="multi-field" id="mult-field-1">
-            <td>
-                <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label" value="Checkpoint 1"/>
-            </td>
-            <td>
-                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
-            </td>
-        </tr>
     </table>
     <button type="button" id="add-checkpoint_field">Add Checkpoint</button>
     <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="visibilty:hidden;">Remove Last Checkpoint</button>
@@ -39,9 +30,17 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
-        var numCheckpoints = 1;
+        let numCheckpoints = 0;
 
         function addCheckpoint(label, extra_credit) {
+            // Add a new checkpoint to the page
+            addCheckpointToPage(label, extra_credit);
+
+            // When adding a checkpoint, save the rubric
+            saveRubric(false);
+        }
+
+        function addCheckpointToPage(label, extra_credit) {
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
@@ -49,9 +48,6 @@
             $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).attr('checked', extra_credit).change(() => saveRubric(false));
             $('#remove-checkpoint_field').show();
             $('#mult-field-' + numCheckpoints, wrapper).show();
-
-            // When adding a checkpoint, save the rubric
-            saveRubric(false);
         }
 
         function removeCheckpoint() {
@@ -79,13 +75,11 @@
 
         // Add the existing checkpoints
         if ($('#radio_checkpoints').is(':checked')){
-            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
-            // remove the default checkpoint
-            removeCheckpoint();
+            let components = {{ gradeable_components_enc|raw }};
             $.each(components, function(i,elem){
                 var extra_credit = false;
-                if (elem.gc_max_value == 0) extra_credit = true;
-                addCheckpoint(elem.gc_title, extra_credit);
+                if (elem.max_value === 0) extra_credit = true;
+                addCheckpointToPage(elem.title, extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();

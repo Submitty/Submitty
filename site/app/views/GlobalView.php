@@ -76,9 +76,12 @@ class GlobalView extends AbstractView {
             "messages" => $messages,
             "css" => $css,
             "js" => $js,
-            "pageTitle" => $pageTitle,
-            "navURLs" => $navURLs,
+            "page_title" => $pageTitle,
+            "nav_urls" => $navURLs,
             "breadcrumbs" => $breadcrumbs,
+            "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
+            "base_url" => $this->core->getConfig()->getBaseUrl(),
+            "site_url" => $this->core->getConfig()->getSiteUrl(),
             "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled(),
             "upper_left_path" => $upper_left_path,
             "upper_right_path" => $upper_right_path,
@@ -89,7 +92,10 @@ class GlobalView extends AbstractView {
     public function footer($runtime) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
-            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled()
+            "wrapper_enabled" => $this->core->getConfig()->getWrapperEnabled(),
+            "is_debug" => $this->core->getConfig()->isDebug(),
+            "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
+            "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
         ]);
     }
 

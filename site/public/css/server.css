@@ -577,7 +577,7 @@ table tr.table-header {
 }
 
 .deleted.active {
-    background-color: #006400 !important;
+    background-color: #505050 !important;
 }
 
 .important {
@@ -696,7 +696,10 @@ table tr.table-header {
 
 .gradeable_comment {
     word-break: break-word;
-    white-space: pre-wrap;
+}
+
+.gradeable_comment td {
+    padding: 0 4px;
 }
 
 #search_wrapper{
@@ -911,6 +914,16 @@ table .instructor .two-options{
     color-stop(65%, rgba(0, 0, 255, 0.4)),
     color-stop(80%, rgba(255, 0, 255, 0.4)),
     color-stop(100%, rgba(255, 0, 0, 0.4)));
+}
+
+.thumbnail {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
 
 .popup-form {

@@ -1,4 +1,4 @@
-def up(conn):
+def up(config, conn):
     with conn.cursor() as cursor:
         cursor.execute("""
 CREATE TABLE public.courses_registration_sections (
@@ -34,7 +34,8 @@ $$ LANGUAGE plpgsql;""")
 
         cursor.execute('CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();')
 
-def down(conn):
+
+def down(config, conn):
     with conn.cursor() as cursor:
         cursor.execute('DROP TRIGGER registration_sync_registration_id;')
         cursor.execute('DROP FUNCTION sync_registration_section();')
