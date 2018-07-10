@@ -32,6 +32,7 @@ class AutoGradedGradeable extends AbstractModel {
      * @param Core $core
      * @param GradedGradeable $graded_gradeable
      * @param array $details
+     * @throws \InvalidArgumentException if any of the details are invalid or the graded gradeable is null
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
@@ -104,12 +105,12 @@ class AutoGradedGradeable extends AbstractModel {
      * @param bool $clamp True to clamp the output to 1
      * @return float percentage (0 to 1), or NAN if no visible percent or no active version
      */
-    public function getVisiblePercent($clamp = false) {
+    public function getNonHiddenPercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
         if($instance === null) {
             return NAN;
         }
-        return $instance->getVisiblePercent($clamp);
+        return $instance->getNonHiddenPercent($clamp);
     }
 
     /**

@@ -73,7 +73,9 @@ class NavigationView extends AbstractView {
     const DATE_FORMAT = "m/d/Y @ H:i";
 
     public function noAccessCourse() {
-        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig");
+        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
+            "course_name" => $this->core->getDisplayedCourseName()
+        ]);
     }
 
     public function showGradeables($sections_to_list, $graded_gradeables) {
@@ -116,7 +118,7 @@ class NavigationView extends AbstractView {
             ]);
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
-                "title" => "Upload Config & Review Build Output",
+                "title" => "Upload Config",
                 "class" => "btn btn-primary"
             ]);
 
@@ -554,10 +556,15 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getRebuildButton(Gradeable $gradeable) {
+        $class = "btn btn-default btn-nav";
+        //FIXME: not in new model yet
+        if($gradeable->hasBuildError()){
+            $class = "btn btn-danger btn-nav";
+        }
         $button = new Button($this->core, [
             "title" => "Rebuild",
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
+            "class" => $class
         ]);
         return $button;
     }

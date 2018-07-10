@@ -42,8 +42,10 @@ if [ ${VAGRANT} == 1 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
         chmod -x /etc/update-motd.d/*
-        chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
         chmod +x /etc/update-motd.d/00-header
+    fi
+    if [ -f /usr/share/landscape/landscape-sysinfo.wrapper ]; then
+        chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     fi
 
     # ${x^^} gives capitalized string
@@ -63,13 +65,13 @@ ${DISTRO_LINE}
 ##                                                        ##
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
-##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
-##    hwcgi hwcron, ta, instructor, developer,            ##
-##    postgres                                            ##
+##    vagrant/vagrant, root/vagrant, submitty_dbuser,     ##
+##    submitty_php, submitty_cgi, submitty_daemon, ta,    ##
+##    instructor, developer, postgres                     ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
-##    hsdbu, postgres, root, vagrant                      ##
+##    submitty_dbuser, postgres, root, vagrant            ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##

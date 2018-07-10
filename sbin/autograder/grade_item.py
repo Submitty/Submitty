@@ -24,7 +24,7 @@ SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-HWCRON_UID = OPEN_JSON['hwcron_uid']
+DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
@@ -98,7 +98,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
                        " -> ",os.path.join(target,relpath), file=f)
             
 
-# give permissions to all created files to the hwcron user
+# give permissions to all created files to the DAEMON_USER
 def untrusted_grant_rwx_access(which_untrusted,my_dir):
     subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                      which_untrusted,
@@ -451,7 +451,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         shutil.move(history_file_tmp,history_file)
         # fix permissions
         ta_group_id = os.stat(tmp_results).st_gid
-        os.chown(history_file,int(HWCRON_UID),ta_group_id)
+        os.chown(history_file,int(DAEMON_UID),ta_group_id)
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 

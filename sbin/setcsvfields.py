@@ -13,7 +13,7 @@ INI_PATH = os.path.join(JSON['submitty_install_dir'], 'site', 'config')
 INI_FILE = "student_csv_fields.ini"
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
-INI_OWNER = JSON['hwphp_user']
+INI_OWNER = JSON['php_user']
 
 if os.geteuid() != 0:
     raise SystemExit("Only root is allowed to run this script.")

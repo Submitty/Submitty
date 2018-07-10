@@ -163,6 +163,13 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
+    /**
+     * Gradeable constructor.
+     * @param Core $core
+     * @param array $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid
+     * @throws ValidationException If any of the dates are incompatible or invalid
+     */
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
 
@@ -456,7 +463,7 @@ class Gradeable extends AbstractModel {
      */
     public function getRotatingGraderSections() {
         if($this->rotating_grader_sections === null) {
-            $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
+            $this->setRotatingGraderSections($this->core->getQueries()->getRotatingSectionsByGrader($this->id));
             $this->rotating_grader_sections_modified = false;
         }
         return $this->rotating_grader_sections;
