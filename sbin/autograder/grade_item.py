@@ -285,16 +285,21 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("====================================\nRUNNER STARTS", file=f)
         
     tmp_work = os.path.join(tmp,"TMP_WORK")
+    tmp_work_test_input = os.path.join(tmp_work, "test_input")
+    tmp_work_subission = os.path.join(tmp_work, "submission")
+    tmp_work_checkout = os.path.join(tmp_work, "checkout")
+    
     os.makedirs(tmp_work)
+    
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
-    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
+    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_subission,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)

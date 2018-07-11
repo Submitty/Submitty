@@ -28,7 +28,41 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
-def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, container, which_untrusted):
+def executeTestcases(complete_config_obj, tmp_logs, tmp, queue_obj, submission_string, item_name, USE_DOCKER, container, which_untrusted):
+
+  tmp_work = os.path.join(tmp,"TMP_WORK")
+  os.makedirs(tmp_work)
+  os.chdir(tmp_work)
+
+  # move all executable files from the compilation directory to the main tmp directory
+  # Note: Must preserve the directory structure of compiled files (esp for Java)
+
+  patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
+  pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
+  if is_vcs:
+      pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work,tmp_logs)
+
+  patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
+  pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
+      
+  # copy input files to tmp_work directory
+  copy_contents_into(job_id,test_input_path,tmp_work,tmp_logs)
+
+  subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
+  # copy runner.out to the current directory
+  shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
+
+  # give the untrusted user read/write/execute permissions on the tmp directory & files
+  add_permissions_recursive(tmp_work,
+                            stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                            stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                            stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+
+
+
+
   queue_time_longstring = queue_obj["queue_time"]
   waittime = queue_obj["waittime"]
   is_batch_job = queue_obj["regrade"]
