@@ -1,22 +1,22 @@
 #container {
 	display: table;
+	width: auto;
 }
 
-#container > div {
+#container>div {
 	display: table-row;
+	width: auto;
+	clear: both;
 }
 
-#container > div > div {
+#container>div>div:nth-child(1) {
 	float: left;
     display: table-column;
+	width: 20%;
 }
 
-
-#lower-left-container {
-	width: 60px;
+#container>div>div:nth-child(2) {
 	float: left;
-}
-
-#lower-right-container {
-	margin-left: 70px;
+    display: table-column;
+	width: ;
 }
