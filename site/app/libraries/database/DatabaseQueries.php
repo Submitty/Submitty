@@ -55,9 +55,6 @@ class DatabaseQueries {
     /** @var AbstractDatabase */
     protected $course_db;
 
-    const SORT_ASC = 'ASC';
-    const SORT_DESC = 'DESC';
-
     public function __construct(Core $core) {
         $this->core = $core;
         $this->submitty_db = $core->getSubmittyDB();
@@ -2399,7 +2396,8 @@ AND gc_id IN (
 
     /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
-     *  both $users and $teams are null, then everyone will be retrieved.*  Note: The users' teams will be included in the search
+     *  both $users and $teams are null, then everyone will be retrieved.
+     *  Note: The users' teams will be included in the search
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
