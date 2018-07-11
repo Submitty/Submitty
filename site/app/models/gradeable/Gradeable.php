@@ -792,7 +792,7 @@ class Gradeable extends AbstractModel {
      */
     public function isPdfUpload() {
         foreach ($this->components as $component) {
-            if ($component->getPage() !== 0) {
+            if ($component->getPage() !== Component::PDF_PAGE_NONE) {
                 return true;
             }
         }
@@ -805,7 +805,7 @@ class Gradeable extends AbstractModel {
      */
     public function isStudentPdfUpload() {
         foreach ($this->components as $component) {
-            if ($component->getPage() === -1) {
+            if ($component->getPage() === Component::PDF_PAGE_STUDENT) {
                 return true;
             }
         }
