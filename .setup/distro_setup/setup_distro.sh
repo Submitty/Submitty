@@ -42,8 +42,10 @@ if [ ${VAGRANT} == 1 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
         chmod -x /etc/update-motd.d/*
-        chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
         chmod +x /etc/update-motd.d/00-header
+    fi
+    if [ -f /usr/share/landscape/landscape-sysinfo.wrapper ]; then
+        chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     fi
 
     # ${x^^} gives capitalized string
