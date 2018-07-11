@@ -1478,4 +1478,42 @@ class Gradeable extends AbstractModel {
         return array($components_total, $percent);
     }
 
+    /**
+     * @return array
+     */
+    public function getComponentPages() {
+        // if use student components, get the values for pages from the student's submissions
+        $files = $this->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
+        $pages = [];
+
+        foreach ($this->getComponents() as $component) {
+            $page = intval($component->getPage());
+            // if the page is determined by the student json
+            if ($page == -1) {
+                $order = $component->getOrder();
+                // usually the order matches the json
+                if ($student_pages[intval($order)]["order"] == intval($order)) {
+                    $page = intval($student_pages[intval($order)]["page #"]);
+                } // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($order)) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
+            }
+            $pages[] = $page;
+        }
+        return $pages;
+    }
+
 }

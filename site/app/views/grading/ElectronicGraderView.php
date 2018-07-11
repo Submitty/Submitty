@@ -3,12 +3,10 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
-use app\models\GradeableComponent;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
-use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -636,16 +634,6 @@ class ElectronicGraderView extends AbstractView {
         }
         $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
 
-        // if use student components, get the values for pages from the student's submissions
-        $files = $gradeable->getSubmittedFiles();
-        $student_pages = array();
-        foreach ($files as $filename => $content) {
-            if ($filename == "student_pages.json") {
-                $path = $content["path"];
-                $student_pages = FileUtils::readJsonFile($content["path"]);
-            }
-        }
-
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "your_user_id" => $this->core->getUser()->getId(),
@@ -653,27 +641,11 @@ class ElectronicGraderView extends AbstractView {
             "can_verify" => $display_verify_all // If any can be then this is set
         ];
 
-        foreach ($grading_data["gradeable"]["components"] as &$component) {
-            $page = intval($component["page"]);
-            // if the page is determined by the student json
-            if ($page == -1) {
-                // usually the order matches the json
-                if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
-                    $page = intval($student_pages[intval($component["order"])]["page #"]);
-                } // otherwise, iterate through until the order matches
-                else {
-                    foreach ($student_pages as $student_page) {
-                        if ($student_page["order"] == intval($component["order"])) {
-                            $page = intval($student_page["page #"]);
-                            $component["page"] = $page;
-                            break;
-                        }
-                    }
-                }
-            }
+        //Assign correct page numbers
+        $pages = $gradeable->getComponentPages();
+        foreach ($pages as $i => $page) {
+            $grading_data["gradeable"]["components"][$i]["page"] = $page;
         }
-        //References need to be cleaned up
-        unset($component);
 
         $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
