@@ -1160,7 +1160,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   FROM grading_registration
                   GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
-              ) AS u ON eg IS NULL OR NOT eg.eg_team_assignment
+              ) AS u ON eg IS NULL OR NOT eg.team_assignment
 
               /* Join team data */
               LEFT JOIN (
@@ -1179,7 +1179,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     FROM teams AS in2_team
                     GROUP BY in2_team.team_id
                   ) AS in_team ON in_team.team_id=g_team.team_id
-              ) AS team ON eg.eg_team_assignment AND EXISTS (
+              ) AS team ON eg.team_assignment AND EXISTS (
                          SELECT 1 FROM gradeable_teams gt 
                          WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
                          LIMIT 1)
