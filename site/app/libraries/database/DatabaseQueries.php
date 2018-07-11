@@ -1614,19 +1614,7 @@ WHERE gcm_id=?", $params);
      * @return \app\models\Team
      */
     public function getTeamById($team_id) {
-        $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section
-          FROM gradeable_teams
-          WHERE team_id=?",
-            array($team_id));
-        if (count($this->course_db->rows()) === 0) {
-            return null;
-        }
-        $details = $this->course_db->row();
-
-        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($team_id));
-        $details['users'] = $this->course_db->rows();
-        return new Team($this->core, $details);
+        throw new NotImplementedException();
     }
 
     /**
@@ -1636,22 +1624,7 @@ WHERE gcm_id=?", $params);
      * @return \app\models\Team
      */
     public function getTeamByGradeableAndUser($g_id, $user_id) {
-        $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section
-          FROM gradeable_teams
-          WHERE g_id=? AND team_id IN (
-            SELECT team_id
-            FROM teams
-            WHERE user_id=? AND state=1)",
-            array($g_id, $user_id));
-        if (count($this->course_db->rows()) === 0) {
-            return null;
-        }
-        $details = $this->course_db->row();
-
-        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($details['team_id']));
-        $details['users'] = $this->course_db->rows();
-        return new Team($this->core, $details);
+        throw new NotImplementedException();
     }
 
     /**
