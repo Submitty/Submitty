@@ -11,7 +11,6 @@ use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
 use app\models\GradeableComponent;
-use app\models\Team;
 
 /**
  * All data describing the configuration of a gradeable
@@ -93,8 +92,8 @@ class Gradeable extends AbstractModel {
     private $any_manual_grades = null;
     /** @property @var bool If any submissions exist */
     private $any_submissions = null;
-    /** @property @var Team[] Any teams that have been formed */
-    private $teams = null;
+    /** @property @var bool If any teams have been formed */
+    private $any_teams = null;
     /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
@@ -719,16 +718,6 @@ class Gradeable extends AbstractModel {
     }
 
 
-    /**
-     * Gets all of the teams formed for this gradeable
-     * @return Team[]
-     */
-    public function getTeams() {
-        if($this->teams === null) {
-            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-        }
-        return $this->teams;
-    }
 
     /**
      * Gets if this gradeable has any manual grades (any GradedGradeables exist)
@@ -766,7 +755,17 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anyTeams() {
-        return !empty($this->getTeams());
+        if($this->any_teams === null) {
+            // Unless we find a team, assume there are none
+            $this->any_teams = false;
+            if ($this->type === GradeableType::ELECTRONIC_FILE) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                if (!empty($all_teams)) {
+                    $this->any_teams = true;
+                }
+            }
+        }
+        return $this->any_teams;
     }
 
     /**
