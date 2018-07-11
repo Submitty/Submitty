@@ -67,7 +67,19 @@ class Component extends AbstractModel {
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = array();
 
+    /** @var int Pass to setPage to indicate student-assigned pdf page */
+    const PDF_PAGE_STUDENT = -1;
+    /** @var int Pass to setPage to indicate no pdf page */
+    const PDF_PAGE_NONE = 0;
 
+    /**
+     * Component constructor.
+     * @param Core $core
+     * @param Gradeable $gradeable
+     * @param $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid, or the gradeable was null
+     * @throws ValidationException If the provided point details are incompatible
+     */
     public function __construct(Core $core, Gradeable $gradeable, $details) {
         parent::__construct($core);
 

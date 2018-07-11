@@ -90,10 +90,10 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -122,24 +122,20 @@
         else if (url_file.includes("checkout")) {
             directory = "checkout";
         }
-        window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 </script>
 
 {% macro display_files(self, files, id, indent, title) %}
     {# Files on top #}
-    {% for dir, path in files %}
-        {% if path is not iterable %}
-            {{ self.display_file(self, dir, path, id ~ "f" ~ loop.index, indent, title) }}
-        {% endif %}
+    {% for dir, path in files if path is not iterable %}
+        {{ self.display_file(self, dir, path, id ~ "f" ~ loop.index, indent, title) }}
     {% endfor %}
-    {# /Files on top #}
 
-    {% for dir, contents in files %}
-        {% if contents is iterable %}
-            {{ self.display_dir(self, dir, contents, id ~ "d" ~ loop.index, indent, title) }}
-        {% endif %}
+    {# Directories underneath #}
+    {% for dir, path in files if path is iterable %}
+        {{ self.display_dir(self, dir, path, id ~ "d" ~ loop.index, indent, title) }}
     {% endfor %}
 {% endmacro %}
 
