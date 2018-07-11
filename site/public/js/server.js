@@ -1211,6 +1211,7 @@ function enableTabsInTextArea(jQuerySelector){
 }
 
 function changeDisplayOptions(option, thread_id){
+    document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 

@@ -264,7 +264,14 @@ HTML;
 					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
 HTML;
 			}
-
+	$display_option_js = <<<HTML
+		$("#tree").prop("checked", true);
+HTML;
+	if(in_array($display_option, array("tree", "time", "alpha"))) {
+		$display_option_js = <<<HTML
+			$("#" . $display_option).prop("checked", true);
+HTML;
+	}
 	$return .= <<<HTML
 				</select>
 				</center>
@@ -283,6 +290,7 @@ HTML;
 							{$onChange}
 							return true;
 						});
+						{$display_option_js}
 					});
 				</script>
 			</div>

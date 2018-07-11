@@ -581,10 +581,13 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
-        if(!isset($_REQUEST['option'])){
-            $_REQUEST['option'] = 'tree';
+        $option = 'tree';
+        if(empty($_REQUEST['option']) && !empty($_COOKIE['forum_display_option'])) {
+           $option = $_COOKIE['forum_display_option'];
+        } else {
+           $option = $_REQUEST['option'];
         }
-        $option = ($this->core->getUser()->getGroup() <= 2 || $_REQUEST['option'] != 'alpha') ? $_REQUEST['option'] : 'tree';
+        $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             if($option == "alpha"){
@@ -594,7 +597,6 @@ class ForumController extends AbstractController {
             }
             
         } 
-
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
