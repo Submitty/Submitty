@@ -21,14 +21,17 @@ int main(int argc, char *argv[]) {
   std::string rcsid = "";
   int subnum = -1;
   std::string time_of_submission = "";
+  //If test_case_to_run isn't passed in as a parameter, all testcases are run.
   int test_case_to_run = -1;
   // Check command line arguments
-  if (argc == 6) {
+  if (argc >= 5) {
     hw_id = argv[1];
     rcsid = argv[2];
     subnum = atoi(argv[3]);
     time_of_submission = argv[4];
-    test_case_to_run = atoi(argv[5]);
+    if (argc == 6){
+      test_case_to_run = atoi(argv[5]);
+    }
   }
   else if (argc != 1) {
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
@@ -61,18 +64,28 @@ int main(int argc, char *argv[]) {
 
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
-  assert (test_case_to_run < tc->size());
 
-  //for (unsigned int i = 0; i < tc->size(); i++) {
+  if(test_case_to_run != -1){
+    assert (test_case_to_run < tc->size());
+  }else{
+    std::cout << "Running all testcases in a single run." << std::endl;
+  }
 
-  int i = test_case_to_run;
+  for (unsigned int i = 0; i < tc->size(); i++) {
 
-  std::cout << "========================================================" << std::endl;
-  std::cout << "TEST #" << i+1 << std::endl;
+    TestCase my_testcase(config_json,i);
 
-  TestCase my_testcase(config_json,i);
+    if (my_testcase.isFileCheck() || my_testcase.isCompilation()){
+      continue;
+    }
 
-  if (!my_testcase.isFileCheck() && !my_testcase.isCompilation()){
+    if(test_case_to_run != -1 &&  test_case_to_run != i){
+      continue;
+    }
+
+    std::cout << "========================================================" << std::endl;
+    std::cout << "TEST #" << i+1 << std::endl;
+
 
     std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
     std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i],"actions");
@@ -104,9 +117,9 @@ int main(int argc, char *argv[]) {
                             config_json.value("resource_limits",nlohmann::json()),
                             config_json,
                             windowed); 
-      
+
     }
-    
+
     std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
     assert (filenames.size() > 0);
     assert (filenames.size() == my_testcase.numFileGraders());
@@ -131,11 +144,9 @@ int main(int argc, char *argv[]) {
         }
       }
     }
+    std::cout << "========================================================" << std::endl;
+    std::cout << "FINISHED TEST #" << i+1 << std::endl;
   }
-  
-  std::cout << "========================================================" << std::endl;
-  std::cout << "FINISHED TEST #" << i+1 << std::endl;
-  
   return 0;
 }
 

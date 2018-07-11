@@ -316,7 +316,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                item_name, USE_DOCKER, container, which_untrusted)
+                                                                                    item_name, USE_DOCKER, container, which_untrusted)
     ##################################################################################################
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")

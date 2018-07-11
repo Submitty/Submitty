@@ -39,10 +39,9 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
   with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
       print ("LOGGING BEGIN my_runner.out",file=logfile)
       logfile.flush()
-      try:
-          testcases = complete_config_obj["testcases"]
-          testcase_num = 0
-          for testcase in testcases:
+      testcases = complete_config_obj["testcases"]
+      for testcase_num in range(len(testcases)):
+          try:
               if USE_DOCKER:
                   runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                                     os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
@@ -58,11 +57,10 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                     str(testcase_num)],
                                                     stdout=logfile)
               logfile.flush()
-              testcase_num += 1
-      except Exception as e:
-          traceback.print_exc()
-          print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
-          logfile.flush()
+          except Exception as e:
+              traceback.print_exc()
+              print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
+              logfile.flush()
 
       print ("LOGGING END my_runner.out",file=logfile)
       logfile.flush()
