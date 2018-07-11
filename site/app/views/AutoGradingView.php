@@ -282,8 +282,8 @@ class AutoGradingView extends AbstractView {
             "total_max" => $total_max,
             "active_same_as_graded" => $active_same_as_graded,
             "regrade_enabled" => $regrade_enabled,
-            "regrade_message" => $regrade_message
-            "num_decimals" => $num_decimals,
+            "regrade_message" => $regrade_message,
+            "num_decimals" => $num_decimals
         ]);
     }
 }
