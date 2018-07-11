@@ -959,7 +959,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     ];
 
     /**
-     * Generates the ORDER BY expression with the provided sorting keys
+     * Generates the ORDER BY clause with the provided sorting keys
      * @param string[] $sort_keys
      * @param array $key_map A map from sort keys to arrays of expressions to sort by instead
      *          (see self::graded_gradeable_key_map for example)
