@@ -299,11 +299,10 @@
             {{ gradeable.getUser().getDisplayedFirstName() }}
             {{ gradeable.getUser().getLastName() }}
         {% else %}
-            {%- for member in gradeable.getTeam().getMembers() -%}
+            {%- for member in gradeable.getTeam().getMemberUsers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {# TODO: Not call core.getQueries() anywhere near a Twig file #}
-                {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
-                {{ core.getQueries().getUserById(member).getLastName() -}}
+                {{- member.getDisplayedFirstName() }}
+                {{ member.getLastName() -}}
             {%- endfor -%}
         {% endif %}
     </td>
