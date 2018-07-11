@@ -58,7 +58,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                     stdout=logfile)
               logfile.flush()
           except Exception as e:
-              traceback.print_exc()
               print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
               logfile.flush()
 

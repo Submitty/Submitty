@@ -38,8 +38,6 @@ int main(int argc, char *argv[]) {
     return 1;
   } 
 
-  std::cout << "A CALL TO MAIN RUNNER" << std::endl;
-
   // LOAD HW CONFIGURATION JSON
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
