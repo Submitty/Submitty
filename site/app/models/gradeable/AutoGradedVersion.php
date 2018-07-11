@@ -59,10 +59,6 @@ class AutoGradedVersion extends AbstractModel {
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
     private $queue_position = null;
-    /** @property @var int The total length of the grading queue */
-    private $queue_count = 0;
-    /** @property @var int The total number of items being graded */
-    private $queue_grading_count = 0;
 
     /**
      * AutoGradedVersion constructor.
