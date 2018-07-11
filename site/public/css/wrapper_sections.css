@@ -1,6 +1,7 @@
 #container {
 	display: table;
 	width: auto;
+	margin: 0 0 -60px 0;
 }
 
 #container>div {
