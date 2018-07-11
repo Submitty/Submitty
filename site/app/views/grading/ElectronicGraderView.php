@@ -340,9 +340,7 @@ class ElectronicGraderView extends AbstractView {
                     $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
-                    $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
-                    $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-                    $user_assignment_setting_json = json_encode($user_assignment_setting);
+                    $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
                     $members = json_encode($row->getTeam()->getMembers());
                     $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL" : $row->getTeam()->getRegistrationSection();
                     $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL" : $row->getTeam()->getRotatingSection();
@@ -399,9 +397,7 @@ class ElectronicGraderView extends AbstractView {
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
-            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
-            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-            $user_assignment_setting_json = json_encode($user_assignment_setting);
+            $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
 
