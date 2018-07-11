@@ -73,5 +73,13 @@ sudo usermod -a -G travis ${PHP_USER}
 sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+
+sudo rm -f '/var/local/submitty/to_be_graded_queue/*'
+
 sudo su -c '/usr/local/submitty/sbin/submitty_autograding_shipper.py' submitty_daemon &
+sleep 1
 sudo su -c '/usr/local/submitty/sbin/submitty_autograding_worker.py' submitty_daemon &
+sleep 1
+/usr/local/submitty/bin/grading_done.py
+
+echo 'Finished setup.'
