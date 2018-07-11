@@ -618,26 +618,26 @@ HTML;
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
-							<i class="fa fa-thumb-tack" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if($thread['status'] !=0) {
 							if($thread['status'] == 1) {
 								$fa_icon = "fa-check-circle";
-								$fa_color = "green";
+								$fa_color = "palegreen";
 							} else {
-								$fa_icon = "fa-clock-o";
-								$fa_color = "red";
+								$fa_icon = "fa-exclamation-circle";
+								$fa_color = "yellow";
 							}
 							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
+							<i class="fa ${fa_icon}" style="padding-left:3px;position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}

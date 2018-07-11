@@ -1181,11 +1181,13 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $(".cat-buttons").trigger("eventChangeCatClass");
                     $("#thread_form").prop("ignore-cat",false);
                     $("#category-selection-container").show();
+                    $("#thread_status").show();
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
+                    $("#thread_status").hide();
                 }
             },
             error: function(){
