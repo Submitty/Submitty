@@ -58,13 +58,13 @@ class AutoGradedTestcase extends AbstractModel {
         $this->points = floatval($details['points_awarded'] ?? 0);
         if ($testcase->getPoints() > 0) {
             // POSITIVE POINTS TESTCASE
-            // TODO: ADD ERROR (what does this mean)?
+            // TODO: ADD ERROR <--(what does this mean)?
             /*
             $this->points = min(max(0, $this->points), $testcase->getPoints());
             */
         } else if ($testcase->getPoints() < 0) {
             // PENALTY TESTCASE
-            // TODO: ADD ERROR (what does this mean)?
+            // TODO: ADD ERROR <--(what does this mean)?
             $this->points = min(max($testcase->getPoints(), $this->points), 0);
         }
     }
