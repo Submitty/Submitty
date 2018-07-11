@@ -1,14 +1,22 @@
+#container {
+	display: table;
+}
 
 #container > div {
-    float: top;
-    margin: 20px;
-    padding-right: 100%;
-    margin-right: -100%;
+	display: table-row;
 }
 
 #container > div > div {
-    float : left;
-    margin: 20px;
-    padding-bottom: 100%;
-    margin-bottom: -100%;
+	float: left;
+    display: table-column;
+}
+
+
+#lower-left-container {
+	width: 60px;
+	float: left;
+}
+
+#lower-right-container {
+	margin-left: 70px;
 }
