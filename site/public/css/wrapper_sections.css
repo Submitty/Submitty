@@ -18,5 +18,5 @@
 #container>div>div:nth-child(2) {
 	float: left;
     display: table-column;
-	width: ;
+	width: 80%;
 }
