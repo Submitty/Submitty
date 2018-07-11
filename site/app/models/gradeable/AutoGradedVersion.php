@@ -154,7 +154,9 @@ class AutoGradedVersion extends AbstractModel {
         // Load file that contains numeric results
         $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'results.json'));
         if ($result_details === false) {
-            throw new FileNotFoundException('Could not find results file for autograding version');
+            // Couldn't find the file, so grading hasn't happened yet...
+            $this->graded_testcases = [];
+            return;
         }
 
         // Load the historical results (for early submission incentive)
