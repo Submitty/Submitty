@@ -970,6 +970,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (!is_array($sort_keys)) {
                 $sort_keys = [$sort_keys];
             }
+            if (count($sort_keys) === 0) {
+                return '';
+            }
             // Use simplified expression for empty keymap
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
