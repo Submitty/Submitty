@@ -182,6 +182,7 @@ jobs:
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
       after_script:
+        - ls /var/local/submitty/logs/autograding/
         - cat /var/local/submitty/logs/autograding/*
     - <<: *03-e2e
       php: 7.1

@@ -80,6 +80,6 @@ sudo su -c '/usr/local/submitty/sbin/submitty_autograding_shipper.py' submitty_d
 sleep 1
 sudo su -c '/usr/local/submitty/sbin/submitty_autograding_worker.py' submitty_daemon &
 sleep 1
-/usr/local/submitty/bin/grading_done.py
+sudo /usr/local/submitty/bin/grading_done.py
 
 echo 'Finished setup.'
