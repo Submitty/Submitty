@@ -269,7 +269,7 @@ HTML;
 				</select>
 				&nbsp;
 				<select id="thread_status_select" class="form-control" multiple style="height: auto;" data-ays-ignore="true">
-		            <option value="0">Default</option>
+		            <option value="0">Comment</option>
 		            <option value="-1">Unresolved</option>
 		            <option value="1">Resolved</option>
 		        </select>

@@ -557,7 +557,7 @@ class ForumController extends AbstractController {
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
-        $thread_status = array_key_exists('thread_status', $_POST) && !empty($_POST["thread_status"]) ? explode("|", $_POST['thread_status']) : array();
+        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
         foreach ($thread_status as &$status) {
             $status = (int)$status;
         }
