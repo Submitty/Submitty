@@ -1251,6 +1251,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
+	       console.log(r);
+               document.cookie = "forum_categories=" + categories_value + ";";
                var x = JSON.parse(r).html;
                x = `${x}`;
                $(".thread_list").html(x);

@@ -552,7 +552,10 @@ class ForumController extends AbstractController {
 
         $show_deleted = $this->showDeleted();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
-        foreach ($categories_ids as &$id) {
+	if(empty($categories_ids) && !empty($_COOKIE['forum_categories'])){
+            $categories_ids = explode("|", $_COOKIE['forum_categories']);
+	}
+	foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
         $max_thread = 0;
@@ -573,10 +576,13 @@ class ForumController extends AbstractController {
         $user = $this->core->getUser()->getId();
 
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
-
+	if(!empty($_COOKIE['forum_categories']) &&  $category_id == -1 ) {
+	    $category_id = explode('|', $_COOKIE['forum_categories']);
+	}
+            	
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $threads = $this->getSortedThreads(array($category_id), $max_thread, $show_deleted);
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted);
 
         $current_user = $this->core->getUser()->getId();
 
