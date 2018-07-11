@@ -573,7 +573,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable,
             "submissions" => $submissions,
             "checkout" => $checkout,
-            "results" => $results
+            "results" => $results,
+            "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
 
@@ -698,7 +699,7 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function renderRegradePanel(Gradeable $gradeable) {
-        return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
             "gradeable" => $gradeable
         ]);
     }
