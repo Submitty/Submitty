@@ -1,13 +1,14 @@
 <script type="text/javascript" src="{{ core.getConfig().getBaseUrl() }}/js/drag-and-drop.js"></script>
 <div class="popup-form" id="upload-images-form">
-    <h2>Upload Student Photos</h2>
+    <h2>Upload Images</h2>
     <p>&emsp;</p>
     <p>
         Follow the instructions to download images of students on:<br>
         <a href="http://submitty.org/instructor/photo_scraper">Photo Scraper</a><br><br>
         Upload images by zipping up multiple course sections together,<br>
         zipping up each course section, or uploading the png image(s).<br><br>
-        Total files cannot exceed 10 mb or 10240 kb.<br>
+        Total files cannot exceed 10 mb or 10000 kb.<br><br>
+        Please wait 30 seconds for files to upload and hit refresh.<br>
     </p>
     <br/>
 
@@ -43,6 +44,6 @@
         dropzone.addEventListener("dragenter", draghandle, false);
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
-        dropzone.addEventListener("drop", dropWithMultipleZips, false);
+        dropzone.addEventListener("drop", drop, false);
     </script>
 </div>
