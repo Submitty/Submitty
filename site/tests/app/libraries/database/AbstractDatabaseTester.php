@@ -173,7 +173,10 @@ SELECT * FROM test");
         $database->connect();
         $database->query("CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)");
         $database->query("INSERT INTO test VALUES (?, ?)", array(1, 'a'));
-        $this->assertEquals("1) CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)<br />2) INSERT INTO test VALUES ('1', 'a')<br />", $database->getPrintQueries());
+        $this->assertEquals([
+            "CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)",
+            "INSERT INTO test VALUES ('1', 'a')"
+        ], $database->getPrintQueries());
         $database->disconnect();
     }
 

@@ -1,8 +1,8 @@
 <div id="gradeable_rubric">
-    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val" onchange="calculateTotalScore();"/>
     &emsp;&emsp;
 
-    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
     <br /> <br />
 
     <div class="multi-field-wrapper-numeric">
@@ -152,26 +152,24 @@
             saveRubric(false);
         });
 
-        if ($('#radio_numeric').is(':checked')) {
-            var components = {{ admin_gradeable.getOldComponentsJson()|raw }};
-            $.each(components, function(i,elem) {
-                if(i < {{ admin_gradeable.getNumNumeric() }}) {
-                    var extra_credit = false;
-                    if (elem.gc_upper_clamp > elem.gc_max_value){
-                        addNumeric(elem.gc_title,elem.gc_upper_clamp,true);
-                    }
-                    else{
-                        addNumeric(elem.gc_title,elem.gc_max_value,false);
-                    }
+        let components = {{ gradeable_components_enc|raw }};
+        $.each(components, function(i,elem) {
+            if(i < {{ num_numeric }}) {
+                var extra_credit = false;
+                if (elem.upper_clamp > elem.max_value){
+                    addNumeric(elem.title,elem.upper_clamp,true);
                 }
-                else {
-                    addText(elem.gc_title);
+                else{
+                    addNumeric(elem.title,elem.max_value,false);
                 }
-            });
-            $('#numeric_num-items').val({{ admin_gradeable.getNumNumeric() }});
-            $('#numeric_num_text_items').val({{ admin_gradeable.getNumText() }});
-            $('#numeric').show();
-            $('#grading_questions').show();
-        }
+            }
+            else {
+                addText(elem.title);
+            }
+        });
+        $('#numeric_num-items').val({{ num_numeric }});
+        $('#numeric_num_text_items').val({{ num_text }});
+        $('#numeric').show();
+        $('#grading_questions').show();
     });
 </script>

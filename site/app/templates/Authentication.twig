@@ -4,7 +4,7 @@
     <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
     -->
     <div class="sub">
-        <form action="{{ core.getConfig().getSiteUrl() }}" method="post" id="login">
+        <form action="{{ site_url }}" method="post" id="login">
             <input type="hidden" name="component" value="authentication" />
             <input type="hidden" name="page" value="checkLogin" />
             {% for key, value in old %}

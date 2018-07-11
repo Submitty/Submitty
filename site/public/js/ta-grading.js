@@ -532,7 +532,8 @@ registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, functi
 function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
     if (opened > 0 && index < getComponent(opened).marks.length) {
-        selectMark($("#mark_id-" + opened + "-" + index + "-check")[0]);
+        var mark = getComponent(opened).marks[index];
+        selectMark($("#mark_id-" + opened + "-" + mark.id + "-check")[0]);
     }
 }
 
