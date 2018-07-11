@@ -1162,8 +1162,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Aggregate Team User Data */
               team.team_id,
-              team.array_user,
-              team.array_state,
+              team.array_team_users,
 
               /* User Submitter Data */
               u.user_id,
@@ -1205,21 +1204,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Join team data */
               LEFT JOIN (
-                SELECT
-                  g_team.team_id,
-                  registration_section,
-                  rotating_section,
-                  in_team.array_user,
-                  in_team.array_state
-                FROM gradeable_teams g_team
-                  LEFT JOIN (
-                    SELECT
-                      in2_team.team_id,
-                      json_agg(in2_team.user_id) as array_user,
-                      json_agg(in2_team.state) as array_state
-                    FROM teams as in2_team
-                    GROUP BY in2_team.team_id
-                  ) AS in_team ON in_team.team_id=g_team.team_id
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS array_team_users
+                FROM gradeable_teams gt
+                  JOIN
+                    (SELECT t.team_id, t.state, u.*
+                     FROM teams t
+                       JOIN users u ON t.user_id = u.user_id
+                    ) AS u ON gt.team_id = u.team_id
+                GROUP BY gt.team_id
               ) AS team ON eg.eg_team_assignment AND EXISTS (
                          SELECT 1 FROM gradeable_teams gt 
                          WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
@@ -1310,21 +1302,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $submitter = null;
             if (isset($row['team_id'])) {
                 // Get the user data for the team
-                $users_soa = [];
-                $users_soa['user'] = json_decode($row['array_user']);
-                $users_soa['state'] = json_decode($row['array_state']);
-
-                // Transpose the users/states array from Structure of Arrays to Array of Structures
-                $users_aos = [];
-                for ($j = 0; $j < count($users_soa['user']); ++$j) {
-                    $users_aos[$j] = [
-                        'user_id' => $users_soa['user'][$j],
-                        'state' => $users_soa['state'][$j]
-                    ];
-                }
+                $team_users = json_decode($row["array_team_users"], true);
 
                 // Create the team with the query results and users array
-                $submitter = new Team($this->core, array_merge($row, ['users' => $users_aos]));
+                $submitter = new Team($this->core, array_merge($row, ['users' => $team_users]));
             } else {
                 if (isset($row['grading_registration_sections'])) {
                     $row['grading_registration_sections'] = json_decode($row['grading_registration_sections']);
