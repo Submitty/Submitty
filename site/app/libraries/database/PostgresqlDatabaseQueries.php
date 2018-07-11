@@ -940,7 +940,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
-     * Exceptional sort keys' ORDER BY phrases
+     * Maps sort keys to an array of expressions to sort by in place of the key
      */
     const sort_keys_order_by = [
         'registration_section' => [
