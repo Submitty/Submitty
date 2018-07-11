@@ -100,6 +100,7 @@ class SubmissionController extends AbstractController {
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
+        //Prevent students making post requests for other studnets
         if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->addErrorMessage("You do not have permission to delete this request");
             return;
