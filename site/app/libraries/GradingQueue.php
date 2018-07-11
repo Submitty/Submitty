@@ -109,7 +109,8 @@ class GradingQueue {
             // This means the file didn't exist when we loaded the queue state
             return self::NOT_QUEUED;
         } else {
-            return $queue_status;
+            // Convert from 0-indexed array since 0 is self::GRADING
+            return $queue_status + 1;
         }
     }
 
