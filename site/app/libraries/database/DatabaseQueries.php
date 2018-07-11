@@ -2401,7 +2401,7 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
-     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (sort direction optional)
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
