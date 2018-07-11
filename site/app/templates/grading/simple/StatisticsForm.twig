@@ -8,16 +8,14 @@
                 <td width="33%">Std. Deviation</td>
             </tr>
             </thead>
-            {% for section, info in sections %}
-                {% if section != null %}
-                    <tbody>
-                        <tr>
-                            <td>{{ section }}</td>
-                            <td id="avg-section-{{ section }}"></td>
-                            <td id="stddev-section-{{ section }}"></td>
-                        </tr>
-                    </tbody>
-                {% endif %}
+            {% for section, info in sections if section != null %}
+                <tbody>
+                    <tr>
+                        <td>{{ section }}</td>
+                        <td id="avg-section-{{ section }}"></td>
+                        <td id="stddev-section-{{ section }}"></td>
+                    </tr>
+                </tbody>
             {% endfor %}
             <thead class="persist-thead">
             <tr>

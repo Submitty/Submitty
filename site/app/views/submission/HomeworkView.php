@@ -296,6 +296,7 @@ class HomeworkView extends AbstractView {
             "late_days_use" => $late_days_use,
             "old_files" => $old_files,
             "textboxes" => $textboxes,
+            "upload_message" => $this->core->getConfig()->getUploadMessage()
         ]);
     }
 
