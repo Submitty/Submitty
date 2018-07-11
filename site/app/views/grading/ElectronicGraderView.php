@@ -703,7 +703,7 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable
         ]);
     }
-    
+
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
