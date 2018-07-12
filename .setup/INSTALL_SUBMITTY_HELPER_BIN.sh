@@ -71,7 +71,7 @@ chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder )
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
-    chmod -R 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
 if [ "${WORKER}" == 1 ]; then
