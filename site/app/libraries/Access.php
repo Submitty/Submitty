@@ -235,7 +235,7 @@ class Access {
     }
 
     /**
-     * Check that a a user group has privilege at least equal to minimum
+     * Check that a user group has privilege at least equal to minimum
      * @param int $check
      * @param int $minimum
      * @return bool
