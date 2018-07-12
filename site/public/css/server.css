@@ -701,7 +701,10 @@ table tr.table-header {
 
 .gradeable_comment {
     word-break: break-word;
-    white-space: pre-wrap;
+}
+
+.gradeable_comment td {
+    padding: 0 4px;
 }
 
 #search_wrapper{

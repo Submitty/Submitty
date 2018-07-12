@@ -5,7 +5,7 @@
     {% else %}
         <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'merge_thread'}) }}">
             Merge current thread into
-            <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ currentThread }}" data-ays-ignore="true">
+            <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
             <select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true">
                 {% for thread in merge_thread_list %}
                     <option value='{{ thread.id }}'>{{ thread.title }} ({{ thread.id }})</option>
