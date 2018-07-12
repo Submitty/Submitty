@@ -28,9 +28,8 @@ class Config:
         # existing
         self.database = self.submitty = None
         self.config_path = Path(config_path)
-        for key in ('database', 'submitty'):
+        for key in ('database', 'submitty','submitty_users'):
             self.__dict__[key] = self._get_data(key)
-
     def _get_data(self, filename):
         with Path(self.config_path, filename + '.json').open('r') as open_file:
             return json.load(open_file)

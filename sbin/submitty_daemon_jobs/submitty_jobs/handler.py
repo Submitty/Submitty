@@ -106,7 +106,7 @@ def main():
                 name = entry.name
             queue.put(name)
 
-    print(queue.qsize())
+    print("initial queue size ", queue.qsize())
     observer = Observer()
     observer.schedule(NewFileHandler(queue), str(QUEUE_DIR))
     observer.start()
@@ -114,6 +114,7 @@ def main():
     pool = multiprocessing.Pool(5, process_queue, (queue, ))
     try:
         while True:
+            print ("current queue size ", queue.qsize())
             time.sleep(1)
     finally:
         pool.terminate()
