@@ -9,17 +9,12 @@ use app\libraries\Core;
  * Can be either registration or rotating
  *
  * @package app\models
- * @method Gradeable getGradeable()
  * @method string getName()
  * @method User[] getGraders()
  * @method User[] getUsers()
  * @method Team[] getTeams()
  */
 class GradingSection extends AbstractModel {
-    /**
-     * @var Gradeable
-     */
-    protected $gradeable;
     /**
      * If this is a registration section (false for rotating)
      * @var bool
@@ -42,9 +37,8 @@ class GradingSection extends AbstractModel {
      */
     protected $teams;
 
-    public function __construct(Core $core, Gradeable $gradeable, bool $registration, string $name, $graders, $users, $teams) {
+    public function __construct(Core $core, bool $registration, string $name, $graders, $users, $teams) {
         parent::__construct($core);
-        $this->gradeable = $gradeable;
         $this->registration = $registration;
         $this->name = $name;
         $this->graders = $graders;

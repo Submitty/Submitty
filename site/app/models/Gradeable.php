@@ -1343,7 +1343,7 @@ class Gradeable extends AbstractModel {
         if ($this->getPeerGrading() && $user->getGroup() === 4) {
             $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
             //TODO: Peer grading team assignments
-            return new GradingSection($this->core, $this, "Peer", [$user], $users, []);
+            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
         } else {
             $users = [];
             $teams = [];
@@ -1398,7 +1398,7 @@ class Gradeable extends AbstractModel {
 
             $sections = [];
             foreach ($section_names as $section_name) {
-                $sections[] = new GradingSection($this->core, $this, $this->isGradeByRegistration(), $section_name, $graders[$section_name], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name], $users[$section_name] ?? null, $teams[$section_name] ?? null);
             }
 
             return $sections;
