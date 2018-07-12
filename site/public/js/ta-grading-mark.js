@@ -1122,7 +1122,10 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
                 component.grader.id = grading_data.your_user_id;
             }
             //Just graded it
-            gradedByElement.text("Graded by " + component.grader.id + "!");
+            if(component.grader2==null)
+                gradedByElement.text("Graded by " + component.grader.id + "!");
+            else
+                gradedByElement.text("Graded by " + component.grader.id + "/" + component.grader2.id + "!");
         }
 
         gradedByElement.show();
@@ -1193,7 +1196,7 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
         },
         success: function(data) {
             window.location.reload();
-            console.log("verified user");
+            console.log(data);
             if(action === 'verify_all')
                 document.getElementById("verifyAllButton").style.display = "none";
         },

@@ -1207,13 +1207,13 @@ VALUES (?, ?, ?)", $params);
         if($component->getGrader2() === null){
             $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), null, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader_id2, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader2_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
         else{
             $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGrader2()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader_id2, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader2_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
@@ -1238,7 +1238,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
 UPDATE gradeable_component_data
 SET
   gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
-  gcd_grader_id=?, gcd_grader2_id
+  gcd_grader_id=?, gcd_grader2_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
 

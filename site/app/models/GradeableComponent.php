@@ -127,7 +127,6 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
-            $this->grader2 = $details['gcd_grader2'];
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
@@ -249,11 +248,10 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function setGrader2(User $user) {
-        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader2_modified = true;
             $this->modified = true;
+            $this->grader_modified = true;
             $this->grader2 = $user;
-        }
     }
 
     /**
@@ -270,13 +268,20 @@ class GradeableComponent extends AbstractModel {
     public function saveGradeableComponentData($gd_id) {
         if ($this->modified) {
             if ($this->has_grade || $this->has_marks) {
-                if($this->getGrader2()===null)
+                if($this->getGrader2()===null){
                     $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), null, $this);
-                else
+                    echo("case1");
+                    }
+                else{
                     $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this->getGrader2()->getId(), $this);
+                    echo("case2");
+                    $check=$this->getGrader()->getId();
+                    echo(""+$check);
+                }
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
+                echo("case3");
             }
         }
     }
