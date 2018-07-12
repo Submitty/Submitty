@@ -2,13 +2,6 @@ language: php
 sudo: true
 dist: trusty
 
-cache:
-  pip: true
-  directories:
-    - ${TRAVIS_BUILD_DIR}/site/vendor
-    - ${HOME}/.composer/cache
-    - ${HOME}/.cache/pip
-
 # We use build stages (https://docs.travis-ci.com/user/build-stages/) to allow us to
 # create a matrix of firstly building and testing various PHP targets in several ways
 # (lint, unit test, e2e test) and then test out various C++ compilers to ensure our
@@ -23,22 +16,6 @@ jobs:
     - &00-cache
       stage: 00 warm up cache
       php: 7.0
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - pushd site
-        - travis_retry composer install --prefer-dist --no-interaction
-        - popd
-        - pip3 install -U pip
-        - pip3 install python-pam
-        - pip3 install PyYAML
-        - pip3 install psycopg2-binary
-        - pip3 install sqlalchemy
-        - pip3 install pylint_runner
-        - pip3 install python-dateutil
-        - pip3 install selenium
-        - pip3 install pause
-        - pip3 install tzlocal
-        - pip3 install paramiko
       script:
         - fake_command_to_throw_error
 
