@@ -46,7 +46,7 @@ adduser ${CGI_USER} shadow
 adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
-adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" -p $(openssl passwd -1 submitty_dbuser)
+useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
