@@ -264,12 +264,21 @@ HTML;
 					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
 HTML;
 			}
+	$cookieSelectedCategories = '';
+	$category_ids_array = array_column($categories, 'category_id');
+	foreach(explode('|', $_COOKIE['forum_categories']) as $selectedId) {
+		if(in_array((int)$selectedId, $category_ids_array)) {
+			$cookieSelectedCategories .= <<<HTML
+				$('#thread_category option[value="{$selectedId}"]').prop('selected', true);
+HTML;
+		}
+	}
 	$display_option_js = <<<HTML
 		$("#tree").prop("checked", true);
 HTML;
 	if(in_array($display_option, array("tree", "time", "alpha"))) {
 		$display_option_js = <<<HTML
-			$("#" . $display_option).prop("checked", true);
+			$("#{$display_option}").prop("checked", true);
 HTML;
 	}
 	$return .= <<<HTML
@@ -290,6 +299,7 @@ HTML;
 							{$onChange}
 							return true;
 						});
+						{$cookieSelectedCategories}
 						{$display_option_js}
 					});
 				</script>

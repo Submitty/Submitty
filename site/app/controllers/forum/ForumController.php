@@ -557,7 +557,7 @@ class ForumController extends AbstractController {
 	}
 	foreach ($categories_ids as &$id) {
             $id = (int)$id;
-        }
+	}
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
 
@@ -575,12 +575,16 @@ class ForumController extends AbstractController {
     public function showThreads(){
         $user = $this->core->getUser()->getId();
 
-        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
-	if(!empty($_COOKIE['forum_categories']) &&  $category_id == -1 ) {
+        $category_id = in_array('thread_category', $_POST) ? array($_POST['thread_category']) : -1;
+        $category_id = array($category_id);
+	if(!empty($_COOKIE['forum_categories']) &&  $category_id[0] == -1 ) {
 	    $category_id = explode('|', $_COOKIE['forum_categories']);
 	}
-            	
-        $max_thread = 0;
+	foreach ($category_id as &$id) {
+            $id = (int)$id;
+	}
+	
+	$max_thread = 0;
         $show_deleted = $this->showDeleted();
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted);
 
@@ -588,10 +592,10 @@ class ForumController extends AbstractController {
 
         $posts = null;
         $option = 'tree';
-        if(empty($_REQUEST['option']) && !empty($_COOKIE['forum_display_option'])) {
-           $option = $_COOKIE['forum_display_option'];
-        } else {
+        if(!empty($_REQUEST['option'])) {
            $option = $_REQUEST['option'];
+        } else if(!empty($_COOKIE['forum_display_option'])) {
+           $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){

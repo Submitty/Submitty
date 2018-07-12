@@ -1241,6 +1241,7 @@ function alterShowDeletedStatus(newStatus) {
 function modifyThreadList(currentThreadId, currentCategoriesId){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    document.cookie = "forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
@@ -1251,14 +1252,13 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
-	       console.log(r);
-               document.cookie = "forum_categories=" + categories_value + ";";
                var x = JSON.parse(r).html;
                x = `${x}`;
                $(".thread_list").html(x);
             },
             error: function(){
-                window.alert("Something went wrong when trying to filter. Please try again.");
+               window.alert("Something went wrong when trying to filter. Please try again.");
+               document.cookie = "forum_categories=;";
             }
     })
 }
