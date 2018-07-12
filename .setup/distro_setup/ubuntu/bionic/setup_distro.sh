@@ -82,6 +82,9 @@ apt-get install -qqy ninja-build
 echo "installing cmake"
 apt-get install -qqy cmake
 
+# for Lichen (Plagiarism Detection)
+apt-get install -qqy python-clang-6.0
+
 # Install Oracle 8 Non-Interactively
 echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
