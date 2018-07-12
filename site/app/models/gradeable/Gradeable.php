@@ -10,7 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
-use app\models\GradeableComponent;
+use app\models\Team;
 
 /**
  * All data describing the configuration of a gradeable
@@ -92,8 +92,8 @@ class Gradeable extends AbstractModel {
     private $any_manual_grades = null;
     /** @property @var bool If any submissions exist */
     private $any_submissions = null;
-    /** @property @var bool If any teams have been formed */
-    private $any_teams = null;
+    /** @property @var Team[] Any teams that have been formed */
+    private $teams = null;
     /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
@@ -751,21 +751,22 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets all of the teams formed for this gradeable
+     * @return Team[]
+     */
+    public function getTeams() {
+        if($this->teams === null) {
+            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+        }
+        return $this->teams;
+    }
+
+    /**
      * Gets if this gradeable has any teams formed yet
      * @return bool
      */
     public function anyTeams() {
-        if($this->any_teams === null) {
-            // Unless we find a team, assume there are none
-            $this->any_teams = false;
-            if ($this->type === GradeableType::ELECTRONIC_FILE) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                if (!empty($all_teams)) {
-                    $this->any_teams = true;
-                }
-            }
-        }
-        return $this->any_teams;
+        return !empty($this->getTeams());
     }
 
     /**
@@ -783,5 +784,65 @@ class Gradeable extends AbstractModel {
      */
     public function isRotatingGraderSectionsModified() {
         return $this->rotating_grader_sections_modified;
+    }
+
+    /**
+     * Gets if this gradeable is pdf-upload
+     * @return bool
+     */
+    public function isPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() !== Component::PDF_PAGE_NONE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets if the students assign pages to components
+     * @return bool
+     */
+    public function isStudentPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() === Component::PDF_PAGE_STUDENT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the number of numeric components if type is GradeableType::NUMERIC_TEXT
+     * @return int
+     */
+    public function getNumNumeric() {
+        if ($this->type !== GradeableType::NUMERIC_TEXT) {
+            return 0;
+        }
+        $count = 0;
+        foreach ($this->components as $component) {
+            if (!$component->isText()) {
+                ++$count;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * Gets the number of text components if type is GradeableType::NUMERIC_TEXT
+     * @return int
+     */
+    public function getNumText() {
+        if ($this->type !== GradeableType::NUMERIC_TEXT) {
+            return 0;
+        }
+        $count = 0;
+        foreach ($this->components as $component) {
+            if ($component->isText()) {
+                ++$count;
+            }
+        }
+        return $count;
     }
 }
