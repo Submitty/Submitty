@@ -851,7 +851,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Returns array of User objects for users with given User IDs
      * @param string[] $user_ids
-     * @return User[]
+     * @return User[] The user objects, indexed by user id
      */
     public function getUsersById(array $user_ids) {
         if (count($user_ids) === 0) {
@@ -886,7 +886,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Return array of Team objects for teams with given Team IDs
      * @param string[] $team_ids
-     * @return Team[]
+     * @return Team[] The team objects, indexed by team id
      */
     public function getTeamsById(array $team_ids) {
         if (count($team_ids) === 0) {
@@ -1375,14 +1375,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         $grader = new User($this->core, $user_array);
 
                         // Create the component
-                        $graded_components[] = new GradedComponent($this->core,
+                        $graded_component = new GradedComponent($this->core,
+                            $ta_graded_gradeable,
                             $gradeable->getComponent($db_row_split['comp_id'][$i]),
                             $grader,
-                            $db_row_split['mark_id'][$i] ?? [],
                             $comp_array);
+                        $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
+                        $graded_components[] = $graded_component;
                     }
                 }
-                $ta_graded_gradeable->setGradedComponents($graded_components);
+                $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
 
             if ($auto_graded_gradeable !== null) {
