@@ -9,17 +9,10 @@ GENERAL_MESSAGE_ID = -2;
  * @returns Object Gradeable data
  */
 function getGradeable() {
-    try{
-        if(grading_data == null){
-            return null;
-        }
-        return grading_data.gradeable;
+    if (typeof(grading_data) === 'undefined' || grading_data === null){
+        return null;
     }
-    catch(e){
-        if(e.name == "ReferenceError"){
-            return null;
-        }
-    }
+    return grading_data.gradeable;
 }
 
 /**
