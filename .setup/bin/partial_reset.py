@@ -73,10 +73,10 @@ def parse_args():
     parser.add_argument("--force", action="store_true",
                         help="Run this script skipping the 'are you sure' prompts. These are also "
                              "bypassed if .vagrant folder is detected.")
-    parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
+    parser.add_argument("--users_path", default=str(SETUP_DATA_PATH / "users"),
                         help="Path to folder that contains .yml files to use for user creation. "
                              "Defaults to ../data/users")
-    parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
+    parser.add_argument("--courses_path", default=str(SETUP_DATA_PATH / "courses"),
                         help="Path to the folder that contains .yml files to use for course "
                              "creation. Defaults to ../data/courses")
     return parser.parse_args()
@@ -94,21 +94,26 @@ def main():
             raise SystemExit("Aborting...")
 
     shutil.rmtree('/var/local/submitty', True)
-    os.makedirs(str(SUBMITTY_DATA_DIR / 'courses'), exist_ok=True)
+    Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
 
     distro_name = distro.id()
     distro_version = distro.lsb_release_attr('codename')
 
     # Clean out the log files, but leave the folders intact
     if Path(CURRENT_PATH, "..", "..", ".vagrant").is_dir():
-        log_path = SUBMITTY_REPOSITORY / '.vagrant' / distro_name / distro_version / 'logs' / 'submitty'
-        shutil.rmtree(str(log_path))
+        repo_path = SUBMITTY_REPOSITORY / '.vagrant' / distro_name / distro_version / 'logs' / 'submitty'
+        data_path = SUBMITTY_DATA_DIR / 'logs'
+        data_path.mkdir()
+        if repo_path.exists():
+            shutil.rmtree(str(repo_path))
+        repo_path.mkdir()
         for folder in ['autograding', 'access', 'site_errors']:
-            path = log_path / folder
-            os.makedirs(str(path))
-            path.symlink_to(SUBMITTY_DATA_DIR / 'logs' / folder)
+            repo_log_path = repo_path / folder
+            data_log_path = data_path / folder
+            repo_log_path.mkdir()
+            data_log_path.symlink_to(repo_log_path)
 
-    with Path(SUBMITTY_REPOSITORY, 'config', 'database.json').open() as submitty_config:
+    with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
         submitty_config_json = json.load(submitty_config)
         os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
         db_user = submitty_config_json["database_user"]
@@ -142,8 +147,7 @@ def main():
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
         for queue in ['to_be_graded_queue']:
-            path = Path(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))
-            for queue_file in path.iterdir():
+            for queue_file in Path(SUBMITTY_DATA_DIR, queue).glob("*__{}__*".format(course['code'])):
                 queue_file.unlink()
 
     for group in groups:
