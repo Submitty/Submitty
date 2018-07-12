@@ -616,17 +616,14 @@ ORDER BY {$section_key}", $params);
 
     public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
-        $params = array();
+        $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section) {
-                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section);
-            }
-            $where .= ")";
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
@@ -636,7 +633,7 @@ ON
 users.user_id = electronic_gradeable_version.user_id
 AND users.". $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
-AND electronic_gradeable_version.g_id='{$g_id}'
+AND electronic_gradeable_version.g_id=?
 {$where}
 GROUP BY {$section_key}
 ORDER BY {$section_key}", $params);
@@ -655,12 +652,9 @@ ORDER BY {$section_key}", $params);
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section) {
-                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section);
-            }
-            $where .= ")";
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
             SELECT COUNT(*) as cnt, {$section_key}
@@ -1718,12 +1712,9 @@ public function getSubmittedTeamCountByGradingSections($g_id, $sections, $sectio
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section) {
-                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section);
-            }
-            $where .= ")";
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
