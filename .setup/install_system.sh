@@ -183,6 +183,7 @@ pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
+pip3 install distro
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
