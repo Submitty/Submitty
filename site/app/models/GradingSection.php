@@ -19,28 +19,28 @@ class GradingSection extends AbstractModel {
     /**
      * @var Gradeable
      */
-    private $gradeable;
+    protected $gradeable;
     /**
      * If this is a registration section (false for rotating)
      * @var bool
      */
-    private $registration;
+    protected $registration;
     /**
      * @var string
      */
-    private $name;
+    protected $name;
     /**
      * @var User[]
      */
-    private $graders;
+    protected $graders;
     /**
      * @var User[]
      */
-    private $users;
+    protected $users;
     /**
      * @var Team[]
      */
-    private $teams;
+    protected $teams;
 
     public function __construct(Core $core, Gradeable $gradeable, bool $registration, string $name, $graders, $users, $teams) {
         parent::__construct($core);
