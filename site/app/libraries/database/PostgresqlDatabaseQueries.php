@@ -1260,7 +1260,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Join team data */
               LEFT JOIN (
-                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(tu) AS array_team_users
+                SELECT gt.team_id,
+                  gt.registration_section,
+                  gt.rotating_section,
+                  json_agg(tu) AS array_team_users
                 FROM gradeable_teams gt
                   JOIN (
                     SELECT
