@@ -1,35 +1,32 @@
 {% import _self as self %}
 
 {% for check in checks %}
-    {% if check.actual %}
-        {% if loop.index0 != 0 %}
-            <div class="clear"></div>
-        {% endif %}
-        {% if check.pdf %}
-            <iframe src="{{ core.buildUrl({"component": "misc", "page": "display_file", "dir": "results", "file": check.name, "path": check.path}) }}" width="95%" height="1200px" style="border: 0"></iframe>
-        {% else %}
-            <br>
-            {% if check.actual %}
-            <div style="height:23px; float:right;">
-                <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ who }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
-            </div>
-            {% endif %}
-            <div><span style="margin-left: 20px" class="line_code" id='white_space_helper_{{ index }}'></span></div>
-            <div class="box-block">
-
-                {% if check.actual %}
-                    {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
-                {% endif %}
-                {% if check.expected %}
-                    {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
-                {% endif %}
-                {% if check.difference %}
-                    {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
-                {% endif %}
-
-            </div>
-        {% endif %}
+    {% if loop.index0 != 0 %}
+        <div class="clear"></div>
     {% endif %}
+    {% if check.pdf %}
+        <iframe src="{{ core.buildUrl({"component": "misc", "page": "display_file", "dir": "results", "file": check.name, "path": check.path}) }}" width="95%" height="1200px" style="border: 0"></iframe>
+    {% else %}
+        <br>
+        <div style="height:23px; float:right;">
+            <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ who }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
+        </div>
+        <div><span style="margin-left: 20px" class="line_code" id='white_space_helper_{{ index }}'></span></div>
+        <div class="box-block">
+
+            {% if check.actual %}
+                {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
+            {% endif %}
+            {% if check.expected %}
+                {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
+            {% endif %}
+            {% if check.difference %}
+                {{ self.render_diff_element(check, check.difference, 2, popup_css_file, index, loop.index0) }}
+            {% endif %}
+
+        </div>
+    {% endif %}
+
 {% endfor %}
 
 {% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
