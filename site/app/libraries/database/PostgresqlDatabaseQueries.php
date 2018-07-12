@@ -940,16 +940,69 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
+     * Maps sort keys to an array of expressions to sort by in place of the key.
+     *  Useful for ambiguous keys or for key alias's
+     */
+    const graded_gradeable_key_map = [
+        'registration_section' => [
+            'SUBSTRING(u.registration_section, \'^[^0-9]*\')',
+            'COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1)',
+            'SUBSTRING(u.registration_section, \'[^0-9]*$\')',
+            'SUBSTRING(team.registration_section, \'^[^0-9]*\')',
+            'COALESCE(SUBSTRING(team.registration_section, \'[0-9]+\')::INT, -1)',
+            'SUBSTRING(team.registration_section, \'[^0-9]*$\')'
+        ],
+        'rotating_section' => [
+            'u.rotating_section',
+            'team.rotating_section'
+        ]
+    ];
+
+    /**
+     * Generates the ORDER BY clause with the provided sorting keys
+     * @param string[] $sort_keys
+     * @param array $key_map A map from sort keys to arrays of expressions to sort by instead
+     *          (see self::graded_gradeable_key_map for example)
+     * @return string
+     */
+    private static function generateOrderByClause(array $sort_keys, array $key_map) {
+        if ($sort_keys !== null) {
+            if (!is_array($sort_keys)) {
+                $sort_keys = [$sort_keys];
+            }
+            if (count($sort_keys) === 0) {
+                return '';
+            }
+            // Use simplified expression for empty keymap
+            if (empty($key_map)) {
+                return 'ORDER BY ' . implode(',', $sort_keys);
+            }
+            return 'ORDER BY ' . implode(',', array_map(function ($key_ext) use ($key_map) {
+                    $split_key = explode(' ', $key_ext);
+                    $key = $split_key[0];
+                    $order = '';
+                    if (count($split_key) > 1) {
+                        $order = $split_key[1];
+                    }
+                    // Map any keys with special requirements to the proper statements and preserve specified order
+                    return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
+                }, $sort_keys));
+        }
+        return '';
+    }
+
+    /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
@@ -1018,6 +1071,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         // Create the complete selector
         $selector = implode(' AND ', $selector_intersection_list);
 
+        // Generate the ORDER BY clause
+        $order = self::generateOrderByClause($sort_keys, self::graded_gradeable_key_map);
+
         $query = "
             SELECT /* Select everything we retrieved */
             
@@ -1025,8 +1081,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_overall_comment as overall_comment,
-              gd.gd_user_viewed_date as user_viewed_date,
+              gd.gd_overall_comment AS overall_comment,
+              gd.gd_user_viewed_date AS user_viewed_date,
 
               /* Aggregate Gradeable Component Data */
               gcd.array_comp_id,
@@ -1081,15 +1137,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               u.grading_registration_sections,
 
               /* Only select the section information for the submitter type */
-              (CASE WHEN team.team_id IS NULL THEN u.registration_section ELSE team.registration_section END) as registration_section,
-              (CASE WHEN team.team_id IS NULL THEN u.rotating_section ELSE team.rotating_section END) as rotating_section
+              (CASE WHEN team.team_id IS NULL THEN u.registration_section ELSE team.registration_section END) AS registration_section,
+              (CASE WHEN team.team_id IS NULL THEN u.rotating_section ELSE team.rotating_section END) AS rotating_section
             FROM gradeable g
 
               /* Get teamness so we know to join teams or users*/
               LEFT JOIN (
                 SELECT
                   g_id,
-                  eg_team_assignment
+                  eg_team_assignment AS team_assignment
                 FROM electronic_gradeable
               ) AS eg ON eg.g_id=g.g_id
 
@@ -1099,12 +1155,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM users u
                 LEFT JOIN (
                   SELECT
-                    json_agg(sections_registration_id) as grading_registration_sections,
+                    json_agg(sections_registration_id) AS grading_registration_sections,
                     user_id
                   FROM grading_registration
                   GROUP BY user_id
-                ) as sr ON u.user_id=sr.user_id
-              ) AS u ON eg IS NULL OR NOT eg.eg_team_assignment
+                ) AS sr ON u.user_id=sr.user_id
+              ) AS u ON eg IS NULL OR NOT eg.team_assignment
 
               /* Join team data */
               LEFT JOIN (
@@ -1118,12 +1174,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   LEFT JOIN (
                     SELECT
                       in2_team.team_id,
-                      json_agg(in2_team.user_id) as array_user,
-                      json_agg(in2_team.state) as array_state
-                    FROM teams as in2_team
+                      json_agg(in2_team.user_id) AS array_user,
+                      json_agg(in2_team.state) AS array_state
+                    FROM teams AS in2_team
                     GROUP BY in2_team.team_id
                   ) AS in_team ON in_team.team_id=g_team.team_id
-              ) AS team ON eg.eg_team_assignment AND EXISTS (
+              ) AS team ON eg.team_assignment AND EXISTS (
                          SELECT 1 FROM gradeable_teams gt 
                          WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
                          LIMIT 1)
@@ -1137,13 +1193,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join aggregate gradeable component data */
               LEFT JOIN (
                 SELECT
-                  json_agg(in_gcd.gc_id) as array_comp_id,
-                  json_agg(gcd_score) as array_score,
-                  json_agg(gcd_component_comment) as array_comment,
-                  json_agg(gcd_grader_id) as array_grader_id,
-                  json_agg(gcd_graded_version) as array_graded_version,
-                  json_agg(gcd_grade_time) as array_grade_time,
-                  json_agg(string_mark_id) as array_mark_id,
+                  json_agg(in_gcd.gc_id) AS array_comp_id,
+                  json_agg(gcd_score) AS array_score,
+                  json_agg(gcd_component_comment) AS array_comment,
+                  json_agg(gcd_grader_id) AS array_grader_id,
+                  json_agg(gcd_graded_version) AS array_graded_version,
+                  json_agg(gcd_grade_time) AS array_grade_time,
+                  json_agg(string_mark_id) AS array_mark_id,
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
@@ -1174,11 +1230,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     FROM users u
                     LEFT JOIN (
                       SELECT
-                        json_agg(sections_registration_id) as grading_registration_sections,
+                        json_agg(sections_registration_id) AS grading_registration_sections,
                         user_id
                       FROM grading_registration
                       GROUP BY user_id
-                    ) as sr ON u.user_id=sr.user_id
+                    ) AS sr ON u.user_id=sr.user_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
@@ -1196,14 +1252,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   g_id,
                   user_id,
                   team_id
-                FROM electronic_gradeable_data as in_egd
+                FROM electronic_gradeable_data AS in_egd
                 GROUP BY g_id, user_id, team_id
               ) AS egd ON egd.g_id=g.g_id AND (egd.user_id=u.user_id OR egd.team_id=team.team_id)
               LEFT JOIN (
                 SELECT *
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
-            WHERE $selector";
+            WHERE $selector
+            $order";
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
@@ -1363,11 +1420,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
         if($ids === null) {
             $ids = [];
         }
@@ -1379,7 +1437,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $selector = "WHERE g.g_id IN ($place_holders)";
         }
 
-        // First, get the gradeable data
+        // Generate the ORDER BY clause
+        $order = self::generateOrderByClause($sort_keys, []);
+
         $query = "
             SELECT
               g.g_id AS id,
@@ -1422,7 +1482,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
                 SELECT
-                  g_id as gc_g_id,
+                  g_id AS gc_g_id,
                   json_agg(gc.gc_id) AS array_id,
                   json_agg(gc_title) AS array_title,
                   json_agg(gc_ta_comment) AS array_ta_comment,
@@ -1455,7 +1515,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 GROUP BY g_id
               ) AS gc ON gc.gc_g_id=g.g_id
              $selector
-             ORDER BY g.g_id";
+             $order";
 
         $gradeable_constructor = function($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {

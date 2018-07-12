@@ -2345,11 +2345,12 @@ AND gc_id IN (
     /**
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
         throw new NotImplementedException();
     }
 
@@ -2404,10 +2405,11 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
         throw new NotImplementedException();
     }
 
