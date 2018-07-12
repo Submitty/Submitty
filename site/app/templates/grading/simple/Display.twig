@@ -181,18 +181,18 @@
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
-                    data-score="{{ component_grade.getScore() | default('0') }}"
-                    {% if component_grade.getGrader() != null %}
-                        data-grader="{{ component_grade.getGrader().getId() }}"
-                    {% endif %}
-                    {% if component_grade.getGradeTime() != null %}
-                        data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
-                    {% endif %}
-                    {% if component_grade.getScore() == 1.0 %}
-                        style="background-color: #149bdf;"
-                    {% elseif component_grade.getScore() == 0.5 %}
-                        style="background-color: #88d0f4;"
-                    {% endif %}
+                data-score="{{ component_grade.getScore() | default('0') }}"
+                {% if component_grade.getGrader() != null %}
+                    data-grader="{{ component_grade.getGrader().getId() }}"
+                {% endif %}
+                {% if component_grade.getGradeTime() != null %}
+                    data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
+                {% endif %}
+                {% if component_grade.getScore() == 1.0 %}
+                    style="background-color: #149bdf;"
+                {% elseif component_grade.getScore() == 0.5 %}
+                    style="background-color: #88d0f4;"
+                {% endif %}
             ></td>
         {% endif %}
     {% endfor %}
