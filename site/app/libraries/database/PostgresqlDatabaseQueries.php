@@ -851,7 +851,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Returns array of User objects for users with given User IDs
      * @param string[] $user_ids
-     * @return User[]
+     * @return User[] The user objects, indexed by user id
      */
     public function getUsersById(array $user_ids) {
         if (count($user_ids) === 0) {
@@ -886,7 +886,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Return array of Team objects for teams with given Team IDs
      * @param string[] $team_ids
-     * @return Team[]
+     * @return Team[] The team objects, indexed by team id
      */
     public function getTeamsById(array $team_ids) {
         if (count($team_ids) === 0) {
@@ -943,9 +943,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeables to retrieve data for
-     * @param string[]|null $users The ids of the users to get data for
-     * @param string[]|null $teams The ids of the teams to get data for
+     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param string[]|string|null $users The id(s) of the user(s) to get data for
+     * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -1318,14 +1318,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         $grader = new User($this->core, $user_array);
 
                         // Create the component
-                        $graded_components[] = new GradedComponent($this->core,
+                        $graded_component = new GradedComponent($this->core,
+                            $ta_graded_gradeable,
                             $gradeable->getComponent($db_row_split['comp_id'][$i]),
                             $grader,
-                            $db_row_split['mark_id'][$i] ?? [],
                             $comp_array);
+                        $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
+                        $graded_components[] = $graded_component;
                     }
                 }
-                $ta_graded_gradeable->setGradedComponents($graded_components);
+                $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
 
             if ($auto_graded_gradeable !== null) {
