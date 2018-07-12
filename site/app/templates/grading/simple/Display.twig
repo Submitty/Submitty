@@ -181,7 +181,7 @@
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
-                    data-score="{{ component_grade.getScore() }}"
+                    data-score="{{ component_grade.getScore() | default('0') }}"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -213,7 +213,7 @@
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
-                    value="{{ component_grade.getScore() }}"
+                    value="{{ component_grade.getScore() | default('0') }}"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
