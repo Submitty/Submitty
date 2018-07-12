@@ -47,7 +47,8 @@ adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --di
 adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
 adduser submitty_dbuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-echo "submitty_dbuser:submitty_dbuser" | chpasswd
+# piped commands drop the sudo to subsequent commands it seems
+echo "submitty_dbuser:submitty_dbuser" | sudo chpasswd
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
