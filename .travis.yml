@@ -23,7 +23,7 @@ jobs:
     - &00-cache
       stage: 00 warm up cache
       php: 7.0
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install: sudo bash ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
@@ -129,7 +129,7 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install: sudo bash ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
@@ -160,7 +160,7 @@ jobs:
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/autograder.sh
-        - bash .setup/travis/setup.sh
+        - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
@@ -227,8 +227,7 @@ jobs:
             - unzip
             - libboost-all-dev
       env: CLANG_VER="5.0.1"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install: sudo bash ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - sudo apt-get install clang
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz

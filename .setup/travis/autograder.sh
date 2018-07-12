@@ -1,4 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit 1
+fi
+
+set -ev
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 MY_PATH="`dirname \"$0\"`"
