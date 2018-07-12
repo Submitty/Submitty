@@ -643,7 +643,8 @@ std::string TestCase::getTitle() const {
 
 std::string TestCase::getPrefix() const {
   std::stringstream ss;
-  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id;
+  //TODO remove hard coded '/'
+  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id << "/";
   return ss.str();
 }
 

@@ -13,6 +13,7 @@ import string
 import random
 import socket
 import zipfile
+import sys
 
 from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
@@ -142,7 +143,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
-    os.makedirs(tmp)
+    os.mkdir(tmp)
+    os.system('ls -la {0}'.format(tmp))
+    print('checkpoint 1')
 
     which_machine=socket.gethostname()
 
@@ -160,6 +163,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(queue_file, 'r') as infile:
         queue_obj = json.load(infile)
 
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 1')
+
     queue_time_longstring = queue_obj["queue_time"]
     waittime = queue_obj["waittime"]
     is_batch_job = queue_obj["regrade"]
@@ -171,6 +177,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"wait:",waittime,"")
 
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 2')
     # --------------------------------------------------------------------
     # START DOCKER
 
@@ -199,6 +207,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.mkdir(tmp_compilation)
     os.chdir(tmp_compilation)
 
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 3')
+
     submission_path = os.path.join(tmp_submission,"submission")
     checkout_path = os.path.join(tmp_submission,"checkout")
 
@@ -209,7 +220,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     bin_path = os.path.join(tmp_autograding,"bin")
     form_json_config = os.path.join(tmp_autograding,"form.json")
     complete_config = os.path.join(tmp_autograding,"complete_config.json")
-
+    
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 4')
 
     with open(form_json_config, 'r') as infile:
         gradeable_config_obj = json.load(infile)
@@ -223,6 +236,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     is_vcs = gradeable_config_obj["upload_type"]=="repository"
     checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
+
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 5')
 
     if is_vcs:
         pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
@@ -241,8 +257,15 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
                               stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
 
-    add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
+    os.system('ls -la {0}'.format(tmp))
+    print('blip 6')
+
+    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+    os.system('ls -al {0}'.format(tmp))
+    print('checkpoint 2 heyo')
+    
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
@@ -289,8 +312,15 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     tmp_work_subission = os.path.join(tmp_work, "submission")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     
-    os.makedirs(tmp_work)
+    os.mkdir(tmp_work)
     
+    os.mkdir(tmp_work_test_input)
+    os.mkdir(tmp_work_subission)
+    os.mkdir(tmp_work_checkout)
+    
+    os.system('ls -la {0}'.format(tmp_work))
+    print("checkpoint 3 (should have input, checkout, submission")
+
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
@@ -302,21 +332,26 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
+    #TODO what does this do?
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
         
     # copy input files to tmp_work directory
-    copy_contents_into(job_id,test_input_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,test_input_path,tmp_work_test_input,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
+    add_permissions(os.path.join(tmp_work,"my_runner.out"), stat.S_IXUSR | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_work,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    ## give the untrusted user read/write/execute permissions on the tmp directory & files
+    # os.system('ls -al {0}'.format(tmp_work))
+    # add_permissions_recursive(tmp_work,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    os.system('ls -al {0}'.format(tmp_work))
+    print('checkpoint 4')    
 
     ##################################################################################################
     #call grade_item_main_runner.py
@@ -328,6 +363,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     else:
         print (which_machine,which_untrusted, "RUNNER FAILURE")
         grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
+
+    
+    os.system('ls -al {0}'.format(tmp_work))
+    print('checkpoint 5')
+    sys.exit(1)  
 
     untrusted_grant_rwx_access(which_untrusted, tmp_work)
     untrusted_grant_rwx_access(which_untrusted, tmp_compilation)
