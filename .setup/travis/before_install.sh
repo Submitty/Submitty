@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # Execute this script using source so that PATH is updated for the rest of the build
-set -ev
 
 # Set the Java version
 jdk_switcher use default
