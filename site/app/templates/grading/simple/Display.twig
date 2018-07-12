@@ -175,12 +175,12 @@
                 {{ component.getComment() }}
             </td>
         {% else %}
+            {% set ta_grade = grade.getTaGradedGradeable() %}
+            {% set component_grade = ta_grade.getGradedComponent(component) %}
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
-                {% if grade.getTaGradedGradeable() != null and grade.getTaGradedGradeable().getGradedComponent(component) != null %}
-                    {% set component_grade = grade.getTaGradedGradeable().getGradedComponent(component) %}
                     data-score="{{ component_grade.getScore() }}"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
@@ -193,31 +193,32 @@
                     {% elseif component_grade.getScore() == 0.5 %}
                         style="background-color: #88d0f4;"
                     {% endif %}
-                {% endif %}
             ></td>
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
 {# Render the grading columns for a test #}
-{% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric) %}
+{% macro render_numeric_cols(self, gradeable, section, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
-        {% for component in row.getComponents() if not component.getIsText() %}
-            {% set total = total + component.getScore() %}
+        {% for component in grade.getGradeable().getComponents() if not component.isText() %}
+            {% set total = total + component_grade.getScore() %}
+            {% set ta_grade = grade.getTaGradedGradeable() %}
+            {% set component_grade = ta_grade.getGradedComponent(component) %}
             <td class="option-small-input">
                 <input
                     class="option-small-box"
-                    style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : "" }}"
+                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: #bbbbbb;" : "" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
-                    data-id="{{  component.getId() }}"
-                    value="{{  component.getScore() }}"
-                    {% if component.getGrader() != null %}
-                        data-grader="{{ component.getGrader().getId() }}"
+                    data-id="{{ component.getId() }}"
+                    value="{{ component_grade.getScore() }}"
+                    {% if component_grade.getGrader() != null %}
+                        data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
-                    {% if component.getGradeTime() != null %}
-                        data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                    {% if component_grade.getGradeTime() != null %}
+                        data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                     {% endif %}
                     data-num="true"
                 />
@@ -230,13 +231,15 @@
     {% endif %}
 
     {% set text_start = components_numeric|length %}
-    {% for component in row.getComponents() if component.getIsText() %}
+    {% for component in grade.getGradeable().getComponents() if component.isText() %}
+        {% set ta_grade = grade.getTaGradedGradeable() %}
+        {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
             <input
                 class="option-small-box"
                 type="text"
                 id="cell-{{ index }}-{{ text_start + loop.index0 }}"
-                value="{{ component.getComment() }}"
+                value="{{ component_grade.getComment() }}"
                 data-id="{{ component.getId() }}"
             />
         </td>

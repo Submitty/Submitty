@@ -221,19 +221,21 @@ class SimpleGraderController extends GradingController  {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         foreach ($gradeable->getComponents() as $component) {
-            if (isset($_POST['scores'][$component->getId()])) {
+            $data = $_POST['scores'][$component->getId()] ?? '';
+            // This catches both the not-set and blank-data case
+            if ($data !== '') {
                 $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
 
                 if ($component->isText()) {
-                    $component_grade->setComment($_POST['scores'][$component->getId()]);
+                    $component_grade->setComment($data);
                 } else {
-                    if ($component->getUpperClamp() < $_POST['scores'][$component->getId()] ||
-                        !is_numeric($_POST['scores'][$component->getId()])) {
+                    if ($component->getUpperClamp() < $data ||
+                        !is_numeric($data)) {
                         $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the upper clamp");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
                     }
-                    $component_grade->setScore($_POST['scores'][$component->getId()]);
+                    $component_grade->setScore($data);
                 }
                 $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
             }
