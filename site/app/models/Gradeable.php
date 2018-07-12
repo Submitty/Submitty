@@ -1339,6 +1339,11 @@ class Gradeable extends AbstractModel {
         }
     }
 
+    /**
+     * Get a list of all grading sections assigned to a given user
+     * @param User $user
+     * @return GradingSection[]
+     */
     public function getGradingSectionsForUser(User $user) {
         if ($this->getPeerGrading() && $user->getGroup() === 4) {
             $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
@@ -1406,7 +1411,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * Get the percent completed grading for the current user
      * @return array [total_components, percent]
      */
     public function getGradingProgress(): array {

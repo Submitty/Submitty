@@ -676,10 +676,24 @@ ORDER BY {$section_key}", $params);
         return $return;
     }
 
+    /**
+     * Get an array of Teams for a Gradeable matching the given registration sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
     public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
         throw new NotImplementedException();
     }
 
+    /**
+     * Get an array of Teams for a Gradeable matching the given rotating sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
     public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy="rotating_section") {
         throw new NotImplementedException();
     }
