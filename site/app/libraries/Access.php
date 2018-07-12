@@ -24,23 +24,26 @@ class Access {
      * Check that the current user is at or above the minimum grading group required for a gradeable
      * If the gradeable has peer grading, this will also accept for students
      */
-    const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5;
+    const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's grading section for a gradeable
      * Only applies to limited access graders
      */
-    const CHECK_GRADING_SECTION_GRADER  = 1 << 6;
+    const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's peer grading assignment for a gradeable
      * Only applies to students
      */
-    const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7;
+    const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADEABLE;
     /** Require that the given gradeable have an active version / submission */
-    const CHECK_HAS_SUBMISSION          = 1 << 8;
+    const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
     /** Check that a valid CSRF token was passed in the request */
     const CHECK_CSRF                    = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
-    const ALLOW_SELF_GRADEABLE          = 1 << 10;
+    const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+
+    /** If the current set of flags requires the "gradeable" argument */
+    const REQUIRE_ARG_GRADEABLE         = 1 << 31;
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -125,55 +128,43 @@ class Access {
             }
         }
 
-        if ($checks & self::CHECK_GRADEABLE_MIN_GROUP) {
+        if ($checks & self::REQUIRE_ARG_GRADEABLE) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
-            //Make sure they meet the minimum requirements
-            if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
-                //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
-                if (!($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())) {
+
+            if (($checks & self::CHECK_GRADEABLE_MIN_GROUP) === self::CHECK_GRADEABLE_MIN_GROUP) {
+                //Make sure they meet the minimum requirements
+                if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
+                    //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
+                    if (!($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())) {
+                        return false;
+                    }
+                }
+            }
+
+            if (($checks & self::CHECK_HAS_SUBMISSION) === self::CHECK_HAS_SUBMISSION) {
+                if ($gradeable->getActiveVersion() <= 0) {
                     return false;
                 }
             }
-        }
 
-        if ($checks & self::CHECK_HAS_SUBMISSION) {
-            /* @var Gradeable|null $gradeable */
-            $gradeable = $this->requireArg($args, "gradeable");
-            if ($gradeable === null) {
-                return false;
-            }
-            if ($gradeable->getActiveVersion() <= 0) {
-                return false;
-            }
-        }
-
-        if ($group === User::GROUP_LIMITED_ACCESS_GRADER && ($checks & self::CHECK_GRADING_SECTION_GRADER)) {
-            /* @var Gradeable|null $gradeable */
-            $gradeable = $this->requireArg($args, "gradeable");
-            if ($gradeable === null) {
-                return false;
-            }
-            //Check their grading section
-            if (!$this->checkGradingSection($gradeable)) {
-                return false;
-            }
-        }
-        if ($group === User::GROUP_STUDENT && ($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT)) {
-            /* @var Gradeable|null $gradeable */
-            $gradeable = $this->requireArg($args, "gradeable");
-            if ($gradeable === null) {
-                return false;
-            }
-
-            //If they're allowed to view their own
-            if (!($gradeable->getUser()->getId() === $user->getId() && ($checks & self::ALLOW_SELF_GRADEABLE))) {
-                //Check their peer assignment
-                if (!$this->checkPeerAssignment($gradeable)) {
+            if ((($checks & self::CHECK_GRADING_SECTION_GRADER) === self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+                //Check their grading section
+                if (!$this->checkGradingSection($gradeable)) {
                     return false;
+                }
+            }
+
+            if ((($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT) === self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
+                //If they're allowed to view their own
+                if (!($gradeable->getUser()->getId() === $user->getId() && (($checks & self::ALLOW_SELF_GRADEABLE) === self::ALLOW_SELF_GRADEABLE))) {
+                    //Check their peer assignment
+                    if (!$this->checkPeerAssignment($gradeable)) {
+                        return false;
+                    }
                 }
             }
         }
