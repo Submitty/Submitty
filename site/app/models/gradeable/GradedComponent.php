@@ -27,6 +27,8 @@ use app\models\User;
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
     private $component = null;
+    /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
+    private $ta_graded_gradeable = null;
     /** @property @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
@@ -58,13 +60,19 @@ class GradedComponent extends AbstractModel {
     /**
      * GradedComponent constructor.
      * @param Core $core
+     * @param TaGradedGradeable $ta_graded_gradeable The grade this component belongs to
      * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
      * @param array $details any remaining properties
      * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
-    public function __construct(Core $core, Component $component, User $grader, array $details) {
+    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details) {
         parent::__construct($core);
+
+        if($ta_graded_gradeable === null) {
+            throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
+        }
+        $this->ta_graded_gradeable = $ta_graded_gradeable;
 
         $this->setComponent($component);
         $this->setGrader($grader);
@@ -99,6 +107,14 @@ class GradedComponent extends AbstractModel {
      */
     public function getComponent() {
         return $this->component;
+    }
+
+    /**
+     * Gets the TaGradedGradeable that owns this graded component
+     * @return TaGradedGradeable
+     */
+    public function getTaGradedGradeable() {
+        return $this->ta_graded_gradeable;
     }
 
     /**

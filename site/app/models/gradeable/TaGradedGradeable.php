@@ -35,7 +35,9 @@ class TaGradedGradeable extends AbstractModel {
     /** @property @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
     /** @property @var array[] The an array of arrays of GradedComponents, indexed by component id */
-    protected $graded_components = array();
+    protected $graded_components = [];
+    /** @property @var GradedComponent[] The components that have been marked for deletion */
+    private $deleted_graded_components = [];
 
 
     /**
@@ -174,7 +176,7 @@ class TaGradedGradeable extends AbstractModel {
             // None found, but generate one (append to array)
             if ($generate) {
                 return $this->graded_components[$component->getId()][] =
-                    new GradedComponent($this->core, $component, $grader, []);
+                    new GradedComponent($this->core, $this, $component, $grader, []);
             }
 
             // None found. Don't generate one
@@ -196,7 +198,7 @@ class TaGradedGradeable extends AbstractModel {
         // Grades don't exist, but generate one (at zero index of array)
         if ($generate) {
             return $this->graded_components[$component->getId()][0] =
-                new GradedComponent($this->core, $component, $grader, []);
+                new GradedComponent($this->core, $this, $component, $grader, []);
         }
 
         // Grades don't exist.  Don't generate one
@@ -302,9 +304,11 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of graded components for this gradeable data
+     *  Note: only call from db methods for loading
      * @param array[]|GradedComponent[] $graded_components
+     * @internal
      */
-    public function setGradedComponents(array $graded_components) {
+    public function setGradedComponentsFromDatabase(array $graded_components) {
 
         // Flatten the array if we are given a 2d array.  Don't trust the user to
         //  give us properly indexed components
@@ -332,6 +336,63 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Clears the array of graded components en-route to deletion
+     *  Note: only call from db methods for saving
+     * @internal
+     */
+    public function clearDeletedGradedComponents() {
+        $this->deleted_graded_components = [];
+    }
+
+    /**
+     * Deletes the GradedComponent(s) associated with the provided Component and grader
+     * @param Component $component The component to delete the grade for
+     * @param User|null $grader The grader to delete the grade for, or null to delete all grades
+     */
+    public function deleteGradedComponent(Component $component, User $grader = null) {
+        // If no grades exist, or this component isn't for this gradeable, don't do anything
+        if (!isset($this->graded_components[$component->getId()])) {
+            return;
+        }
+
+        if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
+            // If the grader is null or we aren't peer grading, then delete all component grades for this component
+            $this->deleted_graded_components = array_merge($this->deleted_graded_components,
+                $this->graded_components[$component->getId()]);
+
+            // Remove the entry from the graded components array for this component
+            unset($this->graded_components[$component->getId()]);
+        } else {
+            // Otherwise, only delete the component with the provided grader
+            /** @var GradedComponent $graded_component */
+            $new_component_array = [];
+            foreach ($this->graded_components[$component->getId()] as $graded_component) {
+                if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                    $this->deleted_graded_components[] = $graded_component;
+                } else {
+                    $new_component_array[] = $graded_component;
+                }
+            }
+
+            // Set array to filtered array (without deleted components)
+            if (count($new_component_array) === 0) {
+                // If none are left, remove the entry from the graded components array for this component
+                unset($this->graded_components[$component->getId()]);
+            } else {
+                $this->graded_components[$component->getId()] = $new_component_array;
+            }
+        }
+    }
+
+    /**
+     * Gets the GradedComponents marked for deletion via deleteGradedComponent
+     * @return GradedComponent[]
+     */
+    public function getDeletedGradedComponents() {
+        return $this->deleted_graded_components;
+    }
+
+    /**
      * Sets the date that the user viewed their grade
      * @param string|\DateTime $user_viewed_date The date or date string of when the user viewed their grade
      * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
@@ -354,5 +415,10 @@ class TaGradedGradeable extends AbstractModel {
     /** @internal */
     public function setId($id) {
         throw new \BadFunctionCallException('Cannot set id of gradeable data');
+    }
+
+    /** @internal */
+    public function setGradedComponents(array $graded_components) {
+        throw new \BadFunctionCallException('Cannot set graded components for grade.  Use getOrCreateGradedComponent instead');
     }
 }

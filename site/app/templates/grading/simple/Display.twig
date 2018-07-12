@@ -117,7 +117,7 @@
                             {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
-                                <a target=_blank href="{{ this.core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                <a target=_blank href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
                                     <i class="fa fa-print"></i>
                                 </a>
                             {% endif %}
@@ -148,11 +148,11 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(self, action, gradeable, section, row, index, components_numeric) %}
-    {% set sytle = "" %}
-    {% if row.getUser().accessGrading() %}
-        {% set sytle = "style='background: #7bd0f7;'" %}
-    {% endif %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}" {{ style }}>
+    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}"
+        {% if student.accessGrading() %}
+            style='background: #7bd0f7;'
+        {% endif %}
+    >
         <td class="">{{ index + 1 }}</td>
         <td class="">{{ row.getUser().getRegistrationSection() }}</td>
         <td class="cell-all" style="text-align: left">{{ row.getUser().getId() }}</td>
@@ -198,36 +198,27 @@
 
 {# Render the grading columns for a test #}
 {% macro render_numeric_cols(self, gradeable, section, row, index, components_numeric) %}
-    {% set col = 0 %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
-        {% for component in row.getComponents() %}
-            {% if not component.getIsText() %}
-                {% set total = total + component.getScore() %}
-                <td class="option-small-input">
-                    <input
-                        class="option-small-box"
-                        style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : ""}}"
-                        type="text"
-                        id="cell-{{ index }}-{{ col }}"
-                        data-id="{{  component.getId() }}"
-                        value="{{  component.getScore() }}"
-                        {% if component.getGrader() != null %}
-                            data-grader="{{ component.getGrader().getId() }}"
-                        {% endif %}
-                        {% if component.getGradeTime() != null %}
-                            data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
-                        {% endif %}
-                        data-num="true"
-                    />
-                </td>
-                {#
-                    This is ugly but we can't easily split up the components and need
-                    to keep track of what index we're on. And no, we can't use
-                    components_numeric because they're part of the static gradeable
-                #}
-                {% set col = col + 1 %}
-            {% endif %}
+        {% for component in row.getComponents() if not component.getIsText() %}
+            {% set total = total + component.getScore() %}
+            <td class="option-small-input">
+                <input
+                    class="option-small-box"
+                    style="text-align: center; {{ component.getScore == 0 ? "color: #bbbbbb;" : "" }}"
+                    type="text"
+                    id="cell-{{ index }}-{{ loop.index0 }}"
+                    data-id="{{  component.getId() }}"
+                    value="{{  component.getScore() }}"
+                    {% if component.getGrader() != null %}
+                        data-grader="{{ component.getGrader().getId() }}"
+                    {% endif %}
+                    {% if component.getGradeTime() != null %}
+                        data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
+                    {% endif %}
+                    data-num="true"
+                />
+            </td>
         {% endfor %}
 
         <td class="option-small-output">
@@ -235,19 +226,16 @@
         </td>
     {% endif %}
 
-    {% for component in row.getComponents() %}
-        {% if component.getIsText() %}
-            <td class="option-small-input">
-                <input
-                    class="option-small-box"
-                    type="text"
-                    id="cell-{{ index }}-{{ col }}"
-                    value="{{ component.getComment() }}"
-                    data-id="{{ component.getId() }}"
-                />
-            </td>
-            {# See above #}
-            {% set col = col + 1 %}
-        {% endif %}
+    {% set text_start = components_numeric|length %}
+    {% for component in row.getComponents() if component.getIsText() %}
+        <td class="option-small-input">
+            <input
+                class="option-small-box"
+                type="text"
+                id="cell-{{ index }}-{{ text_start + loop.index0 }}"
+                value="{{ component.getComment() }}"
+                data-id="{{ component.getId() }}"
+            />
+        </td>
     {% endfor %}
 {% endmacro %}

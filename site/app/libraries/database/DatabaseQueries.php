@@ -10,7 +10,6 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\GradeableType;
-use app\models\AdminGradeable;
 use app\models\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
@@ -1015,13 +1014,19 @@ ORDER BY rotating_section");
      * @param $gradeable_id
      * @return array An array (indexed by user id) of arrays of section numbers
      */
-    public function getGradersForAllRotatingSections($gradeable_id) {
+    public function getRotatingSectionsByGrader($gradeable_id) {
         throw new NotImplementedException();
     }
 
-    public function getGradersFromUserType($user_type) {
-        $this->course_db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array($user_type));
-        return $this->course_db->rows();
+    public function getGradersByUserType() {
+        $this->course_db->query(
+            "SELECT user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
+        $users = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $users[$row['user_group']][] = $row['user_id'];
+        }
+        return $users;
     }
 
     /**
@@ -1307,88 +1312,6 @@ INSERT INTO gradeable_component_mark_data (gc_id, gd_id, gcd_grader_id, gcm_id)
 VALUES (?, ?, ?, ?)", $params);
     }
 
-    /**
-     * Creates a new gradeable in the database
-     *
-     * @param AdminGradeable $gradeable
-     */
-    public function createNewGradeable(AdminGradeable $gradeable) {
-        $params = array($gradeable->g_id,
-            $gradeable->g_title,
-            $gradeable->g_instructions_url,
-            $gradeable->g_overall_ta_instructions,
-            $gradeable->g_gradeable_type,
-            var_export($gradeable->g_grade_by_registration, true),
-            $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
-            $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
-            $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
-            $gradeable->g_min_grading_group,
-            $gradeable->g_syllabus_bucket);
-        $this->course_db->query("
-INSERT INTO gradeable(g_id, g_title, g_instructions_url,g_overall_ta_instructions, g_gradeable_type, g_grade_by_registration, g_ta_view_start_date, g_grade_start_date,  g_grade_released_date,  g_min_grading_group, g_syllabus_bucket)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        if ($gradeable->g_gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $params = array($gradeable->g_id,
-                $gradeable->eg_submission_open_date->format('Y/m/d H:i:s'),
-                $gradeable->eg_submission_due_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_is_repository, true),
-                $gradeable->eg_subdirectory,
-                var_export($gradeable->eg_team_assignment,true),
-                $gradeable->eg_max_team_size,
-                $gradeable->eg_team_lock_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_use_ta_grading, true),
-                var_export($gradeable->eg_student_view, true),
-                var_export($gradeable->eg_student_submit, true),
-                var_export($gradeable->eg_student_download, true),
-                var_export($gradeable->eg_student_any_version, true),
-                $gradeable->eg_config_path,
-                $gradeable->eg_late_days,
-                $gradeable->eg_precision,
-                var_export($gradeable->eg_peer_grading, true),
-                $gradeable->eg_peer_grade_set);
-            $this->course_db->query("
-INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, eg_is_repository,
-eg_subdirectory, eg_team_assignment, eg_max_team_size, eg_team_lock_date, eg_use_ta_grading, eg_student_view, eg_student_submit, eg_student_download,
-eg_student_any_version, eg_config_path, eg_late_days, eg_precision, eg_peer_grading, eg_peer_grade_set)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        }
-    }
-
-    /**
-     * Updates the current gradeable with new properties.
-     * TODO: it could be worth while to be able to only update some properties
-     *
-     * @param AdminGradeable $gradeable
-     */
-    public function updateGradeable(AdminGradeable $gradeable) {
-        $params = array($gradeable->g_title, $gradeable->g_instructions_url, $gradeable->g_overall_ta_instructions,
-                        $gradeable->g_gradeable_type,
-                        var_export($gradeable->g_grade_by_registration, true),
-                        $gradeable->g_ta_view_start_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_grade_start_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_grade_released_date->format('Y/m/d H:i:s'),
-                        $gradeable->g_min_grading_group, $gradeable->g_syllabus_bucket, $gradeable->g_id);
-        $this->course_db->query("
-UPDATE gradeable SET g_title=?, g_instructions_url=?, g_overall_ta_instructions=?,
-g_gradeable_type=?, g_grade_by_registration=?, g_ta_view_start_date=?, g_grade_start_date=?,
-g_grade_released_date=?, g_min_grading_group=?, g_syllabus_bucket=? WHERE g_id=?", $params);
-        if ($gradeable->g_gradeable_type === 0) {
-            $params = array($gradeable->eg_submission_open_date->format('Y/m/d H:i:s'),
-                $gradeable->eg_submission_due_date->format('Y/m/d H:i:s'), var_export($gradeable->eg_is_repository, true),
-                $gradeable->eg_subdirectory, var_export($gradeable->eg_team_assignment,true),
-                $gradeable->eg_max_team_size, $gradeable->eg_team_lock_date->format('Y/m/d H:i:s'),
-                var_export($gradeable->eg_use_ta_grading, true), var_export($gradeable->eg_student_view, true),
-                var_export($gradeable->eg_student_submit, true), var_export($gradeable->eg_student_download, true),
-                var_export($gradeable->eg_student_any_version, true), $gradeable->eg_config_path,
-                $gradeable->eg_late_days, $gradeable->eg_precision, var_export($gradeable->eg_peer_grading, true),
-                $gradeable->eg_peer_grade_set, $gradeable->g_id);
-            $this->course_db->query("
-UPDATE electronic_gradeable SET eg_submission_open_date=?, eg_submission_due_date=?, eg_is_repository=?,
-eg_subdirectory=?, eg_team_assignment=?, eg_max_team_size=?, eg_team_lock_date=?, eg_use_ta_grading=?, eg_student_view=?, eg_student_submit=?,
-eg_student_download=?, eg_student_any_version=?, eg_config_path=?, eg_late_days=?, eg_precision=?, eg_peer_grading=?, eg_peer_grade_set=? WHERE g_id=?", $params);
-        }
-    }
-
     public function createNewGradeableComponent(GradeableComponent $component, $gradeable_id) {
         $params = array($gradeable_id, $component->getTitle(), $component->getTaComment(),
                         $component->getStudentComment(), $component->getLowerClamp(), $component->getDefault(),
@@ -1444,19 +1367,6 @@ WHERE gcm_id=?", $params);
     	$row = $this->course_db->row();
         return $row['max'];
 
-    }
-
-    /**
-     * Gets an array that contains all revelant data in a gradeable.
-     * Uses the gradeable id to use the data in the database.
-     *
-     * @param $gradeable_id
-     * @param $admin_gradeable
-     * @param $template
-     *
-     */
-    public function getGradeableInfo($gradeable_id, AdminGradeable $admin_gradeable, $template=false) {
-        throw new NotImplementedException();
     }
 
     /**
@@ -2435,11 +2345,12 @@ AND gc_id IN (
     /**
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
      * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
-    public function getGradeableConfigs($ids) {
+    public function getGradeableConfigs($ids, $sort_keys = ['id']) {
         throw new NotImplementedException();
     }
 
@@ -2494,10 +2405,11 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
      * @return DatabaseRowIterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
-    public function getGradedGradeables(array $gradeables, $users = null, $teams = null) {
+    public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
         throw new NotImplementedException();
     }
 
@@ -2821,11 +2733,8 @@ AND gc_id IN (
     /**
      * Updates the gradeable and its components/marks with new properties
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to update
-     * 
-     * FIXME: The 'new' at the end of this should be removed when the method
-     * FIXME:  'updateGradeable' gets deleted
      */
-    public function updateGradeableNew(\app\models\gradeable\Gradeable $gradeable) {
+    public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
 
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
@@ -2900,11 +2809,11 @@ AND gc_id IN (
                       eg_peer_grade_set=?
                     WHERE g_id=?", $params);
             }
+        }
 
-            // Save the rotating sections
-            if ($gradeable->isRotatingGraderSectionsModified()) {
-                $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
-            }
+        // Save the rotating sections
+        if ($gradeable->isRotatingGraderSectionsModified()) {
+            $this->setupRotatingSections($gradeable->getRotatingGraderSections(), $gradeable->getId());
         }
 
         // Also make sure to update components
@@ -2914,17 +2823,16 @@ AND gc_id IN (
 
     /**
      * Removes the provided mark ids from the marks assigned to a graded component
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      * @param int[] $mark_ids
      */
-    private function deleteGradedComponentMarks(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, $mark_ids) {
+    private function deleteGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
         if (count($mark_ids) === 0) {
             return;
         }
 
         $param = array_merge([
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getComponentId(),
             $graded_component->getGraderId(),
         ], $mark_ids);
@@ -2937,17 +2845,16 @@ AND gc_id IN (
 
     /**
      * Adds the provided mark ids as marks assigned to a graded component
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      * @param int[] $mark_ids
      */
-    private function createGradedComponentMarks(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, $mark_ids) {
+    private function createGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
         if (count($mark_ids) === 0) {
             return;
         }
 
         $param = [
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getComponentId(),
             $graded_component->getGraderId(),
             -1  // This value gets set on each loop iteration
@@ -2968,13 +2875,12 @@ AND gc_id IN (
 
     /**
      * Creates a new graded component in the database
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      */
-    private function createGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component) {
+    private function createGradedComponent(GradedComponent $graded_component) {
         $param = [
             $graded_component->getComponentId(),
-            $ta_graded_gradeable->getId(),
+            $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getScore(),
             $graded_component->getComment(),
             $graded_component->getGraderId(),
@@ -2996,17 +2902,16 @@ AND gc_id IN (
 
     /**
      * Updates an existing graded component in the database
-     * @param TaGradedGradeable $ta_graded_gradeable The ta graded gradeable that $graded_component belongs to
      * @param GradedComponent $graded_component
      */
-    private function updateGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component) {
+    private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
             $params = [
                 $graded_component->getScore(),
                 $graded_component->getComment(),
                 $graded_component->getGradedVersion(),
                 DateUtils::dateTimeToString($graded_component->getGradeTime()),
-                $ta_graded_gradeable->getId(),
+                $graded_component->getTaGradedGradeable()->getId(),
                 $graded_component->getComponentId(),
                 $graded_component->getGraderId()
             ];
@@ -3021,9 +2926,21 @@ AND gc_id IN (
         }
     }
 
+    private function deleteGradedComponent(GradedComponent $graded_component) {
+        // Only the db marks need to be deleted since the others haven't been applied to the database
+        $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
+
+        $params = [
+            $graded_component->getTaGradedGradeable()->getId(),
+            $graded_component->getComponentId(),
+            $graded_component->getGrader()->getId()
+        ];
+        $query = "DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
-     *  Note: This does NOT delete components.  Any missing components will left alone
      * @param TaGradedGradeable $ta_graded_gradeable
      */
     private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
@@ -3033,26 +2950,26 @@ AND gc_id IN (
             foreach ($component_grades as $component_grade) {
                 // This means the component wasn't loaded from the database, ergo its new
                 if ($component_grade->getDbMarkIds() === null) {
-                    $this->createGradedComponent($ta_graded_gradeable, $component_grade);
+                    $this->createGradedComponent($component_grade);
                 } else {
-                    $this->updateGradedComponent($ta_graded_gradeable, $component_grade);
+                    $this->updateGradedComponent($component_grade);
                 }
 
                 // If the marks have been modified, this means we need to update the entries
                 if ($component_grade->isMarksModified()) {
                     $new_marks = array_diff($component_grade->getMarkIds(), $component_grade->getDbMarkIds() ?? []);
                     $deleted_marks = array_diff($component_grade->getDbMarkIds() ?? [], $component_grade->getMarkIds());
-                    $this->deleteGradedComponentMarks(
-                        $ta_graded_gradeable,
-                        $component_grade,
-                        $deleted_marks);
-                    $this->createGradedComponentMarks(
-                        $ta_graded_gradeable,
-                        $component_grade,
-                        $new_marks);
+                    $this->deleteGradedComponentMarks($component_grade, $deleted_marks);
+                    $this->createGradedComponentMarks($component_grade, $new_marks);
                 }
             }
         }
+
+        // Iterate through deleted graded components and see if anything should be deleted
+        foreach ($ta_graded_gradeable->getDeletedGradedComponents() as $component_grade) {
+            $this->deleteGradedComponent($component_grade);
+        }
+        $ta_graded_gradeable->clearDeletedGradedComponents();
     }
 
     /**
@@ -3126,10 +3043,20 @@ AND gc_id IN (
     }
 
     /**
-     * Deletes an entry from the gradeable_data table with the provided data id
-     * @param int $ta_graded_gradeable_id
+     * Deletes an entry from the gradeable_data table
+     * @param TaGradedGradeable $ta_graded_gradeable
      */
-    public function deleteTaGradedGradeable($ta_graded_gradeable_id) {
-        $this->course_db->query("DELETE FROM gradeable_data WHERE gd_id=?", [$ta_graded_gradeable_id]);
+    public function deleteTaGradedGradeable(TaGradedGradeable $ta_graded_gradeable) {
+        $this->course_db->query("DELETE FROM gradeable_data WHERE gd_id=?", [$ta_graded_gradeable->getId()]);
+    }
+
+    /**
+     * Deletes an entry from the gradeable_data table with the provided gradeable id and user/team id
+     * @param string $gradeable_id
+     * @param int $submitter_id User or Team id
+     */
+    public function deleteTaGradedGradeableByIds($gradeable_id, $submitter_id) {
+        $this->course_db->query('DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
+            [$gradeable_id, $submitter_id, $submitter_id]);
     }
 }
