@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-# this script must be run by root or sudo
-if [[ "$UID" -ne "0" ]] ; then
-    echo "ERROR: This script must be run by root or sudo"
-    exit 1
-fi
-
+# Execute this script using source so that PATH is updated for the rest of the build
 set -ev
 
 # Set the Java version
@@ -18,7 +13,6 @@ unset _JAVA_OPTIONS
 PY_VERSION_3=$(pyenv versions | grep -oP "3.6.[0-9]" || pyenv versions | grep -oP "3.5.[0-9]")
 pyenv global ${PY_VERSION_3}
 
-export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-sed -e "s?secure_path=\"?secure_path=\"/home/travis/.phpenv/shims:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
 mkdir -p ~/.local/bin
-export PATH=$HOME/.local/bin:$PATH
+export PATH="${HOME}/.local/bin:${PATH}:${HOME}/.composer/vendor/bin:/usr/bin"
+sudo sed -e "s?secure_path=\"?secure_path=\"/home/travis/.phpenv/shims:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
