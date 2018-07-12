@@ -1509,7 +1509,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-
+        $this->core->addSuccessMessage("Successfully uploaded file(s)!");
         return $this->uploadResult("Successfully uploaded!", true);
 
     }
