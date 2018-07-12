@@ -1,0 +1,58 @@
+{
+  "name": "pdf-annotate.js",
+  "version": "0.0.0",
+  "description": "Annotation layer for pdf.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "karma start --single-run",
+    "start": "./scripts/web",
+    "startindocker": "./scripts/web-docker",
+    "build": "webpack && MINIFY=1 webpack",
+    "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mzabriskie/pdf-annotate.js.git"
+  },
+  "keywords": [
+    "pdf",
+    "annotation"
+  ],
+  "author": "Matt Zabriskie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mzabriskie/pdf-annotate.js/issues"
+  },
+  "homepage": "https://github.com/mzabriskie/pdf-annotate.js#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "6.2.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.6.0",
+    "chai": "^3.5.0",
+    "coveralls": "^3.0.2",
+    "istanbul-instrumenter-loader": "^0.2.0",
+    "karma": "^2.0.4",
+    "karma-cli": "^0.1.2",
+    "karma-coverage": "^0.5.5",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-mocha": "^0.2.2",
+    "karma-sinon-chai": "^1.2.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^3.0.0",
+    "lolex": "^1.4.0",
+    "mocha": "^5.2.0",
+    "object-assign": "^4.0.1",
+    "pdfjs-dist": "1.4.162",
+    "simulant": "^0.2.0",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0",
+    "twitter-text": "^1.13.4",
+    "webpack": "1.12.14",
+    "webpack-dev-server": "1.14.1"
+  },
+  "dependencies": {
+    "create-stylesheet": "^0.3.0",
+    "object-assign": "^4.0.1"
+  }
+}

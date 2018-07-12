@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>PDFJSAnnotate</title>
+  <style type="text/css">
+    body {
+      background-color: #eee;
+    }
+    #canvas, #svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      box-shadow: 0 0 5px #999;
+    }
+    fieldset {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+    fieldset label {
+      display: inline-block;
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <fieldset>
+    <legend>Controls</legend>
+    <label for="scale">Scale</label>
+    <input id="scale" type="range" min=".25" max="2" step=".25" value="1"/><br/>
+    <label for="rotation">Rotate</label>
+    <input id="rotation" type="range" min="0" max="360" step="90" value="0"/>
+  </fieldset>
+  <script src="../shared/pdf.js"></script>
+  <script src="../__build__/shared.js"></script>
+  <script src="../__build__/basic.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>PDFJSAnnotate</title>
+  <link rel="stylesheet" type="text/css" href="../shared/toolbar.css"/>
+  <style type="text/css">
+    body {
+      background: #eee;
+    }
+    .page {
+      position: relative;
+      width: 550px;
+      height: 700px;
+      margin: 0 auto 25px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+    .page > .annotationLayer,
+    .page > .textLayer {
+      position: absolute;
+      top: 10px;
+      left: 25px;
+      right: 25px;
+      bottom: 25px;
+      width: 500px;
+      height: 665px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="rectangle" type="button" title="Rectangle" data-tooltype="area">&nbsp;</button>
+    <button class="highlight" type="button" title="Highlight" data-tooltype="highlight">&nbsp;</button>
+    <button class="strikeout" type="button" title="Strikeout" data-tooltype="strikeout">&nbsp;</button>
+
+    <div class="spacer"></div>
+    
+    <a href="javascript://" class="clear" title="Clear">×</a>
+  </div>
+  <div class="page" id="pageContainer1" data-page-number="1">
+    <svg class="annotationLayer" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="textLayer">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent arcu sem, hendrerit a feugiat at, faucibus id ligula. Morbi eget interdum libero. Quisque vel mauris a diam semper dignissim in iaculis lorem. Ut condimentum, ipsum quis volutpat volutpat, nibh magna malesuada nisi, non rhoncus arcu risus at turpis. Maecenas id auctor arcu. Suspendisse eget convallis arcu, eget vestibulum elit. Nam consectetur erat sed magna tincidunt, ut commodo risus dignissim. Duis porta accumsan quam, quis congue nunc semper a.</p>
+    <p>Integer feugiat ex vel ex varius pellentesque. Sed urna ex, faucibus id porttitor at, elementum elementum orci. Nullam augue nibh, auctor at maximus id, sollicitudin quis purus. Aliquam et pharetra magna. Proin elementum semper ultricies. Phasellus viverra lectus ac nulla iaculis auctor. Praesent nec iaculis est, eu dapibus felis. Sed eu dolor egestas, consectetur purus sit amet, sollicitudin nulla. Vivamus placerat rhoncus quam, rutrum finibus turpis commodo in. Curabitur a mi turpis.</p>
+    <p>Nulla faucibus lacinia diam, a tempor dui bibendum id. Curabitur sagittis nisl ac nulla porttitor, sit amet venenatis nibh interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis ipsum nibh, rhoncus volutpat justo vitae, pulvinar dignissim quam. Praesent nibh nulla, aliquet pharetra scelerisque ut, lobortis et lorem. Morbi consequat enim lectus, eget rhoncus ante convallis non. Integer in tempor est, eu ornare libero. Pellentesque pretium tellus eu orci ultricies dignissim. Suspendisse vel dui vitae orci condimentum suscipit a nec elit. Sed auctor felis eget tellus pharetra fermentum. Pellentesque a posuere ipsum. Curabitur venenatis ex et ipsum vestibulum, nec pretium augue dictum.</p>
+    </p>
+    </div>
+  </div>
+  <div class="page" id="pageContainer2" data-page-number="2">
+    <svg class="annotationLayer" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="textLayer">
+      <p>Nunc quam nulla, tempor vitae rutrum ac, lacinia ut turpis. Sed vel nulla interdum, consequat odio id, finibus metus. Nullam porta feugiat turpis vitae cursus. Vestibulum turpis lorem, blandit eget purus nec, ultricies tempor orci. Curabitur id enim ac odio rhoncus finibus. Fusce sit amet laoreet ligula, in faucibus purus. Etiam non lacinia lectus. Aliquam vel metus id lacus pretium consectetur. Phasellus turpis neque, vestibulum sit amet ipsum in, tincidunt elementum sapien. Maecenas vitae risus fermentum, malesuada arcu vel, efficitur ex. Vestibulum consequat egestas dolor, in sagittis augue placerat quis. Pellentesque in est at lacus tincidunt convallis in nec nulla. Vestibulum dictum lectus sed pulvinar posuere. Donec ac ante porttitor lorem pellentesque sagittis quis ut urna. Aliquam erat volutpat. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      <p>Donec hendrerit risus ac eros imperdiet laoreet. Mauris nec leo velit. Pellentesque tincidunt lacus eros, in vulputate risus efficitur a. In hac habitasse platea dictumst. Nam egestas, sapien vitae blandit semper, ante sapien tempus tellus, eget semper ex purus blandit ante. Nam a sapien ac nulla elementum tempor. Morbi venenatis at lorem non mattis. Maecenas nec sem id nulla fermentum porta in at augue. Donec id lacus sed urna faucibus pellentesque. Aenean dignissim iaculis leo, id dapibus risus euismod id.</p>
+      <p>Vivamus ornare lorem rutrum, consequat nunc at, rhoncus nunc. Quisque et dictum lacus, eget consequat justo. Nunc vestibulum tellus erat, non tincidunt dui fermentum ac. Fusce non felis mollis orci dictum tincidunt in nec dolor. Morbi est mi, elementum eget commodo nec, eleifend vestibulum sapien. Vestibulum venenatis eget sapien vel sollicitudin. Nunc libero neque, rhoncus sit amet accumsan ut, commodo et dui. Cras quis dui eget quam posuere eleifend. Cras tortor massa, scelerisque vitae diam ac, bibendum placerat ligula. Nunc sed turpis sit amet nisi efficitur euismod hendrerit at mauris. Integer pellentesque metus eu semper fringilla. Suspendisse eget nisi ullamcorper, sagittis est aliquam, dictum felis. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>
+    </div>
+  </div>
+  <script src="../__build__/shared.js"></script>
+  <script src="../__build__/rect.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,11 @@
+language: node_js
+addons:
+  firefox: latest
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+after_success:
+  - npm run coveralls
+email:
+  on_failure: change
+  on_success: never

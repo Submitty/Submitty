@@ -1,0 +1,12 @@
+#!/bin/bash
+
+source=./web
+output=./web-dist
+app=./node_modules/.bin/webpack
+
+mkdir -p $output
+cp -rf ./shared/ $output/shared/
+cp $source/example.pdf $output
+cp $source/index.html $output
+
+$app --config ./webpack.web-build.js

@@ -73,15 +73,19 @@
     </div>
     </div>
     <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
-        <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
-        <br>
-        <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
-        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
-        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
+        <div id="viewer"></div>
+        {#<span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>#}
+        {#<br>#}
+        {#<span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>#}
+        {#<a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>#}
+        {#<div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>#}
     </div>
 </div>
 
 {# todo: Move to ta-grading.js #}
+<script src="js/pdf-annotation/web/shared/pdf.js"></script>
+<script src="js/pdf-annotation/web/shared/pdf_viewer.js"></script>
+<script src="js/pdf-annotation/build.js"></script>
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
