@@ -168,9 +168,15 @@ class SimpleGraderController extends GradingController  {
         }
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
 
-        // TODO: $rows needs to be GradedGradeable's (pending #2344)
-        $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key, $sort_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $graders, $section_key);
+        $student_full = json_encode(array_map(function(User $user) {
+            return ['value' => $user->getId(),
+                'label' => $user->getDisplayedFirstName() . ' '
+                    . $user->getLastName()
+                    . ' <' . $user->getId() . '>'];
+        }, $students));
+
+        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key);
     }
 
     public function save($action) {

@@ -131,8 +131,8 @@
                 </tbody>
                 {# /Section header #}
                 <tbody id="section-{{ section_id }}" data-numnumeric="{{ components_numeric|length }}" data-numtext="{{ components_text|length }}" data-compids="{{ component_ids }}">
-                    {% for row in section.rows %}
-                        {{ self.render_row(self, action, gradeable, section, row, loop.index0 + row_index_start, components_numeric) }}
+                    {% for grade in section.rows %}
+                        {{ self.render_row(self, action, gradeable, section, grade, loop.index0 + row_index_start, components_numeric) }}
                     {% endfor %}
                 </tbody>
                 {% set row_index_start = row_index_start + section.rows|length %}
@@ -147,30 +147,30 @@
 </div>
 
 {# Render one student's row in the table #}
-{% macro render_row(self, action, gradeable, section, row, index, components_numeric) %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  row.getUser().getId() }}" data-row="{{ index }}"
+{% macro render_row(self, action, gradeable, section, grade, index, components_numeric) %}
+    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
     >
         <td class="">{{ index + 1 }}</td>
-        <td class="">{{ row.getUser().getRegistrationSection() }}</td>
-        <td class="cell-all" style="text-align: left">{{ row.getUser().getId() }}</td>
-        <td class="" style="text-align: left">{{ row.getUser().getDisplayedFirstName() }}</td>
-        <td class="" style="text-align: left">{{ row.getUser().getLastName() }}</td>
+        <td class="">{{ grade.getSubmitter().getUser().getRegistrationSection() }}</td>
+        <td class="cell-all" style="text-align: left">{{ grade.getSubmitter().getId() }}</td>
+        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getDisplayedFirstName() }}</td>
+        <td class="" style="text-align: left">{{ grade.getSubmitter().getUser().getLastName() }}</td>
 
         {% if action == 'lab' %}
-            {{ self.render_lab_cols(self, gradeable, section, row, index) }}
+            {{ self.render_lab_cols(self, gradeable, section, grade, index) }}
         {% else %}
-            {{ self.render_numeric_cols(self, gradeable, section, row, index, components_numeric) }}
+            {{ self.render_numeric_cols(self, gradeable, section, grade, index, components_numeric) }}
         {% endif %}
     </tr>
 {% endmacro %}
 
 {# Render the grading columns for a lab #}
-{% macro render_lab_cols(self, gradeable, section, row, index) %}
-    {% for component in row.getComponents() %}
-        {% if component.getIsText() %}
+{% macro render_lab_cols(self, gradeable, section, grade, index) %}
+    {% for component in grade.getGradeable().getComponents() %}
+        {% if component.isText() %}
             <td>
                 {{ component.getComment() }}
             </td>
@@ -179,17 +179,20 @@
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
                 data-id="{{ component.getId() }}"
-                data-score="{{ component.getScore() }}"
-                {% if component.getGrader() != null %}
-                    data-grader="{{ component.getGrader().getId() }}"
-                {% endif %}
-                {% if component.getGradeTime() != null %}
-                    data-grade-time="{{ component.getGradeTime().format("Y-m-d H:i:s") }}"
-                {% endif %}
-                {% if component.getScore() == 1.0 %}
-                    style="background-color: #149bdf;"
-                {% elseif component.getScore() == 0.5 %}
-                    style="background-color: #88d0f4;"
+                {% if grade.getTaGradedGradeable() != null and grade.getTaGradedGradeable().getGradedComponent(component) != null %}
+                    {% set component_grade = grade.getTaGradedGradeable().getGradedComponent(component) %}
+                    data-score="{{ component_grade.getScore() }}"
+                    {% if component_grade.getGrader() != null %}
+                        data-grader="{{ component_grade.getGrader().getId() }}"
+                    {% endif %}
+                    {% if component_grade.getGradeTime() != null %}
+                        data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
+                    {% endif %}
+                    {% if component_grade.getScore() == 1.0 %}
+                        style="background-color: #149bdf;"
+                    {% elseif component_grade.getScore() == 0.5 %}
+                        style="background-color: #88d0f4;"
+                    {% endif %}
                 {% endif %}
             ></td>
         {% endif %}

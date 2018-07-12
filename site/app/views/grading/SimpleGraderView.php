@@ -13,11 +13,11 @@ class SimpleGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables
-     * @param array       $graders
+     * @param array $graders
      * @param string $section_type
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $graders, $section_type) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -35,15 +35,6 @@ class SimpleGraderView extends AbstractView {
         }
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
-
-        // FIXME: use the database iterator for this
-        // Get all the names/ids from all the students
-        $student_full = json_encode(array_map(function(GradedGradeable $gg) {
-            return ['value' => $gg->getSubmitter()->getId(),
-                'label' => $gg->getSubmitter()->getUser()->getDisplayedFirstName() . ' '
-                    . $gg->getSubmitter()->getUser()->getLastName()
-                    . ' <' . $gg->getSubmitter()->getId() . '>'];
-        }, $graded_gradeables));
 
         $components_numeric = [];
         $components_text = [];
@@ -64,6 +55,7 @@ class SimpleGraderView extends AbstractView {
         $sections = array();
 
         // Iterate through every row
+        /** @var GradedGradeable $graded_gradeable */
         foreach ($graded_gradeables as $graded_gradeable) {
             if ($gradeable->isGradeByRegistration()) {
                 $section = $graded_gradeable->getSubmitter()->getUser()->getRegistrationSection();
