@@ -950,137 +950,141 @@ class ElectronicGraderController extends GradingController {
         $overwrite = $_POST['overwrite'];
         $version_updated = "false"; //if the version is updated
 
+        //find the component
+        $component = null;
+        foreach ($gradeable->getComponents() as $question) {
+            if (is_array($question)) {
+                if ($question[0]->getId() == $_POST['gradeable_component_id']) {
+                    continue;
+                }
+                $found = false;
+                foreach ($question as $peer) {
+                    if ($peer->getGrader() === null) {
+                        $component = $peer;
+                        $found = true;
+                        break;
+                    }
+                    if ($peer->getGrader()->getId() == $grader_id) {
+                        $component = $peer;
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $component = $this->core->getQueries()->getGradeableComponents($gradeable->getId())[$question[0]->getId()];
+                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($question->getId());
+                    $component->setMarks($marks); //I think this does nothing
+                }
+                break;
+            } else if ($question->getId() == $_POST['gradeable_component_id']) {
+                $component = $question;
+                break;
+            }
+        }
+
         //checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $gradeable, "component" => $component])) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
         }
 
-      //save the component
-        foreach ($gradeable->getComponents() as $component) {
-            if(is_array($component)) {
-                if($component[0]->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-                $found = false;
-                foreach($component as $peer) {
-                    if($peer->getGrader() === null) {
-                        $component = $peer;
-                        $found = true;
-                        break;
-                    }
-                    if($peer->getGrader()->getId() == $grader_id) {
-                        $component = $peer;
-                        $found = true;
-                        break;
-                    }
-                }
-                if(!$found){
-                    $component = $this->core->getQueries()->getGradeableComponents($gradeable->getId())[$component[0]->getId()];
-                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($component->getId());
-                    $component->setMarks($marks); //I think this does nothing
-                }
-            }
-            else if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
-            }
-            //checks if a component has changed, i.e. a mark has been selected or unselected since last time
-            //also checks if all the marks are false
-            $index = 0;
-            $temp_mark_selected = false;
-            $all_false = true;
-            $debug = "";
-            $mark_modified = false;
-            foreach ($component->getMarks() as $mark) {
-                if (isset($_POST['num_existing_marks'])) {
-                    if ($index >= $_POST['num_existing_marks']) {
-                        break;
-                    }   
-                }
-                $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
-                if($all_false === true && $temp_mark_selected === true) {
-                    $all_false = false;
-                }
-                if($temp_mark_selected !== $mark->getHasMark()) {
-                    $mark_modified = true;
-                }
-                $index++;
-            }
-            for ($i = $index; $i < $_POST['num_mark']; $i++) {
-                if ($_POST['marks'][$i]['selected'] == 'true') {
-                    $all_false = false;
-                    $mark_modified = true;
+        //checks if a component has changed, i.e. a mark has been selected or unselected since last time
+        //also checks if all the marks are false
+        $index = 0;
+        $temp_mark_selected = false;
+        $all_false = true;
+        $debug = "";
+        $mark_modified = false;
+        foreach ($component->getMarks() as $mark) {
+            if (isset($_POST['num_existing_marks'])) {
+                if ($index >= $_POST['num_existing_marks']) {
                     break;
                 }
             }
+            $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
+            if($all_false === true && $temp_mark_selected === true) {
+                $all_false = false;
+            }
+            if($temp_mark_selected !== $mark->getHasMark()) {
+                $mark_modified = true;
+            }
+            $index++;
+        }
+        for ($i = $index; $i < $_POST['num_mark']; $i++) {
+            if ($_POST['marks'][$i]['selected'] == 'true') {
+                $all_false = false;
+                $mark_modified = true;
+                break;
+            }
+        }
 
-            if($all_false === true) {
-                if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
-                    $all_false = false;
-                }
+        if($all_false === true) {
+            if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
+                $all_false = false;
             }
+        }
 
-            if($mark_modified === false) {
-                if (array_key_exists('custom_message', $_POST) && $component->getComment() != $_POST['custom_message']) {
-                    $mark_modified = true;
-                }
-                if (array_key_exists('custom_points', $_POST) && $component->getScore() != $_POST['custom_points']) {
-                    $mark_modified = true;
-                }
+        if($mark_modified === false) {
+            if (array_key_exists('custom_message', $_POST) && $component->getComment() != $_POST['custom_message']) {
+                $mark_modified = true;
             }
-            //if no gradeable id exists adds one to the gradeable data
-            if($gradeable->getGdId() == null) {
-                $gradeable->saveGradeableData();
+            if (array_key_exists('custom_points', $_POST) && $component->getScore() != $_POST['custom_points']) {
+                $mark_modified = true;
             }
-            if($all_false === true) {
-                $component->deleteData($gradeable->getGdId());
-                $debug = 'delete';
-            } else {
-                //only change the component information is the mark was modified or componet and its gradeable are out of sync.
-                if ($component->getGrader() === null || $overwrite === "true") {
-                    $component->setGrader($this->core->getUser());
-                }
-                $version_updated = "true";
-                $component->setGradedVersion($_POST['active_version']);
-                $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
-                $component->setComment($_POST['custom_message']);
-                $component->setScore($_POST['custom_points']);
-                $debug = $component->saveGradeableComponentData($gradeable->getGdId());
+        }
+        //if no gradeable id exists adds one to the gradeable data
+        if($gradeable->getGdId() == null) {
+            $gradeable->saveGradeableData();
+        }
+        if($all_false === true) {
+            $component->deleteData($gradeable->getGdId());
+            $debug = 'delete';
+        } else {
+            //only change the component information is the mark was modified or componet and its gradeable are out of sync.
+            if ($component->getGrader() === null || $overwrite === "true") {
+                $component->setGrader($this->core->getUser());
             }
+            $version_updated = "true";
+            $component->setGradedVersion($_POST['active_version']);
+            $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $component->setComment($_POST['custom_message']);
+            $component->setScore($_POST['custom_points']);
+            $debug = $component->saveGradeableComponentData($gradeable->getGdId());
+        }
 
-            $index = 0;
-            //delete marks that have been deleted
-            // save existing marks
-            if (array_key_exists('marks', $_POST)) {
-                foreach ($_POST['marks'] as $post_mark) {
-                    if (isset($_POST['num_existing_marks'])) {
-                        if ($index >= $_POST['num_existing_marks']) {
-                            break;
-                        }
+        $index = 0;
+        //delete marks that have been deleted
+        // save existing marks
+        if (array_key_exists('marks', $_POST)) {
+            foreach ($_POST['marks'] as $post_mark) {
+                if (isset($_POST['num_existing_marks'])) {
+                    if ($index >= $_POST['num_existing_marks']) {
+                        break;
                     }
-                    $mark = null;
-                    foreach ($component->getMarks() as $cmark) {
-                        if ($cmark->getId() == $post_mark['id']) {
-                            $mark = $cmark;
-                            break;
-                        }
+                }
+                $mark = null;
+                foreach ($component->getMarks() as $cmark) {
+                    if ($cmark->getId() == $post_mark['id']) {
+                        $mark = $cmark;
+                        break;
                     }
-                    if ($mark != null) {
-                        $mark->setId($post_mark['id']);
-                        $mark->setPoints($post_mark['points']);
-                        $mark->setNote($post_mark['note']);
-                        $mark->setOrder($post_mark['order']);
-                        $mark->setHasMark($post_mark['selected'] == 'true');
-                        $mark->save();
-                        if ($all_false === false) {
-                            $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-                        }
-                        $index++;
+                }
+                if ($mark != null) {
+                    $mark->setId($post_mark['id']);
+                    $mark->setPoints($post_mark['points']);
+                    $mark->setNote($post_mark['note']);
+                    $mark->setOrder($post_mark['order']);
+                    $mark->setHasMark($post_mark['selected'] == 'true');
+                    $mark->save();
+                    if ($all_false === false) {
+                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
                     }
+                    $index++;
                 }
             }
         }
+
         $gradeable->resetUserViewedDate();
         $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
         $this->core->getOutput()->renderJson($response);
@@ -1204,50 +1208,53 @@ class ElectronicGraderController extends GradingController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
 
-        if (!$this->core->getAccess()->canI("grading.get_mark_data", ["gradeable" => $gradeable])) {
+        $component = null;
+        foreach ($gradeable->getComponents() as $question) {
+            if (is_array($question)) {
+                if ($question[0]->getId() != $_POST['gradeable_component_id']) {
+                    continue;
+                }
+                foreach ($question as $cmpt) {
+                    if ($cmpt->getGrader() == null) {
+                        $component = $cmpt;
+                        break;
+                    }
+                    if ($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
+                        $component = $cmpt;
+                        break;
+                    }
+                }
+                break;
+            } else {
+                if ($question->getId() != $_POST['gradeable_component_id']) {
+                    continue;
+                }
+                $component = $question;
+                break;
+            }
+        }
+
+        if (!$this->core->getAccess()->canI("grading.get_mark_data", ["gradeable" => $gradeable, "component" => $component])) {
             $response = array('status' => 'failure');
             $this->core->getOutput()->renderJson($response);
             return $response;
         }
 
         $return_data = array();
-        foreach ($gradeable->getComponents() as $question) {
-            if(is_array($question)) {
-                if($question[0]->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-                foreach($question as $cmpt) {
-                    if($cmpt->getGrader() == null) {
-                        $component = $cmpt;
-                        break;
-                    }
-                    if($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
-                        $component = $cmpt;
-                        break;
-                    }
-                }
-            }
-            else {
-                $component = $question;
-                if($component->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-            }
-            foreach ($component->getMarks() as $mark) {
-                $temp_array = array();
-                $temp_array['id'] = $mark->getId();
-                $temp_array['score'] = $mark->getPoints();
-                $temp_array['note'] = $mark->getNote();
-                $temp_array['has_mark'] = $mark->getHasMark();
-                $temp_array['is_publish'] = $mark->getPublish();
-                $temp_array['order'] = $mark->getOrder();
-                $return_data[] = $temp_array;
-            }
+        foreach ($component->getMarks() as $mark) {
             $temp_array = array();
-            $temp_array['custom_score'] = $component->getScore();
-            $temp_array['custom_note'] = $component->getComment();
+            $temp_array['id'] = $mark->getId();
+            $temp_array['score'] = $mark->getPoints();
+            $temp_array['note'] = $mark->getNote();
+            $temp_array['has_mark'] = $mark->getHasMark();
+            $temp_array['is_publish'] = $mark->getPublish();
+            $temp_array['order'] = $mark->getOrder();
             $return_data[] = $temp_array;
         }
+        $temp_array = array();
+        $temp_array['custom_score'] = $component->getScore();
+        $temp_array['custom_note'] = $component->getComment();
+        $return_data[] = $temp_array;
 
         $response = array('status' => 'success', 'data' => $return_data);
         $this->core->getOutput()->renderJson($response);

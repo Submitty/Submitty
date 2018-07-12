@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use app\models\Gradeable;
+use app\models\GradeableComponent;
 use app\models\GradingSection;
 use app\models\User;
 use InvalidArgumentException;
@@ -41,9 +42,17 @@ class Access {
     const CHECK_CSRF                    = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
     const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+    /**
+     * Check if the given component allows peer grading
+     * Only applies to students
+     */
+    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 11 | self::REQUIRE_ARG_COMPONENT;
 
     /** If the current set of flags requires the "gradeable" argument */
-    const REQUIRE_ARG_GRADEABLE         = 1 << 31;
+    const REQUIRE_ARG_GRADEABLE         = 1 << 24;
+    /** If the current set of flags requires the "gradeable" argument */
+    const REQUIRE_ARG_COMPONENT         = 1 << 25;
+
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -69,9 +78,9 @@ class Access {
         $this->permissions["grading.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
         $this->permissions["grading.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["grading.get_mark_data"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.get_mark_data"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_COMPONENT_PEER_STUDENT;
         $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.add_one_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.delete_one_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -165,6 +174,21 @@ class Access {
                     if (!$this->checkPeerAssignment($gradeable)) {
                         return false;
                     }
+                }
+            }
+        }
+
+        if (self::checkBits($checks, self::REQUIRE_ARG_COMPONENT)) {
+            /* @var GradeableComponent|null $component */
+            $component = $this->requireArg($args, "component");
+            if ($component === null) {
+                return false;
+            }
+
+            if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
+                //Make sure a component allows students to access it via peer grading
+                if (!$component->getIsPeer()) {
+                    return false;
                 }
             }
         }
