@@ -90,7 +90,19 @@ class NavigationView extends AbstractView {
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
-	// ======================================================================================
+        // ======================================================================================
+        // UPLOAD SITE WRAPPER BUTTON -- only visible to instructors
+        // ======================================================================================
+        if($this->core->getUser()->accessAdmin() && $this->core->getConfig()->getWrapperEnabled()) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper', 'action' => 'upload_wrapper')),
+                "title" => "Upload Site Wrapper",
+                "class" => "btn btn-primary"
+            ]);
+        }
+
+
+	    // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {

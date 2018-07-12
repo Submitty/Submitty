@@ -1,0 +1,13 @@
+{% import _self as self %}
+<div class="content">
+	<h2>Upload Site Wrapper</h2>
+	<br><br>
+	<p>/documentation</p>
+	<br>
+
+	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_wrapper'}) }}" method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+		Upload a file: <input type="file" name="wrapper_upload"><br />
+	</form>
+
+</div>
