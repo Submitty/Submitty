@@ -188,7 +188,7 @@ pip3 install PyPDF2
 pip3 install parso
 
 # (yes, we need to run Python2 for clang tokenizer)
-pip install clang
+pip2 install clang
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
@@ -460,7 +460,7 @@ if [ ! -d "${clangsrc}" ]; then
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
     pushd ${clangbuild}
-    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++
     popd > /dev/null
 
     # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
