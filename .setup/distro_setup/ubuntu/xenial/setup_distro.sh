@@ -51,7 +51,7 @@ apt-get install -qqy libpam-passwdqc
 
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-9.5
-apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3 libapache2-mod-fastcgi
+apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
 apt-get install -qqy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt php7.0-zip php7.0-mbstring php7.0-xml
 
 if [ ${VAGRANT} == 1 ]; then
@@ -76,6 +76,9 @@ apt-get install -qqy ninja-build
 #CMAKE
 echo "installing cmake"
 apt-get install -qqy cmake
+
+# for Lichen (Plagiarism Detection)
+apt-get -qqy install python-clang-3.8
 
 # Install Oracle 8 Non-Interactively
 echo "installing java8"

@@ -11,7 +11,6 @@ use app\models\Gradeable;
 use app\models\GradeableList;
 use tests\BaseUnitTest;
 use app\models\User;
-use app\models\LateDaysCalculation;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
@@ -67,15 +66,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
     }
 
-    protected function createMockUser($id) {
+    protected function createMockUser($id, $group = null) {
         $return = $this->createMockModel(User::class);
         $return->method("getId")->willReturn($id);
-        return $return;
-    }
-
-    protected function createMockLateDaysCalculation() {
-        $return = $this->createMockModel(LateDaysCalculation::class);
-        $return->method("getGradeable")->willReturn(array('late_days_charged' => 0, 'extensions' => 0));
+        if($group !== null) {
+            $return->method("getGroup")->willReturn($group);
+        }
         return $return;
     }
 
@@ -742,6 +738,30 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
     }
 
+    /**
+     * Test that one must have at least full grading access to change the active submission version a user
+     */
+    public function testUpdateSubmissionVersionPermission() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['ta'] = 'true';
+        $return = $this->runController($this->createMockCore($user_config = array('access_full_grading' => false)));
+        $this->assertTrue($return['error']);
+        $this->assertEquals("You do not have access to that page.", $return['message']);
+        unset($_REQUEST['ta']);
+    }
+
+    /**
+     * Test that one must have at least grading access to delete split items
+     */
+    public function testDeleteSplitItemPermission() {
+        $_REQUEST['action'] = 'delete_split';
+        $return = $this->runController($this->createMockCore(array('csrf_token' => true), array('access_grading' => false)));
+        $this->assertTrue($return['error']);
+        $this->assertFalse($return['success']);
+        $this->assertEquals("You do not have access to that page.", $return['message']);
+    }
+
+
     public function testErrorInvalidCsrfToken() {
         $config = $this->config;
         $config['csrf_token'] = false;
@@ -1093,15 +1113,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
-        $ldu = $this->createMockLateDaysCalculation();
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
         $gradeable->method('getUser')->willReturn($this->createMockUser('testUser'));
-
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getGradeable')->willReturn($gradeable);
-        $core->method('loadModel')->willReturnOnConsecutiveCalls($g_list, $ldu);
+        $core->method('loadModel')->willReturnOnConsecutiveCalls($g_list);
         $return = $this->runController($core);
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
@@ -1140,7 +1158,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
-    public function testUpdateSumbmissionNoId() {
+    public function testUpdateSubmissionNoId() {
         $_REQUEST['gradeable_id'] = null;
         $_REQUEST['action'] = 'update';
         $return = $this->runController();

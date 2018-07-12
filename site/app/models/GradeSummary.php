@@ -16,9 +16,8 @@ class GradeSummary extends AbstractModel {
      * @param $student_output_json
      * @param $buckets
      * @param Gradeable[] $summary_data
-     * @param $ldu
      */
-    public function generateSummariesFromQueryResults(&$student_output_json, &$buckets, $summary_data, $ldu) {
+    public function generateSummariesFromQueryResults(&$student_output_json, &$buckets, $summary_data) {
         /* Array of Students, indexed by user_id
             Each index contains an array indexed by syllabus
             bucket which contain all assignments in the respective syllabus bucket
@@ -50,18 +49,18 @@ class GradeSummary extends AbstractModel {
                 $student_output_json[$student_id][ucwords($gradeable->getSyllabusBucket())] = array();
             }
             $student = $student_output_json[$student_id];
-            $student_output_json[$student_id] = $this->generateSummary($gradeable, $ldu, $student);
+            $total_late_used = 0;
+            $student_output_json[$student_id] = $this->generateSummary($gradeable, $student, $total_late_used);
         }
     }
 
     /**
      * @param Gradeable $gradeable
-     * @param $ldu
      * @param $student
      *
      * @return mixed
      */
-    private function generateSummary($gradeable, $ldu, $student) {
+    private function generateSummary($gradeable, $student, &$total_late_used) {
         $this_g = array();
         
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
@@ -86,7 +85,7 @@ class GradeSummary extends AbstractModel {
         
         switch ($gradeable->getType()) {
             case GradeableType::ELECTRONIC_FILE:
-                $this->addLateDays($this_g, $ldu, $gradeable);
+                $this->addLateDays($this_g, $gradeable);
                 $this->addText($this_g, $gradeable);
                 break;
             case GradeableType::NUMERIC_TEXT:
@@ -104,26 +103,25 @@ class GradeSummary extends AbstractModel {
 
     /**
      * @param $this_g
-     * @param \app\models\LateDaysCalculation $ldu
      * @param Gradeable $gradeable
      */
-    private function addLateDays(&$this_g, $ldu, $gradeable) {
-        $late_days = $ldu->getGradeable($gradeable->getUser()->getId(), $gradeable->getId());
+    private function addLateDays(&$this_g, $gradeable, &$total_late_used) {
+        $gradeable->calculateLateDays($total_late_used);
 
-        if(substr($late_days['status'], 0, 3) == 'Bad') {
+        if(substr($gradeable->getLateStatus(), 0, 3) == 'Bad') {
             $this_g["score"] = 0;
         }
-        $this_g['status'] = $late_days['status'];
+        $this_g['status'] = $gradeable->getLateStatus();
 
-        if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
+        if ($gradeable->getCurrLateCharged() != 0 && $total_late_used > 0) {
 
             // TODO:  DEPRECATE THIS FIELD
-            $this_g['days_late'] = $late_days['late_days_charged'];
+            $this_g['days_late'] = $gradeable->getCurrLateCharged();
 
             // REPLACED BY:
-            $this_g['days_after_deadline'] = $late_days['late_days_used'];
-            $this_g['extensions'] = $late_days['extensions'];
-            $this_g['days_charged'] = $late_days['late_days_charged'];
+            $this_g['days_after_deadline'] = $total_late_used;
+            $this_g['extensions'] = $gradeable->getLateDayExceptions();
+            $this_g['days_charged'] = $gradeable->getCurrLateCharged();
 
         }
         else {
@@ -177,11 +175,10 @@ class GradeSummary extends AbstractModel {
         $gradeable_id_chunks = array_chunk($gradeable_ids,$size_of_gradeable_id_chunks);
         $user_id_chunks = array_chunk($user_ids,$size_of_user_id_chunks);
         foreach($user_id_chunks as $user_id_chunk) {
-            $ldu = new LateDaysCalculation($this->core, $user_id_chunk);
             foreach ($gradeable_id_chunks as $gradeable_id_chunk) {
                 $summary_data = $this->core->getQueries()->getGradeables($gradeable_id_chunk, $user_id_chunk);
                 //Logger::debug("Got gradeables " . implode(",", $gradeable_id_chunk) . " for users " . implode(",",$user_id_chunk));
-                $this->generateSummariesFromQueryResults($student_output_json, $buckets, $summary_data, $ldu);
+                $this->generateSummariesFromQueryResults($student_output_json, $buckets, $summary_data);
                 //Logger::debug("Current memory usage: " . memory_get_usage(false) . " True memory usage: " . memory_get_usage(true));
             }
         }

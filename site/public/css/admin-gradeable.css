@@ -3,12 +3,8 @@ body {
 }
 
 input[readonly] {
-    background-color: #999999;
-}
-
-.uneditable-text {
-    color: red;
-    font-style: italic;
+    background:rgba(0,0,0,0);
+    border:none;
 }
 
 #gradeable-dates input[type="text"] {
@@ -99,9 +95,28 @@ fieldset {
     border: 1px solid silver;
     padding: 8px;
     border-radius: 4px;
+    display: block;
 }
 
 legend{
     padding: 2px;
     font-size: 12pt;
+}
+
+.table-wrapper {
+    position: relative;
+}
+.table-scroll {
+    width: 1150px;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.table-wrapper table {
+    width:100%;
+}
+
+table#grader-history th, table#grader-history td {
+    padding: 8px;
+    border: 3px solid black;
+    text-align: center;
 }

@@ -3,10 +3,30 @@
 # Usage:
 #   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
 
+err_message() {
+    >&2 echo -e "
+#####################################################################
+
+                        INSTALLATION FAILURE
+
+Something has gone wrong in the installation process. If you feel
+that this is in error, please create an issue on our issue tracker at
+https://github.com/Submitty/Submitty including an output of the build
+log to better help us diagnose what has gone wrong.
+#####################################################################
+"
+}
+
+# Display our error message if something fails below
+trap 'err_message' ERR
+
+# print commands as we execute and fail early
+set -ev
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 1
 fi
 
 #################################################################
@@ -19,6 +39,17 @@ CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
+
+
+# USERS / GROUPS
+DAEMON_USER=submitty_daemon
+DAEMON_GROUP=submitty_daemon
+PHP_USER=submitty_php
+PHP_GROUP=submitty_php
+CGI_USER=submitty_cgi
+CGI_GROUP=submitty_cgi
+
+DAEMONPHP_GROUP=submitty_daemonphp
 
 #################################################################
 # PROVISION SETUP
@@ -48,7 +79,9 @@ else
     export WORKER=0
 fi
 
-COURSE_BUILDERS_GROUP=course_builders
+COURSE_BUILDERS_GROUP=submitty_course_builders
+DB_USER=submitty_dbuser
+DATABASE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -70,7 +103,7 @@ fi
 # USERS SETUP
 #################
 
-${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
+python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 
 # Special users and groups needed to run Submitty
 #
@@ -78,13 +111,14 @@ ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # accounts, although you can also use ‘sudo su user’ to change to the
 # desired user on the local machine which works for most things.
 
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
+# The group DAEMONPHP_GROUP allows the PHP_USER to write the
+# submissions, but give read-only access to the DAEMON_USER.  And the
+# DAEMON_USER writes the results, and gives read-only access to the
+# PHP_USER.
 
-addgroup hwcronphp
+addgroup ${DAEMONPHP_GROUP}
 
-# The group course_builders allows instructors/head TAs/course
+# The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
 addgroup ${COURSE_BUILDERS_GROUP}
@@ -99,40 +133,41 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwphp hwcronphp
+    adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
+    usermod -a -G www-data "${CGI_USER}"
+    # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
+    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
-    adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwcgi hwphp
-    adduser hwcgi www-data
-    adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    # NOTE: hwcgi must be in the shadow group so that it has access to the
+    # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
-    adduser hwcgi shadow
+    usermod -a -G shadow "${CGI_USER}"
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
-    # the hwphp and hwcron single user groups.  See also /etc/login.defs
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+    # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and hwcron needs access to them for autograding
-adduser hwcron www-data
+adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
+# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
+usermod -a -G www-data "${DAEMON_USER}"
 
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
 if [ ${VAGRANT} == 1 ]; then
-	# add these users so that they can write to .vagrant/logs folder
+    # add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser hwphp vagrant
-    	adduser hwcgi vagrant
+        usermod -a -G vagrant "${PHP_USER}"
+        usermod -a -G vagrant "${CGI_USER}"
     fi
-	adduser hwcron vagrant
+    usermod -a -G vagrant "${DAEMON_USER}"
 fi
 
-usermod -aG docker hwcron
+usermod -a -G docker "${DAEMON_USER}"
 
 pip3 install -U pip
 pip3 install python-pam
@@ -149,12 +184,19 @@ pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
 
+# for Lichen / Plagiarism Detection
+pip3 install parso
+
+# (yes, we need to run Python2 for clang tokenizer)
+pip install clang
+pip3 install clang
+
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
-    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 fi
 
 #################################################################
@@ -195,9 +237,7 @@ EMMA_VER=2.0.5312
 wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}
-rm emma-${EMMA_VER}.zip
-rm index.html* > /dev/null 2>&1
+rm -rf emma-${EMMA_VER}*
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -215,7 +255,7 @@ unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
 mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
 mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
 rm -rf jacoco-${JACOCO_VER}
-rm jacoco-${JACOCO_VER}.zip
+rm -f jacoco-${JACOCO_VER}.zip
 
 chmod o+r . *.jar
 
@@ -231,8 +271,6 @@ popd > /dev/null
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
-
-
 
 DRMEM_TAG=release_2.0.0_rc2
 DRMEM_VER=2.0.0-RC2
@@ -252,12 +290,14 @@ popd > /dev/null
 
 #Set up website if not in worker mode
 if [ ${WORKER} == 0 ]; then
+    PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+
     # install composer which is needed for the website
     curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -287,19 +327,28 @@ if [ ${WORKER} == 0 ]; then
         phpenmod xdebug
 
         # In case you reprovision without wiping the drive, don't paste this twice
-        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/7.0/cli/conf.d/20-xdebug.ini) ]
+        if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
         then
             # Tell it to send requests to our host on port 9000 (PhpStorm default)
-            cat << EOF >> /etc/php/7.0/cli/conf.d/20-xdebug.ini
+            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
 [xdebug]
 xdebug.remote_enable=1
 xdebug.remote_port=9000
 xdebug.remote_host=10.0.2.2
 EOF
         fi
+
+        if [ -z $(grep 'xdebug\.profiler_enable_trigger' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
+        then
+            # Allow remote profiling and upload outputs to the shared folder
+            cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
+xdebug.profiler_enable_trigger=1
+xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+EOF
+        fi
     fi
 
-    cp ${SUBMITTY_REPOSITORY}/.setup/php7.0-fpm/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
+    cp ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
@@ -312,12 +361,12 @@ EOF
     # you’ll need to increase both upload_max_filesize and
     # post_max_filesize
 
-    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/7.0/fpm/php.ini
-    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/7.0/fpm/php.ini
+    sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -339,7 +388,7 @@ EOF
         DISABLED_FUNCTIONS+="phpinfo,"
     fi
 
-    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
+    sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/${PHP_VERSION}/fpm/php.ini
 fi
 
 # create directories and fix permissions
@@ -347,7 +396,6 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 #Set up database and copy down the tutorial repo if not in worker mode
 if [ ${WORKER} == 0 ]; then
-
     # create a list of valid userids and put them in /var/local/submitty/instructors
     # one way to create your list is by listing all of the userids in /home
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -357,72 +405,35 @@ if [ ${WORKER} == 0 ]; then
     # POSTGRES SETUP
     #################
     if [ ${VAGRANT} == 1 ]; then
-    	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-    	cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
-    	cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
-    	echo "Creating PostgreSQL users"
-    	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
-    	echo "Finished creating PostgreSQL users"
+        PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}.[0-9]{1,}' | head -1)"
+        if [ ! -d "/etc/postgresql/${PG_VERSION}" ]; then
+            # PG 10.x stopped putting the minor version in the folder name
+            PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
+        fi
+        cp /etc/postgresql/${PG_VERSION}/main/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf.backup
+        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+        echo "Creating PostgreSQL users"
+        su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
+        echo "Finished creating PostgreSQL users"
 
-    	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-    	service postgresql restart
-    fi
-
-
-    #################################################################
-    # CLONE THE TUTORIAL REPO
-    #################
-
-    # grab the tutorial repo, which includes a number of curated example
-    # assignment configurations
-
-    if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
-        echo 'Submitty/Tutorial git repo already exists'
-        echo 'You may need to manually pull updates to this repo'
-    else
-        git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-        pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial
-        # remember to change this version in .setup/travis/autograder.sh too
-        git checkout v0.94
-        popd > /dev/null
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        service postgresql restart
     fi
 fi
 
-#################################################################
-# ANALYSIS TOOLS SETUP
-#################
-
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools ]; then
-    echo 'Submitty/AnalysisTools git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
-fi
 
 
 #################################################################
-# LICHEN SETUP
+# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen ]; then
-    echo 'Submitty/Lichen git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/Lichen' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Lichen
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+
+if [ $? -eq 1 ]; then
+    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
+    echo -n "Exiting install_system.sh"
+    exit 1
 fi
-
-
-#################################################################
-# RainbowGrades SETUP
-#################
-
-if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades ]; then
-    echo 'Submitty/RainbowGrades git repo already exists'
-    echo 'You may need to manually pull updates to this repo'
-else
-    git clone 'https://github.com/Submitty/RainbowGrades' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
-fi
-
 
 
 #################################################################
@@ -467,7 +478,7 @@ echo Beginning Submitty Setup
 #If in worker mode, run configure with --worker option.
 if [ ${WORKER} == 1 ]; then
     echo  Running configure submitty in worker mode
-    ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
+    python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
     # This should be set by setup_distro.sh for whatever distro we have, but
@@ -476,40 +487,40 @@ else
         SUBMISSION_URL='http://192.168.56.101'
     fi
     echo -e "/var/run/postgresql
-    hsdbu
-    hsdbu
+    ${DB_USER}
+    ${DATABASE_PASSWORD}
     America/New_York
     ${SUBMISSION_URL}
     ${GIT_URL}/git
 
-    1" | ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
-        ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
+        python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
 fi
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
-    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+    dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+    PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty"
+    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 fi
 
 echo Beginning Install Submitty Script
-source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 
 # (re)start the submitty grading scheduler daemon
@@ -521,15 +532,6 @@ sudo systemctl enable submitty_autograding_worker
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/instructors
-    mkdir -p ${SUBMITTY_DATA_DIR}/bin
-    touch ${SUBMITTY_DATA_DIR}/instructors/authlist
-    touch ${SUBMITTY_DATA_DIR}/instructors/valid
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/authonly.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/authonly.pl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-    [ ! -f ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl ] && cp ${SUBMITTY_REPOSITORY}/Docs/sample_bin/validate.auth.pl ${SUBMITTY_DATA_DIR}/bin/validate.auth.pl
-    chmod 660 ${SUBMITTY_DATA_DIR}/instructors/authlist
-    chmod 640 ${SUBMITTY_DATA_DIR}/instructors/valid
-
     sudo mkdir -p /usr/lib/cgi-bin
     sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
@@ -548,29 +550,31 @@ fi
 if [ ${WORKER} == 0 ]; then
     if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
-        echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
+        echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
-        DISTRO=$(lsb_release -i | sed -e "s/Distributor\ ID\:\t//g")
+        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+        VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 
         rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
 
         #################################################################
         # SET CSV FIELDS (for classlist upload data)
@@ -598,10 +602,10 @@ fi
 # cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
 # cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-# chown hwcron:hwcron -R /tmp/docker
+# chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
 # pushd /tmp/docker
-# su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+# su -c 'docker build -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
 # popd > /dev/null
 
 
@@ -610,7 +614,7 @@ fi
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
-    service php7.0-fpm restart
+    service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
 

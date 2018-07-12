@@ -118,7 +118,7 @@ class ExceptionHandler {
             }
         }
 
-        if ($log_exception) {
+       if ($log_exception) {
             Logger::fatal($message);
         }
 

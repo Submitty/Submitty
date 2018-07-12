@@ -21,7 +21,7 @@ use app\libraries\Core;
  * @method void setEmail(string $email)
  * @method int getGroup()
  * @method void setGroup(integer $group)
- * @method int getRegistrationSection()
+ * @method string getRegistrationSection()
  * @method int getRotatingSection()
  * @method void setManualRegistration(bool $flag)
  * @method bool isManualRegistration()
@@ -60,7 +60,7 @@ class User extends AbstractModel {
     /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
 
-    /** @property @var int What is the registration section that the user was assigned to for the course */
+    /** @property @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @property @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
@@ -129,7 +129,7 @@ class User extends AbstractModel {
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
-        $this->registration_section = isset($details['registration_section']) ? intval($details['registration_section']) : null;
+        $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
@@ -197,7 +197,7 @@ class User extends AbstractModel {
     }
 
     public function setRegistrationSection($section) {
-        $this->registration_section = ($section !== null) ? intval($section) : null;
+        $this->registration_section = ($section !== null) ? $section : null;
     }
 
     public function setRotatingSection($section) {
@@ -255,6 +255,9 @@ class User extends AbstractModel {
 		case 'user_group':
             //user_group check is a digit between 1 - 4.
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
+		case 'registration_section':
+			//Registration section must contain only alpha, numbers, underscores, hyphens
+			return preg_match("~^[A-Za-z0-9_\-]+$~", $data) === 1;	
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";

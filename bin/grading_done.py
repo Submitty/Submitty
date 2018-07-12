@@ -25,6 +25,10 @@ SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    OPEN_USERS_JSON = json.load(open_file)
+
+DAEMON_USER=OPEN_USERS_JSON['daemon_user']
 
 # ======================================================================
 # some error checking on the queues (& permissions of this user)
@@ -53,7 +57,7 @@ def main():
         for pid in pid_list:
             try:
                 proc = psutil.Process(pid)
-                if 'hwcron' == proc.username():
+                if DAEMON_USER == proc.username():
                     if (len(proc.cmdline()) >= 2 and
                         proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_shipper.py")):
                         num_procs+=1
