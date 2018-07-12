@@ -23,11 +23,6 @@ echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | su
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
 
 apt-get install -qqy python python-dev python3 python3-dev libpython3.6
-if [ ! -x "$(command -v pip)" ]; then
-    wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-    python3 /tmp/get-pip.py
-    rm -f /tmp/get-pip.py
-fi
 
 apt-get -qqy update
 
