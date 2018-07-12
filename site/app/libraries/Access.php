@@ -112,30 +112,30 @@ class Access {
         }
 
         //Check user group first
-        if ($group === User::GROUP_STUDENT && !($checks & self::ALLOW_STUDENT)) {
+        if ($group === User::GROUP_STUDENT && !self::checkBits($checks, self::ALLOW_STUDENT)) {
             return false;
-        } else if ($group === User::GROUP_LIMITED_ACCESS_GRADER && !($checks & self::ALLOW_LIMITED_ACCESS_GRADER)) {
+        } else if ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        } else if ($group === User::GROUP_FULL_ACCESS_GRADER && !($checks & self::ALLOW_FULL_ACCESS_GRADER)) {
+        } else if ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
-        } else if ($group === User::GROUP_INSTRUCTOR && !($checks & self::ALLOW_INSTRUCTOR)) {
+        } else if ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
             return false;
         }
 
-        if ($checks & self::CHECK_CSRF) {
+        if (self::checkBits($checks, self::CHECK_CSRF)) {
             if ($this->core->checkCsrfToken()) {
                 return false;
             }
         }
 
-        if ($checks & self::REQUIRE_ARG_GRADEABLE) {
+        if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
             /* @var Gradeable|null $gradeable */
             $gradeable = $this->requireArg($args, "gradeable");
             if ($gradeable === null) {
                 return false;
             }
 
-            if (($checks & self::CHECK_GRADEABLE_MIN_GROUP) === self::CHECK_GRADEABLE_MIN_GROUP) {
+            if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
                     //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
@@ -145,22 +145,22 @@ class Access {
                 }
             }
 
-            if (($checks & self::CHECK_HAS_SUBMISSION) === self::CHECK_HAS_SUBMISSION) {
+            if (self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
                 if ($gradeable->getActiveVersion() <= 0) {
                     return false;
                 }
             }
 
-            if ((($checks & self::CHECK_GRADING_SECTION_GRADER) === self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+            if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
                 if (!$this->checkGradingSection($gradeable)) {
                     return false;
                 }
             }
 
-            if ((($checks & self::CHECK_PEER_ASSIGNMENT_STUDENT) === self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
+            if (self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //If they're allowed to view their own
-                if (!($gradeable->getUser()->getId() === $user->getId() && (($checks & self::ALLOW_SELF_GRADEABLE) === self::ALLOW_SELF_GRADEABLE))) {
+                if (!($gradeable->getUser()->getId() === $user->getId() && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE))) {
                     //Check their peer assignment
                     if (!$this->checkPeerAssignment($gradeable)) {
                         return false;
@@ -172,11 +172,27 @@ class Access {
         return true;
     }
 
+    /**
+     * Require that a named key is in the list of args. Throws otherwise
+     * @param array $args List of args
+     * @param string $name Name of required arg
+     * @return mixed Arg value
+     */
     private function requireArg(array $args, string $name) {
         if (!array_key_exists($name, $args)) {
             throw new InvalidArgumentException("Missing argument '$name'");
         }
         return $args[$name];
+    }
+
+    /**
+     * Check if a bit set matches a given bit mask
+     * @param int $bits Bit set (list of flags)
+     * @param int $test Bit mask (flags to check for)
+     * @return bool If matches
+     */
+    private function checkBits(int $bits, int $test) {
+        return ($bits & $test) === $test;
     }
 
     /**
