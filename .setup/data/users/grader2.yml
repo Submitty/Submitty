@@ -1,0 +1,8 @@
+grading_registration_group: 1
+user_firstname: Noby
+user_id: grader2
+anon_id: grader2
+user_lastname: Grader
+courses:
+  sample:
+    user_group: 3
