@@ -9,6 +9,7 @@ use app\libraries\Core;
  * Can be either registration or rotating
  *
  * @package app\models
+ * @method bool isRegistration()
  * @method string getName()
  * @method User[] getGraders()
  * @method User[] getUsers()
@@ -17,23 +18,23 @@ use app\libraries\Core;
 class GradingSection extends AbstractModel {
     /**
      * If this is a registration section (false for rotating)
-     * @var bool
+     * @property @var bool
      */
     protected $registration;
     /**
-     * @var string
+     * @property @var string
      */
     protected $name;
     /**
-     * @var User[]
+     * @property @var User[]
      */
     protected $graders;
     /**
-     * @var User[]
+     * @property @var User[]
      */
     protected $users;
     /**
-     * @var Team[]
+     * @property @var Team[]
      */
     protected $teams;
 
@@ -53,6 +54,7 @@ class GradingSection extends AbstractModel {
         }
 
         foreach ($this->users as $section_user) {
+            /* @var User $section_user */
             if ($section_user->getId() === $user->getId()) {
                 return true;
             }
@@ -67,6 +69,7 @@ class GradingSection extends AbstractModel {
         }
 
         foreach ($this->teams as $section_team) {
+            /* @var Team $section_team */
             if ($section_team->getId() === $team->getId()) {
                 return true;
             }
