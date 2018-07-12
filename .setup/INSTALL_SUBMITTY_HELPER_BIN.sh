@@ -74,10 +74,6 @@ for i in "${array[@]}"; do
     chmod -R 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
 
-#chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/autograder
-#chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
-#chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
-
 if [ "${WORKER}" == 1 ]; then
     chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 else
