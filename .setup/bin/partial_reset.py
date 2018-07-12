@@ -129,7 +129,6 @@ def main():
 
     subprocess.check_call(['bash', str(SUBMITTY_INSTALL_DIR / '.setup' / 'INSTALL_SUBMITTY.sh')])
 
-    # glob.iglob(os.path.join(args.users_path, "*.yml"))
     for user_file in Path(args.users_path).glob('*.yml'):
         user = load_data_yaml(user_file)
         delete_user(user['user_id'])
