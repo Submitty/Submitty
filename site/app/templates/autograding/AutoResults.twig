@@ -1,6 +1,6 @@
 {% import 'functions/Badge.twig' as Badge %}
 
-{% if num_visible_testcases == 1 %}
+{% if num_visible_testcases > 1 %}
     <script type="text/javascript">
         $(document).ready(function() {
             loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
@@ -69,22 +69,14 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                {# /Details button #}
-                {# Badge #}
-                {% if testcase.hasPoints() %}
-                    {% if can_view %}
-                        {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
-                    {% else %}
-                        <div class="badge">
-                            Hidden
-                            {% if gradeable.taGradesReleased() %}
-                                <br>
-                                {{ Badge.format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% elseif not has_badges %}
-                    <div class="no-badge"></div>
+            {% elseif has_badges %}
+                <div class="no-badge"></div>
+            {% endif %}
+            {# /Badge #}
+
+            <h4>
+                {% if testcase.isHidden() and show_hidden %}
+                    HIDDEN:
                 {% endif %}
                 {{ testcase.getName() }}
                 &nbsp;&nbsp;&nbsp;
