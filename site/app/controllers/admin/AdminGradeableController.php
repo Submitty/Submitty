@@ -146,31 +146,6 @@ class AdminGradeableController extends AbstractController {
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
-
-        $num_text = 0;
-        $num_numeric = 0;
-        $pdf_page = false;
-        $pdf_page_student = false;
-        if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            // Count text/numeric components if that is the gradeable type
-            foreach ($gradeable->getComponents() as $component) {
-                if ($component->isText()) {
-                    ++$num_text;
-                } else {
-                    ++$num_numeric;
-                }
-            }
-        } else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            // Get pdf page settings if electronic
-            foreach ($gradeable->getComponents() as $component) {
-                if ($component->getPage() !== 0) {
-                    $pdf_page = true;
-                    $pdf_page_student = $component->getPage() === -1;
-                }
-                break;
-            }
-        }
-
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
         // This helps determine which radio button to check when selecting config.
@@ -241,10 +216,10 @@ class AdminGradeableController extends AbstractController {
             //'inherit_teams_list' => $inherit_teams_list
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
-            'is_pdf_page' => $pdf_page,
-            'is_pdf_page_student' => $pdf_page_student,
-            'num_numeric' => $num_numeric,
-            'num_text' => $num_text,
+            'is_pdf_page' => $gradeable->isPdfUpload(),
+            'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
+            'num_numeric' => $gradeable->getNumNumeric(),
+            'num_text' => $gradeable->getNumText(),
             'type_string' => GradeableType::typeToString($gradeable->getType()),
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
