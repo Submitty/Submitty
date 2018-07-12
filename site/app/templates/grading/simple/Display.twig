@@ -111,9 +111,9 @@
                     <tr class="info persist-header">
                         <td colspan="{{ colspan }}" style="text-align: center">
                             {% if gradeable.isGradeByRegistration() %}
-                                Students Enrolled in Registration Section {{ section_id ?? "NULL" }}
+                                Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
-                                Students Assigned to Rotating Section {{ section_id ?? "NULL" }}
+                                Students Assigned to Rotating Section {{ section_id | default('NULL') }}
                             {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
