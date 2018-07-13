@@ -244,8 +244,7 @@ class SubmissionController extends AbstractController {
         //in the list, we will use this user as the team leader.
         $user_id = reset($user_ids);
 
-        $user = $this->core->getQueries()->getUserById($user_id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user, null);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
         //If this is a team assignment, we need to check that all users are on the same (or no) team.
         //To do this, we just compare the leader's teamid to the team id of every other user.
