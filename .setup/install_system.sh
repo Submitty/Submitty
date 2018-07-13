@@ -188,8 +188,7 @@ pip3 install distro
 # for Lichen / Plagiarism Detection
 pip3 install parso
 
-# (yes, we need to run Python2 for clang tokenizer)
-pip2 install clang
+# Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
