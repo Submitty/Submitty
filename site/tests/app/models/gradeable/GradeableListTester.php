@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\app\models;
+namespace tests\app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
