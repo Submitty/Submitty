@@ -160,7 +160,7 @@ jobs:
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/autograder.sh
-        - bash .setup/travis/setup.sh
+        - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
         - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
@@ -205,6 +205,7 @@ jobs:
       stage: Integration test
       language: cpp
       addons:
+        postgresql: "9.5"
         apt:
           sources:
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
@@ -227,8 +228,7 @@ jobs:
             - unzip
             - libboost-all-dev
       env: CLANG_VER="5.0.1"
-      before_install:
-        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - sudo apt-get install clang
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
@@ -240,14 +240,17 @@ jobs:
         - pip3 install PyYAML
         - pip3 install python-dateutil
         - pip3 install paramiko
+        - pip3 install psycopg2-binary
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
         - sudo chmod -R 555 /usr/local/lib/python*/
         - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
-        - sudo bash ./.setup/travis/autograder.sh
-        - bash ./.setup/travis/setup.sh
-        - sudo bash ./.setup/travis/setup_test_suite.sh
+        - sudo bash .setup/travis/autograder.sh
+        - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
+        - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
+        - sudo bash .setup/travis/setup.sh
+        - sudo bash .setup/travis/setup_test_suite.sh
       script:
         - sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
     - <<: *04-integration
