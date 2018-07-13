@@ -62,7 +62,7 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     shift
 
     # Setting it up to allow SSH as root by default
-    mkdir -m 700 /root/.ssh
+    mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
