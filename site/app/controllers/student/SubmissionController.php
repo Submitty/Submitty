@@ -3,15 +3,12 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
-use app\models\GradeableList;
-use app\models\LateDaysCalculation;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
 
@@ -19,17 +16,9 @@ use app\controllers\grading\ElectronicGraderController;
 
 class SubmissionController extends AbstractController {
 
-    /**
-     * @var GradeableList
-     */
-    private $gradeables_list;
-
     private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
                                     'assignment_settings' => false);
 
-    public function __construct(Core $core) {
-        parent::__construct($core);
-        $this->gradeables_list = $this->core->loadModel(GradeableList::class);
 
     /**
      * Tries to get a given electronic gradeable considering the active
