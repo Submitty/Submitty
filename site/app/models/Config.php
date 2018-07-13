@@ -297,7 +297,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
