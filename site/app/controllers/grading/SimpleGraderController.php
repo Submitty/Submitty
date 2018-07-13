@@ -267,7 +267,7 @@ class SimpleGraderController extends GradingController  {
 
         $num_numeric = $_POST['num_numeric'];
 
-        // FIXME: remove these parameters once we're sure we don't need them
+        // FIXME: remove these parameters in the javascript request
 //        $num_text = $_POST['num_text'];
 //        $component_ids = $_POST['component_ids'];
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
