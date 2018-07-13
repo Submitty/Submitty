@@ -178,6 +178,22 @@ class AutogradingConfig extends AbstractModel {
         return $this->early_submission_incentive;
     }
 
+    /**
+     * Gets the number of submission parts
+     * @return int
+     */
+    public function getNumParts() {
+        return count($this->part_names);
+    }
+
+    /**
+     * Gets the number of text boxes on the submission page
+     * @return int
+     */
+    public function getNumTextBoxes() {
+        return count($this->textboxes);
+    }
+
     /* Disabled setters */
 
     /** @internal */
