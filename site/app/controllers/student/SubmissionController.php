@@ -1214,7 +1214,8 @@ class SubmissionController extends AbstractController {
     }
 
     private function updateSubmissionVersion() {
-        if (isset($_REQUEST['ta'])) {
+        $ta = $_REQUEST['ta'] ?? false;
+        if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
@@ -1222,24 +1223,20 @@ class SubmissionController extends AbstractController {
                 $this->core->redirect($this->core->getConfig()->getSiteUrl());
                 return array('error' => true, 'message' => $msg);
             }
-            $ta = $_REQUEST['ta'];
-            $who = $_REQUEST['who'];
-            $mylist = new GradeableList($this->core, $this->core->getQueries()->getUserById($who));
-            $gradeable_list = $mylist->getSubmittableElectronicGradeables();
+            $ta = true;
         }
-        else{
-            $ta = false;
-            $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
-        }
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
             return array('error' => true, 'message' => $msg);
         }
 
-        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadResultDetails();
+        $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, null);
         $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
@@ -1248,7 +1245,8 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+        // If $graded_gradeable is null, that means its a team assignment and the user is on no team
+        if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
@@ -1263,14 +1261,18 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        if ($new_version > $gradeable->getHighestVersion()) {
-            $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
+        $highest_version = 0;
+        if($graded_gradeable->getAutoGradedGradeable() !== null) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
+        if ($new_version > $highest_version) {
+            $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
 
-        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
@@ -1278,16 +1280,10 @@ class SubmissionController extends AbstractController {
         }
 
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $gradeable->getUser()->getId();
-        if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if ($team !== null) {
-                $user_id = $team->getId();
-            }
-        }
+        $submitter_id = $graded_gradeable->getSubmitter()->getId();
 
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId(), $user_id, "user_assignment_settings.json");
+            $gradeable->getId(), $submitter_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $msg = "Failed to open settings file.";
@@ -1311,11 +1307,12 @@ class SubmissionController extends AbstractController {
 
         $version = ($new_version > 0) ? $new_version : null;
 
+        // FIXME: Add this kind of operation to the graded gradeable saving query
         if($gradeable->isTeamAssignment()) {
-            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $user_id, $version);
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $submitter_id, $version);
         }
         else {
-            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $user_id, null, $version);
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $submitter_id, null, $version);
         }
 
 
