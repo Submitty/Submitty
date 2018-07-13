@@ -1352,6 +1352,7 @@ class SubmissionController extends AbstractController {
             $uploaded_files[1] = $_FILES["files1"];
         }
         $errors = array();
+        $count_item = 0;
         if (isset($uploaded_files[1])) {
             $count_item = count($uploaded_files[1]["name"]);
             for ($j = 0; $j < $count_item[1]; $j++) {
