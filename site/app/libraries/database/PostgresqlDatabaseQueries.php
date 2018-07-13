@@ -282,6 +282,7 @@ SELECT";
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
   gd.array_gcd_grader_id,
+  gd.array_verifier_id,
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
@@ -291,6 +292,13 @@ SELECT";
   gd.array_gcd_user_lastname,
   gd.array_gcd_user_email,
   gd.array_gcd_user_group,
+  gd.array_gcd_user2_id,
+  gd.array_gcd_anon2_id,
+  gd.array_gcd_user_firstname2,
+  gd.array_gcd_user_preferred_firstname2,
+  gd.array_gcd_user_lastname2,
+  gd.array_gcd_user_email2,
+  gd.array_gcd_user_group2,
   CASE WHEN egd.active_version IS NULL THEN
     0 ELSE
     egd.active_version
@@ -363,6 +371,7 @@ LEFT JOIN (
     in_gcd.array_gcd_score,
     in_gcd.array_gcd_component_comment,
     in_gcd.array_gcd_grader_id,
+    in_gcd.array_verifier_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
     in_gcd.array_array_gcm_mark,
@@ -372,7 +381,14 @@ LEFT JOIN (
     in_gcd.array_gcd_user_preferred_firstname,
     in_gcd.array_gcd_user_lastname,
     in_gcd.array_gcd_user_email,
-    in_gcd.array_gcd_user_group
+    in_gcd.array_gcd_user_group,
+    in_gcd.array_gcd_user2_id,
+    in_gcd.array_gcd_anon2_id,
+    in_gcd.array_gcd_user_firstname2,
+    in_gcd.array_gcd_user_preferred_firstname2,
+    in_gcd.array_gcd_user_lastname2,
+    in_gcd.array_gcd_user_email2,
+    in_gcd.array_gcd_user_group2
   FROM gradeable_data as in_gd
   LEFT JOIN (
     SELECT
@@ -381,6 +397,14 @@ LEFT JOIN (
       array_agg(gcd_score) AS array_gcd_score,
       array_agg(gcd_component_comment) AS array_gcd_component_comment,
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
+      array_agg(verifier_id) AS array_verifier_id,
+      array_agg(u2.user_id) AS array_gcd_user2_id,
+      array_agg(u2.anon_id) AS array_gcd_anon2_id,
+      array_agg(u2.user_firstname) AS array_gcd_user_firstname2,
+      array_agg(u2.user_preferred_firstname) AS array_gcd_user_preferred_firstname2,
+      array_agg(u2.user_lastname) AS array_gcd_user_lastname2,
+      array_agg(u2.user_email) AS array_gcd_user_email2,
+      array_agg(u2.user_group) AS array_gcd_user_group2,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
@@ -402,6 +426,7 @@ LEFT JOIN (
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id
+    LEFT JOIN users AS u2 ON gcd.verifier_id = u2.user_id
     GROUP BY gcd.gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON g.g_id = gd.g_id AND (gd.gd_user_id = u.user_id OR u.user_id IN (
@@ -476,9 +501,10 @@ ORDER BY ".implode(", ", $order_by);
                                 'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
                                 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
                                 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
-                                'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
+                                'gcd_component_comment', 'gcd_grader_id','verifier_id', 'gcd_graded_version', 'gcd_grade_time',
                                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
-                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group', 'gcd_user2_id', 'gcd_user_firstname2', 'gcd_user_preferred_firstname2',
+                                'gcd_user_lastname2', 'gcd_user_email2', 'gcd_user_group2');
                 $bools = array('gc_is_text', 'gc_is_peer');
                 foreach ($fields as $key) {
                     if (isset($row['array_' . $key])) {
@@ -1139,6 +1165,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_score) as array_score,
                   json_agg(gcd_component_comment) as array_comment,
                   json_agg(gcd_grader_id) as array_grader_id,
+                  json_agg(verifier_id) as array_verifier_id,
                   json_agg(gcd_graded_version) as array_graded_version,
                   json_agg(gcd_grade_time) as array_grade_time,
                   json_agg(string_mark_id) as array_mark_id,
@@ -1155,6 +1182,18 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(ug.registration_section) AS array_grader_registration_section,
                   json_agg(ug.rotating_section) AS array_grader_rotating_section,
                   json_agg(ug.grading_registration_sections) AS array_grader_grading_registration_sections,
+                  json_agg(ug2.user_id) AS array_verifier_user_id,
+                  json_agg(ug2.anon_id) AS array_verifier_anon_id,
+                  json_agg(ug2.user_firstname) AS array_verifier_user_firstname,
+                  json_agg(ug2.user_preferred_firstname) AS array_verifier_user_preferred_firstname,
+                  json_agg(ug2.user_lastname) AS array_verifier_user_lastname,
+                  json_agg(ug2.user_email) AS array_verifier_user_email,
+                  json_agg(ug2.user_group) AS array_verifier_user_group,
+                  json_agg(ug2.manual_registration) AS array_verifier_manual_registration,
+                  json_agg(ug2.last_updated) AS array_verifier_last_updated,
+                  json_agg(ug2.registration_section) AS array_verifier_registration_section,
+                  json_agg(ug2.rotating_section) AS array_verifier_rotating_section,
+                  json_agg(ug2.grading_registration_sections) AS array_verifier_grading_registration_sections,
                   in_gcd.gd_id
                 FROM gradeable_component_data in_gcd
                   LEFT JOIN (
@@ -1177,7 +1216,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       FROM grading_registration
                       GROUP BY user_id
                     ) as sr ON u.user_id=sr.user_id
-                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
+                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND AS ug2 ON ug2.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
 

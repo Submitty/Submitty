@@ -1204,16 +1204,16 @@ VALUES (?, ?, ?)", $params);
      * @param GradeableComponent $component
      */
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
-        if($component->getGrader2() === null){
+        if($component->getVerifier() === null){
             $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), null, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader2_id, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, verifier_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
         else{
-            $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGrader2()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+            $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getVerifier()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_grader2_id, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, verifier_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
@@ -1231,14 +1231,14 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
      * @param string             $grader_id
      * @param GradeableComponent $component
      */
-    public function updateGradeableComponentData($gd_id, $grader_id, $grader2_id, GradeableComponent $component) {
+    public function updateGradeableComponentData($gd_id, $grader_id, $verifier_id, GradeableComponent $component) {
         $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(),
-                        $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $grader2_id, $component->getId(), $gd_id);
+                        $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $verifier_id, $component->getId(), $gd_id);
         $this->course_db->query("
 UPDATE gradeable_component_data
 SET
   gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
-  gcd_grader_id=?, gcd_grader2_id=?
+  gcd_grader_id=?, verifier_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
 

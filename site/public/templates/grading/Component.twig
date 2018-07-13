@@ -29,10 +29,10 @@
                     {% if component.grader == null %}
                         Ungraded!
                     {% else %}
-                        {% if component.grader2 == null %}
+                        {% if component.verifier == null %}
                             Graded by {{ component.grader.id }}
                         {% else %}
-                            Graded by {{ component.grader.id }} \ {{ component.grader2.id }}
+                            Graded by {{ component.grader.id }} \ {{ component.verifier.id }}
                         {% endif %}
                     {% endif %}
                 </span>

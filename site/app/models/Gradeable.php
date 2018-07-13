@@ -422,6 +422,16 @@ class Gradeable extends AbstractModel {
                                 }
                                 $grade_details[$j]['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
                             }
+                            if (isset($details['array_gcd_user2_id'][$j])) {
+                                $user_details2 = array();
+                                foreach ($user_fields as $key) {
+                                    $user_details2[$key] = $details["array_gcd_{$key}"][$j];
+                                }
+                                $grade_details[$j]['verifier'] = $this->core->loadModel(User::class, $user_details2);
+                            }
+                            else{
+                                $grade_details[$j]['verifier'] = null;
+                            }
                         }
                     }
                 }
