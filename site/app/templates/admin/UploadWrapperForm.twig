@@ -2,25 +2,35 @@
 <div class="content">
 	<h2>Upload Site Wrapper</h2>
 	<br><br>
-	<p>/documentation</p>
+	<p>
+        Instructors can upload three simple html files to use as a wrapper around the Submitty website.<br>
+        The first will go in the upper left corner, the second across the top, and the third along the side
+    </p>
 	<br>
 
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="upper-left">
-		Upload the html for the upper left: <input type="file" name="wrapper_upload"><br />
+		Upload the html for the upper left: <input type="file" name="wrapper_upload">
+		<input type="submit" value="Upload" />
+        <br />
 	</form>
 	<br>
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="upper-right">
-		Upload the html for the upper right: <input type="file" name="wrapper_upload"><br />
+		Upload the html for the top: <input type="file" name="wrapper_upload">
+		<input type="submit" value="Upload" />
+        <br />
 	</form>
 	<br>
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="lower-left">
-		Upload the html for the lower left: <input type="file" name="wrapper_upload"><br />
+		Upload the html for the lower left:
+        <input type="file" name="wrapper_upload">
+        <input type="submit" value="Upload" />
+        <br />
 	</form>
 
 </div>
