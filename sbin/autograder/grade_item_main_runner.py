@@ -97,9 +97,9 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
       logfile.flush()
 
 
-      os.system('ls -al {0}'.format(tmp_work))
-      print('checkpoint (system exit)')
-      sys.exit(1)
+      # os.system('ls -al {0}'.format(tmp_work))
+      # print('checkpoint (system exit)')
+      # sys.exit(1)
 
       killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                          which_untrusted,

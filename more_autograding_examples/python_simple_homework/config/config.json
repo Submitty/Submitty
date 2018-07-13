@@ -8,7 +8,7 @@
             "validation" : [
                 {
                     "method" : "diff",
-                    "actual_file" : "STDOUT.txt",
+                    "actual_file" : "test00/STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "hw01part1_sol.txt"
                 }
