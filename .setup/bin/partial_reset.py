@@ -10,30 +10,33 @@ nice balance for developing when we're not actively changing integral parts of t
 would require a new vagrant install (or at least a rerun of install_system.sh).
 """
 import argparse
-import glob
 import os
-import platform
+from pathlib import Path
 import pwd
 import shutil
 import json
+import subprocess
+
+import distro
 import yaml
 
-CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
-SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT/Submitty"
-SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
-SUBMITTY_DATA_DIR = "/var/local/submitty"
+CURRENT_PATH = Path(__file__).resolve().parent
+SETUP_DATA_PATH = Path(CURRENT_PATH, "..", "data").resolve()
+SUBMITTY_REPOSITORY = Path("/usr/local/submitty/GIT_CHECKOUT/Submitty")
+SUBMITTY_INSTALL_DIR = Path("/usr/local/submitty")
+SUBMITTY_DATA_DIR = Path("/var/local/submitty")
 
 
 def load_data_yaml(file_path):
     """
     Loads yaml file from the .setup/data directory returning the parsed structure
     :param file_path: name of file to load
+    :type file_path: Path
     :return: parsed YAML structure from loaded file
     """
-    if not os.path.isfile(file_path):
+    if not file_path.is_file():
         raise IOError("Missing the yaml file {}".format(file_path))
-    with open(file_path) as open_file:
+    with file_path.open() as open_file:
         yaml_file = yaml.safe_load(open_file)
     return yaml_file
 
@@ -49,8 +52,8 @@ def delete_user(user_id):
     try:
         pwd.getpwnam(user_id)
         os.system("userdel " + user_id)
-        if os.path.isdir("/home/" + user_id):
-            shutil.rmtree("/home/" + user_id)
+        if Path('/home', user_id).is_dir():
+            shutil.rmtree(str(Path('/home', user_id)))
         return True
     except KeyError:
         pass
@@ -61,7 +64,7 @@ def cmd_exists(cmd):
     """
     Given a command name, checks to see if it exists on the system, return True or False
     """
-    return os.system("type " + str(cmd)) == 0
+    return shutil.which(cmd) is not None
 
 
 def parse_args():
@@ -70,10 +73,10 @@ def parse_args():
     parser.add_argument("--force", action="store_true",
                         help="Run this script skipping the 'are you sure' prompts. These are also "
                              "bypassed if .vagrant folder is detected.")
-    parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
+    parser.add_argument("--users_path", default=str(SETUP_DATA_PATH / "users"),
                         help="Path to folder that contains .yml files to use for user creation. "
                              "Defaults to ../data/users")
-    parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
+    parser.add_argument("--courses_path", default=str(SETUP_DATA_PATH / "courses"),
                         help="Path to the folder that contains .yml files to use for course "
                              "creation. Defaults to ../data/courses")
     return parser.parse_args()
@@ -81,69 +84,74 @@ def parse_args():
 
 def main():
     """Primary function"""
+    if not cmd_exists('psql'):
+        raise SystemExit('Postgresql must be installed for this script to run!')
+
     args = parse_args()
-    if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")) and not args.force:
+    if not Path(CURRENT_PATH, '..', '..', '.vagrant').is_dir() and not args.force:
         inp = input("Do you really want to reset the system? There's no undo! [y/n]")
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
     shutil.rmtree('/var/local/submitty', True)
-    os.system("mkdir -p {}/courses".format(SUBMITTY_DATA_DIR))
-    os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
-    os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
+    Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
 
-    distro = platform.linux_distribution()[0].lower()
-    if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
-        os.system("rm -rf {}/logs".format(SUBMITTY_DATA_DIR))
-        os.system('rm -rf {}/.vagrant/{}/logs'.format(SUBMITTY_REPOSITORY, distro))
+    distro_name = distro.id()
+    distro_version = distro.lsb_release_attr('codename')
 
-        os.system('mkdir {}/.vagrant/{}/logs'.format(SUBMITTY_REPOSITORY, distro))
-        os.system('ln -s {}/.vagrant/{}/logs {}'.format(SUBMITTY_REPOSITORY, distro, SUBMITTY_DATA_DIR))
+    # Clean out the log files, but leave the folders intact
+    if Path(CURRENT_PATH, "..", "..", ".vagrant").is_dir():
+        repo_path = SUBMITTY_REPOSITORY / '.vagrant' / distro_name / distro_version / 'logs' / 'submitty'
+        data_path = SUBMITTY_DATA_DIR / 'logs'
+        data_path.mkdir()
+        if repo_path.exists():
+            shutil.rmtree(str(repo_path))
+        repo_path.mkdir()
+        for folder in ['autograding', 'access', 'site_errors']:
+            repo_log_path = repo_path / folder
+            data_log_path = data_path / folder
+            repo_log_path.mkdir()
+            data_log_path.symlink_to(repo_log_path)
 
-        os.system('mkdir {}/.vagrant/{}/logs/autograding'.format(SUBMITTY_REPOSITORY, distro))
-        os.system('mkdir {}/.vagrant/{}/logs/access'.format(SUBMITTY_REPOSITORY, distro))
-        os.system('mkdir {}/.vagrant/{}/logs/site_errors'.format(SUBMITTY_REPOSITORY, distro))
+    with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
+        submitty_config_json = json.load(submitty_config)
+        os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
+        db_user = submitty_config_json["database_user"]
+    os.system('psql -d postgres -U '+db_user+' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
+              'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
+              'pid <> pg_backend_pid();"')
+    os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
+              "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
+    os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
+    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'migrator.py')
+    subprocess.check_call(['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial'])
+    del os.environ['PGPASSWORD']
 
-    if cmd_exists('psql'):
-        with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as submitty_config:
-            submitty_config_json = json.load(submitty_config)
-            os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
-            db_user = submitty_config_json["database_user"]
-        os.system('psql -d postgres -U '+db_user+' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
-                  'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
-                  'pid <> pg_backend_pid();"')
-        os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
-                  "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
-        os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
-        os.system('psql -d submitty -U '+db_user+' -f {}/migration/data/submitty_db.sql'.format(SUBMITTY_REPOSITORY))
-        migrator_script=os.path.join(SUBMITTY_REPOSITORY,'migration','migrator.py')
-        os.system("python3 "+migrator_script+" migrate --fake")
-        del os.environ['PGPASSWORD']
+    subprocess.check_call(['bash', str(SUBMITTY_INSTALL_DIR / '.setup' / 'INSTALL_SUBMITTY.sh')])
 
-    os.system("bash {}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
-
-    for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
+    for user_file in Path(args.users_path).glob('*.yml'):
         user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
-    if os.path.isfile(os.path.join(SETUP_DATA_PATH, "random_users.txt")):
-        with open(os.path.join(SETUP_DATA_PATH, "random_users.txt")) as open_file:
+    random_users = SETUP_DATA_PATH / 'random_users.txt'
+    if random_users.is_file():
+        with random_users.open() as open_file:
             for line in open_file:
                 delete_user(line.strip())
 
     groups = []
-    for course_file in glob.iglob(os.path.join(args.courses_path, "*.yml")):
+    for course_file in Path(args.courses_path).glob('*.yml'):
         course = load_data_yaml(course_file)
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
-        for queue in ["to_be_graded_queue"]:
-            path = os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))
-            for queue_file in glob.iglob(path):
-                os.remove(queue_file)
+        for queue in ['to_be_graded_queue']:
+            for queue_file in Path(SUBMITTY_DATA_DIR, queue).glob("*__{}__*".format(course['code'])):
+                queue_file.unlink()
 
     for group in groups:
         os.system('groupdel ' + group)
+
 
 if __name__ == "__main__":
     main()

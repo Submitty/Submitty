@@ -466,7 +466,7 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->useTAGrading()) {
-                    list($components_total, $TA_percent) = $this->getTAPercent($gradeable);
+                    list($components_total, $TA_percent) = $gradeable->getGradingProgress();
 
                     if ($TA_percent === 100) {
                         //If they're done, change the text to REGRADE
@@ -589,97 +589,6 @@ class NavigationView extends AbstractView {
         }
 
         return null;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return array
-     */
-    private function getTAPercent(Gradeable $gradeable): array {
-        $gradeable_id = $gradeable->getId();
-
-        //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
-        $total_users = array();
-        $no_team_users = array();
-        $graded_components = array();
-        $graders = array();
-        if ($gradeable->isGradeByRegistration()) {
-            if (!$this->core->getUser()->accessFullGrading()) {
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
-            } else {
-                $sections = $this->core->getQueries()->getRegistrationSections();
-                foreach ($sections as $i => $section) {
-                    $sections[$i] = $section['sections_registration_id'];
-                }
-            }
-            $section_key = 'registration_section';
-            if (count($sections) > 0) {
-                $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-            }
-        } else {
-            if (!$this->core->getUser()->accessFullGrading()) {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-            } else {
-                $sections = $this->core->getQueries()->getRotatingSections();
-                foreach ($sections as $i => $section) {
-                    $sections[$i] = $section['sections_rotating_id'];
-                }
-            }
-            $section_key = 'rotating_section';
-            if (count($sections) > 0) {
-                $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
-            }
-        }
-        if (count($sections) > 0) {
-            if ($gradeable->isTeamAssignment()) {
-                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
-                $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key);
-            } else {
-                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-                $no_team_users = array();
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            }
-        }
-
-        $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable_id);
-        $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
-        $sections = array();
-        if (count($total_users) > 0) {
-            foreach ($num_submitted as $key => $value) {
-                $sections[$key] = array(
-                    'total_components' => $value * $num_components,
-                    'graded_components' => 0,
-                    'graders' => array()
-                );
-                if ($gradeable->isTeamAssignment()) {
-                    $sections[$key]['no_team'] = $no_team_users[$key];
-                }
-                if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                }
-                if (isset($graders[$key])) {
-                    $sections[$key]['graders'] = $graders[$key];
-                }
-            }
-        }
-        $components_graded = 0;
-        $components_total = 0;
-        foreach ($sections as $key => $section) {
-            if ($key === "NULL") {
-                continue;
-            }
-            $components_graded += $section['graded_components'];
-            $components_total += $section['total_components'];
-        }
-        if ($components_total == 0) {
-            $TA_percent = 0;
-        } else {
-            $TA_percent = $components_graded / $components_total;
-            $TA_percent = $TA_percent * 100;
-        }
-        return array($components_total, $TA_percent);
     }
 
     public function deleteGradeableForm() {
