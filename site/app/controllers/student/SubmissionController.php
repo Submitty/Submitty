@@ -293,21 +293,6 @@ class SubmissionController extends AbstractController {
     * Its error checking has overlap with ajaxUploadSubmission.
     */
     private function ajaxBulkUpload() {
-        if (!isset($_POST['num_pages'])) {
-            $msg = "Did not pass in number of pages or files were too large.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
-
-        // This checks for an assignment id, and that it's a valid assignment id in that
-        // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
-        }
-
         // make sure is admin
         if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
@@ -315,10 +300,23 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
+        if (!isset($_POST['num_pages'])) {
+            $msg = "Did not pass in number of pages or files were too large.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+
+        // This checks for an assignment id, and that it's a valid assignment id in that
+        // it corresponds to one that we can access (whether through admin or it being released)
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
+        }
+
         $num_pages = $_POST['num_pages'];
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $gradeable_list[$gradeable_id];
-        $gradeable->loadResultDetails();
 
         // making sure files have been uploaded
 
@@ -327,6 +325,7 @@ class SubmissionController extends AbstractController {
         }
 
         $errors = array();
+        $count = 0;
         if (isset($uploaded_file)) {
             $count = count($uploaded_file["name"]);
             for ($j = 0; $j < $count; $j++) {
@@ -345,7 +344,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Upload Failed: ".$error_text, false);
         }
 
-        $max_size = $gradeable->getMaxSize();
+        $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
     	if ($max_size < 10000000) {
     	    $max_size = 10000000;
     	}
@@ -433,8 +432,6 @@ class SubmissionController extends AbstractController {
             FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult($output['message'],false);
         }
-
-        $gradeable->loadResultDetails();
 
         $return = array('success' => true);
         $this->core->getOutput()->renderJson($return);
