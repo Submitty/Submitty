@@ -93,7 +93,7 @@ class NavigationView extends AbstractView {
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
-	    // ======================================================================================
+        // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {
