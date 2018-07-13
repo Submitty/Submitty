@@ -224,6 +224,7 @@ class SimpleGraderController extends GradingController  {
             $data = $_POST['scores'][$component->getId()] ?? '';
             // This catches both the not-set and blank-data case
             if ($data !== '') {
+                // Note: This also sets the grader of the component to $grader
                 $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
 
                 if ($component->isText()) {
