@@ -466,10 +466,6 @@ class HomeworkView extends AbstractView {
                 'student_id' => $gradeable->getUser()->getId()
             ));
         }
-      /*  return $this->core->getOutput()->renderTwigTemplate("submission/regrade/RequestForm.twig", [
-            "btn_type" => $btn_type,
-            "url" => $url,
-        ]);*/
 return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
             "posts" => $posts,
             "gradeable" => $gradeable,
@@ -488,7 +484,8 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             $url = $this->core->buildUrl(array('component' => 'student',
                 'action' => 'request_regrade',
                 'gradeable_id' => $gradeable->getId(),
-                'student_id' => $this->core->getUser()->getId()
+                'student_id' => $gradeable->getUser()->getId(),
+                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'request_regrade';
         } 
@@ -498,7 +495,8 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
                     $url = $this->core->buildUrl(array('component' => 'student',
                         'action' => 'make_request_post',
                         'gradeable_id' => $gradeable->getId(),
-                        'student_id' => $gradeable->getUser()->getId(),
+                        'user_id' => $this->core->getUser()->getId(),
+                        'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId()),
                         'resolved' => false
                     ));
                 $action = 'make_request_post_admin';
@@ -508,7 +506,8 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
                     $url = $this->core->buildUrl(array('component' => 'student',
                         'action' => 'make_request_post',
                         'gradeable_id' => $gradeable->getId(),
-                        'student_id' => $gradeable->getUser()->getId(),
+                        'user_id' => $this->core->getUser()->getId(),
+                        'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId()),
                         'resolved' => true
                     ));
                 $action = 'make_request_post_admin';
@@ -519,15 +518,17 @@ return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussi
             $url = $this->core->buildUrl(array('component' => 'student',
                 'action' => 'make_request_post',
                 'gradeable_id' => $gradeable->getId(),
-                'student_id' => $gradeable->getUser()->getId()
+                'user_id' => $gradeable->getUser()->getId(),
+                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'make_request_post';
         } else {
             $btn_type = "completed";
             $url = $this->core->buildUrl(array('component' => 'student',
                 'gradeable_id' => $gradeable->getId(),
-                'student_id' => $gradeable->getUser()->getId(),
-                'action' => 'make_request_post'
+                'user_id' => $gradeable->getUser()->getId(),
+                'action' => 'make_request_post',
+                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'request_regrade';
         }

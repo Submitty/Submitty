@@ -109,14 +109,11 @@ class SubmissionController extends AbstractController {
     }
 
     private function deleteRequest(){
-        //if($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()){
-      //      $this->core->addErrorMessage("You do not have permission to delete regrade requests");
-       //     $this->core->redirect($this->core->getConfig()->getSiteUrl());
-       // }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
@@ -127,14 +124,9 @@ class SubmissionController extends AbstractController {
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         $status = $_REQUEST['status'];
         //TODO: set userViewedDate to null if the status is change to 1 to make the button green
-        if($status == 1){
-           // $this->core->getQueries()->getGradeable($gradeable_id, $student_id).setUserViewedDate(null);
-        }
-       // $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-      //  $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
-      //  $gradeable->setUserViewedDate(null);
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;
         }
         $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
@@ -366,9 +358,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -1419,7 +1411,7 @@ class SubmissionController extends AbstractController {
 
     private function ajaxUploadImagesFiles() {
         if($this->core->getUser()->getGroup() !== 1) {
-			     return $this->uploadResult("You have no permission to access this page", false);
+                 return $this->uploadResult("You have no permission to access this page", false);
         }
 
         if (empty($_POST)) {

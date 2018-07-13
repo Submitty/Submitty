@@ -80,13 +80,11 @@
 {% endfor %}
 {% if action == 'make_request_post' %}
 <div style="padding:20px;">
-    <form method="POST" id="replyTextForm" value="-1" action="{{ core.buildUrl({'component': 'student',
-            'action': 'make_request_post',
-            'regrade_id': thread_id,
-            'gradeable_id': gradeable.getId(),
-            'user_id': core.getUser().getId()
-        }) }}">
-                <input type="hidden" id="regrade" name="regrade" value=thread_id><input type="hidden" id="g_id" name="g_id" value=gradeable.getId()><input type="hidden" id="u_id" name="u_id" value=core.getUser().getId()><input type="hidden" id="status" name="status" value=-1>
+    <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
+        <input type="hidden" id="regrade" name="regrade" value={{ thread_id }}>
+        <input type="hidden" id="g_id" name="g_id" value={{ gradeable.getId() }} >
+        <input type="hidden" id="u_id" name="u_id" value= {{ core.getUser().getId() }}>
+        <input type="hidden" id="status" name="status" value=-1>
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="this.form.value = -1">
         <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId() }}', '{{ core.getUser().getId() }}', 1);">
@@ -95,13 +93,11 @@
 </div>
 {% elseif btn_type == 'completed' %}
 <div style="padding:20px;">
-    <form method="POST" id="replyTextForm" value="-1" action="{{ core.buildUrl({'component': 'student',
-            'action': 'make_request_post',
-            'regrade_id': thread_id,
-            'gradeable_id': gradeable.getId(),
-            'user_id': core.getUser().getId()
-        }) }}">
-                <input type="hidden" id="regrade" name="regrade" value=thread_id><input type="hidden" id="g_id" name="g_id" value=gradeable.getId()><input type="hidden" id="u_id" name="u_id" value=core.getUser().getId()><input type="hidden" id="status" name="status" value=-1>
+    <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
+        <input type="hidden" id="regrade" name="regrade" value={{ thread_id }}>
+        <input type="hidden" id="g_id" name="g_id" value={{ gradeable.getId() }}>
+        <input type="hidden" id="u_id" name="u_id" value= {{ core.getUser().getId() }}>
+        <input type="hidden" id="status" name="status" value=-1>
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Regrade Request Without Responding" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId()}}', '{{ core.getUser().getId() }}', -1);">
         <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin-top: 15px; float: right" onclick="this.form.value = 1">
@@ -110,13 +106,11 @@
 </div>
 {% elseif btn_type == 'admin_open' %}
 <div style="padding:20px;">
-    <form method="POST" id="replyTextForm" value="-1" action="{{ core.buildUrl({'component': 'student',
-            'action': 'make_request_post',
-            'regrade_id': thread_id,
-            'gradeable_id': gradeable.getId(),
-            'user_id': core.getUser().getId()
-        }) }}">
-                <input type="hidden" id="regrade" name="regrade" value=thread_id><input type="hidden" id="g_id" name="g_id" value=gradeable.getId()><input type="hidden" id="u_id" name="u_id" value=core.getUser().getId()><input type="hidden" id="status" name="status" value=-1>
+    <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
+        <input type="hidden" id="regrade" name="regrade" value={{ thread_id }}>
+        <input type="hidden" id="g_id" name="g_id" value={{ gradeable.getId() }}>
+        <input type="hidden" id="u_id" name="u_id" value= {{ core.getUser().getId() }}>
+        <input type="hidden" id="status" name="status" value=-1>
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="submit" value="Respond and Resolve Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="this.form.value = 1">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
@@ -126,13 +120,11 @@
 </div>
 {% elseif btn_type == 'admin_closed' %}
 <div style="padding:20px;">
-    <form method="POST" id="replyTextForm" value="-1" action="{{ core.buildUrl({'component': 'student',
-            'action': 'make_request_post',
-            'regrade_id': thread_id,
-            'gradeable_id': gradeable.getId(),
-            'user_id': core.getUser().getId()
-        }) }}">
-        <input type="hidden" id="regrade" name="regrade" value=thread_id><input type="hidden" id="g_id" name="g_id" value=gradeable.getId()><input type="hidden" id="u_id" name="u_id" value=core.getUser().getId()><input type="hidden" id="status" name="status" value=-1>
+    <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
+        <input type="hidden" id="regrade" name="regrade" value={{ thread_id }}>
+        <input type="hidden" id="g_id" name="g_id" value={{ gradeable.getId() }}>
+        <input type="hidden" id="u_id" name="u_id" value= {{ core.getUser().getId() }}>
+        <input type="hidden" id="status" name="status" value=-1>
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="submit" value="Post" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="this.form.value = 1">
         <input type="button" class="btn btn-default" id="cancelRegrade" value="Open Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId()}}', '{{ core.getUser().getId() }}' , -1);">
@@ -142,7 +134,10 @@
 {% else %}
 <div style="padding:20px;">
     <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
-            <input type="hidden" id="regrade" name="regrade" value=thread_id><input type="hidden" id="g_id" name="g_id" value=gradeable.getId()><input type="hidden" id="u_id" name="u_id" value=core.getUser().getId()><input type="hidden" id="status" name="status" value=-1>
+        <input type="hidden" id="regrade" name="regrade" value={{ thread_id }}>
+        <input type="hidden" id="g_id" name="g_id" value={{ gradeable.getId() }}>
+        <input type="hidden" id="u_id" name="u_id" value= {{ core.getUser().getId() }}>
+        <input type="hidden" id="status" name="status" value=-1>
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
         <input type="submit" value="Submit Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="this.form.value = -1">
         <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
