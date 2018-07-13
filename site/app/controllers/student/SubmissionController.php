@@ -209,17 +209,17 @@ class SubmissionController extends AbstractController {
             return $return;
         }
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         //usernames come in comma delimited. We split on the commas, then filter out blanks.
-        $user_ids = explode (",", $_POST['user_id']);
+        $user_ids = explode(",", $_POST['user_id']);
         $user_ids = array_filter($user_ids);
 
         //If no user id's were submitted, give a graceful error.
@@ -231,7 +231,7 @@ class SubmissionController extends AbstractController {
         }
 
         //For every userid, we have to check that its real.
-        foreach($user_ids as $id){
+        foreach ($user_ids as $id) {
             $user = $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
@@ -251,31 +251,23 @@ class SubmissionController extends AbstractController {
         $user_id = reset($user_ids);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-
-        if($gradeable === null){
-            $msg = "Gradeable not found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user, null);
 
         //If this is a team assignment, we need to check that all users are on the same (or no) team.
         //To do this, we just compare the leader's teamid to the team id of every other user.
-        if($gradeable->isTeamAssignment()){
+        if ($gradeable->isTeamAssignment()) {
             $leader_team_id = "";
             $leader_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if($leader_team !== null){
+            if ($leader_team !== null) {
                 $leader_team_id = $leader_team->getId();
             }
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user_team_id = "";
                 $user_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id);
-                if($user_team !== null){
+                if ($user_team !== null) {
                     $user_team_id = $user_team->getId();
                 }
-                if($user_team_id !== $leader_team_id){
+                if ($user_team_id !== $leader_team_id) {
                     $msg = "Inconsistent teams. One or more users are on different teams.";
                     $return = array('success' => false, 'message' => $msg);
                     $this->core->getOutput()->renderJson($return);
@@ -284,16 +276,13 @@ class SubmissionController extends AbstractController {
             }
         }
 
-
-        $gradeable->loadResultDetails();
-
-        $highest_version = $gradeable->getHighestVersion();
-        $previous_submission = false;
-        //If there has been a previous submission, we tag it so that we can pop up a warning.
-        if($highest_version > 0){
-            $previous_submission = true;
+        $highest_version = 0;
+        if ($graded_gradeable->getAutoGradedGradeable() !== null) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         }
-        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $previous_submission);
+
+        //If there has been a previous submission, we tag it so that we can pop up a warning.
+        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
         $this->core->getOutput()->renderJson($return);
 
         return $return;
