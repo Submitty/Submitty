@@ -64,6 +64,8 @@ ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 usermod -a -G travis ${PHP_USER}
 
