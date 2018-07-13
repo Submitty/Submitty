@@ -12,6 +12,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
 use app\models\LateDaysCalculation;
+use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
 
 
@@ -30,6 +31,33 @@ class SubmissionController extends AbstractController {
         parent::__construct($core);
         $this->gradeables_list = $this->core->loadModel(GradeableList::class);
 
+    /**
+     * Tries to get a given electronic gradeable considering the active
+     *  users access level and the status of the gradeable, but returns
+     *  null if no access
+     *
+     * FIXME: put this in new access control system
+     *
+     * @param string $gradeable_id
+     * @return Gradeable|null
+     * TODO: @throws \InvalidArgumentException If the gradeable id is invalid
+     */
+    public function tryGetElectronicGradeable($gradeable_id) {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
+        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
+            && ($this->core->getUser()->accessAdmin()
+                || $gradeable->getTaViewStartDate() <= $now
+                    && $this->core->getUser()->accessGrading()
+                || $gradeable->getSubmissionOpenDate() <= $now)) {
+            return $gradeable;
+        }
+        return null;
     }
 
     public function run() {
