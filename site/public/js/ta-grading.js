@@ -32,7 +32,6 @@ $(function() {
    else{
         readCookies();
         updateCookies();
-        hideIfEmpty(".rubric_panel");
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
@@ -377,7 +376,6 @@ function setAutogradingVisible(visible) {
 function setRubricVisible(visible) {
     $('.fa-pencil-square-o').toggleClass('icon-selected', visible);
     $("#grading_rubric").toggle(visible);
-    hideIfEmpty("#grading_rubric");
 }
 
 function setSubmissionsVisible(visible) {
@@ -429,7 +427,6 @@ function resetModules() {
     $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
     $('.fa-hand-paper-o').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
-    hideIfEmpty(".rubric_panel");
     deleteCookies();
     updateCookies();
 }
