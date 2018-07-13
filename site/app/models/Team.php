@@ -2,6 +2,7 @@
 
 namespace app\models;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 
 /**
  * Class Team
@@ -16,12 +17,18 @@ class Team extends AbstractModel {
     protected $registration_section;
     /** @property @var integer registration section (registration or rotating) of team creator */
     protected $rotating_section;
-    /** @property @var array containing user ids of team members */
+    /** @property @var string[] containing user ids of team members */
     protected $member_user_ids;
-    /** @propety @var array containing user ids of those invited to the team */
+    /** @property @var string[] containing user ids of those invited to the team */
     protected $invited_user_ids;
+    /** @property @var User[] containing users of team members */
+    protected $member_users;
+    /** @property @var User[] containing users of those invited to the team */
+    protected $invited_users;
     /** @property @var string containing comma-seperated list of team members */
     protected $member_list;
+    /** @var array $assignment_settings */
+    protected $assignment_settings;
 
     /**
      * Team constructor.
@@ -36,12 +43,26 @@ class Team extends AbstractModel {
         $this->rotating_section = $details['rotating_section'];
         $this->member_user_ids = array();
         $this->invited_user_ids = array();
+        $this->member_users = array();
+        $this->invited_users = array();
         foreach($details['users'] as $user_details) {
+            //If we have user details, get user objects
+            if (array_key_exists('anon_id', $user_details)) {
+                $user = new User($core, $user_details);
+            } else {
+                $user = null;
+            }
             if ($user_details['state'] === 1) {
                 $this->member_user_ids[] = $user_details['user_id'];
+                if ($user !== null) {
+                    $this->member_users[] = $user;
+                }
             }
             else if ($user_details['state'] === 0) {
                 $this->invited_user_ids[] = $user_details['user_id'];
+                if ($user !== null) {
+                    $this->invited_users[] = $user;
+                }
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
@@ -122,5 +143,18 @@ class Team extends AbstractModel {
      */
     public function sentInvite($user_id) {
         return in_array($user_id, $this->invited_user_ids);
+    }
+
+    /**
+     * Gets the data from a team's user_assignment_settings.json file
+     * @param Gradeable $gradeable
+     * @return array
+     */
+    public function getAssignmentSettings(Gradeable $gradeable) {
+        if ($this->assignment_settings === null) {
+            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $this->getId(), "user_assignment_settings.json");
+            $this->assignment_settings = FileUtils::readJsonFile($settings_file);
+        }
+        return $this->assignment_settings;
     }
 }
