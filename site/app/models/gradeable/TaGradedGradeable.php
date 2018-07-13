@@ -131,7 +131,7 @@ class TaGradedGradeable extends AbstractModel {
      * @return GradedComponent|null The graded component instance or null if not found
      * @throws \InvalidArgumentException If $grader is null and ($component is peer or $generate is true)
      */
-    public function getOrCreateGradedComponent(Component $component, User $grader, $generate = false) {
+    public function getOrCreateGradedComponent(Component $component, $grader = null, $generate = false) {
         $grades_exist = isset($this->graded_components[$component->getId()]);
         if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
