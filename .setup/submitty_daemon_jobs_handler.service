@@ -1,0 +1,14 @@
+[Unit]
+Description=Submitty Daemon Jobs Handler
+Documentation=http://submitty.org
+
+[Service]
+User=submitty_daemon
+Restart=always
+Type=simple
+ExecStart=/usr/local/submitty/sbin/submitty_daemon_jobs/submitty_daemon_jobs.py
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target
