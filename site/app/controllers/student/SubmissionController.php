@@ -461,7 +461,7 @@ class SubmissionController extends AbstractController {
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if ($gradeable) {
+        if ($gradeable === null) {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
         if (!isset($_POST['user_id'])) {
