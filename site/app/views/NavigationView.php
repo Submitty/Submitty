@@ -494,7 +494,7 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->isTaGrading()) {
-                    $TA_percent = $this->core->getUser()->getGradingPercent($gradeable);
+                    $TA_percent = $gradeable->getGradingProgress($this->core->getUser());
 
                     if ($TA_percent === 1.0) {
                         //If they're done, change the text to REGRADE
