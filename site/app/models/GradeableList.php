@@ -167,4 +167,26 @@ class GradeableList extends AbstractModel {
         }
         return $count;
     }
+
+    /**
+     * Gets the list of electronic gradeables that the current user has access to submit for. Admins have
+     * access to all gradeables, while graders have access to all gradeables that have the TA view date
+     * having passed, and then students are only allowed to submit to gradeables past its open date.
+     *
+     * @return Gradeable[]
+     */
+    public function getSubmittableElectronicGradeables() {
+        $return = array();
+        foreach ($this->gradeables as $gradeable) {
+            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+                continue;
+            }
+            if ($this->core->getUser()->accessAdmin() ||
+                ($gradeable->getTAViewDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
+                $gradeable->getOpenDate() <= $this->now) {
+                $return[$gradeable->getId()] = $gradeable;
+            }
+        }
+        return $return;
+    }
 }
