@@ -62,7 +62,7 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     shift
 
     # Setting it up to allow SSH as root by default
-    mkdir -m 700 /root/.ssh
+    mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
@@ -188,8 +188,7 @@ pip3 install distro
 # for Lichen / Plagiarism Detection
 pip3 install parso
 
-# (yes, we need to run Python2 for clang tokenizer)
-pip2 install clang
+# Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
