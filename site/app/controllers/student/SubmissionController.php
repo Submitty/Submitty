@@ -59,9 +59,6 @@ class SubmissionController extends AbstractController {
             case 'check_refresh':
                 return $this->checkRefresh();
                 break;
-            case 'pop_up':
-                return $this->popUp();
-                break;
             case 'bulk':
                 return $this->ajaxBulkUpload();
                 break;
@@ -128,13 +125,6 @@ class SubmissionController extends AbstractController {
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
-    }
-
-    private function popUp() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
-        $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showPopUp', $gradeable);
     }
 
     private function showHomeworkPage() {
