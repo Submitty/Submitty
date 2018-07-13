@@ -88,14 +88,22 @@ ${DISTRO_LINE}
 fi
 
 
-# We don't want to install pip via the system as we get an old version
-# and upgrading it is not recommended
-if [ ! -x "$(command -v pip)" ]; then
+if [ ! -x "$(command -v pip2)" ] || [ ! -x "$(command -v pip3)" ]; then
     wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+fi
+
+if [ ! -x "$(command -v pip2)" ]; then
     python2 /tmp/get-pip.py
-    python3 /tmp/get-pip.py
-    rm -f /tmp/get-pip.py
 else
     pip2 install -U pip
+fi
+
+if [ ! -x "$(command -v pip3)" ]; then
+    python3 /tmp/get-pip.py
+else
     pip3 install -U pip
+fi
+
+if [ -f /tmp/get-pip.py ]; then
+    rm -f /tmp/get-pip.py
 fi
