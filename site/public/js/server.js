@@ -814,43 +814,6 @@ function removeMessagePopup(elem) {
     });
 }
 
-function removeCourseMaterial(filename) {
-    var delete_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'delete_course_materials_file'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
-    var formData = new FormData();
-    //formData.append('csrf_token', csrf_token);
-
-    formData.append('filename', filename);
-
-    $.ajax({
-        url: delete_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-
-                if (data['success']) {
-                    window.location.href = return_url;
-                }
-                else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                }
-            }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-            }
-        },
-        error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
-            //alert("ERROR! Please contact administrator that you could not upload image files.");
-        }
-    });
-}
-
 function gradeableChange(url, sel){
     url = url + sel.value;
     window.location.href = url;
@@ -911,14 +874,14 @@ function downloadFile(file, path) {
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
 }
 
-function downloadFileWithAnyRole(file, path) {
+function downloadFileWithAnyRole(file_name, path) {
+    // Trim file without path
+    var file = file_name;
+    if (file.indexOf("/") != -1) {
+        file = file.substring(file.lastIndexOf('/')+1);
+    }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
 }
-
-function deleteCourseMaterialFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
-}
-
 
 function changeColor(div, hexColor){
     div.style.color = hexColor;

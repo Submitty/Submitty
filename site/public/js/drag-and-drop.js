@@ -866,7 +866,7 @@ function handleDownloadImages(csrf_token) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
-            //alert("ERROR! Please contact administrator that you could not upload image files.");
+            //window.location.reload(true);
         }
     });
 }
@@ -875,12 +875,13 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token) {
+function handleUploadCourseMaterials(csrf_token, requested_path) {
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
     var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
     var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
 
+    formData.append('csrf_token', csrf_token);
+    formData.append('requested_path', requested_path);
 
     // Files selected
     for (var i = 0; i < file_array.length; i++) {
@@ -912,13 +913,13 @@ function handleUploadCourseMaterials(csrf_token) {
         type: 'POST',
         success: function(data) {
             try {
-                data = JSON.parse(data);
+                var jsondata = JSON.parse(data);
 
-                if (data['success']) {
+                if (jsondata['success']) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    alert("ERROR! Please contact administrator with following error:\n\n" + jsondata['message']);
                 }
             }
             catch (e) {
@@ -928,7 +929,7 @@ function handleUploadCourseMaterials(csrf_token) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
-            //alert("ERROR! Please contact administrator that you could not upload course material files.");
+            window.location.reload(true);
         }
     });
 }

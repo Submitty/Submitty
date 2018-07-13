@@ -221,16 +221,14 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-		// delete the file from upload/course_materials
-		$filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
-		unlink($filename); //deletes the selected file from course_materials folder
+		    // delete the file from upload/course_materials
+		    $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        unlink($filename); //deletes the selected file from course_materials folder
 
-        //$this->core->getOutput()->useHeader(false);
-        //$this->core->getOutput()->useFooter(false);
-        //header('Content-Type: application/octet-stream');
-        //header("Content-Transfer-Encoding: Binary");
-        //header("Content-disposition: attachment; filename=\"{$filename}\"");
-        //readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+														  'page' => 'course_materials',
+														  'action' => 'view_course_materials_page')));
     }
 
 

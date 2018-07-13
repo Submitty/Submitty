@@ -7,13 +7,12 @@
     <h2>View Course Materials</h2>
     {% for courseMaterial in courseMaterialsArray %}
         <div class="name">{{courseMaterial}}
-        {% if '.zip' not in courseMaterial %}
+        {% if '.zip' not in courseMaterial and '.docx' not in courseMaterial %}
             <a onclick='openFileCourseMaterial("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
         {% endif %}
         <a onclick='downloadFileWithAnyRole("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
         {% if hasInstructorPermission %}
-            {# <a onclick='deleteCourseMaterialFile("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;" title="Delete the file"></i></a> #}
-            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'course', 'page': 'course_materials', 'action': 'delete_course_materials_file'}) }}","{{ courseMaterial }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': courseMaterial, 'path': folderPath~'/'~courseMaterial }) }}", "{{ courseMaterial }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
         {% endif %}
         </div>
     {% endfor %}
@@ -28,17 +27,7 @@
         return false;
     }
 </script>
-<script type="text/javascript">
-    function makeDeletion() {
-        deleteCourseMaterialFile("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}");
-    }
-    $(function() {
-        $("#submit").click(function(e){ // delete button
-            makeDeletion();
-            e.stopPropagation();
-        });
-    });
-</script>
+
 
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
 {% include('course/UploadCourseMaterialsForm.twig') %}

@@ -1531,6 +1531,15 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("Invalid CSRF token.", false);
       }
 
+	  $requested_path = "";
+	  if (isset($_POST['requested_path'])) {
+		  $requested_path = $_POST['requested_path'];
+		  //$this->core->addErrorMessage($requested_pat//h);
+      }
+	  else{
+		  //$this->core->addErrorMessage("Unable to get requested_path");
+	  }
+
       $uploaded_files = array();
       if (isset($_FILES["files1"])) {
           $uploaded_files[1] = $_FILES["files1"];
@@ -1579,6 +1588,15 @@ class SubmissionController extends AbstractController {
       if (!FileUtils::createDir($upload_img_path)) {
           return $this->uploadResult("Failed to make image path.", false);
       }
+
+	    // create nested path
+	    if (!empty($requested_path)) {
+		    $upload_nested_path = $requested_path;
+		    if (!FileUtils::createDir($upload_nested_path, null, true)) {
+			    return $this->uploadResult("Failed to make image path.", false);
+		    }
+		    $upload_img_path = $upload_nested_path;
+	    }
 
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {
