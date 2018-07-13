@@ -125,7 +125,7 @@ class ElectronicGraderController extends GradingController {
             if($verifyAll || $component->getId() == $component_id){
                 //Only verify the component if we weren't already the grader.
                 if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                    $component->setGrader2($this->core->getUser());
+                    $component->setVerifier($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
                     $verified = true;
                 }
