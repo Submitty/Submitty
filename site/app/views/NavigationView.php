@@ -200,7 +200,7 @@ class NavigationView extends AbstractView {
      */
     private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section): array {
         $buttons = [];
-        $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable) : null;
+        $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section): null;
 
         //Grade button if we can access grading
@@ -269,9 +269,10 @@ class NavigationView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
+     * @param GradedGradeable|null $graded_gradeable
      * @return Button|null
      */
-    private function getTeamButton(Gradeable $gradeable) {
+    private function getTeamButton(Gradeable $gradeable, $graded_gradeable) {
         // Team management button, only visible on team assignments
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         $past_lock_date = $date < $gradeable->getTeamLockDate();
@@ -282,7 +283,7 @@ class NavigationView extends AbstractView {
             $team_display_date = '';
         }
 
-        if ($gradeable->isTeamAssignment()) {
+        if ($graded_gradeable === null || $graded_gradeable->getSubmitter()->getTeam() === null) {
             if ($past_lock_date) {
                 $team_button_type = 'btn-primary';
             } else {
