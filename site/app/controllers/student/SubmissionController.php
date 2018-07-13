@@ -11,7 +11,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
-
+use app\models\GradeableList;
 
 
 class SubmissionController extends AbstractController {
@@ -129,7 +129,12 @@ class SubmissionController extends AbstractController {
 
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+
+        // FIXME: The GradeableList is constructed here for legacy purposes
+        // FIXME:   Replace with tryGetElectronicGradeable when converting homework view to new model
+        $gradeable_list = $this->core->loadModel(GradeableList::class);
+        /** @var \app\models\Gradeable $gradeable */
+        $gradeable = $gradeable_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         if ($gradeable !== null) {
             $error = false;
             $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
