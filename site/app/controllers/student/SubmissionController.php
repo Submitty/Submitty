@@ -679,27 +679,18 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+        if ($gradeable === null) {
             return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
         }
         if (!isset($_POST['path'])) {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $gradeable_list[$gradeable_id];
-        $gradeable->loadResultDetails();
         $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
