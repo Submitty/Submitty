@@ -1459,6 +1459,7 @@ class SubmissionController extends AbstractController {
         return $this->uploadResult("Successfully uploaded!", true);
 
     }
+
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
@@ -1468,19 +1469,20 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $version = $_REQUEST['gradeable_version'];
-        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
-        $user_id = $this->core->getUser()->getId();
+        // Don't load the graded gradeable, since that may not exist yet
+        $submitter_id = $this->core->getUser()->getId();
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($g_id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $submitter_id);
             if ($team !== null) {
-                $user_id = $team->getId();
+                $submitter_id = $team->getId();
             }
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id,
-            $user_id, $version);
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
+            $submitter_id, $version);
         if (file_exists($path."/results.json")) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
