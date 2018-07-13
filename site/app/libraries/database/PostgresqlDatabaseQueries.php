@@ -51,8 +51,8 @@ WHERE u.user_id=?", array($user_id));
         $this->course_db->query("
 SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
 FROM grading_registration
-GROUP BY user_id
-WHERE user_id=?", array($user_id));
+WHERE user_id=?
+GROUP BY user_id", array($user_id));
         return $this->course_db->row();
     }
 
