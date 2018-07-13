@@ -203,9 +203,9 @@
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
         {% for component in grade.getGradeable().getComponents() if not component.isText() %}
-            {% set total = total + component_grade.getScore() %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade.getGradedComponent(component) %}
+            {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
                     class="option-small-box"
