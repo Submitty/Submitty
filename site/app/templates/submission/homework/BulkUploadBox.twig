@@ -20,9 +20,8 @@
             </thead>
             <tbody>
                 {% for file in files %}
-                    {% set index = loop.index %}
                     <tr class="tr tr-vertically-centered">
-                        <td>{{ index }}</td>
+                        <td>{{ loop.index }}</td>
                         <td>{{ file.clean_timestamp }}</td>
                         <td>
                             {{ file.filename_full }}
@@ -36,21 +35,21 @@
                         </td>
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                            <div id="users_{{ index }}">
-                                <input type="text" id="bulk_user_id_{{ index }}[0]" value =""/>
+                            <div id="users_{{ loop.index }}">
+                                <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
                                 {% if gradeable.isTeamAssignment() %}
                                     {# (size - 1) because twig loops are range inclusive #}
                                     {% for i in 1..(gradeable.getMaxTeamSize() - 1) %}
-                                        <input type="text" id="bulk_user_id_{{ index }}[{{ i }}]" value =""/>
+                                        <input type="text" id="bulk_user_id_{{ loop.index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
                             </div>
                         </td>
                         <td>
-                            <button type="button" id="bulk_submit_{{ index }}" class="btn btn-success">Submit</button>
+                            <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-success">Submit</button>
                         </td>
                         <td>
-                            <button type="button" id="bulk_delete_{{ index }}" class="btn btn-danger">Delete</button>
+                            <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-danger">Delete</button>
                         </td>
                     </tr>
                 {% endfor %}

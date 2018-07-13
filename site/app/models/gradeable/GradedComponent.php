@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -19,10 +20,15 @@ use app\models\User;
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
+ * @method int[] getMarkIds()
+ * @method int[]|null getDbMarkIds()
+ * @method bool isMarksModified()
  */
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
     private $component = null;
+    /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
+    private $ta_graded_gradeable = null;
     /** @property @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
@@ -34,6 +40,11 @@ class GradedComponent extends AbstractModel {
 
     /** @property @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
+    /** @property @var int[]|null The mark ids the submitter received for this component as reflected in the db */
+    protected $db_mark_ids = null;
+
+    /** @property @var bool True if the marks array was modified after construction */
+    protected $marks_modified = false;
 
     /** @property @var float The score for this component (or custom mark point value) */
     protected $score = 0;
@@ -49,37 +60,35 @@ class GradedComponent extends AbstractModel {
     /**
      * GradedComponent constructor.
      * @param Core $core
+     * @param TaGradedGradeable $ta_graded_gradeable The grade this component belongs to
      * @param Component $component The component this grade is associated with
      * @param User $grader The user who graded this component
-     * @param int[] $mark_ids The mark ids this graded component received
      * @param array $details any remaining properties
      * @throws \InvalidArgumentException if any of the details are invalid, or the component/grader are null
      */
-    public function __construct(Core $core, Component $component, User $grader, array $mark_ids, array $details) {
+    public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details) {
         parent::__construct($core);
+
+        if($ta_graded_gradeable === null) {
+            throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
+        }
+        $this->ta_graded_gradeable = $ta_graded_gradeable;
 
         $this->setComponent($component);
         $this->setGrader($grader);
 
-        // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
-        //  effectively filter out any of the invalid values in $mark_ids
-        $mark_objects = [];
-        foreach($this->component->getMarks() as $mark) {
-            if(in_array($mark->getId(), $mark_ids)) {
-                $mark_objects[] = $mark;
-            }
-        }
-        $this->setMarks($mark_objects);
+        $this->setComment($details['comment'] ?? '');
+        $this->setGradedVersion($details['graded_version'] ?? 0);
+        $this->setGradeTime($details['grade_time'] ?? new \DateTime());
 
-        $this->setComment($details['comment']);
-        $this->setGradedVersion($details['graded_version']);
-        $this->setGradeTime($details['grade_time']);
-
-        // Make sure the loaded score overrides the calculated
-        //  score if it exists / there aren't any marks
-        if (isset($details['score'])) {
-            $this->setScore($details['score']);
+        // assign the default score if its not electronic (or rather not a custom mark)
+        if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+            $score = $details['score'] ?? 0;
+        } else {
+            $score = $details['score'] ?? $component->getDefault();
         }
+        $this->setScore($score);
+
         $this->modified = false;
     }
 
@@ -98,6 +107,14 @@ class GradedComponent extends AbstractModel {
      */
     public function getComponent() {
         return $this->component;
+    }
+
+    /**
+     * Gets the TaGradedGradeable that owns this graded component
+     * @return TaGradedGradeable
+     */
+    public function getTaGradedGradeable() {
+        return $this->ta_graded_gradeable;
     }
 
     /**
@@ -132,18 +149,33 @@ class GradedComponent extends AbstractModel {
 
     /**
      * Sets the marks the submitter received for this component
-     * @param array $marks
+     * @param int[] $mark_ids
      */
-    public function setMarks(array $marks) {
-        $new_mark_ids = [];
-        foreach ($marks as $mark) {
-            if (!($mark instanceof Mark)) {
-                throw new \InvalidArgumentException('Object in marks array was not a mark');
+    public function setMarkIds(array $mark_ids) {
+        // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
+        //  effectively filter out any of the invalid values in $mark_ids
+        $marks = [];
+        $actual_ids = [];
+        foreach ($this->component->getMarks() as $mark) {
+            if (in_array($mark->getId(), $mark_ids)) {
+                $marks[] = $mark;
+                $actual_ids[] = $mark->getId();
             }
-            $new_mark_ids[] = $mark->getId();
         }
         $this->marks = $marks;
-        $this->mark_ids = $new_mark_ids;
+        $this->mark_ids = $actual_ids;
+        $this->marks_modified = true;
+    }
+
+    /**
+     * Called from the db methods to load the mark ids the submitter received
+     * @param int[] $db_mark_ids
+     * @internal
+     */
+    public function setMarkIdsFromDb(array $db_mark_ids) {
+        $this->setMarkIds($db_mark_ids);
+        $this->db_mark_ids = $db_mark_ids;
+        $this->marks_modified = false;
     }
 
     /**
@@ -175,14 +207,18 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
-     * Sets the score the submitter received for this component, clamped to be
-     *  between the lower and upper clamp of the associated component
+     * Sets the score the submitter received for this component--clamped or custom mark--not clamped
      * @param float $score
      */
     public function setScore($score) {
-        // clamp the score (no error if not in bounds)
-        //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
-        $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        if ($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+            $this->score = $score;
+        } else {
+            // clamp the score (no error if not in bounds)
+            //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
+            $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
+        }
+        $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
         $this->modified = true;
     }
 
@@ -199,7 +235,7 @@ class GradedComponent extends AbstractModel {
     }
 
     /** @internal */
-    public function setMarkIds() {
-        throw new \BadFunctionCallException('Cannot set mark ids');
+    public function setDbMarkIds() {
+        throw new \BadFunctionCallException('Cannot set db mark ids');
     }
 }

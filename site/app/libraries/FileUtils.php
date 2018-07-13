@@ -125,7 +125,7 @@ class FileUtils {
                 $extension = strtolower(pathinfo($iter->getFilename(), PATHINFO_EXTENSION));
                 if ($extension === 'png') { // just get all png file only
                     $newFilename = $iter->getFilename();
-                    if (forceLowerCase) {
+                    if ($forceLowerCase) {
                         $newFilename = strtolower($newFilename);
                     }
                     copy($src . '/' . $iter->getFilename(),$dst . '/' . $newFilename);
