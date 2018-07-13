@@ -810,6 +810,59 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $this->course_db->query($query, $vals);
     }
 
+    /**
+     * Return Team object for team whith given Team ID
+     * @param string $team_id
+     * @return \app\models\Team|null
+     */
+    public function getTeamById($team_id) {
+        $this->course_db->query("
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            FROM gradeable_teams gt
+              JOIN
+              (SELECT t.team_id, t.state, u.*
+               FROM teams t
+                 JOIN users u ON t.user_id = u.user_id
+              ) AS u ON gt.team_id = u.team_id
+            WHERE gt.team_id = ?
+            GROUP BY gt.team_id",
+            array($team_id));
+        if (count($this->course_db->rows()) === 0) {
+            return null;
+        }
+        $details = $this->course_db->row();
+        $details["users"] = json_decode($details["users"], true);
+        return new Team($this->core, $details);
+    }
+
+    /**
+     * Return Team object for team which the given user belongs to on the given gradeable
+     * @param string $g_id
+     * @param string $user_id
+     * @return \app\models\Team|null
+     */
+    public function getTeamByGradeableAndUser($g_id, $user_id) {
+        $this->course_db->query("
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            FROM gradeable_teams gt
+              JOIN
+              (SELECT t.team_id, t.state, u.*
+               FROM teams t
+                 JOIN users u ON t.user_id = u.user_id
+              ) AS u ON gt.team_id = u.team_id
+            WHERE g_id=? AND gt.team_id IN (
+              SELECT team_id
+              FROM teams
+              WHERE user_id=? AND state=1)
+            GROUP BY gt.team_id",
+            array($g_id, $user_id));
+        if (count($this->course_db->rows()) === 0) {
+            return null;
+        }
+        $details = $this->course_db->row();
+        $details["users"] = json_decode($details["users"], true);
+        return new Team($this->core, $details);
+    }
 
     /**
      * Return an array of Team objects for all teams on given gradeable
@@ -818,30 +871,21 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      */
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query("
-          SELECT 
-            gt.team_id, 
-            registration_section, 
-            rotating_section,
-            members.array_user_id,
-            members.array_state
-          FROM gradeable_teams gt
-            LEFT JOIN (
-              SELECT
-                json_agg(t.user_id) as array_user_id,
-                json_agg(t.state) as array_state,
-                t.team_id
-              FROM teams t
-              GROUP BY t.team_id
-            ) AS members ON members.team_id=gt.team_id
-          WHERE g_id=?
-          ORDER BY team_id",
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            FROM gradeable_teams gt
+              JOIN
+                (SELECT t.team_id, t.state, u.*
+                 FROM teams t
+                   JOIN users u ON t.user_id = u.user_id
+                ) AS u ON gt.team_id = u.team_id
+            WHERE g_id=?
+            GROUP BY gt.team_id
+            ORDER BY team_id",
             array($g_id));
 
         $teams = array();
         foreach($this->course_db->rows() as $row) {
-            $row['users'] = array_map(function ($id, $state) {
-                return ['user_id' => $id, 'state' => $state];
-            }, json_decode($row['array_user_id']), json_decode($row['array_state']));
+            $row['users'] = json_decode($row['users'], true);
             $teams[] = new Team($this->core, $row);
         }
 
@@ -896,47 +940,100 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         // Generate placeholders for each team id
         $place_holders = implode(',', array_fill(0, count($team_ids), '?'));
         $query = "
-          SELECT 
-            g_team.team_id, 
-            registration_section, 
-            rotating_section,
-            team.array_user,
-            team.array_state
-          FROM gradeable_teams g_team
-          LEFT JOIN (
-            SELECT
-              in_team.team_id,
-              array_agg(in_team.user_id) as array_user,
-              array_agg(in_team.state) as array_state
-            FROM teams as in_team
-            GROUP BY in_team.team_id
-          ) AS team ON team.team_id=g_team.team_id
-          WHERE g_team.team_id IN ($place_holders)";
+            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            FROM gradeable_teams gt
+              JOIN
+                (SELECT t.team_id, t.state, u.*
+                 FROM teams t
+                   JOIN users u ON t.user_id = u.user_id
+                ) AS u ON gt.team_id = u.team_id
+            WHERE gt.team_id IN ($place_holders)
+            GROUP BY gt.team_id";
 
         $this->course_db->query($query, array_values($team_ids));
 
         $teams = [];
-        foreach ($this->course_db->rows() as $team_row) {
+        foreach ($this->course_db->rows() as $row) {
             // Get the user data for the team
-            $row = [];
-            $row['user'] = $this->course_db->fromDatabaseToPHPArray($team_row['array_user']);
-            $row['state'] = $this->course_db->fromDatabaseToPHPArray($team_row['array_state']);
-
-            // Transpose the users/states array
-            $users = [];
-            for ($j = 0; $j < count($row['user']); ++$j) {
-                $users[$j] = [
-                    'user_id' => $row['user'][$j],
-                    'state' => $row['state'][$j]
-                ];
-            }
+            $row['users'] = json_decode($row['users'], true);
 
             // Create the team with the query results and users array
-            $team = new Team($this->core, array_merge($team_row, ['users' => $users]));
+            $team = new Team($this->core, $row);
             $teams[$team->getId()] = $team;
         }
 
         return $teams;
+    }
+
+    /**
+     * Get an array of Teams for a Gradeable matching the given registration sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
+    public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
+        $return = array();
+        if (count($sections) > 0) {
+            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $placeholders = implode(",", array_fill(0, count($sections), "?"));
+            $params = [$g_id];
+            $params = array_merge($params, $sections);
+
+            $this->course_db->query("
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                FROM gradeable_teams gt
+                  JOIN
+                    (SELECT t.team_id, t.state, u.*
+                     FROM teams t
+                       JOIN users u ON t.user_id = u.user_id
+                    ) AS u ON gt.team_id = u.team_id
+                WHERE gt.g_id = ?
+                  AND gt.registration_section IN ($placeholders)
+                GROUP BY gt.team_id
+                ORDER BY {$orderBy}
+            ", $params);
+            foreach ($this->course_db->rows() as $row) {
+                $row["users"] = json_decode($row["users"], true);
+                $return[] = new Team($this->core, $row);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Get an array of Teams for a Gradeable matching the given rotating sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
+    public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy="rotating_section") {
+        $return = array();
+        if (count($sections) > 0) {
+            $placeholders = implode(",", array_fill(0, count($sections), "?"));
+            $params = [$g_id];
+            $params = array_merge($params, $sections);
+
+            $this->course_db->query("
+                SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+                FROM gradeable_teams gt
+                  JOIN
+                    (SELECT t.team_id, t.state, u.*
+                     FROM teams t
+                       JOIN users u ON t.user_id = u.user_id
+                    ) AS u ON gt.team_id = u.team_id
+                WHERE gt.g_id = ?
+                  AND gt.rotating_section IN ($placeholders)
+                GROUP BY gt.team_id
+                ORDER BY {$orderBy}
+            ", $params);
+            foreach ($this->course_db->rows() as $row) {
+                $row["users"] = json_decode($row["users"], true);
+                $return[] = new Team($this->core, $row);
+            }
+        }
+        return $return;
     }
 
     /**
@@ -1121,8 +1218,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Aggregate Team User Data */
               team.team_id,
-              team.array_user,
-              team.array_state,
+              team.array_team_users,
 
               /* User Submitter Data */
               u.user_id,
@@ -1164,21 +1260,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Join team data */
               LEFT JOIN (
-                SELECT
-                  g_team.team_id,
-                  registration_section,
-                  rotating_section,
-                  in_team.array_user,
-                  in_team.array_state
-                FROM gradeable_teams g_team
-                  LEFT JOIN (
+                SELECT gt.team_id,
+                  gt.registration_section,
+                  gt.rotating_section,
+                  json_agg(tu) AS array_team_users
+                FROM gradeable_teams gt
+                  JOIN (
                     SELECT
-                      in2_team.team_id,
-                      json_agg(in2_team.user_id) AS array_user,
-                      json_agg(in2_team.state) AS array_state
-                    FROM teams AS in2_team
-                    GROUP BY in2_team.team_id
-                  ) AS in_team ON in_team.team_id=g_team.team_id
+                      t.team_id,
+                      t.state,
+                      tu.*
+                    FROM teams t
+                    JOIN users tu ON t.user_id = tu.user_id
+                  ) AS tu ON gt.team_id = tu.team_id
+                GROUP BY gt.team_id
               ) AS team ON eg.team_assignment AND EXISTS (
                          SELECT 1 FROM gradeable_teams gt 
                          WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
@@ -1270,21 +1365,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $submitter = null;
             if (isset($row['team_id'])) {
                 // Get the user data for the team
-                $users_soa = [];
-                $users_soa['user'] = json_decode($row['array_user']);
-                $users_soa['state'] = json_decode($row['array_state']);
-
-                // Transpose the users/states array from Structure of Arrays to Array of Structures
-                $users_aos = [];
-                for ($j = 0; $j < count($users_soa['user']); ++$j) {
-                    $users_aos[$j] = [
-                        'user_id' => $users_soa['user'][$j],
-                        'state' => $users_soa['state'][$j]
-                    ];
-                }
+                $team_users = json_decode($row["array_team_users"], true);
 
                 // Create the team with the query results and users array
-                $submitter = new Team($this->core, array_merge($row, ['users' => $users_aos]));
+                $submitter = new Team($this->core, array_merge($row, ['users' => $team_users]));
             } else {
                 if (isset($row['grading_registration_sections'])) {
                     $row['grading_registration_sections'] = json_decode($row['grading_registration_sections']);

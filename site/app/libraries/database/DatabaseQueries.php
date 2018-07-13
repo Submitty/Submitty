@@ -616,17 +616,14 @@ ORDER BY {$section_key}", $params);
 
     public function getTotalSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
-        $params = array();
+        $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section) {
-                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section);
-            }
-            $where .= ")";
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
@@ -636,7 +633,7 @@ ON
 users.user_id = electronic_gradeable_version.user_id
 AND users.". $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
-AND electronic_gradeable_version.g_id='{$g_id}'
+AND electronic_gradeable_version.g_id=?
 {$where}
 GROUP BY {$section_key}
 ORDER BY {$section_key}", $params);
@@ -646,6 +643,59 @@ ORDER BY {$section_key}", $params);
         }
 
         return $return;
+    }
+
+    public function getTotalSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
+        }
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt, {$section_key}
+            FROM gradeable_teams
+            INNER JOIN electronic_gradeable_version
+                    ON gradeable_teams.team_id = electronic_gradeable_version.team_id
+                   AND gradeable_teams.{$section_key} IS NOT NULL
+                   AND electronic_gradeable_version.active_version>0
+                   AND electronic_gradeable_version.g_id=?
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$section_key}
+        ", $params);
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Get an array of Teams for a Gradeable matching the given registration sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
+    public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Get an array of Teams for a Gradeable matching the given rotating sections
+     * @param string $g_id
+     * @param array $sections
+     * @param string $orderBy
+     * @return Team[]
+     */
+    public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy="rotating_section") {
+        throw new NotImplementedException();
     }
 
     public function getTotalComponentCount($g_id) {
@@ -1575,19 +1625,7 @@ WHERE gcm_id=?", $params);
      * @return \app\models\Team
      */
     public function getTeamById($team_id) {
-        $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section
-          FROM gradeable_teams
-          WHERE team_id=?",
-            array($team_id));
-        if (count($this->course_db->rows()) === 0) {
-            return null;
-        }
-        $details = $this->course_db->row();
-
-        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($team_id));
-        $details['users'] = $this->course_db->rows();
-        return new Team($this->core, $details);
+        throw new NotImplementedException();
     }
 
     /**
@@ -1597,22 +1635,7 @@ WHERE gcm_id=?", $params);
      * @return \app\models\Team
      */
     public function getTeamByGradeableAndUser($g_id, $user_id) {
-        $this->course_db->query("
-          SELECT team_id, registration_section, rotating_section
-          FROM gradeable_teams
-          WHERE g_id=? AND team_id IN (
-            SELECT team_id
-            FROM teams
-            WHERE user_id=? AND state=1)",
-            array($g_id, $user_id));
-        if (count($this->course_db->rows()) === 0) {
-            return null;
-        }
-        $details = $this->course_db->row();
-
-        $this->course_db->query("SELECT user_id, state FROM teams WHERE team_id=? ORDER BY user_id", array($details['team_id']));
-        $details['users'] = $this->course_db->rows();
-        return new Team($this->core, $details);
+        throw new NotImplementedException();
     }
 
     /**
@@ -1703,12 +1726,9 @@ public function getSubmittedTeamCountByGradingSections($g_id, $sections, $sectio
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $where = "WHERE {$section_key} IN (";
-            foreach($sections_keys as $section) {
-                $where .= "?" . ($section != $sections_keys[count($sections_keys)-1] ? "," : "");
-                array_push($params, $section);
-            }
-            $where .= ")";
+            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
+            $where = "WHERE {$section_key} IN ($placeholders)";
+            $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
