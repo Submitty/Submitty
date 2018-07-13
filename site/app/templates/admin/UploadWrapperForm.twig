@@ -1,17 +1,16 @@
 {% import _self as self %}
 <div class="content">
-	<h2>Upload Site Wrapper</h2>
+	<h2>Upload Site Wrapper [WIP]</h2>
 	<br><br>
 	<p>
         Instructors can upload three simple html files to use as a wrapper around the Submitty website.<br>
-        The first will go in the upper left corner, the second across the top, and the third along the side
+        The first will go in the upper left corner, the second across the top (upper right), and the third along the left side (lower left).
     </p>
 	<br>
-
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="upper-left">
-		Upload the html for the upper left: <input type="file" name="wrapper_upload">
+		{{ html_files['up_left_file'] == null ? "Upload" : "Reupload" }} the html for the upper left: <input type="file" name="wrapper_upload">
 		<input type="submit" value="Upload" />
         <br />
 	</form>
@@ -19,7 +18,7 @@
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="upper-right">
-		Upload the html for the top: <input type="file" name="wrapper_upload">
+        {{ html_files['up_right_file'] == null ? "Upload" : "Reupload" }} the html for the upper right: <input type="file" name="wrapper_upload">
 		<input type="submit" value="Upload" />
         <br />
 	</form>
@@ -27,10 +26,24 @@
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 		<input type="hidden" name="location" value="lower-left">
-		Upload the html for the lower left:
+        {{ html_files['low_left_file'] == null ? "Upload" : "Reupload" }} the html for the lower left:
         <input type="file" name="wrapper_upload">
         <input type="submit" value="Upload" />
         <br />
 	</form>
 
 </div>
+
+{% if html_files|length > 0 %}
+    <div class="content">
+        <h2>Previous Uploads</h2>
+        <br>
+        <b>located in {{ target_dir }}</b>
+        {% for file in html_files %}
+            <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;{{ file['path'] }}
+        {% endfor %}
+
+    </div>
+
+{% endif %}

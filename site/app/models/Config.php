@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\IniParser;
 use app\libraries\Utils;
+use phpDocumentor\Reflection\File;
 
 /**
  * Class Config
@@ -133,6 +134,9 @@ class Config extends AbstractModel {
     /** @property @var array */
     protected $course_database_params = array();
 
+    /** @property @var array */
+    protected $wrapper_files = array();
+
     /** @property @var string */
     protected $course_name;
     /** @property @var string */
@@ -166,8 +170,7 @@ class Config extends AbstractModel {
     protected $forum_enabled;
     /** @property @var bool */
     protected $regrade_enabled;
-    /** @property @var bool */
-    protected $wrapper_enabled = false;
+
 
     /**
      * Config constructor.
@@ -280,7 +283,7 @@ class Config extends AbstractModel {
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled',
-            'regrade_enabled', 'wrapper_enabled');
+            'regrade_enabled');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -303,8 +306,14 @@ class Config extends AbstractModel {
         }
 
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
+        $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
+        $this->wrapper_files['up_left_html'] = FileUtils::joinPaths($wrapper_files_path, 'upper-left.html');
+        $this->wrapper_files['up_right_html'] = FileUtils::joinPaths($wrapper_files_path, 'upper-right.html');
+        $this->wrapper_files['low_left_html'] = FileUtils::joinPaths($wrapper_files_path, 'lower-left.html');
+
         $this->course_loaded = true;
-   }
+    }
+
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
@@ -325,11 +334,10 @@ class Config extends AbstractModel {
             // END TEMPORARY WORKAROUND
 
 
-            // DEFAULT FOR: FORUM || REGRADE || WRAPPER
+            // DEFAULT FOR: FORUM || REGRADE
             if (!isset($config[$section][$key]) &&
                 ($key == "forum_enabled" ||
-                 $key == "regrade_enabled" ||
-                 $key == "wrapper_enabled")) {
+                 $key == "regrade_enabled")) {
               $config[$section][$key] = false;
             }
             // DEFAULT FOR PRIVATE_REPOSITORY
@@ -398,5 +406,12 @@ class Config extends AbstractModel {
 
     public function saveCourseIni($save) {
         IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
+    }
+
+    public function wrapperEnabled() {
+        return $this->course_loaded
+            && (file_exists($this->wrapper_files['up_left_html'])
+            ||  file_exists($this->wrapper_files['up_right_html'])
+            ||  file_exists($this->wrapper_files['low_left_html']));
     }
 }

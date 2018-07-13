@@ -27,17 +27,23 @@
         <div id="upper-container">
             <div id="upper-left-container">
                 {# uploaded homepage redirect can go here? #}
+                {% if wrapper_files_exist['up_left_html'] %}
                 {{ include('@site_uploads/upper-left.html') }}
+                {% endif %}
             </div>
             <div id="upper-right-container">
                 {# uploaded banner can go here? #}
+                {% if wrapper_files_exist['up_right_html'] %}
                 {{ include('@site_uploads/upper-right.html') }}
+                {% endif %}
             </div>
         </div>
         <div id="lower-container">
             <div id="lower-left-container">
                 {# uploaded sidebar can go here? #}
+                {% if wrapper_files_exist['low_left_html'] %}
                 {{ include('@site_uploads/lower-left.html') }}
+                {% endif %}
             </div>
             <div id="lower-right-container">
     {% endif %}

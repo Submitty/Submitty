@@ -56,7 +56,7 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        if($this->core->getConfig()->getWrapperEnabled()) {
+        if($this->core->getConfig()->wrapperEnabled()) {
             $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
         }
     }
@@ -190,7 +190,7 @@ class Output {
     }
 
     public function getOutput() {
-        if($this->core->getConfig()->getWrapperEnabled()) {
+        if($this->core->getConfig()->wrapperEnabled()) {
             $this->addInternalCss('wrapper_sections.css');
         }
         $return = "";

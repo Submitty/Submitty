@@ -20,8 +20,21 @@ class WrapperController extends AbstractController {
 	private function uploadWrapperPage() {
 	    $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site');
 	    $all_files = FileUtils::getAllFiles($target_dir);
+	    $html_files = array();
+	    foreach($all_files as $file) {
+	        if($file['name'] === 'upper-left.html') {
+	            $html_files['up_left_file'] = $file;
+            }
+            else if($file['name'] === 'upper-right.html') {
+	            $html_files['up_right_file'] = $file;
+            }
+            else if($file['name'] === 'lower-left.html') {
+	            $html_files['low_left_file'] = $file;
+            }
+        }
 
-		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage');
+
+		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $target_dir, $html_files);
 	}
 
 	private function processUploadHTML() {
