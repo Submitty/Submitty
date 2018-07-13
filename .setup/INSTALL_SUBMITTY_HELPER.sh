@@ -72,6 +72,8 @@ systemctl is-active --quiet submitty_autograding_shipper
 is_shipper_active_before=$?
 systemctl is-active --quiet submitty_autograding_worker
 is_worker_active_before=$?
+systemctl is-active --quiet submitty_daemon_jobs_handler
+is_jobs_handler_active_before=$?
 
 
 ################################################################################################################
@@ -684,6 +686,10 @@ chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
 rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
 chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_worker.service
 chmod 444 /etc/systemd/system/submitty_autograding_worker.service
+# update the daemon jobs handler daemon
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_daemon_jobs_handler.service   /etc/systemd/system/submitty_daemon_jobs_handler.service
+chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_daemon_jobs_handler.service
+chmod 444 /etc/systemd/system/submitty_daemon_jobs_handler.service
 
 
 # delete the autograding tmp directories
@@ -708,8 +714,10 @@ done
 python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
-# If the submitty_autograding_shipper.service or submitty_autograding_worker.service
-# files have changed, we should reload the units:
+# If the submitty_autograding_shipper.service,
+# submitty_autograding_worker.service, or
+# submitty_daemon_jobs_handler.service files have changed, we should
+# reload the units:
 systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
@@ -739,6 +747,20 @@ if [[ "$is_worker_active_before" == "0" ]]; then
 else
     echo -e "NOTE: Submitty Grading Worker Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
+fi
+
+# start the jobs handler daemon (if it was running)
+if [[ "$is_jobs_handler_active_before" == "0" ]]; then
+    systemctl start submitty_daemon_jobs_handler
+    systemctl is-active --quiet submitty_daemon_jobs_handler
+    is_jobs_handler_active_after=$?
+    if [[ "$is_jobs_handler_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart Submitty Jobs Handler Daemon\n"
+    fi
+    echo -e "Restarted Submitty Jobs Handler Daemon\n"
+else
+    echo -e "NOTE: Submitty Jobs Handler Daemon is not currently running\n"
+    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_daemon_jobs_handler\n"
 fi
 
 ################################################################################################################
