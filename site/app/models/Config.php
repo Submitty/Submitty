@@ -167,7 +167,7 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $regrade_enabled;
     /** @property @var bool */
-    protected $wrapper_enabled;
+    protected $wrapper_enabled = false;
 
     /**
      * Config constructor.

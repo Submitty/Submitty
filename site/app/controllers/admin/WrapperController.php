@@ -7,15 +7,13 @@ use app\controllers\AbstractController;
 class WrapperController extends AbstractController {
 	public function run() {
 		switch($_REQUEST['action']) {
-			case 'upload_wrapper':
-				$this->uploadWrapper();
-				break;
+			case 'show_page':
 			default:
-				$this->core->getOutput()->showError("Invalid action request for wrapper controller");
+				$this->uploadWrapperPage();
 		}
 	}
 
-	public function uploadWrapper() {
+	public function uploadWrapperPage() {
 		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage');
 	}
 }
