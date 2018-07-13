@@ -30,13 +30,10 @@ DAEMON_UID = OPEN_JSON['daemon_uid']
 
 def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, container, which_untrusted):
 
+  #The paths to the important folders.
   tmp_work_test_input = os.path.join(tmp_work, "test_input")
   tmp_work_subission = os.path.join(tmp_work, "submission")
   tmp_work_checkout = os.path.join(tmp_work, "checkout")
-
-  # print('giving {0} rwx on {1}'.format(which_untrusted, tmp_work))
-  # grade_item.untrusted_grant_rwx_access(which_untrusted,tmp_work)
-  # print('permission granted.')
 
   queue_time_longstring = queue_obj["queue_time"]
   waittime = queue_obj["waittime"]
@@ -50,23 +47,19 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
       logfile.flush()
       testcases = complete_config_obj["testcases"]
       for testcase_num in range(len(testcases)):
+          
           #make the tmp folder for this testcase.
           testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
-          print("making {0}".format(testcase_folder))
           os.makedirs(testcase_folder)
-          print("made {0}".format(testcase_folder))
-          #Set the permissions
-          # print("setting permissions for {0}".format(which_untrusted))
+
+          #Set the permissions 
+          #TODO see if these can be made more strict. 
           # try:
           #   grade_item.add_permissions(testcase_folder, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
           # except Exception as e:
           #   print(e)
-          # print("added permissions")
-          #move into that directory
-          # print("navigating")
-          # os.chdir(testcase_folder)
-          # print("navigated")
-          print("running")
+          #Navigate into the newly created testcase folder.
+          os.chdir(testcase_folder)
 
           try:
               if USE_DOCKER:
@@ -91,14 +84,22 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                     submission_string,
                                                     str(testcase_num)],
                                                     stdout=logfile)
-              print("ran")
               logfile.flush()
           except Exception as e:
               print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
               logfile.flush()
+          finally:
+              #move back to the tmp_work directory (up one level)
+              os.chdir(tmp_work)
 
+      
       print ("LOGGING END my_runner.out",file=logfile)
       logfile.flush()
+
+
+      os.system('ls -al {0}'.format(tmp_work))
+      print('checkpoint (system exit)')
+      sys.exit(1)
 
       killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                          which_untrusted,
