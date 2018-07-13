@@ -10,7 +10,6 @@ def up(config):
     clang_ver = p3.communicate()[0].strip()
 
     os.system("sudo apt-get -qqy install python-clang-{}".format(clang_ver))
-    os.system("sudo pip2 install clang")
     os.system("sudo pip3 install clang")
 
     # python tokenzier
