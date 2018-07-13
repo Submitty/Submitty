@@ -23,11 +23,6 @@ echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | su
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
 
 apt-get install -qqy python python-dev python3 python3-dev libpython3.6
-if [ ! -x "$(command -v pip)" ]; then
-    wget --tries=5 https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-    python3 /tmp/get-pip.py
-    rm -f /tmp/get-pip.py
-fi
 
 apt-get -qqy update
 
@@ -64,6 +59,9 @@ if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy php-xdebug
 fi
 
+#Add the scrot screenshotting program
+apt-get install -qqy scrot
+
 # Add additional packages for compiling, authentication, and security,
 # and program support
 
@@ -81,6 +79,9 @@ apt-get install -qqy ninja-build
 #CMAKE
 echo "installing cmake"
 apt-get install -qqy cmake
+
+# for Lichen (Plagiarism Detection)
+apt-get install -qqy python-clang-6.0
 
 # Install Oracle 8 Non-Interactively
 echo "installing java8"

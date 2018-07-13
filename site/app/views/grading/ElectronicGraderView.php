@@ -3,12 +3,10 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
-use app\models\GradeableComponent;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
-use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -340,9 +338,7 @@ class ElectronicGraderView extends AbstractView {
                     $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
-                    $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
-                    $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-                    $user_assignment_setting_json = json_encode($user_assignment_setting);
+                    $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
                     $members = json_encode($row->getTeam()->getMembers());
                     $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL" : $row->getTeam()->getRegistrationSection();
                     $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL" : $row->getTeam()->getRotatingSection();
@@ -399,9 +395,7 @@ class ElectronicGraderView extends AbstractView {
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
-            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
-            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-            $user_assignment_setting_json = json_encode($user_assignment_setting);
+            $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
 
@@ -463,18 +457,15 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
-
         $user = $gradeable->getUser();
+        //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
-        }
-        if($gradeable->useTAGrading()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
         }
         if($gradeable->getRegradeStatus() !== 0){
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
         }
-        
         if ($gradeable->getActiveVersion() == 0) {
             if ($gradeable->hasSubmitted()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
@@ -640,16 +631,6 @@ class ElectronicGraderView extends AbstractView {
         }
         $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
 
-        // if use student components, get the values for pages from the student's submissions
-        $files = $gradeable->getSubmittedFiles();
-        $student_pages = array();
-        foreach ($files as $filename => $content) {
-            if ($filename == "student_pages.json") {
-                $path = $content["path"];
-                $student_pages = FileUtils::readJsonFile($content["path"]);
-            }
-        }
-
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "your_user_id" => $this->core->getUser()->getId(),
@@ -657,27 +638,11 @@ class ElectronicGraderView extends AbstractView {
             "can_verify" => $display_verify_all // If any can be then this is set
         ];
 
-        foreach ($grading_data["gradeable"]["components"] as &$component) {
-            $page = intval($component["page"]);
-            // if the page is determined by the student json
-            if ($page == -1) {
-                // usually the order matches the json
-                if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
-                    $page = intval($student_pages[intval($component["order"])]["page #"]);
-                } // otherwise, iterate through until the order matches
-                else {
-                    foreach ($student_pages as $student_page) {
-                        if ($student_page["order"] == intval($component["order"])) {
-                            $page = intval($student_page["page #"]);
-                            $component["page"] = $page;
-                            break;
-                        }
-                    }
-                }
-            }
+        //Assign correct page numbers
+        $pages = $gradeable->getComponentPages();
+        foreach ($pages as $i => $page) {
+            $grading_data["gradeable"]["components"][$i]["page"] = $page;
         }
-        //References need to be cleaned up
-        unset($component);
 
         $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
