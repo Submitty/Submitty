@@ -32,11 +32,10 @@ class SubmissionController extends AbstractController {
      * TODO: @throws \InvalidArgumentException If the gradeable id is invalid
      */
     public function tryGetElectronicGradeable($gradeable_id) {
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        if ($gradeable_id === null || $gradeable_id === '') {
             return null;
         }
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
