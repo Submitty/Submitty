@@ -496,7 +496,7 @@ class NavigationView extends AbstractView {
                 if ($gradeable->isTaGrading()) {
                     $TA_percent = $gradeable->getGradingProgress($this->core->getUser());
 
-                    if ($TA_percent === 1.0) {
+                    if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE
                         $class = 'btn-default';
                         $title = 'REGRADE';
