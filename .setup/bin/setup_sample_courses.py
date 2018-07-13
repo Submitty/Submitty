@@ -244,7 +244,8 @@ def generate_probability_space(probability_dict, default = 0):
     probability_counter = 0
     target_random = random.random()
     prev_random_counter = 0
-    for key, value in sorted(probability_dict.items(), key=lambda x: random.random()):
+    for key in sorted(probability_dict.keys()):
+        value = probability_dict[key]
         probability_counter += key
         if probability_counter >= target_random and target_random > prev_random_counter:
             return value
