@@ -447,15 +447,14 @@ class SubmissionController extends AbstractController {
      * @return boolean
      */
     private function ajaxUploadSplitItem() {
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return $this->uploadResult("Invalid CSRF token.", false);
+        }
         // make sure is grader
         if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
-        }
-
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token.", false);
         }
 
         // check for whether the item should be merged with previous submission
