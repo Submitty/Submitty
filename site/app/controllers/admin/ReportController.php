@@ -37,7 +37,7 @@ class ReportController extends AbstractController {
     /** Generates and offers download of CSV grade report */
     public function generateCSVReport() {
         $current_user = null;
-		$row = [];
+        $row = [];
         $csv = "";
         $order_by = [
             'g.g_syllabus_bucket',
