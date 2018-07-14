@@ -243,6 +243,12 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function reRunPlagiarismForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#rerun-plagiarism-form");
+    form.css("display", "block");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
     var form = $("#run-plagiarism-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
@@ -255,7 +261,7 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
 
@@ -577,7 +583,7 @@ function toggleUsersPlagiarism() {
 }
 
 
-function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#run-plagiarism-form");
     if(select_element_name == "language") {
         if ($('[name="language"]', form).val() == "python") {

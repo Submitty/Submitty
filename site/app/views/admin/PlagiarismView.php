@@ -47,7 +47,8 @@ HTML;
 HTML;
         $return .= <<<HTML
         <div class="nav-buttons">
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'plagiarism_form'))}">Configure Lichen Plagiarism Detection</a>
+            <a class="btn btn-primary" onclick="reRunPlagiarismForm();">Re-Run Plagiarism</a>
+            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'save_configuration_form'))}">Configure Lichen Plagiarism Detection</a>
         </div><br /><br /><br />
         <form id="gradeables_with_plagiarism_result">
             Gradeables with Plagiarism Result: 
@@ -123,7 +124,36 @@ HTML;
         return $return;       
     }
 
-    public function plagiarismForm($gradeable_ids_titles, $prior_term_gradeables) {
+    public function reRunPlagiarismForm($semester, $course, $lichen_saved_configs) {
+        $return = <<<HTML
+    <div class="popup-form" id="rerun-plagiarism-form">
+        <br />
+        <h2 style="text-align: center">Re-Run Plagiarism Detector</h2>
+        <br />
+        <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 're_run_plagiarism'))}">
+            <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+            Gradeables with Saved Configuration: <br />
+            <select name="gradeable_id">
+HTML;
+        foreach ($lichen_saved_configs as $id=>$lichen_saved_config) {
+            $return .= <<<HTML
+                <option value="{$id}">$lichen_saved_config</option>
+HTML;
+        }
+        $return .= <<<HTML
+            </select>
+            <br /><br />
+            <div style="float: right; width: auto; margin-top: 5px;">
+                <a onclick="$('#rerun-plagiarism-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+                <input class="btn btn-primary" type="submit" value="Re-Run Plagiarism" />
+            </div><br /><br /><br />
+        </form>
+    </div>
+HTML;
+        return $return;       
+    }
+
+    public function saveConfigurationForm($gradeable_ids_titles, $prior_term_gradeables) {
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -135,7 +165,7 @@ HTML;
 HTML;
         $return .= <<<HTML
     <div id="run-plagiarism-form" style="overflow:auto;">
-        <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'run_plagiarism'))}" enctype="multipart/form-data">
+        <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'save_plagiarism_configuration'))}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
             <input type="hidden" name="prior_term_gradeables_number" value="1" />
             <input type="hidden" name="ignore_submission_number" value="1" /><br />
@@ -260,7 +290,7 @@ HTML;
     var prior_term_gradeables = JSON.parse('{$prior_term_gradeables_json}');
     $("select").change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
     $('[name="add_more_prev_gradeable"]', form).on('click', function(){
         addMorePriorTermGradeable(prior_term_gradeables);

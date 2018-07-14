@@ -15,11 +15,11 @@ class PlagiarismController extends AbstractController {
             case 'index':
                 $this->plagiarismIndex();
                 break;
-            case 'plagiarism_form':
-                $this->plagiarismForm();
+            case 'save_configuration_form':
+                $this->saveConfigurationForm();
                 break;    
-            case 'run_plagiarism':
-                $this->runPlagiarism();
+            case 'save_plagiarism_configuration':
+                $this->savePlagiarismConfiguration();
                 break; 
             case 'get_plagiarism_ranking_for_gradeable':
                 $this->ajaxGetPlagiarismRankingForGradeable();
@@ -32,6 +32,9 @@ class PlagiarismController extends AbstractController {
             	break;     
             case 'get_matches_for_clicked_match':
                 $this->ajaxGetMatchesForClickedMatch();
+                break;
+            case 're_run_plagiarism':
+                $this->reRunPlagiarism();
                 break;      
             default:
                 $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
@@ -70,11 +73,18 @@ class PlagiarismController extends AbstractController {
         		unset($gradeable_ids_titles[$i]);
         	}
         }
+        $lichen_saved_configs = array_diff(scandir("/var/local/submitty/courses/$semester/$course/lichen/config"), array('.', '..'));
+        foreach($lichen_saved_configs as $i=>$lichen_saved_config) {
+            $config_gradeable_id = json_decode(file_get_contents("/var/local/submitty/courses/$semester/$course/lichen/config/".$lichen_saved_config), true)["gradeable"];
+            unset($lichen_saved_configs[$i]);
+            $lichen_saved_configs[$lichen_saved_config] = ($this->core->getQueries()->getGradeable($config_gradeable_id))->getName();
+        }
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');     
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches'); 
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
     }
 
-    public function plagiarismForm() {
+    public function saveConfigurationForm() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
@@ -87,10 +97,10 @@ class PlagiarismController extends AbstractController {
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismForm', $gradeable_ids_titles, $prior_term_gradeables);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'saveConfigurationForm', $gradeable_ids_titles, $prior_term_gradeables);
     }
 
-    public function runPlagiarism() {
+    public function savePlagiarismConfiguration() {
 
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
@@ -243,6 +253,20 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
+    }
+
+    public function reRunPlagiarism() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
+        
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
+        $gradeable_id = $_POST['gradeable_id'];
+        // code for rerun plagirism
+        $this->core->redirect($return_url);
     }
 
     public function ajaxGetPlagiarismRankingForGradeable(){
