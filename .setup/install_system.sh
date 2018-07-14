@@ -66,6 +66,16 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+
+    # Set up some convinence stuff for the root user on ssh
+     echo -e "
+
+# Convinence stuff for Submitty
+export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
+export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
+alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
     export VAGRANT=0
