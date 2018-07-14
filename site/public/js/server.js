@@ -429,6 +429,132 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
+function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    var version_user_1 = $('[name="version_user_1"]', form2).val();
+    var version_user_2='';
+    var user_id_2='';
+    if($('[name="user_id_2"]', form2).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    }
+    $('[name="code_box_1"]').find('span').each(function(){
+        var attr = $(this).css('background-color');
+        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
+            $(this).css('background-color',"#ffa500");    
+        }
+    });
+    $('[name="code_box_2"]').find('span').each(function(){
+        var attr = $(this).css('background-color');
+        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
+            $(this).css('background-color',"#ffa500");    
+        }
+    });
+
+    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            data = JSON.parse(data);
+            if(data.error){
+                alert(data.error);
+                return;
+            }
+
+            if(where == 'code_box_2') {
+                var name_span_clicked = $(span_clicked).attr('name');
+                var scroll_position=-1;
+                $('[name="code_box_2"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
+                        $(this).css('background-color',"#FF0000");       
+                    }
+                });
+                $('[name="code_box_1"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        attr= JSON.parse(attr);
+                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
+                            $(this).css('background-color',"#FF0000");    
+                        }      
+                    }  
+                }); 
+                $('[name="code_box_1"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_1"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
+                        return false;
+                    } 
+                });
+                $('[name="code_box_1"]').scrollTop(scroll_position);
+            }
+              
+            else if(where == 'code_box_1') {
+                var to_append='';
+                $.each(data, function(i,match){
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                });
+                to_append = $.parseHTML(to_append);
+                $("#popup_to_show_matches_id").empty().append(to_append);
+                var x = event.pageX;
+                var y = event.pageY; 
+                $('#popup_to_show_matches_id').css('display', 'block');
+                var width = $('#popup_to_show_matches_id').width();
+                $('#popup_to_show_matches_id').css('top', y+5);
+                $('#popup_to_show_matches_id').css('left', x-width/2.00);
+                
+            } 
+
+            else if(where == 'popup') {
+                jQuery.ajaxSetup({async:false});
+                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode('user_id_2');
+                $('[name="code_box_1"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        attr= JSON.parse(attr);
+                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
+                            $(this).css('background-color',"#FF0000");    
+                        }      
+                    }  
+                });
+                $.each(data, function(i,match){
+                    if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
+                        $.each(match[2], function(j, range){
+                            $('[name="code_box_2"]').find('span').each(function(){
+                                var attr = $(this).attr('name');
+                                if (typeof attr !== typeof undefined && attr !== false) {
+                                    if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
+                                        $(this).css('background-color',"#FF0000");    
+                                    }      
+                                }
+                            });
+                        });
+                    }                    
+                });
+                $('[name="code_box_2"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_2"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
+                        return false;
+                    } 
+                });
+                $('[name="code_box_2"]').scrollTop(scroll_position);
+                jQuery.ajaxSetup({async:true});
+            }   
+        },
+        error: function(e) {
+            alert("Could not load submitted code, please refresh the page and try again.");
+        }
+    })
+}
+
 function toggleUsersPlagiarism() {
     var form = $("#gradeables_with_plagiarism_result");
     var form2 = $("#users_with_plagiarism");
