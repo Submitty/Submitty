@@ -27,6 +27,7 @@
 
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j);
 std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what);
+std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string what);
 
 // =================================================================================
 // =================================================================================

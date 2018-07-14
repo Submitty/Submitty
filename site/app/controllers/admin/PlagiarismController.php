@@ -29,7 +29,10 @@ class PlagiarismController extends AbstractController {
             	break;
             case 'get_matching_users':
             	$this->ajaxGetMatchingUsers();
-            	break;      
+            	break;     
+            case 'get_matches_for_clicked_match':
+                $this->ajaxGetMatchesForClickedMatch();
+                break;      
             default:
                 $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
                 $this->plagiarismTree();
@@ -67,7 +70,8 @@ class PlagiarismController extends AbstractController {
         		unset($gradeable_ids_titles[$i]);
         	}
         }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);  
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');     
     }
 
     public function plagiarismForm() {
@@ -366,11 +370,13 @@ class PlagiarismController extends AbstractController {
 	    				}	
 	    			}
 	    			if($codebox == "1" && $orange_color) {
+                        $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
+                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
+			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
 			    		}
 			    		else {	
-			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
+			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
 			    		}
 			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
 			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
@@ -380,11 +386,13 @@ class PlagiarismController extends AbstractController {
 			    		}
 	    			}
 	    			else if($codebox == "1" && !$orange_color) {
+                        $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
+                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ffff00'>";		
+			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";		
 			    		}
 			    		else {	
-			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ffff00'>";
+			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
 			    		}
 			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
 			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
@@ -400,11 +408,13 @@ class PlagiarismController extends AbstractController {
     			    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
     			    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
     			    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
+                            $onclick_function = 'getMatchesForClickedMatch(event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
+                            $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
     	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-    			    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#ff531a'>";		
+    			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
     			    		}
     			    		else {	
-    			    			$color_info[$start_line][$start_pos] = "<span style='background-color:#ff531a'>";
+    			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
     			    		}
     			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
     			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
@@ -546,6 +556,38 @@ class PlagiarismController extends AbstractController {
 	    	$return = json_encode($return);
 	        echo($return);
 	    }    
+    }
+
+    public function ajaxGetMatchesForClickedMatch() {
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $user_id_1 =$_REQUEST['user_id_1'];
+        $version_user_1 = $_REQUEST['version_user_1'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+
+        $return = array();
+
+        $file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
+        if (!file_exists($file_path)) {
+            echo(json_encode(array("error"=>"user 1 matches.json does not exists")));
+        }
+        else {
+            $content = json_decode(file_get_contents($file_path), true);
+            foreach($content as $match) {
+                if($match["start"] == $_REQUEST['start'] && $match["end"] == $_REQUEST['end']) {
+                    foreach ($match["others"] as $match_info) {
+                        $matchingpositions= array();
+                        foreach($match_info['matchingpositions'] as $matchingpos) {
+                            array_push($matchingpositions, array("start"=> $matchingpos["start"] , "end"=>$matchingpos["end"]));
+                        }
+                        array_push($return, array($match_info["username"],$match_info["version"], $matchingpositions));
+                    }
+                }
+            }
+            $return = json_encode($return);
+            echo($return);
+        }    
     }
 
 }

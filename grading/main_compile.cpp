@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
   std::cout << "MAIN COMPILE" << std::endl;
-  std::vector<std::string> actions;
+  std::vector<nlohmann::json> actions;
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
@@ -173,8 +173,8 @@ int main(int argc, char *argv[]) {
                       "/dev/null",
                       my_testcase.get_test_case_limits(),
                       config_json.value("resource_limits",nlohmann::json()),
-                      config_json);
-              
+                      config_json,
+                      false);
             }
           }
         }
@@ -207,7 +207,8 @@ int main(int argc, char *argv[]) {
                               my_testcase.getPrefix() + "_execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()),
-                              config_json);
+                              config_json,
+                              false);
 
         std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
       }
