@@ -62,7 +62,7 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     shift
 
     # Setting it up to allow SSH as root by default
-    mkdir -m 700 /root/.ssh
+    mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
@@ -183,12 +183,12 @@ pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
+pip3 install distro
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
 
-# (yes, we need to run Python2 for clang tokenizer)
-pip install clang
+# Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
@@ -460,7 +460,7 @@ if [ ! -d "${clangsrc}" ]; then
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
     pushd ${clangbuild}
-    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++
     popd > /dev/null
 
     # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
