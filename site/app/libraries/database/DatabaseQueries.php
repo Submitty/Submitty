@@ -235,8 +235,8 @@ class DatabaseQueries {
     }
 
     public function getThread($thread_id) {
-	$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
-	return $this->course_db->rows();
+		$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
+		return $this->course_db->rows();
     }
 
     public function getThreadTitle($thread_id){
@@ -282,8 +282,8 @@ class DatabaseQueries {
     }
 
     public function threadExists(){
-	$this->course_db->query("SELECT id from threads LIMIT 1");
-	return count($this->course_db->rows()) == 1;
+		$this->course_db->query("SELECT id from threads LIMIT 1");
+		return count($this->course_db->rows()) == 1;
     }
 
     /**
