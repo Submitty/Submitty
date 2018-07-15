@@ -672,7 +672,6 @@ class ForumController extends AbstractController {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['post_time'] = date_format(date_create($post['edit_timestamp']),"n/j g:i A");
-                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -681,10 +680,13 @@ class ForumController extends AbstractController {
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
                 $_post['post_time'] = date_format(date_create($current_post['timestamp']),"n/j g:i A");
-                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
                 $output[] = $_post;
             }
-
+            // Fetch additional information
+            foreach ($output as &$_post) {
+                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
+                $_post['is_staff_post'] = $this->core->getQueries()->isStaffPost($_post['user']);
+            }
         } else {
             $output['error'] = "You do not have permissions to do that.";
         }

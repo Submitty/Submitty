@@ -1446,9 +1446,12 @@ function showHistory(post_id) {
                     box.show();
                     box.addClass("history_box");
                     box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
 
                     var first_name = post['user_info']['first_name'];
-                    var last_name = post['user_info']['first_name'];
+                    var last_name = post['user_info']['last_name'];
                     var author_user_id = post['user'];
                     var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
                     var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
