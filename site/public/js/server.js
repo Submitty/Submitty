@@ -1238,10 +1238,10 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId){
+function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
-    document.cookie = "forum_categories=" + categories_value + ";";
+    document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
@@ -1258,7 +1258,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
-               document.cookie = "forum_categories=;";
+               document.cookie = course + "_forum_categories=;";
             }
     })
 }

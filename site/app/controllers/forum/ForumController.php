@@ -550,10 +550,11 @@ class ForumController extends AbstractController {
 
     public function getThreads(){
 
-        $show_deleted = $this->showDeleted();
+	$show_deleted = $this->showDeleted();
+	$currentCourse = $this->core->getConfig()->getCourse();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
-	if(empty($categories_ids) && !empty($_COOKIE['forum_categories'])){
-            $categories_ids = explode("|", $_COOKIE['forum_categories']);
+	if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
+            $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
 	}
 	foreach ($categories_ids as &$id) {
             $id = (int)$id;
@@ -574,11 +575,11 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-
+	$currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? array($_POST['thread_category']) : -1;
         $category_id = array($category_id);
-	if(!empty($_COOKIE['forum_categories']) &&  $category_id[0] == -1 ) {
-	    $category_id = explode('|', $_COOKIE['forum_categories']);
+	if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+	    $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
 	}
 	foreach ($category_id as &$id) {
             $id = (int)$id;
