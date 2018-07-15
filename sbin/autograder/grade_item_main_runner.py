@@ -45,7 +45,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
               if USE_DOCKER:
                   runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                                     os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
-                                                    queue_obj['who'], str(queue_obj['version']), submission_string, testcase_num], stdout=logfile)
+                                                    queue_obj['who'], str(queue_obj['version']), submission_string,
+                                                    str(testcase_num)], stdout=logfile)
               else:
                   runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                     which_untrusted,
