@@ -8,6 +8,7 @@ import json
 from submitty_utils import dateutils
 import multiprocessing
 import contextlib
+import traceback
 
 from autograder import grade_items_logging
 from autograder import grade_item

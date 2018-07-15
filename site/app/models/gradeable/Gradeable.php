@@ -23,6 +23,7 @@ use app\models\Team;
  * @method string getId()
  * @method string getTitle()
  * @method string getInstructionsUrl()
+ * @method void setInstructionsUrl($url)
  * @method int getType()
  * @method bool isGradeByRegistration()
  * @method void setGradeByRegistration($grade_by_reg)
@@ -648,16 +649,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-
-    /**
-     * Sets the instructions url and sanitizes any special characters
-     * @param string $url
-     */
-    public function setInstructionsUrl($url) {
-        $this->instructions_url = filter_var($url, FILTER_SANITIZE_SPECIAL_CHARS);
-        $this->modified = true;
-    }
-
+    
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
