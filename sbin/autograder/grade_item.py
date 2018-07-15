@@ -28,7 +28,7 @@ DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
 # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
-USE_DOCKER = True
+USE_DOCKER = False
 
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
