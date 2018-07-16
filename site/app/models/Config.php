@@ -43,6 +43,7 @@ use app\libraries\Utils;
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
+ * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
  * @method string getCourseEmail()
  * @method string getVcsUser()
@@ -166,6 +167,8 @@ class Config extends AbstractModel {
     protected $forum_enabled;
     /** @property @var bool */
     protected $regrade_enabled;
+    /** @property @var string */
+    protected $regrade_message;
 
     /**
      * Config constructor.
@@ -277,7 +280,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -327,17 +330,20 @@ class Config extends AbstractModel {
                 $key == "forum_enabled") {
               $config[$section][$key] = false;
             }
-            // DEFAULT FOR REGRADE
+            // DEFAULT FOR REGRADE ENABLED
             if (!isset($config[$section][$key]) &&
                 $key == "regrade_enabled") {
               $config[$section][$key] = false;
+            }
+            if (!isset($config[$section][$key]) &&
+                $key == "regrade_message") {
+              $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
             }
             // DEFAULT FOR PRIVATE_REPOSITORY
             if (!isset($config[$section][$key]) &&
                 $key == "private_repository") {
               $config[$section][$key] = "";
             }
-
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }

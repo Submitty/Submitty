@@ -150,7 +150,6 @@ def main():
         delete_user(user['user_id'])
 
     os.system('pkill -u submitty_daemon')
-    os.system('crontab -u submitty_daemon -r')
     for user in ["submitty_cgi", "submitty_php", "submitty_daemon"]:
         delete_user(user)
 
