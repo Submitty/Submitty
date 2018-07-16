@@ -214,11 +214,11 @@ class SubmissionController extends AbstractController {
         }
 
         //usernames come in comma delimited. We split on the commas, then filter out blanks.
-        $user_ids = explode(",", $_POST['user_id']);
+        $user_ids = explode (",", $_POST['user_id']);
         $user_ids = array_filter($user_ids);
 
         //If no user id's were submitted, give a graceful error.
-        if (count($user_ids) === 0) {
+        if(count($user_ids) === 0){
             $msg = "No valid user ids were found.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
@@ -249,19 +249,19 @@ class SubmissionController extends AbstractController {
 
         //If this is a team assignment, we need to check that all users are on the same (or no) team.
         //To do this, we just compare the leader's teamid to the team id of every other user.
-        if ($gradeable->isTeamAssignment()) {
+        if($gradeable->isTeamAssignment()){
             $leader_team_id = "";
             $leader_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if ($leader_team !== null) {
+            if($leader_team !== null){
                 $leader_team_id = $leader_team->getId();
             }
-            foreach ($user_ids as $id) {
+            foreach($user_ids as $id){
                 $user_team_id = "";
                 $user_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id);
-                if ($user_team !== null) {
+                if($user_team !== null){
                     $user_team_id = $user_team->getId();
                 }
-                if ($user_team_id !== $leader_team_id) {
+                if($user_team_id !== $leader_team_id){
                     $msg = "Inconsistent teams. One or more users are on different teams.";
                     $return = array('success' => false, 'message' => $msg);
                     $this->core->getOutput()->renderJson($return);
