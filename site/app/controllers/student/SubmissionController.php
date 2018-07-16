@@ -218,7 +218,7 @@ class SubmissionController extends AbstractController {
         $user_ids = array_filter($user_ids);
 
         //If no user id's were submitted, give a graceful error.
-        if(count($user_ids) === 0){
+        if (count($user_ids) === 0) {
             $msg = "No valid user ids were found.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
@@ -226,7 +226,7 @@ class SubmissionController extends AbstractController {
         }
 
         //For every userid, we have to check that its real.
-        foreach ($user_ids as $id) {
+        foreach($user_ids as $id){
             $user = $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
@@ -475,7 +475,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
 
         //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
-        $user_ids = explode(",", $_POST['user_id']);
+        $user_ids = explode (",", $_POST['user_id']);
         $user_ids = array_filter($user_ids);
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
@@ -483,9 +483,7 @@ class SubmissionController extends AbstractController {
         $path = $_POST['path'];
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
-        $gradeable_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getCoursePath(),
-            "submissions",
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
 
         /*
@@ -503,19 +501,20 @@ class SubmissionController extends AbstractController {
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
             $leader = $user_id;
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
+            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
-            } //if the student isn't on a team, build the team.
+            }
+            //if the student isn't on a team, build the team.
             else {
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
                 // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
                 // TODO:    so its ok, but fragile
                 ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
-                $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
+                $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -554,20 +553,20 @@ class SubmissionController extends AbstractController {
 
         if (isset($uploaded_file)) {
             // if we are merging in the previous submission (TODO check folder support)
-            if ($merge_previous && $new_version !== 1) {
+            if($merge_previous && $new_version !== 1) {
                 $old_version = $new_version - 1;
                 $old_version_path = FileUtils::joinPaths($user_path, $old_version);
                 $to_search = FileUtils::joinPaths($old_version_path, "*.*");
                 $files = glob($to_search);
-                foreach ($files as $file) {
+                foreach($files as $file) {
                     $file_base_name = basename($file);
-                    if (!$clobber && $file_base_name === $uploaded_file_base_name) {
+                    if(!$clobber && $file_base_name === $uploaded_file_base_name) {
                         $parts = explode(".", $file_base_name);
-                        $parts[0] .= "_version_" . $old_version;
+                        $parts[0] .= "_version_".$old_version;
                         $file_base_name = implode(".", $parts);
                     }
                     $move_here = FileUtils::joinPaths($version_path, $file_base_name);
-                    if (!@copy($file, $move_here)) {
+                    if (!@copy($file, $move_here)){
                         return $this->uploadResult("Failed to merge previous version.", false);
                     }
                 }
@@ -600,17 +599,18 @@ class SubmissionController extends AbstractController {
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
-                "history" => array(array("version" => $new_version,
-                    "time" => $current_time_string_tz,
-                    "who" => $original_user_id,
-                    "type" => "upload")));
-        } else {
+                          "history" => array(array("version" => $new_version,
+                                                       "time" => $current_time_string_tz,
+                                                       "who" => $original_user_id,
+                                                       "type" => "upload")));
+        }
+        else {
             $json = FileUtils::readJsonFile($settings_file);
             if ($json === false) {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
             $json["active_version"] = $new_version;
-            $json["history"][] = array("version" => $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "upload");
+            $json["history"][] = array("version"=> $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "upload");
         }
 
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
@@ -620,7 +620,7 @@ class SubmissionController extends AbstractController {
 
         $this->upload_details['assignment_settings'] = true;
 
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz . "\n")) {
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
@@ -647,9 +647,10 @@ class SubmissionController extends AbstractController {
         }
 
         // FIXME: Add this as part of the graded gradeable saving query
-        if ($gradeable->isTeamAssignment()) {
+        if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
-        } else {
+        }
+        else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
