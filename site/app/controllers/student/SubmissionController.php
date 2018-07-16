@@ -271,7 +271,7 @@ class SubmissionController extends AbstractController {
         }
 
         $highest_version = 0;
-        if ($graded_gradeable->getAutoGradedGradeable() !== null) {
+        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         }
 
