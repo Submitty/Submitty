@@ -1128,3 +1128,16 @@ end of styles used in the admin gradeable page
     min-width: 400px;
     border-radius: 5px;
 }
+
+.query-list {
+    width: 2em;
+}
+
+.query-list .index {
+    text-align: right;
+}
+
+#header .fa-external-link {
+    margin-left: 10px;
+}
+

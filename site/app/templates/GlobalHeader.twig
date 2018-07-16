@@ -54,7 +54,7 @@
                     {% endif %}
                     {% if b.getUrl() != null and b.getUrl() != "" %}
                         {% if b.getIcon() %}
-                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
+                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i class="fa fa-external-link"></i></a>
                         {% else %}
                             {% if b.getTop() %}
                                 <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
