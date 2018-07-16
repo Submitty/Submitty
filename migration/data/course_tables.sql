@@ -517,7 +517,7 @@ CREATE TABLE "posts" (
     "endorsed_by" varchar,
     "resolved" BOOLEAN NOT NULL,
     "type" int NOT NULL,
-  "has_attachment" BOOLEAN NOT NULL,
+    "has_attachment" BOOLEAN NOT NULL,
     CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
