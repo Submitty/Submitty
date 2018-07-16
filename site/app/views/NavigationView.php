@@ -448,7 +448,7 @@ class NavigationView extends AbstractView {
                 //Open regrade requests
                 $button = new Button($this->core, [
                     "title" => "REGRADE",
-                    "class" => "btn btn-success btn-nav btn-nav-grade",
+                    "class" => "btn btn-danger btn-nav btn-nav-grade",
                     "href" => $href
                 ]);
 

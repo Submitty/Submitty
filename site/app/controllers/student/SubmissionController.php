@@ -70,6 +70,9 @@ class SubmissionController extends AbstractController {
             case 'delete_request':
                 return $this->deleteRequest();
                 break;
+            case 'change_request_status':
+                return $this->changeRequestStatus();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -77,43 +80,58 @@ class SubmissionController extends AbstractController {
         }
     }
     private function requestRegrade(){
-        $content = $_REQUEST["request_content"];
+        $content = $_POST['replyTextArea'];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
+        }
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+            $this->core->getOutput()->renderJson(["status" => "success"]);
         }else{
-            $this->core->addErrorMessage("Unable to create new regrade request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
         }
     }
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        $content = $_POST['replyTextArea'];
+        $content = str_replace("\r", "", $_POST['replyTextArea']);
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
-        if($this->core->getQueries()->isStaffPost($user_id)){
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
-        }else{
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
+        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
+        //Prevent students making post requests for other studnets
+        if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
         }
+        $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
 
     private function deleteRequest(){
-        //if($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()){
-      //      $this->core->addErrorMessage("You do not have permission to delete regrade requests");
-       //     $this->core->redirect($this->core->getConfig()->getSiteUrl());
-       // }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
-
+    private function changeRequestStatus(){
+        $regrade_id = $_REQUEST['regrade_id'];
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        $status = $_REQUEST['status'];
+        //TODO: set userViewedDate to null if the status is change to 1 to make the button green
+        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
+        }
+        $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
+    }
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
@@ -341,9 +359,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -1394,7 +1412,7 @@ class SubmissionController extends AbstractController {
 
     private function ajaxUploadImagesFiles() {
         if($this->core->getUser()->getGroup() !== 1) {
-			     return $this->uploadResult("You have no permission to access this page", false);
+                 return $this->uploadResult("You have no permission to access this page", false);
         }
 
         if (empty($_POST)) {
