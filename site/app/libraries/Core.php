@@ -46,6 +46,9 @@ class Core {
     /** @var Output */
     private $output = null;
 
+    /** @var GradingQueue */
+    private $grading_queue = null;
+
     /** @var Access $access */
     private $access = null;
 
@@ -139,6 +142,20 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
+    }
+
+    /**
+     * Loads the shell of the grading queue
+     *
+     * @throws \Exception if we have not loaded the config yet
+     */
+    public function loadGradingQueue() {
+        if ($this->config === null) {
+            throw new \Exception("Need to load the config before we can initialize the grading queue");
+        }
+
+        $this->grading_queue = new GradingQueue($this->config->getSemester(),
+            $this->config->getCourse(), $this->config->getSubmittyPath());
     }
 
     /**
@@ -414,6 +431,13 @@ class Core {
      */
     public function getOutput() {
         return $this->output;
+    }
+
+    /**
+     * @return GradingQueue
+     */
+    public function getGradingQueue() {
+        return $this->grading_queue;
     }
 
     /**
