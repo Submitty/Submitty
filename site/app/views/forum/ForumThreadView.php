@@ -184,11 +184,10 @@ HTML;
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
-				$("form").areYouSure();
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
-
 				$(".post_reply_from").submit(publishPost);
+				$("form").areYouSure();
 			});
 
 		</script>
@@ -362,35 +361,49 @@ HTML;
                     "merge_thread_list" => $merge_thread_list,
                     "current_thread" => $currentThread
                 ]);
-				$return .= <<<HTML
-				<div class="popup-form decent" id="edit-user-post">
-					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-					 <h3 id="edit_user_prompt"></h3>
-HTML;
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-								"show_title" => true,
-								"show_post" => true,
-								"post_content_placeholder" => "Enter your post here...",
-								"show_categories" => true,
-								"show_anon" => true,
-								"show_cancel_edit_form" => true,
-								"submit_label" => "Update Post",
-							]);
-						$return .= <<<HTML
-					</form>
-					<script type="text/javascript">
-						$("#thread_form").submit(function() {
-							if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-								alert("At least one category must be selected.");
-								return false;
-							}
-						});
-					</script>
-				</div>
-HTML;
 			}
+			$return .= <<<HTML
+			<div class="popup-form decent" id="edit-user-post">
+				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
+				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+				 <h3 id="edit_user_prompt"></h3>
+HTML;
+					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
+							"show_title" => true,
+							"show_post" => true,
+							"post_content_placeholder" => "Enter your post here...",
+							"show_categories" => true,
+							"show_anon" => true,
+							"show_cancel_edit_form" => true,
+							"submit_label" => "Update Post",
+						]);
+					$return .= <<<HTML
+				</form>
+				<script type="text/javascript">
+					$("#thread_form").submit(function() {
+						if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+							alert("At least one category must be selected.");
+							return false;
+						}
+					});
+				</script>
+			</div>
+			<div class="popup-form decent posts_list no-popup-div" style="height: auto;">
+				<h3>Edit History
+					<a onclick="$('#popup-post-history').parent().hide();" class="btn btn-danger" style="float: right;">Close</a>
+				</h3>
+				<div id="popup-post-history">
+					<div class="post_box" style="margin-left:0px;display: none;">
+						<pre><p class="post_content" style="white-space: pre-wrap; "></p></pre>
+						<hr style="margin-bottom:3px;">
+						<span style="margin-top:8px;margin-left:10px;float:right;">
+							<h7 style="position:relative; right:5px;"></h7>
+						</span>
+					</div>
+				</div>
+			</div>
+HTML;
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
@@ -535,28 +548,11 @@ HTML;
 		}
 
 		$return .= <<<HTML
-	<script>
-		var codeSegments = document.querySelectorAll("[id=code]");
-		for (let element of codeSegments){
-			var editor0 = CodeMirror.fromTextArea(element, {
-            lineNumbers: true,
-            readOnly: true,
-            cursorHeight: 0.0,
-            lineWrapping: true
-	    });
-
-	    var lineCount = editor0.lineCount();
-	    if (lineCount == 1) {
-	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
-	    }
-	    else {
-	        editor0.setSize("100%", "auto");
-	    }
-	    editor0.setOption("theme", "eclipse");
-	    editor0.refresh(); 
-		}
-			
-	    </script>
+		<script>
+			$(function() {
+				generateCodeMirrorBlocks(document);
+			});
+		</script>
 HTML;
 
 		return $return;
@@ -674,12 +670,64 @@ HTML;
 					return $return;
 	}
 
+	public function filter_post_content($original_post_content) {
+		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+		if(!empty($pre_post)){
+			$post_content = $pre_post;
+		}
+
+		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+		$accepted_schemes = array("https", "http");
+		$pos = 0;
+		if(count($result) > 0) {
+			foreach($result[1] as $url){
+				$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+				$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+				if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+				} else {
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+				}
+				if(!empty($pre_post)){
+					$post_content = $pre_post;
+				}
+				$pre_post = "";
+				$pos++;
+			}
+		}
+		//This code is for legacy posts that had an extra \r per newline
+		if(strpos($original_post_content, "\r") !== false){
+			$post_content = str_replace("\r","", $post_content);
+		}
+
+		//end link handling
+
+		//handle converting code segments
+
+		$codeBracketString = "&lbrack;&sol;code&rsqb;";
+		if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+			$codeBracketString = "&NewLine;" . $codeBracketString;
+		}
+
+		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		return $post_content;
+	}
+
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = date_create($post["timestamp"]);
+		if(!is_null($post["edit_timestamp"])) {
+			$edit_date = $function_date(date_create($post["edit_timestamp"]),"n/j g:i A");
+		} else {
+			$edit_date = null;
+		}
 		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
 		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -722,49 +770,7 @@ HTML;
 
 
         //convert legacy htmlentities being saved in db
-        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
-
-        if(!empty($pre_post)){
-            $post_content = $pre_post;
-        }
-			
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
-        $accepted_schemes = array("https", "http");
-        $pos = 0;
-        if(count($result) > 0) {
-            foreach($result[1] as $url){
-                $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
-                $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-            	if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
-                } else {
-            		$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
-                }
-                if(!empty($pre_post)){
-                	$post_content = $pre_post;
-				} 
-				$pre_post = "";
-                $pos++;
-            }
-        }
-        //This code is for legacy posts that had an extra \r per newline
-        if(strpos($post['content'], "\r") !== false){
-            $post_content = str_replace("\r","", $post_content);
-        }
-
-        //end link handling
-
-        //handle converting code segments
-
-        $codeBracketString = "&lbrack;&sol;code&rsqb;";
-        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-            $codeBracketString = "&NewLine;" . $codeBracketString;
-        }
-
-        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+        $post_content = $this->filter_post_content($post['content']);
 
 		//end code segment handling
 		$return .= <<<HTML
@@ -779,6 +785,11 @@ HTML;
 			} else {
 				$return .= <<<HTML
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+HTML;
+			}
+			if($this->core->getUser()->getGroup() <= 2) {
+				$return .= <<<HTML
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}
@@ -801,17 +812,7 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2){
-			$wrapped_content = json_encode($post['content']);
-			$shouldEditThread = null;
-			$edit_button_title = "";
-			if($first) {
-				$shouldEditThread = "true";
-				$edit_button_title = "Edit thread and post";
-			} else {
-				$shouldEditThread = "false";
-				$edit_button_title = "Edit post";
-			}
+		if($this->core->getUser()->getGroup() <= 2) {
 			if($deleted){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
@@ -822,13 +823,37 @@ HTML;
 				$ud_button_icon = "fa-trash";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+HTML;
+		}
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
+			$shouldEditThread = null;
+			$edit_button_title = "";
+			if($first) {
+				$shouldEditThread = "true";
+				$edit_button_title = "Edit thread and post";
+			} else {
+				$shouldEditThread = "false";
+				$edit_button_title = "Edit post";
+			}
+			$return .= <<<HTML
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
 
 		$return .= <<<HTML
-		<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
+		<h7 style="position:relative; right:5px;">
+			<strong id="post_user_id">{$visible_username}</strong>
+			{$function_date($date,"n/j g:i A")}
+HTML;
+		if(!is_null($edit_date)) {
+			$return .= <<<HTML
+			(<i>Last edit at {$edit_date}</i>)
+HTML;
+		}
+		$return .= <<<HTML
+		</h7>
+		</span>
 HTML;
 
 		if($post["has_attachment"]){
