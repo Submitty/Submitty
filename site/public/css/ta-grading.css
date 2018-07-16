@@ -435,3 +435,123 @@ tr.is_publish {
     width: 100%;
     text-align: center;
 }
+
+/* Gradeable */
+
+.general-comment {
+    background-color:#E9EFEF;
+    cursor: pointer;
+}
+
+.general-comment-entry {
+    width:98%;
+    height:100%;
+    min-height:100px;
+    resize:none;
+    float:left;
+}
+
+/* Components */
+
+.component {
+    cursor: pointer;
+}
+
+.component .gradebar {
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.version-warning {
+    color:rgb(200, 0, 0);
+    font-weight: bold;
+    font-size:medium;
+}
+
+.graded-by {
+    font-style: italic;
+    padding-right: 10px;
+}
+
+.ta-student-note {
+    margin-bottom: 5px;
+    color: #777;
+}
+
+.grader-container {
+    float: right;
+}
+
+.verify-container {
+    display: inline;
+    color: red;
+}
+
+.done-container {
+    float: right;
+}
+
+.done-button {
+    color: green;
+}
+
+.cancel-container {
+    float: right;
+}
+
+.cancel-button {
+    color: red;
+}
+
+.summary-text {
+    width:95%;
+    height:100%;
+    min-height:20px;
+    font-family: 'Source Sans Pro', sans-serif;
+    float:left;
+    cursor: pointer;
+}
+
+.add-common-mark {
+    cursor: pointer;
+}
+
+/* Marks */
+
+.mark {
+
+}
+
+.mark-selector {
+    visibility: visible;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+}
+
+input.mark-score {
+    resize:none;
+    width: 50px;
+}
+
+.mark-score-container {
+    width: 90px;
+}
+
+.mark-note {
+    width: calc(100% - 40px);
+    resize:none;
+}
+
+.mark-note-custom {
+    width: calc(100% - 165px);
+    resize:none;
+}
+
+.mark-editable {
+    cursor: default;
+    border: none;
+    outline: none;
+    background-color: initial;
+}
