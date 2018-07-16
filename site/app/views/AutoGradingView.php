@@ -240,8 +240,14 @@ class AutoGradingView extends AbstractView {
                     continue;
                 }
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                if($component->getVerifier()!=NULL){
+                    $name2 = $component->getVerifier()->getDisplayedFirstName() . " " . $component->getVerifier()->getLastName();
+                }
                 if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
+                }
+                if ($component->getVerifier()!=NULL && !in_array($name2, $grader_names) && $component->getVerifier()->accessFullGrading()) {
+                    $grader_names[] = $name2;
                 }
             }
         } else {

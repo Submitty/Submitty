@@ -632,7 +632,7 @@ class ElectronicGraderView extends AbstractView {
             if (!$component->getGrader()) {
                 continue;
             }
-            if ($component->getGrader()->getId() !== $this->core->getUser()->getId() && ($component->getVerifier() == null || $component->getVerifier()->getId() !== $this->core->getUser()->getId()) && $this->core->getUser()->accessFullGrading()) {
+            if ($this->core->getConfig()->isManualGradingEnabled() && $component->getGrader()->getId() !== $this->core->getUser()->getId() && ($component->getVerifier() == null || $component->getVerifier()->getId() !== $this->core->getUser()->getId()) && $this->core->getUser()->accessFullGrading()) {
                 $display_verify_all = true;
                 break;
             }

@@ -134,10 +134,18 @@
             </div>
 
             <div class="option">
-                <div class="option-input"><input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} /></div>
+                <div class="option-input"><input type="checkbox" name="regrade_enabled" value="false" {{ fields['regrade_enabled'] ? 'checked': '' }} /></div>
                 <div class="option-desc">
                     <div class="option-title">WORK IN PROGRESS Regrade Requests</div>
                     <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
+                </div>
+            </div>
+
+            <div class="option">
+                <div class="option-input"><input type="checkbox" name="manual_grading_enabled" value="true" {{ fields['manual_grading_enabled'] ? 'checked': '' }} /></div>
+                <div class="option-desc">
+                    <div class="option-title">Manual Grading Enabled</div>
+                    <div class="option-alt">Grading by limited access graders (undergraduate mentors) requires verification by full access graders (graduate TAs or instructors)</div>
                 </div>
             </div>
         </div>

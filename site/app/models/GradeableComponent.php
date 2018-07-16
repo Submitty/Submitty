@@ -248,11 +248,12 @@ class GradeableComponent extends AbstractModel {
         $this->grader = $user;
     }
 
-    public function setVerifier(User $user) {
+    public function setVerifier(User $user = null) {
+        if(($this->verifier == null || $user == null || $this->verifier->getId() !== $user->getId()) && ($user == null || $user->accessFullGrading())) {
             $this->verifier_modified = true;
             $this->modified = true;
-            $this->grader_modified = true;
             $this->verifier = $user;
+        }
     }
 
     /**
