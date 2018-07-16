@@ -1424,6 +1424,8 @@ class Gradeable(object):
                     else:
                         self.submissions = os.listdir(self.sample_path)
                         self.submissions = list(filter(lambda x: not x.startswith("."), self.submissions))
+                        #Ensure we're not sensitive to directory traversal order
+                        self.submissions.sort()
                     if isinstance(self.submissions, list):
                         for elem in self.submissions:
                             if isinstance(elem, dict):
