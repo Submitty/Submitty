@@ -21,4 +21,6 @@ cd ../../
 
 python3 ./.setup/bin/partial_reset.py
 python3 ./.setup/bin/setup_sample_courses.py
-service php7.0-fpm restart
+
+PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+service php${PHP_VERSION}-fpm restart
