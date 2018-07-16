@@ -150,9 +150,12 @@ HTML;
 			return;
 		}
 
+		$threadExists = $this->core->getQueries()->threadExists();
 		$thread_count = count($threads);
 		$currentThread = -1;
 		$currentCategoryId = array();
+		$currentCourse = $this->core->getConfig()->getCourse();
+		$threadFiltering = $threadExists && $thread_count == 0 && !empty($_COOKIE[$currentCourse . '_forum_categories']);
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
@@ -219,7 +222,7 @@ HTML;
 			</script>
 HTML;
 	}
-	if($thread_count > 0) {
+	if($thread_count > 0 || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
@@ -244,9 +247,9 @@ HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
 	$onChange = '';
-	if($thread_count > 0) {
+	if($threadExists) {
 		$onChange = <<<HTML
-		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}');
+		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
 HTML;
 	}
 	$return .= <<<HTML
@@ -263,7 +266,25 @@ HTML;
 					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
 HTML;
 			}
-
+	$cookieSelectedCategories = '';
+	$category_ids_array = array_column($categories, 'category_id');
+	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
+		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
+			if(in_array((int)$selectedId, $category_ids_array)) {
+				$cookieSelectedCategories .= <<<HTML
+					$('#thread_category option[value="{$selectedId}"]').prop('selected', true);
+HTML;
+			}
+		}
+	}
+	$display_option_js = <<<HTML
+		$("#tree").prop("checked", true);
+HTML;
+	if(in_array($display_option, array("tree", "time", "alpha"))) {
+		$display_option_js = <<<HTML
+			$("#{$display_option}").prop("checked", true);
+HTML;
+	}
 	$return .= <<<HTML
 				</select>
 				</center>
@@ -282,6 +303,8 @@ HTML;
 							{$onChange}
 							return true;
 						});
+						{$cookieSelectedCategories}
+						{$display_option_js}
 					});
 				</script>
 			</div>
@@ -313,7 +336,7 @@ HTML;
 		</div>
 
 HTML;
-		if($thread_count == 0){
+		if(!$threadExists){
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
@@ -391,7 +414,10 @@ HTML;
 				$function_date = 'date_format';
 				$activeThread = array();
 				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
-
+				if(count($activeThread) == 0) {
+					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+					$activeThreadTitle = $activeThread['title'];
+				}
 					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;

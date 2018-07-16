@@ -239,13 +239,13 @@ class DatabaseQueries {
         return array("thread_id" => $id, "post_id" => $post_id);
     }
 
-    public function getThreadTitle($thread_id){
-        $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
-        return $this->course_db->rows()[0];
+    public function getThread($thread_id) {
+		$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
+		return $this->course_db->rows();
     }
 
-    public function getThread($thread_id){
-        $this->course_db->query("SELECT * FROM threads where id=?", array($thread_id));
+    public function getThreadTitle($thread_id){
+        $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
         return $this->course_db->rows()[0];
     }
 
@@ -287,6 +287,10 @@ class DatabaseQueries {
     	return $this->course_db->rows();
     }
 
+    public function threadExists(){
+		$this->course_db->query("SELECT id from threads LIMIT 1");
+		return count($this->course_db->rows()) == 1;
+    }
 
     /**
      * Set delete status for given post and all descendant
