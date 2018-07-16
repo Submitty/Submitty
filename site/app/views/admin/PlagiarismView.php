@@ -105,9 +105,22 @@ HTML;
     $('[name="user_id_2"]', form2).change(function(){
         setUserSubmittedCode('user_id_2');
     });
+    $(document).click(function() {
+        if($('#popup_to_show_matches_id').css('display') == 'block'){
+            $('#popup_to_show_matches_id').css('display', 'none');
+        }
+    });
 </script>
 HTML;
         return $return;
+    }
+
+    public function plagiarismPopUpToShowMatches() {
+        $return = <<<HTML
+    <ul id="popup_to_show_matches_id" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;top:0px;left:0px;width:auto;" >
+    </ul>
+HTML;
+        return $return;       
     }
 
     public function plagiarismForm($gradeable_ids_titles, $prior_term_gradeables) {

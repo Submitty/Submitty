@@ -83,7 +83,11 @@
             true
         {% elseif max < 0 %}
             {# Negaitve points only show if you got it #}
-            {{ earned < 0 }}
+            {% if earned < 0 %}
+                true
+            {% else %}
+                false
+            {% endif %}
         {% else %}
             {# Otherwise it's worth zero points, don't show #}
             false
