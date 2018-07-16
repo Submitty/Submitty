@@ -1,26 +1,26 @@
 {# This is the control shown/hidden #}
 <div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;">
-    {# This lets us center the window #}
-    <div class="popup-box">
-        {# Actual displayed window #}
-        <div class="popup-window">
-            {% block form %}
-                <div class="popup-body">
-                    <div class="form-body">
-                        <h2>{% block title %}Untitled Form{% endblock %}</h2>
-                        {% block body %}Be sure to override the body block.{% endblock %}
-                    </div>
-                    <div class="form-buttons">
-                        <div class="form-button-container">
-                            {% block buttons %}
-                                {% block close_button %}
-                                   <a onclick="$('#{{ block('popup_id') }}').css('display', 'none');" class="btn btn-default">Close</a>
-                                {% endblock %}
+    {% block form %}
+        {# This lets us center the window #}
+        <div class="popup-box">
+            {# Actual displayed window #}
+            <div class="popup-window">
+                <div class="form-title">
+                    <h2>{% block title %}Untitled Form{% endblock %}</h2>
+                </div>
+                <div class="form-body">
+                    {% block body %}Be sure to override the body block.{% endblock %}
+                </div>
+                <div class="form-buttons">
+                    <div class="form-button-container">
+                        {% block buttons %}
+                            {% block close_button %}
+                               <a onclick="$('#{{ block('popup_id') }}').css('display', 'none');" class="btn btn-default">Close</a>
                             {% endblock %}
-                        </div>
+                        {% endblock %}
                     </div>
                 </div>
-            {% endblock %}
+            </div>
         </div>
-    </div>
+    {% endblock %}
 </div>

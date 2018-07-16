@@ -344,7 +344,7 @@ table tr.table-header {
 
 #footer {
     margin-top: 30px;
-    z-index: 9999;
+    z-index: 20;
 }
 
 #push, #footer {
@@ -956,19 +956,23 @@ table .instructor .two-options{
     background: #FFFFFF;
     border: 1px solid #000000;
     padding: 10px;
-    height: 80%;
+    max-height: 80%;
+    min-height: 300px;
     overflow-y: auto;
-}
-
-.popup-body {
-    height: 100%;
     display: flex;
     flex-direction: column;
     align-content: space-around;
 }
 
 .popup-form form {
+    width: 100%;
     height: 100%;
+}
+
+.popup-form .form-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
 }
 
 .popup-form .form-body {
@@ -977,7 +981,9 @@ table .instructor .two-options{
 }
 
 .popup-form .form-buttons {
+    padding-top: 10px;
     margin-top: 10px;
+    border-top: 1px solid #ccc;
 }
 
 .popup-form .form-button-container {
