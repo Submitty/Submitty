@@ -45,7 +45,7 @@ class HomePageView extends AbstractView {
             "user" => $user,
             "ranks" => $ranks,
             "change_name_text" => $changeNameText,
-            "show_change_password" => !$this->core->getAuthentication() instanceof DatabaseAuthentication
+            "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication
         ]);
     }
 }
