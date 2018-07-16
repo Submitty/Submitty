@@ -84,13 +84,13 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to create this request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+            $this->core->getOutput()->renderJson(["status" => "success"]);
         }else{
-            $this->core->addErrorMessage("Unable to create new regrade request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
         }
     }
 
@@ -102,21 +102,22 @@ class SubmissionController extends AbstractController {
         $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
         //Prevent students making post requests for other studnets
         if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
 
     private function deleteRequest(){
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to delete this request");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
     private function changeRequestStatus(){
         $regrade_id = $_REQUEST['regrade_id'];
@@ -125,11 +126,11 @@ class SubmissionController extends AbstractController {
         $status = $_REQUEST['status'];
         //TODO: set userViewedDate to null if the status is change to 1 to make the button green
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to delete this request");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;

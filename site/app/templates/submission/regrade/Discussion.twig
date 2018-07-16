@@ -80,7 +80,7 @@
 {% endfor %}
 <div style="padding:20px;">
     <form method="POST" id="replyTextForm" value="-1" action="{{ url }}">
-        <input type="hidden" id="regrade" name="regrade" value="{{ thread_id }}">
+        <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
         <input type="hidden" id="g_id" name="g_id" value="{{ gradeable.getId() }}">
         <input type="hidden" id="u_id" name="u_id" value="{{ core.getUser().getId() }}">
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" id="makeRequestPost" required></textarea>
