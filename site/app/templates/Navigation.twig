@@ -29,7 +29,7 @@
                 </tr>
                 <tbody id="{{ info.section_id }}_tbody">
                     {% for g_info in info.gradeables %}
-                    <tr class="gradeable_row" id="{{g_info.id}}">
+                    <tr class="gradeable_row" id="{{ g_info.id }}">
                         <td>
                             <label>{{ g_info.name }}</label>
                             {% if g_info.url|trim != "" %}

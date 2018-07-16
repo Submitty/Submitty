@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "json.hpp"
 
 float stringToFloat(std::string const &str, int precision);
 
@@ -141,6 +142,14 @@ void moveMouseToOrigin(std::string window_name);
 void type(std::string command, std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
                 float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
 
+
+/**
+* This function defines which actions are inherently bound for a GUI/window.
+**/
+bool isWindowedAction(const nlohmann::json action);
+
+
+
 /**
 * The central routing function for for all actions. Takes in a vector of actions and the # of actions taken 
 * thus far. It then passes the current action to be taken through tests to see which function to route to.
@@ -149,6 +158,6 @@ void type(std::string command, std::string window_name, int childPID, float &ela
 * NOTE TO DEVLOPERS: If you want to add a new action, also modify the preprocessing script for config.json to 
 * include your new action as valid.
 */
-void takeAction(const std::vector<std::string>& actions, int& actions_taken, int& number_of_screenshots, 
+void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, int& number_of_screenshots, 
                 std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
                 float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);

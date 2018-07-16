@@ -178,60 +178,6 @@ class GradeableComponent extends AbstractModel {
         return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
-    public function getGradedTAPrecisionValue($gradeable) {
-      $point_precision = $gradeable->getPointPrecision();
-      $str_point_precision = (string) $point_precision;
-      $num_decimals =  strlen(substr(strrchr($str_point_precision, "."), 1));
-
-      $str1 = '%4.';
-      $str2 = 'f';
-      $precision_str = $str1 . (string) $num_decimals . $str2;
-      return $precision_str;
-    }
-
-    public function getGradedTAComments($nl, $show_students, $gradeable, $use_ascii = true) {
-        $text = "";
-        $first_text = true;
-        if(!$use_ascii){
-            $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
-            $box = '<i class="fa fa-square-o"></i> ';
-        }else{
-            $checkedBox = '(*)';
-            $box = '( )';
-        }
-        foreach ($this->marks as $mark) {
-            $points_string = "    ";
-            if ($mark->getPoints() != 0) {
-              $points_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $mark->getPoints());
-            }
-            $hasmark = $box;
-            if($mark->getHasMark() === true) {
-              $hasmark = $checkedBox;
-            } else if (!($show_students === true && $mark->getPublish() === 't')) {
-              continue;
-            }
-            $newline=$nl;
-            if ($first_text === true) {
-              $newline = "";
-              $first_text = false;
-            }
-            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
-        }
-        if($this->score != 0 || $this->comment != "") {
-            $newline=$nl;
-            if ($first_text === true) {
-              $newline = "";
-              $first_text = false;
-            }
-            $score_string = "    ";
-            if (floatval($this->score) != 0) {
-                $score_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $this->score);
-            }
-            $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
-        }
-        return $text;
-    }
-
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
