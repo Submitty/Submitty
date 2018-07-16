@@ -15,7 +15,7 @@
         {# Overview #}
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
             {% if grader_names|join(",") == "" %}
-                <p>Version #{{ gradeable.getActiveVersion() }} graded by: An Undergraduate TA</p>
+                <p>Version #{{ gradeable.getActiveVersion() }} graded by: </p>
             {% else %}
                 <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
             {% endif %}
@@ -58,7 +58,7 @@
                         {% elseif not gradeable.getPeerGrading() and component.getVerifier().accessFullGrading() %}
                             <i>(Graded by: {{ component.getVerifier().getLastName() }})</i>
                         {% else %}
-                            <i>(Graded by: An undergraduate mentor)</i>
+                            <i>(Graded by: )</i>
                         {% endif %}
                     </h4>
                     <div style="float:left; word-break: break-word;">
