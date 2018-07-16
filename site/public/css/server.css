@@ -953,8 +953,9 @@ table .instructor .two-options{
 
 .popup-window {
     width: 680px;
-    background: #FFFFFF;
-    border: 1px solid #000000;
+    background: #ffffff;
+    box-shadow: 0 6px 20px 2px #0000007f;
+    border-radius: 4px;
     padding: 10px;
     max-height: 80%;
     min-height: 300px;
