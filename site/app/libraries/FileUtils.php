@@ -157,8 +157,6 @@ class FileUtils {
           else if ($iter->isFile()) {
                 $filename = $iter->getPathname();
                 array_push($files, substr($filename, $pathLength, strlen($filename)-$pathLength));
-                //array_push($files, substr($filename, $pathLength, 2));
-                //array_push($files, $filename);
           }
           else if ($iter->isDir()) {
             if (in_array($iter->getFilename(), array('__MACOSX'))) {

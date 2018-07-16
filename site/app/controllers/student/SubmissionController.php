@@ -1566,10 +1566,10 @@ class SubmissionController extends AbstractController {
       $file_size = 0;
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {
-                  if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                      return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
-                  }
-                  $file_size += $uploaded_files[1]["size"][$j];
+              if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
+                  return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+              }
+              $file_size += $uploaded_files[1]["size"][$j];
           }
       }
 

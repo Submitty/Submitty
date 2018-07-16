@@ -31,17 +31,11 @@ class CourseMaterialsController extends AbstractController {
            return $this->uploadResult("You have no permission to delete this file", false);
         }
 
-        //if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            //return $this->uploadResult("Invalid CSRF token.", false);
-        //}
-
         if (!isset($_POST['filename'])) {
             return $this->uploadResult("Empty file.", false);
         }
 
         $file_name = $_POST['filename'];
-
-        // creating uploads/student_images directory
 
         $course_materials_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials", $filename);
 

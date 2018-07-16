@@ -32,13 +32,11 @@
     </form>
     <script type="text/javascript">
         function makeSubmission(requestedPath) {
-
-				    var testString = requestedPath;
-            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", testString);
+            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", requestedPath);
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button
-				var requestedPath = document.getElementById("input_provide_full_path").value;
+                var requestedPath = document.getElementById("input_provide_full_path").value;
                 makeSubmission(requestedPath);
                 e.stopPropagation();
             });
@@ -52,57 +50,5 @@
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
-    </script>
-    <script type="text/javascript">
-        var blankQuestion =
-            {
-                'id': 'NEW',
-                'title': '',
-                'ta_comment': '',
-                'student_comment': ''
-            };
-
-        function onPdfChange() {
-            if($('#yes_pdf_page').is(':checked')) {
-                // $('#pdf_page').show();
-                // $('.pdf_page_input').show();
-                disableElementChildren('#pdf_page', false);
-                disableElementChildren('.pdf_page_input', $('#yes_pdf_page_student').is(':checked'));
-            }
-            else {
-                // $('#pdf_page').hide();
-                // $('.pdf_page_input').hide();
-                disableElementChildren('#pdf_page', true);
-                disableElementChildren('.pdf_page_input', true);
-            }
-        }
-
-        function onConfigChange(){
-            $('.config_option').not(this).prop('checked', false);
-            if($('#existing_paths').is(':checked')) {
-                $('.div_select_config').hide();
-                $('#div_default_configs').show();
-                $('#input_provide_full_path').prop('disabled', true);
-                $("#select_default_config").val($("#select_default_config option:first").val());
-            } else {
-                $('.div_select_config').hide();
-                $('#input_provide_full_path').prop('disabled', false);
-            }
-        }
-        $(document).ready(function() {
-
-            // Hide PDF settings if not in use
-            //onPdfChange();
-            //$('[name="eg_pdf_page"]').change(onPdfChange);
-
-            // Hide PDF pages in Rubric if students assign them
-            //$('[name="eg_pdf_page_student"]').change(onPdfChange);
-
-            // Only show the settings if the setting is enabled
-            //onStudentViewChange();
-            //$('[name="eg_student_view"]').change(onStudentViewChange);
-            $('.config_option').change(onConfigChange);
-            //$('.select_config_path').change(onConfigPathChange);
-        });
     </script>
 </div>
