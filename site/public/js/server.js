@@ -243,6 +243,28 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
     var form = $("#run-plagiarism-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
