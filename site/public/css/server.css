@@ -934,25 +934,54 @@ table .instructor .two-options{
 .popup-form {
     z-index: 2000;
     position: fixed;
-    top: 10%;
-    left: 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup-box {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-window {
     width: 680px;
-    /*height: 300px;*/
-    margin-left: -340px;
     background: #FFFFFF;
     border: 1px solid #000000;
     padding: 10px;
-    display: none;
-    max-height: 80%;
+    height: 80%;
     overflow-y: auto;
 }
 
-.popup-form:not(.no-popup-div) div {
-    width: 30%;
-    display: inline-block;
-    vertical-align: top;
-    padding-right: 10px;
-    padding-bottom: 10px;
+.popup-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-content: space-around;
+}
+
+.popup-form form {
+    height: 100%;
+}
+
+.popup-form .form-body {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.popup-form .form-buttons {
+    margin-top: 10px;
+}
+
+.popup-form .form-button-container {
+    text-align: right;
 }
 
 .popup-form.decent div {
