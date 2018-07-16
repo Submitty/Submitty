@@ -40,7 +40,7 @@ class AdminGradeableView extends AbstractView {
         if($type_of_action === 'add') {
             $admin_gradeable->setEgConfigPath('/usr/local/submitty/more_autograding_examples/upload_only/config');
         }
-        
+
         //makes an array of gradeable ids for javascript
         foreach ($admin_gradeable->getTemplateList() as $g_id_title) {
             array_push($gradeables_array, $g_id_title['g_id']);
@@ -132,7 +132,7 @@ class AdminGradeableView extends AbstractView {
             "cmake_output"            => htmlentities($cmake_output)
         ]);
     }
-    
+
     public function show_edit_gradeable(AdminGradeable $admin_gradeable) {
         return "";
     }

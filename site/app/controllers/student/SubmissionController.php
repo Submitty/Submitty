@@ -1531,14 +1531,10 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("Invalid CSRF token.", false);
       }
 
-	  $requested_path = "";
-	  if (isset($_POST['requested_path'])) {
-		  $requested_path = $_POST['requested_path'];
-		  //$this->core->addErrorMessage($requested_pat//h);
+      $requested_path = "";
+      if (isset($_POST['requested_path'])) {
+          $requested_path = $_POST['requested_path'];
       }
-	  else{
-		  //$this->core->addErrorMessage("Unable to get requested_path");
-	  }
 
       $uploaded_files = array();
       if (isset($_FILES["files1"])) {
@@ -1582,10 +1578,9 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
       }
 
-      // creating uploads/student_images directory
-
-      $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-      if (!FileUtils::createDir($upload_img_path)) {
+      // creating uploads/course_materials directory
+      $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+      if (!FileUtils::createDir($upload_path)) {
           return $this->uploadResult("Failed to make image path.", false);
       }
 
@@ -1595,13 +1590,13 @@ class SubmissionController extends AbstractController {
 		    if (!FileUtils::createDir($upload_nested_path, null, true)) {
 			    return $this->uploadResult("Failed to make image path.", false);
 		    }
-		    $upload_img_path = $upload_nested_path;
+		    $upload_path = $upload_nested_path;
 	    }
 
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                    $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
+                    $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
                     if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
                     }
