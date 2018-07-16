@@ -1250,7 +1250,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1396,6 +1396,81 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function generateCodeMirrorBlocks(container_element) {
+    var codeSegments = container_element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").parent().show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    box = dummy_box.clone();
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
+
+                    var first_name = post['user_info']['first_name'].trim();
+                    var last_name = post['user_info']['last_name'].trim();
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
+                    $("#popup-post-history").prepend(box);
+                }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
@@ -1731,7 +1806,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
