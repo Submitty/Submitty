@@ -9,9 +9,10 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
+use app\models\GradeableList;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
-use app\models\GradeableList;
+
 
 
 class SubmissionController extends AbstractController {
