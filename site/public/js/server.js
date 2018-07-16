@@ -1337,6 +1337,7 @@ function enableTabsInTextArea(jQuerySelector){
 }
 
 function changeDisplayOptions(option, thread_id){
+    document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
@@ -1363,9 +1364,10 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId){
+function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
@@ -1381,7 +1383,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                $(".thread_list").html(x);
             },
             error: function(){
-                window.alert("Something went wrong when trying to filter. Please try again.");
+               window.alert("Something went wrong when trying to filter. Please try again.");
+               document.cookie = course + "_forum_categories=;";
             }
     })
 }
