@@ -4,7 +4,9 @@
 	<br><br>
 	<p>
         Instructors can upload three simple html files to use as a wrapper around the Submitty website.<br>
-        The first will go in the upper left corner, the second across the top (upper right), and the third along the left side (lower left).
+        The first will go in the upper left corner, the second across the top (upper right), and the third along the left side (lower left).<br>
+        The uploaded HTML must be simple enough to not conflict with any of Submitty's HTML, or else the site may experience issues.<br>
+        Do not include any scripts in the HTML.
     </p>
 	<br>
 	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
@@ -39,10 +41,18 @@
         <h2>Previous Uploads</h2>
         <br>
         <b>located in {{ target_dir }}</b>
-        {% for file in html_files %}
+        {% if html_files['up_left_file'] != null %}
             <br>
-            &nbsp;&nbsp;&nbsp;&nbsp;{{ file['path'] }}
-        {% endfor %}
+            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-left'}) }}"></a>&nbsp;{{ html_files['up_left_file']['path'] }}
+        {% endif %}
+        {% if html_files['up_right_file'] != null %}
+            <br>
+            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-right'}) }}"></a>&nbsp;{{ html_files['up_right_file']['path'] }}
+        {% endif %}
+        {% if html_files['low_left_file'] != null %}
+            <br>
+            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ html_files['low_left_file']['path'] }}
+        {% endif %}
 
     </div>
 
