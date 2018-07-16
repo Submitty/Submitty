@@ -528,7 +528,7 @@ class SubmissionController extends AbstractController {
         }
 
         $new_version = 1;
-        if ($graded_gradeable->getAutoGradedGradeable() !== null) {
+        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
             $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
@@ -815,7 +815,7 @@ class SubmissionController extends AbstractController {
         }
 
         $highest_version = 0;
-        if($graded_gradeable->getAutoGradedGradeable() !== null) {
+        if($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         }
         $new_version = $highest_version + 1;
