@@ -5,7 +5,7 @@
 ########################################################################
 
 # If any command fails, we need to bail
-set -e
+set -ev
 
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
