@@ -108,8 +108,9 @@
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
-                 $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');$(this).closest('.thread-post-form').find('[name=thread_post_content]').trigger('checkform.areYouSure');
-                 $('#title').val('');$('#title').trigger('checkform.areYouSure');"
+                 $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
+                 $('#title').val('');
+                 $(this).closest('form').trigger('reinitialize.areYouSure');"
                      class="btn btn-danger">Cancel</a>
         {% endif %}
         <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />

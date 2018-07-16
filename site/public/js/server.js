@@ -429,6 +429,132 @@ function setUserSubmittedCode(changed) {
     }   
 }
 
+function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#gradeables_with_plagiarism_result");
+    var form2 = $("#users_with_plagiarism");
+    var gradeable_id = $('[name="gradeable_id"]', form).val();
+    var user_id_1 = $('[name="user_id_1"]', form2).val();
+    var version_user_1 = $('[name="version_user_1"]', form2).val();
+    var version_user_2='';
+    var user_id_2='';
+    if($('[name="user_id_2"]', form2).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    }
+    $('[name="code_box_1"]').find('span').each(function(){
+        var attr = $(this).css('background-color');
+        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
+            $(this).css('background-color',"#ffa500");    
+        }
+    });
+    $('[name="code_box_2"]').find('span').each(function(){
+        var attr = $(this).css('background-color');
+        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
+            $(this).css('background-color',"#ffa500");    
+        }
+    });
+
+    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            data = JSON.parse(data);
+            if(data.error){
+                alert(data.error);
+                return;
+            }
+
+            if(where == 'code_box_2') {
+                var name_span_clicked = $(span_clicked).attr('name');
+                var scroll_position=-1;
+                $('[name="code_box_2"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
+                        $(this).css('background-color',"#FF0000");       
+                    }
+                });
+                $('[name="code_box_1"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        attr= JSON.parse(attr);
+                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
+                            $(this).css('background-color',"#FF0000");    
+                        }      
+                    }  
+                }); 
+                $('[name="code_box_1"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_1"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
+                        return false;
+                    } 
+                });
+                $('[name="code_box_1"]').scrollTop(scroll_position);
+            }
+              
+            else if(where == 'code_box_1') {
+                var to_append='';
+                $.each(data, function(i,match){
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                });
+                to_append = $.parseHTML(to_append);
+                $("#popup_to_show_matches_id").empty().append(to_append);
+                var x = event.pageX;
+                var y = event.pageY; 
+                $('#popup_to_show_matches_id').css('display', 'block');
+                var width = $('#popup_to_show_matches_id').width();
+                $('#popup_to_show_matches_id').css('top', y+5);
+                $('#popup_to_show_matches_id').css('left', x-width/2.00);
+                
+            } 
+
+            else if(where == 'popup') {
+                jQuery.ajaxSetup({async:false});
+                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode('user_id_2');
+                $('[name="code_box_1"]').find('span').each(function(){
+                    var attr = $(this).attr('name');
+                    if (typeof attr !== typeof undefined && attr !== false) {
+                        attr= JSON.parse(attr);
+                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
+                            $(this).css('background-color',"#FF0000");    
+                        }      
+                    }  
+                });
+                $.each(data, function(i,match){
+                    if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
+                        $.each(match[2], function(j, range){
+                            $('[name="code_box_2"]').find('span').each(function(){
+                                var attr = $(this).attr('name');
+                                if (typeof attr !== typeof undefined && attr !== false) {
+                                    if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
+                                        $(this).css('background-color',"#FF0000");    
+                                    }      
+                                }
+                            });
+                        });
+                    }                    
+                });
+                $('[name="code_box_2"]').scrollTop(0);
+                var scroll_position=0;
+                $('[name="code_box_2"]').find('span').each(function(){
+                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
+                        scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
+                        return false;
+                    } 
+                });
+                $('[name="code_box_2"]').scrollTop(scroll_position);
+                jQuery.ajaxSetup({async:true});
+            }   
+        },
+        error: function(e) {
+            alert("Could not load submitted code, please refresh the page and try again.");
+        }
+    })
+}
+
 function toggleUsersPlagiarism() {
     var form = $("#gradeables_with_plagiarism_result");
     var form2 = $("#users_with_plagiarism");
@@ -1124,7 +1250,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1211,6 +1337,7 @@ function enableTabsInTextArea(jQuerySelector){
 }
 
 function changeDisplayOptions(option, thread_id){
+    document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
@@ -1237,9 +1364,10 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId){
+function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
@@ -1255,7 +1383,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                $(".thread_list").html(x);
             },
             error: function(){
-                window.alert("Something went wrong when trying to filter. Please try again.");
+               window.alert("Something went wrong when trying to filter. Please try again.");
+               document.cookie = course + "_forum_categories=;";
             }
     })
 }
@@ -1267,6 +1396,81 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function generateCodeMirrorBlocks(container_element) {
+    var codeSegments = container_element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").parent().show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    box = dummy_box.clone();
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
+
+                    var first_name = post['user_info']['first_name'].trim();
+                    var last_name = post['user_info']['last_name'].trim();
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
+                    $("#popup-post-history").prepend(box);
+                }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
@@ -1602,7 +1806,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
@@ -1812,7 +2016,28 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
-
+function toggleRegradeRequests(){
+    var element = document.getElementById("regradeBoxSection");
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
+    }
+    else {
+        element.style.display = 'block';
+    }
+    
+}
+function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            window.location.reload();
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
