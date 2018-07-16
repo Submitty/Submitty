@@ -12,5 +12,4 @@ def up(config, conn, semester, course):
         cursor.execute('CREATE INDEX "forum_posts_history_edit_timestamp_index" ON "forum_posts_history" ("edit_timestamp" DESC)')
 
 def down(config, conn, semester, course):
-    with conn.cursor() as cursor:
-        cursor.execute("DROP TABLE forum_posts_history")
+    pass
