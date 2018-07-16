@@ -148,6 +148,13 @@ class SubmissionController extends AbstractController {
 
             // ORIGINAL
             //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+            
+            // hiding entire page if user is not a grader and student cannot view
+            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
+                $message = "Students cannot view that gradeable.";
+                $this->core->addErrorMessage($message);
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
 
             // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
