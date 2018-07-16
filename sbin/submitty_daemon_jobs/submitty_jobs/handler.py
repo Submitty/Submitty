@@ -2,7 +2,7 @@
 
 """
 Job handler for the submitty daemon user. It watches
-${SUBMITTY_DATA_DIR}/submitty_daemon_job_queue for
+${SUBMITTY_DATA_DIR}/daemon_job_queue for
 new files which should be structured:
 {
     "job": "string",
@@ -57,7 +57,8 @@ def process_job(job):
     :param str job:
     """
 
-    with open(os.path.join(QUEUE_DIR, job)) as job_file:
+    print ("START JOB ",job)
+    with open(os.path.join(str(QUEUE_DIR), job)) as job_file:
         job_details = json.load(job_file)
     processing_job = QUEUE_DIR / ('PROCESSING_' + job)
 
@@ -69,7 +70,7 @@ def process_job(job):
         # function does not exist
         pass
     processing_job.unlink()
-
+    print ("finished job ", job)
 
 def cleanup_job(job):
     """
@@ -82,6 +83,7 @@ def cleanup_job(job):
     with Path(QUEUE_DIR, job).open() as job_file:
         job_details = json.load(job_file)
     try:
+        print ("\ncleanup job (will need to re-run) ",job)
         job_class = getattr(jobs, job_details['job'])(job_details)
         job_class.cleanup_job()
     except NameError:
