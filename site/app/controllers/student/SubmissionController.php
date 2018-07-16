@@ -9,7 +9,6 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
-use app\models\GradeableList;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
 
@@ -130,57 +129,56 @@ class SubmissionController extends AbstractController {
 
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-
-        // FIXME: The GradeableList is constructed here for legacy purposes
-        // FIXME:   Replace with tryGetElectronicGradeable when converting homework view to new model
-        $gradeable_list = $this->core->loadModel(GradeableList::class);
-        /** @var \app\models\Gradeable $gradeable */
-        $gradeable = $gradeable_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
-        if ($gradeable !== null) {
-            $error = false;
-            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
-
-            // ORIGINAL
-            //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
-
-            // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-            if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-                $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
-                return array('error' => true, 'message' => 'No gradeable with that id.');
-            }
-            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
-                $this->core->addErrorMessage('Must be on a team to access submission');
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-                return array('error' => true, 'message' => 'Must be on a team to access submission.');
-            }
-            else {
-                $loc = array('component' => 'student',
-                             'gradeable_id' => $gradeable->getId());
-                $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
-                if (!$gradeable->hasConfig()) {
-                    $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'unbuiltGradeable', $gradeable);
-                    $error = true;
-                }
-                else {
-                    $gradeable->loadResultDetails();
-                    $extensions = $gradeable->getLateDayExceptions();
-                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
-                    $late_days_use = max(0, $days_late - $extensions);
-                    if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded()) {
-                        $gradeable->updateUserViewedDate();
-                    }
-                    $canViewWholeGradeable = false;
-                    $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
-                }
-            }
-            return array('id' => $gradeable_id, 'error' => $error);
-        }
-        else {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+
+        $error = false;
+        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+
+        // ORIGINAL
+        //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+
+        // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
+        if ($gradeable->getSubmissionOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return array('error' => true, 'message' => 'No gradeable with that id.');
+        }
+        else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage('Must be on a team to access submission');
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => 'Must be on a team to access submission.');
+        }
+        else {
+            $loc = array('component' => 'student',
+                         'gradeable_id' => $gradeable->getId());
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            if (!$gradeable->hasAutogradingConfig()) {
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
+                                                       'unbuiltGradeable', $gradeable);
+                $error = true;
+            }
+            else {
+                $extensions = $graded_gradeable->getLateDayException($this->core->getUser()->getId());
+                $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
+                $late_days_use = max(0, $days_late - $extensions);
+                if ($graded_gradeable !== null
+                    && $gradeable->getGradeReleasedDate() > $now
+                    && $gradeable->isTaGrading() 
+                    && $graded_gradeable->isTaGradingComplete()) {
+                    $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
+                    $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
+                }
+                $canViewWholeGradeable = false;
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
+                                                       'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
+            }
+        }
+        return array('id' => $gradeable_id, 'error' => $error);
     }
 
     /**
