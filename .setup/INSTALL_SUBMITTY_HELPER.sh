@@ -265,13 +265,15 @@ if [ "${WORKER}" == 0 ]; then
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
     # if the to_be_graded directories do not exist, then make them
     mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
+    mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
 
     # set the permissions of these directories
-
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
     # BATCH QUEUE: course builders (instructors & head TAs) will write items to this list, DAEMON_USER will remove them
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
+    chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
 fi
 
 

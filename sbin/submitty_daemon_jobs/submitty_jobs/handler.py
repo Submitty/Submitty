@@ -2,7 +2,7 @@
 
 """
 Job handler for the submitty daemon user. It watches
-${SUBMITTY_DATA_DIR}/submitty_daemon_job_queue for
+${SUBMITTY_DATA_DIR}/daemon_job_queue for
 new files which should be structured:
 {
     "job": "string",
