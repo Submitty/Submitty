@@ -238,8 +238,8 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
-        $show_import_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
-        $show_export_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
+        $show_import_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
+        $show_export_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
 
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
