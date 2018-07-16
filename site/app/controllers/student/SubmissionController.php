@@ -508,7 +508,7 @@ class SubmissionController extends AbstractController {
                 $user_id = "";
             }
             //if the student isn't on a team, build the team.
-            else {
+            else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
                 // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
@@ -600,9 +600,9 @@ class SubmissionController extends AbstractController {
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
-                                                       "time" => $current_time_string_tz,
-                                                       "who" => $original_user_id,
-                                                       "type" => "upload")));
+                                                   "time" => $current_time_string_tz,
+                                                   "who" => $original_user_id,
+                                                   "type" => "upload")));
         }
         else {
             $json = FileUtils::readJsonFile($settings_file);
