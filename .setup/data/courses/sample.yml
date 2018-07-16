@@ -133,7 +133,8 @@ gradeables:
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: open_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -190,13 +191,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: open_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Open Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: open_team_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -255,13 +256,13 @@ gradeables:
   g_grade_start_date: 9997-12-31 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
-  g_id: open_team_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Open Team Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: grading_team_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -320,13 +321,13 @@ gradeables:
   g_grade_start_date: 1973-01-01 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
-  g_id: grading_team_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Team Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: closed_team_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -385,13 +386,13 @@ gradeables:
   g_grade_start_date: 9997-12-31 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
-  g_id: closed_team_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Closed Team Homework
   gradeable_config: cpp_hidden_tests
   g_bucket: homework
 
-- components:
+- g_id: closed_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -448,13 +449,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: closed_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Closed Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: grading_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -511,13 +512,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grading_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: grades_released_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -533,13 +534,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
-- components:
+- g_id: future_no_tas_lab
+  components:
   - gc_title: Question 1
     gc_lower_clamp: 0
     gc_default: 0
@@ -552,13 +553,13 @@ gradeables:
     gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: future_no_tas_lab
   g_ta_view_start_date: 9996-12-31 23:59:59
   g_title: Future (No TAs) Lab
   g_type: 1
   g_bucket: lab
 
-- components:
+- g_id: future_tas_lab
+  components:
   - gc_title: Question 1
     gc_lower_clamp: 0
     gc_default: 0
@@ -571,13 +572,13 @@ gradeables:
     gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: future_tas_lab
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Future (TAs) Lab
   g_type: 1
   g_bucket: lab
 
-- components:
+- g_id: grading_lab
+  components:
   - gc_title: Question 1
     gc_lower_clamp: 0
     gc_default: 0
@@ -590,13 +591,13 @@ gradeables:
     gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grading_lab
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Lab
   g_type: 1
   g_bucket: lab
 
-- components:
+- g_id: grading_lab_rotating
+  components:
   - gc_title: Question 1
     gc_lower_clamp: 0
     gc_default: 0
@@ -609,14 +610,14 @@ gradeables:
     gc_upper_clamp: 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grading_lab_rotating
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Lab (Rotating Sections)
   g_type: 1
   g_bucket: lab
   g_grade_by_registration: False
 
-- components:
+- g_id: grades_released_lab
+  components:
   - gc_title: Question 1
     gc_lower_clamp: 0
     gc_default: 0
@@ -629,13 +630,13 @@ gradeables:
     gc_upper_clamp: 1
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grades_released_lab
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Lab
   g_type: 1
   g_bucket: lab
 
-- components:
+- g_id: future_no_tas_test
+  components:
   - gc_lower_clamp: 0
     gc_default: 0
     gc_max_value: 0
@@ -650,13 +651,13 @@ gradeables:
     gc_title: Text 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: future_no_tas_test
   g_ta_view_start_date: 9996-12-31 23:59:59
   g_title: Future (No TAs) Test
   g_type: 2
   g_bucket: test
 
-- components:
+- g_id: future_tas_test
+  components:
   - gc_lower_clamp: 0
     gc_default: 0
     gc_max_value: 0
@@ -671,13 +672,13 @@ gradeables:
     gc_title: Text 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  g_id: future_tas_test
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Future (TAs) Test
   g_type: 2
   g_bucket: test
 
-- components:
+- g_id: grading_test
+  components:
   - gc_lower_clamp: 0
     gc_default: 0
     gc_max_value: 0
@@ -692,13 +693,13 @@ gradeables:
     gc_title: Text 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grading_test
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Test
   g_type: 2
   g_bucket: test
 
-- components:
+- g_id: grading_test_rotating
+  components:
   - gc_lower_clamp: 0
     gc_default: 0
     gc_max_value: 0
@@ -713,14 +714,14 @@ gradeables:
     gc_title: Text 1
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grading_test_rotating
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Test (Rotating Sections)
   g_type: 2
   g_bucket: test
   g_grade_by_registration: False
 
-- components:
+- g_id: grades_released_test
+  components:
   - gc_lower_clamp: 0
     gc_default: 0
     gc_max_value: 0
@@ -735,13 +736,13 @@ gradeables:
     gc_title: Text 1
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
-  g_id: grades_released_test
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Test
   g_type: 2
   g_bucket: test
 
-- components:
+- g_id: grades_released_homework_onlyta
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -754,14 +755,14 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_onlyta
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Grade Only Homework (Upload Only)
   gradeable_config: upload_only
   g_bucket: homework
 
 # For no autograding, still need components, but also ned eg_use_ta_grading flag
-- components:
+- g_id: grades_released_homework_onlyauto
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -818,14 +819,14 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_onlyauto
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde Only Homework (Simple Python)
   gradeable_config: 01_simple_python
   eg_use_ta_grading: False
   g_bucket: homework
 
-- components:
+- g_id: grades_released_homework_autota
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -882,13 +883,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_autota
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde and TA Homework (C System Calls)
   gradeable_config: 12_system_calls
   g_bucket: homework
 
-- components:
+- g_id: grades_released_homework_autohiddenEC
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -945,7 +946,6 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_autohiddenEC
   eg_lichen_sample_path: /usr/local/submitty/more_autograding_examples/cpp_cats/submissions
   eg_plagiarized_users:
     - aphacker
@@ -962,7 +962,8 @@ gradeables:
   gradeable_config: cpp_hidden_tests
   g_bucket: homework
 
-- components:
+- g_id: grades_released_homework_onlytaEC
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -1019,13 +1020,13 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_onlytaEC
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Extra Credit (Upload Only)
   gradeable_config: upload_only
   g_bucket: homework
 
-- components:
+- g_id: grades_released_homework_onlytaPenalty
+  components:
   - gc_lower_clamp: 0
     gc_default: 2
     gc_max_value: 2
@@ -1082,7 +1083,6 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  g_id: grades_released_homework_onlytaPenalty
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Penalty (Upload Only)
   gradeable_config: upload_only

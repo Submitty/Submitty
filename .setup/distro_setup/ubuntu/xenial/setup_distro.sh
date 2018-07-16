@@ -58,6 +58,9 @@ if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy php7.0-sqlite3 php-xdebug
 fi
 
+#Add the scrot screenshotting program
+apt-get install -qqy scrot
+
 # Add additional packages for compiling, authentication, and security,
 # and program support
 
@@ -92,7 +95,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get update -qqy
 apt-get install -qqy -y docker-ce
-systemctl status docker
+systemctl status docker | head -n 100
 
 
 if [ ${VAGRANT} == 1 ]; then

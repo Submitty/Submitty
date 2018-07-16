@@ -49,6 +49,8 @@ class Core {
     /** @var GradingQueue */
     private $grading_queue = null;
 
+    /** @var Access $access */
+    private $access = null;
 
     /**
      * Core constructor.
@@ -58,6 +60,8 @@ class Core {
      */
     public function __construct() {
         $this->output = new Output($this);
+        $this->access = new Access($this);
+
         // initialize our alert queue if it doesn't exist
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
@@ -434,6 +438,13 @@ class Core {
      */
     public function getGradingQueue() {
         return $this->grading_queue;
+    }
+
+    /**
+     * @return Access
+     */
+    public function getAccess() {
+        return $this->access;
     }
 
     /**
