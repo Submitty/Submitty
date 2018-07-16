@@ -429,50 +429,7 @@ class HomeworkView extends AbstractView {
             "gradeable" => $gradeable
         ]);
     }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return string
-     */
-    public function showRegradeRequestForm(Gradeable $gradeable): string {
-        if ($gradeable->getRegradeStatus() === 0) {
-            $btn_type = "request";
-            $url = $this->core->buildUrl(array('component' => 'student',
-                'action' => 'request_regrade',
-                'gradeable_id' => $gradeable->getId(),
-                'student_id' => $this->core->getUser()->getId()
-            ));
-        } else if ($gradeable->getRegradeStatus() === -1) {
-            if ($this->core->getUser()->accessGrading()) {
-                $btn_type = "delete";
-                $url = $this->core->buildUrl(array('component' => 'student',
-                    'action' => 'delete_request',
-                    'gradeable_id' => $gradeable->getId(),
-                    'student_id' => $gradeable->getUser()->getId()
-                ));
-            } else {
-                $btn_type = "addPost";
-                $url = $this->core->buildUrl(array('component' => 'student',
-                    'action' => 'make_request_post',
-                    'gradeable_id' => $gradeable->getId(),
-                    'student_id' => $gradeable->getUser()->getId()
-                ));
-            }
-        } else {
-            $btn_type = "completed";
-            $url = $this->core->buildUrl(array('component' => 'student',
-                'action' => 'delete_request',
-                'gradeable_id' => $gradeable->getId(),
-                'student_id' => $gradeable->getUser()->getId()
-            ));
-        }
-return $this->core->getOutput()->renderTwigTemplate("submission/regrade/Discussion.twig", [
-            "posts" => $posts,
-            "gradeable" => $gradeable,
-            "thread_id" => $thread_id
-        ]);
-    }
-
+    
     /**
      * @param Gradeable $gradeable
      * @return string
