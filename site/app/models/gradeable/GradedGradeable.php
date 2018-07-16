@@ -139,7 +139,7 @@ class GradedGradeable extends AbstractModel {
     public function getLateDayException($user = null) {
         if($user === null) {
             if($this->gradeable->isTeamAssignment()) {
-                throw new \InvalidArgumentException('Must provide user id if team assignment');
+                throw new \InvalidArgumentException('Must provide user if team assignment');
             }
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
