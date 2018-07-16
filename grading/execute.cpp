@@ -987,17 +987,31 @@ void TerminateProcess(float &elapsed, int childPID) {
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, 
-      const std::vector<std::string> actions,
+      const std::vector<nlohmann::json> actions,
       const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
-      const nlohmann::json &whole_config) {
+      const nlohmann::json &whole_config,
+      const bool windowed) {
 
   std::set<std::string> invalid_windows;
-  bool window_mode = false; //Tells us if the process is expected to spawn a window. (additional support later) 
+  bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
   
-  if(actions.size() > 0){ //right now, we assume if there are actions, there will be a window.  
+
+  //check if there are any actions present which require a window.
+  if(actions.size() > 0){ 
     std::cout << "Received " << actions.size() << " actions" << std::endl; //useful debug line.
+
+    for(std::vector<nlohmann::json>::const_iterator it = actions.begin(); it != actions.end(); ++it){
+      if(isWindowedAction(*it)){
+        window_mode = true;
+        break;
+      }
+    }
+
+  }
+
+  if(window_mode){
     std::cout <<"Window mode activated." << std::endl;
     char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
@@ -1006,6 +1020,7 @@ int execute(const std::string &cmd,
     window_mode = true;
     invalid_windows = snapshotOfActiveWindows();
   }
+
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -1063,23 +1078,31 @@ int execute(const std::string &cmd,
               centerMouse(windowName); //center our mouse on its screen
             }
           }
-          else{ //if we could not find out anything about our expected window 
-            if(windowName != "" && !windowExists(windowName)){ //If we had a window but it no longer exists (crashed/shut)
-              windowName = "";  //reset it's name to nothing so we can begin searching again.
-              std::cout << "The students window shut midrun." << std::endl;
-            }
+           //If we had a window but it no longer exists (crashed/shut)
+          else if(window_mode && windowName != "" && !windowExists(windowName)){ 
+            windowName = "";  //reset it's name to nothing so we can begin searching again.
+            std::cout << "The students window shut midrun." << std::endl;
           }
+          // sleep 1/10 of a second
           wpid = waitpid(childPID, &status, WNOHANG);
+          
           if (wpid == 0){
             // monitor time & memory usage
             if (!time_kill && !memory_kill){
-                // sleep 1/10 of a second
-              if(window_mode && actions_taken < actions.size() && windowName != ""){ //if we still have actions (keyboard events, etc.) to give the child
+              //if we expect a window, and the window exists, and we still have actions to take
+              if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
                 takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
               }
-              else{ //if we are out of actions or there were none, delay 1/10th second.
+              //If we do not expect a window and we still have actions to take
+              else if(!window_mode && actions_taken < actions.size()){ 
+                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
+                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
+              }
+              //if we are out of actions or there were none, delay 1/10th second.
+              else{ 
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
                   rss_memory, allowed_rss_memory, memory_kill, time_kill);
               }
