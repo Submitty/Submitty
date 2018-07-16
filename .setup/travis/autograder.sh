@@ -1,4 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit 1
+fi
+
+set -ev
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 MY_PATH="`dirname \"$0\"`"
@@ -40,9 +48,7 @@ EMMA_VER=2.0.5312
 wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}
-rm emma-${EMMA_VER}.zip
-rm index.html* > /dev/null 2>&1
+rm -rf emma-${EMMA_VER}*
 chmod o+r . *.jar
 
 # JaCoCo is a potential replacement for EMMA

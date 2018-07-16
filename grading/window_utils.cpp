@@ -19,6 +19,7 @@
 #include "window_utils.h"
 #include "execute.h"
 
+
 /**
 *Converts a string to a double with specified precision.
 */
@@ -335,25 +336,20 @@ int clamp(int& pos, int min, int max){
 }
 
 /**
-* This function is responsible for processing the 'delay' action. It extracts 
-* the number of seconds that we are to delay, then converts to microseconds for
+* This function is responsible for processing the 'delay' action. It 
+* converts to microseconds for
 * use with usleep, and returns. Actual sleeping is handled by the take_action 
 * function, which calls delay_and_memcheck (execute.cpp). 
 */
-float delay(std::string command){
-  //find any numbers in the delay line (float)
-  std::vector<float> numbers = extractFloatsFromString(command); 
-  if (numbers.size() > 0){
-    //if we have any numbers, assume the first is the amount we want to delay.
-    float sleep_time_secs = numbers[0];
-    //we can't delay for a negative amount of time.
-    if(sleep_time_secs < 0){ 
-      sleep_time_secs = abs(sleep_time_secs); 
-    }
-    //convert to microseconds and return. 
-    float sleep_time_micro = 1000000 * sleep_time_secs;  
-    return sleep_time_micro;
+float delay(float sleep_time_secs){
+  
+  if(sleep_time_secs < 0){ 
+    sleep_time_secs = abs(sleep_time_secs); 
   }
+  //convert to microseconds and return. 
+  float sleep_time_micro = 1000000 * sleep_time_secs;
+  return sleep_time_micro;
+
 }
 
 /**
@@ -455,11 +451,6 @@ void click(std::string window_name, int button){
 void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
                  int x_start, int x_end, int y_start, int y_end, bool no_clamp){
 
-  if(!no_clamp)
-  {
-    clamp(moved_mouse_x, x_start, x_end); //don't move outside of the window.
-    clamp(moved_mouse_y, y_start, y_end);
-  }
   //only move the mouse if the window exists. (get focus and mousemove.)
   if(windowExists(window_name)){
     std::string command = "wmctrl -R " + window_name + 
@@ -516,32 +507,28 @@ bool populateWindowData(std::string window_name, int& height, int& width,
 * no_clamp (which is currently disabled/false). returns false on failure. 
 * It is on the programmer to check.
 */
-bool populateClickAndDragValues(std::string command, std::string window_name, 
-      int& x_start, int& x_end, int& y_start, int& y_end, int& mouse_button, 
-                                std::vector<int>& destination, bool& no_clamp){
+bool populateClickAndDragValues(nlohmann::json action, std::string window_name, 
+      int& window_left, int& window_right, int& window_top, int& window_bottom, int& mouse_button, 
+                                bool& no_clamp){
   int height, width;
-  populateWindowData(window_name,height,width,x_start,x_end,y_start,y_end);
+  //Get the window dimensions.
+  populateWindowData(window_name,height,width,window_left,window_right,window_top,window_bottom);
 
-  destination = extractIntsFromString(command);
-  if(destination.size() == 0){
-    std::cout << "ERROR: The line " << command 
-                << " does not specify two coordinates." <<std::endl;
-    return false;
-  }
-  
-  if(command.find("no clamp") != std::string::npos){
-    std::cout << "Multiple windows are not yet supported. (No no clamp)"
-                 << std::endl;
-    no_clamp = false;
-  }
 
-  if(command.find("left") != std::string::npos){
+  // if(command.find("no clamp") != std::string::npos){
+  //   std::cout << "Multiple windows are not yet supported. (No 'no clamp' option available)" << std::endl;
+  //   no_clamp = false;
+  // }
+
+  std::string mouse_button_string = action.value("mouse_button", "left");
+
+  if(mouse_button_string == "left"){
     mouse_button = 1;
   }
-  else if (command.find("middle") != std::string::npos){
+  else if (mouse_button_string == "middle"){
     mouse_button = 2;
   }
-  else if (command.find("right") != std::string::npos){
+  else if (mouse_button_string == "right"){
     mouse_button = 3;
   }
   else{ //default.
@@ -593,13 +580,12 @@ std::vector<float> getLineIntersectionPoint(std::vector<int> p1,
 * move again. We give a one pixel border at each side of the window and clamp 
 * using that value to avoid accidental resizing.
 */
-void clickAndDragDelta(std::string window_name, std::string command){
+void clickAndDragDelta(std::string window_name, nlohmann::json action){
   //get the values of the student's window.
   int x_start, x_end, y_start, y_end, mouse_button; 
-  std::vector<int> coords; 
   bool no_clamp = false; 
-  bool success = populateClickAndDragValues(command, window_name, x_start, 
-                      x_end, y_start, y_end, mouse_button, coords, no_clamp);
+  bool success = populateClickAndDragValues(action, window_name, x_start, 
+                      x_end, y_start, y_end, mouse_button, no_clamp);
   
   //if we can't populate the click and drag values, do nothing.
   if(!success){ 
@@ -616,12 +602,11 @@ void clickAndDragDelta(std::string window_name, std::string command){
 
   
   //delta version, 2 values movement x and movement y.
-  int amt_x_movement_remaining = coords[0];
-  int amt_y_movement_remaining = coords[1];
+  int amt_x_movement_remaining = action.value("x_distance", 0);
+  int amt_y_movement_remaining = action.value("y_distance", 0);
 
   //This shouldn't fail unless there isn't a mouse.
-  std::string mouse_location_string = 
-    output_of_system_command("xdotool getmouselocation"); 
+  std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
   std::vector<int> xy = extractIntsFromString(mouse_location_string);                      
   
   //if the mouse isn't detected, fail.
@@ -672,8 +657,8 @@ void clickAndDragDelta(std::string window_name, std::string command){
     float fraction_of_distance_remaining = remaining_distance_needed 
                                             / total_distance_needed; 
     //project in the direction of the move to find the end of our line segment.
-    float projected_x = mouse_x + (coords[0] * fraction_of_distance_remaining); 
-    float projected_y = mouse_y + (coords[1] * fraction_of_distance_remaining);  
+    float projected_x = mouse_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
+    float projected_y = mouse_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
 
     //we are using vectors as 2d points.
     std::vector<int> current_point, projected_point;  
@@ -692,7 +677,7 @@ void clickAndDragDelta(std::string window_name, std::string command){
     * projected line.
     */
 
-    //found is just a quick short circuit to keep the code from ballooning.
+    //found is just a quick short-circuit to keep the code from ballooning.
     bool found = false; 
     if(intersection_point.size() != 0){ //TOP
       std::cout << "intersected top" << std::endl;
@@ -764,29 +749,42 @@ void clickAndDragDelta(std::string window_name, std::string command){
 * Click and drag absolute: move to a relative coordinate within the window
 * windowname, clamped.
 */
-void clickAndDragAbsolute(std::string window_name, std::string command){
+void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
    //populate the window variables. 
   int x_start, x_end, y_start, y_end, mouse_button;
-  std::vector<int> coords; 
   bool no_clamp = false; 
-  bool success = populateClickAndDragValues(command, window_name, x_start,
-                       x_end, y_start, y_end, mouse_button, coords, no_clamp);
+  bool success = populateClickAndDragValues(action, window_name, x_start,
+                       x_end, y_start, y_end, mouse_button, no_clamp);
   
   //if we couldn't populate the values, do nothing (window doesn't exist)
   if(!success){ 
-    std::cout << "Click and drag unsuccessful due to failutre to "
-                        << "populate click and drag values." << std::endl;
+    std::cout << "Click and drag unsuccessful due to failure to " << "populate click and drag values." << std::endl;
     return;
   }
 
-  int start_x_position, start_y_position, end_x_position, end_y_position;
+
+  int start_x_position = action.value("start_x", -1);
+  int start_y_position = action.value("start_y", -1);
+
+  int end_x_position = action.value("end_x", -1);
+  int end_y_position = action.value("end_y", -1);
+
+  if (start_x_position == end_x_position && start_y_position == end_y_position){
+    std::cout << "Error, the click and drag action did not specify movement." << std::endl;
+    return;
+  }
+
+  if(end_x_position == -1 || end_y_position == -1){
+    std::cout << "ERROR: the click and drag action must include an ending position" << std::endl;
+    return;
+  }
+  
+
 
   //get the mouse into starting position if they are specified.
-  if(coords.size() >3){ 
-    start_x_position = coords[0] + x_start;
-    start_y_position = coords[1] + y_start;
-    end_x_position   = coords[2] + x_start;
-    end_y_position   = coords[3] + y_start; 
+  if(start_x_position != -1 && start_y_position != -1){ 
+    start_x_position = start_x_position + x_start;
+    start_y_position = start_y_position + y_start;
 
     //don't move out of the window.
     clamp(start_x_position, x_start, x_end); 
@@ -794,11 +792,9 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
     mouse_move(window_name, start_x_position, start_y_position,x_start, x_end, 
                                                         y_start, y_end, false); 
   }
-  else{
-    //If there's no start pos, the first two indices of the vector are the end.
-    end_x_position = coords[0] + x_start;
-    end_y_position = coords[1] + y_start;
-  }
+  
+  end_x_position = end_x_position + x_start;
+  end_y_position = end_y_position + y_start;
   
   //clamp the end position so we don't exit the window. 
   clamp(end_x_position, x_start, x_end); 
@@ -809,23 +805,6 @@ void clickAndDragAbsolute(std::string window_name, std::string command){
   mouse_move(window_name, end_x_position, end_y_position,x_start, x_end, 
                                                   y_start, y_end, false);
   mouseUp(window_name,mouse_button);  
-}
-
-/**
-* Routing function, forwards to delta or absolute click and drag based on 
-* command. (Separated due to length.)
-*/
-void clickAndDrag(std::string window_name, std::string command)
-{
-  if(command.find("delta") != std::string::npos){
-    std::cout << "Routing to delta" << std::endl;
-    //these functions check window existence internally.
-    clickAndDragDelta(window_name, command); 
-  }
-  else{
-    std::cout << "Routing to absolute " << std::endl;
-    clickAndDragAbsolute(window_name, command);
-  }
 }
 
 /**
@@ -879,20 +858,8 @@ void moveMouseToOrigin(std::string window_name){
 * The function wraps the xdotool key command, which can multipress
 * keys. (e.g. ctrl+alt+del)
 */
-void key(std::string command, std::string window_name)
+void key(std::string toType, std::string window_name)
 {
-  std::string buf; // Have a buffer string
-  std::stringstream ss(command); // Insert the string into a stream
-  std::vector<std::string> tokens; // Create vector to hold our words
-  while (ss >> buf){
-    tokens.push_back(buf);
-  }
-  if(tokens.size() < 1){
-    std::cout <<"ERROR: invalid command: " << command << std::endl;
-    return;
-  }
-  std::string toType = tokens[1];
-  //the second token is the special key to type
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name
                                     +" &&  xdotool key " + toType;
@@ -909,43 +876,14 @@ void key(std::string command, std::string window_name)
 * between repetitions. Because of the delay, we need all parameters necessary 
 * for a call to execute.cpp's delayAndMemCheck.
 */
-void type(std::string command, std::string window_name, int childPID, 
+void type(std::string toType, float delay, int presses, std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
 
-  //default number of iterations is 1
-  int presses = 1; 
-  //default delay between iterations is 1/10th of a second.
-  float delay = 100000; 
-  std::string toType = ""; 
-  //see if there are ints in the string. (optional times pressed/delay)
-  std::vector<float> values = extractFloatsFromString(command); 
-
-  if(values.size() > 0){
-    //float to int truncation if they entered something incorrect. 
-    presses = values[0]; 
-  }
-  if(values.size() > 1){
-    //convert from seconds to microseconds.
-    delay = values[1] * 1000000; 
-  }
-  //The regex below is of the form: anything (lazy) followed by anything 
-  // between single quotes (lazy) followed by anything (greedy)
-  std::string myReg = ".*?(\'.*?\').*"; 
-                                        
-  std::regex regex(myReg);
-  std::smatch match;
-  //get the text to type.
-  if(std::regex_match(command, match, regex)){ 
-    toType = match[1];  
-  }
-  if(toType == "")
-  {
-    //Evem of there is nothing to type, we allow the function to continue so
-    // that it delays as expected.
-    std::cout << "ERROR: The line " << command << " contained no quoted " <<
-                                                     "string." <<std::endl; 
-  }   
+  delay = delay * 1000000; 
+  
+  toType = "\"" + toType + "\"";
+  
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name 
                                     +" &&  xdotool type " + toType; 
@@ -967,13 +905,57 @@ void type(std::string command, std::string window_name, int childPID,
 }
 
 /**
+* This function defines which actions are inherently bound for a GUI/window.
+**/
+bool isWindowedAction(const nlohmann::json action){
+  std::string action_str = action.value("action", "");
+  if (action_str == ""){
+    std::cout << "ERROR: poorly formatted action (no 'action' type specified)" << std::endl;
+    return false;
+  }
+  else{
+
+    if(action_str.find("screenshot") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("type") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("key") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("click and drag") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("click") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("move mouse") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("center") != std::string::npos){
+      return true;
+    }
+    else if(action_str.find("origin") != std::string::npos){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+
+}
+
+
+/**
 * The central routing function for for all actions. Takes in a vector of 
 * actions and the # of actions taken thus far. It then passes the current 
 * action to be taken through tests to see which function to route to.
 * This function requires all parameters to for execute.cpp's delayAndMemCheck
 * function. 
 */
-void takeAction(const std::vector<std::string>& actions, int& actions_taken, 
+void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
   int& number_of_screenshots, std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
@@ -983,43 +965,73 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken,
   if(!windowExists(window_name)){ 
     return;
   }
-  float delay_time = 0;  
   
-  std::cout<<"Taking action " << actions_taken+1 << " of " << actions.size() 
-              << ": " << actions[actions_taken]<< std::endl;
+  nlohmann::json action = actions[actions_taken];
+  
+  // std::vector<std::string> vec = stringOrArrayOfStrings(action, "action");
 
+  // if (vec.size() == 0){
+  //   std::cout << "ERROR: poorly formatted action (no 'action' type specified)" << std::endl;
+  //   action_name = "INVALID: NAME MISSING";
+  // }
+  // else{
+  //     std::string action_name = vec[0];
+  // }
+
+  std::string action_name = action.value("action", "ACTION_NOT_SPECIFIED");
+
+  std::cout<<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
+
+  float delay_time = 0;
   //DELAY            
-  if(actions[actions_taken].find("delay") != std::string::npos){ 
-    delay_time = delay(actions[actions_taken]);
+  if(action_name == "delay"){
+    float time_in_secs = action.value("seconds", 0);
+    delay_time = delay(time_in_secs);
   }
   //SCREENSHOT
-  else if(actions[actions_taken].find("screenshot") != std::string::npos){ 
+  else if(action_name.find("screenshot") != std::string::npos){ 
     screenshot(window_name, number_of_screenshots);
   }
   //TYPE
-  else if(actions[actions_taken].find("type") != std::string::npos){ 
-    type(actions[actions_taken],window_name,childPID,elapsed, next_checkpoint, 
-       seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
+  else if(action_name == "type"){ 
+
+    float delay_in_secs = action.value("delay_in_seconds", .1);
+    int presses = action.value("presses", 1);
+    std::string string_to_type = action.value("string", "");
+
+    type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
+      seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
+
+
   }
   //KEY
-  else if(actions[actions_taken].find("key") != std::string::npos)
+  else if(action_name.find("key") != std::string::npos)
   {
-    key(actions[actions_taken], window_name);
+    std::string key_to_type = action.value("key_combination", "INVALID_COMBINATION");
+    if (key_to_type != "INVALID_COMBINATION"){
+      key(key_to_type, window_name);
+    }
+    else{
+      std::cout << "ERROR: ill formatted key command. No key to type found." << std::endl;
+    }
   }
   //CLICK AND DRAG    
-  else if(actions[actions_taken].find("click and drag") != std::string::npos){ 
-    clickAndDrag(window_name,actions[actions_taken]);
+  else if(action_name == "click and drag"){ 
+    clickAndDragAbsolute(window_name,action);
+  }
+  else if(action_name == "click and drag delta"){
+    clickAndDragDelta(window_name,action);
   }
   //CLICK
-  else if(actions[actions_taken].find("click") != std::string::npos){ 
-    std::vector<int> button = extractIntsFromString(actions[actions_taken]);
-    if(actions[actions_taken].find("left") != std::string::npos){
+  else if(action_name.find("click") != std::string::npos){ 
+    std::string mouse_button = action.value("mouse_button", "left");
+    if(mouse_button == "left"){
       click(window_name, 1);
     }
-    else if(actions[actions_taken].find("middle") != std::string::npos){
+    else if(mouse_button == "middle"){
       click(window_name, 2);
     }
-    else if(actions[actions_taken].find("right") != std::string::npos){
+    else if(mouse_button == "right"){
       click(window_name, 3);
     }
     else{
@@ -1027,44 +1039,145 @@ void takeAction(const std::vector<std::string>& actions, int& actions_taken,
     }
   }
   //MOUSE MOVE
-  else if(actions[actions_taken].find("move mouse") != std::string::npos || 
-          actions[actions_taken].find("mouse move") != std::string::npos){
-      bool no_clamp = false;
-      if(actions[actions_taken].find("no clamp") != std::string::npos){
-        no_clamp = true;
-      }
-      
-      std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
-      if(coordinates.size() >= 2){
+  else if(action_name.find("move mouse") != std::string::npos){
+    //TODO: implement later if deemed prudent.
+    bool no_clamp = false;
+    
+    int moved_x = action.value("end_x", -1);
+    int moved_y = action.value("end_y", -1);
+
+
+    if(moved_x >=0 && moved_y >= 0){
       int height, width, x_start, x_end, y_start, y_end;
-      bool success = populateWindowData(window_name, height, width, x_start, 
-                                                        x_end, y_start, y_end);
+      bool success = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
       if(success){
-          int moved_x = x_start + coordinates[0];
-          int moved_y = y_start + coordinates[1];
-          mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, 
-                                                            y_end, no_clamp);
+          moved_x += x_start;
+          moved_y += y_start;
+          mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
       }
       else{
-        std::cout << "No mouse move due to unsuccessful data population."
-                    << std::endl;
+        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
       }
     }
   }
   //CENTER
-  else if(actions[actions_taken].find("center") != std::string::npos){ 
+  else if(action_name.find("center") != std::string::npos){ 
     centerMouse(window_name);
   }
   //ORIGIN
-  else if(actions[actions_taken].find("origin") != std::string::npos){ 
+  else if(action_name.find("origin") != std::string::npos){ 
     moveMouseToOrigin(window_name);
   }
    //BAD COMMAND
   else{
-    std::cout << "ERROR: ill formatted command: " << actions[actions_taken] 
-                  << std::endl;    
+    std::cout << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
   }
   actions_taken++;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
     seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);   
 }
+
+
+
+/**
+* The central routing function for for all actions. Takes in a vector of 
+* actions and the # of actions taken thus far. It then passes the current 
+* action to be taken through tests to see which function to route to.
+* This function requires all parameters to for execute.cpp's delayAndMemCheck
+* function. 
+*/
+// void takeAction(const std::vector<std::string>& actions, int& actions_taken, 
+//   int& number_of_screenshots, std::string window_name, int childPID, 
+//   float &elapsed, float& next_checkpoint, float seconds_to_run, 
+//   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+//   //We get the window data at every step in case it has changed size.
+
+//   //if we make it past this check, we'll assume an action has been taken.
+//   if(!windowExists(window_name)){ 
+//     return;
+//   }
+//   float delay_time = 0;  
+  
+//   std::cout<<"Taking action " << actions_taken+1 << " of " << actions.size() 
+//               << ": " << actions[actions_taken]<< std::endl;
+
+//   //DELAY            
+//   if(actions[actions_taken].find("delay") != std::string::npos){ 
+//     delay_time = delay(actions[actions_taken]);
+//   }
+//   //SCREENSHOT
+//   else if(actions[actions_taken].find("screenshot") != std::string::npos){ 
+//     screenshot(window_name, number_of_screenshots);
+//   }
+//   //TYPE
+//   else if(actions[actions_taken].find("type") != std::string::npos){ 
+//     type(actions[actions_taken],window_name,childPID,elapsed, next_checkpoint, 
+//        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
+//   }
+//   //KEY
+//   else if(actions[actions_taken].find("key") != std::string::npos)
+//   {
+//     key(actions[actions_taken], window_name);
+//   }
+//   //CLICK AND DRAG    
+//   else if(actions[actions_taken].find("click and drag") != std::string::npos){ 
+//     clickAndDrag(window_name,actions[actions_taken]);
+//   }
+//   //CLICK
+//   else if(actions[actions_taken].find("click") != std::string::npos){ 
+//     std::vector<int> button = extractIntsFromString(actions[actions_taken]);
+//     if(actions[actions_taken].find("left") != std::string::npos){
+//       click(window_name, 1);
+//     }
+//     else if(actions[actions_taken].find("middle") != std::string::npos){
+//       click(window_name, 2);
+//     }
+//     else if(actions[actions_taken].find("right") != std::string::npos){
+//       click(window_name, 3);
+//     }
+//     else{
+//       click(window_name, 1);
+//     }
+//   }
+//   //MOUSE MOVE
+//   else if(actions[actions_taken].find("move mouse") != std::string::npos || 
+//           actions[actions_taken].find("mouse move") != std::string::npos){
+//       bool no_clamp = false;
+//       if(actions[actions_taken].find("no clamp") != std::string::npos){
+//         no_clamp = true;
+//       }
+      
+//       std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
+//       if(coordinates.size() >= 2){
+//       int height, width, x_start, x_end, y_start, y_end;
+//       bool success = populateWindowData(window_name, height, width, x_start, 
+//                                                         x_end, y_start, y_end);
+//       if(success){
+//           int moved_x = x_start + coordinates[0];
+//           int moved_y = y_start + coordinates[1];
+//           mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, 
+//                                                             y_end, no_clamp);
+//       }
+//       else{
+//         std::cout << "No mouse move due to unsuccessful data population."
+//                     << std::endl;
+//       }
+//     }
+//   }
+//   //CENTER
+//   else if(actions[actions_taken].find("center") != std::string::npos){ 
+//     centerMouse(window_name);
+//   }
+//   //ORIGIN
+//   else if(actions[actions_taken].find("origin") != std::string::npos){ 
+//     moveMouseToOrigin(window_name);
+//   }
+//    //BAD COMMAND
+//   else{
+//     std::cout << "ERROR: ill formatted command: " << actions[actions_taken] 
+//                   << std::endl;    
+//   }
+//   actions_taken++;
+//   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
+//     seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);   
+// }

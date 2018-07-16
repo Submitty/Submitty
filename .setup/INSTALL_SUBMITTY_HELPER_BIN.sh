@@ -68,15 +68,11 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things
-array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py )
+array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder )
 for i in "${array[@]}"; do
-    chown root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
-    chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
+    chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
 done
-
-chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/autograder
-chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/autograder
-chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/autograder/*
 
 if [ "${WORKER}" == 1 ]; then
     chown -R root:${SUPERVISOR_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
