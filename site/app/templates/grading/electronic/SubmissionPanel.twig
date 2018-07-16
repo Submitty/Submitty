@@ -150,9 +150,11 @@
         let offset = $("#directory_view").width();
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
+        $("#directory_view").hide();
     }
 
     function collapseFile(){
+        $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
 
