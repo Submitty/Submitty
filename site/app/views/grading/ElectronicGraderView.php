@@ -3,12 +3,10 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
-use app\models\GradeableComponent;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
-use app\libraries\FileUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -340,9 +338,7 @@ class ElectronicGraderView extends AbstractView {
                     $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
-                    $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $row->getTeam()->getId(), "user_assignment_settings.json");
-                    $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-                    $user_assignment_setting_json = json_encode($user_assignment_setting);
+                    $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
                     $members = json_encode($row->getTeam()->getMembers());
                     $reg_section = ($row->getTeam()->getRegistrationSection() === null) ? "NULL" : $row->getTeam()->getRegistrationSection();
                     $rot_section = ($row->getTeam()->getRotatingSection() === null) ? "NULL" : $row->getTeam()->getRotatingSection();
@@ -399,9 +395,7 @@ class ElectronicGraderView extends AbstractView {
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
-            $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId(), $team->getId(), "user_assignment_settings.json");
-            $user_assignment_setting = FileUtils::readJsonFile($settings_file);
-            $user_assignment_setting_json = json_encode($user_assignment_setting);
+            $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
 
@@ -463,18 +457,15 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
-
         $user = $gradeable->getUser();
+        //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
-        }
-        if($gradeable->useTAGrading()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
         }
         if($gradeable->getRegradeStatus() !== 0){
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
         }
-        
         if ($gradeable->getActiveVersion() == 0) {
             if ($gradeable->hasSubmitted()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
@@ -576,7 +567,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable,
             "submissions" => $submissions,
             "checkout" => $checkout,
-            "results" => $results
+            "results" => $results,
+            "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
 
@@ -586,95 +578,35 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function renderInformationPanel(Gradeable $gradeable, User $user) {
-        $return = <<<HTML
+        $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
 
-<div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
-    <div class="draggable_content">
-    <span class="grading_label">Student Information</span>
-    <div class="inner-container">
-        <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
-        <div class="rubric-title">
-HTML;
-            $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
-            $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
-            $formatting = "font-size: 13px;";
-            $return .= <<<HTML
-            <div style="float:right;">
-HTML;
-        $return .= $this->core->getOutput()->renderTemplate('AutoGrading', 'showVersionChoice', $gradeable, $onChange, $formatting);
-
-        // If viewing the active version, show cancel button, otherwise show button to switch active
-        if ($gradeable->getCurrentVersionNumber() > 0) {
-            if ($gradeable->getCurrentVersionNumber() == $gradeable->getActiveVersion()) {
-                $version = 0;
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">';
-            } else {
-                $version = $gradeable->getCurrentVersionNumber();
-                $button = '<input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">';
-            }
-            $return .= <<<HTML
-                <br/><br/>
-                <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
-                        action="{$this->core->buildUrl(array('component' => 'student',
-                'action' => 'update',
-                'gradeable_id' => $gradeable->getId(),
-                'new_version' => $version, 'ta' => true, 'who' => $who))}">
-                    <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                    {$button}
-                </form>
-HTML;
-        }
-        $return .= <<<HTML
-            </div>
-            <div>
-HTML;
-
+        $team_members = [];
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            $return .= <<<HTML
-                <b>Team:<br/>
-HTML;
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                $team_member = $this->core->getQueries()->getUserById($team_member);
-                $return .= <<<HTML
-                &emsp;{$team_member->getDisplayedFirstName()} {$team_member->getLastName()} ({$team_member->getId()})<br/>
-HTML;
+                $team_members[] = $this->core->getQueries()->getUserById($team_member);
             }
-        } else {
-            $return .= <<<HTML
-                <b>{$user->getDisplayedFirstName()} {$user->getLastName()} ({$user->getId()})<br/>
-HTML;
         }
 
-        $return .= <<<HTML
-                Submission Number: {$gradeable->getActiveVersion()} / {$gradeable->getHighestVersion()}<br/>
-                Submitted: {$gradeable->getSubmissionTime()->format("m/d/Y H:i:s")}<br/></b>
-            </div>
-HTML;
-        $return .= <<<HTML
-            <form id="rubric_form">
-                <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                <input type="hidden" name="g_id" value="{$gradeable->getId()}" />
-                <input type="hidden" name="u_id" value="{$user->getId()}" />
-                <input type="hidden" name="graded_version" value="{$gradeable->getActiveVersion()}" />
-HTML;
+        $tables = [];
 
         //Late day calculation
         if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
             foreach ($gradeable->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
-                $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
+                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
         } else {
-            $return .= $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
+            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
         }
 
-        $return .= <<<HTML
-        </div>
-    </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
+            "gradeable" => $gradeable,
+            "who" => $who,
+            "on_change" => $onChange,
+            "team_members" => $team_members,
+            "tables" => $tables,
+        ]);
     }
 
     /**
@@ -699,16 +631,6 @@ HTML;
         }
         $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
 
-        // if use student components, get the values for pages from the student's submissions
-        $files = $gradeable->getSubmittedFiles();
-        $student_pages = array();
-        foreach ($files as $filename => $content) {
-            if ($filename == "student_pages.json") {
-                $path = $content["path"];
-                $student_pages = FileUtils::readJsonFile($content["path"]);
-            }
-        }
-
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "your_user_id" => $this->core->getUser()->getId(),
@@ -716,27 +638,11 @@ HTML;
             "can_verify" => $display_verify_all // If any can be then this is set
         ];
 
-        foreach ($grading_data["gradeable"]["components"] as &$component) {
-            $page = intval($component["page"]);
-            // if the page is determined by the student json
-            if ($page == -1) {
-                // usually the order matches the json
-                if ($student_pages[intval($component["order"])]["order"] == intval($component["order"])) {
-                    $page = intval($student_pages[intval($component["order"])]["page #"]);
-                } // otherwise, iterate through until the order matches
-                else {
-                    foreach ($student_pages as $student_page) {
-                        if ($student_page["order"] == intval($component["order"])) {
-                            $page = intval($student_page["page #"]);
-                            $component["page"] = $page;
-                            break;
-                        }
-                    }
-                }
-            }
+        //Assign correct page numbers
+        $pages = $gradeable->getComponentPages();
+        foreach ($pages as $i => $page) {
+            $grading_data["gradeable"]["components"][$i]["page"] = $page;
         }
-        //References need to be cleaned up
-        unset($component);
 
         $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
 
@@ -761,19 +667,9 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(Gradeable $gradeable) {
-        $return = <<<HTML
-<div id="regrade_info" class = "draggable rubric_panel" style="right: 15px; bottom: 40px;width: 48%; height: 30%">
-    <div class = "draggable_content">
-        <div class = "inner-container" style="padding:20px;">
-HTML;
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeRequestForm', $gradeable);
-        $return .= $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $gradeable);
-        $return .= <<<HTML
-        </div>
-    </div>
-</div>
-HTML;
-        return $return;
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+            "gradeable" => $gradeable
+        ]);
     }
 
     public function popupStudents() {
@@ -787,5 +683,4 @@ HTML;
     public function popupSettings() {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
     }
-
 }

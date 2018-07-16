@@ -79,7 +79,7 @@ function build_homework {
 
 
     # copy the files to the build directory 
-    rsync -ruz --delete  $hw_source/   $hw_build_path || ( echo 'ERROR: configuration source directory does not exist or hwcron cannot read this directory' ; exit 1 )
+    rsync -ruz --delete  $hw_source/   $hw_build_path || ( echo 'ERROR: configuration source directory does not exist or DAEMON_USER cannot read this directory' ; exit 1 )
     find $hw_build_path -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $hw_build_path -type f -exec chmod -f ug+rw,o= {} \;
     find $hw_build_path -type f -exec chgrp -f ${course_group} {} \;
@@ -137,7 +137,7 @@ function build_homework {
 	rsync -ruz --delete $hw_build_path/custom_validation_code/    $course_dir/custom_validation_code/$assignment/
     fi
 
-    # change permissions so other instructor users in this course & hwcron can re-run the build course script
+    # change permissions so other instructor users in this course & DAEMON_USER can re-run the build course script
     find $course_dir/build/                   -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/build/                   -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/build/                           -exec chgrp -f ${course_group} {} \;

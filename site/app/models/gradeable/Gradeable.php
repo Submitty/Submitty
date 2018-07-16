@@ -10,7 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
-use app\models\GradeableComponent;
+use app\models\Team;
 
 /**
  * All data describing the configuration of a gradeable
@@ -23,6 +23,7 @@ use app\models\GradeableComponent;
  * @method string getId()
  * @method string getTitle()
  * @method string getInstructionsUrl()
+ * @method void setInstructionsUrl($url)
  * @method int getType()
  * @method bool isGradeByRegistration()
  * @method void setGradeByRegistration($grade_by_reg)
@@ -36,7 +37,6 @@ use app\models\GradeableComponent;
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
- * @method object getAutogradingConfig()
  * @method bool isVcs()
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
@@ -87,19 +87,21 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
 
-    /* (private) Lazy-loaded properties */
+    /* (private) Lazy-loaded Properties */
 
     /** @property @var bool If any manual grades have been entered for this gradeable */
     private $any_manual_grades = null;
     /** @property @var bool If any submissions exist */
     private $any_submissions = null;
-    /** @property @var bool If any teams have been formed */
-    private $any_teams = null;
+    /** @property @var Team[] Any teams that have been formed */
+    private $teams = null;
     /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
     private $rotating_grader_sections = null;
     private $rotating_grader_sections_modified = false;
+    /** @property @var AutogradingConfig The object that contains the autograding config data */
+    private $autograding_config = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -110,8 +112,6 @@ class Gradeable extends AbstractModel {
 
     /** @property @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
-    /** @property @var string[] The object that contains the autograding config data */
-    protected $autograding_config = null;
     /** @property @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
@@ -163,7 +163,14 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
-    public function __construct(Core $core, $details) {
+    /**
+     * Gradeable constructor.
+     * @param Core $core
+     * @param array $details
+     * @throws \InvalidArgumentException if any of the details were not found or invalid
+     * @throws ValidationException If any of the dates are incompatible or invalid
+     */
+    public function __construct(Core $core, array $details) {
         parent::__construct($core);
 
         $this->setIdInternal($details['id']);
@@ -177,7 +184,6 @@ class Gradeable extends AbstractModel {
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
-            $this->autograding_config = $this->loadAutogradingConfig();
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
@@ -218,6 +224,7 @@ class Gradeable extends AbstractModel {
 
         // Serialize important Lazy-loaded values
         $return['rotating_grader_sections'] = parent::parseObject($this->getRotatingGraderSections());
+        $return['autograding_config'] = parent::parseObject($this->getAutogradingConfig());
 
         return $return;
     }
@@ -228,8 +235,8 @@ class Gradeable extends AbstractModel {
      * @return Component|null The Component with the provided id, or null if not found
      */
     public function getComponent($component_id) {
-        foreach($this->components as $component) {
-            if($component->getId() === $component_id) {
+        foreach ($this->getComponents() as $component) {
+            if ($component->getId() === $component_id) {
                 return $component;
             }
         }
@@ -238,7 +245,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Loads the autograding config file at $this->autograding_config into an array, or null if error/not found
-     * @return array|bool|null
+     * @return AutogradingConfig|null
      */
     private function loadAutogradingConfig() {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -246,24 +253,17 @@ class Gradeable extends AbstractModel {
         try {
             $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
                 "build_{$this->id}.json"));
+
+            // If the file could not be found, the result will be false, so don't
+            //  create the config if the file can't be found
+            if ($details !== false) {
+                return new AutogradingConfig($this->core, $details);
+            }
+            return null;
         } catch (\Exception $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
-
-        if (isset($details['max_submission_size'])) {
-            $details['max_submission_size'] = floatval($details['max_submission_size']);
-        }
-
-        if (isset($details['max_submissions'])) {
-            $details['max_submissions'] = intval($details['max_submissions']);
-        }
-
-        if (isset($details['assignment_message'])) {
-            $details['assignment_message'] = Utils::prepareHtmlString($details['assignment_message']);
-        }
-
-        return $details;
     }
 
     /**
@@ -463,10 +463,29 @@ class Gradeable extends AbstractModel {
      */
     public function getRotatingGraderSections() {
         if($this->rotating_grader_sections === null) {
-            $this->setRotatingGraderSections($this->core->getQueries()->getGradersForAllRotatingSections($this->getId()));
+            $this->setRotatingGraderSections($this->core->getQueries()->getRotatingSectionsByGrader($this->id));
             $this->rotating_grader_sections_modified = false;
         }
         return $this->rotating_grader_sections;
+    }
+
+    /**
+     * Gets the autograding configuration object
+     * @return AutogradingConfig
+     */
+    public function getAutogradingConfig() {
+        if($this->autograding_config === null) {
+            $this->autograding_config = $this->loadAutogradingConfig();
+        }
+        return $this->autograding_config;
+    }
+
+    /**
+     * Gets whether this gradeable has an autograding config
+     * @return bool True if it has an autograding config
+     */
+    public function hasAutogradingConfig() {
+        return $this->getAutogradingConfig() !== null;
     }
 
     /** @internal */
@@ -630,16 +649,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-
-    /**
-     * Sets the instructions url and sanitizes any special characters
-     * @param string $url
-     */
-    public function setInstructionsUrl($url) {
-        $this->instructions_url = filter_var($url, FILTER_SANITIZE_SPECIAL_CHARS);
-        $this->modified = true;
-    }
-
+    
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -733,21 +743,22 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets all of the teams formed for this gradeable
+     * @return Team[]
+     */
+    public function getTeams() {
+        if($this->teams === null) {
+            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+        }
+        return $this->teams;
+    }
+
+    /**
      * Gets if this gradeable has any teams formed yet
      * @return bool
      */
     public function anyTeams() {
-        if($this->any_teams === null) {
-            // Unless we find a team, assume there are none
-            $this->any_teams = false;
-            if ($this->type === GradeableType::ELECTRONIC_FILE) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                if (!empty($all_teams)) {
-                    $this->any_teams = true;
-                }
-            }
-        }
-        return $this->any_teams;
+        return !empty($this->getTeams());
     }
 
     /**
@@ -765,5 +776,65 @@ class Gradeable extends AbstractModel {
      */
     public function isRotatingGraderSectionsModified() {
         return $this->rotating_grader_sections_modified;
+    }
+
+    /**
+     * Gets if this gradeable is pdf-upload
+     * @return bool
+     */
+    public function isPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() !== Component::PDF_PAGE_NONE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets if the students assign pages to components
+     * @return bool
+     */
+    public function isStudentPdfUpload() {
+        foreach ($this->components as $component) {
+            if ($component->getPage() === Component::PDF_PAGE_STUDENT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the number of numeric components if type is GradeableType::NUMERIC_TEXT
+     * @return int
+     */
+    public function getNumNumeric() {
+        if ($this->type !== GradeableType::NUMERIC_TEXT) {
+            return 0;
+        }
+        $count = 0;
+        foreach ($this->components as $component) {
+            if (!$component->isText()) {
+                ++$count;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * Gets the number of text components if type is GradeableType::NUMERIC_TEXT
+     * @return int
+     */
+    public function getNumText() {
+        if ($this->type !== GradeableType::NUMERIC_TEXT) {
+            return 0;
+        }
+        $count = 0;
+        foreach ($this->components as $component) {
+            if ($component->isText()) {
+                ++$count;
+            }
+        }
+        return $count;
     }
 }
