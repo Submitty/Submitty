@@ -386,7 +386,31 @@ HTML;
 			$title_html = '';
 			$return .= <<<HTML
 
+				<div class="thread-list-load-status">
+				  <div class="loader-ellips infinite-scroll-request">
+						<i class="fa fa-circle-o-notch fa-spin" style="font-size:24px"></i>
+				  </div>
+				  <p class="infinite-scroll-last">End of content</p>
+				  <p class="infinite-scroll-error">No more pages to load</p>
+				</div>
+
 					</div>
+
+					<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+					<script type="text/javascript">
+						$(function(){
+							$('.thread_list').infiniteScroll({
+								path: buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '{{#}}'}),
+								responseType: 'text',
+								status: ".thread-list-load-status",
+								history: false,
+							});
+							$('.thread_list').on( 'load.infiniteScroll', function( event, response ) {
+								var data = JSON.parse( response );
+								$('.thread_list .thread-list-load-status').before(data["html"]);
+							});
+						});
+					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
