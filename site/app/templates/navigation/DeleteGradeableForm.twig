@@ -2,13 +2,13 @@
 {% block popup_id %}delete-gradeable-form{% endblock %}
 {% block title %}Delete Gradeable{% endblock %}
 {% block body %}
-    <p>&emsp;</p>
     <p>Note: A gradeable can only be deleted if it has no formed student teams and it has no student submission files and it has no TA grading data.
-    </p><br />
+    </p>
+    <br />
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     Are you sure you want to delete
     <div name="delete-gradeable-message">
-    </div><br />
+    </div>
 {% endblock %}
 {% block form %}
     <form name="delete-confirmation" method="post" action="">
