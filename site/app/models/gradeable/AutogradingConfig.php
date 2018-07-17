@@ -178,6 +178,38 @@ class AutogradingConfig extends AbstractModel {
         return $this->early_submission_incentive;
     }
 
+    /**
+     * Gets the number of submission parts
+     * @return int
+     */
+    public function getNumParts() {
+        return count($this->getPartNames());
+    }
+
+    /**
+     * Gets the number of text boxes on the submission page
+     * @return int
+     */
+    public function getNumTextBoxes() {
+        return count($this->getTextboxes());
+    }
+
+    /**
+     * Gets the number of non-hidden points possible for this assignment (including extra credit)
+     * @return int
+     */
+    public function getTotalNonHidden() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the number of non-extra-credit points possible for this assignment
+     * @return int
+     */
+    public function getTotalNonExtraCredit() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_hidden_non_extra_credit;
+    }
+
     /* Disabled setters */
 
     /** @internal */

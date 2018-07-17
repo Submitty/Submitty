@@ -306,6 +306,22 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
+     * Gets the number of hidden points earned (including extra credit)
+     * @return int
+     */
+    public function getHiddenPoints() {
+        return $this->hidden_non_extra_credit + $this->hidden_extra_credit;
+    }
+
+    /**
+     * Gets the total points earned (including extra credit and hidden)
+     * @return int
+     */
+    public function getTotalPoints() {
+        return $this->getNonHiddenPoints() + $this->getHiddenPoints();
+    }
+
+    /**
      * Gets the percent of all possible points the submitter earned
      * @param bool $clamp True to clamp the output to 1
      * @return float percentage (0 to 1), or NAN if no points possible
