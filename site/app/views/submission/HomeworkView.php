@@ -17,6 +17,7 @@ class HomeworkView extends AbstractView {
     }
 
     /**
+     * FIXME: will throw exception when admin tries to access with no team on team assignments
      * @param GradedGradeable $graded_gradeable
      * @param int $late_days_use
      * @param int $extensions
