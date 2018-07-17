@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
@@ -361,55 +362,125 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
+     * @param int $display_version
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    private function renderCurrentVersionBox(Gradeable $gradeable, bool $canViewWholeGradeable): string {
-        $current_version = $gradeable->getCurrentVersion();
+    private function renderVersionBox(GradedGradeable $graded_gradeable, int $display_version, bool $canViewWholeGradeable): string {
+        $gradeable = $graded_gradeable->getGradeable();
+        $autograding_config = $gradeable->getAutogradingConfig();
+        if ($graded_gradeable->hasAutoGradingInfo()) {
+            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+            $active_version_number = $auto_graded_gradeable->getActiveVersion();
+            $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
 
-        // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->useVcsCheckout() && $gradeable->getStudentDownload() && !($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion());
-
-        $files = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
-        foreach ($files as &$file) {
-            if (isset($file['size'])) {
-                $file['size'] = number_format($file['size'] / 1024, 2);
-            } else {
-                $file['size'] = number_format(-1);
+            if ($version_instance === null) {
+                // Sanity check for debugging
+                throw new \InvalidArgumentException('Requested version out of bounds!');
             }
-        }
-        unset($file); //Clean up reference
 
-        $results = $gradeable->getResults();
+            // if not active version and student cannot see any more than active version
+            $can_download = !$gradeable->isVcs()
+                && $gradeable->isStudentDownload()
+                && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
 
-        $show_testcases = false;
-        foreach ($gradeable->getTestcases() as $testcase) {
-            if ($testcase->viewTestcase()) {
-                $show_testcases = true;
-                break;
-            }
-        }
-
-        $active_same_as_graded = true;
-        if ($gradeable->getActiveVersion() !== 0 || $gradeable->getCurrentVersionNumber() !== 0) {
-            foreach ($gradeable->getComponents() as $component) {
-                if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
-                    $active_same_as_graded = false;
+            $show_testcases = false;
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $show_testcases = true;
                     break;
                 }
             }
-        }
+            $active_same_as_graded = true;
+            if ($active_version_number !== 0 || $display_version !== 0) {
+                if ($graded_gradeable->hasTaGradingInfo()) {
+                    /** @var GradedComponent[] $graded_components */
+                    foreach ($graded_gradeable->getTaGradedGradeable()->getGradedComponents() as $graded_components) {
+                        foreach ($graded_components as $component_grade) {
+                            if ($component_grade->getGradedVersion() !== $active_version_number
+                                && $component_grade->getGradedVersion() !== -1) {
+                                $active_same_as_graded = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
+            $cancel_url = $this->core->buildUrl([
+                'component' => 'student',
+                'action' => 'update',
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => 0
+            ]);
+
+            $change_version_url = $this->core->buildUrl([
+                'component' => 'student',
+                'action' => 'update',
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => $display_version
+            ]);
+
+            $check_refresh_submission_url = $this->core->buildUrl([
+                'component' => 'student',
+                'page' => 'submission',
+                'action' => 'check_refresh',
+                'gradeable_id' => $gradeable->getId(),
+                'gradeable_version' => $display_version
+            ]);
+
+            $show_incentive_message = $autograding_config->hasEarlySubmissionIncentive()
+                && $active_version_number > 0
+                && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
+                && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
+
+            $history = $version_instance->getLatestHistory();
+            $param = [
+                "team_assignment" => $gradeable->isTeamAssignment(),
+                "team_members" => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
+                "display_version" => $display_version,
+                "active_version" => $active_version_number,
+                "cancel_url" => $cancel_url,
+                "change_version_url" => $change_version_url,
+                'check_refresh_submission_url' => $check_refresh_submission_url,
+                "files" => $version_instance->getFiles(),
+
+                "is_vcs" => $gradeable->isVcs(),
+                "can_download" => $can_download,
+                "cant_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+                "cant_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+                "show_testcases" => $show_testcases,
+                "canViewWholeGradeable" => $canViewWholeGradeable,
+                "active_same_as_graded" => $active_same_as_graded,
+                'show_incentive_message' => $show_incentive_message,
+                'in_queue' => $version_instance->isQueued(),
+                'grading' => $version_instance->isGrading()
+            ];
+            if ($history !== null) {
+                $param = array_merge($param, [
+                    'results' => 0,
+                    'grade_time' => $history->getGradeTime(),
+                    'num_autogrades' => $version_instance->getHistoryCount(),
+                    'grading_finished' => $history->getGradingFinished(),
+                    'wait_time' => $history->getWaitTime(),
+                    'revision' => $history->getVcsRevision(),
+                    'submission_time' => $version_instance->getSubmissionTime(),
+                    'days_late' => $version_instance->getDaysLate()
+                ]);
+            }
+
+            if($version_instance->isQueued()) {
+                $param = array_merge($param, [
+                    'queue_pos' => $version_instance->getQueuePosition(),
+                    'queue_total' => $this->core->getGradingQueue()->getQueueCount()
+                ]);
+            }
+
+            return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", $param);
+        }
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", [
             "gradeable" => $gradeable,
-            "current_version" => $current_version,
-            "can_download" => $can_download,
-            "files" => $files,
-            "results" => $results,
-            "show_testcases" => $show_testcases,
-            "canViewWholeGradeable" => $canViewWholeGradeable,
-            "active_same_as_graded" => $active_same_as_graded,
         ]);
     }
 

@@ -1,4 +1,5 @@
-<select style="margin: 0 10px;{{ formatting|raw }} " name="submission_version" onChange="{{ on_change|raw }}">
+<select style="margin: 0 10px;{{ formatting|default('')|raw }}"
+        name="submission_version" onChange="{{ on_change|default('')|raw }}">
 
     {% if active_version_number == 0 %}
         <option value="0" {{ display_version == active_version_number ? "selected" : "" }}></option>
