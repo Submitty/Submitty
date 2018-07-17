@@ -46,6 +46,10 @@ class AutoGradedVersion extends AbstractModel {
     private $graded_testcases = null;
     /** @property @var float The number of early submission incentive points this version is worth */
     private $early_incentive_points = 0.0;
+    /** @var AutoGradedVersionHistory[] Array of history info loaded from history.json in results folder
+     *      This will only have a size more than 1 if the version was graded multiple times
+     */
+    private $history = [];
 
     /** @property @var string[] An array of the names of all meta files in submission directory */
     private $meta_files = null;
@@ -162,18 +166,12 @@ class AutoGradedVersion extends AbstractModel {
         // Load the historical results (for early submission incentive)
         $history = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'history.json'));
         if ($history !== false) {
-            $last_results_timestamp = $history[count($history) - 1];
-        } else {
-            $last_results_timestamp = [
-                'submission_time' => 'UNKNOWN',
-                'grade_time' => 'UNKNOWN',
-                'wait_time' => 'UNKNOWN'
-            ];
+            $this->history = array_map(function ($data) {
+                return new AutoGradedVersionHistory($this->core, $data);
+            }, $history);
         }
 
         // Load the testcase results (and calculate early incentive points)
-        $result_details = array_merge($result_details, $last_results_timestamp);
-        $result_details['num_autogrades'] = count($history);
         foreach ($config->getTestcases() as $testcase) {
             if (!isset($result_details['testcases'][$testcase->getIndex()])) {
                 // TODO: Autograding results file was incomplete.  This is a big problem, but how should
@@ -330,6 +328,45 @@ class AutoGradedVersion extends AbstractModel {
             return 0.0;
         }
         return $result;
+    }
+
+    /**
+     * Gets all grade history for this version (empty array if none)
+     * @return AutoGradedVersionHistory[]
+     */
+    public function getHistory() {
+        if($this->graded_testcases === null) {
+            $this->loadTestcases();
+        }
+        return $this->history;
+    }
+
+    /**
+     * Gets the most recent grade history for this version (or null of none)
+     * @return AutoGradedVersionHistory|null
+     */
+    public function getLatestHistory() {
+        $history = $this->getHistory();
+        if(count($history) === 0) {
+            return null;
+        }
+        return $history[count($history) - 1];
+    }
+
+    /**
+     * Gets the number times this version has been graded (history.json)
+     * @return int
+     */
+    public function getHistoryCount() {
+        return count($this->getHistory());
+    }
+
+    /**
+     * Gets if this version has any history data (history.json)
+     * @return bool
+     */
+    public function anyHistory() {
+        return $this->getHistoryCount() !== 0;
     }
 
     /**
