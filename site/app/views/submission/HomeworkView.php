@@ -364,10 +364,10 @@ class HomeworkView extends AbstractView {
     /**
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @param bool $canViewWholeGradeable
+     * @param bool $show_hidden
      * @return string
      */
-    private function renderVersionBox(GradedGradeable $graded_gradeable, int $display_version, bool $canViewWholeGradeable): string {
+    private function renderVersionBox(GradedGradeable $graded_gradeable, int $display_version, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         if ($graded_gradeable->hasAutoGradingInfo()) {
@@ -385,11 +385,10 @@ class HomeworkView extends AbstractView {
                 && $gradeable->isStudentDownload()
                 && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
 
-            $show_testcases = false;
+            $num_visible_testcases = 0;
             foreach ($version_instance->getTestcases() as $testcase) {
                 if ($testcase->canView()) {
-                    $show_testcases = true;
-                    break;
+                    $num_visible_testcases++;
                 }
             }
             $active_same_as_graded = true;
@@ -407,6 +406,43 @@ class HomeworkView extends AbstractView {
                     }
                 }
             }
+
+            // Grafted from AutoGradingView::showResults
+            //
+
+            $has_badges = false;
+
+            $nonhidden_earned = 0;
+            $nonhidden_max = 0;
+            $hidden_earned = 0;
+            $hidden_max = 0;
+            $show_hidden_breakdown = false;
+            $display_hidden = false;
+
+            if ($autograding_config->getTotalNonHidden() >= 0) {
+                $has_badges = true;
+
+                $nonhidden_earned = $version_instance->getNonHiddenPoints();
+                $nonhidden_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+                $hidden_earned = $version_instance->getTotalPoints();
+                $hidden_max = $autograding_config->getTotalNonExtraCredit();
+
+                $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
+
+                $display_hidden = false;
+                if ($gradeable->isTaGradeReleased()) {
+                    foreach ($autograding_config->getTestcases() as $index=>$testcase) {
+                        if (!$version_instance->getTestcases()[$index]->canView()) continue;
+                        if ($testcase->isHidden()) {
+                            $display_hidden = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //
+            // End Graft
 
             $cancel_url = $this->core->buildUrl([
                 'component' => 'student',
@@ -446,12 +482,21 @@ class HomeworkView extends AbstractView {
                 'check_refresh_submission_url' => $check_refresh_submission_url,
                 "files" => $version_instance->getFiles(),
 
+                "num_visible_testcases" => $num_visible_testcases,
+                "show_hidden_breakdown" => $show_hidden_breakdown,
+                "display_hidden" => $display_hidden,
+                "nonhidden_earned" => $nonhidden_earned,
+                "nonhidden_max" => $nonhidden_max,
+                "hidden_earned" => $hidden_earned,
+                "hidden_max" => $hidden_max,
+                "has_badges" => $has_badges,
+
                 "is_vcs" => $gradeable->isVcs(),
                 "can_download" => $can_download,
                 "cant_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
                 "cant_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
-                "show_testcases" => $show_testcases,
-                "canViewWholeGradeable" => $canViewWholeGradeable,
+                "show_testcases" => $num_visible_testcases > 0,
+                "show_hidden" => $show_hidden,
                 "active_same_as_graded" => $active_same_as_graded,
                 'show_incentive_message' => $show_incentive_message,
                 'in_queue' => $version_instance->isQueued(),
@@ -476,6 +521,8 @@ class HomeworkView extends AbstractView {
                     'queue_total' => $this->core->getGradingQueue()->getQueueCount()
                 ]);
             }
+
+
 
             return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", $param);
         }

@@ -76,7 +76,7 @@
             </script>
         {% endif %}
 
-        {{ render_template('AutoGrading', 'showResults', gradeable, canViewWholeGradeable) }}
+        {{ include('autograding/AutoResultsNew.twig') }}
     {% endif %}
     {# /Actual results #}
 </div>
