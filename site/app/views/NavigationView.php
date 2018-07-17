@@ -94,6 +94,15 @@ class NavigationView extends AbstractView {
         $top_buttons = [];
 
         // ======================================================================================
+        // COURSE MATERIALS BUTTON -- visible to everyone
+        // ======================================================================================
+        $top_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+            "title" => "Course Materials",
+            "class" => "btn btn-primary"
+        ]);
+        
+	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {
