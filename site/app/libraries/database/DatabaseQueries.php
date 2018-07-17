@@ -1996,7 +1996,13 @@ SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
 WHERE (u.user_id=? AND u.user_group=1) OR (u.user_id=? AND c.status=1)
-ORDER BY u.course", array($user_id, $user_id));
+ORDER BY SUBSTRING(u.semester, 2, 2)::INT DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN '2'
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN '3'
+         END ASC,
+         u.user_group ASC,
+         u.course ASC", array($user_id, $user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
