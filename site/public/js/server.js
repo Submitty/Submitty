@@ -167,6 +167,14 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
+            console.log(registration_section);
+            console.log(json['user_group']);
+            if(registration_section == null && json['user_group'] === 4) {
+                $('#student-error-message').css('display', 'block');
+            }
+            else {
+                $('#student-error-message').css('display', 'none');
+            }
 
         },
         error: function() {
@@ -190,6 +198,7 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+    $('#student-error-message').css('display', 'block');
 }
 
 function extensionPopup(json){

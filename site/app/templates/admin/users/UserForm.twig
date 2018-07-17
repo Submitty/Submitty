@@ -49,6 +49,9 @@
                 {% endfor %}
             </select>
         </div>
+        <p id="student-error-message" class="red-message">
+            Warning: students with no registration section cannot login to the course
+        </p>
         <div style="width: 70%">
             <input type="checkbox" id="manual_registration" name="manual_registration">
             <label for="manual_registration">Manually Registered User (no automatic updates)</label>
@@ -69,9 +72,6 @@
             <input type="password" name="user_password" placeholder="New Password" />
         </div>
         {% endif %}
-        <p id="student-error-message" class="red-message">
-            Warning: students with no registration section cannot login to the course
-        </p>
         <div style="float: right; width: auto; margin-top: 10px">
             <a onclick="$('#edit-user-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
             <input class="btn btn-primary" type="submit" value="Submit" />
