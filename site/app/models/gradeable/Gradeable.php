@@ -948,4 +948,20 @@ class Gradeable extends AbstractModel {
         }
         return $this->split_pdf_files;
     }
+
+    /**
+     * Gets if the grades released date has passed yet
+     * @return bool
+     */
+    public function isTaGradeReleased() {
+        return $this->grade_released_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
+
+    /**
+     * Gets if the submission open date has passed yet
+     * @return bool
+     */
+    public function isSubmissionOpen() {
+        return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
 }
