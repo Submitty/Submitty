@@ -1368,7 +1368,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       FROM grading_registration
                       GROUP BY user_id
                     ) as sr ON u.user_id=sr.user_id
-                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND AS ug2 ON ug2.user_id=in_gcd.gcd_verifier_id
+                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND ug.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
 
