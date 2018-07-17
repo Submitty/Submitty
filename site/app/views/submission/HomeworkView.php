@@ -306,7 +306,7 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderBulkUploadBox(Gradeable $gradeable): string {
-        $all_directories = $gradeable->getUploadsFiles();
+        $all_directories = $gradeable->getSplitPdfFiles();
 
         $files = [];
 
