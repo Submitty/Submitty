@@ -764,9 +764,14 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anyBuildErrors() {
-        if($this->any_build_errors === null) {
+        if ($this->any_build_errors === null) {
             $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
-            $this->any_build_errors = strpos(file_get_contents($build_file),"error") !== false;
+
+            // Default to true so if the file isn't found it counts as a 'build error'
+            $this->any_build_errors = true;
+            if (file_exists($build_file)) {
+                $this->any_build_errors = strpos(file_get_contents($build_file), "error") !== false;
+            }
         }
         return $this->any_build_errors;
     }
