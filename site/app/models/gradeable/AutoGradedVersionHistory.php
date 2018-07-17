@@ -17,6 +17,7 @@ use app\models\AbstractModel;
  * @method int getWaitTime()
  * @method \DateTime getGradingFinished()
  * @method int getGradeTime()
+ * @method string getVcsRevision()
  */
 class AutoGradedVersionHistory extends AbstractModel {
 
@@ -32,6 +33,8 @@ class AutoGradedVersionHistory extends AbstractModel {
     protected $grading_finished = null;
     /** @property @var int Seconds the version took to grade */
     protected $grade_time = 0;
+    /** @property @var string VCS revision id (i.e. git commit hash) */
+    protected $vcs_revision = '';
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -43,6 +46,7 @@ class AutoGradedVersionHistory extends AbstractModel {
         $this->batch_regrade = $details['batch_regrade'] === true;
         $this->wait_time = $details['wait_time'];
         $this->grade_time = $details['grade_time'];
+        $this->vcs_revision = $details['revision'] ?? '';
     }
 
     /** @internal */
@@ -72,6 +76,11 @@ class AutoGradedVersionHistory extends AbstractModel {
 
     /** @internal */
     private function setGradeTime() {
+        throw new \BadFunctionCallException('Setters disabled for AutoGradedVersionHistory');
+    }
+
+    /** @internal */
+    private function setVcsRevision() {
         throw new \BadFunctionCallException('Setters disabled for AutoGradedVersionHistory');
     }
 }
