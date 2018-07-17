@@ -194,6 +194,22 @@ class AutogradingConfig extends AbstractModel {
         return count($this->getTextboxes());
     }
 
+    /**
+     * Gets the number of non-hidden points possible for this assignment (including extra credit)
+     * @return int
+     */
+    public function getTotalNonHidden() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the number of non-extra-credit points possible for this assignment
+     * @return int
+     */
+    public function getTotalNonExtraCredit() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_hidden_non_extra_credit;
+    }
+
     /* Disabled setters */
 
     /** @internal */
