@@ -109,7 +109,6 @@ fi
 
 apt-get install -qqy oracle-java8-set-default
 
-
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
