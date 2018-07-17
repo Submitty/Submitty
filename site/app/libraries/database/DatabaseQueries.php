@@ -1978,31 +1978,61 @@ ORDER BY gt.{$section_key}", $params);
     }
 
 	/**
-	 * Retrieves all courses (and details) that are accessible by $user_id
+	 * Retrieves all unarchived courses (and details) that are accessible by $user_id
 	 *
-	 * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
-	 * Instructors may access all of their courses
 	 * (u.user_id=? AND c.status=1) checks if a course is active
 	 * An active course may be accessed by all users
-	 * Inactive courses may only be accessed by the instructor
 	 *
 	 * @param string $user_id
 	 * @param string $submitty_path
-	 * @return array - courses (and their details) accessible by $user_id
+	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getStudentCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-WHERE (u.user_id=? AND u.user_group=1) OR (u.user_id=? AND c.status=1)
+WHERE u.user_id=? AND c.status=1
 ORDER BY u.user_group ASC,
          SUBSTRING(u.semester, 2, 2)::INT DESC,
          CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
               WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN '2'
               WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN '3'
          END ASC,
-         u.course ASC", array($user_id, $user_id));
+         u.course ASC", array($user_id));
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName($submitty_path);
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    /**
+     * Retrieves all courses (and details) that are accessible by $user_id
+     *
+     * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
+     * Instructors may access all of their courses
+     * Inactive courses may only be accessed by the instructor
+     *
+     * @param string $user_id
+     * @param string $submitty_path
+     * @return array - archived courses (and their details) accessible by $user_id
+     */
+    public function getArchivedCoursesById($user_id, $submitty_path) {
+        $this->submitty_db->query("
+SELECT u.semester, u.course
+FROM courses_users u
+INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+WHERE u.user_id=? AND c.status=1 AND u.user_group=1
+ORDER BY u.user_group ASC,
+         SUBSTRING(u.semester, 2, 2)::INT DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN '2'
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN '3'
+         END ASC,
+         u.course ASC", array($user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
