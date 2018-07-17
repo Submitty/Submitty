@@ -164,10 +164,10 @@ class SubmissionController extends AbstractController {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         // ORIGINAL
-        //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+        //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
 
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-        if ($gradeable->getSubmissionOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
+        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
@@ -190,7 +190,7 @@ class SubmissionController extends AbstractController {
                 $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null
-                    && $gradeable->getGradeReleasedDate() > $now
+                    && $gradeable->isTaGradeReleased()
                     && $gradeable->isTaGrading() 
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
