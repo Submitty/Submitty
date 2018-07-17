@@ -349,12 +349,13 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    private function renderNoSubmissionBox(Gradeable $gradeable): string {
+    private function renderNoSubmissionBox(GradedGradeable $graded_gradeable): string {
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/NoSubmissionBox.twig", [
-            "gradeable" => $gradeable
+            'team_assignment' => $graded_gradeable->getGradeable()->isTeamAssignment(),
+            'member_list' => $graded_gradeable->getSubmitter()->getTeam()->getMemberList()
         ]);
     }
 
