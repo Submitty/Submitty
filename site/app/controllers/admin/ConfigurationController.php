@@ -40,10 +40,9 @@ class ConfigurationController extends AbstractController {
             'forum_enabled'             => $this->core->getConfig()->isForumEnabled(),
             'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled(),
             'manual_grading_enabled'    => $this->core->getConfig()->isManualGradingEnabled()
-            'regrade_message'           => $this->core->getConfig()->getRegradeMessage(),
         );
 
-        foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
+        foreach (array('upload_message', 'course_email') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = htmlentities($_SESSION['request'][$key]);
             }
@@ -57,7 +56,7 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'regrade_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -113,7 +112,6 @@ class ConfigurationController extends AbstractController {
                 'forum_enabled'		    => $_POST['forum_enabled'],
                 'regrade_enabled'           => $_POST['regrade_enabled'],
                 'manual_grading_enabled'    => $_POST['manual_grading_enabled']
-                'regrade_message'           => $_POST['regrade_message'],
             )
         );
 

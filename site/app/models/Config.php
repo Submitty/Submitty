@@ -44,7 +44,6 @@ use app\libraries\Utils;
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
  * @method bool isManualGradingEnabled()
- * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
  * @method string getCourseEmail()
  * @method string getVcsUser()
@@ -170,8 +169,6 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var bool */
     protected $manual_grading_enabled;
-    /** @property @var string */
-    protected $regrade_message;
 
     /**
      * Config constructor.
@@ -283,7 +280,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'manual_grading_enabled', 'regrade_message');
+            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'manual_grading_enabled');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -323,7 +320,7 @@ class Config extends AbstractModel {
             if (!isset($config[$section][$key]) &&
                 $key == "display_rainbow_grades_summary" &&
                 isset($config[$section]["display_iris_grades_summary"])) {
-                $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
+              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
             }
             // END TEMPORARY WORKAROUND
 
@@ -331,34 +328,31 @@ class Config extends AbstractModel {
             // DEFAULT FOR FORUM
             if (!isset($config[$section][$key]) &&
                 $key == "forum_enabled") {
-                $config[$section][$key] = false;
+              $config[$section][$key] = false;
             }
-            // DEFAULT FOR REGRADE ENABLED
+            // DEFAULT FOR REGRADE
             if (!isset($config[$section][$key]) &&
                 $key == "regrade_enabled") {
-                $config[$section][$key] = false;
+              $config[$section][$key] = false;
             }
             // DEFAULT FOR MANUAL GRADING
             if (!isset($config[$section][$key]) &&
                 $key == "manual_grading_enabled") {
-                $config[$section][$key] = true;
-            }
-            // DEFAULT FOR REGRADE MESSAGE
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_message") {
-                $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
+              $config[$section][$key] = true;
             }
             // DEFAULT FOR PRIVATE_REPOSITORY
             if (!isset($config[$section][$key]) &&
                 $key == "private_repository") {
-                $config[$section][$key] = "";
+              $config[$section][$key] = "";
             }
+
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
             $this->$key = $config[$section][$key];
         }
     }
+
     public function getHomepageUrl()
     {
         return $this->base_url."index.php?";

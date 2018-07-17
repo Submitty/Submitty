@@ -10,7 +10,6 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
-use app\libraries\GradingQueue;
 use app\models\AbstractModel;
 
 /**
@@ -18,15 +17,15 @@ use app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * @method int getActiveVersion()
- * @method AutoGradedVersion[] getAutoGradedVersions()
+ * @method AutogradingVersion[] getAutogradingVersions()
  */
 class AutoGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
     private $graded_gradeable = null;
     /** @property @var int The active submission version for electronic gradeables */
     protected $active_version = 0;
-    /** @property @var AutoGradedVersion[] The graded versions for electronic gradeables */
-    protected $auto_graded_versions = [];
+    /** @property @var AutogradingVersion[] The graded versions for electronic gradeables */
+    protected $autograding_versions = array();
 
     /**
      * AutoGradedGradeable constructor.
@@ -62,11 +61,11 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets the AutoGradedVersion instance for the active version
-     * @return AutoGradedVersion
+     * Gets the AutogradingVersion instance for the active version
+     * @return AutogradingVersion
      */
     public function getActiveVersionInstance() {
-        return $this->auto_graded_versions[$this->active_version] ?? null;
+        return $this->autograding_versions[$this->active_version];
     }
 
     /**
@@ -84,17 +83,17 @@ class AutoGradedGradeable extends AbstractModel {
 
     /**
      * Sets the array of autograding versions for this gradeable data
-     * @param AutoGradedVersion[] $auto_graded_versions
+     * @param AutogradingVersion[] $autograding_versions
      */
-    public function setAutoGradedVersions(array $auto_graded_versions) {
-        foreach ($auto_graded_versions as $auto_graded_version) {
-            if (!($auto_graded_version instanceof AutoGradedVersion)) {
+    public function setAutogradingVersions(array $autograding_versions) {
+        foreach ($autograding_versions as $autograding_version) {
+            if (!($autograding_version instanceof AutogradingVersion)) {
                 throw new \InvalidArgumentException('Autograding version array contained invalid type');
             }
         }
-        $this->auto_graded_versions = [];
-        foreach ($auto_graded_versions as $auto_graded_version) {
-            $this->auto_graded_versions[$auto_graded_version->getVersion()] = $auto_graded_version;
+        $this->autograding_versions = [];
+        foreach ($autograding_versions as $autograding_version) {
+            $this->autograding_versions[$autograding_version->getVersion()] = $autograding_version;
         }
     }
 
@@ -126,44 +125,5 @@ class AutoGradedGradeable extends AbstractModel {
             return NAN;
         }
         return $instance->getTotalPercent($clamp);
-    }
-
-    /* Queue status access methods */
-
-    /**
-     * Gets if the active version is in the queue to be graded
-     * @return bool
-     */
-    public function isQueued() {
-        $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
-            return false;
-        }
-        return $instance->isQueued();
-    }
-
-    /**
-     * Gets if the active version is being graded
-     * @return bool
-     */
-    public function isGrading() {
-        $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
-            return false;
-        }
-        return $instance->isGrading();
-    }
-
-    /**
-     * Gets the position of the active version in the queue
-     * @return int GradingQueue::GRADING if being graded, GradingQueue::NOT_QUEUED if not in queue,
-     *              otherwise the queue count
-     */
-    public function getQueuePosition() {
-        $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
-            return GradingQueue::NOT_QUEUED;
-        }
-        return $instance->getQueuePosition();
     }
 }

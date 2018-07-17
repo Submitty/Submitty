@@ -2,12 +2,17 @@
 
 namespace app\controllers;
 
+use app\controllers\AbstractController;
 use app\libraries\Core;
+use app\libraries\DateUtils;
+use app\libraries\ErrorMessages;
+use app\libraries\FileUtils;
 use app\libraries\GradeableType;
-use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\Submitter;
-use app\models\gradeable\GradeableList;
+use app\libraries\Logger;
+use app\libraries\Utils;
+use app\models\Gradeable;
+use app\models\GradeableList;
+use app\models\GradeableSection;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -70,22 +75,7 @@ class NavigationController extends AbstractController {
             }
         }
 
-        // Get a single array of the visible gradeables
-        $visible_gradeables = [];
-        foreach($sections_to_lists as $gradeables) {
-            foreach($gradeables as $gradeable) {
-                $visible_gradeables[] = $gradeable;
-            }
-        }
-
-        // Get the user data for each gradeable
-        $graded_gradeables = [];
-        // FIXME: Add sorting when that PR gets merged
-        foreach($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
-            $graded_gradeables[$gg->getGradeableId()] = $gg;
-        }
-
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables);
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
     
@@ -94,12 +84,11 @@ class NavigationController extends AbstractController {
      * @param Gradeable $gradeable
      * @return bool True if they are
      */
-    private function filterCanView(Gradeable $gradeable) {
+    private function filterCanView($gradeable) {
         $user = $this->core->getUser();
 
         //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
-            !$gradeable->hasAutogradingConfig()) {
+        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE && !$gradeable->hasConfig()) {
             return false;
         }
 
@@ -109,13 +98,13 @@ class NavigationController extends AbstractController {
         }
 
         // if student view false, never show
-        if (!$gradeable->isStudentView() && !$user->accessGrading()) {
+        if (!$gradeable->getStudentView() && !$user->accessGrading()) {
             return false;
         }
 
         //If we're not instructor and this is not open to TAs
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+        if ($gradeable->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
             return false;
         }
 

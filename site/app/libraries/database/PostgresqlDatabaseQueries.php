@@ -11,7 +11,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\AutogradingVersion;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
@@ -1368,7 +1368,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       FROM grading_registration
                       GROUP BY user_id
                     ) as sr ON u.user_id=sr.user_id
-                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND ug.user_id=in_gcd.gcd_verifier_id
+                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND AS ug2 ON ug2.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
 
@@ -1476,7 +1476,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $db_row_split[$property] = json_decode($row['array_' . $property]);
             }
 
-            if (isset($db_row_split['comp_id'])) {
+            if ($ta_graded_gradeable !== null) {
                 // Create all of the GradedComponents
                 if (isset($db_row_split['comp_id'])) {
                     for ($i = 0; $i < count($db_row_split['comp_id']); ++$i) {
@@ -1509,19 +1509,21 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
 
-            if (isset($db_row_split['version'])) {
-                // Create all of the AutoGradedVersions
-                for ($i = 0; $i < count($db_row_split['version']); ++$i) {
-                    // Similarly, transpose each version
-                    $version_array = [];
-                    foreach ($version_array_properties as $property) {
-                        $version_array[$property] = $db_row_split[$property][$i];
-                    }
+            if ($auto_graded_gradeable !== null) {
+                // Create all of the AutogradingVersions
+                if (isset($db_row_split['version'])) {
+                    for ($i = 0; $i < count($db_row_split['version']); ++$i) {
+                        // Similarly, transpose each version
+                        $version_array = [];
+                        foreach ($version_array_properties as $property) {
+                            $version_array[$property] = $db_row_split[$property][$i];
+                        }
 
-                    $version = new AutoGradedVersion($this->core, $graded_gradeable, $version_array);
-                    $graded_versions[$version->getVersion()] = $version;
+                        $version = new AutogradingVersion($this->core, $graded_gradeable, $version_array);
+                        $graded_versions[$version->getVersion()] = $version;
+                    }
                 }
-                $auto_graded_gradeable->setAutoGradedVersions($graded_versions);
+                $auto_graded_gradeable->setAutogradingVersions($graded_versions);
             }
 
             return $graded_gradeable;

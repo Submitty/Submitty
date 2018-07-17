@@ -98,8 +98,7 @@ except KeyError:
 
 ##############################################################################
 
-# This is the upper limit of the number of parallel grading threads on
-# this machine
+# This value must be at least 60: assumed in INSTALL_SUBMITTY.sh generation of crontab
 NUM_UNTRUSTED = 60
 
 FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
