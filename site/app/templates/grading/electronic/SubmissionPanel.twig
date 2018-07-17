@@ -4,39 +4,56 @@
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
     <div id="directory_view" style="position:relative; float:left;">
         <div class="draggable_content">
-            <span class="grading_label">Submissions and Results Browser</span>
-            <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+        <span class="grading_label">Submissions and Results Browser</span>
+        <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
-            {# check if there are vcs files, if yes display the toggle button, else don't display it #}
-            {% if has_vcs_files %}
-                <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
-            {% endif %}
+        {# check if there are vcs files, if yes display the toggle button, else don't display it #}
+        {% if has_vcs_files %}
+            <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
+        {% endif %}
 
-            <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+        <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
 
-            <script type="text/javascript">
-                $(document).ready(function(){
-                    //note the commented out code here along with the code where files are displayed that is commented out
-                    //is intended to allow open and close to change dynamically on click
-                    //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-                    $(".expand-button").on('click', function(){
-                        // $(this).attr('clicked-state', "clicked");
-                        // updateValue($(this), "Open", "Close");
-                        openAll( 'openable-element-', $(this).data('linked-type'))
-                        // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                        //     console.log('HELLLO');
-                        // });
-                    })
+        <script type="text/javascript">
+            $(document).ready(function(){
+                //note the commented out code here along with the code where files are displayed that is commented out
+                //is intended to allow open and close to change dynamically on click
+                //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
+                $(".expand-button").on('click', function(){
+                    // $(this).attr('clicked-state', "clicked");
+                    // updateValue($(this), "Open", "Close");
+                    openAll( 'openable-element-', $(this).data('linked-type'))
+                    // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                    //     console.log('HELLLO');
+                    // });
+                })
 
-                    var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
-                    var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-                    $('#' + currentCodeStyleRadio).parent().addClass('active');
-                    $('#' + currentCodeStyleRadio).prop('checked', true);
-                });
-            </script>
+                var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+                var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+                $('#' + currentCodeStyleRadio).parent().addClass('active');
+                $('#' + currentCodeStyleRadio).prop('checked', true);
+            });
+        </script>
 
-            {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+        {% if not peer %}
+            <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+        {% endif %}
+
+        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
+            </label>
+        </div>
+        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto open </span>
+        <br />
+        {# Files #}
+        <div class="inner-container" id="file-container">
+            {{ self.display_files(self, submissions, "s", 0, "submissions") }}
+            {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
+                {{ self.display_files(self, checkout, "c", 0, "checkout") }}
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
@@ -74,6 +91,14 @@
     </div>
     <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
         {#<div id="viewer"></div>#}
+        <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
+        <br>
+        <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
+        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
+        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
+    </div>
+    </div>
+    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>

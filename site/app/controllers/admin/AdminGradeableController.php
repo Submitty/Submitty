@@ -1030,14 +1030,8 @@ class AdminGradeableController extends AbstractController {
             die("Cannot delete form_{$g_id}.json");
         }
 
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $g_id . ".json";
-        $config_build_data = array("semester" => $semester,
-            "course" => $course,
-            "no_build" => true);
-
-        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
-            die("Failed to write file {$config_build_file}");
-        }
+        // this will cleanup the build files
+        $this->enqueueBuildFile($g_id);
 
         $this->returnToNav();
     }
@@ -1068,9 +1062,10 @@ class AdminGradeableController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
 
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
+            "job" => "BuildConfig",
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $g_id
