@@ -167,7 +167,7 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
-            if(registration_section == null && json['user_group'] === 4) {
+            if(registration_section === 'null' && json['user_group'] === 4) {
                 $('#student-error-message').css('display', 'block');
             }
             else {
