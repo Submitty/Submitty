@@ -1,8 +1,9 @@
 {% import _self as self %}
 {% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
 
-<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%">
-    <div class="draggable_content">
+<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
+    <div id="directory_view" style="position:relative; float:left;">
+        <div class="draggable_content">
         <span class="grading_label">Submissions and Results Browser</span>
         <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
@@ -70,13 +71,21 @@
             // });
         </script>
     </div>
+    </div>
+    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
+        <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
+        <br>
+        <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
+        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
+        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
+    </div>
 </div>
 
 {# todo: Move to ta-grading.js #}
 <script type="text/javascript">
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
-        if (!iframe.hasClass('open')) {
+        if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
             var iframeId = "file_viewer_" + num + "_iframe";
             var directory = "";
             if (url_file.includes("submissions")) {
@@ -93,20 +102,24 @@
                 iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                if(iframe.hasClass("full_panel")){
+                    $('#'+iframeId).attr("height", "1200px");
+                }
             }
             iframe.addClass('open');
         }
-
-        if (!iframe.hasClass('shown')) {
-            iframe.show();
-            iframe.addClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
-        }
-        else {
-            iframe.hide();
-            iframe.removeClass('shown');
-            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+        if(!iframe.hasClass("full_panel")){
+            if (!iframe.hasClass('shown')) {
+                iframe.show();
+                iframe.addClass('shown');
+                $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
+            }
+            else {
+                iframe.hide();
+                iframe.removeClass('shown');
+                $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+            }
         }
         return false;
     }
@@ -125,6 +138,32 @@
         window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
+
+    function expandFile(dir, path) {
+        $("#file_viewer_full_panel").empty();
+        $("#file_viewer_full_panel").attr("data-file_name", "");
+        $("#file_viewer_full_panel").attr("data-file_url", "");
+        $("#file_viewer_full_panel").attr("data-file_name", dir);
+        $("#file_viewer_full_panel").attr("data-file_url", path);
+        openFrame(dir, path, "full_panel");
+        $("#grading_file_name").html(dir);
+        let offset = $("#directory_view").width();
+        $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
+        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
+        $("#directory_view").hide();
+    }
+
+    function collapseFile(){
+        $("#directory_view").show();
+        var offset1 = $("#directory_view").css('left');
+        var offset2 = $("#directory_view").width();
+
+        $("#directory_view").animate({'left': '-=' + offset1}, 200);
+        $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
+            $('#file_view').css('left', "");
+        });
+    }
+
 </script>
 
 {% macro display_files(self, files, id, indent, title) %}
@@ -146,6 +185,7 @@
                 <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+            <a onclick='expandFile("{{ dir }}", "{{ path }}", "{{ id }}")'><i class="fa fa-mail-forward" aria-hidden="true" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>

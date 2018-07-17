@@ -506,31 +506,31 @@ CREATE TABLE regrade_discussion (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-    "id" serial NOT NULL,
-    "thread_id" int NOT NULL,
-    "parent_id" int DEFAULT '-1',
-    "author_user_id" character varying NOT NULL,
-    "content" TEXT NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    "anonymous" BOOLEAN NOT NULL,
-    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
-    "endorsed_by" varchar,
-    "resolved" BOOLEAN NOT NULL,
-    "type" int NOT NULL,
-    "has_attachment" BOOLEAN NOT NULL,
-    CONSTRAINT posts_pk PRIMARY KEY ("id")
+	"id" serial NOT NULL,
+	"thread_id" int NOT NULL,
+	"parent_id" int DEFAULT '-1',
+	"author_user_id" character varying NOT NULL,
+	"content" TEXT NOT NULL,
+	"timestamp" timestamp with time zone NOT NULL,
+	"anonymous" BOOLEAN NOT NULL,
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"endorsed_by" varchar,
+	"type" int NOT NULL,
+  "has_attachment" BOOLEAN NOT NULL,
+	CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
-    "id" serial NOT NULL,
-    "title" varchar NOT NULL,
-    "created_by" varchar NOT NULL,
-    "pinned" BOOLEAN NOT NULL DEFAULT 'false',
-    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
-    "merged_thread_id" int DEFAULT '-1',
-    "merged_post_id" int DEFAULT '-1',
-    "is_visible" BOOLEAN NOT NULL,
-    CONSTRAINT threads_pk PRIMARY KEY ("id")
+	"id" serial NOT NULL,
+	"title" varchar NOT NULL,
+	"created_by" varchar NOT NULL,
+	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
+	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
+	"merged_thread_id" int DEFAULT '-1',
+	"merged_post_id" int DEFAULT '-1',
+	"is_visible" BOOLEAN NOT NULL,
+	"status" int DEFAULT 0 NOT NULL,
+	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE forum_posts_history (
@@ -1055,6 +1055,8 @@ ALTER TABLE ONLY regrade_discussion
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk1" FOREIGN KEY ("author_user_id") REFERENCES "users"("user_id");
+
+ALTER TABLE "threads" ADD CONSTRAINT "threads_status_check" CHECK ("status" IN (-1,0,1));
 
 ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "posts"("id");
 ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_edit_author_fk" FOREIGN KEY ("edit_author") REFERENCES "users"("user_id");
