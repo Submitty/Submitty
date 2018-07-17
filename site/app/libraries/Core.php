@@ -4,6 +4,7 @@ namespace app\libraries;
 
 use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
+use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
@@ -445,6 +446,33 @@ class Core {
      */
     public function getAccess() {
         return $this->access;
+    }
+
+    /**
+     * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
+     * assuming that we
+     *
+     * @param string $url
+     *
+     * @return string
+     *
+     * @throws \app\exceptions\CurlException
+     */
+    public function curlRequest(string $url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        try {
+            $return = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            if (!curl_errno($ch) && $http_code === 200) {
+                return $return;
+            }
+            throw new CurlException($ch, $return);
+        }
+        finally {
+            curl_close($ch);
+        }
     }
 
     /**
