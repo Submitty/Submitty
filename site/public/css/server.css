@@ -947,7 +947,7 @@ table .instructor .two-options{
     overflow-y: auto;
 }
 
-.popup-form div {
+.popup-form:not(.no-popup-div) div {
     width: 30%;
     display: inline-block;
     vertical-align: top;

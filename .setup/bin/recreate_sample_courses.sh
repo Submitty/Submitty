@@ -4,6 +4,9 @@
 
 ########################################################################
 
+# If any command fails, we need to bail
+set -ev
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
