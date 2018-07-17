@@ -353,21 +353,9 @@ HTML;
 					});
 				</script>
 			</div>
-			<div class="popup-form decent posts_list no-popup-div" style="height: auto;">
-				<h3>Edit History
-					<a onclick="$('#popup-post-history').parent().hide();" class="btn btn-danger" style="float: right;">Close</a>
-				</h3>
-				<div id="popup-post-history">
-					<div class="post_box" style="margin-left:0px;display: none;">
-						<pre><p class="post_content" style="white-space: pre-wrap; "></p></pre>
-						<hr style="margin-bottom:3px;">
-						<span style="margin-top:8px;margin-left:10px;float:right;">
-							<h7 style="position:relative; right:5px;"></h7>
-						</span>
-					</div>
-				</div>
-			</div>
+			
 HTML;
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
