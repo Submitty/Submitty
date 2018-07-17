@@ -2,7 +2,8 @@
 
 namespace app\views\submission;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -16,23 +17,24 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @param int $late_days_use
      * @param int $extensions
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    public function showGradeable($gradeable, $late_days_use, $extensions, $canViewWholeGradeable = false) {
+    public function showGradeable(GradedGradeable $graded_gradeable, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
         $return = "";
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $gradeable = $graded_gradeable->getGradeable();
 
-        $return .= $this->renderLateDayMessage($gradeable, $extensions);
+        $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
         // showing submission if user is grader or student can submit
-        if ($this->core->getUser()->accessGrading() || $gradeable->getStudentSubmit()) {
+        if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
             $return .= $this->renderSubmitBox($gradeable, $late_days_use);
         }
-        $all_directories = $gradeable->getUploadsFiles();
+        $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
             $return .= $this->renderBulkUploadBox($gradeable);
         }
@@ -46,16 +48,27 @@ class HomeworkView extends AbstractView {
           }
          */
 
-        if ($gradeable->getSubmissionCount() === 0) {
-            $return .= $this->renderNoSubmissionBox($gradeable);
+        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $submission_count = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getHighestVersion() : 0;
+        $active_version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : 0;
+        if ($submission_count === 0) {
+            $return .= $this->renderNoSubmissionBox($graded_gradeable);
         } else {
-            $return .= $this->renderCurrentVersionBox($gradeable, $canViewWholeGradeable);
+            $return .= $this->renderCurrentVersionBox($graded_gradeable, $canViewWholeGradeable);
         }
-        if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->getSubmissionCount() !== 0 && $gradeable->getActiveVersion()) {
-            $return .= $this->renderTAResultsBox($gradeable);
+
+        if ($gradeable->isTaGradeReleased()
+            && $gradeable->isTaGrading()
+            && $submission_count !== 0
+            && $active_version !== 0) {
+            $return .= $this->renderTAResultsBox($graded_gradeable);
         }
-        if ($this->core->getConfig()->isRegradeEnabled() && $gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded() && $gradeable->getSubmissionCount() !== 0) {
-            $return .= $this->renderRegradeBox($gradeable);
+        if ($this->core->getConfig()->isRegradeEnabled()
+            && $gradeable->isTaGradeReleased()
+            && $gradeable->isTaGrading()
+            && $graded_gradeable->isTaGradingComplete()
+            && $submission_count !== 0) {
+            $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
     }
