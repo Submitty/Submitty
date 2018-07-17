@@ -202,14 +202,15 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @param int $late_days_use
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, int $late_days_use): string {
-        $student_page = false;
+    private function renderSubmitBox(GradedGradeable $graded_gradeable, int $late_days_use): string {
+        $gradeable = $graded_gradeable->getGradeable();
+        $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $textboxes = [];
+        $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
         $old_files = [];
 
         if ($this->core->getUser()->accessGrading()) {
@@ -219,6 +220,7 @@ class HomeworkView extends AbstractView {
                 $student_ids[] = $student->getId();
             }
 
+            // FIXME: this works, but does not really use new model.  We don't need all that much of the info anyway
             $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
             $students_version = array();
             foreach ($gradeables as $g) {
@@ -241,18 +243,17 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        if (!$gradeable->useVcsCheckout()) {
-            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $textbox = $gradeable->getTextboxes()[$i];
-                $textbox['index'] = $i;
-
-                if (!isset($textbox['images']) || !is_array($textbox['images'])) {
-                    $textbox['images'] = [];
-                }
-
-                foreach ($textbox['images'] as &$currImage) {
-                    $currImageName = $currImage["image_name"];
-                    $imgPath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "test_input", $gradeable->getId(), $currImageName);
+        $image_data = [];
+        if (!$gradeable->isVcs()) {
+            foreach ($textboxes as $textbox) {
+                foreach ($textbox->getImages() as $image) {
+                    $image_name = $image['name'];
+                    $imgPath = FileUtils::joinPaths(
+                        $this->core->getConfig()->getCoursePath(),
+                        "test_input",
+                        $gradeable->getId(),
+                        $image_name
+                    );
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === "image") {
                         // Read image path, convert to base64 encoding
@@ -261,37 +262,26 @@ class HomeworkView extends AbstractView {
                         $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
                         // insert the sample image data
 
-                        $currImage['src'] = $textBoximagesrc;
+                        $image_data[$image_name] = $textBoximagesrc;
                     }
-                }
-                unset($currImage);
-
-                $textboxes[] = $textbox;
-            }
-            // does this gradeable have parts assigned by students
-            foreach ($gradeable->getComponents() as $question) {
-                if (is_array($question)) {
-                    $page_num = $question[0]->getPage();
-                } else {
-                    $page_num = $question->getPage();
-                }
-                if ($page_num === -1) {
-                    $student_page = true;
-                    break;
                 }
             }
 
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                foreach ($gradeable->getPreviousFiles($i) as $file) {
-                    $size = number_format($file['size'] / 1024, 2);
-                    // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
-                    if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
-                        $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                    } else {
-                        $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
-                    }
+            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+            $version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : null;
+            if($version !== null) {
+                for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
+                    foreach ($auto_graded_gradeable->getAutoGradedVersions()[$version]->getPartFiles($i) as $file) {
+                        $size = number_format($file['size'] / 1024, 2);
+                        // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                        if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
+                            $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
+                        } else {
+                            $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
+                        }
 
-                    $old_files[] = ["name" => $escape_quote_filename, "size" => $size, "part" => $i];
+                        $old_files[] = ["name" => $escape_quote_filename, "size" => $size, "part" => $i];
+                    }
                 }
             }
         }
@@ -303,6 +293,7 @@ class HomeworkView extends AbstractView {
             "late_days_use" => $late_days_use,
             "old_files" => $old_files,
             "textboxes" => $textboxes,
+            "image_data" => $image_data,
             "upload_message" => $this->core->getConfig()->getUploadMessage()
         ]);
     }
