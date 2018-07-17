@@ -261,7 +261,7 @@ class MiscController extends AbstractController {
             $paths[] = $checkout_path;
         }
         for ($x = 0; $x < 3; $x++) {
-            if (is_dir($paths[$x]) && ($this->core->getUser()->accessGrading() || $paths[$x] === $submissions_path)) {
+            if (is_dir($paths[$x])) {
                     $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($paths[$x]),
                     \RecursiveIteratorIterator::LEAVES_ONLY
