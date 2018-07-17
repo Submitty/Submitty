@@ -8,9 +8,6 @@
         <p>{{ user }} ({{ id }})</p>
     {% endfor %}
 {% endblock %}
-{% block form %}
-    {{ parent() }}
-{% endblock %}
 {% block buttons %}
     <a class="btn btn-primary" onclick="confirmExtension(1)">Yes</a>
     <a class="btn btn-default" onclick="confirmExtension(0)">No</a>
