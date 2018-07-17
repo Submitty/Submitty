@@ -2025,7 +2025,7 @@ ORDER BY u.user_group ASC,
 SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-WHERE u.user_id=? AND c.status=1 AND u.user_group=1
+WHERE u.user_id=? AND c.status=0 AND u.user_group=1
 ORDER BY u.user_group ASC,
          SUBSTRING(u.semester, 2, 2)::INT DESC,
          CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
