@@ -54,13 +54,13 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var bool If there is an early submission incentive */
     private $early_submission_incentive = false;
     /** @property @var string The message given to describe the early submission */
-    protected $early_submission_message;
+    protected $early_submission_message = '';
     /** @property @var int The minimum number days early to receive the early submission incentive */
-    protected $early_submission_minimum_days_early;
+    protected $early_submission_minimum_days_early = 0;
     /** @property @var int The minimum number of points required to receive the early submission incentive */
-    protected $early_submission_minimum_points;
+    protected $early_submission_minimum_points = 0;
     /** @property @var GradeableTestcase[] The test cases for which the points must be earned to satisfy the incentive */
-    protected $early_submission_test_cases;
+    protected $early_submission_test_cases = [];
 
 
     /* Properties accumulated from GradeableTestcase's */
