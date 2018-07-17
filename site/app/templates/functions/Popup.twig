@@ -6,7 +6,9 @@
             {# Actual displayed window #}
             <div class="popup-window">
                 <div class="form-title">
-                    <h2>{% block title %}Untitled Form{% endblock %}</h2>
+                    {% block title_tag %}
+                        <h2>{% block title %}Untitled Form{% endblock %}</h2>
+                    {% endblock %}
                 </div>
                 <div class="form-body">
                     {% block body %}Be sure to override the body block.{% endblock %}
