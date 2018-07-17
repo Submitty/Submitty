@@ -167,8 +167,6 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
-            console.log(registration_section);
-            console.log(json['user_group']);
             if(registration_section == null && json['user_group'] === 4) {
                 $('#student-error-message').css('display', 'block');
             }
