@@ -11,8 +11,8 @@
     {% if view %}
         <input type="hidden" name="view" value="{{ view }}" />
     {% endif %}
-    <div id="admin-team-members" style="width:50%; display: inline-block;"></div>
-    <div style="width: calc(50% - 10px); display: inline-block; vertical-align: top;">
+    <div id="admin-team-members" class="left-panel"></div>
+    <div class="right-panel">
         Registration Section:<br />
         <select name="reg_section">
             {% for section in all_reg_sections %}
@@ -31,8 +31,8 @@
     <br />
     <br />
     <h4 id="admin-team-history-title"></h4>
-    <div id="admin-team-history-left" style="width:28%; display: inline-block; margin-right: 10px;"></div>
-    <div id="admin-team-history-right" style="width:62%; display: inline-block;"></div>
+    <div id="admin-team-history-left"></div>
+    <div id="admin-team-history-right"></div>
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'submit_team_form', 'gradeable_id': gradeable.getId()}) }}">

@@ -1001,6 +1001,28 @@ table .instructor .two-options{
     width: 95%;
 }
 
+.popup-form .left-panel {
+    width:50%;
+    display: inline-block;
+}
+
+.popup-form .right-panel {
+    width: calc(50% - 10px);
+    display: inline-block;
+    vertical-align: top;
+}
+
+#admin-team-history-left {
+    width:28%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#admin-team-history-right {
+    width:62%;
+    display: inline-block;
+}
+
 .fill-available {
     width: 100%;
     width: -webkit-fill-available;
