@@ -331,6 +331,24 @@ class AutoGradedVersion extends AbstractModel {
     }
 
     /**
+     * Gets the number of days late this version is
+     * @return int
+     */
+    public function getDaysLate() {
+        return DateUtils::calculateDayDiff(
+            (clone $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate())
+                ->add(new \DateInterval("PT5M")), $this->submission_time);
+    }
+
+    /**
+     * Gets the number of days early this version is
+     * @return int
+     */
+    public function getDaysEarly() {
+        return -$this->getDaysLate();
+    }
+
+    /**
      * Gets all grade history for this version (empty array if none)
      * @return AutoGradedVersionHistory[]
      */
