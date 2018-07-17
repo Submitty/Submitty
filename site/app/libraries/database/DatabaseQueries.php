@@ -1998,7 +1998,7 @@ ORDER BY u.user_group ASC,
          CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
               WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN '2'
               WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN '3'
-         END ASC,
+         END DESC,
          u.course ASC", array($user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
@@ -2010,7 +2010,7 @@ ORDER BY u.user_group ASC,
     }
 
     /**
-     * Retrieves all courses (and details) that are accessible by $user_id
+     * Retrieves all archived courses (and details) that are accessible by $user_id
      *
      * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
      * Instructors may access all of their courses
@@ -2031,7 +2031,7 @@ ORDER BY u.user_group ASC,
          CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN '1'
               WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN '2'
               WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN '3'
-         END ASC,
+         END DESC,
          u.course ASC", array($user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
