@@ -225,7 +225,6 @@ HTML;
 	if($thread_count > 0 || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
-		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
@@ -247,83 +246,47 @@ HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
 	$onChange = '';
-	if($threadExists) {
-		$onChange = <<<HTML
-		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
-HTML;
-	}
 	$return .= <<<HTML
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+HTML;
 
-		<div id="category_wrapper" class="popup-form" style="width: 50%;">
-			<label for="thread_category"><h3>Categories</h3></label><br/>
-			<i>For no filter, unselect all categories</i><br/>
-			<center>
-			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;">
-HTML;
-			for($i = 0; $i < count($categories); $i++){
-				$return .= <<<HTML
-					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
-HTML;
-			}
 	$cookieSelectedCategories = '';
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
-				$cookieSelectedCategories .= <<<HTML
-					$('#thread_category option[value="{$selectedId}"]').prop('selected', true);
-HTML;
+				$cookieSelectedCategories[] = $selectedId;
 			}
 		}
 	}
-	$display_option_js = <<<HTML
-		$("#tree").prop("checked", true);
-HTML;
-	if(in_array($display_option, array("tree", "time", "alpha"))) {
-		$display_option_js = <<<HTML
-			$("#{$display_option}").prop("checked", true);
-HTML;
-	}
-	$return .= <<<HTML
-				</select>
-				</center>
-				<br/>
-				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
-					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
-				</div>
 
-				<script type="text/javascript">
-					$( document ).ready(function() {
-						$('#thread_category option').mousedown(function(e) {
-							e.preventDefault();
-							var current_selection = $(this).prop('selected');
-							$(this).prop('selected', !current_selection);
-							{$onChange}
-							return true;
-						});
-						{$cookieSelectedCategories}
-						{$display_option_js}
-					});
-				</script>
-			</div>
+    $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+        "categories" => $categories,
+        "current_thread" => $currentThread,
+        "current_category_ids" => $currentCategoriesIds,
+        "current_course" => $currentCourse,
+        "cookie_selected_categories" => $cookieSelectedCategories,
+        "display_option" => $display_option,
+        "thread_exists" => $threadExists
+    ]);
+
+	$return .= <<<HTML
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
-			$return .= <<<HTML
+        $return .= <<<HTML
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
 			<label for="radio">Hierarchical</label>  
 
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
 			<label for="radio2">Chronological</label>
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
+        if($this->core->getUser()->getGroup() <= 2){
+            $return .= <<<HTML
 			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
 			<label for="radio3">Alphabetical</label>
 HTML;
-	}
-	$return .= <<<HTML
+        }
+        $return .= <<<HTML
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
@@ -332,11 +295,12 @@ HTML;
 			</button>
 			</form>
 HTML;
-		$return .= <<<HTML
+        $return .= <<<HTML
 		</div>
 
 HTML;
-		if(!$threadExists){
+
+        if(!$threadExists){
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
