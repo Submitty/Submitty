@@ -34,7 +34,7 @@ class HomeworkView extends AbstractView {
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
-            $return .= $this->renderSubmitBox($gradeable, $late_days_use);
+            $return .= $this->renderSubmitBox($graded_gradeable, $late_days_use);
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
