@@ -338,7 +338,7 @@ function moveNextInput(count) {
             offset = inputOffset;
         }
         var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed); 
+        $('html, body').animate({scrollTop:offset}, speed);
     }
 }
 
@@ -482,7 +482,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
     var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
-    
+
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -866,7 +866,70 @@ function handleDownloadImages(csrf_token) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
-            //alert("ERROR! Please contact administrator that you could not upload image files.");
+            //window.location.reload(true);
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+
+function handleUploadCourseMaterials(csrf_token, requested_path) {
+    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
+    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('requested_path', requested_path);
+
+    // Files selected
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+        }
+    }
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                var jsondata = JSON.parse(data);
+
+                if (jsondata['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+            }
+        },
+        error: function(data) {
+            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+            window.location.reload(true);
         }
     });
 }

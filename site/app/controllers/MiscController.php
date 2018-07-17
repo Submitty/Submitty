@@ -21,6 +21,12 @@ class MiscController extends AbstractController {
             case 'download_file':
                 $this->downloadFile();
                 break;
+            case 'download_file_with_any_role':
+                $this->downloadFile(true);
+                break;
+            case 'delete_course_material_file':
+                $this->deleteCourseMaterialFile();
+                break;
             case 'download_zip':
                 $this->downloadZip();
                 break;
@@ -31,7 +37,7 @@ class MiscController extends AbstractController {
     }
 
     // function to check that this is a valid access request
-    private function checkValidAccess($is_zip, &$error_string, $gradeable = null) {
+    private function checkValidAccess($is_zip, &$error_string, $download_with_any_role = false, $gradeable = null) {
         $error_string="";
         // only allow zip if it's a grader
         if ($is_zip) {
@@ -73,7 +79,7 @@ class MiscController extends AbstractController {
         // END HACK
 
 
-        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments");
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments", "uploads/course_materials");
         if (!in_array($dir, $possible_directories)) {
             $error_string="not in possible directories list";
             return false;
@@ -82,7 +88,7 @@ class MiscController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $check = FileUtils::joinPaths($course_path, $dir);
         if (!Utils::startsWith($path, $check)) {
-            $error_string="does not start with course path";
+            $error_string= "does not start with course path";
             return false;
         }
         if (!file_exists($path)) {
@@ -174,7 +180,12 @@ class MiscController extends AbstractController {
             }
             return true;
         }
-        else {
+        else if ($download_with_any_role === true)
+        {
+            return true;
+        }
+        else
+        {
             return false;
         }
     }
@@ -208,10 +219,30 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function downloadFile() {
+    private function deleteCourseMaterialFile() {
         // security check
         $error_string="";
         if (!$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        // delete the file from upload/course_materials
+        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        unlink($filename); //deletes the selected file from course_materials folder
+
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+    }
+
+
+    private function downloadFile($download_with_any_role = false) {
+        // security check
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string, $download_with_any_role)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
@@ -229,7 +260,7 @@ class MiscController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
         // security check
         $error_string="";
-        if (!$this->checkValidAccess(true,$error_string, $gradeable)) {
+        if (!$this->checkValidAccess(true, $error_string, false, $gradeable)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
