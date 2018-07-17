@@ -29,7 +29,9 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $gradeable = $graded_gradeable->getGradeable();
 
-        $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
+        // FIXME: uncomment when working
+        // $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
+
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
             $return .= $this->renderSubmitBox($gradeable, $late_days_use);
@@ -74,11 +76,12 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+    // TODO: waiting on late days model first
+     * @param \app\models\Gradeable $gradeable
      * @param int $extensions
      * @return string
      */
-    public function renderLateDayMessage(Gradeable $gradeable, int $extensions) {
+    public function renderLateDayMessage(\app\models\Gradeable $gradeable, int $extensions) {
         $order_by = [
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
         ];
