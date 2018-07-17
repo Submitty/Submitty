@@ -1292,9 +1292,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
                     $("#title").val(thread_title);
+                    $("#thread_status").val(thread_status);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1305,11 +1307,13 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $(".cat-buttons").trigger("eventChangeCatClass");
                     $("#thread_form").prop("ignore-cat",false);
                     $("#category-selection-container").show();
+                    $("#thread_status").show();
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
+                    $("#thread_status").hide();
                 }
             },
             error: function(){
@@ -1366,7 +1370,9 @@ function alterShowDeletedStatus(newStatus) {
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
@@ -1374,6 +1380,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
             type: "POST",
             data: {
                 thread_categories: categories_value,
+                thread_status: thread_status_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
