@@ -65,10 +65,17 @@ class ElectronicGraderController extends GradingController {
             case 'remove_empty':
                 return $this->ajaxRemoveEmpty();
                 break;
+            case 'pdf_annotation':
+                $this->showPDFAnnotation();
+                break;
             default:
                 $this->showStatus();
                 break;
         }
+    }
+
+    public function showPDFAnnotation(){
+        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
 
     public function ajaxRemoveEmpty(){

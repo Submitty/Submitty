@@ -27,7 +27,15 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'base64_encode_pdf':
+                $this->encodePDF();
+                break;
         }
+    }
+
+    private function encodePDF(){
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', 'open_homework', 'instructor', '2', 'senate.pdf')));
+        return $this->core->getOutput()->renderJson(json_encode($pdf64));
     }
 
     // function to check that this is a valid access request

@@ -38,6 +38,19 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
 });
 
 function render() {
+  var url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+  let pdf64 = "data:application/pdf;base64,";
+  var pdf;
+  $.ajax({
+    url: url,
+    success: function(data) {
+      pdf64 += JSON.parse(data);
+      pdf = convertDataURIToBinary(pdf64);
+    },
+    error: function(e) {
+      alert("Could not load pdf, please refresh the page and try again.");
+    }
+  });
   PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
     RENDER_OPTIONS.pdfDocument = pdf;
 
@@ -446,3 +459,26 @@ render();
   UI.setCircle(10, 'darkgoldenrod')
 
 })(window, document);
+
+function buildUrl(parts) {
+  var constructed = "";
+  for (var part in parts) {
+      if (parts.hasOwnProperty(part)) {
+          constructed += "&" + part + "=" + parts[part];
+      }
+  }
+  return document.body.dataset.siteUrl + constructed;
+}
+
+function convertDataURIToBinary(dataURI) {
+  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  var base64 = dataURI.substring(base64Index);
+  var raw = window.atob(base64);
+  var rawLength = raw.length;
+  var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(var i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
+  }
+  return array;
+}
