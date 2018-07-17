@@ -2,6 +2,9 @@ import twitter from 'twitter-text';
 import PDFJSAnnotate from '../';
 import initColorPicker from './shared/initColorPicker';
 
+var doc = new jsPDF();
+doc.text('Hello world!', 10, 10);
+doc.save('a4.pdf')
 const { UI } = PDFJSAnnotate;
 const documentId = 'example.pdf';
 let PAGE_HEIGHT;
@@ -39,18 +42,6 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
 
 function render() {
   var url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
-  let pdf64 = "data:application/pdf;base64,";
-  var pdf;
-  $.ajax({
-    url: url,
-    success: function(data) {
-      pdf64 += JSON.parse(data);
-      pdf = convertDataURIToBinary(pdf64);
-    },
-    error: function(e) {
-      alert("Could not load pdf, please refresh the page and try again.");
-    }
-  });
   PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
     RENDER_OPTIONS.pdfDocument = pdf;
 
@@ -395,6 +386,14 @@ render();
     }
   }
   document.querySelector('a.clear').addEventListener('click', handleClearClick);
+})();
+
+//Handles Download
+(function() {
+  function handleDownloadClick(e){
+    
+  }
+  document.querySelector('a.download').addEventListener('click', handleDownloadClick);
 })();
 
 // Comment stuff
