@@ -245,7 +245,6 @@ HTML;
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
-	$onChange = '';
 	$return .= <<<HTML
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
 HTML;
@@ -326,35 +325,7 @@ HTML;
                     "current_thread" => $currentThread
                 ]);
 			}
-			$return .= <<<HTML
-			<div class="popup-form decent" id="edit-user-post">
-				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-				 <h3 id="edit_user_prompt"></h3>
-HTML;
-					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-							"show_title" => true,
-							"show_post" => true,
-							"post_content_placeholder" => "Enter your post here...",
-							"show_categories" => true,
-							"show_anon" => true,
-							"show_cancel_edit_form" => true,
-							"submit_label" => "Update Post",
-						]);
-					$return .= <<<HTML
-				</form>
-				<script type="text/javascript">
-					$("#thread_form").submit(function() {
-						if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-							alert("At least one category must be selected.");
-							return false;
-						}
-					});
-				</script>
-			</div>
-			
-HTML;
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
             $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
 			$return .= <<<HTML

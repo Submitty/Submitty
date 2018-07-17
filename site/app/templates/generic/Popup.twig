@@ -5,23 +5,29 @@
         <div class="popup-box">
             {# Actual displayed window #}
             <div class="popup-window">
-                <div class="form-title">
-                    {% block title_tag %}
-                        <h2>{% block title %}Untitled Form{% endblock %}</h2>
-                    {% endblock %}
-                </div>
-                <div class="form-body">
-                    {% block body %}Be sure to override the body block.{% endblock %}
-                </div>
-                <div class="form-buttons">
-                    <div class="form-button-container">
-                        {% block buttons %}
-                            {% block close_button %}
-                               <a onclick="$('#{{ block('popup_id') }}').css('display', 'none');" class="btn btn-default">Close</a>
-                            {% endblock %}
+                {% block title_panel %}
+                    <div class="form-title">
+                        {% block title_tag %}
+                            <h2>{% block title %}Untitled Form{% endblock %}</h2>
                         {% endblock %}
                     </div>
-                </div>
+                {% endblock %}
+                {% block body_panel %}
+                    <div class="form-body">
+                        {% block body %}Be sure to override the body block.{% endblock %}
+                    </div>
+                {% endblock %}
+                {% block buttons_panel %}
+                    <div class="form-buttons">
+                        <div class="form-button-container">
+                            {% block buttons %}
+                                {% block close_button %}
+                                   <a onclick="$('#{{ block('popup_id') }}').css('display', 'none');" class="btn btn-default">Close</a>
+                                {% endblock %}
+                            {% endblock %}
+                        </div>
+                    </div>
+                {% endblock %}
             </div>
         </div>
     {% endblock %}
