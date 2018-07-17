@@ -17,6 +17,11 @@
                 <br />
             {% endif %}
         {% endfor %}
+        {% if can_download and files|length > 1 %}
+            <br />
+            <br />
+            Download all files:
+        {% endif %}
     </div>
     <div class="box half">
         {% if gradeable.hasResults() %}

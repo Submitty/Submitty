@@ -27,6 +27,9 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'download_submission_zip':
+                $this->downloadSubmissionZip();
+                break;
         }
     }
 
@@ -398,5 +401,9 @@ class MiscController extends AbstractController {
         header("Expires: 0");
         readfile("$zip_name");
         unlink($zip_name); //deletes the random zip file
+    }
+
+    private function downloadSubmissionZip() {
+
     }
 }
