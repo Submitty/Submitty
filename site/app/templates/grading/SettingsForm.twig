@@ -6,11 +6,3 @@
     <br>
     <table id="hotkeys-list"></table>
 {% endblock %}
-{% block form %}
-    <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
-        {{ parent() }}
-    </form>
-{% endblock %}
-{% block buttons %}
-    {{ block('close_button') }}
-{% endblock %}
