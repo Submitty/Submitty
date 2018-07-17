@@ -221,8 +221,11 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-    {% else %}
+    {% elseif gradeable.isTaGrading() %}
         {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% else %}
+        {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
     {% set who_id = (gradeable.isTeamAssignment() ? gradeable.getTeam().getId() : gradeable.getUser().getId()) %}
