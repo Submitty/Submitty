@@ -981,7 +981,35 @@ function check_server(url) {
 }
 
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    if(version === null) {
+        window.location = buildUrl({
+            'component': 'misc',
+            'page': 'download_zip',
+            'dir': 'submissions',
+            'gradeable_id': grade_id,
+            'user_id': user_id
+        });
+    }
+    else {
+        window.location = buildUrl({
+            'component': 'misc',
+            'page': 'download_zip',
+            'dir': 'submissions',
+            'gradeable_id': grade_id,
+            'user_id': user_id,
+            'version': version
+        });
+    }
+    return false;
 }
 
 function changeColor(div, hexColor){
