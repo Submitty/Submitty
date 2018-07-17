@@ -83,10 +83,10 @@ apt-get install -qqy cmake
 # for Lichen (Plagiarism Detection)
 apt-get -qqy install python-clang-3.8
 
-
 # Install Oracle 8 Non-Interactively
 echo "installing java8"
-GOT_JAVA=$(apt-get install -qqy oracle-java8-installer > /dev/null 2>&1)
+
+GOT_JAVA=$(bash -c 'apt-get install -qqy oracle-java8-installer > /dev/null 2>&1; echo $?')
 if [ $GOT_JAVA -ne 0 ]; then
     pushd .
     # https://askubuntu.com/a/996986
@@ -98,7 +98,9 @@ if [ $GOT_JAVA -ne 0 ]; then
     popd
     apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 fi
+
 apt-get install -qqy oracle-java8-set-default
+
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
