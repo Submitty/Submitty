@@ -80,15 +80,16 @@ def main():
                 SUBMITTY_DATA_DIR, directory))
     use_courses = args.course
 
-    # We have to kill crontab and all running grading scheduler processes as otherwise we end up with the process
-    # grabbing the homework files that we are inserting before we're ready to (and permission errors exist) which
-    # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
-    # all steps of setting up a course.
-    print ("pausing the autograding scheduling daemon")
-    os.system("crontab -u submitty_daemon -l > /tmp/submitty_daemon_cron_backup.txt")
-    os.system("crontab -u submitty_daemon -r")
+    # We have to stop all running daemon grading and jobs handling
+    # processes as otherwise we end up with the process grabbing the
+    # homework files that we are inserting before we're ready to (and
+    # permission errors exist) which ends up with just having a ton of
+    # build failures. Better to wait on grading any homeworks until
+    # we've done all steps of setting up a course.
+    print ("pausing the autograding and jobs hander daemons")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
+    os.system("systemctl stop submitty_daemon_jobs_handler")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -207,11 +208,10 @@ def main():
             courses[course].make_course_json()
 
     # restart the autograding daemon
-    print("restarting the autograding scheduling daemon")
-    os.system("crontab -u submitty_daemon /tmp/submitty_daemon_cron_backup.txt")
-    os.system("rm /tmp/submitty_daemon_cron_backup.txt")
+    print("restarting the autograding and jobs handler daemons")
     os.system("systemctl restart submitty_autograding_shipper")
     os.system("systemctl restart submitty_autograding_worker")
+    os.system("systemctl restart submitty_daemon_jobs_handler")
 
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
