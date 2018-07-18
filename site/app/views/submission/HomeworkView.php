@@ -25,6 +25,7 @@ class HomeworkView extends AbstractView {
     /**
      * FIXME: will throw exception when admin tries to access with no team on team assignments
      * @param GradedGradeable $graded_gradeable
+     * @param int $display_version
      * @param int $late_days_use
      * @param int $extensions
      * @param bool $canViewWholeGradeable
@@ -35,13 +36,14 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $gradeable = $graded_gradeable->getGradeable();
+        $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
 
         // FIXME: uncomment when working
         // $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
-            $return .= $this->renderSubmitBox($graded_gradeable, $display_version, $late_days_use);
+            $return .= $this->renderSubmitBox($graded_gradeable, $version_instance, $late_days_use);
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
@@ -63,14 +65,14 @@ class HomeworkView extends AbstractView {
         if ($submission_count === 0) {
             $return .= $this->renderNoSubmissionBox($graded_gradeable);
         } else {
-            $return .= $this->renderVersionBox($graded_gradeable, $display_version, $canViewWholeGradeable);
+            $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $canViewWholeGradeable);
         }
 
         if ($gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()
             && $gradeable->isTaGradeReleased()
@@ -213,15 +215,17 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
      * @return string
      */
-    private function renderSubmitBox(GradedGradeable $graded_gradeable, int $display_version, int $late_days_use): string {
+    private function renderSubmitBox(GradedGradeable $graded_gradeable, $version_instance, int $late_days_use): string {
         $gradeable = $graded_gradeable->getGradeable();
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
         $old_files = [];
+        $display_version = 0;
 
         if ($this->core->getUser()->accessGrading()) {
             $students = $this->core->getQueries()->getAllUsers();
@@ -277,9 +281,10 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            if($display_version !== 0) {
+            if($version_instance !== null) {
+                $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
-                    foreach ($graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version]->getPartFiles($i) as $file) {
+                    foreach ($version_instance->getPartFiles($i) as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
@@ -389,15 +394,16 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param int $display_version
+     * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden
      * @return string
      */
-    private function renderVersionBox(GradedGradeable $graded_gradeable, int $display_version, bool $show_hidden): string {
+    private function renderVersionBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
+        $display_version = 0;
 
         $version_data = array_map(function(AutoGradedVersion $version) {
             return [
@@ -411,8 +417,8 @@ class HomeworkView extends AbstractView {
         $show_incentive_message = false;
         $history = null;
 
-        $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
         if ($version_instance !== null) {
+            $display_version = $version_instance->getVersion();
             $history = $version_instance->getLatestHistory();
 
             foreach ($version_instance->getTestcases() as $testcase) {
