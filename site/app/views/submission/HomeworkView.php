@@ -2,11 +2,14 @@
 
 namespace app\views\submission;
 
+use app\libraries\DateUtils;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -38,7 +41,7 @@ class HomeworkView extends AbstractView {
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
-            $return .= $this->renderSubmitBox($graded_gradeable, $late_days_use);
+            $return .= $this->renderSubmitBox($graded_gradeable, $display_version, $late_days_use);
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
@@ -213,7 +216,7 @@ class HomeworkView extends AbstractView {
      * @param int $late_days_use
      * @return string
      */
-    private function renderSubmitBox(GradedGradeable $graded_gradeable, int $late_days_use): string {
+    private function renderSubmitBox(GradedGradeable $graded_gradeable, int $display_version, int $late_days_use): string {
         $gradeable = $graded_gradeable->getGradeable();
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
@@ -293,15 +296,42 @@ class HomeworkView extends AbstractView {
             }
         }
 
+        $component_names = array_map(function(Component $component) {
+            return $component->getTitle();
+        }, $gradeable->getComponents());
+        
+        $textbox_data = array_map(function(SubmissionTextBox $text_box) {
+            return $text_box->toArray();
+        }, $textboxes);
+
+        $highest_version = 0;
+        if($graded_gradeable->hasAutoGradingInfo()) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/SubmitBox.twig", [
-            "gradeable" => $gradeable,
-            "student_page" => $student_page,
-            "students_full" => $students_full,
-            "late_days_use" => $late_days_use,
-            "old_files" => $old_files,
-            "textboxes" => $textboxes,
-            "image_data" => $image_data,
-            "upload_message" => $this->core->getConfig()->getUploadMessage()
+            'gradeable_id' => $gradeable->getId(),
+            'gradeable_name' => $gradeable->getTitle(),
+            'due_date' => $gradeable->getSubmissionDueDate(),
+            'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
+            'is_vcs' => $gradeable->isVcs(),
+            'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'user_id' => $graded_gradeable->getSubmitter()->getId(),
+            'has_assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage() !== '',
+            'assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage(),
+            'allowed_late_days' => $gradeable->getLateDays(),
+            'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
+            'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
+            'display_version' => $display_version,
+            'highest_version' => $highest_version,
+            'student_page' => $student_page,
+            'students_full' => $students_full,
+            'late_days_use' => $late_days_use,
+            'old_files' => $old_files,
+            'textboxes' => $textbox_data,
+            'image_data' => $image_data,
+            'component_names' => $component_names,
+            'upload_message' => $this->core->getConfig()->getUploadMessage()
         ]);
     }
 
@@ -374,6 +404,14 @@ class HomeworkView extends AbstractView {
         $autograding_config = $gradeable->getAutogradingConfig();
         if ($graded_gradeable->hasAutoGradingInfo()) {
             $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+
+            $version_data = array_map(function(AutoGradedVersion $version) {
+                return [
+                    'points' => $version->getNonHiddenPoints(),
+                    'days_late' => $version->getDaysLate()
+                ];
+            }, $auto_graded_gradeable->getAutoGradedVersions());
+
             $active_version_number = $auto_graded_gradeable->getActiveVersion();
             $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
 
@@ -500,6 +538,8 @@ class HomeworkView extends AbstractView {
                 'check_refresh_submission_url' => $check_refresh_submission_url,
                 "files" => $version_instance->getFiles(),
                 'testcases' => $testcase_array,
+                'versions' => $version_data,
+                'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
 
                 'gradeable_id',
                 'user_id',
@@ -517,8 +557,8 @@ class HomeworkView extends AbstractView {
                 'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
                 "is_vcs" => $gradeable->isVcs(),
                 "can_download" => $can_download,
-                "cant_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-                "cant_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+                "can_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+                "can_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
                 "show_testcases" => $num_visible_testcases > 0,
                 "show_hidden" => $show_hidden,
                 "active_same_as_graded" => $active_same_as_graded,
@@ -531,10 +571,10 @@ class HomeworkView extends AbstractView {
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
                     'num_autogrades' => $version_instance->getHistoryCount(),
-                    'grading_finished' => $history->getGradingFinished(),
+                    'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),
-                    'submission_time' => $version_instance->getSubmissionTime(),
+                    'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                     'days_late' => $version_instance->getDaysLate()
                 ]);
             }
