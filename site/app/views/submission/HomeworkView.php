@@ -548,6 +548,8 @@ class HomeworkView extends AbstractView {
                 'testcases' => $testcase_array,
                 'versions' => $version_data,
                 'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
+                'allowed_late_days' => $gradeable->getLateDays(),
+                'display_version_days_late' => $version_instance->getDaysLate(),
 
                 'gradeable_id' => $gradeable->getId(),
                 // FIXME: only works with non-team assignments
