@@ -159,8 +159,8 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        if (isset($_REQUEST['new_version'])) {
-            $version = $_REQUEST['new_version'];
+        if (isset($_REQUEST['gradeable_version'])) {
+            $version = $_REQUEST['gradeable_version'];
         } else {
             $version = $graded_gradeable->hasAutoGradingInfo() ?
                 $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;

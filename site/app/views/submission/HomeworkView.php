@@ -510,7 +510,14 @@ class HomeworkView extends AbstractView {
             $change_version_url = $this->core->buildUrl([
                 'component' => 'student',
                 'action' => 'update',
-                'gradeable_id' => $gradeable->getId()
+                'gradeable_id' => $gradeable->getId(),
+                'new_version' => $display_version
+            ]);
+
+            $view_version_url = $this->core->buildUrl([
+                'component' => 'student',
+                'gradeable_id' => $gradeable->getId(),
+                'gradeable_version' => ''
             ]);
 
             $check_refresh_submission_url = $this->core->buildUrl([
@@ -534,6 +541,7 @@ class HomeworkView extends AbstractView {
                 "active_version" => $active_version_number,
                 "cancel_url" => $cancel_url,
                 "change_version_url" => $change_version_url,
+                'view_version_url' => $view_version_url,
                 'check_refresh_submission_url' => $check_refresh_submission_url,
                 "files" => $version_instance->getFiles(),
                 'testcases' => $testcase_array,
