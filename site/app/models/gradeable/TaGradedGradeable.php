@@ -239,15 +239,9 @@ class TaGradedGradeable extends AbstractModel {
                 // Iterate through each grader for this component
                 /** @var GradedComponent $component_grade */
                 foreach ($graded_component as $component_grade) {
-                    // Be sure to add the default so count-down gradeables don't become negative
-                    $component_points_earned += $component_grade->getComponent()->getDefault();
-
-                    // TODO: how should peer grades be calculated: now its an average
-                    $component_points_earned += $component_grade->getScore();
-                    foreach ($component_grade->getMarks() as $mark) {
-                        $component_points_earned += $mark->getPoints();
-                    }
+                    $component_points_earned += $component_grade->getTotalScore();
                 }
+                // TODO: how should peer grades be calculated: now its an average
                 $points_earned += $component_points_earned / count($graded_component);
             }
         }
