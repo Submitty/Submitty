@@ -18,9 +18,9 @@
         {% endfor %}
     </div>
     <div class="box half">
+        submission timestamp: {{ submission_time }}<br />
+        days late: {{ days_late }} (before extensions)<br />
         {% if results is defined %}
-            submission timestamp: {{ submission_time }}<br />
-            days late: {{ days_late }} (before extensions)<br />
             grading time: {{ grade_time }} seconds<br />
             {% if num_autogrades > 1 %}
                 <br />

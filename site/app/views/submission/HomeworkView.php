@@ -573,18 +573,18 @@ class HomeworkView extends AbstractView {
                 "active_same_as_graded" => $active_same_as_graded,
                 'show_incentive_message' => $show_incentive_message,
                 'in_queue' => $version_instance->isQueued(),
-                'grading' => $version_instance->isGrading()
+                'grading' => $version_instance->isGrading(),
+                'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
+                'days_late' => $version_instance->getDaysLate(),
+                'num_autogrades' => $version_instance->getHistoryCount()
             ];
             if ($history !== null) {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
-                    'num_autogrades' => $version_instance->getHistoryCount(),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),
-                    'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
-                    'days_late' => $version_instance->getDaysLate()
                 ]);
             }
 
