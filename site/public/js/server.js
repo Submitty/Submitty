@@ -259,29 +259,28 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
-
 function newUploadCourseMaterialsForm() {
-	
-	createArray(1);
-	
-	var fileList = document.getElementsByClassName("file-viewer-data");
-	
-	var files = [];
-	for(var i=0;i<fileList.length;i++){
-		var file = fileList[i];
-		files.push(file.getAttribute('data-file_url'));
-		readPrevious(file.getAttribute('data-file_url'), 1);
+
+    createArray(1);
+
+    var fileList = document.getElementsByClassName("file-viewer-data");
+
+    var files = [];
+    for(var i=0;i<fileList.length;i++){
+        var file = fileList[i];
+        files.push(file.getAttribute('data-file_url'));
+        readPrevious(file.getAttribute('data-file_url'), 1);
     }
-	
+
     $('.popup-form').css('display', 'none');
     var form = $("#upload-course-materials-form");
-	
+
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
 
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
-	
+
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -485,13 +484,13 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
     $('[name="code_box_2"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
 
@@ -512,7 +511,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                 $('[name="code_box_2"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
-                        $(this).css('background-color',"#FF0000");       
+                        $(this).css('background-color',"#FF0000");
                     }
                 });
                 $('[name="code_box_1"]').find('span').each(function(){
@@ -520,36 +519,36 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
-                }); 
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
+                });
                 $('[name="code_box_1"]').scrollTop(0);
                 var scroll_position=0;
                 $('[name="code_box_1"]').find('span').each(function(){
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_1"]').scrollTop(scroll_position);
             }
-              
+
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
                 var x = event.pageX;
-                var y = event.pageY; 
+                var y = event.pageY;
                 $('#popup_to_show_matches_id').css('display', 'block');
                 var width = $('#popup_to_show_matches_id').width();
                 $('#popup_to_show_matches_id').css('top', y+5);
                 $('#popup_to_show_matches_id').css('left', x-width/2.00);
-                
-            } 
+
+            }
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
@@ -560,9 +559,9 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
                 });
                 $.each(data, function(i,match){
                     if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
@@ -571,12 +570,12 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                                 var attr = $(this).attr('name');
                                 if (typeof attr !== typeof undefined && attr !== false) {
                                     if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
-                                        $(this).css('background-color',"#FF0000");    
-                                    }      
+                                        $(this).css('background-color',"#FF0000");
+                                    }
                                 }
                             });
                         });
-                    }                    
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(0);
                 var scroll_position=0;
@@ -584,11 +583,11 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(scroll_position);
                 jQuery.ajaxSetup({async:true});
-            }   
+            }
         },
         error: function(e) {
             alert("Could not load submitted code, please refresh the page and try again.");
@@ -1315,7 +1314,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1357,9 +1356,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
                     $("#title").val(thread_title);
+                    $("#thread_status").val(thread_status);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1370,11 +1371,13 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $(".cat-buttons").trigger("eventChangeCatClass");
                     $("#thread_form").prop("ignore-cat",false);
                     $("#category-selection-container").show();
+                    $("#thread_status").show();
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
+                    $("#thread_status").hide();
                 }
             },
             error: function(){
@@ -1431,7 +1434,9 @@ function alterShowDeletedStatus(newStatus) {
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
@@ -1439,6 +1444,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
             type: "POST",
             data: {
                 thread_categories: categories_value,
+                thread_status: thread_status_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1461,6 +1467,81 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function generateCodeMirrorBlocks(container_element) {
+    var codeSegments = container_element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").parent().show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    box = dummy_box.clone();
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
+
+                    var first_name = post['user_info']['first_name'].trim();
+                    var last_name = post['user_info']['last_name'].trim();
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
+                    $("#popup-post-history").prepend(box);
+                }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
@@ -1796,7 +1877,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
@@ -2006,7 +2087,28 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+function toggleRegradeRequests(){
+    var element = document.getElementById("regradeBoxSection");
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
+    }
+    else {
+        element.style.display = 'block';
+    }
 
+}
+function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            window.location.reload();
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
