@@ -227,16 +227,11 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets the percent of points the student has earned of the
-     *  components that have been graded
-     * @param bool $clamp True to clamp the result to 1.0
-     * @return float percentage (0 to 1), or NAN if no grading started
+     * Gets the manual grading points the student earned
+     * @return int
      */
-    public function getGradedPercent($clamp = false) {
+    public function getGradedPoints() {
         $points_earned = 0.0;
-        $points_possible = 0.0;
-
-        // Iterate through each component
         /** @var GradedComponent[] $graded_component */
         foreach ($this->graded_components as $graded_component) {
             if (count($graded_component) > 0) {
@@ -254,11 +249,20 @@ class TaGradedGradeable extends AbstractModel {
                     }
                 }
                 $points_earned += $component_points_earned / count($graded_component);
-                $points_possible += $graded_component[0]->getComponent()->getMaxValue();
             }
         }
+        return $points_earned;
+    }
 
-        return Utils::safeCalcPercent($points_earned, $points_possible, $clamp);
+    /**
+     * Gets the percent of points the student has earned of the
+     *  components that have been graded
+     * @param bool $clamp True to clamp the result to 1.0
+     * @return float percentage (0 to 1), or NAN if no grading started
+     */
+    public function getGradedPercent($clamp = false) {
+        return Utils::safeCalcPercent($this->getGradedPoints(),
+            $this->getGradedGradeable()->getGradeable()->getTaNonExtraCreditPoints(), $clamp);
     }
 
     /**
@@ -285,6 +289,15 @@ class TaGradedGradeable extends AbstractModel {
         }
 
         return Utils::safeCalcPercent($components_graded, $total_graders, true);
+    }
+
+    /**
+     * Gets if this graded gradeable is completely graded
+     * TODO this will need to change for peer grading
+     * @return bool
+     */
+    public function isComplete() {
+        return $this->getPercentGraded() >= 1.0;
     }
 
     /**
