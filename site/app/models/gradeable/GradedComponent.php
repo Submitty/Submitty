@@ -143,11 +143,7 @@ class GradedComponent extends AbstractModel {
 
     /**
      * Gets if this graded component received a mark id
-<<<<<<< HEAD
-     * @param $mark_id
-=======
      * @param int $mark_id
->>>>>>> gradeable-model-refactor-misc-3
      * @return bool
      */
     public function hasMarkId($mark_id) {
