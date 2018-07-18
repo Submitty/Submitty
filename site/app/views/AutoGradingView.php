@@ -5,6 +5,9 @@ namespace app\views;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\Component;
+use app\models\gradeable\Mark;
+use app\models\gradeable\TaGradedGradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -69,6 +72,11 @@ class AutoGradingView extends AbstractView {
         ]);
     }
 
+    /**
+     * @param AutoGradedVersion $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
     public function showResultsNew(AutoGradedVersion $version_instance, bool $show_hidden = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
@@ -361,6 +369,121 @@ class AutoGradingView extends AbstractView {
             "regrade_enabled" => $regrade_enabled,
             "regrade_message" => $regrade_message,
             "num_decimals" => $num_decimals
+        ]);
+    }
+
+    /**
+     * @param TaGradedGradeable $ta_graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
+     * @return string
+     */
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, $version_instance) {
+        $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
+        $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
+        $grading_complete = true;
+        $active_same_as_graded = true;
+        foreach ($gradeable->getComponents() as $component) {
+            // FIXME: peer grading support
+            $component_grade = $ta_graded_gradeable->getGradedComponent($component);
+            if ($component_grade === null) {
+                $grading_complete = false;
+                continue;
+            }
+
+            if ($component_grade->getGradedVersion() !== $active_version && $component_grade->hasGradedVersion()) {
+                $active_same_as_graded = false;
+            }
+        }
+        $grader_names = array();
+        //find all names of instructors who graded part(s) of this assignment that are full access grader_names
+        //FIXME: peer grading support
+//        if (!$gradeable->isPeerGrading()) {
+//            foreach ($gradeable->getComponents() as $component) {
+//                if ($component->getGrader() == NULL) {
+//                    continue;
+//                }
+//                $name = $component->getGrader()->getDisplayedFirstName() . ' ' . $component->getGrader()->getLastName();
+//                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
+//                    $grader_names[] = $name;
+//                }
+//            }
+//        } else {
+//            $grader_names = 'Graded by Peer(s)';
+//        }
+
+        //get total score and max possible score
+        $total_score = $graded_score = $ta_graded_gradeable->getGradedPoints();
+        $total_max = $graded_max = $gradeable->getTaNonExtraCreditPoints();
+
+        //change title if autograding exists or not
+        //display a sum of autograding and instructor points if both exist
+        $has_autograding = $gradeable->getAutogradingConfig()->anyVisibleTestcases();
+
+        // Todo: this is a modest amount of math for the view
+        //add total points if both autograding and instructor grading exist
+        if ($version_instance !== null) {
+            $total_score += $version_instance->getTotalPoints();
+            $total_max += $graded_max + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+        }
+        $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
+        $regrade_message = $this->core->getConfig()->getRegradeMessage();
+
+        //Clamp full gradeable score to zero
+        $total_score = max($total_score, 0);
+        $total_score = $gradeable->roundPointValue($total_score);
+
+        $late_days_url = $this->core->buildUrl([
+            'component' => 'student',
+            'page' => 'view_late_table',
+            'g_id' => $gradeable->getId()
+        ]);
+
+        $component_data = array_map(function(Component $component) use($ta_graded_gradeable) {
+            // FIXME: peer grading
+            $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+            return [
+                'title' => $component->getTitle(),
+                'extra_credit' => $component->isExtraCredit(),
+                'points_possible' => $component->getMaxValue(),
+                'student_comment' => $component->getStudentComment(),
+
+                'score' => $graded_component->getScore(),
+                'comment' => $graded_component->getComment(),
+                'grader' => [
+                    'is_full_access' => $graded_component->getGrader()->accessFullGrading(),
+                    'last_name' => $graded_component->getGrader()->getLastName()
+                    ],
+                'marks' => array_map(function (Mark $mark) use ($graded_component) {
+                    return [
+                        'title' => $mark->getTitle(),
+                        'points' => $mark->getPoints(),
+
+                        'show_mark' => $mark->isPublish() || $graded_component->hasMark($mark),
+                        'earned' => $graded_component->hasMark($mark),
+                    ];
+                }, $component->getMarks())
+            ];
+        }, $gradeable->getComponents());
+
+        return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
+            'been_ta_graded' => $ta_graded_gradeable->isComplete(),
+            'version' => $version_instance->getVersion(),
+            'overall_comment' => $ta_graded_gradeable->getOverallComment(),
+            'late_days_allowed' => $gradeable->getLateDays() > 0,
+            'is_peer' => $gradeable->isPeerGrading(),
+            'components' => $component_data,
+
+            'late_days_url' => $late_days_url,
+            'grader_names' => $grader_names,
+            'grading_complete' => $grading_complete,
+            'has_autograding' => $has_autograding,
+            'graded_score' => $graded_score,
+            'graded_max' => $graded_max,
+            'total_score' => $total_score,
+            'total_max' => $total_max,
+            'active_same_as_graded' => $active_same_as_graded,
+            'regrade_enabled' => $regrade_enabled,
+            'regrade_message' => $regrade_message,
         ]);
     }
 }
