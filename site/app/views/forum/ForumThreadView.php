@@ -258,16 +258,6 @@ HTML;
 		}
 	}
 
-    $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
-        "categories" => $categories,
-        "current_thread" => $currentThread,
-        "current_category_ids" => $currentCategoriesIds,
-        "current_course" => $currentCourse,
-        "cookie_selected_categories" => $cookieSelectedCategories,
-        "display_option" => $display_option,
-        "thread_exists" => $threadExists
-    ]);
-
 	$return .= <<<HTML
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
@@ -306,26 +296,6 @@ HTML;
 				</div>
 HTML;
 		} else {
-
-			if($this->core->getUser()->getGroup() <= 2){
-				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
-				$merge_thread_list = array();
-				for($i = 0; $i < count($threads); $i++){
-					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-					$date = date_create($first_post['timestamp']);
-					if($current_thead_date>$date) {
-						array_push($merge_thread_list, $threads[$i]);
-					}
-				}
-
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                    "merge_thread_list" => $merge_thread_list,
-                    "current_thread" => $currentThread
-                ]);
-			}
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
@@ -476,6 +446,36 @@ HTML;
 			});
 		</script>
 HTML;
+
+        if($this->core->getUser()->getGroup() <= 2){
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thead_date = date_create($current_thread_first_post["timestamp"]);
+            $merge_thread_list = array();
+            for($i = 0; $i < count($threads); $i++){
+                $first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
+                $date = date_create($first_post['timestamp']);
+                if($current_thead_date>$date) {
+                    array_push($merge_thread_list, $threads[$i]);
+                }
+            }
+
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                "merge_thread_list" => $merge_thread_list,
+                "current_thread" => $currentThread
+            ]);
+        }
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+            "categories" => $categories,
+            "current_thread" => $currentThread,
+            "current_category_ids" => $currentCategoriesIds,
+            "current_course" => $currentCourse,
+            "cookie_selected_categories" => $cookieSelectedCategories,
+            "display_option" => $display_option,
+            "thread_exists" => $threadExists
+        ]);
 
 		return $return;
 	}
@@ -849,11 +849,9 @@ HTML;
 				$("form").areYouSure();
 			});
 		 </script>
-
-		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 HTML;
-		if($this->core->getUser()->getGroup() <= 2){
-			$categories = $this->core->getQueries()->getCategories();
+        if($this->core->getUser()->getGroup() <= 2){
+            $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
             array_unshift($categories, $dummy_category);
@@ -862,8 +860,10 @@ HTML;
                 "categories" => $categories,
                 "category_colors" => $category_colors
             ]);
-		}
+        }
+
 		$return .= <<<HTML
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
