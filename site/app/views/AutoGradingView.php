@@ -240,8 +240,14 @@ class AutoGradingView extends AbstractView {
                     continue;
                 }
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                if($component->getVerifier()!=NULL){
+                    $name2 = $component->getVerifier()->getDisplayedFirstName() . " " . $component->getVerifier()->getLastName();
+                }
                 if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
+                }
+                if ($component->getVerifier()!=NULL && !in_array($name2, $grader_names) && $component->getVerifier()->accessFullGrading()) {
+                    $grader_names[] = $name2;
                 }
             }
         } else {
@@ -264,8 +270,7 @@ class AutoGradingView extends AbstractView {
         $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
         $total_score = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $graded_score;
         $total_max = $gradeable->getTotalAutograderNonExtraCreditPoints() + $graded_max;
-        $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
-        $regrade_message = $this->core->getConfig()->getRegradeMessage();
+
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
 
@@ -281,9 +286,7 @@ class AutoGradingView extends AbstractView {
             "total_score" => $total_score,
             "total_max" => $total_max,
             "active_same_as_graded" => $active_same_as_graded,
-            "regrade_enabled" => $regrade_enabled,
-            "regrade_message" => $regrade_message,
-            "num_decimals" => $num_decimals
+            "num_decimals" => $num_decimals,
         ]);
     }
 }

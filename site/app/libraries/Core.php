@@ -47,11 +47,6 @@ class Core {
     /** @var Output */
     private $output = null;
 
-    /** @var GradingQueue */
-    private $grading_queue = null;
-
-    /** @var Access $access */
-    private $access = null;
 
     /**
      * Core constructor.
@@ -61,8 +56,6 @@ class Core {
      */
     public function __construct() {
         $this->output = new Output($this);
-        $this->access = new Access($this);
-
         // initialize our alert queue if it doesn't exist
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
@@ -143,20 +136,6 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
-    }
-
-    /**
-     * Loads the shell of the grading queue
-     *
-     * @throws \Exception if we have not loaded the config yet
-     */
-    public function loadGradingQueue() {
-        if ($this->config === null) {
-            throw new \Exception("Need to load the config before we can initialize the grading queue");
-        }
-
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
     }
 
     /**

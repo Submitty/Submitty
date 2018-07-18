@@ -36,13 +36,13 @@ class ConfigurationController extends AbstractController {
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
-            'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
+            'private_repository'        => $this->core->getConfig()->getPrivateRepository(),
+            'forum_enabled'             => $this->core->getConfig()->isForumEnabled(),
             'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled(),
-            'regrade_message'           => $this->core->getConfig()->getRegradeMessage(),
-            'private_repository'        => $this->core->getConfig()->getPrivateRepository()
+            'manual_grading_enabled'    => $this->core->getConfig()->isManualGradingEnabled()
         );
 
-        foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
+        foreach (array('upload_message', 'course_email') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = htmlentities($_SESSION['request'][$key]);
             }
@@ -56,7 +56,7 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'regrade_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -90,7 +90,7 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled', 'manual_grading_enabled') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
@@ -108,10 +108,10 @@ class ConfigurationController extends AbstractController {
                 'course_email'              => $_POST['course_email'],
                 'vcs_base_url'              => $_POST['vcs_base_url'],
                 'vcs_type'                  => $_POST['vcs_type'],
-                'forum_enabled'				=> $_POST['forum_enabled'],
+                'private_repository'        => $_POST['private_repository'],
+                'forum_enabled'		    => $_POST['forum_enabled'],
                 'regrade_enabled'           => $_POST['regrade_enabled'],
-                'regrade_message'           => $_POST['regrade_message'],
-                'private_repository'        => $_POST['private_repository']
+                'manual_grading_enabled'    => $_POST['manual_grading_enabled']
             )
         );
 

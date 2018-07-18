@@ -14,7 +14,11 @@
     <div class="sub">
         {# Overview #}
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
-            <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
+            {% if grader_names|join(",") == "" %}
+                <p>Version #{{ gradeable.getActiveVersion() }} graded by: </p>
+            {% else %}
+                <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
+            {% endif %}
             <i>Any regrade requests are due within 7 days of posting</i>
             <p>
                 {% if gradeable.getOverallComment()|length != 0 %}
@@ -42,14 +46,19 @@
         {% for component in gradeable.getComponents() %}
             {# Todo: This is heinous #}
             {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
-
             <div class="box">
                 <div class="box-title">
                     {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
                     <h4>{{ component.getTitle() }}
                         {# Grader only shows up if they are not peer and full access #}
-                        {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
+                        {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() and component.getVerifier().accessFullGrading() %}
+                            <i>(Graded by: {{ component.getGrader().getLastName() }} / {{ component.getVerifier().getLastName() }})</i>
+                        {% elseif not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
                             <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                        {% elseif not gradeable.getPeerGrading() and component.getVerifier().accessFullGrading() %}
+                            <i>(Graded by: {{ component.getVerifier().getLastName() }})</i>
+                        {% else %}
+                            <i>(Graded by: )</i>
                         {% endif %}
                     </h4>
                     <div style="float:left; word-break: break-word;">
@@ -105,9 +114,4 @@
         {% endif %}
         {# /Total auto + manual #}
     </div>
-    {% if regrade_enabled == true %}
-    <div id="ShowRegradeRequestButton">
-        <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
-    </div>
-    {% endif %}
 {% endif %}

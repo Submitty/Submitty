@@ -100,10 +100,10 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         LOOP
           IF istext[j] THEN
           --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, verifier_id ,gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, verifier_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL, NULL);
           END IF;
         END LOOP;
 
@@ -257,6 +257,7 @@ CREATE TABLE gradeable_component_data (
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
+    verifier_id character varying(255) NULL,
     gcd_graded_version integer,
     gcd_grade_time timestamp(6) with time zone NOT NULL
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
@@ -505,64 +506,57 @@ CREATE TABLE regrade_discussion (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"type" int NOT NULL,
-  "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "thread_id" int NOT NULL,
+    "parent_id" int DEFAULT '-1',
+    "author_user_id" character varying NOT NULL,
+    "content" TEXT NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL,
+    "anonymous" BOOLEAN NOT NULL,
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "endorsed_by" varchar,
+    "resolved" BOOLEAN NOT NULL,
+    "type" int NOT NULL,
+    "has_attachment" BOOLEAN NOT NULL,
+    CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
-	"id" serial NOT NULL,
-	"title" varchar NOT NULL,
-	"created_by" varchar NOT NULL,
-	"pinned" BOOLEAN NOT NULL DEFAULT 'false',
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"merged_thread_id" int DEFAULT '-1',
-	"merged_post_id" int DEFAULT '-1',
-	"is_visible" BOOLEAN NOT NULL,
-	"status" int DEFAULT 0 NOT NULL,
-	CONSTRAINT threads_pk PRIMARY KEY ("id")
-);
-
-CREATE TABLE forum_posts_history (
-    "post_id" int NOT NULL,
-    "edit_author" character varying NOT NULL,
-    "content" text NOT NULL,
-    "edit_timestamp" timestamp with time zone NOT NULL
+    "id" serial NOT NULL,
+    "title" varchar NOT NULL,
+    "created_by" varchar NOT NULL,
+    "pinned" BOOLEAN NOT NULL DEFAULT 'false',
+    "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+    "merged_thread_id" int DEFAULT '-1',
+    "merged_post_id" int DEFAULT '-1',
+    "is_visible" BOOLEAN NOT NULL,
+    CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "thread_categories" (
-	"thread_id" int NOT NULL,
-	"category_id" int NOT NULL
+    "thread_id" int NOT NULL,
+    "category_id" int NOT NULL
 );
 
 CREATE TABLE "categories_list" (
-	"category_id" serial NOT NULL,
-	"category_desc" varchar NOT NULL,
-	"rank" int,
-	"color" varchar DEFAULT '#000080' NOT NULL,
-	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+    "category_id" serial NOT NULL,
+    "category_desc" varchar NOT NULL,
+    "rank" int,
+    "color" varchar DEFAULT '#000080' NOT NULL,
+    CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
 CREATE TABLE "student_favorites" (
-	"id" serial NOT NULL,
-	"user_id" character varying NOT NULL,
-	"thread_id" int,
-	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "user_id" character varying NOT NULL,
+    "thread_id" int,
+    CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "viewed_responses" (
-	"thread_id" int NOT NULL,
-	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+    "thread_id" int NOT NULL,
+    "user_id" character varying NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
 );
 
 
@@ -838,6 +832,13 @@ ALTER TABLE ONLY gradeable_component_data
   ADD CONSTRAINT gradeable_component_data_gcd_grader_id_fkey FOREIGN KEY (gcd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 --
+-- Name: gradeable_component_data_verifier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_component_data
+  ADD CONSTRAINT gradeable_component_data_verifier_id_fkey FOREIGN KEY (verifier_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
 -- Name: gradeable_component_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1048,12 +1049,6 @@ ALTER TABLE ONLY regrade_discussion
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk1" FOREIGN KEY ("author_user_id") REFERENCES "users"("user_id");
 
-ALTER TABLE "threads" ADD CONSTRAINT "threads_status_check" CHECK ("status" IN (-1,0,1));
-
-ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "posts"("id");
-ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_edit_author_fk" FOREIGN KEY ("edit_author") REFERENCES "users"("user_id");
-CREATE INDEX "forum_posts_history_post_id_index" ON "forum_posts_history" ("post_id");
-CREATE INDEX "forum_posts_history_edit_timestamp_index" ON "forum_posts_history" ("edit_timestamp" DESC);
 
 ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk1" FOREIGN KEY ("category_id") REFERENCES "categories_list"("category_id");

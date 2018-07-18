@@ -947,7 +947,7 @@ table .instructor .two-options{
     overflow-y: auto;
 }
 
-.popup-form:not(.no-popup-div) div {
+.popup-form div {
     width: 30%;
     display: inline-block;
     vertical-align: top;
@@ -1095,6 +1095,8 @@ end of styles used in the admin gradeable page
     width: 100%;
     text-align: center;
 }
+
+
 
 
 .required::-webkit-input-placeholder { color: red; }
