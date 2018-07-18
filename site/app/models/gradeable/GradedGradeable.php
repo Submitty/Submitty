@@ -105,39 +105,6 @@ class GradedGradeable extends AbstractModel {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
     }
 
-    /**
-     * Gets whether any Auto grading information exists for this submitter/gradeable
-     * Note: this will be false if the student's submission is in queue
-     * @return bool
-     */
-    public function hasAutoGradingInfo() {
-        return $this->auto_graded_gradeable !== null;
-    }
-
-    /**
-     * Gets whether the Auto grading has been completed for this submitter/gradeable for
-     *  at least one submission
-     * @return bool
-     */
-    public function isAutoGradingComplete() {
-        return $this->hasAutoGradingInfo() && $this->auto_graded_gradeable->getActiveVersion() > 0;
-    }
-
-    /**
-     * Gets the late day exception count for a user
-     * @param User|null $user The user to get exception info for (can be null if not team assignment)
-     * @return int The number of late days the user has for this gradeable
-     */
-    public function getLateDayException($user = null) {
-        if($user === null) {
-            if($this->gradeable->isTeamAssignment()) {
-                throw new \InvalidArgumentException('Must provide user id if team assignment');
-            }
-            return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
-        }
-        return $this->late_day_exceptions[$user->getId()] ?? 0;
-    }
-
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
