@@ -159,6 +159,12 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        if (isset($_REQUEST['new_version'])) {
+            $version = $_REQUEST['new_version'];
+        } else {
+            $version = $graded_gradeable->hasAutoGradingInfo() ?
+                $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
+        }
 
         $error = false;
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
@@ -186,7 +192,7 @@ class SubmissionController extends AbstractController {
                 $error = true;
             }
             else {
-                $extensions = $graded_gradeable->getLateDayException($this->core->getUser()->getId());
+                $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
                 $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null
@@ -198,7 +204,7 @@ class SubmissionController extends AbstractController {
                 }
                 $canViewWholeGradeable = false;
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $graded_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

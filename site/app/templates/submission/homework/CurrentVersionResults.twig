@@ -7,7 +7,7 @@
     <h4>Submitted Files</h4>
     <div class="box half">
         {% for file in files %}
-            {{ file.relative_name }} ({{ file.size / 1024) | number_format(2) | default(-1) }}kb)
+            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
 
             {# download icon if student can download files #}
             {% if can_download %}
