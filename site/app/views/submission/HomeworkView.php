@@ -397,6 +397,7 @@ class HomeworkView extends AbstractView {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $active_version_number = $auto_graded_gradeable->getActiveVersion();
 
         $version_data = array_map(function(AutoGradedVersion $version) {
             return [
@@ -405,70 +406,19 @@ class HomeworkView extends AbstractView {
             ];
         }, $auto_graded_gradeable->getAutoGradedVersions());
 
-        $active_version_number = $auto_graded_gradeable->getActiveVersion();
-
-
-        $has_badges = false;
-
-        $nonhidden_earned = 0;
-        $nonhidden_max = 0;
-        $hidden_earned = 0;
-        $hidden_max = 0;
-        $show_hidden_breakdown = false;
-        $display_hidden = false;
+        $param = [];
+        $show_testcases = false;
         $show_incentive_message = false;
         $history = null;
-        $num_visible_testcases = 0;
-        $testcase_array = [];
-
-        $param = [];
 
         $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
         if ($version_instance !== null) {
             $history = $version_instance->getLatestHistory();
 
-            $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
-                return [
-                    'name' => $testcase->getTestcase()->getName(),
-                    'hidden' => $testcase->getTestcase()->isHidden(),
-                    'has_details' => $testcase->getTestcase()->getDetails() !== '',
-                    'details' => $testcase->getTestcase()->getDetails(),
-                    'has_points' => $testcase->getTestcase()->getPoints() !== 0,
-                    'extra_credit' => $testcase->getTestcase()->isExtraCredit(),
-                    'view_testcase_message' => $testcase->getTestcase()->canViewTestcaseMessage(),
-                    'points_total' => $testcase->getTestcase()->getPoints(),
-                    'points' => $testcase->getPoints(),
-                    'can_view' => $testcase->canView(),
-                    'testcase_message' => $testcase->getMessage()
-                ];
-            }, $version_instance->getTestcases());
-
-
-            if ($autograding_config->getTotalNonHidden() >= 0) {
-                $has_badges = true;
-
-                $nonhidden_earned = $version_instance->getNonHiddenPoints();
-                $nonhidden_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
-                $hidden_earned = $version_instance->getTotalPoints();
-                $hidden_max = $autograding_config->getTotalNonExtraCredit();
-
-                $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
-
-                $display_hidden = false;
-                if ($gradeable->isTaGradeReleased()) {
-                    foreach ($version_instance->getTestcases() as $testcase) {
-                        if (!$testcase->canView()) continue;
-                        if ($testcase->getTestcase()->isHidden()) {
-                            $display_hidden = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
             foreach ($version_instance->getTestcases() as $testcase) {
                 if ($testcase->canView()) {
-                    $num_visible_testcases++;
+                    $show_testcases = true;
+                    break;
                 }
             }
 
@@ -485,6 +435,7 @@ class HomeworkView extends AbstractView {
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => $version_instance->getFiles(),
                 'display_version_days_late' => $version_instance->getDaysLate(),
+                'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResultsNew', $version_instance, $show_hidden)
             ]);
 
             if ($history !== null) {
@@ -566,62 +517,45 @@ class HomeworkView extends AbstractView {
             'versions' => $version_data,
             'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'testcases' => $testcase_array,
 
-            'gradeable_id' => $gradeable->getId(),
-            // FIXME: only works with non-team assignments
-            'user_id' => $graded_gradeable->getSubmitter()->getId(),
-
-            "num_visible_testcases" => $num_visible_testcases,
-            "show_hidden_breakdown" => $show_hidden_breakdown,
-            "display_hidden" => $display_hidden,
-            "nonhidden_earned" => $nonhidden_earned,
-            "nonhidden_max" => $nonhidden_max,
-            "hidden_earned" => $hidden_earned,
-            "hidden_max" => $hidden_max,
-            "has_badges" => $has_badges,
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
-
-            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
             "is_vcs" => $gradeable->isVcs(),
             "can_download" => $can_download,
             "can_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             "can_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
-            "show_testcases" => $num_visible_testcases > 0,
-            "show_hidden" => $show_hidden,
+            "show_testcases" => $show_testcases,
             "active_same_as_graded" => $active_same_as_graded,
-            'show_incentive_message' => $show_incentive_message,
+            'show_incentive_message' => $show_incentive_message
         ]);
 
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", $param);
-
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    private function renderTAResultsBox(Gradeable $gradeable): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable): string {
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/TAResultsBox.twig", [
-            "gradeable" => $gradeable
+            "gradeable" => $graded_gradeable
         ]);
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    private function renderRegradeBox(Gradeable $gradeable): string {
+    private function renderRegradeBox(GradedGradeable $graded_gradeable): string {
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/RegradeBox.twig", [
-            "gradeable" => $gradeable
+            "gradeable" => $graded_gradeable
         ]);
     }
     
     /**
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function showRegradeDiscussion(Gradeable $gradeable): string {
+    public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
         $regradeMessage = $this->core->getConfig()->getRegradeMessage();
         if ($gradeable->getRegradeStatus() === 0) {
             $btn_type = "request";

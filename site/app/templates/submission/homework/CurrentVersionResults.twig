@@ -77,8 +77,7 @@
                 })();
             </script>
         {% endif %}
-
-        {% include 'autograding/AutoResultsNew.twig' %}
     {% endif %}
-    {# /Actual results #}
+
+    {{ result_text|raw }}
 </div>

@@ -3,6 +3,8 @@
 namespace app\views;
 
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedTestcase;
+use app\models\gradeable\AutoGradedVersion;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -64,6 +66,81 @@ class AutoGradingView extends AbstractView {
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
             "has_badges" => $has_badges,
+        ]);
+    }
+
+    public function showResultsNew(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+        $graded_gradeable = $version_instance->getGradedGradeable();
+        $gradeable = $graded_gradeable->getGradeable();
+        $autograding_config = $gradeable->getAutogradingConfig();
+
+        $has_badges = false;
+        $nonhidden_earned = 0;
+        $nonhidden_max = 0;
+        $hidden_earned = 0;
+        $hidden_max = 0;
+        $show_hidden_breakdown = false;
+        $display_hidden = false;
+        $num_visible_testcases = 0;
+
+        $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
+            return [
+                'name' => $testcase->getTestcase()->getName(),
+                'hidden' => $testcase->getTestcase()->isHidden(),
+                'has_details' => $testcase->getTestcase()->getDetails() !== '',
+                'details' => $testcase->getTestcase()->getDetails(),
+                'has_points' => $testcase->getTestcase()->getPoints() !== 0,
+                'extra_credit' => $testcase->getTestcase()->isExtraCredit(),
+                'view_testcase_message' => $testcase->getTestcase()->canViewTestcaseMessage(),
+                'points_total' => $testcase->getTestcase()->getPoints(),
+                'points' => $testcase->getPoints(),
+                'can_view' => $testcase->canView(),
+                'testcase_message' => $testcase->getMessage()
+            ];
+        }, $version_instance->getTestcases());
+
+        if ($autograding_config->getTotalNonHidden() >= 0) {
+            $has_badges = true;
+
+            $nonhidden_earned = $version_instance->getNonHiddenPoints();
+            $nonhidden_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+            $hidden_earned = $version_instance->getTotalPoints();
+            $hidden_max = $autograding_config->getTotalNonExtraCredit();
+
+            $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
+
+            $display_hidden = false;
+            if ($gradeable->isTaGradeReleased()) {
+                foreach ($version_instance->getTestcases() as $testcase) {
+                    if (!$testcase->canView()) continue;
+                    if ($testcase->getTestcase()->isHidden()) {
+                        $display_hidden = true;
+                        break;
+                    }
+                }
+            }
+        }
+        foreach ($version_instance->getTestcases() as $testcase) {
+            if ($testcase->canView()) {
+                $num_visible_testcases++;
+            }
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResultsNew.twig", [
+            'gradeable_id' => $gradeable->getId(),
+            // FIXME: only works with non-team assignments
+            'user_id' => $graded_gradeable->getSubmitter()->getId(),
+            "num_visible_testcases" => $num_visible_testcases,
+            "show_hidden_breakdown" => $show_hidden_breakdown,
+            "nonhidden_earned" => $nonhidden_earned,
+            "nonhidden_max" => $nonhidden_max,
+            "hidden_earned" => $hidden_earned,
+            "hidden_max" => $hidden_max,
+            "display_hidden" => $display_hidden,
+            "has_badges" => $has_badges,
+            'testcases' => $testcase_array,
+            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
+            "show_hidden" => $show_hidden,
         ]);
     }
 
