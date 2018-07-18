@@ -316,6 +316,7 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            // FIXME: only works with non-team assignments
             'user_id' => $graded_gradeable->getSubmitter()->getId(),
             'has_assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage() !== '',
             'assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage(),
@@ -548,8 +549,9 @@ class HomeworkView extends AbstractView {
                 'versions' => $version_data,
                 'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
 
-                'gradeable_id',
-                'user_id',
+                'gradeable_id' => $gradeable->getId(),
+                // FIXME: only works with non-team assignments
+                'user_id' => $graded_gradeable->getSubmitter()->getId(),
 
                 "num_visible_testcases" => $num_visible_testcases,
                 "show_hidden_breakdown" => $show_hidden_breakdown,
