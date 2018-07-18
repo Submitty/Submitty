@@ -159,6 +159,22 @@ class GradedComponent extends AbstractModel {
         return $this->hasMarkId($mark->getId());
     }
 
+    /**
+     * Gets the total number of points earned for this component
+     *  (including mark points)
+     * @return float
+     */
+    public function getTotalScore() {
+        // Be sure to add the default so count-down gradeables don't become negative
+        $score = $this->component->getDefault();
+        foreach($this->marks as $mark) {
+            $score += $mark->getPoints();
+        }
+        $score += $this->getScore();
+        $score = min(max($score, $this->component->getLowerClamp()), $this->component->getUpperClamp());
+        return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
+    }
+
     /* Overridden setters with validation */
 
     /**
