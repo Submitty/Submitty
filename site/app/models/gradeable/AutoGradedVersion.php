@@ -364,7 +364,7 @@ class AutoGradedVersion extends AbstractModel {
 
     /**
      * Gets the number of days early this version is
-     * @return int reusult clamped to be >= 0
+     * @return int result clamped to be >= 0
      */
     public function getDaysEarly() {
         return max(0, -DateUtils::calculateDayDiff(
