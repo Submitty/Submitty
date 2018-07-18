@@ -1091,6 +1091,7 @@ class AdminGradeableController extends AbstractController {
         if ($result !== null) {
             die($result);
         }
+        $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
         $this->returnToNav();
     }
 
