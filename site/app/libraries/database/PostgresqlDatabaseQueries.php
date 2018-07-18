@@ -1387,11 +1387,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
             }
 
-            // This will be false if autograding hasn't run yet, or if the gradeable isn't electronic
-            if (isset($row['active_version'])) {
-                $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
-                $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
-            }
+            // Always construct an instance even if there is no data
+            $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
+            $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
 
             $graded_components = [];
             $graded_versions = [];
