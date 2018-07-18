@@ -11,7 +11,7 @@ use \app\models\AbstractModel;
  * @package app\models\gradeable
  *
  * @method string getGradeableId()
- * @method AutoGradedGradeable|null getAutoGradedGradeable()
+ * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
  * @method Submitter getSubmitter()
  */
@@ -103,24 +103,6 @@ class GradedGradeable extends AbstractModel {
      */
     public function isTaGradingComplete() {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->getPercentGraded() == 1;
-    }
-
-    /**
-     * Gets whether any Auto grading information exists for this submitter/gradeable
-     * Note: this will be false if the student's submission is in queue
-     * @return bool
-     */
-    public function hasAutoGradingInfo() {
-        return $this->auto_graded_gradeable !== null;
-    }
-
-    /**
-     * Gets whether the Auto grading has been completed for this submitter/gradeable for
-     *  at least one submission
-     * @return bool
-     */
-    public function isAutoGradingComplete() {
-        return $this->hasAutoGradingInfo() && $this->auto_graded_gradeable->getActiveVersion() > 0;
     }
 
     /* Intentionally Unimplemented accessor methods */
