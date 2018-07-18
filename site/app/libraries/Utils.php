@@ -66,12 +66,14 @@ class Utils {
      * as tokens and other things where uniqueness is of absolute importance. The generated
      * string is twice as long as the given number of bytes as the parameter.
      *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param int $bytes
      *
      * @return string
-     * @throws \Exception
      */
     public static function generateRandomString($bytes = 16) {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return bin2hex(random_bytes($bytes));
     }
     
