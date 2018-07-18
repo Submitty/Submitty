@@ -61,7 +61,7 @@
 
 {% macro renderButton(button) %}
     {% if button != null %}
-        <a class="{{ button.getClass() }}" name="{{ button.getTitle()|lower }}_button"
+        <a class="{{ button.getClass() }}"
             {% if button.isDisabled() %}
                 disabled
             {% else %}
@@ -71,11 +71,14 @@
                 title="{{ button.getTitle() }}"
             {% endif %}
         >
-            {% if not button.isTitleOnHover() %}
+            {% if not button.isTitleOnHover() and button.getTitle() != null %}
                 {{ button.getTitle() }}
             {% endif %}
             {% if button.getSubtitle() != null %}
-                <br><span style="font-size: smaller;">{{ button.getSubtitle() }}</span>
+                {% if button.getTitle() != null %}
+                    <br>
+                {% endif %}
+                <span style="font-size: smaller;">{{ button.getSubtitle() }}</span>
             {% endif %}
         </a>
         {% if button.getProgress() != null %}
