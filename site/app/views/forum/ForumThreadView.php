@@ -555,17 +555,32 @@ HTML;
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
-							<i class="fa fa-thumb-tack" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
-
+						if (!isset($thread['status'])) {
+                            $thread['status'] = 0;
+                        }
+						if($thread['status'] !=0) {
+							if($thread['status'] == 1) {
+								$fa_icon = "fa-check-circle";
+								$fa_color = "palegreen";
+							} else {
+								$fa_icon = "fa-exclamation-circle";
+								$fa_color = "yellow";
+							}
+							$return .= <<<HTML
+							<i class="fa ${fa_icon}" style="padding-left:3px;position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
 						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
 							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -885,6 +900,7 @@ HTML;
 					"post_box_id" => 1,
 					"attachment_script" => true,
 					"show_anon" => true,
+					"show_thread_status" => true,
 					"show_announcement" => true,
 					"show_editcat" => true,
 					"submit_label" => "Submit Post",

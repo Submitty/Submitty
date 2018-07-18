@@ -33,6 +33,9 @@
             {% endfor %}
         </select>
     </div>
+    <p id="student-error-message" class="red-message">
+        Warning: Students with no registration section cannot login to the course
+    </p>
     <div style="display: inline-block">
         Group:<br />
         <select name="user_group">
@@ -71,9 +74,29 @@
             <input type="password" name="user_password" placeholder="New Password" />
         </div>
     {% endif %}
+
+    <script>
+        function userFormChange() {
+            var display_message = true;
+
+            var user_elem = $("select[name='user_group']")[0];
+            display_message = display_message && (user_elem.options[user_elem.selectedIndex].text === "Student");
+
+            var regis_elem = $("select[name='registered_section']")[0];
+            display_message = display_message && (regis_elem.options[regis_elem.selectedIndex].text === "Not Registered");
+
+            if(display_message) {
+                $("#student-error-message").css("display", "block");
+            }
+            else {
+                $("#student-error-message").css("display", "none");
+            }
+        }
+
+    </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}">
+    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}" onchange="userFormChange()">
         {{ parent() }}
     </form>
 {% endblock %}
