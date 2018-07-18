@@ -14,7 +14,7 @@
     <br />
     <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_class_list'}) }}" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-        Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
+        <label for="move_missing">Move students missing from the classlist to NULL section?</label><input type="checkbox" name="move_missing" id="move_missing" /><br>
         <br />
         <div>
             <input type="file" name="upload" accept=".xlsx, .csv">
