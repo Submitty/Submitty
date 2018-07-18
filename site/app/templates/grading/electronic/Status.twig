@@ -31,6 +31,12 @@
                     <br />
                     <br />
                     Current percentage of grading done: {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                    <br />
+                    <br />
+                    Current percentage of verification: {{ verified_total }} / {{ submitted_total }} ({{ verified_percentage }}%)
+                    <br />
+                    <br />
+                    Current percentage of double-grading: {{ doubleGraded_total }} / {{ submitted_total }} ({{ doubleGraded_percentage }}%)
                 {% endif %}
 
                 <br />
@@ -39,11 +45,24 @@
                     Current percentage of students grading done: {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                 {% else %}
                     By Grading Sections:
+                    <table cellspacing="10">
+                        <tr>
+                            <th>Section</th>
+                            <th>Graded</th>
+                            <th>Verified</th>
+                            <th>Double-Graded</th>
+                        </tr>
                     <div style="margin-left: 20px">
                         {% for key, section in sections %}
-                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                            <tr>
+                                <td style="padding: 0 10px 0 10px;">{{ key }}</td>
+                                <td style="padding: 0 10px 0 10px;">{{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)</td>
+                                <td style="padding: 0 10px 0 10px;">{{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</td>
+                                <td style="padding: 0 10px 0 10px;">{{ section.doubleGraded }} / {{ section.total }} ({{ section.doubleGraded_percentage }}%)</td>
+                            </tr>
                         {% endfor %}
                     </div>
+                    </table>
                     <br />
                     Graders:
                     <div style="margin-left: 20px">
