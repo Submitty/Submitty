@@ -46,12 +46,7 @@
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
     </script>
 {% endblock %}
-{% block form %}
-    <form method="post">
-        {{ parent() }}
-    </form>
-{% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
 {% endblock %}
