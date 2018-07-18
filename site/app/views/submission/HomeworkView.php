@@ -377,6 +377,22 @@ class HomeworkView extends AbstractView {
             $active_version_number = $auto_graded_gradeable->getActiveVersion();
             $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
 
+            $testcase_array = array_map(function(AutoGradedTestcase $testcase) {
+                return [
+                    'name' => $testcase->getTestcase()->getName(),
+                    'hidden' => $testcase->getTestcase()->isHidden(),
+                    'has_details' => $testcase->getTestcase()->getDetails() !== '',
+                    'details' => $testcase->getTestcase()->getDetails(),
+                    'has_points' => $testcase->getTestcase()->getPoints() !== 0,
+                    'extra_credit' => $testcase->getTestcase()->isExtraCredit(),
+                    'view_testcase_message' => $testcase->getTestcase()->canViewTestcaseMessage(),
+                    'points_total' => $testcase->getTestcase()->getPoints(),
+                    'points' => $testcase->getPoints(),
+                    'can_view' => $testcase->canView(),
+                    'testcase_message' => $testcase->getMessage()
+                ];
+            }, $version_instance->getTestcases());
+
             if ($version_instance === null) {
                 // Sanity check for debugging
                 throw new \InvalidArgumentException('Requested version out of bounds!');
