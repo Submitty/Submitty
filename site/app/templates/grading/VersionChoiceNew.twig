@@ -1,21 +1,21 @@
 <select style="margin: 0 10px;{{ formatting|default('')|raw }}"
         name="submission_version" onChange="{{ on_change|default('')|raw }}">
 
-    {% if active_version_number == 0 %}
-        <option value="0" {{ display_version == active_version_number ? "selected" : "" }}></option>
+    {% if active_version == 0 %}
+        <option value="0" {{ display_version == active_version ? "selected" : "" }}></option>
     {% endif %}
 
-    {% for version_number, version in versions %}
-        <option value="{{ version_number }}" {{ version_number == display_version ? "selected" : "" }}>
-            Version #{{ version_number }}
+    {% for version in versions %}
+        <option value="{{ loop.index }}" {{ loop.index == display_version ? "selected" : "" }}>
+            Version #{{ loop.index }}
 
-            {%- if gradeable.getNormalPoints() > 0 -%}
-                &nbsp;&nbsp;&nbsp;Score: {{ version.points }} / {{ total_points }}
+            {%- if normal_points > 0 -%}
+                &nbsp;&nbsp;&nbsp;Score: {{ version.points }} / {{ normal_points }}
             {%- endif -%}
             {%- if version.days_late > 0 -%}
                 &nbsp;&nbsp;&nbsp;Days Late: {{ version.days_late }}
             {%- endif -%}
-            {%- if version_number == active_version_number -%}
+            {%- if loop.index == active_version -%}
                 &nbsp;&nbsp;&nbsp;GRADE THIS VERSION
             {%- endif -%}
         </option>
