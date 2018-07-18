@@ -1,0 +1,54 @@
+<script type="text/javascript" src="{{ core.getConfig().getBaseUrl() }}/js/drag-and-drop.js"></script>
+<div class="popup-form" id="upload-course-materials-form">
+    <h2>Upload Course Materials</h2>
+    <p>&emsp;</p>
+    <p>
+        Total files cannot exceed 10 mb or 10240 kb.<br>
+    </p>
+    <br/>
+
+    <b>Full path to the directory containing the course material file(s):</b><br>
+    <fieldset>
+
+        <p><br>Add folder(s) to the course_materials folder if necessary: <br>
+        (ex: homework1 or homework1/classes/pokemon) <br><br>
+        Current folder setting:</p>
+        <input style='width: 90%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ folderPath~'/'~courseMaterial }}" placeholder="(Optional)"/>
+
+    </fieldset>
+    <br /> <br />
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+      <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
+          <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
+          <input type="file" name="files" id="input_file1" style="display: none" onchange="addFilesFromInput(1,false)" multiple />
+        </div>
+      </div>
+      <div style="float: right; width: auto">
+          <a onclick="$('#upload-course-materials-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
+          <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
+      </div>
+    </form>
+    <script type="text/javascript">
+        function makeSubmission(requestedPath) {
+            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", requestedPath);
+        }
+        $(function() {
+            $("#submit").click(function(e){ // Submit button
+                var requestedPath = document.getElementById("input_provide_full_path").value;
+                makeSubmission(requestedPath);
+                e.stopPropagation();
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        createArray(1);
+        var dropzone = document.getElementById("upload1");
+        dropzone.addEventListener("click", clicked_on_box, false);
+        dropzone.addEventListener("dragenter", draghandle, false);
+        dropzone.addEventListener("dragover", draghandle, false);
+        dropzone.addEventListener("dragleave", draghandle, false);
+        dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    </script>
+</div>

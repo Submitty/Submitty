@@ -94,6 +94,15 @@ class NavigationView extends AbstractView {
         $top_buttons = [];
 
         // ======================================================================================
+        // COURSE MATERIALS BUTTON -- visible to everyone
+        // ======================================================================================
+        $top_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+            "title" => "Course Materials",
+            "class" => "btn btn-primary"
+        ]);
+        
+	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         if ($this->core->getUser()->accessGrading()) {
@@ -558,7 +567,8 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-            "class" => "btn btn-default btn-nav"
+            "class" => "fa fa-pencil",
+            "title_on_hover" => true
         ]);
         return $button;
     }
@@ -568,14 +578,11 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getRebuildButton(Gradeable $gradeable) {
-        $class = "btn btn-default btn-nav";
-        if($gradeable->anyBuildErrors()){
-            $class = "btn btn-danger btn-nav";
-        }
         $button = new Button($this->core, [
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
-            "class" => $class
+            "class" => "fa fa-wrench",
+            "title_on_hover" => true
         ]);
         return $button;
     }

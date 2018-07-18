@@ -67,8 +67,13 @@
             {% else %}
                 href="{{ button.getHref() }}"
             {% endif %}
+            {% if button.isTitleOnHover %}
+                title="{{ button.getTitle() }}"
+            {% endif %}
         >
-            {{ button.getTitle() }}
+            {% if not button.isTitleOnHover() %}
+                {{ button.getTitle() }}
+            {% endif %}
             {% if button.getSubtitle() != null %}
                 <br><span style="font-size: smaller;">{{ button.getSubtitle() }}</span>
             {% endif %}

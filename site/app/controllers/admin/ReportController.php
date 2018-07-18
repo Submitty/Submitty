@@ -96,7 +96,8 @@ class ReportController extends AbstractController {
         $user = [];
         $order_by = [
             'g.g_gradeable_type',
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END',
+            'g.g_id'
         ];
         foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
             /** @var \app\models\Gradeable $gradeable */

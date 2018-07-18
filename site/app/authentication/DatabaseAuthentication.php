@@ -15,6 +15,9 @@ namespace app\authentication;
 class DatabaseAuthentication extends AbstractAuthentication {
 
     public function authenticate() {
+        if ($this->user_id === null || $this->password === null) {
+            return false;
+        }
         $user = $this->core->getQueries()->getSubmittyUser($this->user_id);
         if ($user === null) {
             return false;
