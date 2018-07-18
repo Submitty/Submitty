@@ -539,16 +539,15 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param AutoGradedVersion|null $version_instance
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, $version_instance): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable): string {
         $rendered_results = '';
         $been_ta_graded = false;
-        if($graded_gradeable->isTaGradingComplete()) {
+        if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
             $rendered_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
-                $graded_gradeable->getTaGradedGradeable(), $version_instance);
+                $graded_gradeable->getTaGradedGradeable());
         }
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/TAResultsBox.twig", [
             'been_ta_graded' => $been_ta_graded,

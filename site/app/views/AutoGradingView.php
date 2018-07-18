@@ -374,12 +374,12 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
-     * @param AutoGradedVersion|null $version_instance
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, $version_instance) {
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
+        $version_instance = $ta_graded_gradeable->getGradedVersion();
         $grading_complete = true;
         $active_same_as_graded = true;
         foreach ($gradeable->getComponents() as $component) {
@@ -468,7 +468,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
-            'version' => $version_instance->getVersion(),
+            'ta_graded_version' => $version_instance->getVersion(),
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'late_days_allowed' => $gradeable->getLateDays() > 0,
             'is_peer' => $gradeable->isPeerGrading(),
