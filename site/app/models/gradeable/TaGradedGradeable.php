@@ -219,6 +219,31 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the AutoGradedVersion of the first graded component with a valid graded version
+     * @return AutoGradedVersion|null
+     */
+    public function getGradedVersion() {
+        $versions = $this->graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions();
+        // Get the version instance associated with the graded version
+        $version_instance = null;
+        /** @var GradedComponent[] $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            foreach ($graded_component as $component_grade) {
+                if ($component_grade->hasGradedVersion()) {
+                    $version_instance = $versions[$component_grade->getGradedVersion()] ?? null;
+                    if ($version_instance !== null) {
+                        break;
+                    }
+                }
+            }
+            if ($version_instance !== null) {
+                break;
+            }
+        }
+        return $version_instance;
+    }
+
+    /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
      */
