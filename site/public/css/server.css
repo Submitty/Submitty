@@ -871,6 +871,14 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.btn-nav-open {
+    width: 80% !important;
+}
+
+.btn-nav-open>span {
+    font-size: smaller !important;
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
