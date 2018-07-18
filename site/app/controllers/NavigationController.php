@@ -74,8 +74,23 @@ class NavigationController extends AbstractController {
                 unset($sections_to_lists[$key]);
             }
         }
+        // Get a single array of the visible gradeables
+        $visible_gradeables = [];
+        foreach($sections_to_lists as $gradeables) {
+            foreach($gradeables as $gradeable) {
+                $visible_gradeables[] = $gradeable;
+            }
+        }
 
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
+        // Get the user data for each gradeable
+        $graded_gradeables = [];
+        if (count($visible_gradeables) !== 0) {
+            foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
+                $graded_gradeables[$gg->getGradeableId()] = $gg;
+            }
+        }
+
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
     

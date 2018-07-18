@@ -746,9 +746,15 @@ class Gradeable extends AbstractModel {
      * Gets all of the teams formed for this gradeable
      * @return Team[]
      */
-    public function getTeams() {
-        if($this->teams === null) {
-            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+    public function anyBuildErrors() {
+        if ($this->any_build_errors === null) {
+            $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
+
+            // Default to true so if the file isn't found it counts as a 'build error'
+            $this->any_build_errors = true;
+            if (file_exists($build_file)) {
+                $this->any_build_errors = strpos(file_get_contents($build_file), "error") !== false;
+            }
         }
         return $this->teams;
     }
