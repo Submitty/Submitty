@@ -38,7 +38,7 @@ class AutoGradedGradeable extends AbstractModel {
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        $this->setActiveVersion($details['active_version']);
+        $this->setActiveVersion($details['active_version'] ?? 0);
         if($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
