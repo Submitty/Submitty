@@ -5,7 +5,7 @@
 
     <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
     {% include 'grading/VersionChoiceNew.twig' with({
-        'on_change': "versionChange('" ~ change_version_url ~ "', this)"
+        'on_change': "versionChange('" ~ change_version_url ~ "&new_version=', this)"
     }) %}
 
     {# If viewing the active version, show cancel button, otherwise so button to switch active #}
