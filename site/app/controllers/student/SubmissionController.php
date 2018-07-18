@@ -162,12 +162,10 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        if (isset($_REQUEST['gradeable_version'])) {
-            $version = $_REQUEST['gradeable_version'];
-        } else {
-            $version = $graded_gradeable->hasAutoGradingInfo() ?
-                $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
-        }
+        // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
+        // FIXME    to nav with an error
+
+        $version = $_REQUEST['gradeable_version'] ?? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $error = false;
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
