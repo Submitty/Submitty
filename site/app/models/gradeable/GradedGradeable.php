@@ -105,15 +105,6 @@ class GradedGradeable extends AbstractModel {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->getPercentGraded() == 1;
     }
 
-    /**
-     * Gets whether the Auto grading has been completed for this submitter/gradeable for
-     *  the active version
-     * @return bool
-     */
-    public function isAutoGradingComplete() {
-        return $this->auto_graded_gradeable->getActiveVersion() > 0;
-    }
-
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */

@@ -128,6 +128,22 @@ class AutoGradedGradeable extends AbstractModel {
         return $instance->getTotalPercent($clamp);
     }
 
+    /**
+     * Gets if the submitter has a version selected for grading
+     * @return bool
+     */
+    public function hasActiveVersion() {
+        return $this->active_version > 0;
+    }
+
+    /**
+     * Gets if the autograding is finished for the active version (if one)
+     * @return bool
+     */
+    public function isAutogradingComplete() {
+        return $this->hasActiveVersion() && $this->getActiveVersionInstance()->isAutogradingComplete();
+    }
+
     /* Queue status access methods */
 
     /**
