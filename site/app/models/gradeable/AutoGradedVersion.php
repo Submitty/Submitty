@@ -126,6 +126,12 @@ class AutoGradedVersion extends AbstractModel {
             }
         }
 
+        // If there is only one part (no separation of upload files),
+        //  be sure to set the "Part 1" files to the "all" files
+        if($config->getNumParts() === 1) {
+            $this->files[1] = $this->files[0];
+        }
+
         // A second time, look through the folder, but now split up based on part number
         foreach ($config->getPartNames() as $i => $name) {
             foreach ($submitted_files as $file => $details) {
