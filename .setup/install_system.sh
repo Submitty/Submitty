@@ -151,9 +151,13 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    if [ cut -d ':' -f 1 /etc/passwd | grep -q {$PHP_USER} ]; then
+        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
-    adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    if [ cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ]; then
+        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G www-data "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
@@ -169,7 +173,10 @@ if [ ${WORKER} == 0 ]; then
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if [ cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ];then
+    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+fi
+
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 # The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
 usermod -a -G www-data "${DAEMON_USER}"
