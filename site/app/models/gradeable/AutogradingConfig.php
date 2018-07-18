@@ -211,6 +211,20 @@ class AutogradingConfig extends AbstractModel {
         return $this->total_non_hidden_non_extra_credit + $this->total_hidden_non_extra_credit;
     }
 
+    /**
+     * Gets if there are any user-viewable testcases
+     * @return bool
+     */
+    public function anyVisibleTestcases() {
+        /** @var AutogradingTestcase $testcase */
+        foreach($this->testcases as $testcase) {
+            if(!$testcase->isHidden()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /* Disabled setters */
 
     /** @internal */
