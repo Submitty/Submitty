@@ -16,6 +16,7 @@ use app\models\GradeableTestcase;
  *
  * @method int getMaxSubmissionSize()
  * @method int getMaxSubmissions()
+ * @method string getAssignmentMessage()
  * @method string getRequiredCapabilities()
  * @method float getMaxPossibleGradingTime()
  * @method string[] getPartNames()
