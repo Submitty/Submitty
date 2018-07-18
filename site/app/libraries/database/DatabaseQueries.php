@@ -115,39 +115,24 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadAnnouncements($categories_ids, $show_deleted = false){
-        assert(count($categories_ids) > 0);
-        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+    public function loadThreadBlock($categories_ids, $show_deleted, $current_user, $blockSize, $blockNumber){
+        // TODO: favorite and order
+        // Query Generation
+        if(count($categories_ids) == 0) {
+            $query_multiple_qmarks = "NULL";
+        } else {
+            $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+        }
+        $query_delete = $show_deleted?"true":"deleted = false";
+        $query_delete .= " and merged_thread_id = -1";
+        // Need to sort  by pinned and fav , pinned , fav , none and then t.id 
+        $query = "SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color, true as favorite FROM threads t JOIN thread_categories e ON t.id = e.thread_id JOIN categories_list w ON e.category_id = w.category_id  WHERE {$query_delete} GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) ORDER BY pinned DESC, t.id DESC";
+
+        // Parameters
         $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
 
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
-        return $this->course_db->rows();
-    }
-
-    public function loadAnnouncementsWithoutCategory($show_deleted = false){
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
-        return $this->course_db->rows();
-    }
-
-    public function loadThreadsWithoutCategory($show_deleted = false){
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
-        return $this->course_db->rows();
-    }
-
-    public function loadThreads($categories_ids, $show_deleted = false) {
-        assert(count($categories_ids) > 0);
-        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
-        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
+        // Execute
+        $this->course_db->query($query, $query_parameters);
         return $this->course_db->rows();
     }
 

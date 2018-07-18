@@ -141,21 +141,22 @@ HTML;
     }
 	
 	/** Shows Forums thread splash page, including all posts
-		for a specific thread, in addition to all of the threads
-		that have been created to be displayed in the left panel.
+		for a specific thread, in addition to head of the threads
+		that have been created after applying filter and to be
+		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}
 
 		$threadExists = $this->core->getQueries()->threadExists();
-		$thread_count = count($threads);
+		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
 		$currentCategoryId = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && $thread_count == 0 && !empty($_COOKIE[$currentCourse . '_forum_categories']);
+		$threadFiltering = $threadExists && !$filteredThreadExists && !empty($_COOKIE[$currentCourse . '_forum_categories']);
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
@@ -222,7 +223,7 @@ HTML;
 			</script>
 HTML;
 	}
-	if($thread_count > 0 || $threadFiltering) {
+	if($filteredThreadExists || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
@@ -352,19 +353,20 @@ HTML;
 		} else {
 
 			if($this->core->getUser()->getGroup() <= 2){
+				// TODO: Work on list for merge list
 				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
-				$merge_thread_list = array();
-				for($i = 0; $i < count($threads); $i++){
-					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-					$date = date_create($first_post['timestamp']);
-					if($current_thead_date>$date) {
-						array_push($merge_thread_list, $threads[$i]);
-					}
-				}
+				// $merge_thread_list = array();
+				// for($i = 0; $i < count($threads); $i++){
+				// 	$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
+				// 	$date = date_create($first_post['timestamp']);
+				// 	if($current_thead_date>$date) {
+				// 		array_push($merge_thread_list, $threads[$i]);
+				// 	}
+				// }
 
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                    "merge_thread_list" => $merge_thread_list,
+                    "merge_thread_list" => array(),//$merge_thread_list,
                     "current_thread" => $currentThread
                 ]);
 			}
@@ -420,7 +422,7 @@ HTML;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
+				$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 				if(count($activeThread) == 0) {
 					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 					$activeThreadTitle = $activeThread['title'];

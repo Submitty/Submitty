@@ -545,41 +545,15 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted = false){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status){
+        $blockSize = 10;
+        $blockNumber = 0;
         $current_user = $this->core->getUser()->getId();
-        if($this->isValidCategories($categories_ids)) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids, $show_deleted);
-            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids, $show_deleted);
-        } else {
-            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory($show_deleted);
-            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory($show_deleted);
+        if(!$this->isValidCategories($categories_ids)) {
+            // No category filter
+            $categories_ids = array();
         }
-        $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
-
-        $ordered_threads = array();
-        // Order : Favourite and Announcements => Announcements only => Favourite only => Others
-        foreach ($announce_threads as $thread) {
-            if(in_array($thread['id'], $favorite_threads)) {
-                $thread['favorite'] = true;
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($announce_threads as $thread) {
-            if(!in_array($thread['id'], $favorite_threads)) {
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($reg_threads as $thread) {
-            if(in_array($thread['id'], $favorite_threads)) {
-                $thread['favorite'] = true;
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($reg_threads as $thread) {
-            if(!in_array($thread['id'], $favorite_threads)) {
-                $ordered_threads[] = $thread;
-            }
-        }
+        $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $show_deleted, $current_user, $blockSize, $blockNumber);
 
         foreach ($ordered_threads as &$thread) {
             $list = array();
@@ -609,17 +583,7 @@ class ForumController extends AbstractController {
             $status = (int)$status;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
-        // Filter thread list
-        if(!empty($thread_status)) {
-            $filtered = array();
-            foreach ($threads as &$thread) {
-                if(in_array($thread['status'], $thread_status)) {
-                    $filtered[] = $thread;
-                }
-            }
-            $threads = $filtered;
-        }
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status);
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
@@ -636,6 +600,8 @@ class ForumController extends AbstractController {
 	$currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? array($_POST['thread_category']) : -1;
         $category_id = array($category_id);
+        // TODO: $thread_status in cookies 
+        $thread_status = array();
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
 	    $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
 	}
@@ -645,7 +611,7 @@ class ForumController extends AbstractController {
 	
 	$max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted);
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status);
 
         $current_user = $this->core->getUser()->getId();
 
