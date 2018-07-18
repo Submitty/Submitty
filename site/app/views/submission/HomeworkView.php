@@ -277,11 +277,9 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
-            $version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : null;
-            if($version !== null) {
+            if($display_version !== 0) {
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
-                    foreach ($auto_graded_gradeable->getAutoGradedVersions()[$version]->getPartFiles($i) as $file) {
+                    foreach ($graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version]->getPartFiles($i) as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
@@ -304,11 +302,6 @@ class HomeworkView extends AbstractView {
             return $text_box->toArray();
         }, $textboxes);
 
-        $highest_version = 0;
-        if($graded_gradeable->hasAutoGradingInfo()) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
-
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/SubmitBox.twig", [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -324,7 +317,7 @@ class HomeworkView extends AbstractView {
             'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
-            'highest_version' => $highest_version,
+            'highest_version' => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
             'student_page' => $student_page,
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
@@ -403,20 +396,38 @@ class HomeworkView extends AbstractView {
     private function renderVersionBox(GradedGradeable $graded_gradeable, int $display_version, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
-        if ($graded_gradeable->hasAutoGradingInfo()) {
-            $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
 
-            $version_data = array_map(function(AutoGradedVersion $version) {
-                return [
-                    'points' => $version->getNonHiddenPoints(),
-                    'days_late' => $version->getDaysLate()
-                ];
-            }, $auto_graded_gradeable->getAutoGradedVersions());
+        $version_data = array_map(function(AutoGradedVersion $version) {
+            return [
+                'points' => $version->getNonHiddenPoints(),
+                'days_late' => $version->getDaysLate()
+            ];
+        }, $auto_graded_gradeable->getAutoGradedVersions());
 
-            $active_version_number = $auto_graded_gradeable->getActiveVersion();
-            $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
+        $active_version_number = $auto_graded_gradeable->getActiveVersion();
 
-            $testcase_array = array_map(function(AutoGradedTestcase $testcase) {
+
+        $has_badges = false;
+
+        $nonhidden_earned = 0;
+        $nonhidden_max = 0;
+        $hidden_earned = 0;
+        $hidden_max = 0;
+        $show_hidden_breakdown = false;
+        $display_hidden = false;
+        $show_incentive_message = false;
+        $history = null;
+        $num_visible_testcases = 0;
+        $testcase_array = [];
+
+        $param = [];
+
+        $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$display_version] ?? null;
+        if ($version_instance !== null) {
+            $history = $version_instance->getLatestHistory();
+
+            $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
                 return [
                     'name' => $testcase->getTestcase()->getName(),
                     'hidden' => $testcase->getTestcase()->isHidden(),
@@ -432,49 +443,6 @@ class HomeworkView extends AbstractView {
                 ];
             }, $version_instance->getTestcases());
 
-            if ($version_instance === null) {
-                // Sanity check for debugging
-                throw new \InvalidArgumentException('Requested version out of bounds!');
-            }
-
-            // if not active version and student cannot see any more than active version
-            $can_download = !$gradeable->isVcs()
-                && $gradeable->isStudentDownload()
-                && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
-
-            $num_visible_testcases = 0;
-            foreach ($version_instance->getTestcases() as $testcase) {
-                if ($testcase->canView()) {
-                    $num_visible_testcases++;
-                }
-            }
-            $active_same_as_graded = true;
-            if ($active_version_number !== 0 || $display_version !== 0) {
-                if ($graded_gradeable->hasTaGradingInfo()) {
-                    /** @var GradedComponent[] $graded_components */
-                    foreach ($graded_gradeable->getTaGradedGradeable()->getGradedComponents() as $graded_components) {
-                        foreach ($graded_components as $component_grade) {
-                            if ($component_grade->getGradedVersion() !== $active_version_number
-                                && $component_grade->getGradedVersion() !== -1) {
-                                $active_same_as_graded = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Grafted from AutoGradingView::showResults
-            //
-
-            $has_badges = false;
-
-            $nonhidden_earned = 0;
-            $nonhidden_max = 0;
-            $hidden_earned = 0;
-            $hidden_max = 0;
-            $show_hidden_breakdown = false;
-            $display_hidden = false;
 
             if ($autograding_config->getTotalNonHidden() >= 0) {
                 $has_badges = true;
@@ -498,88 +466,27 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            //
-            // End Graft
-
-            $cancel_url = $this->core->buildUrl([
-                'component' => 'student',
-                'action' => 'update',
-                'gradeable_id' => $gradeable->getId(),
-                'new_version' => 0
-            ]);
-
-            $change_version_url = $this->core->buildUrl([
-                'component' => 'student',
-                'action' => 'update',
-                'gradeable_id' => $gradeable->getId(),
-                'new_version' => $display_version
-            ]);
-
-            $view_version_url = $this->core->buildUrl([
-                'component' => 'student',
-                'gradeable_id' => $gradeable->getId(),
-                'gradeable_version' => ''
-            ]);
-
-            $check_refresh_submission_url = $this->core->buildUrl([
-                'component' => 'student',
-                'page' => 'submission',
-                'action' => 'check_refresh',
-                'gradeable_id' => $gradeable->getId(),
-                'gradeable_version' => $display_version
-            ]);
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_visible_testcases++;
+                }
+            }
 
             $show_incentive_message = $autograding_config->hasEarlySubmissionIncentive()
                 && $active_version_number > 0
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
-            $history = $version_instance->getLatestHistory();
-            $param = [
-                "team_assignment" => $gradeable->isTeamAssignment(),
-                "team_members" => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
-                "display_version" => $display_version,
-                "active_version" => $active_version_number,
-                "cancel_url" => $cancel_url,
-                "change_version_url" => $change_version_url,
-                'view_version_url' => $view_version_url,
-                'check_refresh_submission_url' => $check_refresh_submission_url,
-                "files" => $version_instance->getFiles(),
-                'testcases' => $testcase_array,
-                'versions' => $version_data,
-                'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
-                'allowed_late_days' => $gradeable->getLateDays(),
-                'display_version_days_late' => $version_instance->getDaysLate(),
-
-                'gradeable_id' => $gradeable->getId(),
-                // FIXME: only works with non-team assignments
-                'user_id' => $graded_gradeable->getSubmitter()->getId(),
-
-                "num_visible_testcases" => $num_visible_testcases,
-                "show_hidden_breakdown" => $show_hidden_breakdown,
-                "display_hidden" => $display_hidden,
-                "nonhidden_earned" => $nonhidden_earned,
-                "nonhidden_max" => $nonhidden_max,
-                "hidden_earned" => $hidden_earned,
-                "hidden_max" => $hidden_max,
-                "has_badges" => $has_badges,
-                'ta_grades_released' => $gradeable->isTaGradeReleased(),
-
-                'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
-                "is_vcs" => $gradeable->isVcs(),
-                "can_download" => $can_download,
-                "can_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-                "can_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
-                "show_testcases" => $num_visible_testcases > 0,
-                "show_hidden" => $show_hidden,
-                "active_same_as_graded" => $active_same_as_graded,
-                'show_incentive_message' => $show_incentive_message,
+            $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
-                'num_autogrades' => $version_instance->getHistoryCount()
-            ];
+                'num_autogrades' => $version_instance->getHistoryCount(),
+                'files' => $version_instance->getFiles(),
+                'display_version_days_late' => $version_instance->getDaysLate(),
+            ]);
+
             if ($history !== null) {
                 $param = array_merge($param, [
                     'results' => 0,
@@ -596,12 +503,98 @@ class HomeworkView extends AbstractView {
                     'queue_total' => $this->core->getGradingQueue()->getQueueCount()
                 ]);
             }
-
-            return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", $param);
         }
-        return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", [
-            "gradeable" => $gradeable,
+
+        // if not active version and student cannot see any more than active version
+        $can_download = !$gradeable->isVcs()
+            && $gradeable->isStudentDownload()
+            && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
+
+        $active_same_as_graded = true;
+        if ($active_version_number !== 0 || $display_version !== 0) {
+            if ($graded_gradeable->hasTaGradingInfo()) {
+                /** @var GradedComponent[] $graded_components */
+                foreach ($graded_gradeable->getTaGradedGradeable()->getGradedComponents() as $graded_components) {
+                    foreach ($graded_components as $component_grade) {
+                        if ($component_grade->getGradedVersion() !== $active_version_number
+                            && $component_grade->getGradedVersion() !== -1) {
+                            $active_same_as_graded = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        $cancel_url = $this->core->buildUrl([
+            'component' => 'student',
+            'action' => 'update',
+            'gradeable_id' => $gradeable->getId(),
+            'new_version' => 0
         ]);
+
+        $change_version_url = $this->core->buildUrl([
+            'component' => 'student',
+            'action' => 'update',
+            'gradeable_id' => $gradeable->getId(),
+            'new_version' => $display_version
+        ]);
+
+        $view_version_url = $this->core->buildUrl([
+            'component' => 'student',
+            'gradeable_id' => $gradeable->getId(),
+            'gradeable_version' => ''
+        ]);
+
+        $check_refresh_submission_url = $this->core->buildUrl([
+            'component' => 'student',
+            'page' => 'submission',
+            'action' => 'check_refresh',
+            'gradeable_id' => $gradeable->getId(),
+            'gradeable_version' => $display_version
+        ]);
+
+        $param = array_merge($param, [
+            "team_assignment" => $gradeable->isTeamAssignment(),
+            "team_members" => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
+            "display_version" => $display_version,
+            "active_version" => $active_version_number,
+            "cancel_url" => $cancel_url,
+            "change_version_url" => $change_version_url,
+            'view_version_url' => $view_version_url,
+            'check_refresh_submission_url' => $check_refresh_submission_url,
+            'versions' => $version_data,
+            'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
+            'allowed_late_days' => $gradeable->getLateDays(),
+            'testcases' => $testcase_array,
+
+            'gradeable_id' => $gradeable->getId(),
+            // FIXME: only works with non-team assignments
+            'user_id' => $graded_gradeable->getSubmitter()->getId(),
+
+            "num_visible_testcases" => $num_visible_testcases,
+            "show_hidden_breakdown" => $show_hidden_breakdown,
+            "display_hidden" => $display_hidden,
+            "nonhidden_earned" => $nonhidden_earned,
+            "nonhidden_max" => $nonhidden_max,
+            "hidden_earned" => $hidden_earned,
+            "hidden_max" => $hidden_max,
+            "has_badges" => $has_badges,
+            'ta_grades_released' => $gradeable->isTaGradeReleased(),
+
+            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
+            "is_vcs" => $gradeable->isVcs(),
+            "can_download" => $can_download,
+            "can_change_submissions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
+            "can_see_all_versions" => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+            "show_testcases" => $num_visible_testcases > 0,
+            "show_hidden" => $show_hidden,
+            "active_same_as_graded" => $active_same_as_graded,
+            'show_incentive_message' => $show_incentive_message,
+        ]);
+
+        return $this->core->getOutput()->renderTwigTemplate("submission/homework/CurrentVersionBox.twig", $param);
+
     }
 
     /**
