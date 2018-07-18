@@ -10,7 +10,6 @@ use app\models\Config;
 use app\models\User;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
-    /** @noinspection PhpDocMissingThrowsInspection */
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -24,7 +23,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     protected function createMockCore($config_values=array(), $user_config=array()) {
         $core = $this->createMock(Core::class);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
@@ -83,7 +81,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $user->method('accessAdmin')->willReturn(false);
         }
-        
 
         $core->method('getUser')->willReturn($user);
 
@@ -103,11 +100,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * and does slow testing down some, but it's easier than having to manually update a list of needed functions
      * when mocking these things.
      *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param string $class
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
-     *
-     * @throws \ReflectionException
      */
     public function createMockModel($class) {
         $builder = $this->getMockBuilder($class)
@@ -116,6 +113,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes();
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $reflection = new \ReflectionClass($class);
         $methods = array();
         $matches = array();

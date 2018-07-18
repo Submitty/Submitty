@@ -12,7 +12,7 @@ use app\models\User;
  * @package app\models\gradeable
  *
  * @method string getGradeableId()
- * @method AutoGradedGradeable|null getAutoGradedGradeable()
+ * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
  * @method Submitter getSubmitter()
  * @method array getLateDayExceptions()
