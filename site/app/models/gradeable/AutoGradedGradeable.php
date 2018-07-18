@@ -140,7 +140,7 @@ class AutoGradedGradeable extends AbstractModel {
      * Gets if the autograding is finished for the active version (if one)
      * @return bool
      */
-    public function isAutogradingComplete() {
+    public function isAutoGradingComplete() {
         return $this->hasActiveVersion() && $this->getActiveVersionInstance()->isAutogradingComplete();
     }
 

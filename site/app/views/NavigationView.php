@@ -389,7 +389,7 @@ class NavigationView extends AbstractView {
             }
 
             // Submitted, currently after grade released date
-            if ($graded_gradeable->getAutoGradedGradeable()->isAutogradingComplete() &&
+            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $list_section == GradeableList::GRADED) {
                 if ($gradeable->isTaGrading()) {
                     if (!$graded_gradeable->isTaGradingComplete()) {
