@@ -140,6 +140,14 @@
                     <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
                 </div>
             </div>
+
+            <div class="option">
+                <div class="option-input"><input type="checkbox" name="manual_grading_enabled" value="true" {{ fields['manual_grading_enabled'] ? 'checked': '' }} /></div>
+                <div class="option-desc">
+                    <div class="option-title">Manual Grading Enabled</div>
+                    <div class="option-alt">Grading by limited access graders (undergraduate mentors) requires verification by full access graders (graduate TAs or instructors)</div>
+                </div>
+            </div>
         </div>
         <div class="post-panel-btn">
             <button class="btn btn-primary" style="float: right" type="submit" form="configForm">

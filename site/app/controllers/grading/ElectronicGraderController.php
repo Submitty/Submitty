@@ -125,7 +125,7 @@ class ElectronicGraderController extends GradingController {
             if($verifyAll || $component->getId() == $component_id){
                 //Only verify the component if we weren't already the grader.
                 if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                    $component->setGrader2($this->core->getUser());
+                    $component->setVerifier($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
                     $verified = true;
                 }
@@ -1091,8 +1091,12 @@ class ElectronicGraderController extends GradingController {
                 $debug = 'delete';
             } else {
                 //only change the component information is the mark was modified or componet and its gradeable are out of sync.
-                if ($component->getGrader() === null || $overwrite === "true") {
+                if ($component->getGrader() === null || ($overwrite === "true" && !$this->core->getUser()->accessFullGrading())) {
                     $component->setGrader($this->core->getUser());
+                    $component->setVerifier(null);
+                }
+                else if($overwrite === "true" && $this->core->getUser()->accessFullGrading()){
+                    $component->setVerifier($this->core->getUser());
                 }
                 $version_updated = "true";
                 $component->setGradedVersion($_POST['active_version']);

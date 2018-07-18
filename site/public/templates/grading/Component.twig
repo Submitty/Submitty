@@ -1,4 +1,4 @@
-{% set display_verify_user = can_verify and component.grader != null and component.grader.id != your_user_id %}
+{% set display_verify_user = can_verify and component.grader != null and component.grader.id != your_user_id and (component.verifier == null or component.verifier.id != your_user_id) %}
 
 <div id="title-{{ c_index }}" class="box" style="cursor: pointer" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
 
@@ -29,10 +29,10 @@
                     {% if component.grader == null %}
                         Ungraded!
                     {% else %}
-                        {% if component.grader2 == null %}
+                        {% if component.verifier == null %}
                             Graded by {{ component.grader.id }}
                         {% else %}
-                            Graded by {{ component.grader.id }} \ {{ component.grader2.id }}
+                            Graded by {{ component.grader.id }} / {{ component.verifier.id }}
                         {% endif %}
                     {% endif %}
                 </span>

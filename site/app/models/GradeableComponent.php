@@ -39,7 +39,7 @@ use app\libraries\Core;
  * @method string getComment()
  * @method void setComment(string $comment)
  * @method User getGrader()
- * @method User getGrader2()
+ * @method User getVerifier()
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
  * @method \DateTime getGradeTime()
@@ -81,7 +81,7 @@ class GradeableComponent extends AbstractModel {
     protected $grader = null;
 
     /** @property @var User */
-    protected $grader2 = null;
+    protected $verifier = null;
 
     /** @property @var int */
     protected $graded_version = -1;
@@ -104,8 +104,8 @@ class GradeableComponent extends AbstractModel {
     /** @property @var bool has the grader of this component been modified*/
     protected $grader_modified = false;
 
-    /** @property @var bool has the grader2 of this component been modified*/
-    protected $grader2_modified = false;
+    /** @property @var bool has the verifier of this component been modified*/
+    protected $verifier_modified = false;
 
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
@@ -127,7 +127,7 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
-            $this->grader2 = $details['gcd_grader2'];
+            $this->verifier = $details['verifier'];
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
@@ -186,60 +186,6 @@ class GradeableComponent extends AbstractModel {
         return min(max($points, $this->lower_clamp), $this->upper_clamp);
     }
 
-    public function getGradedTAPrecisionValue($gradeable) {
-      $point_precision = $gradeable->getPointPrecision();
-      $str_point_precision = (string) $point_precision;
-      $num_decimals =  strlen(substr(strrchr($str_point_precision, "."), 1));
-
-      $str1 = '%4.';
-      $str2 = 'f';
-      $precision_str = $str1 . (string) $num_decimals . $str2;
-      return $precision_str;
-    }
-
-    public function getGradedTAComments($nl, $show_students, $gradeable, $use_ascii = true) {
-        $text = "";
-        $first_text = true;
-        if(!$use_ascii){
-            $checkedBox = '<i class="fa fa-check-square-o fa-1g"></i> ';
-            $box = '<i class="fa fa-square-o"></i> ';
-        }else{
-            $checkedBox = '(*)';
-            $box = '( )';
-        }
-        foreach ($this->marks as $mark) {
-            $points_string = "    ";
-            if ($mark->getPoints() != 0) {
-              $points_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $mark->getPoints());
-            }
-            $hasmark = $box;
-            if($mark->getHasMark() === true) {
-              $hasmark = $checkedBox;
-            } else if (!($show_students === true && $mark->getPublish() === 't')) {
-              continue;
-            }
-            $newline=$nl;
-            if ($first_text === true) {
-              $newline = "";
-              $first_text = false;
-            }
-            $text .= $newline . $hasmark . $points_string . "  " . $mark->getNote();
-        }
-        if($this->score != 0 || $this->comment != "") {
-            $newline=$nl;
-            if ($first_text === true) {
-              $newline = "";
-              $first_text = false;
-            }
-            $score_string = "    ";
-            if (floatval($this->score) != 0) {
-                $score_string = sprintf($this->getGradedTAPrecisionValue($gradeable), $this->score);
-            }
-            $text .= $newline . $checkedBox . $score_string . "  " . $this->comment;
-        }
-        return $text;
-    }
-
     public function setGrader(User $user) {
         if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
             $this->grader_modified = true;
@@ -248,11 +194,11 @@ class GradeableComponent extends AbstractModel {
         $this->grader = $user;
     }
 
-    public function setGrader2(User $user) {
-        if($this->grader !== null && $this->grader->getId() !== $user->getId()) {
-            $this->grader2_modified = true;
+    public function setVerifier(User $user = null) {
+        if(($this->verifier == null || $user == null || $this->verifier->getId() !== $user->getId()) && ($user == null || $user->accessFullGrading())) {
+            $this->verifier_modified = true;
             $this->modified = true;
-            $this->grader2 = $user;
+            $this->verifier = $user;
         }
     }
 
@@ -270,10 +216,12 @@ class GradeableComponent extends AbstractModel {
     public function saveGradeableComponentData($gd_id) {
         if ($this->modified) {
             if ($this->has_grade || $this->has_marks) {
-                if($this->getGrader2()===null)
+                if($this->getVerifier()===null){
                     $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), null, $this);
-                else
-                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this->getGrader2()->getId(), $this);
+                }
+                else{
+                    $this->core->getQueries()->updateGradeableComponentData($gd_id, $this->getGrader()->getId(), $this->getVerifier()->getId(), $this);
+                }
             }
             else {
                 $this->core->getQueries()->insertGradeableComponentData($gd_id, $this);
@@ -347,7 +295,7 @@ class GradeableComponent extends AbstractModel {
             "has_grade" => $this->has_grade,
             "has_marks" => $this->has_marks,
             "grader_modified" => $this->grader_modified,
-            "grader2_modified" => $this->grader2_modified,
+            "verifier_modified" => $this->verifier_modified,
             "marks" => []
         ];
 
@@ -359,7 +307,14 @@ class GradeableComponent extends AbstractModel {
 
             ];
         }
+        if ($this->verifier === null) {
+            $compData["verifier"] = null;
+        } else {
+            $compData["verifier"] = [
+                "id" => $this->verifier->getId(),
 
+            ];
+        }
         foreach ($this->getMarks() as $mark) {
             //Ignore
             if ($mark->getOrder() == -1) {
