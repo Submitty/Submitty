@@ -6,6 +6,8 @@ use app\controllers\grading\ElectronicGraderController;
 use app\controllers\grading\SimpleGraderController;
 use app\controllers\grading\TeamListController;
 use app\controllers\grading\ImagesController;
+use app\controllers\course\CourseMaterialsController;
+use app\libraries\DateUtils;
 
 
 class GradingController extends AbstractController {
@@ -21,6 +23,9 @@ class GradingController extends AbstractController {
                 break;
             case 'images':
                 $controller = new ImagesController($this->core);
+                break;
+            case 'course_materials':
+                $controller = new CourseMaterialsController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
