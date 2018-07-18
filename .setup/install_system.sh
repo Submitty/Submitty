@@ -126,12 +126,20 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # DAEMON_USER writes the results, and gives read-only access to the
 # PHP_USER.
 
-addgroup ${DAEMONPHP_GROUP}
+if [ cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHP_GROUP} ]; then
+	addgroup ${DAEMONPHP_GROUP}
+else
+	echo "${DAEMONPHP_GROUP} already exists"
+fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-addgroup ${COURSE_BUILDERS_GROUP}
+if [ cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ]; then
+        addgroup ${COURSE_BUILDERS_GROUP}
+else
+        echo "${COURSE_BUILDERS_GROUP} already exists"
+fi
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
