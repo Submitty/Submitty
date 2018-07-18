@@ -969,4 +969,16 @@ class Gradeable extends AbstractModel {
     public function isSubmissionOpen() {
         return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
     }
+
+    /**
+     * Gets the total possible non-extra-credit ta points
+     * @return float
+     */
+    public function getTaNonExtraCreditPoints() {
+        $total = 0.0;
+        foreach($this->getComponents() as $component) {
+            $total += $component->getMaxValue();
+        }
+        return $total;
+    }
 }
