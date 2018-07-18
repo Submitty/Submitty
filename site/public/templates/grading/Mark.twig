@@ -1,12 +1,3 @@
-{# If m_index == 0, it's the No Credit / Full Credit item and we should not be allowed to edit it #}
-{% if editEnabled and m_index != 0 %}
-    {% set editable = true %}
-    {% set class = "" %}
-{% else %}
-    {% set editable = false %}
-    {% set class = "mark-uneditable" %}
-{% endif %}
-
 <tr
     id="mark_id-{{ c_index }}-{{ m_id }}"
     name="mark_{{ c_index }}"
@@ -42,7 +33,7 @@
             value="{{ mark.points }}"
             data-component_index="{{ c_index }}"
             data-mark_index="{{ m_id }}"
-            class="mark-score {{ class }}"
+            class="mark-score {% if not editable %} mark-uneditable {% endif %}"
         >
     </td>
     {% if editable %}
@@ -60,7 +51,7 @@
                 cols="120"
                 data-component_index="{{ c_index }}"
                 data-mark_index="{{ m_id }}"
-                class="mark-note {{ class }}"
+                class="mark-note {% if not editable %} mark-uneditable {% endif %}"
             >{{ mark.name }}</textarea>
             <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
                 <i class="fa fa-users icon-got-this-mark"></i>
@@ -87,7 +78,7 @@
                 cols="120"
                 data-component_index="{{ c_index }}"
                 data-mark_index="{{ m_id }}"
-                class="mark-note {{ class }}"
+                class="mark-note {% if not editable %} mark-uneditable {% endif %}"
             >{{ mark.name }}</textarea>
             <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
                 <i class="fa fa-users icon-got-this-mark"></i>

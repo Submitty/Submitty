@@ -112,6 +112,9 @@ function checkIfSelected(me) {
  * @returns DOM structure for the mark
  */
 function getMarkView(c_index, m_index, m_id, editEnabled) {
+    //If m_index == 0, it's the No Credit / Full Credit item and we should not be allowed to edit it
+    var editable = editEnabled && m_index !== 0;
+
     return Twig.twig({ref: "Mark"}).render({
         gradeable: getGradeable(),
         component: getComponent(c_index),
@@ -119,7 +122,7 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
         c_index: c_index,
         m_index: m_index,
         m_id: m_id,
-        editEnabled: editEnabled
+        editable: editable
     });
 }
 
