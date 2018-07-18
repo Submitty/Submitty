@@ -42,7 +42,7 @@
         {% for component in components %}
             <div class="box">
                 <div class="box-title">
-                    {{ Badge.render(component.score, component.points_posisble, extra_credit) }}
+                    {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
                     <h4>{{ component.title }}
                         {# Grader only shows up if they are not peer and full access #}
                         {% if not is_peer and component.grader.is_full_access %}
@@ -70,13 +70,13 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
-                                {% if component.score != 0 or component.comment != '' %}
+                                {% if component.total_score != 0 or component.comment != '' %}
                                     <tr>
                                         <td>
                                             <i class="fa fa-check-square-o fa-1g"></i>
                                         </td>
                                         <td style="text-align: right">
-                                            {{ component.score }}
+                                            {{ component.custom_mark_score }}
                                         </td>
                                         <td>
                                             {{ component.comment }}

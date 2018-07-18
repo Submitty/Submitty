@@ -423,7 +423,7 @@ class AutoGradingView extends AbstractView {
         //add total points if both autograding and instructor grading exist
         if ($version_instance !== null) {
             $total_score += $version_instance->getTotalPoints();
-            $total_max += $graded_max + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+            $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
         }
         $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
@@ -447,7 +447,8 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
-                'score' => $graded_component->getScore(),
+                'total_score' => $graded_component->getTotalScore(),
+                'custom_mark_score' => $graded_component->getScore(),
                 'comment' => $graded_component->getComment(),
                 'grader' => [
                     'is_full_access' => $graded_component->getGrader()->accessFullGrading(),
