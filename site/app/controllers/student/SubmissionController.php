@@ -151,7 +151,7 @@ class SubmissionController extends AbstractController {
 
             // ORIGINAL
             //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
-            
+
             // hiding entire page if user is not a grader and student cannot view
             if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
                 $message = "Students cannot view that gradeable.";
@@ -1609,14 +1609,14 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("Failed to make image path.", false);
       }
 
-	    // create nested path
-	    if (!empty($requested_path)) {
-		    $upload_nested_path = $requested_path;
-		    if (!FileUtils::createDir($upload_nested_path, null, true)) {
-			    return $this->uploadResult("Failed to make image path.", false);
-		    }
-		    $upload_path = $upload_nested_path;
-	    }
+      // create nested path
+      if (!empty($requested_path)) {
+          $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
+          if (!FileUtils::createDir($upload_nested_path, null, true)) {
+             return $this->uploadResult("Failed to make image path.", false);
+          }
+          $upload_path = $upload_nested_path;
+      }
 
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {

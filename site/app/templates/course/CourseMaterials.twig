@@ -29,9 +29,10 @@
 {% macro display_file(self, dir, path, id, indent, title, hasInstructorPermission) %}
     <div>
         <div class="file-viewer">
-                <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
-                {{ dir }}&nbsp;
-            {% if '.zip' not in dir and '.docx' not in dir and '.xlsx' not in dir %}
+            <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
+            {{ dir }}&nbsp;
+            {% set dirExtension = dir|split('.')[1] %}
+            {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
@@ -49,7 +50,7 @@
     {% else %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'> 
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
                 <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
@@ -57,12 +58,12 @@
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
 
             {# Recurse #}
-			
+
             {{ self.display_files(self, contents, id, indent + 1, title, hasInstructorPermission) }}
 
         </div>
     </div>
-    {% endif %}	
+    {% endif %}
 {% endmacro %}
 
 
@@ -75,7 +76,7 @@
         window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
-	
+
 
 </script>
 
