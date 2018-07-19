@@ -53,13 +53,19 @@
                             <th>Double-Graded</th>
                         </tr>
                     <div style="margin-left: 20px">
+                        {% set counter = 0 %}
                         {% for key, section in sections %}
-                            <tr>
-                                <td style="padding: 0 10px 0 10px;">{{ key }}</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.doubleGraded }} / {{ section.total }} ({{ section.doubleGraded_percentage }}%)</td>
-                            </tr>
+                            {% set counter = counter+1 %}
+                            {% for key2, section2 in sections %}
+                                {% if key2 == counter %}
+                                    <tr>
+                                        <td style="padding: 0 10px 0 10px;">{{ key2 }}</td>
+                                        <td style="padding: 0 10px 0 10px;">{{ section2.graded }} / {{ section2.total }} ({{ section2.percentage }}%)</td>
+                                        <td style="padding: 0 10px 0 10px;">{{ section2.verified }} / {{ section2.total }} ({{ section2.verified_percentage }}%)</td>
+                                        <td style="padding: 0 10px 0 10px;">{{ section2.doubleGraded }} / {{ section2.total }} ({{ section2.doubleGraded_percentage }}%)</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
                     </div>
                     </table>

@@ -65,7 +65,6 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
-
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
                 continue;
