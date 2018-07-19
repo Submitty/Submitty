@@ -15,7 +15,7 @@ import socket
 import zipfile
 
 from submitty_utils import dateutils, glob
-from . import grade_items_logging, write_grade_history, CONFIG_PATH
+from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -88,15 +88,17 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
             for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
-                # grab the matched name
-                relpath = os.path.relpath(my_file,source)
-                # make the necessary directories leading to the file
-                os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
-                # copy the file
-                shutil.copy(my_file,os.path.join(target,relpath))
-                print ("    COPY ",my_file,
-                       " -> ",os.path.join(target,relpath), file=f)
-            
+                if (os.path.isfile(my_file)):
+                    # grab the matched name
+                    relpath = os.path.relpath(my_file,source)
+                    # make the necessary directories leading to the file
+                    os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
+                    # copy the file
+                    shutil.copy(my_file,os.path.join(target,relpath))
+                    print ("    COPY ",my_file,
+                           " -> ",os.path.join(target,relpath), file=f)
+                else:
+                    print ("skip this directory (will recurse into it later)", my_file, file=f)
 
 # give permissions to all created files to the DAEMON_USER
 def untrusted_grant_rwx_access(which_untrusted,my_dir):
@@ -210,6 +212,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     form_json_config = os.path.join(tmp_autograding,"form.json")
     complete_config = os.path.join(tmp_autograding,"complete_config.json")
 
+
     with open(form_json_config, 'r') as infile:
         gradeable_config_obj = json.load(infile)
     gradeable_deadline_string = gradeable_config_obj["date_due"]
@@ -312,46 +315,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    # run the run.out as the untrusted user
-    with open(os.path.join(tmp_logs,"runner_log.txt"), 'w') as logfile:
-        print ("LOGGING BEGIN my_runner.out",file=logfile)
-        logfile.flush()
-
-        try:
-            if USE_DOCKER:
-                runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                                  os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
-                                                  queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
-            else:
-                runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                  which_untrusted,
-                                                  os.path.join(tmp_work,"my_runner.out"),
-                                                  queue_obj["gradeable"],
-                                                  queue_obj["who"],
-                                                  str(queue_obj["version"]),
-                                                  submission_string],
-                                                 stdout=logfile)
-            logfile.flush()
-        except Exception as e:
-            print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
-            logfile.flush()
-
-        print ("LOGGING END my_runner.out",file=logfile)
-        logfile.flush()
-
-        killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                           which_untrusted,
-                                           os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                          stdout=logfile)
-
-        print ("KILLALL COMPLETE my_runner.out",file=logfile)
-        logfile.flush()
-
-        if killall_success != 0:
-            msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
-            print ("pid",os.getpid(),msg)
-            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
-
+    ##################################################################################################
+    #call grade_item_main_runner.py
+    runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
+                                                                                    item_name, USE_DOCKER, container, which_untrusted)
+    ##################################################################################################
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")
     else:

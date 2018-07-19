@@ -21,7 +21,7 @@
                         </script>
                         <div class="popup-form" id="edit-username-form">
                             <h2>Specify Preferred First Name</h2>
-                            <p>{{ changeNameText }}</p>
+                            <p>{{ change_name_text }}</p>
                             <p>&emsp;</p>
                             <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
                                 <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -38,7 +38,7 @@
                     <tr>
                         <td><b>Last Name:</b> {{ user.getLastName() }} </td>
                     </tr>
-                    {% if showChangePassword %}
+                    {% if show_change_password %}
                         <tr>
                             <td><b>Change Password</b></td>
                             <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>

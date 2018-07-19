@@ -701,7 +701,10 @@ table tr.table-header {
 
 .gradeable_comment {
     word-break: break-word;
-    white-space: pre-wrap;
+}
+
+.gradeable_comment td {
+    padding: 0 4px;
 }
 
 #search_wrapper{
@@ -944,7 +947,7 @@ table .instructor .two-options{
     overflow-y: auto;
 }
 
-.popup-form div {
+.popup-form:not(.no-popup-div) div {
     width: 30%;
     display: inline-block;
     vertical-align: top;
@@ -1092,8 +1095,6 @@ end of styles used in the admin gradeable page
     width: 100%;
     text-align: center;
 }
-
-
 
 
 .required::-webkit-input-placeholder { color: red; }

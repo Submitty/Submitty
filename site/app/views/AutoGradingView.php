@@ -264,9 +264,12 @@ class AutoGradingView extends AbstractView {
         $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
         $total_score = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $graded_score;
         $total_max = $gradeable->getTotalAutograderNonExtraCreditPoints() + $graded_max;
-
+        $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
+        $regrade_message = $this->core->getConfig()->getRegradeMessage();
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
+
+        $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
@@ -278,6 +281,9 @@ class AutoGradingView extends AbstractView {
             "total_score" => $total_score,
             "total_max" => $total_max,
             "active_same_as_graded" => $active_same_as_graded,
+            "regrade_enabled" => $regrade_enabled,
+            "regrade_message" => $regrade_message,
+            "num_decimals" => $num_decimals
         ]);
     }
 }

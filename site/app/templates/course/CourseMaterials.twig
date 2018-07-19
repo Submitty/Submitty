@@ -1,0 +1,34 @@
+<div class="content">
+    {% if hasInstructorPermission %}
+        <div style="float: right; margin-bottom: 20px;">
+            <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Materials</a>
+        </div>
+    {% endif %}
+    <h2>View Course Materials</h2>
+    {% for courseMaterial in courseMaterialsArray %}
+        <div class="name">{{courseMaterial}}
+        {% if '.zip' not in courseMaterial and '.docx' not in courseMaterial and '.xlsx' not in courseMaterial %}
+            <a onclick='openFileCourseMaterial("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+        {% endif %}
+        <a onclick='downloadFileWithAnyRole("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+        {% if hasInstructorPermission %}
+            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': courseMaterial, 'path': folderPath~'/'~courseMaterial }) }}", "{{ courseMaterial }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+        {% endif %}
+        </div>
+    {% endfor %}
+</div>
+<script type="text/javascript">
+    function openFileCourseMaterial(html_file, url_file) {
+        var directory = "";
+        if (url_file.includes("uploads")) {
+            directory = "uploads";
+        }
+        window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        return false;
+    }
+</script>
+
+
+{% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
+{% include('course/UploadCourseMaterialsForm.twig') %}
+{% include('course/DeleteCourseMaterialForm.twig') %}
