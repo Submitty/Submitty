@@ -31,7 +31,7 @@
                     {% for g_info in info.gradeables %}
                     <tr class="gradeable_row" id="{{ g_info.id }}">
                         <td>
-                            <label>{{ g_info.name }}</label>
+                            {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
                                 <a class="external" href="{{ g_info.url }}" target="_blank">
                                     <i style="margin-left: 10px;" class="fa fa-external-link"></i>
