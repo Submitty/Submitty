@@ -281,9 +281,7 @@ class ElectronicGraderController extends GradingController {
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
-                $counter=0;
                 foreach ($total_users as $key => $value) {  
-                    $counter++;                         
                     if(array_key_exists($key, $num_submitted)){
                         $sections[$key] = array(
                             'total_components' => $num_submitted[$key] * $num_components,
@@ -291,7 +289,6 @@ class ElectronicGraderController extends GradingController {
                             'verified_components' => 0,
                             'doubleGraded_components' => 0,
                             'graders' => array(),
-                            'order' => $counter
                         );
                         if ($gradeable->isTeamAssignment()) {
                             $sections[$key]['no_team'] = $no_team_users[$key];
