@@ -127,6 +127,9 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         $status = $_REQUEST['status'];
+        if($status == 1){
+        //    $this->core->getQueries()->getGradeable($gradeable_id, $student_id)->setJustRegraded(false);
+        }
         //TODO: set userViewedDate to null if the status is change to 1 to make the button green
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->getOutput()->renderJson(["status" => "failure"]);
