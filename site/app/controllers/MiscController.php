@@ -46,7 +46,7 @@ class MiscController extends AbstractController {
                 $gradeable !== null
                 && !$gradeable->useVcsCheckout()
                 && $gradeable->getStudentDownload()
-                && !($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion())
+                && ($gradeable->getCurrentVersionNumber() === $gradeable->getActiveVersion() || $gradeable->getStudentAnyVersion())
                 && $this->core->getUser()->getId() === $_REQUEST['user_id']
             );
             return ($this->core->getUser()->accessGrading() || $can_download);
