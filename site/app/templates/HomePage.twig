@@ -20,13 +20,13 @@
                             }
                         </script>
                         <div class="popup-form" id="edit-username-form">
-                            <h2>Specify Preferred First Name</h2>
+                            <h2 id="name_user_change">Specify Preferred First Name</h2>
                             <p>{{ change_name_text }}</p>
                             <p>&emsp;</p>
                             <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
                                 <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                                 <div>
-                                    <input type="text" name="user_name_change" />
+                                    <input type="text" name="user_name_change" aria-labelledby="name_user_change" />
                                 </div>
                                 <div style="float: right; width: auto; margin-top: 10px">
                                     <a onclick="$('#edit-username-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
@@ -58,8 +58,8 @@
                                 <form method="post" action="{{ core.buildUrl({'page': 'change_password'}) }}">
                                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                                     <div>
-                                        Password: <input type="password" name="new_password"/>
-                                        Confirm: <input type="password" name="confirm_new_password"/>
+                                        <label for="new_password">Password:</label> <input type="password" name="new_password" id="new_password" />
+                                        <label for="confirm_new_password">Confirm:</label> <input type="password" name="confirm_new_password" id="confirm_new_password" />
                                         <a onclick="$('#change-password-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
                                         <input class="btn btn-primary" type="submit" value="Submit" />
                                     </div>
