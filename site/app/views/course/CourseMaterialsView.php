@@ -14,11 +14,11 @@ class CourseMaterialsView extends AbstractView {
      * @return string
      */
     public function listCourseMaterials($instructor_permission) {
-
+        $this->core->getOutput()->addBreadcrumb("Course Materials", $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')));
         function add_files(&$files, $expected_path, $course_materials_array, $start_dir_name) {
             $files[$start_dir_name] = array();
             $working_dirRoot = &$files[$start_dir_name];
-			
+
             $arrlength = count($course_materials_array);
 
             foreach($course_materials_array as $file) {
@@ -31,13 +31,13 @@ class CourseMaterialsView extends AbstractView {
                     }
                     $working_dir = &$working_dir[$dir];
                 }
-				
+
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
-				
+
                 $working_dir[$filename] = $expected_file_path;
             }
         }
-		 
+
         $submissions = array();
 
         $course_materials_array = array();
