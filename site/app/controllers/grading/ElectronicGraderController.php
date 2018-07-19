@@ -349,7 +349,6 @@ class ElectronicGraderController extends GradingController {
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
         $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $this->core->getAccess()->canI("grading.details.show_all");
-
         $students = array();
         //If we are peer grading, load in all students to be graded by this peer.
         if ($peer) {
@@ -374,14 +373,10 @@ class ElectronicGraderController extends GradingController {
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
-
-        //If there are no sections, see if we should show all instead
-        if (count($sections) === 0) {
-            $show_all = $this->core->getAccess()->canI("grading.details.show_all_no_sections");
-        }
-
         if ($show_all) {
             $students = $this->core->getQueries()->getAllUsers($section_key);
+        }
+        else{
         }
         if(!$peer) {
             $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
@@ -403,7 +398,6 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
-
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         if ($gradeable->isTeamAssignment()) {
             // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)

@@ -74,7 +74,7 @@ class Access {
         $this->permissions["grading.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.details"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.details.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.details.show_all_no_sections"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.details.show_all_no_sections"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
