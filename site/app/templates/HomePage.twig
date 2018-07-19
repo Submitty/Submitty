@@ -98,7 +98,7 @@
                             {% endfor %}
                             </tbody>
                         </table>
-                        {% if loop.index != statuses|length %}
+                        {% if not (loop.index == statuses|length or statuses[loop.index0 + 1]|length == 0) %}
                             <br>
                         {% endif %}
                     {% endif %}
