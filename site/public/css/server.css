@@ -871,12 +871,8 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
-.btn-nav-open {
-    width: 65% !important;
-}
-
-.btn-nav-open>span {
-    font-size: smaller !important;
+.td-open {
+    width: 10%;
 }
 
 .cat-buttons:hover {
