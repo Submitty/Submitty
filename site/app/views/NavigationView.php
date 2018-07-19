@@ -96,12 +96,14 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
-        $top_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
-            "title" => "Course Materials",
-            "class" => "btn btn-primary"
-        ]);
-        
+        if ($this->core->getUser()->getGroup()=== 1 || !empty($course_materials_array)) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                "title" => "Course Materials",
+                "class" => "btn btn-primary"
+            ]);
+        }
+
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
