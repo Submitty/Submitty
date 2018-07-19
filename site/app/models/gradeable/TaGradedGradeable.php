@@ -310,7 +310,7 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /** @internal */
-    public function setGradedComponents(array $graded_components) {
-        throw new \BadFunctionCallException('Cannot set graded components for grade.  Use getOrCreateGradedComponent instead');
+    public function setGradedComponentContainers(array $graded_component_containers) {
+        throw new \BadFunctionCallException('Cannot set graded component containers');
     }
 }
