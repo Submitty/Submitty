@@ -65,8 +65,11 @@ class ElectronicGraderController extends GradingController {
             case 'remove_empty':
                 return $this->ajaxRemoveEmpty();
                 break;
-            case 'pdf_annotation':
-                $this->showPDFAnnotation();
+            case 'pdf_annotation_fullpage':
+                $this->showPDFAnnotationFullPage();
+                break;
+            case 'pdf_annotation_embedded':
+                $this->showEmbeddedPDFAnnotation();
                 break;
             default:
                 $this->showStatus();
@@ -74,7 +77,22 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function showPDFAnnotation(){
+    public function showEmbeddedPDFAnnotation(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $filename = $_POST['filename'] ?? NULL;
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+            'gradeable_id' => $gradeable_id,
+            'user_id' => $user_id,
+            'filename' => $filename
+        ]);
+    }
+
+    public function showPDFAnnotationFullPage(){
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
 

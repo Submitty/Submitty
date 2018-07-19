@@ -10,6 +10,18 @@
      border: solid 6px #FFD700;
 }
 
+#pdf_annotation_bar {
+    position:relative;
+    height: 400px;
+    width: 41px;
+    top: -90px;
+    left: 45%;
+    background-color: #edf6f6;
+    cursor: move;
+    z-index:40;
+    border: solid 6px #e741ff;
+}
+
 #footer {
     z-index: 20;
 }

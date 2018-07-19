@@ -1,6 +1,0 @@
-#!/bin/bash
-
-server=./node_modules/.bin/webpack
-$server
-export MINIFY=1
-$server

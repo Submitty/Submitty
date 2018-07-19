@@ -76,8 +76,8 @@
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
-        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
-        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
+        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
+        {#<div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>#}
     </div>
 </div>
 
@@ -140,6 +140,10 @@
     }
 
     function expandFile(dir, path) {
+        if($('#viewer').length != 0){
+            $('#viewer').remove();
+        }
+        $('#file_view').show();
         $("#file_viewer_full_panel").empty();
         $("#file_viewer_full_panel").attr("data-file_name", "");
         $("#file_viewer_full_panel").attr("data-file_url", "");
@@ -149,7 +153,20 @@
         $("#grading_file_name").html(dir);
         let offset = $("#directory_view").width();
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
+        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200, function () {
+            $.ajax({
+                type: 'POST',
+                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
+                data: {
+                    'gradeable_id': '{{ gradeable.getId() }}',
+                    'user_id': '{{ gradeable.getUser().getId() }}',
+                    'filename': dir
+                },
+                success: function(data){
+                    $('#file_view').append(data);
+                }
+            });
+        });
         $("#directory_view").hide();
     }
 
@@ -161,6 +178,7 @@
         $("#directory_view").animate({'left': '-=' + offset1}, 200);
         $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
             $('#file_view').css('left', "");
+            $('#file_view').hide();
         });
     }
 

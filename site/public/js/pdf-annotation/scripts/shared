@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cp ./node_modules/pdfjs-dist/build/pdf.js ./shared/
-cp ./node_modules/pdfjs-dist/build/pdf.worker.js ./shared/
-cp ./node_modules/pdfjs-dist/web/pdf_viewer.js ./shared/
-cp ./node_modules/pdfjs-dist/web/pdf_viewer.css ./shared/

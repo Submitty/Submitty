@@ -1,6 +1,0 @@
-node_modules/
-coverage/
-sandbox/shared
-web/shared
-web-dist
-npm-debug.log

@@ -1,0 +1,31 @@
+<script src="js/pdf/pdf.js"></script>
+<script src="js/pdf/pdf_viewer.js"></script>
+<script src="js/pdf/pdf-annotate.js"></script>
+<script src="js/pdf/initColorPicker.js" type="module"></script>
+<script src="js/pdf/PDFAnnotateEmbedded.js"></script>
+{#<link rel="stylesheet" type="text/css" href="css/pdf/toolbar.css"/>#}
+<link rel="stylesheet" type="text/css" href="css/pdf/pdf_viewer.css"/>
+<style>
+    .annotationLayer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .pdfViewer .canvasWrapper {
+        box-shadow: 0 0 3px #bbb;
+    }
+    .pdfViewer .page {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div id="content-wrapper">
+    <div id="viewer" class="pdfViewer"></div>
+</div>
+
+<script>
+    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}');
+</script>

@@ -12,7 +12,7 @@ class PDFAnnotationView extends AbstractView {
     public function showAnnotationPage(){
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $return = $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotation.twig", [
+        $return = $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationFullPage.twig", [
 
         ]);
         return $return;

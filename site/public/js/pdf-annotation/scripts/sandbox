@@ -1,7 +1,0 @@
-#!/bin/bash
-
-./scripts/shared
-cp -rf ./shared/ ./sandbox/shared/
-
-server=./node_modules/.bin/webpack-dev-server
-$server --inline --config ./webpack.sandbox.js --content-base sandbox/
