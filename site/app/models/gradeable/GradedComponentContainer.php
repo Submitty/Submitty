@@ -24,7 +24,7 @@ class GradedComponentContainer extends AbstractModel {
     private $ta_graded_gradeable = null;
 
     /** @property @var GradedComponent[] The graded components for this Component */
-    protected $graded_components =  [];
+    protected $graded_components = [];
 
     /**
      * GradedComponentContainer constructor.
@@ -174,11 +174,11 @@ class GradedComponentContainer extends AbstractModel {
      * @param GradedComponent[] $graded_components
      */
     public function setGradedComponents(array $graded_components) {
-        foreach($graded_components as $graded_component) {
-            if(!($graded_component instanceof GradedComponent)) {
+        foreach ($graded_components as $graded_component) {
+            if (!($graded_component instanceof GradedComponent)) {
                 throw new \InvalidArgumentException('Array must only contain graded components');
             }
-            if($graded_component->getComponentId() !== $this->component->getId()) {
+            if ($graded_component->getComponentId() !== $this->component->getId()) {
                 throw new \InvalidArgumentException('Graded components must have same component id');
             }
         }
@@ -192,8 +192,8 @@ class GradedComponentContainer extends AbstractModel {
      */
     public function removeGradedComponent(User $user) {
         /** @var GradedComponent $graded_component */
-        foreach($this->graded_components as $i=>$graded_component) {
-            if($graded_component->getGrader()->getId() === $user->getId()) {
+        foreach ($this->graded_components as $i => $graded_component) {
+            if ($graded_component->getGrader()->getId() === $user->getId()) {
                 unset($this->graded_components[$i]);
                 return $graded_component;
             }
@@ -212,7 +212,7 @@ class GradedComponentContainer extends AbstractModel {
         $points_earned = 0.0;
         // TODO: how should peer grades be calculated: now its an average
         /** @var GradedComponent $graded_component */
-        foreach($this->graded_components as $graded_component) {
+        foreach ($this->graded_components as $graded_component) {
             $points_earned += $graded_component->getTotalScore();
         }
         $points_earned /= count($this->graded_components);
@@ -227,8 +227,8 @@ class GradedComponentContainer extends AbstractModel {
      */
     public function getMarkMultiplicity(Mark $mark) {
         $count = 0;
-        foreach($this->graded_components as $graded_component) {
-            if($graded_component->hasMark($mark)) {
+        foreach ($this->graded_components as $graded_component) {
+            if ($graded_component->hasMark($mark)) {
                 $count++;
             }
         }
