@@ -2974,6 +2974,10 @@ AND gc_id IN (
         }
     }
 
+    /**
+     * Deletes a GradedComponent from the database
+     * @param GradedComponent $graded_component
+     */
     private function deleteGradedComponent(GradedComponent $graded_component) {
         // Only the db marks need to be deleted since the others haven't been applied to the database
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
