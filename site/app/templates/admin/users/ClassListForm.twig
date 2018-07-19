@@ -1,5 +1,5 @@
 <div class="popup-form" id="class-list-form">
-    <h2>Upload Classlist</h2>
+    <h2 id="upload-classlist">Upload Classlist</h2>
     <p>&emsp;</p>
     <p>
         Format your class list as an .xlsx or .csv file with {{ use_database ? 7 : 6 }} columns:<br>
@@ -17,7 +17,7 @@
         <label for="move_missing">Move students missing from the classlist to NULL section?</label><input type="checkbox" name="move_missing" id="move_missing" /><br>
         <br />
         <div>
-            <input type="file" name="upload" accept=".xlsx, .csv">
+            <input type="file" name="upload" accept=".xlsx, .csv" aria-labelledby="upload-classlist">
         </div>
         <div style="float: right; width: auto">
             <a onclick="$('#class-list-form').css('display', 'none');" class="btn btn-danger">Cancel</a>
