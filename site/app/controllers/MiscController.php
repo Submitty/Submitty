@@ -291,7 +291,7 @@ class MiscController extends AbstractController {
             $paths[] = $results_path;
             $paths[] = $checkout_path;
         }
-        for ($x = 0; $x < 3; $x++) {
+        for ($x = 0; $x < count($paths); $x++) {
             if (is_dir($paths[$x])) {
                     $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($paths[$x]),
