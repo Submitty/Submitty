@@ -198,7 +198,7 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable is completely graded
-     * TODO this will need to change for peer grading
+     * TODO: for peer grading there might be a threshold for 'completeness'
      * @return bool
      */
     public function isComplete() {
