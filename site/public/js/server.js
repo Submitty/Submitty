@@ -1006,25 +1006,18 @@ function downloadFile(file, path) {
 }
 
 function downloadZip(grade_id, user_id, version = null) {
-    if(version === null) {
-        window.location = buildUrl({
-            'component': 'misc',
-            'page': 'download_zip',
-            'dir': 'submissions',
-            'gradeable_id': grade_id,
-            'user_id': user_id
-        });
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
     }
-    else {
-        window.location = buildUrl({
-            'component': 'misc',
-            'page': 'download_zip',
-            'dir': 'submissions',
-            'gradeable_id': grade_id,
-            'user_id': user_id,
-            'version': version
-        });
-    }
+    window.location = buildUrl(url_components);
     return false;
 }
 

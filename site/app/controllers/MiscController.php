@@ -322,10 +322,6 @@ class MiscController extends AbstractController {
         header("Expires: 0");
         readfile("$zip_name");
         unlink($zip_name); //deletes the random zip file
-
-        if(!$this->core->getUser()->accessGrading()) {
-            // make sure that the user id matches the requested id, and check the version number
-        }
     }
 
     private function downloadAssignedZips() {
