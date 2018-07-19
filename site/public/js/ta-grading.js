@@ -530,7 +530,7 @@ function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
     if (opened > 0 && index < getComponent(opened).marks.length) {
         var mark = getComponent(opened).marks[index];
-        selectMark($("#mark_id-" + opened + "-" + mark.id + "-check")[0]);
+        selectMark(opened, mark.id);
     }
 }
 
