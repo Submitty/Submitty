@@ -544,10 +544,6 @@ function showMarklist(me) {
         // Create list of students
         var students_html = "";
         for (var x = 0; x < data['data'].length; x++) {
-            // New line every 5 names
-            if (x % 5 == 0)
-                students_html += "<br>";
-
             var id = data['data'][x]['gd_user_id'] || data['data'][x]['gd_team_id'];
 
             var href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id="+id);

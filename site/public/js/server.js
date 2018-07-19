@@ -259,6 +259,28 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
+}
+
 function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-course-materials-form");
@@ -1500,7 +1522,7 @@ function showHistory(post_id) {
                     $('#messages').append(message);
                     return;
                 }
-                $("#popup-post-history").parent().show();
+                $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
@@ -1523,7 +1545,7 @@ function showHistory(post_id) {
                     var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
                     box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                     box.find("h7").before(user_button_code);
-                    $("#popup-post-history").prepend(box);
+                    $("#popup-post-history .form-body").prepend(box);
                 }
                 generateCodeMirrorBlocks($("#popup-post-history")[0]);
             },
