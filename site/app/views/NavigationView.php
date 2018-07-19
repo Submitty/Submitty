@@ -368,13 +368,13 @@ class NavigationView extends AbstractView {
 
 
             //If the button is autograded and has been submitted once, give a progress bar.
-            if (!is_nan($points_percent) &&  $graded_gradeable->isAutoGradingComplete() &&
+            if (!is_nan($points_percent) &&  $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)) {
                 $progress = $points_percent * 100;
             }
 
             // Not submitted or cancelled, after submission deadline
-            if (!$graded_gradeable->isAutoGradingComplete() &&
+            if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //You forgot to submit
                 $class = "btn-danger";
@@ -389,7 +389,7 @@ class NavigationView extends AbstractView {
             }
 
             // Submitted, currently after grade released date
-            if ($graded_gradeable->isAutoGradingComplete() &&
+            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $list_section == GradeableList::GRADED) {
                 if ($gradeable->isTaGrading()) {
                     if (!$graded_gradeable->isTaGradingComplete()) {
@@ -402,24 +402,24 @@ class NavigationView extends AbstractView {
                 }
             }
 
-            if ($graded_gradeable->isAutoGradingComplete() &&
+            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5 &&
                 $list_section == GradeableList::CLOSED) {
                 $class = "btn-default";
             }
 
-            if ($graded_gradeable->isAutoGradingComplete() &&
+            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 $display_date = "";
             }
 
-            if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
+            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
                 //if the user submitted something on time
                 $title = "RESUBMIT";
-            } else if ($graded_gradeable->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
+            } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
                 //if the user submitted something past time
                 $title = "LATE RESUBMIT";
-            } else if (!$graded_gradeable->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
+            } else if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //to change the text to overdue submission if nothing was submitted on time
                 $title = "OVERDUE SUBMISSION";
             } else if ($gradeable->isTaGrading() && !$graded_gradeable->isTaGradingComplete() && $list_section == GradeableList::GRADED) {

@@ -1004,7 +1004,28 @@ function check_server(url) {
 }
 
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
+    }
+    window.location = buildUrl(url_components);
+    return false;
 }
 
 function downloadFileWithAnyRole(file_name, path) {

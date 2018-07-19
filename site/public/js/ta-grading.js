@@ -627,11 +627,6 @@ function autoResizeComment(e){
     e.target.style.height = e.target.scrollHeight + "px";
 }
 
-function downloadZip(grade_id, user_id) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
-    return false;
-}
-
 function downloadFile(html_file, url_file) {
     var directory = "";
     if (url_file.includes("submissions")) {
