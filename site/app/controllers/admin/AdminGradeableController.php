@@ -938,6 +938,10 @@ class AdminGradeableController extends AbstractController {
             return $errors;
         }
 
+        // Trigger a rebuild if the config / due date changes
+        $trigger_rebuild_props = ['autograding_config_path', 'submission_due_date'];
+        $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
+
         $boolean_properties = [
             'grade_by_registration',
             'ta_grading',
@@ -989,9 +993,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Trigger a rebuild if the config / due date changes
-        $trigger_rebuild = ['autograding_config_path', 'submission_due_date'];
-        if (count(array_intersect($trigger_rebuild, array_keys($details))) > 0) {
+        if ($trigger_rebuild) {
             $result = $this->enqueueBuild($gradeable);
             if ($result !== null) {
                 // TODO: what key should this get?
