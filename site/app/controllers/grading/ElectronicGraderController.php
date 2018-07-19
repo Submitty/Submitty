@@ -397,7 +397,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
-        
+
         $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         if ($gradeable->isTeamAssignment()) {
             // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
