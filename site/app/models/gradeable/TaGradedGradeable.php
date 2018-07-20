@@ -226,15 +226,6 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if this graded gradeable is completely graded
-     * TODO this will need to change for peer grading
-     * @return bool
-     */
-    public function isComplete() {
-        return $this->getPercentGraded() >= 1.0;
-    }
-
-    /**
      * Sets the id of this grade data (used from database methods)
      * @param int $id
      * @internal
