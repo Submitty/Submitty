@@ -50,7 +50,7 @@ class SubmissionTextBox extends AbstractModel {
                 'width' => $image_details['image_width'] ?? 0,
                 'name' => $image_details['image_name']
             ];
-        }, $details['images']);
+        }, $details['images'] ?? []);
     }
 
     public function setFileName() {

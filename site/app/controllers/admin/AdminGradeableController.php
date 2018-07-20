@@ -938,6 +938,10 @@ class AdminGradeableController extends AbstractController {
             return $errors;
         }
 
+        // Trigger a rebuild if the config / due date changes
+        $trigger_rebuild_props = ['autograding_config_path', 'submission_due_date'];
+        $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
+
         $boolean_properties = [
             'grade_by_registration',
             'ta_grading',
@@ -989,9 +993,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Trigger a rebuild if the config / due date changes
-        $trigger_rebuild = ['autograding_config_path', 'submission_due_date'];
-        if (count(array_intersect($trigger_rebuild, array_keys($details))) > 0) {
+        if ($trigger_rebuild) {
             $result = $this->enqueueBuild($gradeable);
             if ($result !== null) {
                 // TODO: what key should this get?
@@ -1030,14 +1032,8 @@ class AdminGradeableController extends AbstractController {
             die("Cannot delete form_{$g_id}.json");
         }
 
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $g_id . ".json";
-        $config_build_data = array("semester" => $semester,
-            "course" => $course,
-            "no_build" => true);
-
-        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
-            die("Failed to write file {$config_build_file}");
-        }
+        // this will cleanup the build files
+        $this->enqueueBuildFile($g_id);
 
         $this->returnToNav();
     }
@@ -1057,7 +1053,7 @@ class AdminGradeableController extends AbstractController {
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
-        if (file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+        if (!is_writable($fp) || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
             return "Failed to write to file {$fp}";
         }
         return null;
@@ -1068,15 +1064,16 @@ class AdminGradeableController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
 
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/to_be_built/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
+            "job" => "BuildConfig",
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $g_id
         ];
 
-        if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+        if (!is_writable($config_build_file) || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             return "Failed to write to file {$config_build_file}";
         }
         return null;

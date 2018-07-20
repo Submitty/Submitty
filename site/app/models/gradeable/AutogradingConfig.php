@@ -16,6 +16,7 @@ use app\models\GradeableTestcase;
  *
  * @method int getMaxSubmissionSize()
  * @method int getMaxSubmissions()
+ * @method string getAssignmentMessage()
  * @method string getRequiredCapabilities()
  * @method float getMaxPossibleGradingTime()
  * @method string[] getPartNames()
@@ -54,13 +55,13 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var bool If there is an early submission incentive */
     private $early_submission_incentive = false;
     /** @property @var string The message given to describe the early submission */
-    protected $early_submission_message;
+    protected $early_submission_message = '';
     /** @property @var int The minimum number days early to receive the early submission incentive */
-    protected $early_submission_minimum_days_early;
+    protected $early_submission_minimum_days_early = 0;
     /** @property @var int The minimum number of points required to receive the early submission incentive */
-    protected $early_submission_minimum_points;
+    protected $early_submission_minimum_points = 0;
     /** @property @var GradeableTestcase[] The test cases for which the points must be earned to satisfy the incentive */
-    protected $early_submission_test_cases;
+    protected $early_submission_test_cases = [];
 
 
     /* Properties accumulated from GradeableTestcase's */
@@ -176,6 +177,52 @@ class AutogradingConfig extends AbstractModel {
      */
     public function hasEarlySubmissionIncentive() {
         return $this->early_submission_incentive;
+    }
+
+    /**
+     * Gets the number of submission parts
+     * @return int
+     */
+    public function getNumParts() {
+        return count($this->getPartNames());
+    }
+
+    /**
+     * Gets the number of text boxes on the submission page
+     * @return int
+     */
+    public function getNumTextBoxes() {
+        return count($this->getTextboxes());
+    }
+
+    /**
+     * Gets the number of non-hidden points possible for this assignment (including extra credit)
+     * @return int
+     */
+    public function getTotalNonHidden() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the number of non-extra-credit points possible for this assignment
+     * @return int
+     */
+    public function getTotalNonExtraCredit() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_hidden_non_extra_credit;
+    }
+
+    /**
+     * Gets if there are any user-viewable testcases
+     * @return bool
+     */
+    public function anyVisibleTestcases() {
+        /** @var AutogradingTestcase $testcase */
+        foreach($this->testcases as $testcase) {
+            if(!$testcase->isHidden()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* Disabled setters */

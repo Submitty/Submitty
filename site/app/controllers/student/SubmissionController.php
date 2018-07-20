@@ -55,6 +55,9 @@ class SubmissionController extends AbstractController {
             case 'upload_images_files':
                 return $this->ajaxUploadImagesFiles();
                 break;
+            case 'upload_course_materials_files':
+                return $this->ajaxUploadCourseMaterialsFiles();
+                break;
             case 'delete_split':
                 return $this->ajaxDeleteSplitItem();
                 break;
@@ -70,6 +73,9 @@ class SubmissionController extends AbstractController {
             case 'delete_request':
                 return $this->deleteRequest();
                 break;
+            case 'change_request_status':
+                return $this->changeRequestStatus();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -77,43 +83,58 @@ class SubmissionController extends AbstractController {
         }
     }
     private function requestRegrade(){
-        $content = $_REQUEST["request_content"];
+        $content = $_POST['replyTextArea'];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
+        }
         if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id ) ) );
+            $this->core->getOutput()->renderJson(["status" => "success"]);
         }else{
-            $this->core->addErrorMessage("Unable to create new regrade request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
         }
     }
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
-        $content = $_POST['replyTextArea'];
+        $content = str_replace("\r", "", $_POST['replyTextArea']);
         $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $this->core->getQueries()->insertNewRegradePost($regrade_id,$gradeable_id, $user_id, $content);
-        if($this->core->getQueries()->isStaffPost($user_id)){
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, 1);
-        }else{
-            $this->core->getQueries()->modifyRegradeStatus($regrade_id, -1);
+        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
+        //Prevent students making post requests for other studnets
+        if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
         }
+        $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
 
     private function deleteRequest(){
-        //if($this->core->getUser()->getGroup() > $gradeable->getMinimumGradingGroup()){
-      //      $this->core->addErrorMessage("You do not have permission to delete regrade requests");
-       //     $this->core->redirect($this->core->getConfig()->getSiteUrl());
-       // }
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
     }
-
+    private function changeRequestStatus(){
+        $regrade_id = $_REQUEST['regrade_id'];
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
+        $status = $_REQUEST['status'];
+        //TODO: set userViewedDate to null if the status is change to 1 to make the button green
+        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+            return;
+        }
+        $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
+        $this->core->getOutput()->renderJson(["status" => "success"]);
+    }
     private function popUp() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
@@ -130,6 +151,13 @@ class SubmissionController extends AbstractController {
 
             // ORIGINAL
             //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+            
+            // hiding entire page if user is not a grader and student cannot view
+            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
+                $message = "Students cannot view that gradeable.";
+                $this->core->addErrorMessage($message);
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            }
 
             // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
@@ -341,9 +369,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getMaxSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -1394,7 +1422,7 @@ class SubmissionController extends AbstractController {
 
     private function ajaxUploadImagesFiles() {
         if($this->core->getUser()->getGroup() !== 1) {
-			     return $this->uploadResult("You have no permission to access this page", false);
+                 return $this->uploadResult("You have no permission to access this page", false);
         }
 
         if (empty($_POST)) {
@@ -1513,6 +1541,106 @@ class SubmissionController extends AbstractController {
         return $this->uploadResult("Successfully uploaded!", true);
 
     }
+
+    private function ajaxUploadCourseMaterialsFiles() {
+      if($this->core->getUser()->getGroup() !== 1) {
+         return $this->uploadResult("You have no permission to access this page", false);
+      }
+
+      if (empty($_POST)) {
+         $max_size = ini_get('post_max_size');
+         return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+      }
+
+      if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+          return $this->uploadResult("Invalid CSRF token.", false);
+      }
+
+      $requested_path = "";
+      if (isset($_POST['requested_path'])) {
+          $requested_path = $_POST['requested_path'];
+      }
+
+      $uploaded_files = array();
+      if (isset($_FILES["files1"])) {
+          $uploaded_files[1] = $_FILES["files1"];
+      }
+      $errors = array();
+      if (isset($uploaded_files[1])) {
+          $count_item = count($uploaded_files[1]["name"]);
+          for ($j = 0; $j < $count_item[1]; $j++) {
+              if (!isset($uploaded_files[1]["tmp_name"][$j]) || $uploaded_files[1]["tmp_name"][$j] === "") {
+                  $error_message = $uploaded_files[1]["name"][$j]." failed to upload. ";
+                  if (isset($uploaded_files[1]["error"][$j])) {
+                      $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[1]["error"][$j]). ".";
+                  }
+                  $errors[] = $error_message;
+              }
+          }
+      }
+
+      if (count($errors) > 0) {
+          $error_text = implode("\n", $errors);
+          return $this->uploadResult("Upload Failed: ".$error_text, false);
+      }
+
+      if (empty($uploaded_files)) {
+          return $this->uploadResult("No files to be submitted.", false);
+      }
+
+      $file_size = 0;
+      if (isset($uploaded_files[1])) {
+          for ($j = 0; $j < $count_item; $j++) {
+              if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
+                  return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+              }
+              $file_size += $uploaded_files[1]["size"][$j];
+          }
+      }
+
+      $max_size = 10485760;
+      if ($file_size > $max_size) {
+          return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+      }
+
+      // creating uploads/course_materials directory
+      $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+      if (!FileUtils::createDir($upload_path)) {
+          return $this->uploadResult("Failed to make image path.", false);
+      }
+
+	    // create nested path
+	    if (!empty($requested_path)) {
+		    $upload_nested_path = $requested_path;
+		    if (!FileUtils::createDir($upload_nested_path, null, true)) {
+			    return $this->uploadResult("Failed to make image path.", false);
+		    }
+		    $upload_path = $upload_nested_path;
+	    }
+
+      if (isset($uploaded_files[1])) {
+          for ($j = 0; $j < $count_item; $j++) {
+                if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                    $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
+                    if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
+                        return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                    }
+                }
+                else {
+                    return $this->uploadResult("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
+                }
+            // Is this really an error we should fail on?
+              if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
+                  return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
+              }
+          }
+      }
+
+
+      return $this->uploadResult("Successfully uploaded!", true);
+
+    }
+
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
