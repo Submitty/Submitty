@@ -8,10 +8,13 @@ jdk_switcher use default
 unset _JAVA_OPTIONS
 
 # Setup our python3 version to use for application. We try to use python 3.6.x if available, else fallback to
-# python 3.5.x
-PY_VERSION_3=$(pyenv versions | grep -oP "3.6.[0-9]" || pyenv versions | grep -oP "3.5.[0-9]")
-pyenv global ${PY_VERSION_3}
+# python 3.5.x, but only when we're not explicitly building for python
+if [ -z ${TRAVIS_PYTHON_VERSION} ]; then
+    PY_VERSION_2=$(pyenv versions | grep -oP "2.7.[0-9]{1,}")
+    PY_VERSION_3=$(pyenv versions | grep -oP "3.[0-9]{1,}.[0-9]{1,}" | tail -1)
+    pyenv global ${PY_VERSION_3} ${PY_VERSION_2}
+fi
 
 mkdir -p ~/.local/bin
-export PATH="${HOME}/.local/bin:${PATH}:${HOME}/.composer/vendor/bin:/usr/bin"
-sudo sed -e "s?secure_path=\"?secure_path=\"/home/travis/.phpenv/shims:/opt/python/${PY_VERSION_3}/bin:${PATH}:?g" --in-place /etc/sudoers
+sudo sed -i -e "s/env_reset/\!env_reset/g" /etc/sudoers
+sudo sed -i -e "s?secure_path=\"?secure_path=\"${PATH}:?g" /etc/sudoers
