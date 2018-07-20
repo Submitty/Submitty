@@ -161,38 +161,29 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets how much of this submitter's submission has been graded
-     * @return float percentage (0 to 1), or NAN if no components
+     * @return float percentage (0 to 1) not clamped to 100%, or NAN if no component in gradeable
      */
     public function getPercentGraded() {
-        $components_graded = 0.0;
-        $components = $this->graded_gradeable->getGradeable()->getComponents();
-        $gradeable = $this->graded_gradeable->getGradeable();
-
-        $peer_component_count = array_sum(array_map(function (Component $component) {
-            return $component->isPeer() ? 1 : 0;
-        }, $components));
-        $ta_component_count = count($components) - $peer_component_count;
-
-        // For each peer component, there will be a certain number (set in gradeable) of peer graders
-        //  For each non-peer component, there must be one grade (ta/instructor)
-        $total_graders = $peer_component_count * $gradeable->getPeerGradeSet() + $ta_component_count;
-
-        // Get the number of component grades
+        $running_percent = 0.0;
         /** @var GradedComponentContainer $container */
-        foreach ($this->graded_component_containers as $container) {
-            $components_graded += count($container->getGradedComponents());
+        foreach($this->graded_component_containers as $container) {
+            $running_percent += $container->getPercentGraded();
         }
-
-        return Utils::safeCalcPercent($components_graded, $total_graders, true);
+        return Utils::safeCalcPercent($running_percent, count($this->graded_component_containers), false);
     }
 
     /**
      * Gets if this graded gradeable is completely graded
-     * TODO: for peer grading there might be a threshold for 'completeness'
      * @return bool
      */
     public function isComplete() {
-        return $this->getPercentGraded() >= 1.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            if (!$container->isComplete()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
