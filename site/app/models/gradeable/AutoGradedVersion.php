@@ -358,8 +358,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysLate() {
         return max(0, DateUtils::calculateDayDiff(
-            (clone $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate())
-                ->add(new \DateInterval("PT5M")), $this->submission_time));
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time));
     }
 
     /**
@@ -368,8 +367,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysEarly() {
         return max(0, -DateUtils::calculateDayDiff(
-            (clone $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate())
-                ->add(new \DateInterval("PT5M")), $this->submission_time));
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time));
     }
 
     /**
