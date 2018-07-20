@@ -1039,7 +1039,7 @@ class Course(object):
                              team_id=unique_team_id,
                              g_id=gradeable.id,
                              registration_section=str(reg_section),
-                             rotation_section=None)
+                             rotating_section=str(random.randint(1, self.rotating_sections)))
                 self.conn.execute(teams_table.insert(),
                              team_id=unique_team_id, 
                              user_id=user.get_detail(self.code, "id"),
