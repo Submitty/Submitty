@@ -2028,7 +2028,7 @@ ORDER BY u.user_group ASC,
 SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-WHERE u.user_id=? AND c.status=0 AND u.user_group=1
+WHERE u.user_id=? AND c.status=2 AND u.user_group=1
 ORDER BY u.user_group ASC,
          CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
               ELSE 0
