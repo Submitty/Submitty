@@ -1,4 +1,7 @@
-<div class="popup-form" id="mark-creation-popup" style="display: none; width: 500px; margin-left: -250px;">
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}mark-creation-popup{% endblock %}
+{% block title %}New Mark{% endblock %}
+{% block body %}
     <div style="width: auto; height: 450px; overflow-y: auto;" id="mark-creation-popup-content">
         Amount of points:<br>
         <input id="mark-creation-popup-points" type="number" value="0"><br>
@@ -10,11 +13,8 @@
             Note cannot be blank!
         </span>
     </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-cancel" onclick="$('#mark-creation-popup').css('display', 'none');" class="btn btn-danger">Cancel</a>
-    </div>
-    <div style="float: right; width: auto">
-        <a id="mark-creation-popup-confirm" class="btn btn-primary">Create</a>
-    </div>
-</div>
-</div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input id="mark-creation-popup-confirm" class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

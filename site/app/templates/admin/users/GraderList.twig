@@ -27,11 +27,7 @@
                     <td style="text-align: left">{{ grader.getLastName() }}</td>
                     <td>{{ groups[grader.getGroup()].name }}</td>
                     <td>
-                    {% if groups[grader.getGroup()].all_sections %}
-                        All
-                    {% else %}
-                        {{ grader.getGradingRegistrationSections()|join(", ") }}
-                    {% endif %}
+                    {{ grader.getGradingRegistrationSections()|join(", ") }}
                     </td>
                     <td><a onclick="editUserForm('{{ grader.getId() }}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 </tr>
