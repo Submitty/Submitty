@@ -111,11 +111,7 @@ class TaGradedGradeable extends AbstractModel {
      * @return GradedComponent|null The graded component instance or null if not found
      */
     public function getOrCreateGradedComponent(Component $component, $grader = null, $generate = false) {
-        $container = $this->graded_component_containers[$component->getId()] ?? null;
-        if ($container === null) {
-            throw new \InvalidArgumentException('Invalid component');
-        }
-        return $container->getOrCreateGradedComponent($grader, $generate);
+        return $this->getGradedComponentContainer($component)->getOrCreateGradedComponent($grader, $generate);
     }
 
     /**
@@ -248,11 +244,7 @@ class TaGradedGradeable extends AbstractModel {
      * @param User|null $grader The grader to delete the grade for, or null to delete all grades
      */
     public function deleteGradedComponent(Component $component, User $grader = null) {
-        /** @var GradedComponentContainer $container */
-        $container = $this->graded_component_containers[$component->getId()] ?? null;
-        if ($container === null) {
-            throw new \InvalidArgumentException('Invalid component');
-        }
+        $container = $this->getGradedComponentContainer($component);
 
         if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
             // If the grader is null or we aren't peer grading, then delete all component grades for this component
