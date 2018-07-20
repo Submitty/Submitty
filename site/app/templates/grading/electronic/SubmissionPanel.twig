@@ -77,7 +77,6 @@
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
         <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
-        {#<div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>#}
     </div>
 </div>
 
@@ -143,6 +142,7 @@
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
+        loadFile(dir);
         $('#file_view').show();
         $("#file_viewer_full_panel").empty();
         $("#file_viewer_full_panel").attr("data-file_name", "");
@@ -153,24 +153,34 @@
         $("#grading_file_name").html(dir);
         let offset = $("#directory_view").width();
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200, function () {
+        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
+        $("#directory_view").hide();
+    }
+
+    function loadFile(filename){
+        let extension = filename.split('.').pop();
+        if(extension == "pdf"){
             $.ajax({
                 type: 'POST',
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
                 data: {
                     'gradeable_id': '{{ gradeable.getId() }}',
                     'user_id': '{{ gradeable.getUser().getId() }}',
-                    'filename': dir
+                    'filename': filename
                 },
                 success: function(data){
                     $('#file_view').append(data);
                 }
             });
-        });
-        $("#directory_view").hide();
+        } else {
+            $('#file_view').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+        }
     }
 
     function collapseFile(){
+        //Removing these two to reset the full panel viewer.
+        $("#file_viewer_full_panel").remove();
+        $("#content-wrapper").remove();
         $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
