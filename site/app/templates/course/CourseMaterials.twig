@@ -9,44 +9,52 @@
     {% endif %}
     <h2>View Course Materials</h2>
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, "s", 0, "submissions", hasInstructorPermission) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", hasInstructorPermission) }}
     </div>
 </div>
 
-{% macro display_files(self, files, id, indent, title, hasInstructorPermission) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, hasInstructorPermission) %}
     {# Files on top #}
+
     {% for dir, path in files if path is not iterable %}
-        {{ self.display_file(self, dir, path, id ~ "f" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {% if hasInstructorPermission or fileShares[path] == "1" %}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, path, id, indent, title, hasInstructorPermission) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, hasInstructorPermission) %}
     <div>
         <div class="file-viewer">
             <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')[1] %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
-                <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if hasInstructorPermission %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <input id="share_checkbox_{{ dir }}_{{ indent }}" type="checkbox"
+                {% if ( (fileShares[path] == "1") )%}
+                   checked="true"
+                {% endif %}
+                onclick="shareToOther('{{ dir }}', '{{ indent }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, contents, id, indent, title, hasInstructorPermission) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, hasInstructorPermission) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, id, indent + 1, title, hasInstructorPermission) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
     {% else %}
     <div>
         <div class="div-viewer">
@@ -59,7 +67,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, id, indent + 1, title, hasInstructorPermission) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
 
         </div>
     </div>
@@ -77,7 +85,17 @@
         return false;
     }
 
-
+    function shareToOther(dir, indent, path) {
+        // pass filename to server to record the permission of the file
+        var id = "#share_checkbox_" + dir + "_" + indent;
+        id = id.replace(".", "\\.");  //  jQuery does not like period but adding double backslash can solve this issue.
+        if($(id).is(':checked')) {
+            changePermission(path, '1');
+        }
+        else {
+            changePermission(path, '0');
+        }
+    }
 </script>
 
 

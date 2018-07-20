@@ -14,13 +14,16 @@ class CourseMaterialsView extends AbstractView {
      * @return string
      */
     public function listCourseMaterials($instructor_permission) {
+
         $this->core->getOutput()->addBreadcrumb("Course Materials", $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')));
-        function add_files(&$files, $expected_path, $course_materials_array, $start_dir_name) {
+        function add_files($core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name) {
             $files[$start_dir_name] = array();
             $working_dirRoot = &$files[$start_dir_name];
-
+			
             $arrlength = count($course_materials_array);
 
+            $current_time = (new \DateTime('now', $core->getConfig()->getTimezone()));
+            
             foreach($course_materials_array as $file) {
                 $path = explode('/', $file);
                 $working_dir = &$files[$start_dir_name];
@@ -33,12 +36,33 @@ class CourseMaterialsView extends AbstractView {
                 }
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
-
                 $working_dir[$filename] = $expected_file_path;
+				
+                
+                $releaseData = $current_time;
+                $isShareToOther = '0';
+                if ($json == true){
+                    if ( isset( $json[$expected_file_path] ) )
+                    {
+                        $isShareToOther = $json[$expected_file_path]['checked'];
+                        
+                        $release_date = new \DateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                        
+                        if ($isShareToOther == '1' && $release_date > $current_time)
+                            $isShareToOther == '0';
+                        
+                        $releaseData  = $json[$expected_file_path]['release_datetime'];
+                    }
+                    
+                }
+                $file_datas[$expected_file_path] = $isShareToOther;
+                $file_release_dates[$expected_file_path] = $releaseData;
             }
         }
-
+		 
         $submissions = array();
+        $file_shares = array();
+        $file_release_dates = array();
 
         $course_materials_array = array();
 
@@ -48,12 +72,18 @@ class CourseMaterialsView extends AbstractView {
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         usort($course_materials_array, 'strnatcasecmp');
 
-        add_files($submissions, $expected_path, $course_materials_array, 'course_materials');
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($fp);
 
+        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials');
+
+        
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
             "folderPath" => $expected_path,
             "submissions" => $submissions,
+            "fileShares" => $file_shares,
+            "fileReleaseDates" => $file_release_dates,
             "hasInstructorPermission" => $instructor_permission
         ]);
     }

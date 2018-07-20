@@ -2128,6 +2128,10 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function changePermission(filename, checked) {
+    // send to server to handle file permission change
+    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+}
 
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport

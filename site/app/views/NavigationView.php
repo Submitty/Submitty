@@ -97,7 +97,7 @@ class NavigationView extends AbstractView {
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_materials_path = $course_path."/uploads/course_materials";;
+        $course_materials_path = $course_path."/uploads/course_materials";
         $any_files = FileUtils::getAllFiles($course_materials_path);
         if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
             $top_buttons[] = new Button($this->core, [
