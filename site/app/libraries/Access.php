@@ -53,7 +53,6 @@ class Access {
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_COMPONENT         = 1 << 25;
 
-
     // Broader user group access cases since generally actions are "minimum this group"
 
     const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
@@ -147,8 +146,16 @@ class Access {
             if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
-                    //You may be allowed to see this if you are trying to peer grade. Otherwise, you're not allowed
-                    if (!($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())) {
+
+                    if (
+                        //Full access graders are allowed to view submissions if there is no manual grading
+                        !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
+                        &&
+                        //Students are allowed to see this if its a peer graded assignment
+                        !($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())
+                       ) {
+
+                        //Otherwise, you're not allowed
                         return false;
                     }
                 }
