@@ -93,15 +93,17 @@ class AutoGradingView extends AbstractView {
         $num_visible_testcases = 0;
 
         $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
+            $testcase_config = $testcase->getTestcase();
             return [
-                'name' => $testcase->getTestcase()->getName(),
-                'hidden' => $testcase->getTestcase()->isHidden(),
-                'has_details' => $testcase->getTestcase()->getDetails() !== '',
-                'details' => $testcase->getTestcase()->getDetails(),
-                'has_points' => $testcase->getTestcase()->getPoints() !== 0,
-                'extra_credit' => $testcase->getTestcase()->isExtraCredit(),
-                'view_testcase_message' => $testcase->getTestcase()->canViewTestcaseMessage(),
-                'points_total' => $testcase->getTestcase()->getPoints(),
+                'name' => $testcase_config->getName(),
+                'hidden' => $testcase_config->isHidden(),
+                'has_details' => $testcase_config->getDetails() !== '',
+                'details' => $testcase_config->getDetails(),
+                'has_points' => $testcase_config->getPoints() !== 0,
+                'extra_credit' => $testcase_config->isExtraCredit(),
+                'view_testcase_message' => $testcase_config->canViewTestcaseMessage(),
+                'points_total' => $testcase_config->getPoints(),
+
                 'points' => $testcase->getPoints(),
                 'can_view' => $testcase->canView(),
                 'testcase_message' => $testcase->getMessage()
