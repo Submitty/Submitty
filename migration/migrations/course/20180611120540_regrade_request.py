@@ -1,6 +1,5 @@
 def up(config, conn, semester, course):
     with conn.cursor() as cursor:
-
         cursor.execute("CREATE TABLE regrade_requests (id serial NOT NULL PRIMARY KEY, gradeable_id VARCHAR(255) NOT NULL, timestamp TIMESTAMP NOT NULL, student_id VARCHAR(255) NOT NULL, status INTEGER DEFAULT 0 NOT NULL)")
         cursor.execute("CREATE TABLE regrade_discussion (id serial NOT NULL PRIMARY KEY, regrade_id INTEGER NOT NULL, timestamp TIMESTAMP NOT NULL, user_id VARCHAR(255) NOT NULL, content TEXT, deleted BOOLEAN default FALSE NOT NULL)")
 

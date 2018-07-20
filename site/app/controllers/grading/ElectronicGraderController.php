@@ -1069,7 +1069,7 @@ class ElectronicGraderController extends GradingController {
             $component->deleteData($gradeable->getGdId());
             $debug = 'delete';
         } else {
-                //only change the component information is the mark was modified or componet and its gradeable are out of sync.
+                //only change the component information is the mark was modified or component and its gradeable are out of sync.
                 if ($component->getGrader() === null || ($overwrite === "true" && !$this->core->getUser()->accessFullGrading())) {
                     $component->setGrader($this->core->getUser());
                     $component->setVerifier(null);

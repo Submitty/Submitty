@@ -1314,14 +1314,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join aggregate gradeable component data */
               LEFT JOIN (
                 SELECT
-                  json_agg(in_gcd.gc_id) as array_comp_id,
-                  json_agg(gcd_score) as array_score,
-                  json_agg(gcd_component_comment) as array_comment,
-                  json_agg(gcd_grader_id) as array_grader_id,
-                  json_agg(verifier_id) as array_verifier_id,
-                  json_agg(gcd_graded_version) as array_graded_version,
-                  json_agg(gcd_grade_time) as array_grade_time,
-                  json_agg(string_mark_id) as array_mark_id,
+                  json_agg(in_gcd.gc_id) AS array_comp_id,
+                  json_agg(gcd_score) AS array_score,
+                  json_agg(gcd_component_comment) AS array_comment,
+                  json_agg(gcd_grader_id) AS array_grader_id,
+                  json_agg(verifier_id) AS array_verifier_id,
+                  json_agg(gcd_graded_version) AS array_graded_version,
+                  json_agg(gcd_grade_time) AS array_grade_time,
+                  json_agg(string_mark_id) AS array_mark_id,
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
                   json_agg(ug.user_firstname) AS array_grader_user_firstname,
@@ -1355,7 +1355,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         user_id
                       FROM grading_registration
                       GROUP BY user_id
-                    ) as sr ON u.user_id=sr.user_id
+                    ) AS sr ON u.user_id=sr.user_id
                   ) AS ug ON ug.user_id=in_gcd.gcd_grader_id AND ug.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
@@ -1416,6 +1416,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Always construct an instance even if there is no data
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
+            
             $graded_components = [];
             $graded_versions = [];
 
@@ -1491,6 +1492,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         $graded_components[] = $graded_component;
                     }
                 }
+                
                 $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
             if (isset($db_row_split['version'])) {

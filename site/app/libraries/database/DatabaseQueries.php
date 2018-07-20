@@ -1523,8 +1523,8 @@ WHERE gcm_id=?", $params);
     }
 
     public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
-        $this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
-        $row = $this->course_db->row();
+       $this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
+       $row = $this->course_db->row();
         return $row['max'];
 
     }
@@ -1868,12 +1868,12 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
-        if($section_key == "registration_section") {
-            $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
-        }
-        else {
-            $orderBy = $section_key;
-        }
+               if($section_key == "registration_section") {
+                    $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+               }
+               else {
+                    $orderBy = $section_key;
+               }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
