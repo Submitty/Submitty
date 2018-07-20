@@ -105,6 +105,10 @@ class Gradeable extends AbstractModel {
     private $rotating_grader_sections_modified = false;
     /** @property @var AutogradingConfig The object that contains the autograding config data */
     private $autograding_config = null;
+    /** @property @var array Array of all split pdf uploads. Each key is a filename and then each element is an array
+     * that contains filename, file path, and the file size.
+     */
+    private $split_pdf_files = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -931,5 +935,50 @@ class Gradeable extends AbstractModel {
             return NAN;
         }
         return $components_graded / $components_total;
+    }
+
+    /**
+     * Gets the info about split pdf upload files
+     * @return array An array (indexed by file name) of arrays each containing file info.
+     *      See FileUtils::getAllFiles for more details.
+     */
+    public function getSplitPdfFiles() {
+        if ($this->split_pdf_files === null) {
+            $upload_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'uploads', 'split_pdf',
+                $this->id
+            );
+            $this->split_pdf_files = FileUtils::getAllFiles($upload_path);
+        }
+        return $this->split_pdf_files;
+    }
+
+    /**
+     * Gets if the grades released date has passed yet
+     * @return bool
+     */
+    public function isTaGradeReleased() {
+        return $this->grade_released_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
+
+    /**
+     * Gets if the submission open date has passed yet
+     * @return bool
+     */
+    public function isSubmissionOpen() {
+        return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
+
+    /**
+     * Gets the total possible non-extra-credit ta points
+     * @return float
+     */
+    public function getTaNonExtraCreditPoints() {
+        $total = 0.0;
+        foreach($this->getComponents() as $component) {
+            $total += $component->getMaxValue();
+        }
+        return $total;
     }
 }

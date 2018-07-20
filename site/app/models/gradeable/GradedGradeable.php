@@ -110,7 +110,7 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function isTaGradingComplete() {
-        return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->getPercentGraded() == 1;
+        return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
     }
 
     /**
