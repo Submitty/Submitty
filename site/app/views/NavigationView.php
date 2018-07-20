@@ -604,7 +604,7 @@ class NavigationView extends AbstractView {
         $button = null;
         if ($list_section === GradeableList::GRADING) {
             $button = new Button($this->core, [
-                "subtitle" => "RELEASE GRADES NOW",
+                "subtitle" => "RELEASE \nGRADES NOW",
                 "href" => $this->core->buildUrl([
                     'component' => 'admin',
                     'page' => 'admin_gradeable',
@@ -615,7 +615,7 @@ class NavigationView extends AbstractView {
             ]);
         } else if ($list_section === GradeableList::FUTURE) {
             $button = new Button($this->core, [
-                "subtitle" => "OPEN TO TAS NOW",
+                "subtitle" => "OPEN TO \nTAS NOW",
                 "href" => $this->core->buildUrl([
                     'component' => 'admin',
                     'page' => 'admin_gradeable',
@@ -638,7 +638,7 @@ class NavigationView extends AbstractView {
                 ]);
             } else {
                 $button = new Button($this->core, [
-                    "subtitle" => "OPEN TO GRADING NOW",
+                    "subtitle" => "OPEN TO \nGRADING NOW",
                     "href" => $this->core->buildUrl([
                         'component' => 'admin',
                         'page' => 'admin_gradeable',
@@ -650,7 +650,7 @@ class NavigationView extends AbstractView {
             }
         } else if ($list_section === GradeableList::CLOSED) {
             $button = new Button($this->core, [
-                "subtitle" => "OPEN TO GRADING NOW",
+                "subtitle" => "OPEN TO \nGRADING NOW",
                 "href" => $this->core->buildUrl([
                     'component' => 'admin',
                     'page' => 'admin_gradeable',

@@ -78,7 +78,7 @@
                 {% if button.getTitle() != null %}
                     <br>
                 {% endif %}
-                <span style="font-size: smaller;">{{ button.getSubtitle() }}</span>
+                <span style="font-size: smaller;">{{ button.getSubtitle()|nl2br }}</span>
             {% endif %}
         </a>
         {% if button.getProgress() != null %}
