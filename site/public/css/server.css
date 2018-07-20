@@ -1155,25 +1155,30 @@ end of styles used in the admin gradeable page
 }
 
 /* styles for the colors for the electronic grader details page */
+/* color for no grader */
 .grader-NULL {
     color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
+/* color for student grading (SHOULD NOT HAPPEN) */
 .grader-4 {
-    color: r;
+    color: red;
 }
 
+/* color for a limted access grader */
 .grader-3 {
-    color: yellow;
+    color: #ffd81e;
 }
 
+/* color for a instructor or full access grader */
 .grader-2,
 .grader-1 {
-    color: green;
-}
-
-.grader-both {
-    color: blue;
+    color: #00b500;
 }
 
 
