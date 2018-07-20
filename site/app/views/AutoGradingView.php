@@ -403,9 +403,9 @@ class AutoGradingView extends AbstractView {
         }, $ta_graded_gradeable->getVisibleGraders());
 
         // Special messages for peer / mentor-only grades
-        if($gradeable->isPeerGrading()) {
+        if ($gradeable->isPeerGrading()) {
             $grader_names = ['Graded by Peer(s)'];
-        } else if(count($grader_names) === 0) {
+        } else if (count($grader_names) === 0) {
             // Non-peer assignment with only limited access graders
             $grader_names = ['Graded by the ghosts among you'];
         }
