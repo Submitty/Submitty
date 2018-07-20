@@ -111,8 +111,6 @@ class GradedGradeable extends AbstractModel {
      */
     public function isTaGradingComplete() {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
-<<<<<<< HEAD
-=======
     }
 
     /**
@@ -128,7 +126,6 @@ class GradedGradeable extends AbstractModel {
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
         return $this->late_day_exceptions[$user->getId()];
->>>>>>> origin/master
     }
 
     /* Intentionally Unimplemented accessor methods */
