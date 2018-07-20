@@ -344,7 +344,7 @@ table tr.table-header {
 
 #footer {
     margin-top: 30px;
-    z-index: 9999;
+    z-index: 20;
 }
 
 #push, #footer {
@@ -934,25 +934,61 @@ table .instructor .two-options{
 .popup-form {
     z-index: 2000;
     position: fixed;
-    top: 10%;
-    left: 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popup-box {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-window {
     width: 680px;
-    /*height: 300px;*/
-    margin-left: -340px;
-    background: #FFFFFF;
-    border: 1px solid #000000;
+    background: #ffffff;
+    box-shadow: 0 6px 20px 2px #0000007f;
+    border-radius: 4px;
     padding: 10px;
-    display: none;
     max-height: 80%;
+    min-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-content: space-around;
+}
+
+.popup-form form {
+    width: 100%;
+    height: 100%;
+}
+
+.popup-form .form-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.popup-form .form-body {
+    flex-grow: 1;
     overflow-y: auto;
 }
 
-.popup-form:not(.no-popup-div) div {
-    width: 30%;
-    display: inline-block;
-    vertical-align: top;
-    padding-right: 10px;
-    padding-bottom: 10px;
+.popup-form .form-buttons {
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.popup-form .form-button-container {
+    text-align: right;
 }
 
 .popup-form.decent div {
@@ -963,6 +999,28 @@ table .instructor .two-options{
 
 .popup-form > div > input[type="text"] {
     width: 95%;
+}
+
+.popup-form .left-panel {
+    width:50%;
+    display: inline-block;
+}
+
+.popup-form .right-panel {
+    width: calc(50% - 10px);
+    display: inline-block;
+    vertical-align: top;
+}
+
+#admin-team-history-left {
+    width:28%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#admin-team-history-right {
+    width:62%;
+    display: inline-block;
 }
 
 .fill-available {

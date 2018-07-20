@@ -212,9 +212,17 @@ class NavigationView extends AbstractView {
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section): null;
 
+	// full access graders & instructors are allowed to view submissions of assignments with no manual grading
+	$im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->getGroup() <= 2;
+
+	// limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
+	$im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
+
+	// students can only view the submissions & grading interface if its a peer grading assignment
+	$im_a_peer_grader = $this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading();
+
         //Grade button if we can access grading
-        if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup()))
-            || ($this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading())) {
+        if ($im_allowed_to_view_submissions || $im_a_grader || $im_a_peer_grader) {
             $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
         }
 

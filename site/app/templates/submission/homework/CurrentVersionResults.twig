@@ -17,6 +17,11 @@
                 <br />
             {% endif %}
         {% endfor %}
+        {% if can_download and files|length > 1 %}
+            <br />
+            <br />
+            Download all files: <a onclick='downloadZip("{{ gradeable.getId() }}", "{{ core.getUser().getId() }}", "{{ current_version.getVersion() }}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
+        {% endif %}
     </div>
     <div class="box half">
         {% if gradeable.hasResults() %}

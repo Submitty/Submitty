@@ -5,6 +5,7 @@ namespace app\models\gradeable;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use \app\models\AbstractModel;
+use app\models\User;
 
 /**
  * Class GradedGradeable
@@ -14,6 +15,7 @@ use \app\models\AbstractModel;
  * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
  * @method Submitter getSubmitter()
+ * @method array getLateDayExceptions()
  */
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
@@ -28,15 +30,19 @@ class GradedGradeable extends AbstractModel {
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
 
+    /** @property @var array The late day exceptions indexed by user id */
+    protected $late_day_exceptions = [];
+
 
     /**
      * GradedGradeable constructor.
      * @param Core $core
      * @param Gradeable $gradeable The gradeable associated with this grade
      * @param Submitter $submitter The user or team who submitted for this graded gradeable
+     * @param array $details Other construction details (indexed by property name)
      * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
-    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter) {
+    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details) {
         parent::__construct($core);
 
         // Check the gradeable instance
@@ -51,6 +57,8 @@ class GradedGradeable extends AbstractModel {
             throw new \InvalidArgumentException('Submitter cannot be null');
         }
         $this->submitter = $submitter;
+
+        $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
     }
 
     /**
@@ -105,6 +113,21 @@ class GradedGradeable extends AbstractModel {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->getPercentGraded() == 1;
     }
 
+    /**
+     * Gets the late day exception count for a user
+     * @param User|null $user The user to get exception info for (can be null if not team assignment)
+     * @return int The number of late days the user has for this gradeable
+     */
+    public function getLateDayException($user = null) {
+        if($user === null) {
+            if($this->gradeable->isTeamAssignment()) {
+                throw new \InvalidArgumentException('Must provide user if team assignment');
+            }
+            return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
+        }
+        return $this->late_day_exceptions[$user->getId()];
+    }
+
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
@@ -115,5 +138,10 @@ class GradedGradeable extends AbstractModel {
     /** @internal */
     public function setSubmitter(Submitter $submitter) {
         throw new \BadFunctionCallException('Cannot set gradeable submitter');
+    }
+
+    /** @internal  */
+    public function setLateDayExceptions() {
+        throw new \BadFunctionCallException('Cannot set late day exception info');
     }
 }
