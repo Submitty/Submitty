@@ -437,6 +437,14 @@ class AutoGradingView extends AbstractView {
             'g_id' => $gradeable->getId()
         ]);
 
+        // Get the number of decimal places for floats to display nicely
+        $num_decimals = 0;
+        $precision_parts = explode('.', strval($gradeable->getPrecision()));
+        if (count($precision_parts) > 1) {
+            // TODO: this hardcoded value will mean a weird precision value (like 1/3) won't appear ridiculous
+            $num_decimals = min(3, count($precision_parts[1]));
+        }
+
         $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
             return [
@@ -482,6 +490,7 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_enabled' => $regrade_enabled,
             'regrade_message' => $regrade_message,
+            'num_decimals' => $num_decimals
         ]);
     }
 }

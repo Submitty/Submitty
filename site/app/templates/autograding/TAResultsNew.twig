@@ -62,7 +62,7 @@
                                             {% endif %}
                                         </td>
                                         <td style="text-align: right">
-                                            {{ mark.points }}
+                                            {{ mark.points|number_format(num_decimals) }}
                                         </td>
                                         <td>
                                             {{ mark.title }}
@@ -75,7 +75,7 @@
                                             <i class="fa fa-check-square-o fa-1g"></i>
                                         </td>
                                         <td style="text-align: right">
-                                            {{ component.custom_mark_score }}
+                                            {{ component.custom_mark_score|number_format(num_decimals) }}
                                         </td>
                                         <td>
                                             {{ component.comment }}
