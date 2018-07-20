@@ -167,7 +167,7 @@ class DatabaseQueries {
         }
 
         try {
-            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, resolved, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, 0, $type, $hasAttachment));
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment));
             $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
@@ -182,6 +182,11 @@ class DatabaseQueries {
 
     public function getPosts(){
         $this->course_db->query("SELECT * FROM posts where deleted = false");
+        return $this->course_db->rows();
+    }
+
+    public function getPostHistory($post_id){
+        $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", array($post_id));
         return $this->course_db->rows();
     }
 
@@ -207,13 +212,13 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $hasAttachment, $categories_ids){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids){
 
         $this->course_db->beginTransaction();
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, 0, -1, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -233,10 +238,17 @@ class DatabaseQueries {
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
+
+    public function getThread($thread_id) {
+		$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
+		return $this->course_db->rows();
+    }
+
     public function getThreadTitle($thread_id){
         $this->course_db->query("SELECT title FROM threads where id=?", array($thread_id));
         return $this->course_db->rows()[0];
     }
+
     public function setAnnouncement($thread_id, $onOff){
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
@@ -275,6 +287,10 @@ class DatabaseQueries {
     	return $this->course_db->rows();
     }
 
+    public function threadExists(){
+		$this->course_db->query("SELECT id from threads LIMIT 1");
+		return count($this->course_db->rows()) == 1;
+    }
 
     /**
      * Set delete status for given post and all descendant
@@ -312,18 +328,29 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($post_id, $content, $anon){
+    public function editPost($user, $post_id, $content, $anon){
         try {
-            $this->course_db->query("UPDATE posts SET content = ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
+            // forum_posts_history will store all history state of the post(if edited at any point of time)
+            $this->course_db->beginTransaction();
+            // Insert first version of post during first edit
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, author_user_id, content, timestamp FROM posts WHERE id = ? AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?)", array($post_id, $post_id));
+            // Update current post
+            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
+            // Insert latest version of post into forum_posts_history
+            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
+            $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?)", array($post_id));
+            $this->course_db->commit();
         } catch(DatabaseException $dbException) {
+            $this->course_db->rollback();
             return false;
         } return true;
     }
 
-    public function editThread($thread_id, $thread_title, $categories_ids) {
+    public function editThread($thread_id, $thread_title, $categories_ids, $status) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ? WHERE id = ?", array($thread_title, $thread_id));
+            $this->course_db->query("UPDATE threads SET title = ?, status = ? WHERE id = ?", array($thread_title, $status, $thread_id));
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", array($thread_id));
             foreach ($categories_ids as $category_id) {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));
@@ -1951,25 +1978,67 @@ ORDER BY gt.{$section_key}", $params);
     }
 
 	/**
-	 * Retrieves all courses (and details) that are accessible by $user_id
+	 * Retrieves all unarchived courses (and details) that are accessible by $user_id
 	 *
-	 * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
-	 * Instructors may access all of their courses
 	 * (u.user_id=? AND c.status=1) checks if a course is active
 	 * An active course may be accessed by all users
-	 * Inactive courses may only be accessed by the instructor
 	 *
 	 * @param string $user_id
 	 * @param string $submitty_path
-	 * @return array - courses (and their details) accessible by $user_id
+	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getStudentCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-WHERE (u.user_id=? AND u.user_group=1) OR (u.user_id=? AND c.status=1)
-ORDER BY u.course", array($user_id, $user_id));
+WHERE u.user_id=? AND c.status=1
+ORDER BY u.user_group ASC,
+         CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
+              ELSE 0
+         END DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
+              ELSE 1
+         END DESC,
+         u.course ASC", array($user_id));
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName($submitty_path);
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    /**
+     * Retrieves all archived courses (and details) that are accessible by $user_id
+     *
+     * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
+     * Instructors may access all of their courses
+     * Inactive courses may only be accessed by the instructor
+     *
+     * @param string $user_id
+     * @param string $submitty_path
+     * @return array - archived courses (and their details) accessible by $user_id
+     */
+    public function getArchivedCoursesById($user_id, $submitty_path) {
+        $this->submitty_db->query("
+SELECT u.semester, u.course
+FROM courses_users u
+INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+WHERE u.user_id=? AND c.status=2 AND u.user_group=1
+ORDER BY u.user_group ASC,
+         CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
+              ELSE 0
+         END DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
+              ELSE 1
+         END DESC,
+         u.course ASC", array($user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
@@ -2168,7 +2237,7 @@ AND gc_id IN (
     }
 
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
-    $query_delete = $show_deleted?"true":"deleted = false";
+      $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
         $announcement_id = $this->existsAnnouncements();
         if($announcement_id == -1){
@@ -2178,10 +2247,11 @@ AND gc_id IN (
           $thread_id = $announcement_id;
         }
       }
+      $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
-        $this->course_db->query("SELECT posts.*, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
-        $this->course_db->query("SELECT * FROM posts WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
       }
       
       $result_rows = $this->course_db->rows();

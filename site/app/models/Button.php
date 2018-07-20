@@ -11,6 +11,7 @@ use app\libraries\Core;
  * @method string getHref()
  * @method string getClass()
  * @method bool isDisabled()
+ * @method bool isTitleOnHover()
  * @method float|null getProgress()
  */
 class Button extends AbstractModel {
@@ -26,8 +27,13 @@ class Button extends AbstractModel {
     protected $disabled;
     /** @var float|null $progress */
     protected $progress;
+<<<<<<< HEAD
     /** @var string|null $name */
     protected $name;
+=======
+    /** @var bool $title_on_hover */
+    protected $title_on_hover;
+>>>>>>> master
 
     /**
      * @param Core $core
@@ -44,7 +50,11 @@ class Button extends AbstractModel {
         if ($this->progress !== null) {
             $this->progress = floatval($this->progress);
         }
+<<<<<<< HEAD
         $this->name = $details["name"] ?? null;
+=======
+        $this->title_on_hover = $details["title_on_hover"] ?? false;
+>>>>>>> master
     }
 
 }

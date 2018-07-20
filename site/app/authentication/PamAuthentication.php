@@ -2,6 +2,7 @@
 
 namespace app\authentication;
 use app\exceptions\AuthenticationException;
+use app\exceptions\CurlException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 
@@ -17,46 +18,44 @@ use app\libraries\FileUtils;
  */
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
-        $user = $this->core->getQueries()->getSubmittyUser($this->user_id);
-        if ($user === null) {
+        if ($this->user_id === null || $this->password === null ||
+            $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {
             return false;
         }
 
-        $tmp_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "tmp", "pam");
+        $tmp_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'tmp', 'pam');
 
         do {
             $file = md5(uniqid(rand(), true));
         } while (file_exists(FileUtils::joinPaths($tmp_path, $file)));
 
-        $contents = json_encode(array('username' => $this->user_id, 'password' => $this->password));
-        if (file_put_contents(FileUtils::joinPaths($tmp_path, $file), $contents) === false) {
-            throw new AuthenticationException("Could not create tmp user PAM file.");
-        }
-        register_shutdown_function(function() use ($file) {
-            unlink(FileUtils::joinPaths("/tmp", $file));
-        });
+        try {
+            $contents = json_encode(array('username' => $this->user_id, 'password' => $this->password));
+            if (@file_put_contents(FileUtils::joinPaths($tmp_path, $file), $contents) === false) {
+                throw new AuthenticationException("Could not create tmp user PAM file.");
+            }
+            // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
+            // as that would require some hacky path handling specific to PAM authentication
+            $output = $this->core->curlRequest($this->core->getConfig()->getCgiUrl()."pam_check.cgi?file={$file}");
 
-        // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
-        // as that would require some hacky path handling specific to PAM authentication
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pam_check.cgi?file={$file}");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        if ($output === false) {
-            throw new AuthenticationException(curl_error($ch));
+            $output_after = json_decode($output, true);
+            if ($output_after === null) {
+                throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+            }
+            else if (!isset($output_after['authenticated'])) {
+                throw new AuthenticationException('Missing response in JSON for PAM');
+            }
+            else if ($output_after['authenticated'] !== true) {
+                return false;
+            }
         }
-
-        $output_after = json_decode($output, true);
-        curl_close($ch);
-
-        if ($output_after === null) {
-		throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+        catch (CurlException $exc) {
+            throw new AuthenticationException('Error attempting to authenticate against PAM: '.$exc->getMessage());
         }
-        else if (!isset($output_after['authenticated'])) {
-            throw new AuthenticationException("Missing response in JSON for PAM");
-        }
-        else if ($output_after['authenticated'] !== true) {
-            return false;
+        finally {
+            if (file_exists(FileUtils::joinPaths($tmp_path, $file))) {
+                unlink(FileUtils::joinPaths($tmp_path, $file));
+            }
         }
 
         return true;
