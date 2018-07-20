@@ -38,10 +38,10 @@ class AutoGradedGradeable extends AbstractModel {
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        $this->setActiveVersion($details['active_version']);
-        if ($graded_gradeable === null) {
+        if($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
+        $this->setActiveVersion($details['active_version'] ?? 0);
         $this->graded_gradeable = $graded_gradeable;
         $this->modified = false;
     }
@@ -138,6 +138,22 @@ class AutoGradedGradeable extends AbstractModel {
             $highest_version = max($highest_version, $auto_graded_version->getVersion());
         }
         return $highest_version;
+    }
+    
+    /**
+     * Gets if the submitter has a version selected for grading
+     * @return bool
+     */
+    public function hasActiveVersion() {
+        return $this->active_version > 0;
+    }
+
+    /**
+     * Gets if the autograding is finished for the active version (if one)
+     * @return bool
+     */
+    public function isAutoGradingComplete() {
+        return $this->hasActiveVersion() && $this->getActiveVersionInstance()->isAutogradingComplete();
     }
 
     /* Queue status access methods */

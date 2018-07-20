@@ -70,6 +70,14 @@ class AutoGradedTestcase extends AbstractModel {
     }
 
     /**
+     * Gets the testcase config associated with this grade
+     * @return AutogradingTestcase
+     */
+    public function getTestcase() {
+        return $this->testcase;
+    }
+
+    /**
      * Gets if the user can view this graded testcase
      * @return bool
      */

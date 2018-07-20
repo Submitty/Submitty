@@ -16,6 +16,7 @@ use app\models\GradeableTestcase;
  *
  * @method int getMaxSubmissionSize()
  * @method int getMaxSubmissions()
+ * @method string getAssignmentMessage()
  * @method string getRequiredCapabilities()
  * @method float getMaxPossibleGradingTime()
  * @method string[] getPartNames()
@@ -192,6 +193,36 @@ class AutogradingConfig extends AbstractModel {
      */
     public function getNumTextBoxes() {
         return count($this->getTextboxes());
+    }
+
+    /**
+     * Gets the number of non-hidden points possible for this assignment (including extra credit)
+     * @return int
+     */
+    public function getTotalNonHidden() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_non_hidden_extra_credit;
+    }
+
+    /**
+     * Gets the number of non-extra-credit points possible for this assignment
+     * @return int
+     */
+    public function getTotalNonExtraCredit() {
+        return $this->total_non_hidden_non_extra_credit + $this->total_hidden_non_extra_credit;
+    }
+
+    /**
+     * Gets if there are any user-viewable testcases
+     * @return bool
+     */
+    public function anyVisibleTestcases() {
+        /** @var AutogradingTestcase $testcase */
+        foreach($this->testcases as $testcase) {
+            if(!$testcase->isHidden()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* Disabled setters */
