@@ -4,6 +4,7 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
+use app\libraries\Utils;
 use app\models\AbstractModel;
 use app\models\User;
 
@@ -217,6 +218,39 @@ class GradedComponentContainer extends AbstractModel {
         }
         $points_earned /= count($this->graded_components);
         return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
+    }
+
+    /**
+     * Gets whether this component is considered fully graded
+     * In the peer case, components are considered fully graded if they
+     *  meet the peer grade set or one of the graders is non-peer
+     * @return bool
+     */
+    public function isComplete() {
+        $required_graders = $this->component->getGradingSet();
+        $graders = count($this->graded_components);
+        if ($graders === $required_graders) {
+            return true;
+        } else {
+            /** @var GradedComponent $graded_component */
+            foreach ($this->graded_components as $graded_component) {
+                // TODO: should this be full access?
+                if ($graded_component->getGrader()->accessGrading()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the percent graded this component is (only relevant for peer grading)
+     * @return float percentage (0 to 1) not clamped to 100%
+     */
+    public function getPercentGraded() {
+        $required_graders = $this->component->getGradingSet();
+        $graders = count($this->graded_components);
+        return Utils::safeCalcPercent($graders, $required_graders, false);
     }
 
     /**
