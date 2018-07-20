@@ -8,6 +8,7 @@ use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -379,40 +380,36 @@ class AutoGradingView extends AbstractView {
     public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
-        $version_instance = $ta_graded_gradeable->getGradedVersion();
+        $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
         $grading_complete = true;
         $active_same_as_graded = true;
         foreach ($gradeable->getComponents() as $component) {
-            // FIXME: peer grading support
-            $component_grade = $ta_graded_gradeable->getGradedComponent($component);
-            if ($component_grade === null) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if (!$container->isComplete()) {
                 $grading_complete = false;
                 continue;
             }
 
-            if ($component_grade->getGradedVersion() !== $active_version && $component_grade->hasGradedVersion()) {
+            if ($container->getGradedVersion() !== $active_version) {
                 $active_same_as_graded = false;
             }
         }
-        $grader_names = array();
-        //find all names of instructors who graded part(s) of this assignment that are full access grader_names
-        //FIXME: peer grading support
-//        if (!$gradeable->isPeerGrading()) {
-//            foreach ($gradeable->getComponents() as $component) {
-//                if ($component->getGrader() == NULL) {
-//                    continue;
-//                }
-//                $name = $component->getGrader()->getDisplayedFirstName() . ' ' . $component->getGrader()->getLastName();
-//                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
-//                    $grader_names[] = $name;
-//                }
-//            }
-//        } else {
-//            $grader_names = 'Graded by Peer(s)';
-//        }
+
+        // Get the names of all full access or above graders
+        $grader_names = array_map(function (User $grader) {
+            return $grader->getDisplayedFirstName() . ' ' . $grader->getLastName();
+        }, $ta_graded_gradeable->getVisibleGraders());
+
+        // Special messages for peer / mentor-only grades
+        if($gradeable->isPeerGrading()) {
+            $grader_names = ['Graded by Peer(s)'];
+        } else if(count($grader_names) === 0) {
+            // Non-peer assignment with only limited access graders
+            $grader_names = ['Graded by the ghosts among you'];
+        }
 
         //get total score and max possible score
-        $total_score = $graded_score = $ta_graded_gradeable->getGradedPoints();
+        $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
         $total_max = $graded_max = $gradeable->getTaNonExtraCreditPoints();
 
         //change title if autograding exists or not
@@ -420,7 +417,7 @@ class AutoGradingView extends AbstractView {
         $has_autograding = $gradeable->getAutogradingConfig()->anyVisibleTestcases();
 
         // Todo: this is a modest amount of math for the view
-        //add total points if both autograding and instructor grading exist
+        // add total points if autograding and ta grading are the same version consistently
         if ($version_instance !== null) {
             $total_score += $version_instance->getTotalPoints();
             $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
@@ -438,29 +435,27 @@ class AutoGradingView extends AbstractView {
             'g_id' => $gradeable->getId()
         ]);
 
-        $component_data = array_map(function(Component $component) use($ta_graded_gradeable) {
-            // FIXME: peer grading
-            $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+        $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
             return [
                 'title' => $component->getTitle(),
                 'extra_credit' => $component->isExtraCredit(),
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
-                'total_score' => $graded_component->getTotalScore(),
-                'custom_mark_score' => $graded_component->getScore(),
-                'comment' => $graded_component->getComment(),
-                'grader' => [
-                    'is_full_access' => $graded_component->getGrader()->accessFullGrading(),
-                    'last_name' => $graded_component->getGrader()->getLastName()
-                    ],
-                'marks' => array_map(function (Mark $mark) use ($graded_component) {
+                'total_score' => $container->getTotalScore(),
+                'custom_mark_score' => $container->getScore(),
+                'comment' => $container->getComment(),
+                'graders' => array_map(function (User $grader) {
+                    return $grader->getLastName();
+                }, $container->getVisibleGraders()),
+                'marks' => array_map(function (Mark $mark) use ($container) {
                     return [
                         'title' => $mark->getTitle(),
                         'points' => $mark->getPoints(),
 
-                        'show_mark' => $mark->isPublish() || $graded_component->hasMark($mark),
-                        'earned' => $graded_component->hasMark($mark),
+                        'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                        'earned' => $container->hasMark($mark),
                     ];
                 }, $component->getMarks())
             ];
@@ -468,7 +463,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
-            'ta_graded_version' => $version_instance->getVersion(),
+            'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'late_days_allowed' => $gradeable->getLateDays() > 0,
             'is_peer' => $gradeable->isPeerGrading(),

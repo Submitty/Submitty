@@ -470,16 +470,7 @@ class HomeworkView extends AbstractView {
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
             if ($graded_gradeable->hasTaGradingInfo()) {
-                /** @var GradedComponent[] $graded_components */
-                foreach ($graded_gradeable->getTaGradedGradeable()->getGradedComponents() as $graded_components) {
-                    foreach ($graded_components as $component_grade) {
-                        if ($component_grade->getGradedVersion() !== $active_version_number
-                            && $component_grade->getGradedVersion() !== -1) {
-                            $active_same_as_graded = false;
-                            break;
-                        }
-                    }
-                }
+                $active_same_as_graded = $graded_gradeable->getTaGradedGradeable()->getGradedVersion() === $active_version_number;
             }
         }
 

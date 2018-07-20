@@ -44,9 +44,8 @@
                 <div class="box-title">
                     {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
                     <h4>{{ component.title }}
-                        {# Grader only shows up if they are not peer and full access #}
-                        {% if not is_peer and component.grader.is_full_access %}
-                            <i>(Graded by: {{ component.grader.last_name }})</i>
+                        {% if not is_peer and component.graders|length != 0 %}
+                            <i>(Graded by: {{ component.graders|join(' / ') }})</i>
                         {% endif %}
                     </h4>
                     <div style="float:left; word-break: break-word;">
