@@ -128,6 +128,45 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the AutoGradedVersion for this grade
+     * @param bool $strict if true, all grades for this gradeable must have a consistent version
+     *                      otherwise, returns the first valid version number found
+     * @return AutoGradedVersion|null
+     */
+    public function getGradedVersionInstance($strict = true) {
+        $versions = $this->graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions();
+        $version_number = $this->getGradedVersion($strict);
+        // Get the version instance associated with the graded version
+        return $versions[$version_number] ?? null;
+    }
+
+    /**
+     * Gets the version number for the submission associated with this grade
+     * @param bool $strict if true, all grades for this gradeable must have a consistent version
+     *                      otherwise, return the first valid version number found
+     * @return bool|int
+     */
+    public function getGradedVersion($strict = true) {
+        $version = false;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $v = $container->getGradedVersion();
+            if ($v !== false && $strict !== true) {
+                return $v;
+            } else if ($v === false) {
+                return false;
+            }
+
+            if ($version === false) {
+                $version = $v;
+            } else if ($version !== $v) {
+                return false;
+            }
+        }
+        return $version;
+    }
+
+    /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
      */
@@ -215,7 +254,7 @@ class TaGradedGradeable extends AbstractModel {
             }
 
             // Index by component id
-            $containers_by_id[$container->getComponent()->getId()][] = $container;
+            $containers_by_id[$container->getComponent()->getId()] = $container;
         }
         $this->graded_component_containers = $containers_by_id;
     }
@@ -277,6 +316,32 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
         $this->modified = true;
+    }
+
+    /**
+     * Gets all of the graders
+     * @return User[] indexed by user id
+     */
+    public function getGraders() {
+        $graders = [];
+        /** @var GradedComponentContainer $container */
+        foreach($this->graded_component_containers as $container) {
+            $graders = array_merge($graders, $container->getGraders());
+        }
+        return $graders;
+    }
+
+    /**
+     * Gets all user-visible graders for this component
+     * @return User[] indexed by user id
+     */
+    public function getVisibleGraders() {
+        $graders = [];
+        /** @var GradedComponentContainer $container */
+        foreach($this->graded_component_containers as $container) {
+            $graders = array_merge($graders, $container->getVisibleGraders());
+        }
+        return $graders;
     }
 
     /* Intentionally Unimplemented accessor methods */
