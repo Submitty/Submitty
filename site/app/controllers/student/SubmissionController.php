@@ -162,10 +162,12 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
-        // FIXME    to nav with an error
+        if ($graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
+            // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
+            // FIXME    to nav with an error
+        }
 
-        $version = $_REQUEST['gradeable_version'] ?? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $version = $_REQUEST['gradeable_version'] ?? ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0);
 
         $error = false;
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
@@ -193,7 +195,7 @@ class SubmissionController extends AbstractController {
                 $error = true;
             }
             else {
-                $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
+                $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
                 $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null

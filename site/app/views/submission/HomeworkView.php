@@ -311,6 +311,8 @@ class HomeworkView extends AbstractView {
             return $text_box->toArray();
         }, $textboxes);
 
+        $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
+
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/SubmitBox.twig", [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -318,15 +320,16 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
-            // FIXME: only works with non-team assignments
-            'user_id' => $graded_gradeable->getSubmitter()->getId(),
+            // This is only used as a placeholder, so the who loads this page is the 'user' unless the
+            //  client overrides the user
+            'user_id' => $this->core->getUser()->getId(),
             'has_assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage() !== '',
             'assignment_message' => $gradeable->getAutogradingConfig()->getAssignmentMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
-            'highest_version' => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+            'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
