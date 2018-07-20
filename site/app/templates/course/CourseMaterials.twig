@@ -41,11 +41,11 @@
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if hasInstructorPermission %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <input id="share_checkbox_{{ dir }}_{{ indent }}" type="checkbox"
+                <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
                 {% endif %}
-                onclick="shareToOther('{{ dir }}', '{{ indent }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
+                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
@@ -85,11 +85,10 @@
         return false;
     }
 
-    function shareToOther(dir, indent, path) {
+    function shareToOther(id, path) {
         // pass filename to server to record the permission of the file
-        var id = "#share_checkbox_" + dir + "_" + indent;
-        id = id.replace(".", "\\.");  //  jQuery does not like period but adding double backslash can solve this issue.
-        if($(id).is(':checked')) {
+        var idName = "#share_checkbox_" + id;
+        if($(idName).is(':checked')) {
             changePermission(path, '1');
         }
         else {
