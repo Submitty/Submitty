@@ -94,18 +94,21 @@ class AutogradingConfig extends AbstractModel {
             foreach ($details['testcases'] as $idx => $testcase_details) {
                 $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
 
-                // Accumulate the points
-                if ($testcase->isHidden()) {
-                    if ($testcase->isExtraCredit()) {
-                        $this->total_hidden_extra_credit += $testcase->getPoints();
+                // Accumulate only the positive points
+                $points = $testcase->getPoints();
+                if($points >= 0.0) {
+                    if ($testcase->isHidden()) {
+                        if ($testcase->isExtraCredit()) {
+                            $this->total_hidden_extra_credit += $points;
+                        } else {
+                            $this->total_hidden_non_extra_credit += $points;
+                        }
                     } else {
-                        $this->total_hidden_non_extra_credit += $testcase->getPoints();
-                    }
-                } else {
-                    if ($testcase->isExtraCredit()) {
-                        $this->total_non_hidden_extra_credit += $testcase->getPoints();
-                    } else {
-                        $this->total_non_hidden_non_extra_credit += $testcase->getPoints();
+                        if ($testcase->isExtraCredit()) {
+                            $this->total_non_hidden_extra_credit += $points;
+                        } else {
+                            $this->total_non_hidden_non_extra_credit += $points;
+                        }
                     }
                 }
 
