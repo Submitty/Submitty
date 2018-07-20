@@ -1561,6 +1561,11 @@ class SubmissionController extends AbstractController {
           $requested_path = $_POST['requested_path'];
       }
 
+      $n = strpos($requested_path, '..');
+      if ($n !== false) {
+          return $this->uploadResult(".. is not supported in the path.", false);
+      }
+
       $uploaded_files = array();
       if (isset($_FILES["files1"])) {
           $uploaded_files[1] = $_FILES["files1"];

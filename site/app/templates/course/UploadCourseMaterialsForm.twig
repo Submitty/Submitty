@@ -30,14 +30,8 @@
         $(function() {
             $("#submit").click(function(e){ // Submit button
                 var requestedPath = document.getElementById("input_provide_full_path").value;
-                var n = requestedPath.indexOf("..");
-                if (n != -1) {
-                    alert(".. is not supported in the path");
-                }
-                else {
-                    makeSubmission(requestedPath);
-                    e.stopPropagation();
-                }
+                makeSubmission(requestedPath);
+                e.stopPropagation();
             });
         });
     </script>
