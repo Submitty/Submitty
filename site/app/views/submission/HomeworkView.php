@@ -242,7 +242,7 @@ class HomeworkView extends AbstractView {
             $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
             $students_version = array();
             foreach ($gradeables as $g) {
-                $students_version[] = array($g->getUser(), $g->getActiveVersion());
+                $students_version[] = array($g->getUser(), $g->getHighestVersion());
             }
 
             $students_full = array();
