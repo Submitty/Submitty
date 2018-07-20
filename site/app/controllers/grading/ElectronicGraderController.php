@@ -111,12 +111,18 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $user_id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_annotation.json';
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version, $annotation_file_name);
+        $annotation_json = is_file($annotation_path) ? file_get_contents($annotation_path) : "";
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
+        //TODO: Add a new view
         return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
             'user_id' => $user_id,
-            'filename' => $filename
+            'filename' => $filename,
+            'annotation_json' => $annotation_json
         ]);
     }
 

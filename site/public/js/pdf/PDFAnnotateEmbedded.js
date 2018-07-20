@@ -1,5 +1,5 @@
 const { UI } = PDFAnnotate;
-let documentId = 'example.pdf';
+let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
     documentId,
@@ -15,7 +15,7 @@ let GENERAL_INFORMATION = {
 }
 
 PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = './shared/pdf.worker.js';
+PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
 
 /*
 This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
@@ -169,14 +169,14 @@ function render(gradeable_id, user_id, file_name) {
         if (penSize !== size) {
             modified = true;
             penSize = size;
-            localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/size`, penSize);
+            // localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/size`, penSize);
             // document.querySelector('.toolbar .pen-size').value = penSize;
         }
 
         if (penColor !== color) {
             modified = true;
             penColor = color;
-            localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/color`, penColor);
+            // localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/color`, penColor);
 
             // let selected = document.querySelector('.toolbar .pen-color.color-selected');
             // if (selected) {
@@ -204,3 +204,7 @@ function render(gradeable_id, user_id, file_name) {
 
     initPen();
 })();
+//TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
+$(window).unload(function() {
+    localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+});

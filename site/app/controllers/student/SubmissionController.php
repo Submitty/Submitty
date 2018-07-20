@@ -79,6 +79,7 @@ class SubmissionController extends AbstractController {
                 break;
         }
     }
+
     private function requestRegrade(){
         $content = $_POST['replyTextArea'];
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
