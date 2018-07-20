@@ -435,3 +435,136 @@ tr.is_publish {
     width: 100%;
     text-align: center;
 }
+
+/* Gradeable */
+
+.gradeable .general-comment {
+    background-color:#E9EFEF;
+    cursor: pointer;
+}
+
+.gradeable .general-comment-entry {
+    width:98%;
+    height:100%;
+    min-height:100px;
+    resize:none;
+    float:left;
+}
+
+/* Components */
+
+.gradeable .component {
+    cursor: pointer;
+}
+
+.gradeable .component .gradebar {
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.gradeable .version-warning {
+    color:rgb(200, 0, 0);
+    font-weight: bold;
+    font-size:medium;
+}
+
+.gradeable .graded-by {
+    font-style: italic;
+    padding-right: 10px;
+}
+
+.gradeable .ta-student-note {
+    margin-bottom: 5px;
+    color: #777;
+}
+
+.gradeable .grader-container {
+    float: right;
+}
+
+.gradeable .verify-container {
+    display: inline;
+    color: red;
+}
+
+.gradeable .done-container {
+    float: right;
+}
+
+.gradeable .done-button {
+    color: green;
+}
+
+.gradeable .cancel-container {
+    float: right;
+}
+
+.gradeable .cancel-button {
+    color: red;
+}
+
+.gradeable .summary-text {
+    width:95%;
+    height:100%;
+    min-height:20px;
+    font-family: 'Source Sans Pro', sans-serif;
+    float:left;
+    cursor: pointer;
+}
+
+.gradeable .add-common-mark {
+    cursor: pointer;
+}
+
+/* Marks */
+
+.gradeable .mark {
+    visibility: visible;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5em;
+    height: 1.5em;
+    border: 2px solid #000;
+    border-radius: 4px;
+    color: #888;
+    font-size: 10px;
+    font-family: 'Source Sans Pro', sans-serif;
+    margin-top: -1px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.gradeable .mark.mark-has {
+    color: #ccc;
+    background-color: #000;
+}
+
+
+.gradeable input.mark-score {
+    resize:none;
+    width: 50px;
+}
+
+.gradeable .mark-score-container {
+    width: 90px;
+}
+
+.gradeable .mark-note {
+    width: calc(100% - 40px);
+    resize:none;
+}
+
+.gradeable .mark-note-custom {
+    width: calc(100% - 165px);
+    resize:none;
+}
+
+.gradeable .mark-uneditable {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background-color: initial;
+}
