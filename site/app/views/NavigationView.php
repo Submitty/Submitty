@@ -430,11 +430,13 @@ class NavigationView extends AbstractView {
             // This means either the user isn't on a team, or has no submissions yet
             if ($gradeable->isTeamAssignment()) {
                 // team assignment, no team
-                $title = "MUST BE ON A TEAM TO SUBMIT";
-                $disabled = true;
+                if (!$this->core->getUser()->accessFullGrading()) {
+                    $title = "MUST BE ON A TEAM TO SUBMIT";
+                    $disabled = true;
+                }
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($this->core->getUser()->accessAdmin()) {
+                    if ($this->core->getUser()->accessFullGrading()) {
                         // team assignment, no team (admin)
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
