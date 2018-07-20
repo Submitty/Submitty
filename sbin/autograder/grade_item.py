@@ -88,15 +88,17 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
             for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
-                # grab the matched name
-                relpath = os.path.relpath(my_file,source)
-                # make the necessary directories leading to the file
-                os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
-                # copy the file
-                shutil.copy(my_file,os.path.join(target,relpath))
-                print ("    COPY ",my_file,
-                       " -> ",os.path.join(target,relpath), file=f)
-            
+                if (os.path.isfile(my_file)):
+                    # grab the matched name
+                    relpath = os.path.relpath(my_file,source)
+                    # make the necessary directories leading to the file
+                    os.makedirs(os.path.join(target,os.path.dirname(relpath)),exist_ok=True)
+                    # copy the file
+                    shutil.copy(my_file,os.path.join(target,relpath))
+                    print ("    COPY ",my_file,
+                           " -> ",os.path.join(target,relpath), file=f)
+                else:
+                    print ("skip this directory (will recurse into it later)", my_file, file=f)
 
 # give permissions to all created files to the DAEMON_USER
 def untrusted_grant_rwx_access(which_untrusted,my_dir):

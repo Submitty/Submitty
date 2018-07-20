@@ -167,6 +167,12 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
+            if(registration_section === 'null' && json['user_group'] === 4) {
+                $('#student-error-message').css('display', 'block');
+            }
+            else {
+                $('#student-error-message').css('display', 'none');
+            }
 
         },
         error: function() {
@@ -190,6 +196,7 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+    $('#student-error-message').css('display', 'block');
 }
 
 function extensionPopup(json){
@@ -236,9 +243,47 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function newDeleteCourseMaterialForm(form_action, file_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-course-material-form");
+    $('[name="delete-course-material-message"]', form).html('');
+    $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
+    form.css("display", "block");
+    $('[name="upload"]', form).val(null);
+}
+
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
+}
+
+function newUploadCourseMaterialsForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#upload-course-materials-form");
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
 }
@@ -250,7 +295,7 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>'; 
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
     $('[name="prev_gradeable_div"]', form).append(to_append);
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
@@ -292,7 +337,7 @@ function setRankingForGradeable() {
                 alert("Could not load rankings for plagiarism, please refresh the page and try again.");
             }
         })
-    }    
+    }
 }
 
 function setUserSubmittedCode(changed) {
@@ -310,13 +355,13 @@ function setUserSubmittedCode(changed) {
         var version_user_1 = $('[name="version_user_1"]', form2).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
             $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty(); 
-            $('[name="code_box_2"]').empty(); 
+            $('[name="code_box_1"]').empty();
+            $('[name="code_box_2"]').empty();
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
-                if( version_user_1 == '' || changed == 'user_id_1') {    
-                    version_user_1 = "max_matching";                
+                if( version_user_1 == '' || changed == 'user_id_1') {
+                    version_user_1 = "max_matching";
                 }
 
                 var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
@@ -360,7 +405,7 @@ function setUserSubmittedCode(changed) {
                     success: function(data) {
                         if(data == "no_match_for_this_version") {
                             var append_options='<option value="">None</option>';
-                            $('[name="code_box_2"]').empty(); 
+                            $('[name="code_box_2"]').empty();
                         }
                         else {
                             data = JSON.parse(data);
@@ -415,18 +460,18 @@ function setUserSubmittedCode(changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                             $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
                         }
                     })
-                        
+
                 }
-            }    
-        }    
-    }   
+            }
+        }
+    }
 }
 
 function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
@@ -582,7 +627,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
     if(select_element_name == "language") {
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
-        } 
+        }
         else if ($('[name="language"]', form).val() == "cpp") {
             $('[name="sequence_length"]', form).val('2');
         }
@@ -595,7 +640,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
         var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_sem != '') {
@@ -604,7 +649,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
                 if(selected_sem == sem) {
                     $.each(courses_gradeables, function(course,gradeables){
                         append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });     
+                    });
                 }
             });
             $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
@@ -612,7 +657,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
     }
     else if(select_element_name.substring(0, 12) == "prev_course_") {
         var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_course != '') {
@@ -623,13 +668,13 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
                         if(selected_course == course) {
                             $.each(gradeables, function (index, gradeable) {
                                 append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });    
+                            });
                         }
-                    });     
+                    });
                 }
             });
             $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        } 
+        }
     }
 }
 
@@ -802,6 +847,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 source: student_full
             });
         }
+        members_div.find('[name="reg_section"]').val(reg_section);
+        members_div.find('[name="rot_section"]').val(rot_section);
     }
     else {
         $('[name="new_team_user_id"]', form).val("");
@@ -981,7 +1028,37 @@ function check_server(url) {
 }
 
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
+    }
+    window.location = buildUrl(url_components);
+    return false;
+}
+
+function downloadFileWithAnyRole(file_name, path) {
+    // Trim file without path
+    var file = file_name;
+    if (file.indexOf("/") != -1) {
+        file = file.substring(file.lastIndexOf('/')+1);
+    }
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
 }
 
 function changeColor(div, hexColor){
@@ -1447,7 +1524,7 @@ function showHistory(post_id) {
                     $('#messages').append(message);
                     return;
                 }
-                $("#popup-post-history").parent().show();
+                $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
@@ -1470,7 +1547,7 @@ function showHistory(post_id) {
                     var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
                     box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                     box.find("h7").before(user_button_code);
-                    $("#popup-post-history").prepend(box);
+                    $("#popup-post-history .form-body").prepend(box);
                 }
                 generateCodeMirrorBlocks($("#popup-post-history")[0]);
             },

@@ -111,8 +111,9 @@
 
     function onTitleChange() {
         let title = $('#g_title').val();
+        let my_id = $('#g_id').val();
         if (title !== '') {
-            title = ': ' + title;
+            title = ': [' + my_id + '] ' + title;
         }
         $('#modal_label_title').html(title);
     }

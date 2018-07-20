@@ -133,6 +133,48 @@ class GradedComponent extends AbstractModel {
         return $this->marks;
     }
 
+    /**
+     * Gets if this component grade is attached to a AutoGradedVersion
+     * @return bool
+     */
+    public function hasGradedVersion() {
+        return $this->graded_version !== -1;
+    }
+
+    /**
+     * Gets if this graded component received a mark id
+     * @param int $mark_id
+     * @return bool
+     */
+    public function hasMarkId($mark_id) {
+        return in_array($mark_id, $this->mark_ids);
+    }
+
+    /**
+     * Gets if this graded component received a mark
+     * @param Mark $mark
+     * @return bool
+     */
+    public function hasMark(Mark $mark) {
+        return $this->hasMarkId($mark->getId());
+    }
+
+    /**
+     * Gets the total number of points earned for this component
+     *  (including mark points)
+     * @return float
+     */
+    public function getTotalScore() {
+        // Be sure to add the default so count-down gradeables don't become negative
+        $score = $this->component->getDefault();
+        foreach($this->marks as $mark) {
+            $score += $mark->getPoints();
+        }
+        $score += $this->getScore();
+        $score = min(max($score, $this->component->getLowerClamp()), $this->component->getUpperClamp());
+        return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
+    }
+
     /* Overridden setters with validation */
 
     /**

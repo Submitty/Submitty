@@ -110,7 +110,7 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("User ID cannot be empty");
         }
 
-        $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
+        $user = $this->core->getQueries()->getUserById($_POST['user_id']);
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
@@ -193,9 +193,15 @@ class UsersController extends AbstractController {
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
+                $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
-            $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
-            $this->core->addSuccessMessage("User '{$user->getId()}' created");
+            else {
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
+            }
+
         }
         $this->core->redirect($return_url);
     }
