@@ -578,13 +578,8 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-<<<<<<< HEAD
-            "class" => "btn btn-default btn-nav",
-            "name" => "edit-btn"
-=======
             "class" => "fa fa-pencil",
             "title_on_hover" => true
->>>>>>> master
         ]);
         return $button;
     }
@@ -596,15 +591,9 @@ class NavigationView extends AbstractView {
     private function getRebuildButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
             "title" => "Rebuild",
-<<<<<<< HEAD
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignement', 'id' => $gradeable->getId())),
-            "class" => $class,
-            "name" => "rebuild-btn"
-=======
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
             "class" => "fa fa-wrench",
             "title_on_hover" => true
->>>>>>> master
         ]);
         return $button;
     }
