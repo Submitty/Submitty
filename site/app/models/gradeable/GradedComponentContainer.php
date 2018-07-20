@@ -268,4 +268,76 @@ class GradedComponentContainer extends AbstractModel {
         }
         return $count;
     }
+
+    /**
+     * Gets if the submitter received the mark at least once
+     * @param Mark $mark
+     * @return bool
+     */
+    public function hasMark(Mark $mark) {
+        return $this->getMarkMultiplicity($mark) > 0;
+    }
+
+    /**
+     * Gets the submission version these component grades are for,
+     *  or false if they are inconsistent / ungraded
+     * @return int|bool
+     */
+    public function getGradedVersion() {
+        $version = false;
+        /** @var GradedComponent $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            $v = $graded_component->getGradedVersion();
+            if ($version === false) {
+                $version = $v;
+                continue;
+            }
+            if ($v !== $version) {
+                return false;
+            }
+        }
+        return $version;
+    }
+
+    /**
+     * Gets all of the graders for this component
+     * @return User[] indexed by user id
+     */
+    public function getGraders() {
+        $graders = [];
+        /** @var GradedComponent $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            $grader = $graded_component->getGrader();
+            $graders[$grader->getId()] = $grader;
+        }
+        return $graders;
+    }
+
+    /**
+     * Gets all user-visible graders for this component
+     * @return User[] indexed by user id
+     */
+    public function getVisibleGraders() {
+        return array_filter($this->getGraders(), function (User $grader) {
+            return $grader->accessFullGrading();
+        });
+    }
+
+    /**
+     * Gets the score for this component (custom mark for electronic gradeables)
+     * Note: check that `isComplete` is true before calling this
+     * @return float
+     */
+    public function getScore() {
+        return $this->component->isPeer() ? 0.0 : $this->getGradedComponent()->getScore();
+    }
+
+    /**
+     * Gets the comment for this component (custom mark comment for electronic gradeables)
+     * Note: check that `isComplete` is true before calling this
+     * @return string
+     */
+    public function getComment() {
+        return $this->component->isPeer() ? '' : $this->getGradedComponent()->getComment();
+    }
 }
