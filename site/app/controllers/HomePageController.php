@@ -83,13 +83,20 @@ class HomePageController extends AbstractController {
     public function showHomepage() {
         $user = $this->core->getUser();
         $submitty_path = $this->core->getConfig()->getSubmittyPath();
-        $courses = $this->core->getQueries()->getStudentCoursesById($user->getId(), $submitty_path);
+        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user->getId(), $submitty_path);
+        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user->getId(), $submitty_path);
+
         //Filter out any courses a student has dropped so they do not appear on the homepage.
         //Do not filter courses for non-students.
-        $courses = array_filter($courses, function($course) use($user) {
-        	return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
+
+        $unarchived_courses = array_filter($unarchived_courses, function($course) use($user) {
+            return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
+        $archived_courses = array_filter($archived_courses, function($course) use($user) {
+            return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
+        });
+
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
-        $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $courses, $changeNameText);
+        $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText);
     }
 }

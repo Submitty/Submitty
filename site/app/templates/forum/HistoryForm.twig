@@ -1,0 +1,15 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}popup-post-history{% endblock %}
+{% block title %}Edit History{% endblock %}
+{% block body %}
+    <div class="post_box" style="margin-left:0px;display: none;">
+        <pre><p class="post_content" style="white-space: pre-wrap; "></p></pre>
+        <hr style="margin-bottom:3px;">
+        <span style="margin-top:8px;margin-left:10px;float:right;">
+        <h7 style="position:relative; right:5px;"></h7>
+    </span>
+    </div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}
