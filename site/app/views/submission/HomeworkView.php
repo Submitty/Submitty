@@ -360,7 +360,7 @@ class HomeworkView extends AbstractView {
         $current_version = $gradeable->getCurrentVersion();
 
         // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->useVcsCheckout() && $gradeable->getStudentDownload() && !($gradeable->getCurrentVersionNumber() !== $gradeable->getActiveVersion() && !$gradeable->getStudentAnyVersion());
+        $can_download = !$gradeable->useVcsCheckout() && $gradeable->getStudentDownload() && ($gradeable->getCurrentVersionNumber() === $gradeable->getActiveVersion() || $gradeable->getStudentAnyVersion());
 
         $files = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
         foreach ($files as &$file) {
