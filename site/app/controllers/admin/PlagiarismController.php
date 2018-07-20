@@ -15,15 +15,12 @@ class PlagiarismController extends AbstractController {
             case 'index':
                 $this->plagiarismIndex();
                 break;
-            case 'save_configuration_form':
-                $this->saveConfigurationForm();
+            case 'configure_new_gradeable_for_plagiarism':
+                $this->lichenConfigurationForm();
                 break;    
             case 'save_plagiarism_configuration':
                 $this->savePlagiarismConfiguration();
-                break; 
-            case 'get_plagiarism_ranking_for_gradeable':
-                $this->ajaxGetPlagiarismRankingForGradeable();
-                break; 
+                break;
             case 'get_submission_concatinated':
             	$this->ajaxGetSubmissionConcatinated();
             	break;
@@ -36,8 +33,9 @@ class PlagiarismController extends AbstractController {
             case 're_run_plagiarism':
                 $this->reRunPlagiarism();
                 break; 
-            case 'show_plagiarism_result'
-                $this->showPlagiarismResult();         
+            case 'show_plagiarism_result':
+                $this->showPlagiarismResult(); 
+                break;        
             default:
                 $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
                 $this->plagiarismMainPage();
@@ -65,6 +63,10 @@ class PlagiarismController extends AbstractController {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         
+        if(!$this->core->getUser()->accessAdmin()) {
+            die("Don't have permission to access page.");
+        }
+
         $gradeables_with_plagiarism_result= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
             if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
@@ -79,19 +81,41 @@ class PlagiarismController extends AbstractController {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_id= $_REQUEST['gradeable_id'];
-
+        $gradeable_title= ($this->core->getQueries()->getGradeable($gradeable_id))->getName();
+        $return_url= $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course,'page' => 'plagiarism'));
         // $lichen_saved_configs = array_diff(scandir("/var/local/submitty/courses/$semester/$course/lichen/config"), array('.', '..'));
         // foreach($lichen_saved_configs as $i=>$lichen_saved_config) {
         //     $config_gradeable_id = json_decode(file_get_contents("/var/local/submitty/courses/$semester/$course/lichen/config/".$lichen_saved_config), true)["gradeable"];
         //     unset($lichen_saved_configs[$i]);
         //     $lichen_saved_configs[$lichen_saved_config] = ($this->core->getQueries()->getGradeable($config_gradeable_id))->getName();
         // }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id);
+        if(!$this->core->getUser()->accessAdmin()) {
+            die("Don't have permission to access page.");
+        }
+
+        $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
+        if(!file_exists($file_path)) {
+            $this->core->addErrorMessage("Ranking File do not exist. Lichen Detector failed to create ranking file");
+            $this->core->redirect($return_url);
+        }
+        if(file_get_contents($file_path) == "") {
+            $this->core->addSuccessMessage("There are no matches for the gradeable with current configuration");
+            $this->core->redirect($return_url);   
+        }
+        $content =file_get_contents($file_path);
+        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings,3);
+        foreach($rankings as $i => $ranking) {
+            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());  
+        }
+        
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches'); 
         // $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
     }
 
-    public function saveConfigurationForm() {
+    public function lichenConfigurationForm() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
@@ -275,31 +299,6 @@ class PlagiarismController extends AbstractController {
         
         // code for rerun plagirism
         $this->core->redirect($return_url);
-    }
-
-    public function ajaxGetPlagiarismRankingForGradeable(){
-    	$gradeable_id = $_REQUEST['gradeable_id'];
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
-        $return="";
-        $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
-    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_path))) {
-        	$content =file_get_contents($file_path);
-        	$content = trim(str_replace(array("\r", "\n"), '', $content));
-        	$rankings = preg_split('/ +/', $content);
-    		$rankings = array_chunk($rankings,3);
-    		foreach($rankings as $i => $ranking) {
-    			array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());  
-    		}
-    	    $return = json_encode($rankings);
-        }
-        else{
-        	$return = array('error' => 'Unable to open the ranking file');
-        	$return = json_encode($return);	
-        }
-    	echo($return);
     }
 
     public function ajaxGetSubmissionConcatinated() {

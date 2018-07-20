@@ -265,57 +265,19 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     });
 }
 
-function setRankingForGradeable() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    if(gradeable_id == ""){
-        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="code_box_1"]').empty();
-        $('[name="code_box_2"]').empty();
-    }
-    else {
-        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
-                'gradeable_id': gradeable_id});
-
-        $.ajax({
-            url: url,
-            success: function(data) {
-                var rankings = JSON.parse(data);
-                if(rankings.error){
-                    alert(rankings.error);
-                    return;
-                }
-                var append_options='<option value="">None</option>';
-                $.each(rankings, function(i,user_ranking_info){
-                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
-                });
-                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
-            },
-            error: function(e) {
-                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
-            }
-        })
-    }    
-}
-
-function setUserSubmittedCode(changed) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
+function setUserSubmittedCode(gradeable_id, changed) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
     if(user_id_1 == ""){
-        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="code_box_1"]').empty();
         $('[name="code_box_2"]').empty();
     }
     else {
-        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
-            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
             $('[name="code_box_1"]').empty(); 
             $('[name="code_box_2"]').empty(); 
         }
@@ -351,7 +313,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
                             }
                         });
-                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
                         $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                     },
                     error: function(e) {
@@ -379,7 +341,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
                             });
                         }
-                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                        $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -388,7 +350,7 @@ function setUserSubmittedCode(changed) {
                 $('[name="code_box_2"]').empty();
             }
             if (changed == 'user_id_2') {
-                if (($('[name="user_id_2"]', form2).val()) == '') {
+                if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
@@ -409,8 +371,8 @@ function setUserSubmittedCode(changed) {
 
                 }
                 else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
@@ -561,25 +523,23 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     })
 }
 
-function toggleUsersPlagiarism() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function toggleUsersPlagiarism(gradeable_id) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
 
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
 
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
-    $('[name="user_id_1"]', form2).val(user_id_2);
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
+    $('[name="user_id_1"]', form).val(user_id_2);
     jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode('user_id_1');
-    $('[name="version_user_1"]', form2).val(version_user_2);
-    setUserSubmittedCode('version_user_1');
-    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    setUserSubmittedCode(gradeable_id ,'user_id_1');
+    $('[name="version_user_1"]', form).val(version_user_2);
+    setUserSubmittedCode(gradeable_id, 'version_user_1');
+    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
     jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode('user_id_2');
+    setUserSubmittedCode(gradeable_id, 'user_id_2');
 }
 
 

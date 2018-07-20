@@ -43,6 +43,9 @@ HTML;
         $return .= <<<HTML
 <div class="content">
     <h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <div class="nav-buttons">
+        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'semester' => $semester, 'course'=> $course, 'action' => 'configure_new_gradeable_for_plagiarism'))}">+ Configure New Gradeable for Plagiarism Detection</a>
+    </div><br /><br />
     <div class="sub">
     <center>
     <table style="border-collapse: separate;border-spacing: 15px 10px;"><tr>
@@ -51,13 +54,13 @@ HTML;
             $title = $gradeable['g_title'];
             $id = $gradeable['g_id'];
             $return .= <<<HTML
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
         </td>
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </td>
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
         </td>
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'delete_plagiarism_result_and_config', 'gradeable_id' => $id))}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'delete_plagiarism_result_and_config', 'gradeable_id' => $id))}"><i class="fa fa-trash" aria-hidden="true"></i></a>
         </td>
         </tr>
 HTML;
@@ -71,38 +74,30 @@ HTML;
         return $return;   
     }
 
-    public function showPlagiarismResult($semester, $course, $gradeable_id) {
+    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
         $return = "";
         $return .= <<<HTML
 <div class="content">
 <h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1>
 <br>
 HTML;
+
         $return .= <<<HTML
-        <div class="nav-buttons">
-            <a class="btn btn-primary" onclick="reRunPlagiarismForm();">Re-Run Plagiarism</a>
-            <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'save_configuration_form'))}">Configure Lichen Plagiarism Detection</a>
-        </div><br /><br /><br />
-        <form id="gradeables_with_plagiarism_result">
-            Gradeables with Plagiarism Result: 
-            <select name="gradeable_id">
-            <option value="" selected>None</option>
-HTML;
-        foreach ($gradeable_ids_titles as $gradeable_id_title) {
-            $title = $gradeable_id_title['g_title'];
-            $id = $gradeable_id_title['g_id'];
-            $return .= <<<HTML
-                <option value="{$id}">$title</option>
-HTML;
-        }
-        $return .= <<<HTML
-        </select>
-        </form><br /><br />
         <div class="sub">
+        Gradeable: <b>$gradeable_title</b><br />
+        <br>
         <form id="users_with_plagiarism">
             User 1 (sorted by %match): 
             <select name="user_id_1">
                 <option value="">None</option>
+HTML;
+        foreach ($rankings as $ranking) {
+            $return .= <<<HTML
+                <option value="{$ranking[1]}">$ranking[3]  ($ranking[0])</option>    
+HTML;
+        }
+
+        $return .= <<<HTML
             </select>
             Version: 
             <select name="version_user_1">
@@ -112,7 +107,7 @@ HTML;
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
-                <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism();">Toggle</a>
+                <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>   
         </form><br />
         <div name="code_box_1" style="float:left;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
@@ -124,20 +119,15 @@ HTML;
         $return .= <<<HTML
 </div>
 <script>
-    var form1 = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    $('[name="gradeable_id"]', form1).change(function(){
-        setRankingForGradeable();
+    var form = $("#users_with_plagiarism");
+    $('[name="user_id_1"]', form).change(function(){
+        setUserSubmittedCode('{$gradeable_id}','user_id_1');
     });
-    
-    $('[name="user_id_1"]', form2).change(function(){
-        setUserSubmittedCode('user_id_1');
+    $('[name="version_user_1"]', form).change(function(){
+        setUserSubmittedCode('{$gradeable_id}', 'version_user_1');
     });
-    $('[name="version_user_1"]', form2).change(function(){
-        setUserSubmittedCode('version_user_1');
-    });
-    $('[name="user_id_2"]', form2).change(function(){
-        setUserSubmittedCode('user_id_2');
+    $('[name="user_id_2"]', form).change(function(){
+        setUserSubmittedCode('{$gradeable_id}', 'user_id_2');
     });
     $(document).click(function() {
         if($('#popup_to_show_matches_id').css('display') == 'block'){
