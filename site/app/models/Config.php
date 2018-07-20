@@ -342,6 +342,7 @@ class Config extends AbstractModel {
             if (!isset($config[$section][$key]) &&
                 $key == "manual_grading_enabled") {
               $config[$section][$key] = true;
+            }
             if (!isset($config[$section][$key]) &&
                 $key == "regrade_message") {
               $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
