@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo $PATH
+exit 1
 # Execute this script using source so that PATH is updated for the rest of the build
 
 # Set the Java version
