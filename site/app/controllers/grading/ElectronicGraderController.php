@@ -71,13 +71,43 @@ class ElectronicGraderController extends GradingController {
             case 'pdf_annotation_embedded':
                 $this->showEmbeddedPDFAnnotation();
                 break;
+            case 'save_pdf_annotation':
+                $this->savePDFAnnotation();
+                break;
             default:
                 $this->showStatus();
                 break;
         }
     }
 
+    public function savePDFAnnotation(){
+        //Save the annotation layer to a folder.
+        $annotation_layer = $_POST['annotation_layer'];
+        $annotation_info = $_POST['GENERAL_INFORMATION'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $annotation_info['user_id'])->getActiveVersion();
+        $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
+        if(!FileUtils::createDir($annotation_gradeable_path) && !is_dir($annotation_gradeable_path)){
+            $this->core->addErrorMessage("Creating annotation gradeable folder failed");
+            return false;
+        }
+        $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $annotation_info['user_id']);
+        if(!FileUtils::createDir($annotation_user_path) && !is_dir($annotation_user_path)){
+            $this->core->addErrorMessage("Creating annotation user folder failed");
+            return false;
+        }
+        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
+        if(!FileUtils::createDir($annotation_version_path) && !is_dir($annotation_version_path)){
+            $this->core->addErrorMessage("Creating annotation version folder failed");
+            return false;
+        }
+        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . '_annotation.json';
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
+        return true;
+    }
+
     public function showEmbeddedPDFAnnotation(){
+        //This is the embedded pdf annotator that we built.
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $user_id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
@@ -91,6 +121,8 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function showPDFAnnotationFullPage(){
+        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
+        //a full-sized annotator, so keeping this in for now.
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');

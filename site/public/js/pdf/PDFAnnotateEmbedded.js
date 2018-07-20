@@ -8,6 +8,11 @@ let RENDER_OPTIONS = {
     scale: 1,
     rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
 };
+let GENERAL_INFORMATION = {
+    user_id: "",
+    gradeable_id: "",
+    file_name: "",
+}
 
 PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
 PDFJS.workerSrc = './shared/pdf.worker.js';
@@ -37,16 +42,19 @@ document.getElementById('submission_browser').addEventListener('scroll', functio
 });
 
 function render(gradeable_id, user_id, file_name) {
+    let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
     $.ajax({
         type: 'POST',
-        url:'http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=base64_encode_pdf',
-        // url: buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'}),
+        url: url,
         data: {
             gradeable_id: gradeable_id,
             user_id: user_id,
             filename: file_name
         },
         success: function(data){
+            GENERAL_INFORMATION.user_id = user_id;
+            GENERAL_INFORMATION.gradeable_id = gradeable_id;
+            GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
             documentId = file_name;
             var pdfData = JSON.parse(data);
@@ -69,3 +77,130 @@ function render(gradeable_id, user_id, file_name) {
         }
     });
 }
+//Toolbar stuff
+(function (){
+    function setActiveToolbarItem(option){
+        let selected = $('.tool-selected');
+        if(option != selected.attr('value')){
+            //There are two classes for the icons; toolbar-action and toolbar-item.
+            //toolbar-action are single use buttons such as download and clear
+            //toolbar-item are continuous options such as pen, text, etc.
+            let clicked_button = $("a[value="+option+"]");
+            if(!clicked_button.hasClass('toolbar-action')){
+                $(selected[0]).removeClass('tool-selected');
+                clicked_button.addClass('tool-selected');
+                switch($(selected[0]).attr('value')){
+                    case 'pen':
+                        UI.disablePen();
+                        break;
+                    case 'cursor':
+                        UI.disableEdit();
+                        break;
+                }
+            }
+            switch(option){
+                case 'pen':
+                    UI.enablePen();
+                    break;
+                case 'cursor':
+                    UI.enableEdit();
+                    break;
+                case 'clear':
+                    if (confirm('Are you sure you want to clear annotations?')) {
+                        for (let i=0; i<NUM_PAGES; i++) {
+                            document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
+                        }
+
+                        localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+                    }
+                    break;
+                case 'save':
+                    // debugger;
+                    let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
+                    let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            annotation_layer,
+                            GENERAL_INFORMATION
+                        },
+                        success: function(data){
+                            alert("Annotation successfully saved!");
+                        }
+                    });
+                    break;
+            }
+        }
+
+    }
+
+    function handleToolbarClick(e){
+        setActiveToolbarItem(e.target.getAttribute('value'));
+    }
+    document.getElementById('pdf_annotation_bar').addEventListener('click', handleToolbarClick);
+})();
+
+// Pen stuff
+(function () {
+    let penSize;
+    let penColor;
+
+    function initPen() {
+        //TODO: Add size selector
+        // let size = document.querySelector('.toolbar .pen-size');
+        // for (let i=0; i<20; i++) {
+        //     size.appendChild(new Option(i+1, i+1));
+        // }
+
+        setPen(
+            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/size`) || 1,
+            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/color`) || '#000000'
+        );
+        //TODO: Add color selector
+        // initColorPicker(document.querySelector('.pen-color'), penColor, function (value) {
+        //     setPen(penSize, value);
+        // });
+    }
+
+    function setPen(size, color) {
+        let modified = false;
+
+        if (penSize !== size) {
+            modified = true;
+            penSize = size;
+            localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/size`, penSize);
+            // document.querySelector('.toolbar .pen-size').value = penSize;
+        }
+
+        if (penColor !== color) {
+            modified = true;
+            penColor = color;
+            localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/color`, penColor);
+
+            // let selected = document.querySelector('.toolbar .pen-color.color-selected');
+            // if (selected) {
+            //     selected.classList.remove('color-selected');
+            //     selected.removeAttribute('aria-selected');
+            // }
+            //
+            // selected = document.querySelector(`.toolbar .pen-color[data-color="${color}"]`);
+            // if (selected) {
+            //     selected.classList.add('color-selected');
+            //     selected.setAttribute('aria-selected', true);
+            // }
+        }
+
+        if (modified) {
+            UI.setPen(penSize, penColor);
+        }
+    }
+
+    function handlePenSizeChange(e) {
+        setPen(e.target.value, penColor);
+    }
+
+    // document.querySelector('.toolbar .pen-size').addEventListener('change', handlePenSizeChange);
+
+    initPen();
+})();

@@ -33,15 +33,6 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function encodePDF(){
-        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
-        $user_id = $_POST['user_id'] ?? NULL;
-        $file_name = $_POST['filename'] ?? NULL;
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
-        return $this->core->getOutput()->renderJson($pdf64);
-    }
-
     // function to check that this is a valid access request
     private function checkValidAccess($is_zip, &$error_string) {
         $error_string="";
@@ -182,6 +173,15 @@ class MiscController extends AbstractController {
         else {
             return false;
         }
+    }
+
+    private function encodePDF(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $file_name = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        return $this->core->getOutput()->renderJson($pdf64);
     }
 
     private function displayFile() {

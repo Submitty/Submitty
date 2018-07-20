@@ -12,13 +12,13 @@
 
 #pdf_annotation_bar {
     position:relative;
-    height: 400px;
-    width: 41px;
+    height: 314px;
+    width: 40px;
     top: -90px;
     left: 45%;
     background-color: #edf6f6;
     cursor: move;
-    z-index:40;
+    z-index:41;
     border: solid 6px #e741ff;
 }
 
