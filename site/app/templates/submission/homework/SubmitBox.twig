@@ -269,12 +269,12 @@
                 num_pages = $("#num_pages").val();
             };
             // vcs upload
-            if ({{ gradeable.useVcsCheckout() ? "true" : "false" }}) {
+            if ({{ is_vcs ? "true" : "false" }}) {
                 repo_id = $("#repo_id").val();
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable.getId() }}", num_pages);
+                handleBulk("{{ gradeable_id }}", num_pages);
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
@@ -282,7 +282,7 @@
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
             }
             e.stopPropagation();
         });
