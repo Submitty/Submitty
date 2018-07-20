@@ -35,10 +35,12 @@ class PlagiarismController extends AbstractController {
                 break;
             case 're_run_plagiarism':
                 $this->reRunPlagiarism();
-                break;      
+                break; 
+            case 'show_plagiarism_result'
+                $this->showPlagiarismResult();         
             default:
                 $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
-                $this->plagiarismTree();
+                $this->plagiarismMainPage();
                 break;
         }
     }
@@ -59,29 +61,34 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex', $semester, $course, $assignment);
     }
 
-    public function plagiarismTree() {
+    public function plagiarismMainPage() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        if (file_exists("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/")) {
-            $assignments = array_diff(scandir("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
-        } else {
-            $assignments = array();
+        
+        $gradeables_with_plagiarism_result= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        foreach($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
+            if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
+                unset($gradeables_with_plagiarism_result[$i]);
+            }
         }
-        $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
-        	if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
-        		unset($gradeable_ids_titles[$i]);
-        	}
-        }
-        $lichen_saved_configs = array_diff(scandir("/var/local/submitty/courses/$semester/$course/lichen/config"), array('.', '..'));
-        foreach($lichen_saved_configs as $i=>$lichen_saved_config) {
-            $config_gradeable_id = json_decode(file_get_contents("/var/local/submitty/courses/$semester/$course/lichen/config/".$lichen_saved_config), true)["gradeable"];
-            unset($lichen_saved_configs[$i]);
-            $lichen_saved_configs[$lichen_saved_config] = ($this->core->getQueries()->getGradeable($config_gradeable_id))->getName();
-        }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismTree', $semester, $course, $assignments, $gradeable_ids_titles);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result);
+        
+    }
+
+    public function showPlagiarismResult() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $gradeable_id= $_REQUEST['gradeable_id'];
+
+        // $lichen_saved_configs = array_diff(scandir("/var/local/submitty/courses/$semester/$course/lichen/config"), array('.', '..'));
+        // foreach($lichen_saved_configs as $i=>$lichen_saved_config) {
+        //     $config_gradeable_id = json_decode(file_get_contents("/var/local/submitty/courses/$semester/$course/lichen/config/".$lichen_saved_config), true)["gradeable"];
+        //     unset($lichen_saved_configs[$i]);
+        //     $lichen_saved_configs[$lichen_saved_config] = ($this->core->getQueries()->getGradeable($config_gradeable_id))->getName();
+        // }
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id);
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches'); 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
+        // $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
     }
 
     public function saveConfigurationForm() {
@@ -258,13 +265,14 @@ class PlagiarismController extends AbstractController {
     public function reRunPlagiarism() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
+        $gradeable_id = $_REQUEST['gradeable_id'];
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
         
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
         }
-        $gradeable_id = $_POST['gradeable_id'];
+        
         // code for rerun plagirism
         $this->core->redirect($return_url);
     }

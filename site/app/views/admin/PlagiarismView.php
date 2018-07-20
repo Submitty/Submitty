@@ -38,7 +38,40 @@ HTML;
         return $return;
     }
 
-    public function plagiarismTree($semester, $course, $assignments, $gradeable_ids_titles) {
+    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result) {
+        $return = "";
+        $return .= <<<HTML
+<div class="content">
+    <h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <div class="sub">
+    <center>
+    <table style="border-collapse: separate;border-spacing: 15px 10px;"><tr>
+HTML;
+        foreach ($gradeables_with_plagiarism_result as $gradeable) {
+            $title = $gradeable['g_title'];
+            $id = $gradeable['g_id'];
+            $return .= <<<HTML
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
+        </td>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        </td>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+        </td>
+        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'action' => 'delete_plagiarism_result_and_config', 'gradeable_id' => $id))}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+        </td>
+        </tr>
+HTML;
+        }
+
+        $return .= <<<HTML
+    </table></center>
+    </div>
+</div>    
+HTML;
+        return $return;   
+    }
+
+    public function showPlagiarismResult($semester, $course, $gradeable_id) {
         $return = "";
         $return .= <<<HTML
 <div class="content">
