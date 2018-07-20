@@ -205,7 +205,7 @@ class SubmissionController extends AbstractController {
                 }
                 $canViewWholeGradeable = false;
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $graded_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

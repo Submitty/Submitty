@@ -23,27 +23,30 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * FIXME: will throw exception when admin tries to access with no team on team assignments
-     * @param GradedGradeable $graded_gradeable
+     * @param Gradeable $gradeable
+     * @param GradedGradeable|null $graded_gradeable
      * @param int $display_version
      * @param int $late_days_use
      * @param int $extensions
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    public function showGradeable(GradedGradeable $graded_gradeable, int $display_version, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
         $return = "";
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-        $gradeable = $graded_gradeable->getGradeable();
-        $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
+
+        $version_instance = null;
+        if ($graded_gradeable !== null) {
+            $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
+        }
 
         // FIXME: uncomment when working
         // $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
-            $return .= $this->renderSubmitBox($graded_gradeable, $version_instance, $late_days_use);
+            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
@@ -59,7 +62,7 @@ class HomeworkView extends AbstractView {
           }
          */
 
-        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $auto_graded_gradeable = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable() : null;
         $submission_count = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getHighestVersion() : 0;
         $active_version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : 0;
         if ($submission_count === 0) {
@@ -72,11 +75,12 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $version_instance);
+            $return .= $this->renderTAResultsBox($graded_gradeable);
         }
         if ($this->core->getConfig()->isRegradeEnabled()
             && $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
+            && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
             && $submission_count !== 0) {
             $return .= $this->renderRegradeBox($graded_gradeable);
@@ -214,13 +218,13 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param GradedGradeable $graded_gradeable
+     * @param Gradeable $gradeable
+     * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
      * @return string
      */
-    private function renderSubmitBox(GradedGradeable $graded_gradeable, $version_instance, int $late_days_use): string {
-        $gradeable = $graded_gradeable->getGradeable();
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
@@ -385,10 +389,13 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    private function renderNoSubmissionBox(GradedGradeable $graded_gradeable): string {
+    private function renderNoSubmissionBox($graded_gradeable): string {
+        $team_assignment = $graded_gradeable === null ? true : $graded_gradeable->getGradeable()->isTeamAssignment();
+        $member_list = $graded_gradeable !== null && $team_assignment
+                    ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : '';
         return $this->core->getOutput()->renderTwigTemplate("submission/homework/NoSubmissionBox.twig", [
-            'team_assignment' => $graded_gradeable->getGradeable()->isTeamAssignment(),
-            'member_list' => $graded_gradeable->getSubmitter()->getTeam()->getMemberList()
+            'team_assignment' => $team_assignment,
+            'member_list' => $member_list
         ]);
     }
 
