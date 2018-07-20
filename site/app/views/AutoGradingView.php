@@ -139,8 +139,7 @@ class AutoGradingView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResultsNew.twig", [
             'gradeable_id' => $gradeable->getId(),
-            // FIXME: only works with non-team assignments
-            'user_id' => $graded_gradeable->getSubmitter()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             "num_visible_testcases" => $num_visible_testcases,
             "show_hidden_breakdown" => $show_hidden_breakdown,
             "nonhidden_earned" => $nonhidden_earned,
