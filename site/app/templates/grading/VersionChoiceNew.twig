@@ -9,8 +9,8 @@
         <option value="{{ loop.index }}" {{ loop.index == display_version ? "selected" : "" }}>
             Version #{{ loop.index }}
 
-            {%- if normal_points > 0 -%}
-                &nbsp;&nbsp;&nbsp;Score: {{ version.points }} / {{ normal_points }}
+            {%- if total_points > 0 -%}
+                &nbsp;&nbsp;&nbsp;Score: {{ version.points }} / {{ total_points }}
             {%- endif -%}
             {%- if version.days_late > 0 -%}
                 &nbsp;&nbsp;&nbsp;Days Late: {{ version.days_late }}
