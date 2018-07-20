@@ -791,7 +791,7 @@ INNER JOIN (
   LEFT JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND verifier_id IS NOT NULL
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND gcd_verifier_id IS NOT NULL
 ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
 {$where}
 GROUP BY {$u_or_t}.{$section_key}
@@ -829,7 +829,7 @@ INNER JOIN (
   gradeable_component_data AS gcd
   INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
   INNER JOIN users AS u2 ON gcd_grader_id = user_id
-  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND ((verifier_id IS NOT NULL) OR user_group < 3)
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND ((gcd_verifier_id IS NOT NULL) OR user_group < 3)
 ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
 {$where}
 GROUP BY {$u_or_t}.{$section_key}
@@ -1365,13 +1365,13 @@ VALUES (?, ?, ?)", $params);
         if($component->getVerifier() === null){
             $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), null, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, verifier_id, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
         else{
             $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getVerifier()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
             $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, verifier_id, gcd_graded_version, gcd_grade_time)
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
     }
@@ -1396,7 +1396,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
 UPDATE gradeable_component_data
 SET
   gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
-  gcd_grader_id=?, verifier_id=?
+  gcd_grader_id=?, gcd_verifier_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
 
@@ -1868,12 +1868,12 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
-               if($section_key == "registration_section") {
+                if($section_key == "registration_section") {
                     $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
-               }
-               else {
+                }
+                else {
                     $orderBy = $section_key;
-               }
+                }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users

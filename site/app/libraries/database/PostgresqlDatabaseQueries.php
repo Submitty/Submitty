@@ -281,7 +281,7 @@ SELECT";
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
   gd.array_gcd_grader_id,
-  gd.array_verifier_id,
+  gd.array_gcd_verifier_id,
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
@@ -370,7 +370,7 @@ LEFT JOIN (
     in_gcd.array_gcd_score,
     in_gcd.array_gcd_component_comment,
     in_gcd.array_gcd_grader_id,
-    in_gcd.array_verifier_id,
+    in_gcd.array_gcd_verifier_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
     in_gcd.array_array_gcm_mark,
@@ -396,7 +396,7 @@ LEFT JOIN (
       array_agg(gcd_score) AS array_gcd_score,
       array_agg(gcd_component_comment) AS array_gcd_component_comment,
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
-      array_agg(verifier_id) AS array_verifier_id,
+      array_agg(gcd_verifier_id) AS array_gcd_verifier_id,
       array_agg(u2.user_id) AS array_gcd_user_id2,
       array_agg(u2.anon_id) AS array_gcd_anon_id2,
       array_agg(u2.user_firstname) AS array_gcd_user_firstname2,
@@ -425,7 +425,7 @@ LEFT JOIN (
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id
-    LEFT JOIN users AS u2 ON gcd.verifier_id = u2.user_id
+    LEFT JOIN users AS u2 ON gcd.gcd_verifier_id = u2.user_id
     GROUP BY gcd.gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON g.g_id = gd.g_id AND (gd.gd_user_id = u.user_id OR u.user_id IN (
@@ -500,7 +500,7 @@ ORDER BY ".implode(", ", $order_by);
                                 'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
                                 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
                                 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
-                                'gcd_component_comment', 'gcd_grader_id','verifier_id', 'gcd_graded_version', 'gcd_grade_time',
+                                'gcd_component_comment', 'gcd_grader_id','gcd_verifier_id', 'gcd_graded_version', 'gcd_grade_time',
                                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                                 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group', 'gcd_user_id2', 'gcd_user_firstname2', 'gcd_user_preferred_firstname2',
                                 'gcd_user_lastname2', 'gcd_user_email2', 'gcd_user_group2');
@@ -1318,7 +1318,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_score) AS array_score,
                   json_agg(gcd_component_comment) AS array_comment,
                   json_agg(gcd_grader_id) AS array_grader_id,
-                  json_agg(verifier_id) AS array_verifier_id,
+                  json_agg(gcd_verifier_id) AS array_gcd_verifier_id,
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
@@ -1492,7 +1492,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                         $graded_components[] = $graded_component;
                     }
                 }
-                
+
                 $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
             }
             if (isset($db_row_split['version'])) {
