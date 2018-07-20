@@ -33,7 +33,7 @@
             {% endfor %}
         </select>
     </div>
-    <p id="student-error-message" class="red-message">
+    <p id="user-form-student-error-message" class="red-message">
         Warning: Students with no registration section cannot login to the course
     </p>
     <div style="display: inline-block">
@@ -58,7 +58,7 @@
         <input type="checkbox" id="manual_registration" name="manual_registration">
         <label for="manual_registration">Manually Registered User (no automatic updates)</label>
     </div>
-    <div style="display: inline-block">
+    <div id="user-form-assigned-sections" style="display: inline-block">
         <h3>Assigned Sections (Graders Only)</h3>
         {% for section in reg_sections %}
             <div>
@@ -77,20 +77,25 @@
 
     <script>
         function userFormChange() {
-            var display_message = true;
-
             var user_elem = $("select[name='user_group']")[0];
-            display_message = display_message && (user_elem.options[user_elem.selectedIndex].text === "Student");
+            var is_student = user_elem.options[user_elem.selectedIndex].text === "Student";
 
             var regis_elem = $("select[name='registered_section']")[0];
-            display_message = display_message && (regis_elem.options[regis_elem.selectedIndex].text === "Not Registered");
+            var is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === "Not Registered";
 
-            if(display_message) {
+            if(is_student && is_no_regis) {
                 $("#student-error-message").css("display", "block");
             }
             else {
-                $("#student-error-message").css("display", "none");
+                $("user-form-#student-error-message").css("display", "none");
             }
+            if(is_student) {
+                $("#user-form-assigned-sections").css("display", "none");
+            }
+            else {
+                $("#user-form-assigned-sections").css("display", "block");
+            }
+
         }
 
     </script>
