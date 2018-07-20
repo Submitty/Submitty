@@ -164,7 +164,6 @@ HTML;
 
 		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
 		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
@@ -225,7 +224,6 @@ HTML;
 	if($thread_count > 0 || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
-		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
@@ -246,90 +244,37 @@ HTML;
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
-	$onChange = '';
-	if($threadExists) {
-		$onChange = <<<HTML
-		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
-HTML;
-	}
 	$return .= <<<HTML
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+HTML;
 
-		<div id="category_wrapper" class="popup-form" style="width: 50%;">
-			<label><h3>Filter by Categories/Status</h3></label><br/>
-			<i>Please unselect all options for removing filter.</i><br/>
-			<center>
-			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;" data-ays-ignore="true">
-HTML;
-			for($i = 0; $i < count($categories); $i++){
-				$return .= <<<HTML
-					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
-HTML;
-			}
 	$cookieSelectedCategories = '';
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
-				$cookieSelectedCategories .= <<<HTML
-					$('#thread_category option[value="{$selectedId}"]').prop('selected', true);
-HTML;
+				$cookieSelectedCategories[] = $selectedId;
 			}
 		}
 	}
-	$display_option_js = <<<HTML
-		$("#tree").prop("checked", true);
-HTML;
-	if(in_array($display_option, array("tree", "time", "alpha"))) {
-		$display_option_js = <<<HTML
-			$("#{$display_option}").prop("checked", true);
-HTML;
-	}
-	$return .= <<<HTML
-				</select>
-				&nbsp;
-				<select id="thread_status_select" class="form-control" multiple style="height: auto;" data-ays-ignore="true">
-		            <option value="0">Comment</option>
-		            <option value="-1">Unresolved</option>
-		            <option value="1">Resolved</option>
-		        </select>
-				</center>
-				<br/>
-				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option, #thread_status_select option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
-					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
-				</div>
 
-				<script type="text/javascript">
-					$( document ).ready(function() {
-						$('#thread_category option, #thread_status_select option').mousedown(function(e) {
-							e.preventDefault();
-							var current_selection = $(this).prop('selected');
-							$(this).prop('selected', !current_selection);
-							{$onChange}
-							return true;
-						});
-						{$cookieSelectedCategories}
-						{$display_option_js}
-					});
-				</script>
-			</div>
+	$return .= <<<HTML
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
-			$return .= <<<HTML
+        $return .= <<<HTML
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
 			<label for="radio">Hierarchical</label>  
 
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
 			<label for="radio2">Chronological</label>
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
+        if($this->core->getUser()->getGroup() <= 2){
+            $return .= <<<HTML
 			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
 			<label for="radio3">Alphabetical</label>
 HTML;
-	}
-	$return .= <<<HTML
+        }
+        $return .= <<<HTML
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
@@ -338,11 +283,12 @@ HTML;
 			</button>
 			</form>
 HTML;
-		$return .= <<<HTML
+        $return .= <<<HTML
 		</div>
 
 HTML;
-		if(!$threadExists){
+
+        if(!$threadExists){
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
@@ -350,67 +296,6 @@ HTML;
 				</div>
 HTML;
 		} else {
-
-			if($this->core->getUser()->getGroup() <= 2){
-				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
-				$merge_thread_list = array();
-				for($i = 0; $i < count($threads); $i++){
-					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-					$date = date_create($first_post['timestamp']);
-					if($current_thead_date>$date) {
-						array_push($merge_thread_list, $threads[$i]);
-					}
-				}
-
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                    "merge_thread_list" => $merge_thread_list,
-                    "current_thread" => $currentThread
-                ]);
-			}
-			$return .= <<<HTML
-			<div class="popup-form decent" id="edit-user-post">
-				<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-				 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-				 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-				 <h3 id="edit_user_prompt"></h3>
-HTML;
-					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-							"show_title" => true,
-							"show_post" => true,
-							"post_content_placeholder" => "Enter your post here...",
-							"show_categories" => true,
-							"show_anon" => true,
-							"show_thread_status" => true,
-							"show_cancel_edit_form" => true,
-							"submit_label" => "Update Post",
-						]);
-					$return .= <<<HTML
-				</form>
-				<script type="text/javascript">
-					$("#thread_form").submit(function() {
-						if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-							alert("At least one category must be selected.");
-							return false;
-						}
-					});
-				</script>
-			</div>
-			<div class="popup-form decent posts_list no-popup-div" style="height: auto;">
-				<h3>Edit History
-					<a onclick="$('#popup-post-history').parent().hide();" class="btn btn-danger" style="float: right;">Close</a>
-				</h3>
-				<div id="popup-post-history">
-					<div class="post_box" style="margin-left:0px;display: none;">
-						<pre><p class="post_content" style="white-space: pre-wrap; "></p></pre>
-						<hr style="margin-bottom:3px;">
-						<span style="margin-top:8px;margin-left:10px;float:right;">
-							<h7 style="position:relative; right:5px;"></h7>
-						</span>
-					</div>
-				</div>
-			</div>
-HTML;
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
@@ -562,6 +447,36 @@ HTML;
 		</script>
 HTML;
 
+        if($this->core->getUser()->getGroup() <= 2){
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thead_date = date_create($current_thread_first_post["timestamp"]);
+            $merge_thread_list = array();
+            for($i = 0; $i < count($threads); $i++){
+                $first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
+                $date = date_create($first_post['timestamp']);
+                if($current_thead_date>$date) {
+                    array_push($merge_thread_list, $threads[$i]);
+                }
+            }
+
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                "merge_thread_list" => $merge_thread_list,
+                "current_thread" => $currentThread
+            ]);
+        }
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+            "categories" => $categories,
+            "current_thread" => $currentThread,
+            "current_category_ids" => $currentCategoriesIds,
+            "current_course" => $currentCourse,
+            "cookie_selected_categories" => $cookieSelectedCategories,
+            "display_option" => $display_option,
+            "thread_exists" => $threadExists
+        ]);
+
 		return $return;
 	}
 
@@ -650,6 +565,9 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
+						if (!isset($thread['status'])) {
+                            $thread['status'] = 0;
+                        }
 						if($thread['status'] !=0) {
 							if($thread['status'] == 1) {
 								$fa_icon = "fa-check-circle";
@@ -931,142 +849,21 @@ HTML;
 				$("form").areYouSure();
 			});
 		 </script>
+HTML;
+        if($this->core->getUser()->getGroup() <= 2){
+            $categories = $this->core->getQueries()->getCategories();
 
-		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
-HTML;
-		if($this->core->getUser()->getGroup() <= 2){
-			$categories = $this->core->getQueries()->getCategories();
-			$return .= <<<HTML
-			<div class="popup-form" id="category-list">
-				<h3>Categories</h3>
-				<span  style="float: right;">
-					<input id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
-					<button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
-						<i class="fa fa-plus-circle fa-1x"></i> Add category
-					</button>
-				</span>
-				<pre>(Drag to re-order)</pre><br>
-HTML;
-				if(count($categories) == 0) {
-					$return .= <<<HTML
-					<span class='category-list-no-element' style="margin-left: 1em;" >
-						No categories exists please create one.
-					</span>
-HTML;
-				}
+            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+            array_unshift($categories, $dummy_category);
 
-				$dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-				array_unshift($categories, $dummy_category);
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/CategoriesForm.twig", [
+                "categories" => $categories,
+                "category_colors" => $category_colors
+            ]);
+        }
 
-				$return .= <<<HTML
-				<ul id='ui-category-list' style="padding-left: 1em;">
-HTML;
-				// TODO: scrollbar
-				for($i = 0; $i < count($categories); $i++){
-						$additional_display = "";
-						$additional_class = "category-sortable";
-						if($i==0) {
-							// Dummy Category: On new category creation copy of dummy element will be append.
-							$additional_display = "display: none;";
-							$additional_class = "";
-						}
-						$return .= <<<HTML
-						<li id="categorylistitem-{$categories[$i]['category_id']}" class="{$additional_class}" style="color: {$categories[$i]['color']};{$additional_display}">
-							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
-							<span class="categorylistitem-desc">
-								<span>{$categories[$i]['category_desc']}</span>
-								<a class="post_button" title="Edit Category Description"><i class="fa fa-edit" aria-hidden="true"></i></a>
-							</span>
-							<span class="categorylistitem-editdesc" style="display: none;">
-								<input type="text" placeholder="New Description of Category" style="padding: 0;">
-								<a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
-								<a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
-							</span>
-							<div style="float: right;width: auto;">
-							<select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
-HTML;
-							foreach ($category_colors as $color_name => $color_code) {
-								$selected = "";
-								if($color_code == $categories[$i]['color']) {
-									$selected = 'selected="selected"';
-								}
-								$return .= <<<HTML
-								<option value="{$color_code}" style="color: white;background-color: {$color_code};" {$selected}>{$color_name}</option>
-HTML;
-							}
-							$return .= <<<HTML
-							</select>
-							&nbsp;
-							<a class="post_button" title="Delete Category"><i class="fa fa-trash" aria-hidden="true"></i></a>
-							</div>
-						</li>
-HTML;
-				}
-				$return .= <<<HTML
-				</ul>
-				<div  style="width: 100%; margin-top: 10px;">
-					<a style="float: right;" onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-danger">Close</a>
-				</div>
-				<script type="text/javascript">
-					$(function() {
-						$("#ui-category-list").sortable({
-							items : '.category-sortable',
-							handle: ".handle",
-							update: function (event, ui) {
-						        reorderCategories();
-						    }
-						});
-						$("#ui-category-list").find(".fa-trash").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_id = parseInt(item.attr('id').split("-")[1]);
-							var category_desc = item.find(".categorylistitem-desc span").text().trim();
-							deleteCategory(category_id, category_desc);
-						});
-						$("#ui-category-list").find(".fa-edit").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_desc = item.find(".categorylistitem-desc span").text().trim();
-							item.find(".categorylistitem-editdesc input").val(category_desc);
-							item.find(".categorylistitem-desc").hide();
-							item.find(".categorylistitem-editdesc").show();
-
-						});
-						$("#ui-category-list").find(".fa-times").click(function() {
-							var item = $(this).parent().parent().parent();
-							item.find(".categorylistitem-editdesc").hide();
-							item.find(".categorylistitem-desc").show();
-						});
-
-						$("#ui-category-list").find(".fa-check").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_id = parseInt(item.attr('id').split("-")[1]);
-							var category_desc_original = item.find(".categorylistitem-desc span").text().trim();
-							var category_desc = item.find("input").val().trim();
-							if(category_desc != category_desc_original) {
-								editCategory(category_id, category_desc, null);
-							}
-							item.find(".categorylistitem-editdesc").hide();
-							item.find(".categorylistitem-desc").show();
-						});
-						var refresh_color_select = function(element) {
-							$(element).css("background-color",$(element).val());
-						}
-						$(".category-color-picker").change(function(color) {
-							var category_id = parseInt($(this).parent().parent().attr('id').split("-")[1]);
-							var category_color = $(this).val();
-							editCategory(category_id, null, category_color);
-							refresh_color_select($(this));
-						});
-						$(".category-color-picker").each(function(){
-							refresh_color_select($(this));
-						});
-					});
-				</script>
-
-			</div>
-
-HTML;
-		}
 		$return .= <<<HTML
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
