@@ -151,8 +151,6 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
-        - sudo chmod -R 555 /usr/local/lib/python*/
-        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
       before_script:
         # Doing this helps chromedriver from hanging for some mysterious reason
         # https://github.com/SeleniumHQ/docker-selenium/issues/87
@@ -244,8 +242,6 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
-        - sudo chmod -R 555 /usr/local/lib/python*/
-        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
         - sudo bash .setup/travis/autograder.sh
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"

@@ -1,5 +1,5 @@
 {% set break_onclick = disabled ? "return false;" : "" %}
-<div>
+<div class="gradeable">
 {# Components #}
     {% for component in gradeable.components %}
         {% if component.order != -1 %}
@@ -10,26 +10,27 @@
 {# /Components #}
 
 {# General Comment #}
-    <div class="box" style="background-color:#E9EFEF;">
-        <div class="box-title" style="cursor: pointer" onclick="{{ break_onclick }}; toggleGeneralMessage(true);">
-            <span id="title-general" style="cursor: pointer" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
+    <div class="box general-comment">
+        <div class="box-title" onclick="{{ break_onclick }}; toggleGeneralMessage(true);">
+            <span id="title-general" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
                 <b>General Comment</b>
-                <span style="float: right;">
-                    <span id="save-mark-general" style="cursor: pointer;  display: none;" data-changedisplay1="true"> <i class="fa fa-check" style="color: green;" aria-hidden="true">Done</i> </span>
+                <span class="done-container">
+                    <span id="save-mark-general" style="display: none;" data-changedisplay1="true">
+                        <i class="fa fa-check done-button" aria-hidden="true">Done</i>
+                    </span>
                 </span>
             </span>
-            <span id="title-cancel-general" style="cursor: pointer; display: none; width: 5%" data-changebg="true" data-changedisplay1="true">
-                <span id="cancel-mark-general" onclick="{{ break_onclick }}; closeGeneralMessage(false);" style="cursor: pointer; display: none; float: right;" data-changedisplay1="true"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+            <span id="title-cancel-general" class="cancel-container" data-changebg="true" data-changedisplay1="true">
+                <span id="cancel-mark-general" onclick="{{ break_onclick }}; closeGeneralMessage(false);" data-changedisplay1="true">
+                    <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
+                </span>
             </span>
         </div>
         <div>
-            <div class="box" id="summary-general" style="" onclick="{{ break_onclick }}; openGeneralMessage();" data-changedisplay2="true">
+            <div class="box" id="summary-general" onclick="{{ break_onclick }}; openGeneralMessage();" data-changedisplay2="true">
                 <div class="box-title">
-                    <span style="white-space:nowrap; vertical-align:middle; text-align:center"></span>
-                    <span style="width:98%;">
-                        <span id="rubric-custom">
-                            <span id="rubric-textarea-custom" name="comment-custom" class="rubric-textarea">{{ gradeable.overall_comment }}</span>
-                        </span>
+                    <span id="rubric-custom">
+                        <span id="rubric-textarea-custom" name="comment-custom" class="rubric-textarea">{{ gradeable.overall_comment }}</span>
                     </span>
                 </div>
             </div>
@@ -37,7 +38,7 @@
                 <div class="box">
                     <div class="box-title">
                         <span>
-                            <textarea id="comment-id-general" name="comment-general" rows="5" style="width:98%; height:100%; min-height:100px; resize:none; float:left;" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {{ gradeable.disabled ? "disabled" : "" }}>{{ gradeable.overall_comment }}</textarea>
+                            <textarea id="comment-id-general" name="comment-general" rows="5" class="general-comment-entry" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {{ gradeable.disabled ? "disabled" : "" }}>{{ gradeable.overall_comment }}</textarea>
                         </span>
                     </div>
                 </div>
