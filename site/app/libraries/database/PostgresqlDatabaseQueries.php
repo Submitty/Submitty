@@ -1216,6 +1216,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Active Submission Version */
               egv.active_version,
 
+              /* Late day exception data */
+              ldet.array_late_day_exceptions,
+              ldet.array_late_day_user_ids,
+              ldeu.late_day_exceptions,
+
               /* Aggregate Team User Data */
               team.team_id,
               team.array_team_users,
@@ -1275,9 +1280,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   ) AS tu ON gt.team_id = tu.team_id
                 GROUP BY gt.team_id
               ) AS team ON eg.team_assignment AND EXISTS (
-                         SELECT 1 FROM gradeable_teams gt 
-                         WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
-                         LIMIT 1)
+                SELECT 1 FROM gradeable_teams gt 
+                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
+                LIMIT 1)
                          
               /* Join manual grading data */
               LEFT JOIN (
@@ -1354,6 +1359,21 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 SELECT *
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
+              
+              /* Join user late day exceptions */
+              LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
+              
+              /* Join team late day exceptions */
+              LEFT JOIN (
+                SELECT 
+                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.user_id) AS array_late_day_user_ids,
+                  t.team_id,
+                  g_id
+                FROM late_day_exceptions e
+                LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
+                GROUP BY team_id, g_id
+              ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
             WHERE $selector
             $order";
 
@@ -1369,15 +1389,36 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
                 // Create the team with the query results and users array
                 $submitter = new Team($this->core, array_merge($row, ['users' => $team_users]));
+
+                // Get the late day exceptions for each user
+                $late_day_exceptions = [];
+                if (isset($row['array_late_day_user_ids'])) {
+                    $late_day_exceptions = array_combine(
+                        json_decode($row['array_late_day_user_ids']),
+                        json_decode($row['array_late_day_exceptions'])
+                    );
+                }
+                foreach ($submitter->getMembers() as $user_id) {
+                    if (!isset($late_day_exceptions[$user_id])) {
+                        $late_day_exceptions[$user_id] = 0;
+                    }
+                }
             } else {
                 if (isset($row['grading_registration_sections'])) {
                     $row['grading_registration_sections'] = json_decode($row['grading_registration_sections']);
                 }
                 $submitter = new User($this->core, $row);
+
+                // Get the late day exception for the user
+                $late_day_exceptions = [
+                    $submitter->getId() => $row['late_day_exceptions'] ?? 0
+                ];
             }
 
             // Create the graded gradeable instances
-            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter));
+            $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), [
+                'late_day_exceptions' => $late_day_exceptions
+            ]);
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
 

@@ -55,6 +55,8 @@ class ImagesView extends AbstractView {
             }
         }
 
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
             "imageNameArray" => $images_names_array,
