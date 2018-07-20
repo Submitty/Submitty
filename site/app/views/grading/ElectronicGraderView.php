@@ -369,7 +369,7 @@ class ElectronicGraderView extends AbstractView {
                 }
                 if ($question !== null) {
                     if($question->getGrader() === null) {
-                        $info["graded_components"][] = -1;
+                        $info["graded_components"][] = "NULL";
                     }
                     else {
                         $info["graded_components"][] = $question->getGrader()->getGroup();

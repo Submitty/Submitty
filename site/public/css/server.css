@@ -1154,6 +1154,28 @@ end of styles used in the admin gradeable page
     text-align: center;
 }
 
+/* styles for the colors for the electronic grader details page */
+.grader-NULL {
+    color: white;
+}
+
+.grader-4 {
+    color: r;
+}
+
+.grader-3 {
+    color: yellow;
+}
+
+.grader-2,
+.grader-1 {
+    color: green;
+}
+
+.grader-both {
+    color: blue;
+}
+
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }

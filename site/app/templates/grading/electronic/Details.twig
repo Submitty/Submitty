@@ -185,8 +185,8 @@
 {% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
     <td>
         {%- for component in info.graded_components -%}
-            {%- if loop.index0 != 0 %}, {% endif -%}
-            <i class="fa fa-circle grader{{- component -}}"></i>
+            {%- if loop.index0 != 0 %} {% endif -%}
+            <i class="fa fa-circle grader-{{- component -}}"></i>
         {%- endfor -%}
     </td>
 {% endmacro %}
