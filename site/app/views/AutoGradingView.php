@@ -466,8 +466,8 @@ class AutoGradingView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
+            'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
-            'late_days_allowed' => $gradeable->getLateDays() > 0,
             'is_peer' => $gradeable->isPeerGrading(),
             'components' => $component_data,
 
