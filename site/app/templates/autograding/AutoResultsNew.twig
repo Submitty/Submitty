@@ -65,7 +65,7 @@
                 {% else %}
                     <div class="badge">
                         Hidden
-                        {% if ta_grades_released %}
+                        {% if is_ta_grading_complete %}
                             <br>
                             {{ Badge.format_value(testcase.points, testcase.points_total, testcase.extra_credit) }}
                         {% endif %}
