@@ -187,7 +187,7 @@ HTML;
 <br>
 HTML;
         $return .= <<<HTML
-    <div id="run-plagiarism-form" style="overflow:auto;">
+    <div id="save-configuration-form" style="overflow:auto;">
         <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'save_plagiarism_configuration'))}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
             <input type="hidden" name="prior_term_gradeables_number" value="1" />
@@ -309,7 +309,7 @@ HTML;
     </div>    
 </div>
 <script>
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     var prior_term_gradeables = JSON.parse('{$prior_term_gradeables_json}');
     $("select").change(function(){
         var select_element_name = $(this).attr("name");

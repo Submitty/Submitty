@@ -250,7 +250,7 @@ function reRunPlagiarismForm() {
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
     var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
@@ -397,17 +397,15 @@ function setUserSubmittedCode(gradeable_id, changed) {
     }   
 }
 
-function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
     var version_user_2='';
     var user_id_2='';
-    if($('[name="user_id_2"]', form2).val() != "") {
-        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    if($('[name="user_id_2"]', form).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
@@ -421,7 +419,6 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             $(this).css('background-color',"#ffa500");    
         }
     });
-
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
     $.ajax({
@@ -465,7 +462,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -480,8 +477,8 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
-                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
-                setUserSubmittedCode('user_id_2');
+                $('[name="user_id_2"]', form).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode(gradeable_id, 'user_id_2');
                 $('[name="code_box_1"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false) {
@@ -544,7 +541,7 @@ function toggleUsersPlagiarism(gradeable_id) {
 
 
 function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     if(select_element_name == "language") {
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
