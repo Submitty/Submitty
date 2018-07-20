@@ -1180,7 +1180,10 @@ end of styles used in the admin gradeable page
 .grader-1 {
     color: #00b500;
 }
-
+/* prevents line break in the graded questions column */
+.td-graded-questions {
+    white-space: nowrap;
+}
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }
