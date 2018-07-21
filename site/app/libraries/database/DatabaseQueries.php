@@ -117,6 +117,7 @@ class DatabaseQueries {
 
     public function loadThreadBlock($categories_ids, $show_deleted, $current_user, $blockSize, $blockNumber){
         // TODO: favorite and order
+        $query_offset = 1 + $blockNumber * $blockSize;
         // Query Generation
         if(count($categories_ids) == 0) {
             $query_multiple_qmarks = "NULL";
@@ -125,11 +126,16 @@ class DatabaseQueries {
         }
         $query_delete = $show_deleted?"true":"deleted = false";
         $query_delete .= " and merged_thread_id = -1";
-        // Need to sort  by pinned and fav , pinned , fav , none and then t.id 
-        $query = "SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color, true as favorite FROM threads t JOIN thread_categories e ON t.id = e.thread_id JOIN categories_list w ON e.category_id = w.category_id  WHERE {$query_delete} GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) ORDER BY pinned DESC, t.id DESC";
+        // TODO: case when sf.user_id is NULL then false else true end
+        $query = "SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color, false as favorite FROM threads t JOIN thread_categories e ON t.id = e.thread_id JOIN categories_list w ON e.category_id = w.category_id LEFT JOIN student_favorites sf  ON sf.thread_id = t.id AND sf.user_id = ? WHERE {$query_delete} GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
         // Parameters
-        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
+        $query_parameters   = array();
+        $query_parameters[] = $current_user;
+        $query_parameters[] = count($categories_ids);
+        $query_parameters   = array_merge($query_parameters, $categories_ids );
+        $query_parameters[] = $blockSize;
+        $query_parameters[] = $query_offset;
 
         // Execute
         $this->course_db->query($query, $query_parameters);

@@ -158,6 +158,7 @@ HTML;
 		$currentCourse = $this->core->getConfig()->getCourse();
 		$threadFiltering = $threadExists && !$filteredThreadExists && !empty($_COOKIE[$currentCourse . '_forum_categories']);
 
+
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
 		//Body Style is necessary to make sure that the forum is still readable...
@@ -416,7 +417,7 @@ HTML;
 
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list">
+					<div id="thread_list" class="thread_list" next_page='2'>
 HTML;
 				$activeThreadAnnouncement = false;
 				$activeThreadTitle = "";
@@ -427,36 +428,18 @@ HTML;
 					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 					$activeThreadTitle = $activeThread['title'];
 				}
-					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<<HTML
 
-				<div class="thread-list-load-status">
-				  <div class="loader-ellips infinite-scroll-request">
-						<i class="fa fa-circle-o-notch fa-spin" style="font-size:24px"></i>
-				  </div>
-				  <p class="infinite-scroll-last">End of content</p>
-				  <p class="infinite-scroll-error">No more pages to load</p>
-				</div>
-
+				
 					</div>
-
-					<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 					<script type="text/javascript">
 						$(function(){
-							$('.thread_list').infiniteScroll({
-								path: buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '{{#}}'}),
-								responseType: 'text',
-								status: ".thread-list-load-status",
-								history: false,
-							});
-							$('.thread_list').on( 'load.infiniteScroll', function( event, response ) {
-								var data = JSON.parse( response );
-								$('.thread_list .thread-list-load-status').before(data["html"]);
-							});
+							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
 						});
 					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">

@@ -545,9 +545,8 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $blockNumber = 0){
         $blockSize = 10;
-        $blockNumber = 0;
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
             // No category filter
@@ -583,7 +582,7 @@ class ForumController extends AbstractController {
             $status = (int)$status;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $pageNumber);
         $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
@@ -592,7 +591,10 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));
+        return $this->core->getOutput()->renderJson(array(
+                "html" => $this->core->getOutput()->getOutput(),
+                "count" => count($threads)
+            ));
     }
 
     public function showThreads(){
