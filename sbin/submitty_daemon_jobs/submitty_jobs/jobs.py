@@ -31,3 +31,9 @@ class BuildConfig(AbstractJob):
 
         with open(build_output, "w") as output_file:
             subprocess.call([build_script, gradeable], stdout=output_file, stderr=output_file)
+
+class RunLichen(AbstractJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']

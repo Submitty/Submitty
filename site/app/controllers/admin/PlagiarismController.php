@@ -15,11 +15,11 @@ class PlagiarismController extends AbstractController {
             case 'index':
                 $this->plagiarismIndex();
                 break;
-            case 'configure_new_gradeable_for_plagiarism':
-                $this->lichenConfigurationForm();
+            case 'configure_new_gradeable_for_plagiarism_form':
+                $this->configureNewGradeableForPlagiarismForm();
                 break;    
-            case 'save_plagiarism_configuration':
-                $this->savePlagiarismConfiguration();
+            case 'save_new_plagiarism_configuration':
+                $this->saveNewPlagiarismConfiguration();
                 break;
             case 'get_submission_concatinated':
             	$this->ajaxGetSubmissionConcatinated();
@@ -95,7 +95,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Ranking File do not exist. Lichen Detector failed to create ranking file");
+            $this->core->addErrorMessage("Ranking File do not exist. Rerun the plagiarism with same configuration or create new configuration");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
@@ -115,7 +115,7 @@ class PlagiarismController extends AbstractController {
         // $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
     }
 
-    public function lichenConfigurationForm() {
+    public function configureNewGradeableForPlagiarismForm() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
@@ -128,14 +128,14 @@ class PlagiarismController extends AbstractController {
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'saveConfigurationForm', $gradeable_ids_titles, $prior_term_gradeables);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureNewGradeableForPlagiarismForm', $gradeable_ids_titles, $prior_term_gradeables);
     }
 
-    public function savePlagiarismConfiguration() {
+    public function saveNewPlagiarismConfiguration() {
 
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'plagiarism_form'));
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'configure_new_gradeable_for_plagiarism_form'));
         
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
@@ -144,7 +144,7 @@ class PlagiarismController extends AbstractController {
 
         $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
         $ignore_submission_number = $_POST['ignore_submission_number'];
-        $gradeable = $_POST['gradeable_id'];
+        $gradeable_id = $_POST['gradeable_id'];
         $version_option = $_POST['version_option'];
         if ($version_option == "active_version") {
             $version_option = "active_version";
@@ -203,7 +203,7 @@ class PlagiarismController extends AbstractController {
             }    
         }
         
-        $gradeable_path =  FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable);
+        $gradeable_path =  FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
         $provided_code_option = $_POST['provided_code_option'];
         if($provided_code_option == "code_provided") {
             $instructor_provided_code= true;
@@ -224,7 +224,7 @@ class PlagiarismController extends AbstractController {
 
             else {
                 $upload = $_FILES['provided_code_file'];
-                $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable);
+                $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id);
                 if (!is_dir($target_dir)) {
                     FileUtils::createDir($target_dir);    
                 }
@@ -258,10 +258,10 @@ class PlagiarismController extends AbstractController {
 
         $config_dir = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/";
         $number_of_undone_jobs = count(array_diff(scandir($config_dir), array(".","..")));
-        $json_file = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/".$gradeable."_".$number_of_undone_jobs.".json";
+        $json_file = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/".$gradeable_id."_".$number_of_undone_jobs.".json";
         $json_data = array("semester" =>    $semester,
                             "course" =>     $course,
-                            "gradeable" =>  $gradeable,
+                            "gradeable" =>  $gradeable_id,
                             "version" =>    $version_option,
                             "file_option" =>$file_option,
                             "language" =>   $language,
@@ -280,10 +280,41 @@ class PlagiarismController extends AbstractController {
         }
 
         if (file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT)) === false) {
-          die("Failed to write file {$json_file}");
+            $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
+            $this->core->redirect($return_url);
         }
 
+        $ret = $this->enqueueRunLichenJob($gradeable_id);
+        if($ret !== null) {
+            $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
+            $this->core->redirect($return_url);   
+        }
+
+        $this->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
+    }
+
+    private function enqueueRunLichenJob($gradeable_id) {
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        
+        $run_lichen_data = [
+            "job" => "RunLichen",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $gradeable_id
+        ];
+
+        $run_lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
+        
+        if(file_exists($run_lichen_job_file) && !is_writable($run_lichen_job_file)) {
+            return "Failed to create lichen job. Just rerun the plagiarism for the gradeable";
+        }
+
+        if(file_put_contents($run_lichen_job_file, json_encode($run_lichen_data, JSON_PRETTY_PRINT)) === false) {
+            return "Failed to write lichen job file. Rerun the plagiarism for the gradeable";   
+        }
+        return null;
     }
 
     public function reRunPlagiarism() {
@@ -292,12 +323,13 @@ class PlagiarismController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
         
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
+        $ret = $this->enqueueRunLichenJob($gradeable_id);
+        if($ret !== null) {
+            $this->core->addErrorMessage($ret);
+            $this->core->redirect($return_url);   
         }
-        
-        // code for rerun plagirism
+
+        $this->addSuccessMessage("Refresh after a while to see re-run results.")
         $this->core->redirect($return_url);
     }
 
