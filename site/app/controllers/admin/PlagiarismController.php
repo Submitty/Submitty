@@ -209,6 +209,9 @@ class PlagiarismController extends AbstractController {
             $instructor_provided_code= true;
         }
         else {
+            if(is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id))) {
+                FileUtils::emptyDir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id));   
+            }
             $instructor_provided_code= false;
         }
 
@@ -228,7 +231,7 @@ class PlagiarismController extends AbstractController {
                 if (!is_dir($target_dir)) {
                     FileUtils::createDir($target_dir);    
                 }
-                FileUtils::emptyDir($target_dir)
+                FileUtils::emptyDir($target_dir);
 
                 $instructor_provided_code_path = $target_dir;
 
@@ -284,6 +287,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $ret = $this->enqueueRunLichenJob($gradeable_id);
+        die($ret);
         if($ret !== null) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             $this->core->redirect($return_url);   
@@ -328,7 +332,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $this->addSuccessMessage("Refresh after a while to see re-run results.")
+        $this->addSuccessMessage("Refresh after a while to see re-run results.");
         $this->core->redirect($return_url);
     }
 
