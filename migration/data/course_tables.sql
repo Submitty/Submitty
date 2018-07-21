@@ -514,7 +514,6 @@ CREATE TABLE "posts" (
 	"anonymous" BOOLEAN NOT NULL,
 	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
 	"endorsed_by" varchar,
-	"resolved" BOOLEAN NOT NULL,
 	"type" int NOT NULL,
   "has_attachment" BOOLEAN NOT NULL,
 	CONSTRAINT posts_pk PRIMARY KEY ("id")
@@ -529,7 +528,15 @@ CREATE TABLE "threads" (
 	"merged_thread_id" int DEFAULT '-1',
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
+	"status" int DEFAULT 0 NOT NULL,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
+);
+
+CREATE TABLE forum_posts_history (
+    "post_id" int NOT NULL,
+    "edit_author" character varying NOT NULL,
+    "content" text NOT NULL,
+    "edit_timestamp" timestamp with time zone NOT NULL
 );
 
 CREATE TABLE "thread_categories" (
@@ -1041,6 +1048,12 @@ ALTER TABLE ONLY regrade_discussion
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk1" FOREIGN KEY ("author_user_id") REFERENCES "users"("user_id");
 
+ALTER TABLE "threads" ADD CONSTRAINT "threads_status_check" CHECK ("status" IN (-1,0,1));
+
+ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "posts"("id");
+ALTER TABLE "forum_posts_history" ADD CONSTRAINT "forum_posts_history_edit_author_fk" FOREIGN KEY ("edit_author") REFERENCES "users"("user_id");
+CREATE INDEX "forum_posts_history_post_id_index" ON "forum_posts_history" ("post_id");
+CREATE INDEX "forum_posts_history_edit_timestamp_index" ON "forum_posts_history" ("edit_timestamp" DESC);
 
 ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "thread_categories" ADD CONSTRAINT "thread_categories_fk1" FOREIGN KEY ("category_id") REFERENCES "categories_list"("category_id");

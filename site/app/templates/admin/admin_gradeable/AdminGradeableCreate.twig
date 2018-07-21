@@ -20,22 +20,22 @@
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-What is the title of this gradeable?: 
-    <input style='width: 227px' type='text' name='title' id='g_title' class="required auto_save"
+What is the title of this gradeable?:
+    <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
         value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
 
 <br />
 
 <!-- Instruction URL (read/write in all modes) -->
-What is the URL to the assignment instructions? (shown to student) 
-    <input style='width: 227px' type='text' name='instructions_url' class="auto_save"
+What is the URL to the assignment instructions? (shown to student)
+    <input style='width: 350px' type='text' name='instructions_url' class="auto_save"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
 
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
 What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
-<input style='width: 200px' type='text' name='id' id="g_id" class="required"
+<input style='width: 350px' type='text' name='id' id="g_id" class="required"
        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
 

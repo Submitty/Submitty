@@ -1,0 +1,14 @@
+<div class="popup-form" id="delete-course-material-form" style="width:550px; margin-left:-250px;">
+    <h2>Delete Course Material</h2>
+    <p>&emsp;</p>
+    <form name="delete-confirmation" method="post" action="">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        Are you sure you want to delete
+        <div name="delete-course-material-message">
+        </div><br />
+        <div style="float:right; width:auto;">
+            <a onclick="$('#delete-course-material-form').css('display', 'none')" class="btn btn-danger">Cancel</a>
+            <input class="btn btn-primary" type="submit" value="Delete">
+        </div>
+    </form>
+</div>

@@ -265,18 +265,15 @@ if [ "${WORKER}" == 0 ]; then
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
     # if the to_be_graded directories do not exist, then make them
     mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
-    mkdir -p $SUBMITTY_DATA_DIR/to_be_built
+    mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
 
     # set the permissions of these directories
-
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
     # BATCH QUEUE: course builders (instructors & head TAs) will write items to this list, DAEMON_USER will remove them
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_graded_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
-
-    # PHP_USER will write items to this list, DAEMON_USER will remove them
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/to_be_built
-    chmod  770                                      $SUBMITTY_DATA_DIR/to_be_built
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
+    chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
 fi
 
 
@@ -440,32 +437,6 @@ popd > /dev/null
 if [ ${WORKER} == 0 ]; then
     source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh
 fi
-
-################################################################################################################
-################################################################################################################
-# GENERATE & INSTALL THE CRONTAB FILE FOR THE DAEMON_USER
-#
-
-echo -e "Generate & install the crontab file for submitty daemon user"
-
-# name of temporary file
-DAEMON_CRONTAB_FILE=my_daemon_crontab_file.txt
-
-# generate the file
-echo -e "\n\n"                                                                                >  ${DAEMON_CRONTAB_FILE}
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${DAEMON_CRONTAB_FILE}
-
-## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
-minutes=0
-printf "*/5 * * * *   ${SUBMITTY_INSTALL_DIR}/sbin/build_config_upload.py  >  /dev/null\n"  >> ${DAEMON_CRONTAB_FILE}
-
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${DAEMON_CRONTAB_FILE}
-echo -e "\n\n"                                                                                >> ${DAEMON_CRONTAB_FILE}
-
-# install the crontab file for the DAEMON_USER
-crontab  -u ${DAEMON_USER}  ${DAEMON_CRONTAB_FILE}
-rm ${DAEMON_CRONTAB_FILE}
-
 
 ################################################################################################################
 ################################################################################################################

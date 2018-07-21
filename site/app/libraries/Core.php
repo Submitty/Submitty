@@ -4,6 +4,7 @@ namespace app\libraries;
 
 use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
+use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
@@ -46,6 +47,11 @@ class Core {
     /** @var Output */
     private $output = null;
 
+    /** @var GradingQueue */
+    private $grading_queue = null;
+
+    /** @var Access $access */
+    private $access = null;
 
     /**
      * Core constructor.
@@ -55,6 +61,8 @@ class Core {
      */
     public function __construct() {
         $this->output = new Output($this);
+        $this->access = new Access($this);
+
         // initialize our alert queue if it doesn't exist
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
@@ -135,6 +143,20 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
+    }
+
+    /**
+     * Loads the shell of the grading queue
+     *
+     * @throws \Exception if we have not loaded the config yet
+     */
+    public function loadGradingQueue() {
+        if ($this->config === null) {
+            throw new \Exception("Need to load the config before we can initialize the grading queue");
+        }
+
+        $this->grading_queue = new GradingQueue($this->config->getSemester(),
+            $this->config->getCourse(), $this->config->getSubmittyPath());
     }
 
     /**
@@ -410,6 +432,47 @@ class Core {
      */
     public function getOutput() {
         return $this->output;
+    }
+
+    /**
+     * @return GradingQueue
+     */
+    public function getGradingQueue() {
+        return $this->grading_queue;
+    }
+
+    /**
+     * @return Access
+     */
+    public function getAccess() {
+        return $this->access;
+    }
+
+    /**
+     * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
+     * assuming that we
+     *
+     * @param string $url
+     *
+     * @return string
+     *
+     * @throws \app\exceptions\CurlException
+     */
+    public function curlRequest(string $url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        try {
+            $return = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            if (!curl_errno($ch) && $http_code === 200) {
+                return $return;
+            }
+            throw new CurlException($ch, $return);
+        }
+        finally {
+            curl_close($ch);
+        }
     }
 
     /**

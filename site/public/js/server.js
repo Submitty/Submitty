@@ -236,6 +236,15 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function newDeleteCourseMaterialForm(form_action, file_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-course-material-form");
+    $('[name="delete-course-material-message"]', form).html('');
+    $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
@@ -243,10 +252,12 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
-function reRunPlagiarismForm() {
+
+function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
-    var form = $("#rerun-plagiarism-form");
+    var form = $("#upload-course-materials-form");
     form.css("display", "block");
+    $('[name="upload"]', form).val(null);
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -256,7 +267,7 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>'; 
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
     $('[name="prev_gradeable_div"]', form).append(to_append);
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
@@ -283,8 +294,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
-                if( version_user_1 == '' || changed == 'user_id_1') {    
-                    version_user_1 = "max_matching";                
+                if( version_user_1 == '' || changed == 'user_id_1') {
+                    version_user_1 = "max_matching";
                 }
 
                 var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
@@ -328,7 +339,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     success: function(data) {
                         if(data == "no_match_for_this_version") {
                             var append_options='<option value="">None</option>';
-                            $('[name="code_box_2"]').empty(); 
+                            $('[name="code_box_2"]').empty();
                         }
                         else {
                             data = JSON.parse(data);
@@ -383,18 +394,18 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                             $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
                         }
                     })
-                        
+
                 }
-            }    
-        }    
-    }   
+            }
+        }
+    }
 }
 
 function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
@@ -545,7 +556,7 @@ function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_
     if(select_element_name == "language") {
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
-        } 
+        }
         else if ($('[name="language"]', form).val() == "cpp") {
             $('[name="sequence_length"]', form).val('2');
         }
@@ -558,7 +569,7 @@ function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
         var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_sem != '') {
@@ -567,7 +578,7 @@ function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_
                 if(selected_sem == sem) {
                     $.each(courses_gradeables, function(course,gradeables){
                         append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });     
+                    });
                 }
             });
             $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
@@ -575,7 +586,7 @@ function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_
     }
     else if(select_element_name.substring(0, 12) == "prev_course_") {
         var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_course != '') {
@@ -586,13 +597,13 @@ function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_
                         if(selected_course == course) {
                             $.each(gradeables, function (index, gradeable) {
                                 append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });    
+                            });
                         }
-                    });     
+                    });
                 }
             });
             $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        } 
+        }
     }
 }
 
@@ -947,6 +958,15 @@ function downloadFile(file, path) {
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
 }
 
+function downloadFileWithAnyRole(file_name, path) {
+    // Trim file without path
+    var file = file_name;
+    if (file.indexOf("/") != -1) {
+        file = file.substring(file.lastIndexOf('/')+1);
+    }
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+}
+
 function changeColor(div, hexColor){
     div.style.color = hexColor;
 }
@@ -1213,7 +1233,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1255,9 +1275,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
                     $("#title").val(thread_title);
+                    $("#thread_status").val(thread_status);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1268,11 +1290,13 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $(".cat-buttons").trigger("eventChangeCatClass");
                     $("#thread_form").prop("ignore-cat",false);
                     $("#category-selection-container").show();
+                    $("#thread_status").show();
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
+                    $("#thread_status").hide();
                 }
             },
             error: function(){
@@ -1300,6 +1324,7 @@ function enableTabsInTextArea(jQuerySelector){
 }
 
 function changeDisplayOptions(option, thread_id){
+    document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
@@ -1326,15 +1351,19 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId){
+function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
+    document.cookie = course + "_forum_categories=" + categories_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
                 thread_categories: categories_value,
+                thread_status: thread_status_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1344,7 +1373,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId){
                $(".thread_list").html(x);
             },
             error: function(){
-                window.alert("Something went wrong when trying to filter. Please try again.");
+               window.alert("Something went wrong when trying to filter. Please try again.");
+               document.cookie = course + "_forum_categories=;";
             }
     })
 }
@@ -1356,6 +1386,81 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function generateCodeMirrorBlocks(container_element) {
+    var codeSegments = container_element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").parent().show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    box = dummy_box.clone();
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
+
+                    var first_name = post['user_info']['first_name'].trim();
+                    var last_name = post['user_info']['last_name'].trim();
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
+                    $("#popup-post-history").prepend(box);
+                }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
@@ -1691,7 +1796,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
@@ -1901,7 +2006,28 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
-
+function toggleRegradeRequests(){
+    var element = document.getElementById("regradeBoxSection");
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
+    }
+    else {
+        element.style.display = 'block';
+    }
+    
+}
+function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            window.location.reload();
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
