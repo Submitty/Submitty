@@ -1,7 +1,7 @@
 {% import _self as self %}
 {% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
 
-<div id="submission_browser" class="rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
+<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
     <div id="directory_view" style="position:relative; float:left;">
         <div class="draggable_content">
             <span class="grading_label">Submissions and Results Browser</span>
@@ -144,12 +144,6 @@
         }
         loadFile(dir);
         $('#file_view').show();
-        $("#file_viewer_full_panel").empty();
-        $("#file_viewer_full_panel").attr("data-file_name", "");
-        $("#file_viewer_full_panel").attr("data-file_url", "");
-        $("#file_viewer_full_panel").attr("data-file_name", dir);
-        $("#file_viewer_full_panel").attr("data-file_url", path);
-        openFrame(dir, path, "full_panel");
         $("#grading_file_name").html(dir);
         let offset = $("#directory_view").width();
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
@@ -160,6 +154,7 @@
     function loadFile(filename){
         let extension = filename.split('.').pop();
         if(extension == "pdf"){
+            $('#pdf_annotation_bar').css('visibility', 'visible');
             $.ajax({
                 type: 'POST',
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
@@ -174,6 +169,12 @@
             });
         } else {
             $('#file_view').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $("#file_viewer_full_panel").empty();
+            $("#file_viewer_full_panel").attr("data-file_name", "");
+            $("#file_viewer_full_panel").attr("data-file_url", "");
+            $("#file_viewer_full_panel").attr("data-file_name", dir);
+            $("#file_viewer_full_panel").attr("data-file_url", path);
+            openFrame(dir, path, "full_panel");
         }
     }
 

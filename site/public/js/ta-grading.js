@@ -46,12 +46,11 @@ $(function() {
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
-    if($('#pdf_annotation_bar').length != 0){
-        $('#pdf_annotation_bar').resizable("destroy"); //Same with PDF annotation.
-    }
+    $('#pdf_annotation_bar').length != 0 && $('#pdf_annotation_bar').resizable("destroy"); //Same with PDF annotation.
 
     $(".draggable").on("dragstop", function(){
         $('#bar_wrapper').css({'z-index':'40'}); //Reset z-index after jquery drag
+        $('#pdf_annotation_bar').length != 0 && $('#pdf_annotation_bar').css({'z-index':'40'});
         updateCookies();
     });
 

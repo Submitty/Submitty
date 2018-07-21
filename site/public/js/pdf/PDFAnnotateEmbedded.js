@@ -72,6 +72,13 @@ function render(gradeable_id, user_id, file_name) {
                 UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                     let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                     PAGE_HEIGHT = viewport.height;
+                    document.getElementById('viewer').addEventListener('mousedown', function(){
+                        //Makes sure the panel don't move when writing on it.
+                        $("#submission_browser").draggable('disable');
+                    });
+                    document.getElementById('viewer').addEventListener('mouseup', function(){
+                        $("#submission_browser").draggable('enable');
+                    });
                 })
             });
         }
@@ -106,33 +113,56 @@ function render(gradeable_id, user_id, file_name) {
                     UI.enableEdit();
                     break;
                 case 'clear':
-                    if (confirm('Are you sure you want to clear annotations?')) {
-                        for (let i=0; i<NUM_PAGES; i++) {
-                            document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
-                        }
-
-                        localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
-                    }
+                    clearCanvas();
                     break;
                 case 'save':
-                    // debugger;
-                    let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-                    let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        data: {
-                            annotation_layer,
-                            GENERAL_INFORMATION
-                        },
-                        success: function(data){
-                            alert("Annotation successfully saved!");
-                        }
-                    });
+                    saveFile();
+                    break;
+                case 'zoomin':
+                    zoom('in');
+                    break;
+                case 'zoomout':
+                    zoom('out');
                     break;
             }
         }
 
+    }
+
+    function zoom(option){
+        if(option == 'in'){
+            RENDER_OPTIONS.scale += 0.1;
+        } else {
+            RENDER_OPTIONS.scale -= 0.1;
+        }
+
+        UI.renderPage(1, RENDER_OPTIONS);
+    }
+
+    function clearCanvas(){
+        if (confirm('Are you sure you want to clear annotations?')) {
+            for (let i=0; i<NUM_PAGES; i++) {
+                document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
+            }
+
+            localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        }
+    }
+
+    function saveFile(){
+        let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
+        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                annotation_layer,
+                GENERAL_INFORMATION
+            },
+            success: function(data){
+                alert("Annotation successfully saved!");
+            }
+        });
     }
 
     function handleToolbarClick(e){
