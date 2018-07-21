@@ -77,9 +77,9 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 rm -f '/var/local/submitty/to_be_graded_queue/*'
 
-sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py &
+sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
 sleep 1
-sudo -u submitty_deamon /usr/local/submitty/sbin/submitty_autograding_worker.py &
+sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
 sleep 1
 /usr/local/submitty/bin/grading_done.py
 
