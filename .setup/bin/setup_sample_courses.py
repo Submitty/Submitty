@@ -59,6 +59,7 @@ with open(os.path.join(SUBMITTY_INSTALL_DIR,"config","database.json")) as databa
     DB_PASS = database_config_json["database_password"]
 
 DB_ONLY = False
+NO_SUBMISSIONS = False
 
 NOW = dateutils.get_current_time()
 
@@ -68,10 +69,11 @@ def main():
     Main program execution. This gets us our commandline arugments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
-    global DB_ONLY
+    global DB_ONLY, NO_SUBMISSIONS
 
     args = parse_args()
     DB_ONLY = args.db_only
+    NO_SUBMISSIONS = args.no_submissions
     if not os.path.isdir(SUBMITTY_DATA_DIR):
         raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
     for directory in ["courses"]:
@@ -423,7 +425,8 @@ def parse_args():
                     ".setup/data directory to determine what courses/users are allowed and then "
                     "either adds all or just a few depending on what gets passed to this script")
 
-    parser.add_argument("--db_only", action='store_true')
+    parser.add_argument("--db_only", action='store_true', default=False)
+    parser.add_argument("--no_submissions", action='store_true', default=False)
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
                         help="Path to folder that contains .yml files to use for user creation. Defaults to "
                              "../data/users")
@@ -794,162 +797,163 @@ class Course(object):
             # makes a section be ungraded if the gradeable is not electronic
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             #This for loop adds submissions for users and teams(if applicable)
-            for user in self.users:
-                submitted = False
-                team_id = None
-                if gradeable.team_assignment is True:
-                    #If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                    res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
-                    ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
-                    temp = res.fetchall()
-                    if len(temp) != 0:
-                        team_id = temp[0][0]
-                        previous_submission = select([electronic_gradeable_version]).where(
-                            electronic_gradeable_version.c['team_id'] == team_id)
-                        res = self.conn.execute(previous_submission)
-                        if res.rowcount > 0:
+            if not NO_SUBMISSIONS:
+                for user in self.users:
+                    submitted = False
+                    team_id = None
+                    if gradeable.team_assignment is True:
+                        #If gradeable is team assignment, then make sure to make a team_id and don't over submit
+                        res = self.conn.execute("SELECT teams.team_id FROM teams INNER JOIN gradeable_teams\
+                        ON teams.team_id = gradeable_teams.team_id where user_id='{}' and g_id='{}'".format(user.id, gradeable.id))
+                        temp = res.fetchall()
+                        if len(temp) != 0:
+                            team_id = temp[0][0]
+                            previous_submission = select([electronic_gradeable_version]).where(
+                                electronic_gradeable_version.c['team_id'] == team_id)
+                            res = self.conn.execute(previous_submission)
+                            if res.rowcount > 0:
+                                continue
+                            submission_path = os.path.join(gradeable_path, team_id)
+                        else:
                             continue
-                        submission_path = os.path.join(gradeable_path, team_id)
+                        res.close()
                     else:
-                        continue
-                    res.close()
-                else:
-                    submission_path = os.path.join(gradeable_path, user.id)
+                        submission_path = os.path.join(gradeable_path, user.id)
 
-                if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    if user.id in gradeable.plagiarized_user:
-                        #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to 
-                        # be the same as the number of assignments defined in users.yml in the lichen_submissions folder.
-                        versions_to_submit = len(gradeable.plagiarized_user[user.id])
-                    else:    
-                        versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
-                    if (gradeable.gradeable_config is not None and
-                       (gradeable.submission_due_date < NOW or random.random() < 0.5)
-                       and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
-                        # only create these directories if we're actually going to put something in them
-                        if not os.path.exists(gradeable_path):
-                            os.makedirs(gradeable_path)
-                            os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
-                        if not os.path.exists(submission_path):
-                            os.makedirs(submission_path)
-                        active_version = random.choice(range(1, versions_to_submit+1))
-                        if team_id is not None:
-                            json_history = {"active_version": active_version, "history": [], "team_history": []}
+                    if gradeable.type == 0 and gradeable.submission_open_date < NOW:
+                        if user.id in gradeable.plagiarized_user:
+                            #If the user is a bad and unethical student(plagiarized_user), then the version to submit is going to
+                            # be the same as the number of assignments defined in users.yml in the lichen_submissions folder.
+                            versions_to_submit = len(gradeable.plagiarized_user[user.id])
                         else:
-                            json_history = {"active_version": active_version, "history": []}
-                        random_days = 1
-                        if random.random() < 0.3:
-                            random_days = random.choice(range(-3,2))
-                        for version in range(1, versions_to_submit+1):
-                            os.system("mkdir -p " + os.path.join(submission_path, str(version)))
-                            submitted = True
-                            submission_count += 1
-                            current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
+                            versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
+                        if (gradeable.gradeable_config is not None and
+                           (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                           and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions)):
+                            # only create these directories if we're actually going to put something in them
+                            if not os.path.exists(gradeable_path):
+                                os.makedirs(gradeable_path)
+                                os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
+                            if not os.path.exists(submission_path):
+                                os.makedirs(submission_path)
+                            active_version = random.choice(range(1, versions_to_submit+1))
                             if team_id is not None:
-                                self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
-                                             team_id=team_id, g_version=version, submission_time=current_time_string)
-                                if version == versions_to_submit:
-                                    self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
-                                                 team_id=team_id, active_version=active_version)
-                                json_history["team_history"] = json_team_history[team_id]
+                                json_history = {"active_version": active_version, "history": [], "team_history": []}
                             else:
-                                self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                            g_version=version, submission_time=current_time_string)
-                                if version == versions_to_submit:
-                                    self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                                active_version=active_version)
-                            json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})      
-
-                            with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                open_file.write(current_time_string + "\n")
-
-                            if user.id in gradeable.plagiarized_user:
-                                #If the user is in the plagirized folder, then only add those submissions
-                                src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
-                                dst = os.path.join(submission_path, str(version))
-                                # pdb.set_trace()
-                                create_gradeable_submission(src, dst)
-                            else:
-                                if isinstance(gradeable.submissions, dict):
-                                    for key in sorted(gradeable.submissions.keys()):
-                                        os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
-                                        submission = random.choice(gradeable.submissions[key])
-                                        src = os.path.join(gradeable.sample_path, submission)
-                                        dst = os.path.join(submission_path, str(version), key)
-                                        create_gradeable_submission(src, dst)
+                                json_history = {"active_version": active_version, "history": []}
+                            random_days = 1
+                            if random.random() < 0.3:
+                                random_days = random.choice(range(-3,2))
+                            for version in range(1, versions_to_submit+1):
+                                os.system("mkdir -p " + os.path.join(submission_path, str(version)))
+                                submitted = True
+                                submission_count += 1
+                                current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
+                                if team_id is not None:
+                                    self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
+                                                 team_id=team_id, g_version=version, submission_time=current_time_string)
+                                    if version == versions_to_submit:
+                                        self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
+                                                     team_id=team_id, active_version=active_version)
+                                    json_history["team_history"] = json_team_history[team_id]
                                 else:
-                                    submission = random.choice(gradeable.submissions)
-                                    if isinstance(submission, list):
-                                        submissions = submission
+                                    self.conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                                g_version=version, submission_time=current_time_string)
+                                    if version == versions_to_submit:
+                                        self.conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                                    active_version=active_version)
+                                json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
+
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    open_file.write(current_time_string + "\n")
+
+                                if user.id in gradeable.plagiarized_user:
+                                    #If the user is in the plagirized folder, then only add those submissions
+                                    src = os.path.join(gradeable.lichen_sample_path, gradeable.plagiarized_user[user.id][version-1])
+                                    dst = os.path.join(submission_path, str(version))
+                                    # pdb.set_trace()
+                                    create_gradeable_submission(src, dst)
+                                else:
+                                    if isinstance(gradeable.submissions, dict):
+                                        for key in sorted(gradeable.submissions.keys()):
+                                            os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
+                                            submission = random.choice(gradeable.submissions[key])
+                                            src = os.path.join(gradeable.sample_path, submission)
+                                            dst = os.path.join(submission_path, str(version), key)
+                                            create_gradeable_submission(src, dst)
                                     else:
-                                        submissions = [submission]
-                                    for submission in submissions:
-                                        src = os.path.join(gradeable.sample_path, submission)
-                                        dst = os.path.join(submission_path, str(version))
-                                        create_gradeable_submission(src, dst)
-                            random_days-=0.5
-                        
-                        with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                                json.dump(json_history, open_file)
-                if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
-                    if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
-                        status = 1 if gradeable.type != 0 or submitted else 0
-                        print("Inserting {} for {}...".format(gradeable.id, user.id))
-                        values = {'g_id': gradeable.id, 'gd_overall_comment': 'lorem ipsum lodar'}
-                        if gradeable.team_assignment is True:
-                            values['gd_team_id'] = team_id
-                        else:
-                            values['gd_user_id'] = user.id
-                        if gradeable.grade_released_date < NOW and random.random() < 0.5:
-                            values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
-                        ins = gradeable_data.insert().values(**values)
-                        res = self.conn.execute(ins)
+                                        submission = random.choice(gradeable.submissions)
+                                        if isinstance(submission, list):
+                                            submissions = submission
+                                        else:
+                                            submissions = [submission]
+                                        for submission in submissions:
+                                            src = os.path.join(gradeable.sample_path, submission)
+                                            dst = os.path.join(submission_path, str(version))
+                                            create_gradeable_submission(src, dst)
+                                random_days-=0.5
+
+                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
+                                    json.dump(json_history, open_file)
+                    if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
+                        if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
+                            status = 1 if gradeable.type != 0 or submitted else 0
+                            print("Inserting {} for {}...".format(gradeable.id, user.id))
+                            values = {'g_id': gradeable.id, 'gd_overall_comment': 'lorem ipsum lodar'}
+                            if gradeable.team_assignment is True:
+                                values['gd_team_id'] = team_id
+                            else:
+                                values['gd_user_id'] = user.id
+                            if gradeable.grade_released_date < NOW and random.random() < 0.5:
+                                values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
+                            ins = gradeable_data.insert().values(**values)
+                            res = self.conn.execute(ins)
+                            gd_id = res.inserted_primary_key[0]
+                            if gradeable.type !=0 or gradeable.use_ta_grading:
+                                skip_grading = random.random()
+                                for component in gradeable.components:
+                                    if random.random() < 0.01 and skip_grading < 0.3:
+                                        #This is used to simulate unfinished grading.
+                                        break
+                                    if status == 0 or random.random() < 0.4:
+                                        score = 0
+                                    else:
+                                        max_value_score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
+                                        uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                                        score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
+                                    grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
+                                    self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                                 gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
+                                                 gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
+                                    first = True
+                                    first_set = False
+                                    for mark in component.marks:
+                                        if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
+                                            self.conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
+                                            if(first):
+                                                first_set = True
+                                        first = False
+
+                    if gradeable.type == 0 and os.path.isdir(submission_path):
+                        os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
+
+                    if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
+                       random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
+                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
                         gd_id = res.inserted_primary_key[0]
-                        if gradeable.type !=0 or gradeable.use_ta_grading:
-                            skip_grading = random.random()
-                            for component in gradeable.components:
-                                if random.random() < 0.01 and skip_grading < 0.3:
-                                    #This is used to simulate unfinished grading.
-                                    break
-                                if status == 0 or random.random() < 0.4:
-                                    score = 0
-                                else:
-                                    max_value_score = random.randint(component.lower_clamp * 2, component.max_value * 2) / 2
-                                    uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
-                                    score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
-                                grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                                self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                             gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
-                                             gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
-                                first = True
-                                first_set = False
-                                for mark in component.marks:
-                                    if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                        self.conn.execute(gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
-                                        if(first):
-                                            first_set = True
-                                    first = False
-
-                if gradeable.type == 0 and os.path.isdir(submission_path):
-                    os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, submission_path))
-
-                if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
-                   random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                    res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
-                    gd_id = res.inserted_primary_key[0]
-                    skip_grading = random.random()
-                    for component in gradeable.components:
-                        if random.random() < 0.01 and skip_grading < 0.3:
-                            break
-                        if random.random() < 0.1:
-                            continue
-                        elif gradeable.type == 1:
-                            score = generate_probability_space({0.2: 0, 0.1: 0.5}, 1)
-                        else:
-                            score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
-                        grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                        self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                     gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
+                        skip_grading = random.random()
+                        for component in gradeable.components:
+                            if random.random() < 0.01 and skip_grading < 0.3:
+                                break
+                            if random.random() < 0.1:
+                                continue
+                            elif gradeable.type == 1:
+                                score = generate_probability_space({0.2: 0, 0.1: 0.5}, 1)
+                            else:
+                                score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
+                            grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
+                            self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                         gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
         #This segment adds the sample forum posts for the sample course only
         if self.code == "sample": 
             self.add_sample_forum_data()
