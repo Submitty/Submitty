@@ -228,8 +228,8 @@ class PlagiarismController extends AbstractController {
                 if (!is_dir($target_dir)) {
                     FileUtils::createDir($target_dir);    
                 }
-                $target_dir = FileUtils::joinPaths($target_dir, count(scandir($target_dir))-1);
-                FileUtils::createDir($target_dir);
+                FileUtils::emptyDir($target_dir)
+
                 $instructor_provided_code_path = $target_dir;
 
                 if (FileUtils::getMimeType($upload["tmp_name"]) == "application/zip") {
