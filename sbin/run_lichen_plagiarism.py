@@ -16,33 +16,38 @@ import json
 
 # ------------------------------------------------------------------------
 def run_lichen_plagiarism(data):
-    
-    # construct the paths lichen script and output
-    lichen_script = "/usr/local/submitty/GIT_CHECKOUT/Lichen/bin/process_all.sh"
-    lichen_output = "/var/local/submitty/courses/" + data["semester"] + "/" + data["course"] + "/lichen/lichen_script_output.txt"
+    semester = data["semester"]
+    course = data["course"]
+    gradeable = data["gradeable"]
+    language = data["language"]
+    window = data["sequence_length"]
+    threshold = data["threshold"]
+    regrex = None
+    instructor_provided_code_path = None
+    prior_term_gradeables = None
+    ignore_submissions = None
 
     # construct the command line agruments
-    lichen_args = ['/bin/bash' , lichen_script , data["semester"], data["course"], data["gradeable"], '--language', data["language"], '--window', data["sequence_length"], '--threshold', data["threshold"] ]
     if data["file_option"] == "matching_regrex":
-        lichen_args.append('--regrex')
-        lichen_args.append(data["regrex"])
+        regrex = data["regrex"]
 
     if data["instructor_provided_code"]:
-        lichen_args.append('--provided_code_path')
-        lichen_args.append(data["instructor_provided_code_path"])
+        instructor_provided_code_path = data["instructor_provided_code_path"]
 
     if len(data["prev_term_gradeables"]) != 0:
-        lichen_args.append('--prior_term_gradeables')
+        prior_term_gradeables = []
         for gradeable in data["prev_term_gradeables"]:
-            lichen_args.append(gradeable)     
+            prior_term_gradeables.append(gradeable)     
 
     if len(data["ignore_submissions"]) != 0:
-        lichen_args.append('--ignore_submissions')
-        for ignore_submission in data["ignore_submissions"]:
-            lichen_args.append(ignore_submission)     
+        ignore_submissions = []
+        for submission in data["ignore_submissions"]:
+            ignore_submissions.append(submission)     
 
-    with open(lichen_output, "w") as open_file:
-        subprocess.call(lichen_args, stdout=open_file, stderr=open_file)
+    subprocess.call(['/usr/local/submitty/Lichen/bin/concatenate_all.py', semester, course, gradeable ])
+    subprocess.call(['/usr/local/submitty/Lichen/bin/tokenize_all.py', semester, course, gradeable, '--{}'.format(language) ])
+    subprocess.call(['/usr/local/submitty/Lichen/bin/hash_all.py', semester, course, gradeable, '--window', window, '--{}'.format(language) ])
+    subprocess.call(['/usr/local/submitty/Lichen/bin/compare_hashes.out', semester, course, gradeable, '--window', window ])
 
 
 # ------------------------------------------------------------------------
@@ -55,11 +60,13 @@ def main():
     if username != "submitty_daemon":
         raise SystemError("ERROR!  This script must be run by submitty_daemon")
 
-    if len(sys.argv) != 2:
-        raise SystemError("ERROR!  This script must be given 1 argument which should be path of lichen config")
+    if len(sys.argv) != 4:
+        raise SystemError("ERROR!  This script must be given 3 argument which should be path of lichen config")
 
-    config_path = sys.argv[1];
-
+    semester = sys.argv[1];
+    course = sys.argv[2];   
+    gradeable = sys.argv[3];
+    config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable_id+".json" 
     with open(config_path) as saved_config:
         data = json.load(saved_config)
 

@@ -257,8 +257,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $config_dir = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/";
-        $number_of_undone_jobs = count(array_diff(scandir($config_dir), array(".","..")));
-        $json_file = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/".$gradeable_id."_".$number_of_undone_jobs.".json";
+        $json_file = "/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json";
         $json_data = array("semester" =>    $semester,
                             "course" =>     $course,
                             "gradeable" =>  $gradeable_id,
