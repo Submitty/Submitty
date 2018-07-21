@@ -1170,12 +1170,12 @@ end of styles used in the admin gradeable page
     color: red;
 }
 
-/* color for a limted access grader */
+/* color for a limited access grader */
 .grader-3 {
     color: #ffd81e;
 }
 
-/* color for a instructor or full access grader */
+/* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
     color: #00b500;
