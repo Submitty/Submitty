@@ -553,7 +553,7 @@ class ForumController extends AbstractController {
             $categories_ids = array();
         }
         // TODO: thread status
-        $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $show_deleted, $current_user, $blockSize, $blockNumber);
+        $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber);
         foreach ($ordered_threads as &$thread) {
             $list = array();
             foreach(explode("|", $thread['categories_ids']) as $id ) {
