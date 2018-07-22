@@ -156,7 +156,7 @@ HTML;
 		$currentThread = -1;
 		$currentCategoryId = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && !$filteredThreadExists && !empty($_COOKIE[$currentCourse . '_forum_categories']);
+		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
 
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));

@@ -115,6 +115,13 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
+    /**
+     * Returns thread list along with their category information
+     * Filter based on categories, thread status and deleted status
+     * Order: Favourite and Announcements => Announcements only => Favourite only => Others
+     *
+     * @return ordered threads after filter
+     */
     public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber){
         // $blockNumber is 1 based index
         $query_offset = ($blockNumber-1) * $blockSize;
@@ -240,6 +247,7 @@ class DatabaseQueries {
     }
 
     public function getThreadsBefore($timestamp, $page) {
+        // TODO: Handle request page wise
         $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", array($timestamp));
         return $this->course_db->rows();
     }
@@ -2169,8 +2177,9 @@ AND gc_id IN (
         return count($result) > 0;
     }
 
-    public function existsAnnouncements(){
-        $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
+    public function existsAnnouncements($show_deleted = false){
+        $query_delete = $show_deleted?"true":"deleted = false";
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND pinned = true");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -2244,7 +2253,7 @@ AND gc_id IN (
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
       $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
-        $announcement_id = $this->existsAnnouncements();
+        $announcement_id = $this->existsAnnouncements($show_deleted);
         if($announcement_id == -1){
           $this->course_db->query("SELECT MAX(id) as max from threads WHERE {$query_delete} and pinned = false");
           $thread_id = $this->course_db->rows()[0]["max"];
@@ -2260,7 +2269,6 @@ AND gc_id IN (
       }
       
       $result_rows = $this->course_db->rows();
-
       if(count($result_rows) > 0){
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
       }

@@ -549,7 +549,7 @@ class ForumController extends AbstractController {
         $blockSize = 10;
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
-            // No category filter
+            // No filter for category
             $categories_ids = array();
         }
         $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber);
@@ -644,7 +644,7 @@ class ForumController extends AbstractController {
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
-        
+
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $option, $max_thread);
     }
 
