@@ -24,7 +24,7 @@
             {% endif %}
         }
         $( document ).ready(function() {
-            $('#thread_category option').mousedown(function(e) {
+            $('#thread_category option, #thread_status_select option').mousedown(function(e) {
                 e.preventDefault();
                 var current_selection = $(this).prop('selected');
                 $(this).prop('selected', !current_selection);

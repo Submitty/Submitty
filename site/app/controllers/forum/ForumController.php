@@ -545,15 +545,15 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $blockNumber = 0){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $blockNumber = 1){
         $blockSize = 10;
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
             // No category filter
             $categories_ids = array();
         }
+        // TODO: thread status
         $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $show_deleted, $current_user, $blockSize, $blockNumber);
-
         foreach ($ordered_threads as &$thread) {
             $list = array();
             foreach(explode("|", $thread['categories_ids']) as $id ) {
@@ -600,20 +600,20 @@ class ForumController extends AbstractController {
     public function showThreads(){
         $user = $this->core->getUser()->getId();
 	$currentCourse = $this->core->getConfig()->getCourse();
-        $category_id = in_array('thread_category', $_POST) ? array($_POST['thread_category']) : -1;
+        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
         $category_id = array($category_id);
         // TODO: $thread_status in cookies 
         $thread_status = array();
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
 	    $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
 	}
-	foreach ($category_id as &$id) {
+    foreach ($category_id as &$id) {
             $id = (int)$id;
 	}
 	
 	$max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status);
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status, 1);
 
         $current_user = $this->core->getUser()->getId();
 
