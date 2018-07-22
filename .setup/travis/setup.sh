@@ -75,8 +75,6 @@ python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
-rm -f '/var/local/submitty/to_be_graded_queue/*'
-
 sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
 sleep 1
 sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
