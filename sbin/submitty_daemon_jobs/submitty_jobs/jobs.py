@@ -38,8 +38,8 @@ class RunLichen(AbstractJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = '/usr/local/submitty/sbin/run_lichen_plagiarism.py'
-        build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_script_output.txt')
+        lichen_script = '/usr/local/submitty/sbin/run_lichen_plagiarism.py'
+        lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_script_output.txt')
 
-        with open(build_output, "w") as output_file:
-            subprocess.call([build_script, gradeable], stdout=output_file, stderr=output_file)
+        with open(lichen_output, "w") as output_file:
+            subprocess.call([lichen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)

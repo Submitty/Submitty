@@ -32,10 +32,13 @@ class PlagiarismController extends AbstractController {
                 break;
             case 're_run_plagiarism':
                 $this->reRunPlagiarism();
-                break; 
+                break;
+            case 'delete_plagiarism_result_and_config':
+                $this->deletePlagiarismResultAndConfig();
+                break;     
             case 'show_plagiarism_result':
                 $this->showPlagiarismResult(); 
-                break;        
+                break;            
             default:
                 $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
                 $this->plagiarismMainPage();
@@ -118,13 +121,13 @@ class PlagiarismController extends AbstractController {
     public function configureNewGradeableForPlagiarismForm() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        $gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
+        $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
-            if(!in_array($gradeable_id_title['g_id'], $gradeable_ids)) {
+            if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission)) {
                 unset($gradeable_ids_titles[$i]);
             }
-        }
+        }       
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
@@ -287,13 +290,12 @@ class PlagiarismController extends AbstractController {
         }
 
         $ret = $this->enqueueRunLichenJob($gradeable_id);
-        die($ret);
         if($ret !== null) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);  
         }
 
-        $this->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
+        $this->core->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
     }
 

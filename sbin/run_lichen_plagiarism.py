@@ -66,12 +66,10 @@ def main():
     semester = sys.argv[1];
     course = sys.argv[2];   
     gradeable = sys.argv[3];
-    config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable_id+".json" 
+    
+    config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable+".json" 
     with open(config_path) as saved_config:
         data = json.load(saved_config)
-
-        # after loading the contents of the file, remove it first
-        os.remove(config_path)
         
         run_lichen_plagiarism(data)
         print("finished running lichen plagiarism for " + config_path)
