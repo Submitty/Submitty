@@ -54,11 +54,11 @@ class DeleteLichenResult(AbstractJob):
 
         with open(lichen_output, "w") as output_file:
             subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/config/lichen_"+semester+"_"+course+"_"+gradeable+".json", stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/ranking/"+gradeable+".txt", stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/provided_code/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/tokenized/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/concatenated/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/hashes/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/ranking/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/matches/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-        
+            subprocess.call("echo"+ " Deleted lichen plagiarism results and saved config for "+gradeable, stdout=op, stderr=op,shell=True)
         

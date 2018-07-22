@@ -86,23 +86,17 @@ class PlagiarismController extends AbstractController {
         $gradeable_id= $_REQUEST['gradeable_id'];
         $gradeable_title= ($this->core->getQueries()->getGradeable($gradeable_id))->getName();
         $return_url= $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course,'page' => 'plagiarism'));
-        // $lichen_saved_configs = array_diff(scandir("/var/local/submitty/courses/$semester/$course/lichen/config"), array('.', '..'));
-        // foreach($lichen_saved_configs as $i=>$lichen_saved_config) {
-        //     $config_gradeable_id = json_decode(file_get_contents("/var/local/submitty/courses/$semester/$course/lichen/config/".$lichen_saved_config), true)["gradeable"];
-        //     unset($lichen_saved_configs[$i]);
-        //     $lichen_saved_configs[$lichen_saved_config] = ($this->core->getQueries()->getGradeable($config_gradeable_id))->getName();
-        // }
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
         }
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Ranking File do not exist. Rerun the plagiarism with same configuration or create new configuration");
+            $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
-            $this->core->addSuccessMessage("There are no matches for the gradeable with current configuration");
+            $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
             $this->core->redirect($return_url);   
         }
         $content =file_get_contents($file_path);
@@ -309,12 +303,7 @@ class PlagiarismController extends AbstractController {
             "course" => $course,
             "gradeable" => $gradeable_id
         ];
-        if($job == "RunLichen") {
-            $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";    
-        }
-        else if($job == "DeleteLichenResult") {
-            $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . "_delete.json";   
-        }
+        $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";    
         
         if(file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
             return "Failed to create lichen job. Try again";
@@ -331,14 +320,25 @@ class PlagiarismController extends AbstractController {
         $course = $_REQUEST['course'];
         $gradeable_id = $_REQUEST['gradeable_id'];
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
+
+        # Re run only if following checks are passed.
+        if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
+                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+                $this->core->redirect($return_url);
+        }
+
+        if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
+            $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
+            $this->core->redirect($return_url);   
+        }
         
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage($ret);
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);  
         }
 
-        $this->addSuccessMessage("Refresh after a while to see re-run results.");
+        $this->core->addSuccessMessage("Refresh after a while to see re-run results.");
         $this->core->redirect($return_url);
     }
 
@@ -348,13 +348,25 @@ class PlagiarismController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
 
+        #check before enqueuing deleting request
+        
+        if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
+                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+                $this->core->redirect($return_url);
+        }
+
+        if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
+            $this->core->addErrorMessage("Plagiarism results for the gradeable are already deleted. Refresh the page.");
+            $this->core->redirect($return_url);   
+        }
+
         $ret = $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage($ret);
             $this->core->redirect($return_url);   
         }
 
-        $this->addSuccessMessage("Lichen results for the gradeable will be deleted in a while.");
+        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted in a while.");
         $this->core->redirect($return_url);   
     }
 
