@@ -230,9 +230,14 @@ class DatabaseQueries {
         return array("thread_id" => $id, "post_id" => $post_id);
     }
 
+    public function getThreadsBefore($timestamp, $page) {
+        $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", array($timestamp));
+        return $this->course_db->rows();
+    }
+
     public function getThread($thread_id) {
-		$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
-		return $this->course_db->rows();
+        $this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
+        return $this->course_db->rows();
     }
 
     public function getThreadTitle($thread_id){

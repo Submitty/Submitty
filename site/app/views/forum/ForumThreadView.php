@@ -456,21 +456,13 @@ HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
         	// TODO: Work on list for merge list	
-            // $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-            // $current_thead_date = date_create($current_thread_first_post["timestamp"]);
-            // $merge_thread_list = array();
-            // for($i = 0; $i < count($threads); $i++){
-            //     $first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-            //     $date = date_create($first_post['timestamp']);
-            //     if($current_thead_date>$date) {
-            //         array_push($merge_thread_list, $threads[$i]);
-            //     }
-            // }
-
-            // $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-            //     "merge_thread_list" => $merge_thread_list,
-            //     "current_thread" => $currentThread
-            // ]);
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thead_date = $current_thread_first_post["timestamp"];
+            $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                "merge_thread_list" => $merge_thread_list,
+                "current_thread" => $currentThread
+            ]);
         }
         $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
         $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
