@@ -1527,6 +1527,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
+    document.cookie = "forum_thread_status=" + thread_status_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
     $.ajax({
             url: url,
@@ -1550,6 +1551,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
                document.cookie = course + "_forum_categories=;";
+               document.cookie = "forum_thread_status=;";
             }
     })
 }

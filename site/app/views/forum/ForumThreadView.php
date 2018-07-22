@@ -251,11 +251,19 @@ HTML;
 HTML;
 
 	$cookieSelectedCategories = '';
+	$cookieSelectedThreadStatus = '';
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
 				$cookieSelectedCategories[] = $selectedId;
+			}
+		}
+	}
+	if(!empty($_COOKIE['forum_thread_status'])) {
+		foreach(explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+			if(in_array((int)$selectedStatus, array(-1,0,1))) {
+				$cookieSelectedThreadStatus[] = $selectedStatus;
 			}
 		}
 	}
@@ -455,8 +463,7 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
-        	// TODO: Work on list for merge list	
-            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+        	$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thead_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
             $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
@@ -473,6 +480,7 @@ HTML;
             "current_category_ids" => $currentCategoriesIds,
             "current_course" => $currentCourse,
             "cookie_selected_categories" => $cookieSelectedCategories,
+            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
             "display_option" => $display_option,
             "thread_exists" => $threadExists
         ]);

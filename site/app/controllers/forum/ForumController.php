@@ -552,7 +552,6 @@ class ForumController extends AbstractController {
             // No category filter
             $categories_ids = array();
         }
-        // TODO: thread status
         $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber);
         foreach ($ordered_threads as &$thread) {
             $list = array();
@@ -571,13 +570,16 @@ class ForumController extends AbstractController {
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
+        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
         if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
             $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
+        }
+        if(empty($thread_status) && !empty($_COOKIE['forum_thread_status'])){
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
         }
         foreach ($categories_ids as &$id) {
             $id = (int)$id;
         }
-        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
         foreach ($thread_status as &$status) {
             $status = (int)$status;
         }
@@ -599,19 +601,24 @@ class ForumController extends AbstractController {
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-	$currentCourse = $this->core->getConfig()->getCourse();
+        $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
         $category_id = array($category_id);
-        // TODO: $thread_status in cookies 
         $thread_status = array();
-	if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
-	    $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
-	}
-    foreach ($category_id as &$id) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+            $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
+        }
+        if(!empty($_COOKIE['forum_thread_status'])){
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        foreach ($category_id as &$id) {
             $id = (int)$id;
-	}
-	
-	$max_thread = 0;
+        }
+        foreach ($thread_status as &$status) {
+            $status = (int)$status;
+        }
+
+        $max_thread = 0;
         $show_deleted = $this->showDeleted();
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status, 1);
 
