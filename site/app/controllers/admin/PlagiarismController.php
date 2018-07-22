@@ -289,7 +289,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $ret = $this->enqueueRunLichenJob($gradeable_id);
+        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
             $this->core->redirect($return_url);  
@@ -299,25 +299,29 @@ class PlagiarismController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
     }
 
-    private function enqueueRunLichenJob($gradeable_id) {
+    private function enqueueLichenJob($job, $gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         
-        $run_lichen_data = [
-            "job" => "RunLichen",
+        $lichen_job_data = [
+            "job" => $job,
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id
         ];
-
-        $run_lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
+        if($job == "RunLichen") {
+            $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";    
+        }
+        else if($job == "DeleteLichenResult") {
+            $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . "_delete.json";   
+        }
         
-        if(file_exists($run_lichen_job_file) && !is_writable($run_lichen_job_file)) {
-            return "Failed to create lichen job. Just rerun the plagiarism for the gradeable";
+        if(file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
+            return "Failed to create lichen job. Try again";
         }
 
-        if(file_put_contents($run_lichen_job_file, json_encode($run_lichen_data, JSON_PRETTY_PRINT)) === false) {
-            return "Failed to write lichen job file. Rerun the plagiarism for the gradeable";   
+        if(file_put_contents($lichen_job_file, json_encode($lichen_job_data, JSON_PRETTY_PRINT)) === false) {
+            return "Failed to write lichen job file. Try again";   
         }
         return null;
     }
@@ -328,7 +332,7 @@ class PlagiarismController extends AbstractController {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
         
-        $ret = $this->enqueueRunLichenJob($gradeable_id);
+        $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage($ret);
             $this->core->redirect($return_url);   
@@ -336,6 +340,22 @@ class PlagiarismController extends AbstractController {
 
         $this->addSuccessMessage("Refresh after a while to see re-run results.");
         $this->core->redirect($return_url);
+    }
+
+    public function deletePlagiarismResultAndConfig() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
+
+        $ret = $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id);
+        if($ret !== null) {
+            $this->core->addErrorMessage($ret);
+            $this->core->redirect($return_url);   
+        }
+
+        $this->addSuccessMessage("Lichen results for the gradeable will be deleted in a while.");
+        $this->core->redirect($return_url);   
     }
 
     public function ajaxGetSubmissionConcatinated() {
