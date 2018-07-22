@@ -167,6 +167,12 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
+            if(registration_section === 'null' && json['user_group'] === 4) {
+                $('#student-error-message').css('display', 'block');
+            }
+            else {
+                $('#student-error-message').css('display', 'none');
+            }
 
         },
         error: function() {
@@ -190,6 +196,7 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+    $('#student-error-message').css('display', 'block');
 }
 
 function extensionPopup(json){
@@ -250,6 +257,28 @@ function newUploadImagesForm() {
     var form = $("#upload-images-form");
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
+}
+
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
 }
 
 function newUploadCourseMaterialsForm() {
@@ -818,6 +847,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 source: student_full
             });
         }
+        members_div.find('[name="reg_section"]').val(reg_section);
+        members_div.find('[name="rot_section"]').val(rot_section);
     }
     else {
         $('[name="new_team_user_id"]', form).val("");
@@ -997,7 +1028,28 @@ function check_server(url) {
 }
 
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
+    }
+    window.location = buildUrl(url_components);
+    return false;
 }
 
 function downloadFileWithAnyRole(file_name, path) {
@@ -1553,7 +1605,7 @@ function showHistory(post_id) {
                     $('#messages').append(message);
                     return;
                 }
-                $("#popup-post-history").parent().show();
+                $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
@@ -1576,7 +1628,7 @@ function showHistory(post_id) {
                     var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
                     box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                     box.find("h7").before(user_button_code);
-                    $("#popup-post-history").prepend(box);
+                    $("#popup-post-history .form-body").prepend(box);
                 }
                 generateCodeMirrorBlocks($("#popup-post-history")[0]);
             },
