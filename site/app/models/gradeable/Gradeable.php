@@ -166,7 +166,7 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-
+    /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
     protected $just_regraded = false;
     /**
      * Gradeable constructor.
