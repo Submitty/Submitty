@@ -71,25 +71,29 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $canViewWholeGradeable);
         }
 
-        if ($gradeable->isTaGradeReleased()
-            && $gradeable->isTaGrading()
-            && $submission_count !== 0
-            && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable);
-        }
-        if ($this->core->getConfig()->isRegradeEnabled()
+        $regrade_available = $this->core->getConfig()->isRegradeEnabled()
+            // FIXME: remove this check once regrade requests support team assignments
+            && !$gradeable->isTeamAssignment()
             && $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
-            && $submission_count !== 0) {
-            $return .= $this->renderRegradeBox($graded_gradeable);
+            && $submission_count !== 0;
+
+        if ($gradeable->isTaGradeReleased()
+            && $gradeable->isTaGrading()
+            && $submission_count !== 0
+            && $active_version !== 0) {
+            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
+        }
+        if ($regrade_available) {
+            $return .= $this->renderRegradeBox($old_gradeable);
         }
         return $return;
     }
 
     /**
-    // TODO: waiting on late days model first
+     * TODO: waiting on late day model class before converting this method
      * @param \app\models\Gradeable $gradeable
      * @param int $extensions
      * @return string
@@ -557,15 +561,16 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param bool $regrade_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
         $rendered_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
             $rendered_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
-                $graded_gradeable->getTaGradedGradeable());
+                $graded_gradeable->getTaGradedGradeable(), $regrade_available);
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
             'been_ta_graded' => $been_ta_graded,
@@ -574,20 +579,22 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * @param GradedGradeable $graded_gradeable
+     * TODO: waiting on new model support for regrade requests / team regrade requests
+     * @param \app\models\Gradeable $gradeable
      * @return string
      */
-    private function renderRegradeBox(GradedGradeable $graded_gradeable): string {
+    private function renderRegradeBox(\app\models\Gradeable $gradeable): string {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/RegradeBox.twig', [
-            'graded_gradeable' => $graded_gradeable
+            'gradeable' => $gradeable
         ]);
     }
     
     /**
-     * @param GradedGradeable $graded_gradeable
+     * TODO: waiting on new model support for regrade requests / team regrade requests
+     * @param \app\models\Gradeable $gradeable
      * @return string
      */
-    public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
+    public function showRegradeDiscussion(\app\models\Gradeable $gradeable): string {
         $regradeMessage = $this->core->getConfig()->getRegradeMessage();
         if ($gradeable->getRegradeStatus() === 0) {
             $btn_type = 'request';

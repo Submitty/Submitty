@@ -377,9 +377,10 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
+     * @param bool $regrade_available
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable) {
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -424,7 +425,6 @@ class AutoGradingView extends AbstractView {
             $total_score += $version_instance->getTotalPoints();
             $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
         }
-        $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
 
         //Clamp full gradeable score to zero
@@ -488,7 +488,7 @@ class AutoGradingView extends AbstractView {
             'total_score' => $total_score,
             'total_max' => $total_max,
             'active_same_as_graded' => $active_same_as_graded,
-            'regrade_enabled' => $regrade_enabled,
+            'regrade_available' => $regrade_available,
             'regrade_message' => $regrade_message,
             'num_decimals' => $num_decimals
         ]);
