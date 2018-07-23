@@ -151,6 +151,7 @@ class AutoGradingView extends AbstractView {
             'testcases' => $testcase_array,
             'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
             "show_hidden" => $show_hidden,
+            'display_version' => $version_instance->getVersion()
         ]);
     }
 
