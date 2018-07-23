@@ -3,6 +3,7 @@
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\libraries\DiffViewer;
 use app\models\Team;
 use app\models\User;
 use \app\libraries\GradeableType;
@@ -71,34 +72,99 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function ajaxRemoveEmpty(){
-        //This function shows the empty spaces in the diffViewer
-        //TODO: Need to add checks?
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
-        $gradeable->loadResultDetails();
-        $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
+    /**
+     * Method for getting whitespace information for the diff viewer
+     */
+    public function ajaxRemoveEmpty() {
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['who_id'] ?? '';
+        $index = $_REQUEST['index'] ?? '';
+        $version = $_REQUEST['version'] ?? null;
+        $type = $_REQUEST['which'] ?? 'actual';
+        $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? null;
+
+        if (empty($gradeable_id)) {
+            $this->core->getOutput()->renderJsonFail('Must provide a gradeable_id parameter');
+            return;
+        }
+        if (empty($submitter_id)) {
+            $this->core->getOutput()->renderJsonFail('Must provide a who_id parameter');
+            return;
+        }
+        if (empty($index)) {
+            $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
+            return;
+        }
+        if(!is_int($index) || $index < 0) {
+            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
+            return;
+        }
+
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
         $option = $_REQUEST['option'] ?? 'original';
-        //There are currently two views, the view of student's code and the expected view.
-        $which = $which = $_REQUEST['which'] ?? 'actual';
-        $autocheck_cnt = isset($_REQUEST['autocheck_cnt'])  ? intval($_REQUEST['autocheck_cnt']) : 0;
-        foreach ($testcase->getAutochecks() as $autocheck) {
-            $diff_viewer = $autocheck->getDiffViewer();
-            if($autocheck_cnt <= 0) {
-                break;
+        if(!DiffViewer::isValidSpecialCharsOption($option)) {
+            $this->core->getOutput()->renderJsonFail('Invalid option parameter');
+            return;
+        }
+        
+        if(!DiffViewer::isValidType($type)) {
+            $this->core->getOutput()->renderJsonFail('Invalid which parameter');
+        }
+
+        if($autocheck_cnt === null) {
+            $autocheck_cnt = 0;
+        } else {
+            $autocheck_cnt = intval($autocheck_cnt);
+        }
+
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
+            if($graded_gradeable === null) {
+                $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
+                return;
             }
-            $autocheck_cnt -= 1;
+
+            if($version === null) {
+                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
+                if ($version_instance === null) {
+                    $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
+                    return;
+                }
+            } else {
+                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+                // No version instance, so no whitespace data
+                if($version_instance === null) {
+                    $this->core->getOutput()->renderJsonSuccess(['html' => '', 'whitespaces' => '']);
+                    return;
+                }
+            }
+
+            $testcase = $version_instance->getTestcases()[$index] ?? null;
+            if($testcase === null) {
+                $this->core->getOutput()->renderJsonFail('Invalid testcase index');
+                return;
+            }
+            foreach ($testcase->getAutochecks() as $autocheck) {
+                $diff_viewer = $autocheck->getDiffViewer();
+                if ($autocheck_cnt <= 0) {
+                    break;
+                }
+                $autocheck_cnt -= 1;
+            }
+
+            //There are currently two views, the view of student's code and the expected view.
+            $html = "";
+            if ($type === DiffViewer::ACTUAL) {
+                $html .= $diff_viewer->getDisplayActual($option);
+            } else {
+                $html .= $diff_viewer->getDisplayExpected($option);
+            }
+            $white_spaces = $diff_viewer->getWhiteSpaces();
+            $this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJson(['html' => '', 'whitespaces' => '', 'message' => 'Invalid gradeable id']);
         }
-        $html = "";
-        if($which == "actual"){
-            $html .= $diff_viewer->getDisplayActual($option);
-        }
-        else {
-            $html .= $diff_viewer->getDisplayExpected($option);
-        }
-        $white_spaces = $diff_viewer->getWhiteSpaces();
-        $this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
     }
 
     private function verifyGrader($verifyAll = false){
