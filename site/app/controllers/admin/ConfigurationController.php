@@ -109,7 +109,7 @@ class ConfigurationController extends AbstractController {
                 'course_email'              => $_POST['course_email'],
                 'vcs_base_url'              => $_POST['vcs_base_url'],
                 'vcs_type'                  => $_POST['vcs_type'],
-                'manual_grading_enabled'    => $_POST['manual_grading_enabled']
+                'manual_grading_enabled'    => $_POST['manual_grading_enabled'],
                 'forum_enabled'				=> $_POST['forum_enabled'],
                 'regrade_enabled'           => $_POST['regrade_enabled'],
                 'regrade_message'           => $_POST['regrade_message'],
