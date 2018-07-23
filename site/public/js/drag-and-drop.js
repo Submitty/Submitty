@@ -875,12 +875,13 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, requested_path) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, requested_path) {
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
     var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
+    formData.append('expand_zip', expand_zip);
     formData.append('requested_path', requested_path);
 
 	var filesToBeAdded = false;

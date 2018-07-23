@@ -2173,7 +2173,28 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': filename, 'newdatatime': newdatatime});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+        }
+    })
 }
 
 // edited slightly from https://stackoverflow.com/a/40658647

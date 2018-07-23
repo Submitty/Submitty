@@ -1556,6 +1556,11 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("Invalid CSRF token.", false);
       }
 
+      $expand_zip = "";
+      if (isset($_POST['expand_zip'])) {
+          $expand_zip = $_POST['expand_zip'];
+      }
+
       $requested_path = "";
       if (isset($_POST['requested_path'])) {
           $requested_path = $_POST['requested_path'];
@@ -1627,9 +1632,30 @@ class SubmissionController extends AbstractController {
           for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                        return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                    //
+                    $is_zip_file = false;
+
+                    if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                        if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                            return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
+                        }
+                        $is_zip_file = true;
                     }
+                    if ($expand_zip == 'on' && $is_zip_file === true) {
+                        $zip = new \ZipArchive();
+                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+                        if ($res === true) {
+                            $zip->extractTo($upload_path);
+                            $zip->close();
+                        }
+                    }
+                    else
+                    {
+                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
+                           return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                      }
+                    }
+                    //
                 }
                 else {
                     return $this->uploadResult("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
