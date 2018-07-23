@@ -87,6 +87,7 @@ use app\libraries\Utils;
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
+ * @method int getJustRegraded()
  */
 class Gradeable extends AbstractModel {
     
@@ -317,6 +318,9 @@ class Gradeable extends AbstractModel {
 
     /** @property @var int */
     protected $curr_late_charged = 0;
+
+    /** @property @var boolean */
+    protected $just_regraded = false;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -1018,7 +1022,9 @@ class Gradeable extends AbstractModel {
     public function resetUserViewedDate() {
         $this->core->getQueries()->resetUserViewedDate($this);
     }
-
+    public function setJustRegraded($bool) {
+        $this->just_regraded=$bool;
+    }
     public function getActiveDaysLate() {
         $return =  DateUtils::calculateDayDiff($this->due_date, $this->submission_time);
         if ($return < 0) {
