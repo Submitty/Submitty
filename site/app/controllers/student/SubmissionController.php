@@ -116,7 +116,16 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
+<<<<<<< Updated upstream
             $this->core->getOutput()->renderJson(["status" => "failure"]);
+=======
+<<<<<<< HEAD
+            $this->core->addErrorMessage("You do not have permission to delete this request");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+=======
+            $this->core->getOutput()->renderJson(["status" => "failure"]);
+>>>>>>> 0781cc83e54fb3504845fd728e911e5c6ed9e1ab
+>>>>>>> Stashed changes
             return;
         }
         $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
