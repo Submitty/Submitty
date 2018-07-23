@@ -22,6 +22,17 @@
                 <button onclick="location.href='{{ core.buildUrl({'component': 'admin', 'page': 'reports', 'action': 'csv' }) }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate CSV Report</button>
             </td>
         </tr>
+        <tr class="bar"></tr>
+        <tr class="bar"></tr>
+        <tr>
+            <td width="50%">
+                <p>Pushing this button will bring up the Rainbow Grades Via Web configuration page. </p>
+            </td>
+            <td width="5%"> </td>
+            <td width="45%" style="position:relative">
+                <button onclick="location.href='{{ core.buildUrl({'component': 'admin', 'page': 'reports', 'action': 'customization' }) }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Web-Based Rainbow Grades Generation</button>
+            </td>
+        </tr>
         <tbody>
     </table>
 </div>

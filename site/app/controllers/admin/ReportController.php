@@ -23,6 +23,9 @@ class ReportController extends AbstractController {
             case 'summary':
                 $this->generateGradeSummaries();
                 break;
+            case 'customization':
+                $this->generateCustomization();
+                break;
             case 'reportpage':
             default:
                 $this->showReportPage();
@@ -251,6 +254,29 @@ class ReportController extends AbstractController {
         else {
             $entry['days_late'] = 0;
         }
+    }
+    public function generateCustomization(){
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+        if(isset($_POST["generate_json"])){
+            $customization->processForm();
+            if($customization->error()){
+                $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printError',$customization->getErrorMessages());
+            }
+            else {
+                //TODO: May want this to just be customization.json or to include the date.
+                $filename = $this->core->getConfig()->getCourse() . "_customization.json";
+
+                //TODO: Enable this when ready
+                //$this->core->renderFile($customization->getCustomizationJSON(),$filename);
+                $this->core->getOutput()->renderOutput(array('admin', 'RainbowCustomization'), 'printCompletedCustomization', $filename);
+            }
+        }
+        else{
+            $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printForm',$customization->getCustomizationData());
+        }
+
+
     }
 }
 
