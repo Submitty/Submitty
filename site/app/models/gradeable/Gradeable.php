@@ -67,6 +67,7 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
+ * @method bool getJustRegraded()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -169,7 +170,8 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-
+    /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
+    protected $just_regraded = false;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -846,6 +848,9 @@ class Gradeable extends AbstractModel {
             }
         }
         return $count;
+    }
+    public function setJustRegraded($bool) {
+        $this->just_regraded=$bool;
     }
 
     /**
