@@ -1165,21 +1165,27 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
-/* color for student grading (SHOULD NOT HAPPEN) */
+/* color for student/peer grading */
 .grader-4 {
-    color: red;
+    color: #cc66ff; /* purple */
 }
 
 /* color for a limited access grader */
 .grader-3 {
-    color: #ffd81e;
+    color: #ffcc33;  /* yellow */
 }
 
 /* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
-    color: #00b500;
+    color: #33cc33;  /* green */
 }
+
+/* color for double graded */
+.grader-double {
+    color: #006699;  /* dark blue */
+}
+
 /* prevents line break in the graded questions column */
 .td-graded-questions {
     white-space: nowrap;
