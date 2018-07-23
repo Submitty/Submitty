@@ -78,6 +78,9 @@ class ForumController extends AbstractController {
             case 'show_stats':
                 $this->showStats();
                 break;
+            case 'get_threads_before':
+                $this->getThreadsBefore();
+                break;
             case 'merge_thread':
                 $this->mergeThread();
                 break;
@@ -758,6 +761,23 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    public function getThreadsBefore(){
+        $output = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            if(!empty($_POST["current_thead_date"])){
+                $current_thead_date = $_POST["current_thead_date"];
+                $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
+                $output["content"] = $merge_thread_list;
+            } else {
+               $output["error"] = "No date provided. Please try again.";
+            }
+        } else {
+            $output["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($output);
+        return $output;
     }
 
     public function mergeThread(){

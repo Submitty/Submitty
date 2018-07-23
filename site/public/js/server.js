@@ -1640,6 +1640,54 @@ function showHistory(post_id) {
     });
 }
 
+function loadMergeableThreads() {
+    var selectNode = $("[name='merge_thread_parent']");
+    var current_thead_date = selectNode.attr("current-thead-date");
+    if(!current_thead_date) {
+        // Already Loaded
+        return;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                current_thead_date: current_thead_date
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json.content.length == 0) {
+                    selectNode.closest('.form-body').text("Nothing to merge.");
+                } else {
+                    selectNode.empty();
+                    for(var i = 0; i < json.content.length ; i++ ) {
+                        var row = json.content[i];
+                        var id = escapeSpecialChars(""+row.id);
+                        var title = escapeSpecialChars(row.title);
+                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
+                        selectNode.append(element);
+                    }
+                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
+                }
+                selectNode.attr("current-thead-date", "");
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to load threads list. Please try again.");
+            }
+    });
+}
+
 function addNewCategory(){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});

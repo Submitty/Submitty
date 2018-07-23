@@ -463,11 +463,11 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
-        	$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-            $current_thead_date = $current_thread_first_post["timestamp"];
-            $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thread_date = $current_thread_first_post["timestamp"];
             $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
                 "merge_thread_list" => $merge_thread_list,
+                "current_thread_date" => $current_thread_date,
                 "current_thread" => $currentThread
             ]);
         }
