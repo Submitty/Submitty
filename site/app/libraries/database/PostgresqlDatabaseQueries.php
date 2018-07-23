@@ -10,6 +10,7 @@ use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Mark;
@@ -1379,6 +1380,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
+            /** @var \app\models\gradeable\Gradeable $gradeable */
             $gradeable = $gradeables_by_id[$row['g_id']];
 
             // Get the submitter
@@ -1432,7 +1434,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
 
-            $graded_components = [];
+            $graded_components_by_id = [];
+            /** @var AutoGradedVersion[] $graded_versions */
             $graded_versions = [];
 
             // Break down the graded component / version / grader data into an array of arrays
@@ -1504,10 +1507,18 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                             $grader,
                             $comp_array);
                         $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
-                        $graded_components[] = $graded_component;
+                        $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
                     }
                 }
-                $ta_graded_gradeable->setGradedComponentsFromDatabase($graded_components);
+
+                // Create containers for each component
+                $containers = [];
+                foreach ($gradeable->getComponents() as $component) {
+                    $container = new GradedComponentContainer($this->core, $ta_graded_gradeable, $component);
+                    $container->setGradedComponents($graded_components_by_id[$component->getId()] ?? []);
+                    $containers[$component->getId()] = $container;
+                }
+                $ta_graded_gradeable->setGradedComponentContainersFromDatabase($containers);
             }
 
             if (isset($db_row_split['version'])) {

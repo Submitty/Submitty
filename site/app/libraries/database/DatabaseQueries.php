@@ -3016,6 +3016,10 @@ AND gc_id IN (
         }
     }
 
+    /**
+     * Deletes a GradedComponent from the database
+     * @param GradedComponent $graded_component
+     */
     private function deleteGradedComponent(GradedComponent $graded_component) {
         // Only the db marks need to be deleted since the others haven't been applied to the database
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
@@ -3035,9 +3039,8 @@ AND gc_id IN (
      */
     private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
         // iterate through graded components and see if any need updating/creating
-        /** @var GradedComponent[] $component_grades */
-        foreach ($ta_graded_gradeable->getGradedComponents() as $component_grades) {
-            foreach ($component_grades as $component_grade) {
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            foreach ($container->getGradedComponents() as $component_grade) {
                 // This means the component wasn't loaded from the database, ergo its new
                 if ($component_grade->getDbMarkIds() === null) {
                     $this->createGradedComponent($component_grade);

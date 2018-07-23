@@ -118,6 +118,15 @@ class Component extends AbstractModel {
         throw new \InvalidArgumentException('Component did not contain provided mark id');
     }
 
+    /**
+     * Gets the number of grades required for this component
+     *  to be considered 100% graded
+     * @return int
+     */
+    public function getGradingSet() {
+        return $this->peer ? $this->gradeable->getPeerGradeSet() : 1;
+    }
+
     /* Overridden setters with validation */
 
     /**
