@@ -35,6 +35,7 @@ class AutoGradedGradeable extends AbstractModel {
         if ($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
+        $this->setActiveVersion($details['active_version'] ?? 0);
         $this->graded_gradeable = $graded_gradeable;
 
         $this->setActiveVersion($details['active_version'] ?? 0);

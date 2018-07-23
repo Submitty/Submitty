@@ -135,6 +135,57 @@ class SubmissionControllerTester extends BaseUnitTest {
         return $graded_gradeable;
     }
 
+    protected function createMockSubmitter($id) {
+        $return = $this->createMockModel(Submitter::class);
+        $return->method("getId")->willReturn($id);
+        return $return;
+    }
+
+    /**
+     * Helper method to generate a gradeable. We can use annotations in our testcases
+     * to set various aspects of the gradeable, namely @numParts, and @maxSize for
+     * highest version of submission, number of parts, and filesize respectively.
+     *
+     * @param int    $num_parts
+     * @param double $max_size
+     * @return \PHPUnit\Framework\MockObject\MockObject
+     */
+    private function createMockGradeable($num_parts = 1, $max_size = 1000000.) {
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getId')->willReturn("test");
+        $gradeable->method('getTitle')->willReturn("Test Gradeable");
+        // $gradeable->method('getUser')->willReturn("testUser");
+        $gradeable->method('isStudentSubmit')->willReturn(true);
+        $gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE);
+
+        // Any future calls that get now are going to be later than this now
+        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable->method('getTaViewStartDate')->willReturn($now);
+
+        $autograding_config = $this->createMockModel(AutogradingConfig::class);
+        $autograding_config->method('getNumParts')->willReturn(intval($num_parts));
+        $autograding_config->method('getMaxSubmissionSize')->willReturn($max_size);
+        $gradeable->method('getAutogradingConfig')->willReturn($autograding_config);
+        return $gradeable;
+    }
+
+
+    /**
+     * Helper method to generate a graded gradeable.
+     *
+     * @param int    $highest_version
+     * @return \PHPUnit\Framework\MockObject\MockObject
+     */
+    private function createMockGradedGradeable($highest_version = 0) {
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getSubmitter')->willReturn($this->createMockSubmitter('testUser'));
+        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
+        $auto_graded_gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
+        return $graded_gradeable;
+    }
+
     /**
      * Cleanup routine for the tester. This deletes any folders/files we created in the tmp directory to hold our fake
      * uploaded files.
@@ -1155,8 +1206,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        
         $gradeable = $this->createMockGradeable();
-
         $gradeable->method('hasAutogradingConfig')->willReturn(true);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);

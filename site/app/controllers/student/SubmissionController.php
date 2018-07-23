@@ -144,7 +144,6 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
         $status = $_REQUEST['status'];
-        //TODO: set userViewedDate to null if the status is change to 1 to make the button green
         if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->getOutput()->renderJson(["status" => "failure"]);
             return;
@@ -1489,6 +1488,11 @@ class SubmissionController extends AbstractController {
           $requested_path = $_POST['requested_path'];
       }
 
+      $n = strpos($requested_path, '..');
+      if ($n !== false) {
+          return $this->uploadResult(".. is not supported in the path.", false);
+      }
+
       $uploaded_files = array();
       if (isset($_FILES["files1"])) {
           $uploaded_files[1] = $_FILES["files1"];
@@ -1537,14 +1541,14 @@ class SubmissionController extends AbstractController {
           return $this->uploadResult("Failed to make image path.", false);
       }
 
-	    // create nested path
-	    if (!empty($requested_path)) {
-		    $upload_nested_path = $requested_path;
-		    if (!FileUtils::createDir($upload_nested_path, null, true)) {
-			    return $this->uploadResult("Failed to make image path.", false);
-		    }
-		    $upload_path = $upload_nested_path;
-	    }
+      // create nested path
+      if (!empty($requested_path)) {
+          $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
+          if (!FileUtils::createDir($upload_nested_path, null, true)) {
+             return $this->uploadResult("Failed to make image path.", false);
+          }
+          $upload_path = $upload_nested_path;
+      }
 
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {

@@ -1391,11 +1391,30 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
                 // Create the team with the query results and users array
                 $submitter = new Team($this->core, array_merge($row, ['users' => $team_users]));
+
+                // Get the late day exceptions for each user
+                $late_day_exceptions = [];
+                if (isset($row['array_late_day_user_ids'])) {
+                    $late_day_exceptions = array_combine(
+                        json_decode($row['array_late_day_user_ids']),
+                        json_decode($row['array_late_day_exceptions'])
+                    );
+                }
+                foreach ($submitter->getMembers() as $user_id) {
+                    if (!isset($late_day_exceptions[$user_id])) {
+                        $late_day_exceptions[$user_id] = 0;
+                    }
+                }
             } else {
                 if (isset($row['grading_registration_sections'])) {
                     $row['grading_registration_sections'] = json_decode($row['grading_registration_sections']);
                 }
                 $submitter = new User($this->core, $row);
+
+                // Get the late day exception for the user
+                $late_day_exceptions = [
+                    $submitter->getId() => $row['late_day_exceptions'] ?? 0
+                ];
             }
 
             // Construct the late day exception data
