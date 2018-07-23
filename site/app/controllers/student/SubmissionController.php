@@ -207,6 +207,7 @@ class SubmissionController extends AbstractController {
                 $canViewWholeGradeable = false;
 
                 // If we get here, then we can safely construct the old model w/o checks
+                // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
                 $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                        'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
