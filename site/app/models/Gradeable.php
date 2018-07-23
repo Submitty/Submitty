@@ -430,10 +430,10 @@ class Gradeable extends AbstractModel {
                                     $key2=substr($key, 0, -1);
                                     $user_details2[$key2] = $details["array_gcd_{$key}"][$j];
                                 }
-                                $grade_details[$j]['verifier'] = $this->core->loadModel(User::class, $user_details2);
+                                $grade_details[$j]['gcd_verifier'] = $this->core->loadModel(User::class, $user_details2);
                             }
                             else{
-                                $grade_details[$j]['verifier'] = null;
+                                $grade_details[$j]['gcd_verifier'] = null;
                             }
                         }
                     }
