@@ -127,7 +127,12 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->has_grade = true;
             $this->grader = $details['gcd_grader'];
-            $this->verifier = $details['gcd_verifier'];
+            if(isset($details['gcd_verifier'])){
+                $this->verifier=$details['gcd_verifier'];
+            }
+            else{
+                $this->verifier=null;
+            }
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
                 $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
