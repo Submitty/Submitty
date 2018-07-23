@@ -348,7 +348,7 @@ class ElectronicGraderView extends AbstractView {
             }
 
             //List of graded components
-            $info["graded_components"] = [];
+            $info["graded_groups"] = [];
             foreach ($row->getComponents() as $component) {
                 if (is_array($component)) {
                     foreach ($component as $cmpt) {
@@ -367,8 +367,13 @@ class ElectronicGraderView extends AbstractView {
                 } else {
                     $question = $component;
                 }
-                if ($question->getGrader() !== null && $question !== null) {
-                    $info["graded_components"][] = $question;
+                if ($question !== null) {
+                    if($question->getGrader() === null) {
+                        $info["graded_groups"][] = "NULL";
+                    }
+                    else {
+                        $info["graded_groups"][] = $question->getGrader()->getGroup();
+                    }
                 }
             }
 
