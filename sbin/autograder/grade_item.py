@@ -173,6 +173,10 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"wait:",waittime,"")
 
+    with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
+        grading_began_longstring = f.read()
+    grading_began = dateutils.read_submitty_date(grading_began_longstring)
+
     # --------------------------------------------------------------------
     # START DOCKER
 
@@ -188,7 +192,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                              'ubuntu:custom']).decode('utf8').strip()
         dockerlaunch_done=dateutils.get_current_time()
         dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,"docker container created")
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,"docker container created")
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -439,10 +443,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
     # note: negative = not late
-    
-    with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
-        grading_began_longstring=f.read()
-    grading_began = dateutils.read_submitty_date(grading_began_longstring)
+
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
     gradingtime = (grading_finished-grading_began).total_seconds()
@@ -507,7 +508,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         subprocess.call(['docker', 'rm', '-f', container])
         dockerdestroy_done=dateutils.get_current_time()
         dockerdestroy_time = (dockerdestroy_done-grading_finished).total_seconds()
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",dockerdestroy_time,"docker container destroyed")
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"ddt:",dockerdestroy_time,"docker container destroyed")
         
     grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 

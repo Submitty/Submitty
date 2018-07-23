@@ -259,11 +259,50 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
+}
+
 function newUploadCourseMaterialsForm() {
+
+    createArray(1);
+
+    var fileList = document.getElementsByClassName("file-viewer-data");
+
+    var files = [];
+    for(var i=0;i<fileList.length;i++){
+        var file = fileList[i];
+        files.push(file.getAttribute('data-file_url'));
+        readPrevious(file.getAttribute('data-file_url'), 1);
+    }
+
     $('.popup-form').css('display', 'none');
     var form = $("#upload-course-materials-form");
+
+    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
+
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -467,13 +506,13 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
     $('[name="code_box_2"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
 
@@ -494,7 +533,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                 $('[name="code_box_2"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
-                        $(this).css('background-color',"#FF0000");       
+                        $(this).css('background-color',"#FF0000");
                     }
                 });
                 $('[name="code_box_1"]').find('span').each(function(){
@@ -502,36 +541,36 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
-                }); 
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
+                });
                 $('[name="code_box_1"]').scrollTop(0);
                 var scroll_position=0;
                 $('[name="code_box_1"]').find('span').each(function(){
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_1"]').scrollTop(scroll_position);
             }
-              
+
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
                 var x = event.pageX;
-                var y = event.pageY; 
+                var y = event.pageY;
                 $('#popup_to_show_matches_id').css('display', 'block');
                 var width = $('#popup_to_show_matches_id').width();
                 $('#popup_to_show_matches_id').css('top', y+5);
                 $('#popup_to_show_matches_id').css('left', x-width/2.00);
-                
-            } 
+
+            }
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
@@ -542,9 +581,9 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
                 });
                 $.each(data, function(i,match){
                     if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
@@ -553,12 +592,12 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                                 var attr = $(this).attr('name');
                                 if (typeof attr !== typeof undefined && attr !== false) {
                                     if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
-                                        $(this).css('background-color',"#FF0000");    
-                                    }      
+                                        $(this).css('background-color',"#FF0000");
+                                    }
                                 }
                             });
                         });
-                    }                    
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(0);
                 var scroll_position=0;
@@ -566,11 +605,11 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(scroll_position);
                 jQuery.ajaxSetup({async:true});
-            }   
+            }
         },
         error: function(e) {
             alert("Could not load submitted code, please refresh the page and try again.");
@@ -825,6 +864,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 source: student_full
             });
         }
+        members_div.find('[name="reg_section"]').val(reg_section);
+        members_div.find('[name="rot_section"]').val(rot_section);
     }
     else {
         $('[name="new_team_user_id"]', form).val("");
@@ -1004,7 +1045,28 @@ function check_server(url) {
 }
 
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
+    }
+    window.location = buildUrl(url_components);
+    return false;
 }
 
 function downloadFileWithAnyRole(file_name, path) {
@@ -1031,6 +1093,21 @@ function openDiv(id) {
         elem.show();
         elem.addClass('open');
         $('#' + id + '-span').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return false;
+}
+
+function openDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
     }
     return false;
 }
@@ -1479,7 +1556,7 @@ function showHistory(post_id) {
                     $('#messages').append(message);
                     return;
                 }
-                $("#popup-post-history").parent().show();
+                $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
@@ -1502,7 +1579,7 @@ function showHistory(post_id) {
                     var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
                     box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                     box.find("h7").before(user_button_code);
-                    $("#popup-post-history").prepend(box);
+                    $("#popup-post-history .form-body").prepend(box);
                 }
                 generateCodeMirrorBlocks($("#popup-post-history")[0]);
             },
@@ -2063,7 +2140,7 @@ function toggleRegradeRequests(){
     else {
         element.style.display = 'block';
     }
-    
+
 }
 function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
     var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
@@ -2096,6 +2173,10 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function changePermission(filename, checked) {
+    // send to server to handle file permission change
+    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+}
 
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport

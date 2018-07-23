@@ -7,7 +7,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\gradeable\GradeableList;
-
+use app\libraries\FileUtils;
 
 class NavigationView extends AbstractView {
 
@@ -96,12 +96,17 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
-        $top_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
-            "title" => "Course Materials",
-            "class" => "btn btn-primary"
-        ]);
-        
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $course_materials_path = $course_path."/uploads/course_materials";
+        $any_files = FileUtils::getAllFiles($course_materials_path);
+        if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                "title" => "Course Materials",
+                "class" => "btn btn-primary"
+            ]);
+        }
+
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
@@ -212,9 +217,17 @@ class NavigationView extends AbstractView {
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section): null;
 
+	// full access graders & instructors are allowed to view submissions of assignments with no manual grading
+	$im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->getGroup() <= 2;
+
+	// limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
+	$im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
+
+	// students can only view the submissions & grading interface if its a peer grading assignment
+	$im_a_peer_grader = $this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading();
+
         //Grade button if we can access grading
-        if (($this->core->getUser()->accessGrading() && ($this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup()))
-            || ($this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading())) {
+        if ($im_allowed_to_view_submissions || $im_a_grader || $im_a_peer_grader) {
             $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
         }
 
