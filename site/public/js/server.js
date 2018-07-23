@@ -1671,13 +1671,15 @@ function loadMergeableThreads() {
                     selectNode.closest('.form-body').text("Nothing to merge.");
                 } else {
                     selectNode.empty();
+                    var options = [];
                     for(var i = 0; i < json.content.length ; i++ ) {
                         var row = json.content[i];
                         var id = escapeSpecialChars(""+row.id);
                         var title = escapeSpecialChars(row.title);
                         var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
-                        selectNode.append(element);
+                        options.push(element);
                     }
+                    selectNode.append(options.join(''));
                     selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
                 }
                 selectNode.attr("current-thead-date", "");
