@@ -275,7 +275,6 @@ class SubmissionController extends AbstractController {
         $graded_gradeables = [];
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, null) as $gg) {
             $graded_gradeables[] = $gg;
-            break;
         }
 
         if (count($graded_gradeables) === 0) {
