@@ -271,47 +271,28 @@ class SubmissionController extends AbstractController {
                 return $return;
             }
         }
-        //This grabs the first user in the list. If there is more than one user
-        //in the list, we will use this user as the team leader.
-        $user_id = reset($user_ids);
 
-        $graded_gradeable = null;
+        $graded_gradeables = [];
         foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, null) as $gg) {
-            $graded_gradeable = $gg;
+            $graded_gradeables[] = $gg;
             break;
         }
 
-        // No user was on a team
-        if ($graded_gradeable === null) {
+        if (count($graded_gradeables) === 0) {
+            // No user was on a team
             $msg = 'No user on a team';
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        } else if (count($graded_gradeables) > 0) {
+            // Not all users were on the same team
+            $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
 
-        //If this is a team assignment, we need to check that all users are on the same (or no) team.
-        //To do this, we just compare the leader's teamid to the team id of every other user.
-        if($gradeable->isTeamAssignment()){
-            $leader_team_id = "";
-            $leader_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if($leader_team !== null){
-                $leader_team_id = $leader_team->getId();
-            }
-            foreach($user_ids as $id){
-                $user_team_id = "";
-                $user_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id);
-                if($user_team !== null){
-                    $user_team_id = $user_team->getId();
-                }
-                if($user_team_id !== $leader_team_id){
-                    $msg = "Inconsistent teams. One or more users are on different teams.";
-                    $return = array('success' => false, 'message' => $msg);
-                    $this->core->getOutput()->renderJson($return);
-                    return $return;
-                }
-            }
-        }
-
+        $graded_gradeable = $graded_gradeables[0];
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
