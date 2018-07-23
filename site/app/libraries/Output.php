@@ -127,7 +127,7 @@ class Output {
     /**
      * Renders a json response for the "success" case
      *  (see http://submitty.org/developer/json_responses)
-     * @param mixed|null $data Optional response data
+     * @param mixed|null $data Response data
      */
     public function renderJsonSuccess($data = null) {
         $this->renderJson([
@@ -140,7 +140,7 @@ class Output {
      * Renders a json response for the "fail" case
      *  (see http://submitty.org/developer/json_responses)
      * @param string $message A non-blank failure message
-     * @param mixed|null $data Optional response data
+     * @param mixed|null $data Response data
      * @param array $extra Extra data merged into the response array
      */
     public function renderJsonFail($message, $data = null, $extra = []) {
@@ -162,7 +162,7 @@ class Output {
      * Renders a json response for the "error" case
      *  (see http://submitty.org/developer/json_responses)
      * @param string $message A non-blank error message
-     * @param mixed|null $data Optional response data
+     * @param mixed|null $data Response data
      * @param int $code Code to identify error case
      */
     public function renderJsonError($message, $data = null, $code = null) {
