@@ -154,7 +154,7 @@ class SimpleGraderController extends GradingController  {
             $sort_key = "u.user_lastname";
         }
         if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all")){
-           // $_GET['view'] = "all";
+            $_GET['view'] = "all";
             $student_full = json_encode(array_map(function(User $user) {
                 return ['value' => $user->getId(),
                     'label' => $user->getDisplayedFirstName() . ' '
@@ -168,7 +168,7 @@ class SimpleGraderController extends GradingController  {
             //Checks to see if the Grader has access to all users in the course,
             //Will only show the sections that they are graders for if not TA or Instructor
             if($this->core->getUser()->getGroup() < 3) {
-              //  $_GET['view'] = "all";
+                $_GET['view'] = "all";
                 $students = $this->core->getQueries()->getAllUsers($section_key);
             } else {
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
@@ -183,10 +183,10 @@ class SimpleGraderController extends GradingController  {
                     . ' <' . $user->getId() . '>'];
         }, $students));
         if(isset($_GET['view']) && $_GET['view'] === "all"){
-          // $_GET['view'] = null; 
+           $_GET['view'] = null; 
         }
         else{
-         //  $_GET['view'] = "all"; 
+           $_GET['view'] = "all"; 
         }
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key);

@@ -40,31 +40,39 @@
         </thead>
         {# /Table header #}
         {# Sections #}
-        {% for section in sections %}
-            {# Section heading #}
+        {% if sections|length == 0 %}
             <tbody>
-                <tr class="info persist-header">
-                    <td colspan="{{ columns|length }}" style="text-align: center">
-                        {% if gradeable.isGradeByRegistration() %}
-                            Students Enrolled in Registration Section {{ section.title }}
-                        {% else %}
-                            Students Assigned to Rotating Section {{ section.title }}
-                        {% endif %}
-                    </td>
-                </tr>
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                    <td colspan="{{ 42 + gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
             </tbody>
-            {# /Section heading #}
-            {# Student list #}
-            <tbody>
-                {% for info in section.rows %}
-                    {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
-                {% endfor %}
-            </tbody>
-            {# /Student list #}
-        {% endfor %}
+        {% else %}
+            {% for section in sections %}
+                {# Section heading #}
+                <tbody>
+                    <tr class="info persist-header">
+                        <td colspan="{{ columns|length }}" style="text-align: center">
+                            {% if gradeable.isGradeByRegistration() %}
+                                Students Enrolled in Registration Section {{ section.title }}
+                            {% else %}
+                                Students Assigned to Rotating Section {{ section.title }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="info">
+                        <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                    </tr>
+                </tbody>
+                {# /Section heading #}
+                {# Student list #}
+                <tbody>
+                    {% for info in section.rows %}
+                        {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                    {% endfor %}
+                </tbody>
+                {# /Student list #}
+            {% endfor %}
+        {% endif %}
         {# /Sections #}
         {# Empty teams #}
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}

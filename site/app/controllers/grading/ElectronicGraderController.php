@@ -376,10 +376,6 @@ class ElectronicGraderController extends GradingController {
         }
 
         //If there are no sections, see if we should show all instead
-        if (count($sections) === 0) {
-            $show_all = $this->core->getAccess()->canI("grading.details.show_all_no_sections");
-        }
-
         if ($show_all) {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
