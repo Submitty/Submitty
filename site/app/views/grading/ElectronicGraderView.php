@@ -238,8 +238,8 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
-        $show_import_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
-        $show_export_teams_button = $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
+        $show_import_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
+        $show_export_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
 
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
@@ -335,7 +335,7 @@ class ElectronicGraderView extends AbstractView {
             if ($row->isTeamAssignment()) {
                 if ($row->getTeam() === null) {
                     $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
-                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
+                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRotatingSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
                     $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
@@ -667,11 +667,11 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function renderRegradePanel(Gradeable $gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+        return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
             "gradeable" => $gradeable
         ]);
     }
-
+    
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
