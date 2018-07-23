@@ -205,8 +205,11 @@ class SubmissionController extends AbstractController {
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                 }
                 $canViewWholeGradeable = false;
+
+                // If we get here, then we can safely construct the old model w/o checks
+                $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

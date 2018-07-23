@@ -25,13 +25,14 @@ class HomeworkView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
+     * @param \app\models\Gradeable $old_gradeable
      * @param int $display_version
      * @param int $late_days_use
      * @param int $extensions
      * @param bool $canViewWholeGradeable
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, \app\models\Gradeable $old_gradeable, int $display_version, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -41,8 +42,7 @@ class HomeworkView extends AbstractView {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
         }
 
-        // FIXME: uncomment when working
-        // $return .= $this->renderLateDayMessage($graded_gradeable, $extensions);
+        $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
