@@ -7,7 +7,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\gradeable\GradeableList;
-
+use app\libraries\FileUtils;
 
 class NavigationView extends AbstractView {
 
@@ -96,12 +96,17 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
-        $top_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
-            "title" => "Course Materials",
-            "class" => "btn btn-primary"
-        ]);
-        
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $course_materials_path = $course_path."/uploads/course_materials";
+        $any_files = FileUtils::getAllFiles($course_materials_path);
+        if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                "title" => "Course Materials",
+                "class" => "btn btn-primary"
+            ]);
+        }
+
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
