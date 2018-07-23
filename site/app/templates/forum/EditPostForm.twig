@@ -1,0 +1,39 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-user-post{% endblock %}
+{% block title_tag %}<h2 id="edit_user_prompt"></h2>{% endblock %}
+{% block body %}
+    <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
+    <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+    {% include 'forum/ThreadPostForm.twig' with {
+        "show_title": true,
+        "show_post": true,
+        "post_content_placeholder": "Enter your post here...",
+        "show_categories": true,
+        "show_anon": true,
+        "show_cancel_edit_form": true,
+        "submit_label": "Update Post",
+    } %}
+    <script type="text/javascript">
+        $("#thread_form").submit(function() {
+            if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+                alert("At least one category must be selected.");
+                return false;
+            }
+        });
+    </script>
+{% endblock %}
+{% block form %}
+    <form id="thread_form" method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'edit_post'}) }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
+{% block buttons_panel %}
+    {#
+        TODO: Make the post form not have its own buttons so we can use the normal
+        buttons for the popup
+    #}
+{% endblock %}

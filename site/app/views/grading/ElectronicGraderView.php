@@ -335,7 +335,7 @@ class ElectronicGraderView extends AbstractView {
             if ($row->isTeamAssignment()) {
                 if ($row->getTeam() === null) {
                     $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
-                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
+                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRotatingSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
                     $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));

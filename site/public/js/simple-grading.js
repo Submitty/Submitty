@@ -172,35 +172,13 @@ function updateCheckpointCell(elem, setFull) {
 
 function setupCheckboxCells() {
     // Query for the <td> elements whose class attribute starts with "cell-"
-    $("td[class^=cell-]").click(function() {
+    $("td[class^=cell-grade]").click(function() {
         var parent = $(this).parent();
         var elems = [];
         var scores = {};
-        // If an entry in the User ID column is clicked, click all the checkpoint cells in that row
-        if ($(this).hasClass('cell-all')) {
-            var lastScore = null;
-            var setFull = false;
-            parent.children(".cell-grade").each(function() {
-                updateCheckpointCell(this, setFull);
-                elems.push(this);
-            });
-            parent.children(".cell-grade").each(function() {
-                if (lastScore === null) {
-                    lastScore = $(this).data("score");
-                }
-                else if (lastScore !== $(this).data("score")) {
-                    setFull = true;
-                }
-                scores[$(this).data('id')] = $(this).data('score');
-            });
-        }
-        // Otherwise, a single checkpoint cell was clicked
-        else {
-            updateCheckpointCell(this);
-            elems.push(this);
-            scores[$(this).data('id')] = $(this).data('score');
-        }
-
+        updateCheckpointCell(this);
+        elems.push(this);
+        scores[$(this).data('id')] = $(this).data('score');
 
         // Update the buttons to reflect that they were clicked
         submitAJAX(
@@ -437,26 +415,19 @@ function setupSimpleGrading(action) {
     function updateCheckboxScores(num, elems, is_all, idx=0) {
         if(is_all) {                                // if updating all, update all non .cell-all cells individually
             elems.each(function() {
-                if(!$(this).hasClass("cell-all")) {
-                    updateCheckboxScores(num, elems, false, idx);
-                }
+                updateCheckboxScores(num, elems, false, idx);
                 idx++;
             });
         }
         else {                              // if updating one, click until the score matches 
             elem = $(elems[idx]);
-            if(!elem.hasClass("cell-all")) {
-                for(var i = 0; i < 2; i++) {
-                    if(elem.data("score") == num) {
-                        break;
-                    }
-                    else {
-                        elem.click();
-                    }
+            for(var i = 0; i < 2; i++) {
+                if(elem.data("score") == num) {
+                    break;
                 }
-            }
-            else {      // if it is .cell-all, update all instead
-                updateCheckboxScores(num, elems, true);
+                else {
+                    elem.click();
+                }
             }
         } 
     }
@@ -478,7 +449,7 @@ function setupSimpleGrading(action) {
     var search_bar_offset = $("#student-search").offset();          // the offset of the search bar: used to lock the searhc bar on scroll
     var highlight_color = "#337ab7";                                // the color used in the border around the selected element in the table
     var search_selector = action == 'lab'       ?                   // the selector being used varies depending on the action (lab/numeric are different)
-                         'td[class^=cell-]'     :
+                         'td.cell-grade'     :
                          'td.option-small-input';
     var table_row = 0;                                              // the current row
     var child_idx = 0;                                              // the index of the current element in the row
@@ -613,7 +584,9 @@ function setupSimpleGrading(action) {
         registerKeyHandler({name: "Cycle Row Value", code: "KeyF"}, function(event) {
             if(!$("#student-search-input").is(":focus")) {
                 event.preventDefault();
-                $(child_elems[0]).click();
+                $(child_elems).each(function() {
+                    $(this).click();
+                });
             }
         });
     }
