@@ -72,13 +72,17 @@ function render(gradeable_id, user_id, file_name) {
                 UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                     let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                     PAGE_HEIGHT = viewport.height;
-                    document.getElementById('viewer').addEventListener('mousedown', function(){
-                        //Makes sure the panel don't move when writing on it.
-                        $("#submission_browser").draggable('disable');
-                    });
-                    document.getElementById('viewer').addEventListener('mouseup', function(){
-                        $("#submission_browser").draggable('enable');
-                    });
+                    let pages = document.getElementsByClassName('page');
+                    for(let i = 0; i < pages.length; i++){
+                        pages[i].addEventListener('mousedown', function(){
+                            //Makes sure the panel don't move when writing on it.
+                            $("#submission_browser").draggable('disable');
+                        });
+                        pages[i].addEventListener('mouseup', function(){
+                            $("#submission_browser").draggable('enable');
+                        });
+                    }
+
                 })
             });
         }
@@ -103,6 +107,9 @@ function render(gradeable_id, user_id, file_name) {
                     case 'cursor':
                         UI.disableEdit();
                         break;
+                    case 'text':
+                        UI.disableText();
+                        break;
                 }
             }
             switch(option){
@@ -123,6 +130,9 @@ function render(gradeable_id, user_id, file_name) {
                     break;
                 case 'zoomout':
                     zoom('out');
+                    break;
+                case 'text':
+                    UI.enableText();
                     break;
             }
         }
@@ -234,7 +244,70 @@ function render(gradeable_id, user_id, file_name) {
 
     initPen();
 })();
+
+// Text stuff
+(function () {
+    let textSize;
+    let textColor;
+
+    function initText() {
+        // let size = document.querySelector('.toolbar .text-size');
+        // [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96].forEach((s) => {
+        //     size.appendChild(new Option (s, s));
+        // });
+
+        setText(10, '#000000');
+
+        // initColorPicker(document.querySelector('.text-color'), textColor, function (value) {
+        //     setText(textSize, value);
+        // });
+    }
+
+    function setText(size, color) {
+        let modified = false;
+
+        if (textSize !== size) {
+            modified = true;
+            textSize = size;
+            localStorage.setItem(`${RENDER_OPTIONS.documentId}/text/size`, textSize);
+            // document.querySelector('.toolbar .text-size').value = textSize;
+        }
+
+        if (textColor !== color) {
+            modified = true;
+            textColor = color;
+            localStorage.setItem(`${RENDER_OPTIONS.documentId}/text/color`, textColor);
+
+            // let selected = document.querySelector('.toolbar .text-color.color-selected');
+            // if (selected) {
+            //     selected.classList.remove('color-selected');
+            //     selected.removeAttribute('aria-selected');
+            // }
+
+            // selected = document.querySelector(`.toolbar .text-color[data-color="${color}"]`);
+            // if (selected) {
+            //     selected.classList.add('color-selected');
+            //     selected.setAttribute('aria-selected', true);
+            // }
+
+        }
+
+        // if (modified) {
+            UI.setText(textSize, textColor);
+        // }
+    }
+
+    function handleTextSizeChange(e) {
+        setText(e.target.value, textColor);
+    }
+
+    // document.querySelector('.toolbar .text-size').addEventListener('change', handleTextSizeChange);
+
+    initText();
+})();
+
 //TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 $(window).unload(function() {
     localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
 });
+

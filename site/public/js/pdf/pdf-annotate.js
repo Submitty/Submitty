@@ -4441,7 +4441,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  input.addEventListener('blur', handleInputBlur);
 	  input.addEventListener('keyup', handleInputKeyup);
-	
+
+	  //TODO: Maybe add the entire source and build?
+	  input.style.zIndex = '50';
+
 	  document.body.appendChild(input);
 	  input.focus();
 	}
