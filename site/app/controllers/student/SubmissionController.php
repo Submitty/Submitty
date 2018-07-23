@@ -275,7 +275,19 @@ class SubmissionController extends AbstractController {
         //in the list, we will use this user as the team leader.
         $user_id = reset($user_ids);
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        $graded_gradeable = null;
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, null) as $gg) {
+            $graded_gradeable = $gg;
+            break;
+        }
+
+        // No user was on a team
+        if ($graded_gradeable === null) {
+            $msg = 'No user on a team';
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
 
         //If this is a team assignment, we need to check that all users are on the same (or no) team.
         //To do this, we just compare the leader's teamid to the team id of every other user.
@@ -300,10 +312,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        $highest_version = 0;
-        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
@@ -531,8 +540,8 @@ class SubmissionController extends AbstractController {
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
             $leader = $user_id;
-            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
-            if ($team !== null) {
+            if ($graded_gradeable !== null) {
+                $team =  $graded_gradeable->getSubmitter()->getTeam();
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -544,6 +553,9 @@ class SubmissionController extends AbstractController {
                 // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
                 // TODO:    so its ok, but fragile
                 ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+
+                // Once team is created, load in the graded gradeable
+                $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
                 $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
                 $team_id = $team->getId();
                 $who_id = $team_id;
@@ -557,10 +569,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $new_version = 1;
-        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
-        }
+        $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
@@ -827,8 +836,8 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $graded_gradeable->getSubmitter()->getTeam();
-            if ($team !== null) {
+            if ($graded_gradeable !== null) {
+                $team = $graded_gradeable->getSubmitter()->getTeam();
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -844,10 +853,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $highest_version = 0;
-        if($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         $new_version = $highest_version + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
@@ -1262,7 +1268,7 @@ class SubmissionController extends AbstractController {
         }
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, null);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
         $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
@@ -1287,10 +1293,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        $highest_version = 0;
-        if($graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         if ($new_version > $highest_version) {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
