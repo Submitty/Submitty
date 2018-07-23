@@ -3,7 +3,6 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
@@ -11,25 +10,47 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
-use app\models\LateDaysCalculation;
+use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
 
 
 
 class SubmissionController extends AbstractController {
 
-    /**
-     * @var GradeableList
-     */
-    private $gradeables_list;
-
     private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
                                     'assignment_settings' => false);
 
-    public function __construct(Core $core) {
-        parent::__construct($core);
-        $this->gradeables_list = $this->core->loadModel(GradeableList::class);
 
+    /**
+     * Tries to get a given electronic gradeable considering the active
+     *  users access level and the status of the gradeable, but returns
+     *  null if no access
+     *
+     * FIXME: put this in new access control system
+     *
+     * @param string $gradeable_id
+     * @return Gradeable|null
+     */
+    public function tryGetElectronicGradeable($gradeable_id) {
+        if ($gradeable_id === null || $gradeable_id === '') {
+            return null;
+        }
+
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
+                && ($this->core->getUser()->accessAdmin()
+                    || $gradeable->getTaViewStartDate() <= $now
+                    && $this->core->getUser()->accessGrading()
+                    || $gradeable->getSubmissionOpenDate() <= $now)) {
+                return $gradeable;
+            }
+            return null;
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
     }
 
     public function run() {
@@ -42,9 +63,6 @@ class SubmissionController extends AbstractController {
                 break;
             case 'check_refresh':
                 return $this->checkRefresh();
-                break;
-            case 'pop_up':
-                return $this->popUp();
                 break;
             case 'bulk':
                 return $this->ajaxBulkUpload();
@@ -135,16 +153,15 @@ class SubmissionController extends AbstractController {
         $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
         $this->core->getOutput()->renderJson(["status" => "success"]);
     }
-    private function popUp() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
-        $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showPopUp', $gradeable);
-    }
 
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+
+        // FIXME: The GradeableList is constructed here for legacy purposes
+        // FIXME:   Replace with tryGetElectronicGradeable when converting homework view to new model
+        $gradeable_list = $this->core->loadModel(GradeableList::class);
+        /** @var \app\models\Gradeable $gradeable */
+        $gradeable = $gradeable_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         if ($gradeable !== null) {
             $error = false;
             $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
@@ -220,15 +237,15 @@ class SubmissionController extends AbstractController {
             return $return;
         }
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         //usernames come in comma delimited. We split on the commas, then filter out blanks.
         $user_ids = explode (",", $_POST['user_id']);
         $user_ids = array_filter($user_ids);
@@ -261,16 +278,7 @@ class SubmissionController extends AbstractController {
         //in the list, we will use this user as the team leader.
         $user_id = reset($user_ids);
 
-        $user = $this->core->getQueries()->getUserById($user_id);
-
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-
-        if($gradeable === null){
-            $msg = "Gradeable not found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
         //If this is a team assignment, we need to check that all users are on the same (or no) team.
         //To do this, we just compare the leader's teamid to the team id of every other user.
@@ -295,16 +303,13 @@ class SubmissionController extends AbstractController {
             }
         }
 
-
-        $gradeable->loadResultDetails();
-
-        $highest_version = $gradeable->getHighestVersion();
-        $previous_submission = false;
-        //If there has been a previous submission, we tag it so that we can pop up a warning.
-        if($highest_version > 0){
-            $previous_submission = true;
+        $highest_version = 0;
+        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         }
-        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $previous_submission);
+
+        //If there has been a previous submission, we tag it so that we can pop up a warning.
+        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
         $this->core->getOutput()->renderJson($return);
 
         return $return;
@@ -316,21 +321,6 @@ class SubmissionController extends AbstractController {
     * Its error checking has overlap with ajaxUploadSubmission.
     */
     private function ajaxBulkUpload() {
-        if (!isset($_POST['num_pages'])) {
-            $msg = "Did not pass in number of pages or files were too large.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
-
-        // This checks for an assignment id, and that it's a valid assignment id in that
-        // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
-        }
-
         // make sure is admin
         if (!$this->core->getUser()->accessGrading()) {
             $msg = "You do not have access to that page.";
@@ -338,10 +328,23 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
+        if (!isset($_POST['num_pages'])) {
+            $msg = "Did not pass in number of pages or files were too large.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+
+        // This checks for an assignment id, and that it's a valid assignment id in that
+        // it corresponds to one that we can access (whether through admin or it being released)
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
+        }
+
         $num_pages = $_POST['num_pages'];
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $gradeable_list[$gradeable_id];
-        $gradeable->loadResultDetails();
 
         // making sure files have been uploaded
 
@@ -350,6 +353,7 @@ class SubmissionController extends AbstractController {
         }
 
         $errors = array();
+        $count = 0;
         if (isset($uploaded_file)) {
             $count = count($uploaded_file["name"]);
             for ($j = 0; $j < $count; $j++) {
@@ -368,10 +372,10 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Upload Failed: ".$error_text, false);
         }
 
-        $max_size = $gradeable->getMaxSize();
-        if ($max_size < 10000000) {
-            $max_size = 10000000;
-        }
+        $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
+    	if ($max_size < 10000000) {
+    	    $max_size = 10000000;
+    	}
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -457,8 +461,6 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($output['message'],false);
         }
 
-        $gradeable->loadResultDetails();
-
         $return = array('success' => true);
         $this->core->getOutput()->renderJson($return);
         return $return;
@@ -476,18 +478,25 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
+        // make sure is grader
+        if (!$this->core->getUser()->accessGrading()) {
+            $msg = "You do not have access to that page.";
+            $this->core->addErrorMessage($msg);
+            return $this->uploadResult($msg, false);
+        }
 
         // check for whether the item should be merged with previous submission
         // and whether or not file clobbering should be done
         $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
         $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
         if (!isset($_POST['user_id'])) {
             return $this->uploadResult("Invalid user id.", false);
@@ -496,17 +505,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
-        $gradeable_id = $_REQUEST['gradeable_id'];
         $original_user_id = $this->core->getUser()->getId();
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
         $user_ids = explode (",", $_POST['user_id']);
         $user_ids = array_filter($user_ids);
@@ -514,21 +514,8 @@ class SubmissionController extends AbstractController {
         $user_id = reset($user_ids);
 
         $path = $_POST['path'];
-        if ($user_id === $original_user_id) {
-            $gradeable = $gradeable_list[$gradeable_id];
-        }
-        else {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
-        if($gradeable === null){
-            $msg = "Gradeable not found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
-
-        $gradeable->loadResultDetails();
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
 
@@ -557,6 +544,8 @@ class SubmissionController extends AbstractController {
             else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
+                // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
+                // TODO:    so its ok, but fragile
                 ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
                 $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
                 $team_id = $team->getId();
@@ -568,10 +557,13 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $new_version = $gradeable->getHighestVersion() + 1;
+        $new_version = 1;
+        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+            $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
+        }
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
@@ -583,8 +575,6 @@ class SubmissionController extends AbstractController {
 
         $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
-
-        $max_size = $gradeable->getMaxSize();
 
         $path = rawurldecode(htmlspecialchars_decode($path));
 
@@ -673,37 +663,23 @@ class SubmissionController extends AbstractController {
             implode("__", $queue_file));
 
         // create json file...
-        if ($gradeable->isTeamAssignment()) {
-            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                                "course" => $this->core->getConfig()->getCourse(),
-                                "gradeable" =>  $gradeable->getId(),
-                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
-                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
-                                "queue_time" => $current_time,
-                                "user" => $user_id,
-                                "team" => $team_id,
-                                "who" => $who_id,
-                                "is_team" => True,
-                                "version" => $new_version);
-        }
-        else {
-            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                                "course" => $this->core->getConfig()->getCourse(),
-                                "gradeable" =>  $gradeable->getId(),
-                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
-                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
-                                "queue_time" => $current_time,
-                                "user" => $user_id,
-                                "team" => $team_id,
-                                "who" => $who_id,
-                                "is_team" => False,
-                                "version" => $new_version);
-        }
+        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+            "course" => $this->core->getConfig()->getCourse(),
+            "gradeable" => $gradeable->getId(),
+            "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+            "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+            "queue_time" => $current_time,
+            "user" => $user_id,
+            "team" => $team_id,
+            "who" => $who_id,
+            "is_team" => $gradeable->isTeamAssignment(),
+            "version" => $new_version);
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
 
+        // FIXME: Add this as part of the graded gradeable saving query
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
         }
@@ -711,7 +687,7 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}");
+        return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
 
     /**
@@ -732,27 +708,18 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
         if (!isset($_POST['path'])) {
             return $this->uploadResult("Invalid path.", false);
         }
 
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $gradeable_list[$gradeable_id];
-        $gradeable->loadResultDetails();
         $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
         $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
@@ -812,19 +779,19 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid pages.", false);
         }
 
-        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            return $this->uploadResult("Invalid gradeable id '{$_REQUEST['gradeable_id']}'", false);
+        if ($gradeable === null) {
+            return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
         if (!isset($_POST['user_id'])) {
             return $this->uploadResult("Invalid user id.", false);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         // the user id of the submitter ($user_id is the one being submitted for)
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
@@ -838,21 +805,14 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if ($user_id == $original_user_id) {
-            $gradeable = $gradeable_list[$gradeable_id];
-        }
-        else {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        }
-        $gradeable->loadResultDetails();
-
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->getStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->isStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
         }
 
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
             $gradeable->getId());
 
@@ -870,7 +830,7 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $gradeable->getTeam();
+            $team = $graded_gradeable->getSubmitter()->getTeam();
             if ($team !== null) {
                 $team_id = $team->getId();
                 $who_id = $team_id;
@@ -887,7 +847,11 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $new_version = $gradeable->getHighestVersion() + 1;
+        $highest_version = 0;
+        if($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
+        $new_version = $highest_version + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
@@ -900,8 +864,9 @@ class SubmissionController extends AbstractController {
         $part_path = array();
         // We upload the assignment such that if it's multiple parts, we put it in folders "part#" otherwise
         // put all files in the root folder
-        if ($gradeable->getNumParts() > 1) {
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+        $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
+        if ($num_parts > 1) {
+            for ($i = 1; $i <= $num_parts; $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part".$i);
                 if (!FileUtils::createDir($part_path[$i])) {
                     return $this->uploadResult("Failed to make the folder for part {$i}.", false);
@@ -915,11 +880,11 @@ class SubmissionController extends AbstractController {
         $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
-        $max_size = $gradeable->getMaxSize();
+        $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
 
         if ($vcs_checkout === false) {
             $uploaded_files = array();
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
+            for ($i = 1; $i <= $num_parts; $i++){
                 if (isset($_FILES["files{$i}"])) {
                     $uploaded_files[$i] = $_FILES["files{$i}"];
                 }
@@ -927,7 +892,7 @@ class SubmissionController extends AbstractController {
 
             $errors = array();
             $count = array();
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
                     $count[$i] = count($uploaded_files[$i]["name"]);
                     for ($j = 0; $j < $count[$i]; $j++) {
@@ -951,10 +916,10 @@ class SubmissionController extends AbstractController {
             $empty_textboxes = true;
             if (isset($_POST['textbox_answers'])) {
                 $textbox_answer_array = json_decode($_POST['textbox_answers']);
-                for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
                     $textbox_answer_val = $textbox_answer_array[$i];
                     if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getTextboxes()[$i]['filename'];
+                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]['filename'];
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
@@ -968,7 +933,7 @@ class SubmissionController extends AbstractController {
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
             if (!empty($tmp)) {
-                for ($i = 0; $i < $gradeable->getNumParts(); $i++) {
+                for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];
                         $previous_files_dst[$i + 1] = $tmp[$i];
@@ -983,13 +948,13 @@ class SubmissionController extends AbstractController {
 
             // $merge_previous will only be true if there is a previous submission.
             if (count($previous_files_src) > 0 || $merge_previous) {
-                if ($gradeable->getHighestVersion() === 0) {
+                if ($highest_version === 0) {
                     return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
 
-                $previous_path = FileUtils::joinPaths($user_path, $gradeable->getHighestVersion());
-                if ($gradeable->getNumParts() > 1) {
-                    for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                $previous_path = FileUtils::joinPaths($user_path, $highest_version);
+                if ($num_parts > 1) {
+                    for ($i = 1; $i <= $num_parts; $i++) {
                         $previous_part_path[$i] = FileUtils::joinPaths($previous_path, "part".$i);
                     }
                 }
@@ -1006,7 +971,7 @@ class SubmissionController extends AbstractController {
                 // if merging is being done, get all the old filenames and put them into $previous_files_dst
                 // while checking for name conflicts and preventing them if clobbering is not enabled.
                 if($merge_previous) {
-                    for($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                    for($i = 1; $i <= $num_parts; $i++) {
                         if(isset($uploaded_files[$i])) {
                             $current_files_set = array_flip($uploaded_files[$i]["name"]);
                             $previous_files_src[$i] = array();
@@ -1019,7 +984,7 @@ class SubmissionController extends AbstractController {
                                 $previous_files_src[$i][$j] = $file_base_name;
                                 if(!$clobber && isset($current_files_set[$file_base_name])) {
                                     $parts = explode(".", $file_base_name);
-                                    $parts[0] .= "_version_".$gradeable->getHighestVersion();
+                                    $parts[0] .= "_version_".$highest_version;
                                     $file_base_name = implode(".", $parts);
                                 }
                                 $previous_files_dst[$i][$j] = $file_base_name;
@@ -1030,7 +995,7 @@ class SubmissionController extends AbstractController {
                 }
 
 
-                for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                for ($i = 1; $i <= $num_parts; $i++) {
                     if (isset($previous_files_src[$i])) {
                         foreach ($previous_files_src[$i] as $prev_file) {
                             $filename = FileUtils::joinPaths($previous_part_path[$i], $prev_file);
@@ -1047,7 +1012,7 @@ class SubmissionController extends AbstractController {
             // We save that information for later so we know which files need unpacking or not and can save
             // a check to getMimeType()
             $file_size = 0;
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
@@ -1078,7 +1043,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
             }
 
-            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+            for ($i = 1; $i <= $num_parts; $i++) {
                 // copy selected previous submitted files
                 if (isset($previous_files_src[$i])){
                     for ($j=0; $j < count($previous_files_src[$i]); $j++){
@@ -1129,7 +1094,7 @@ class SubmissionController extends AbstractController {
         }
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-            $vcs_path = $gradeable->getSubdirectory();
+            $vcs_path = $gradeable->getVcsSubdirectory();
 
             // use entirely student input
             if ($vcs_base_url == "" && $vcs_path == "") {
@@ -1214,32 +1179,17 @@ class SubmissionController extends AbstractController {
             implode("__", $queue_file));
 
         // create json file...
-        if ($gradeable->isTeamAssignment()) {
-            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                                "course" => $this->core->getConfig()->getCourse(),
-                                "gradeable" =>  $gradeable->getId(),
-                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
-                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
-                                "queue_time" => $current_time,
-                                "user" => $user_id,
-                                "team" => $team_id,
-                                "who" => $who_id,
-                                "is_team" => True,
-                                "version" => $new_version);
-        }
-        else {
-            $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                                "course" => $this->core->getConfig()->getCourse(),
-                                "gradeable" =>  $gradeable->getId(),
-                                "required_capabilities" => $gradeable->getRequiredCapabilities(),
-                                "max_possible_grading_time" => $gradeable->getMaxPossibleGradingTime(),
-                                "queue_time" => $current_time,
-                                "user" => $user_id,
-                                "team" => $team_id,
-                                "who" => $who_id,
-                                "is_team" => False,
-                                "version" => $new_version);
-        }
+        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+            "course" => $this->core->getConfig()->getCourse(),
+            "gradeable" =>  $gradeable->getId(),
+            "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
+            "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
+            "queue_time" => $current_time,
+            "user" => $user_id,
+            "team" => $team_id,
+            "who" => $who_id,
+            "is_team" => $gradeable->isTeamAssignment(),
+            "version" => $new_version);
 
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
@@ -1254,9 +1204,9 @@ class SubmissionController extends AbstractController {
         }
 
         if ($user_id == $original_user_id)
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()}");
+            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()}");
         else
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getName()} for {$who_id}");
+            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
 
 
         return $this->uploadResult("Successfully uploaded files");
@@ -1293,7 +1243,8 @@ class SubmissionController extends AbstractController {
     }
 
     private function updateSubmissionVersion() {
-        if (isset($_REQUEST['ta'])) {
+        $ta = $_REQUEST['ta'] ?? false;
+        if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
@@ -1301,24 +1252,20 @@ class SubmissionController extends AbstractController {
                 $this->core->redirect($this->core->getConfig()->getSiteUrl());
                 return array('error' => true, 'message' => $msg);
             }
-            $ta = $_REQUEST['ta'];
-            $who = $_REQUEST['who'];
-            $mylist = new GradeableList($this->core, $this->core->getQueries()->getUserById($who));
-            $gradeable_list = $mylist->getSubmittableElectronicGradeables();
+            $ta = true;
         }
-        else{
-            $ta = false;
-            $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
-        }
-        if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
+
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
             return array('error' => true, 'message' => $msg);
         }
 
-        $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadResultDetails();
+        $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, null);
         $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
@@ -1327,7 +1274,8 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null) {
+        // If $graded_gradeable is null, that means its a team assignment and the user is on no team
+        if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
@@ -1342,14 +1290,18 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        if ($new_version > $gradeable->getHighestVersion()) {
-            $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
+        $highest_version = 0;
+        if($graded_gradeable->getAutoGradedGradeable() !== null) {
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
+        if ($new_version > $highest_version) {
+            $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
             return array('error' => true, 'message' => $msg);
         }
 
-        if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
@@ -1357,16 +1309,10 @@ class SubmissionController extends AbstractController {
         }
 
         $original_user_id = $this->core->getUser()->getId();
-        $user_id = $gradeable->getUser()->getId();
-        if ($gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if ($team !== null) {
-                $user_id = $team->getId();
-            }
-        }
+        $submitter_id = $graded_gradeable->getSubmitter()->getId();
 
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId(), $user_id, "user_assignment_settings.json");
+            $gradeable->getId(), $submitter_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $msg = "Failed to open settings file.";
@@ -1390,11 +1336,12 @@ class SubmissionController extends AbstractController {
 
         $version = ($new_version > 0) ? $new_version : null;
 
+        // FIXME: Add this kind of operation to the graded gradeable saving query
         if($gradeable->isTeamAssignment()) {
-            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $user_id, $version);
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), null, $submitter_id, $version);
         }
         else {
-            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $user_id, null, $version);
+            $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $submitter_id, null, $version);
         }
 
 
@@ -1439,6 +1386,7 @@ class SubmissionController extends AbstractController {
             $uploaded_files[1] = $_FILES["files1"];
         }
         $errors = array();
+        $count_item = 0;
         if (isset($uploaded_files[1])) {
             $count_item = count($uploaded_files[1]["name"]);
             for ($j = 0; $j < $count_item[1]; $j++) {
@@ -1655,19 +1603,20 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $version = $_REQUEST['gradeable_version'];
-        $g_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->gradeables_list->getGradeable($g_id, GradeableType::ELECTRONIC_FILE);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
-        $user_id = $this->core->getUser()->getId();
+        // Don't load the graded gradeable, since that may not exist yet
+        $submitter_id = $this->core->getUser()->getId();
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($g_id, $user_id);
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $submitter_id);
             if ($team !== null) {
-                $user_id = $team->getId();
+                $submitter_id = $team->getId();
             }
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id,
-            $user_id, $version);
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
+            $submitter_id, $version);
         if (file_exists($path."/results.json")) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;

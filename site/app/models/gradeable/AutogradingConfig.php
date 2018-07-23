@@ -168,7 +168,7 @@ class AutogradingConfig extends AbstractModel {
      * @return SubmissionTextBox[]
      */
     public function getTextboxes() {
-        return $this->getTextboxes();
+        return $this->textboxes;
     }
 
     /**
