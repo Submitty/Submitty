@@ -168,10 +168,16 @@ function editUserForm(user_id) {
                 });
             }
             if(registration_section === 'null' && json['user_group'] === 4) {
-                $('#student-error-message').css('display', 'block');
+                $('#user-form-student-error-message').css('display', 'block');
             }
             else {
-                $('#student-error-message').css('display', 'none');
+                $('#user-form-student-error-message').css('display', 'none');
+            }
+            if(json['user_group'] == 4) {
+                $('#user-form-assigned-sections').css('display', 'none');
+            }
+            else {
+                $('#user-form-assigned-sections').css('display', 'block');
             }
 
         },
@@ -196,7 +202,8 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#student-error-message').css('display', 'block');
+    $('#user-form-student-error-message').css('display', 'block');
+    $('#user-form-assigned-sections').css('display', 'none');
 }
 
 function extensionPopup(json){
@@ -864,6 +871,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 source: student_full
             });
         }
+        members_div.find('[name="reg_section"]').val(reg_section);
+        members_div.find('[name="rot_section"]').val(rot_section);
     }
     else {
         $('[name="new_team_user_id"]', form).val("");

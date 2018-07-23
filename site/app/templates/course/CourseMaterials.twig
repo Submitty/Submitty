@@ -41,9 +41,9 @@
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if hasInstructorPermission %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <input id="share_checkbox_{{ id }}" type="checkbox" 
+                <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
-                   checked="true" 
+                   checked="true"
                 {% endif %}
                 onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
                 {# <input name="release_date" id="date_grade" class="date_picker" type="text" value="{{ fileReleaseDates[path] | date(date_format) }}"/> #}
@@ -87,9 +87,8 @@
         window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
-	
+
     function shareToOther(id, path) {
-    
         // pass filename to server to record the permission of the file
         var idName = "#share_checkbox_" + id;
         if($(idName).is(':checked')) {
@@ -99,14 +98,14 @@
             changePermission(path, '0');
         }
     }
-	
+
     function setNewDateTime(me, path) {
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
         //alert(newDateTime);
         changeNewDateTime(path, newDateTime);
     }
-    
+
     $(document).ready(function() {
         $(function() {
             $( ".date_picker" ).datetimepicker({

@@ -476,16 +476,16 @@ class MiscController extends AbstractController {
             return;
         }
 
-        if (!isset($_GET['filename']) || 
+        if (!isset($_GET['filename']) ||
             !isset($_GET['checked'])) {
             return;
         }
-		
+
         $file_name = $_GET['filename'];
         $checked =  $_GET['checked'];
-		
+
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-        
+
         $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $json = FileUtils::readJsonFile($fp);
         if ($json != false) {
@@ -496,16 +496,16 @@ class MiscController extends AbstractController {
         {
             $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         }
-        
+
         $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
-		
+
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
 		}
     }
-	  
+
 	public function modifyCourseMaterialsFileTimeStamp() {
-        
+
         if($this->core->getUser()->getGroup() !== 1) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
@@ -515,16 +515,16 @@ class MiscController extends AbstractController {
            return;
         }
 
-        if (!isset($_GET['filename']) || 
+        if (!isset($_GET['filename']) ||
             !isset($_GET['newdatatime'])) {
             return;
         }
 
         $file_name = $_GET['filename'];
         $new_data_time = $_GET['newdatatime'];
-        
+
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-        
+
         $checked = '0';
         $json = FileUtils::readJsonFile($fp);
         if ($json != false) {
@@ -532,7 +532,7 @@ class MiscController extends AbstractController {
         }
 
         $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
-		
+
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
 		}

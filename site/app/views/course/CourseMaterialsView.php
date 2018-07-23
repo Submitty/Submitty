@@ -25,7 +25,7 @@ class CourseMaterialsView extends AbstractView {
             $arrlength = count($course_materials_array);
 
             $now_date_time = (new \DateTime('now', $core->getConfig()->getTimezone()));
-            
+
             foreach($course_materials_array as $file) {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);

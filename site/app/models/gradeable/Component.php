@@ -295,6 +295,14 @@ class Component extends AbstractModel {
         return $this->upper_clamp > $this->max_value;
     }
 
+    /**
+     * Gets if this component is fully extra credit
+     * @return bool
+     */
+    public function isExtraCredit() {
+        return $this->max_value === $this->default && $this->hasExtraCredit();
+    }
+
     // Numeric/Text
     public function getNumericScore() {
         return max($this->upper_clamp, $this->max_value);
