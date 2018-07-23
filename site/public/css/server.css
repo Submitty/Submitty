@@ -877,6 +877,10 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.td-open {
+    width: 10%;
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);

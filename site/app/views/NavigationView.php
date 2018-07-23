@@ -609,35 +609,60 @@ class NavigationView extends AbstractView {
         $button = null;
         if ($list_section === GradeableList::GRADING) {
             $button = new Button($this->core, [
-                "title" => "RELEASE GRADES NOW",
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'release_grades_now')),
-                "class" => "btn btn-primary btn-nav"
+                "subtitle" => "RELEASE \nGRADES NOW",
+                "href" => $this->core->buildUrl([
+                    'component' => 'admin',
+                    'page' => 'admin_gradeable',
+                    'action' => 'quick_link',
+                    'id' => $gradeable->getId(),
+                    'quick_link_action' => 'release_grades_now']),
+                "class" => "btn btn-primary btn-nav btn-nav-open"
             ]);
         } else if ($list_section === GradeableList::FUTURE) {
             $button = new Button($this->core, [
-                "title" => "OPEN TO TAS NOW",
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_ta_now')),
-                "class" => "btn btn-primary btn-nav"
+                "subtitle" => "OPEN TO \nTAS NOW",
+                "href" => $this->core->buildUrl([
+                    'component' => 'admin',
+                    'page' => 'admin_gradeable',
+                    'action' => 'quick_link',
+                    'id' => $gradeable->getId(),
+                    'quick_link_action' => 'open_ta_now']),
+                "class" => "btn btn-primary btn-nav btn-nav-open"
             ]);
         } else if ($list_section === GradeableList::BETA) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                 $button = new Button($this->core, [
-                    "title" => "OPEN NOW",
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_students_now')),
-                    "class" => "btn btn-primary btn-nav"
+                    "subtitle" => "OPEN NOW",
+                    "href" => $this->core->buildUrl([
+                        'component' => 'admin',
+                        'page' => 'admin_gradeable',
+                        'action' => 'quick_link',
+                        'id' => $gradeable->getId(),
+                        'quick_link_action' => 'open_students_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open"
                 ]);
             } else {
                 $button = new Button($this->core, [
-                    "title" => "OPEN TO GRADING NOW",
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
-                    "class" => "btn btn-primary btn-nav"
+                    "subtitle" => "OPEN TO \nGRADING NOW",
+                    "href" => $this->core->buildUrl([
+                        'component' => 'admin',
+                        'page' => 'admin_gradeable',
+                        'action' => 'quick_link',
+                        'id' => $gradeable->getId(),
+                        'quick_link_action' => 'open_grading_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open"
                 ]);
             }
         } else if ($list_section === GradeableList::CLOSED) {
             $button = new Button($this->core, [
-                "title" => "OPEN TO GRADING NOW",
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'quick_link', 'id' => $gradeable->getId(), 'quick_link_action' => 'open_grading_now')),
-                "class" => "btn btn-primary btn-nav"
+                "subtitle" => "OPEN TO \nGRADING NOW",
+                "href" => $this->core->buildUrl([
+                    'component' => 'admin',
+                    'page' => 'admin_gradeable',
+                    'action' => 'quick_link',
+                    'id' => $gradeable->getId(),
+                    'quick_link_action' => 'open_grading_now']),
+                "class" => "btn btn-primary btn-nav btn-nav-open"
             ]);
         }
 
