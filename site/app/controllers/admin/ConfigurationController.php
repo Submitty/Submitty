@@ -36,7 +36,7 @@ class ConfigurationController extends AbstractController {
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                  => $this->core->getConfig()->getVcsType(),
-            'manual_grading_enabled'    => $this->core->getConfig()->isManualGradingEnabled()
+            'manual_grading_enabled'    => $this->core->getConfig()->isManualGradingEnabled(),
             'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
             'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'           => $this->core->getConfig()->getRegradeMessage(),
