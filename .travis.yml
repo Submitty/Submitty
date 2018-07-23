@@ -151,8 +151,6 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
-        - sudo chmod -R 555 /usr/local/lib/python*/
-        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
       before_script:
         # Doing this helps chromedriver from hanging for some mysterious reason
         # https://github.com/SeleniumHQ/docker-selenium/issues/87
@@ -161,7 +159,7 @@ jobs:
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/autograder.sh
         - sudo bash .setup/travis/setup.sh
-        - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py sample
+        - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
         - sudo a2enmod include rewrite actions cgi alias headers
@@ -244,8 +242,6 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - python3 setup.py install
         - popd
-        - sudo chmod -R 555 /usr/local/lib/python*/
-        - sudo chmod -R 555 /opt/python/${PY_VERSION_3}/lib/python${PY_VERSION_3:0:3}/*
         - sudo bash .setup/travis/autograder.sh
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
