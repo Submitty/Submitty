@@ -422,7 +422,6 @@ class HomeworkView extends AbstractView {
             ];
         }, $auto_graded_gradeable->getAutoGradedVersions());
 
-<<<<<<< HEAD
         $param = [];
         $show_testcases = false;
         $show_incentive_message = false;
@@ -437,17 +436,6 @@ class HomeworkView extends AbstractView {
                     $show_testcases = true;
                     break;
                 }
-=======
-        // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->useVcsCheckout() && $gradeable->getStudentDownload() && ($gradeable->getCurrentVersionNumber() === $gradeable->getActiveVersion() || $gradeable->getStudentAnyVersion());
-
-        $files = ($gradeable->useVcsCheckout()) ? $gradeable->getVcsFiles() : $gradeable->getSubmittedFiles();
-        foreach ($files as &$file) {
-            if (isset($file['size'])) {
-                $file['size'] = number_format($file['size'] / 1024, 2);
-            } else {
-                $file['size'] = number_format(-1);
->>>>>>> master
             }
 
             $show_incentive_message = $autograding_config->hasEarlySubmissionIncentive()
