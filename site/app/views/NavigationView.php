@@ -386,8 +386,8 @@ class NavigationView extends AbstractView {
                 $list_section === GradeableList::GRADED) {
                 //Graded and you haven't seen it yet
                 $class = "btn-success";
+                $gradeable->setJustRegraded(false);
             }
-
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $list_section == GradeableList::GRADED) {

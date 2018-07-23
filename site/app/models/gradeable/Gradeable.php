@@ -67,6 +67,7 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
+ * @method bool getJustRegraded()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -166,6 +167,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
 
+    protected $just_regraded = false;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -842,6 +844,9 @@ class Gradeable extends AbstractModel {
             }
         }
         return $count;
+    }
+    public function setJustRegraded($bool) {
+        $this->just_regraded=$bool;
     }
 
     /**

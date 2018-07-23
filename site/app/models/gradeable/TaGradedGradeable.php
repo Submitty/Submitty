@@ -58,7 +58,7 @@ class TaGradedGradeable extends AbstractModel {
         $this->setIdFromDatabase($details['id'] ?? 0);
         $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
-        $this->setUserViewedDate($details['just_regraded'] ?? false);
+        $this->graded_gradeable->getGradeable()->setJustRegraded($details['just_regraded'] ?? false);
         $this->modified = false;
     }
 
