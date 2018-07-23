@@ -879,7 +879,8 @@ class AdminGradeableController extends AbstractController {
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D'))
+            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
+            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable

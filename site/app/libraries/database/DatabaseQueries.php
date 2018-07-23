@@ -2876,7 +2876,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
-                    $gradeable->getId()
+                    $gradeable->getId(),
+                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate())
                 ];
                 $this->course_db->query("
                     UPDATE electronic_gradeable SET 
@@ -2896,7 +2897,8 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_precision=?,
                       eg_peer_grading=?,
-                      eg_peer_grade_set=?
+                      eg_peer_grade_set=?,
+                      eg_regrade_request_date=?
                     WHERE g_id=?", $params);
             }
         }

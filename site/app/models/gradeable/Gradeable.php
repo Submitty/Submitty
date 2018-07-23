@@ -33,6 +33,7 @@ use app\models\User;
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
  * @method \DateTime getMinGradingGroup()
+* @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -169,7 +170,8 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-
+    /** @property @var \DateTime The deadline for submitting a regrade request */
+    protected $regrade_request_date = null;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -218,7 +220,8 @@ class Gradeable extends AbstractModel {
         'team_lock_date',
         'submission_open_date',
         'submission_due_date',
-        'grade_locked_date'
+        'grade_locked_date',
+        'regrade_request_date'
     ];
 
     public function toArray() {
@@ -448,6 +451,7 @@ class Gradeable extends AbstractModel {
             $this->submission_open_date = $dates['submission_open_date'];
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
+            $this->regrade_request_date = $dates['regrade_request_date'];
         }
         $this->modified = true;
     }
