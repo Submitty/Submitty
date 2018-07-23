@@ -539,6 +539,13 @@ CREATE TABLE forum_posts_history (
     "edit_timestamp" timestamp with time zone NOT NULL
 );
 
+CREATE TABLE forum_posts_history (
+    "post_id" int NOT NULL,
+    "edit_author" character varying NOT NULL,
+    "content" text NOT NULL,
+    "edit_timestamp" timestamp with time zone NOT NULL
+);
+
 CREATE TABLE "thread_categories" (
 	"thread_id" int NOT NULL,
 	"category_id" int NOT NULL
