@@ -9,12 +9,11 @@
 
     <b>Full path to the directory containing the course material file(s):</b><br>
     <fieldset>
-
         <p><br>Add folder(s) to the course_materials folder if necessary: <br>
-            (ex: homework1 or homework1/classes/pokemon) <br><br>
-            Current folder setting:</p>
-        <input style='width: 90%' type='text' id='input_provide_full_path' name='eg_config_path' value="{{ folderPath~'/'~courseMaterial }}" placeholder="(Optional)"/>
-
+        (ex: homework1 or homework1/classes/pokemon) <br><br>
+        Current folder setting:</p>
+        {{ folderPath~'/'~courseMaterial }}
+        <input style='width: auto' type='text' id='input_provide_full_path' name='eg_config_path' value="" placeholder="(Optional)"/>
     </fieldset>
     <br /> <br />
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
