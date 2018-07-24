@@ -2187,7 +2187,7 @@ AND gc_id IN (
       $ar = array();
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
-      $ar["user_email"] = $name_rows["user_email"];;
+      $ar["user_email"] = $name_rows["user_email"];
       return $ar;
     }
 

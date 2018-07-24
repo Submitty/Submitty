@@ -667,7 +667,7 @@ HTML;
 			$edit_date = null;
 		}
 		$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
-		$author_email = $user_info['user_email'];
+		$author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
