@@ -1417,19 +1417,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 ];
             }
 
-            // Construct the late day exception data
-            $late_day_exceptions = [];
-            if(isset($row['late_day_exceptions'])) {
-                // This might be set if it is a non-team assignment
-                $late_day_exceptions = [
-                    $submitter->getId() => $row['late_day_exceptions']
-                ];
-            }
-            else if(isset($row['array_late_day_exceptions'])) {
-                // This might be set if it is a team assignment
-                $late_day_exceptions = array_combine($row['array_late_day_user_ids'], $row['array_late_day_exceptions']);
-            }
-
             // Create the graded gradeable instances
             $graded_gradeable = new GradedGradeable($this->core, $gradeable, new Submitter($this->core, $submitter), [
                 'late_day_exceptions' => $late_day_exceptions
