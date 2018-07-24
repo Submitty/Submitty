@@ -447,7 +447,7 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $studentNotInSection=false, $canViewWholeGradeable=false) {
+    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
         $peer = false;
         if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
             $peer = true;
@@ -455,12 +455,12 @@ class ElectronicGraderView extends AbstractView {
 
         $return = "";
 
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $studentNotInSection, $peer);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $canViewWholeGradeable);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user, $can_verify);
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
@@ -498,13 +498,13 @@ class ElectronicGraderView extends AbstractView {
      * @param float $progress
      * @param string $prev_id
      * @param string $next_id
-     * @param bool $studentNotInSection
+     * @param bool $not_in_my_section
      * @param bool $peer
      * @return string
      */
-    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $studentNotInSection, bool $peer) {
+    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
-            "studentNotInSection" => $studentNotInSection,
+            "studentNotInSection" => $not_in_my_section,
             "prev_id" => $prev_id,
             "next_id" => $next_id,
             "progress" => $progress,
@@ -516,13 +516,13 @@ class ElectronicGraderView extends AbstractView {
     /**
      * Render the Auto-Grading Testcases panel
      * @param Gradeable $gradeable
-     * @param bool $canViewWholeGradeable
+     * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel(Gradeable $gradeable, bool $canViewWholeGradeable) {
+    public function renderAutogradingPanel(Gradeable $gradeable, bool $show_hidden_cases) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "gradeable" => $gradeable,
-            "canViewWholeGradeable" => $canViewWholeGradeable,
+            "canViewWholeGradeable" => $show_hidden_cases,
         ]);
     }
 
@@ -616,27 +616,16 @@ class ElectronicGraderView extends AbstractView {
      * @param User $user
      * @return string
      */
-    public function renderRubricPanel(Gradeable $gradeable, User $user) {
+    public function renderRubricPanel(Gradeable $gradeable, User $user, bool $can_verify) {
         $return = "";
 
-        $display_verify_all = false;
-        //check if verify all button should be shown or not
-        foreach ($gradeable->getComponents() as $component) {
-            if (!$component->getGrader()) {
-                continue;
-            }
-            if ($component->getGrader()->getId() !== $this->core->getUser()->getId() && $this->core->getUser()->accessFullGrading()) {
-                $display_verify_all = true;
-                break;
-            }
-        }
         $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
 
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "your_user_id" => $this->core->getUser()->getId(),
             "disabled" => $disabled,
-            "can_verify" => $display_verify_all // If any can be then this is set
+            "can_verify" => $can_verify // If any can be then this is set
         ];
 
         //Assign correct page numbers
@@ -655,7 +644,7 @@ class ElectronicGraderView extends AbstractView {
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable" => $gradeable,
-            "display_verify_all" => $display_verify_all,
+            "display_verify_all" => $can_verify,
             "user" => $user,
             "grading_data" => $grading_data
         ]);

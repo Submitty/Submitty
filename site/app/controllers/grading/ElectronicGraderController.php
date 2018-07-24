@@ -929,25 +929,22 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable->loadResultDetails();
 
-        $anon_ids = $this->core->getQueries()->getAnonId(array($prev_id, $next_id));
-
-        $nameBreadCrumb = '';
-
-
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
-                $team_member = $this->core->getQueries()->getUserById($team_member);
-                $nameBreadCrumb .= $team_member->getId() . ', ';
+        $can_verify = false;
+        //check if verify all button should be shown or not
+        foreach ($gradeable->getComponents() as $component) {
+            if (!$component->getGrader()) {
+                continue;
             }
-            $nameBreadCrumb = rtrim($nameBreadCrumb, ', ');
-        } else {
-            $nameBreadCrumb .= $gradeable->getUser()->getId();
-        }       
-
+            if ($component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+                $can_verify = true;
+                break;
+            }
+        }
+        $can_verify = $can_verify && $this->core->getAccess()->canI("grading.verify_grader");
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
