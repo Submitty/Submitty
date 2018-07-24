@@ -214,12 +214,17 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * @param Gradeable   $gradeable
+     * @param Gradeable $gradeable
      * @param Gradeable[] $rows
-     * @param array       $graders
+     * @param array $graders
+     * @param Team[] $empty_teams
+     * @param bool $show_all_sections_button
+     * @param bool $show_import_teams_button
+     * @param bool $show_export_teams_button
+     * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $rows, $graders, $all_teams, $empty_teams) {
+    public function detailsPage(Gradeable $gradeable, $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -229,17 +234,6 @@ class ElectronicGraderView extends AbstractView {
         if ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
-        if ($peer) {
-            $grading_count = $gradeable->getPeerGradeSet();
-        } else if ($gradeable->isGradeByRegistration()) {
-            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-        } else {
-            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
-        }
-
-        $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
-        $show_import_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
-        $show_export_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
 
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
@@ -262,7 +256,7 @@ class ElectronicGraderView extends AbstractView {
             }
         } else {
             if ($gradeable->isTeamAssignment()) {
-                if ($this->core->getUser()->accessAdmin()) {
+                if ($show_edit_teams) {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
                     $columns[] = ["width" => "5%",  "title" => "Section",          "function" => "section"];
                     $columns[] = ["width" => "6%",  "title" => "Edit Teams",       "function" => "team_edit"];

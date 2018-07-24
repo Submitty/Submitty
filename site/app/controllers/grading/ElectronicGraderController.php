@@ -348,7 +348,8 @@ class ElectronicGraderController extends GradingController {
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
-        $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $this->core->getAccess()->canI("grading.details.show_all");
+        $can_show_all = $this->core->getAccess()->canI("grading.details.show_all");
+        $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $can_show_all;
 
         $students = array();
         //If we are peer grading, load in all students to be graded by this peer.
@@ -448,10 +449,23 @@ class ElectronicGraderController extends GradingController {
                 $rows = array_merge($rows, $individual_rows[""]);
             }
         }
-        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $all_teams, $empty_teams);
 
-        if ($gradeable->isTeamAssignment() && $this->core->getAccess()->canI("grading.show_edit_teams")) {
+        if ($peer) {
+            $grading_count = $gradeable->getPeerGradeSet();
+        } else if ($gradeable->isGradeByRegistration()) {
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        } else {
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
+        }
+
+        $show_all_sections_button = $can_show_all && $grading_count !== 0;
+        $show_edit_teams = $this->core->getAccess()->canI("grading.show_edit_teams") && $gradeable->isTeamAssignment();
+        $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
+        $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
+
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams);
+
+        if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
             $key = 'sections_registration_id';
             foreach ($all_reg_sections as $i => $section) {
