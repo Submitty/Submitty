@@ -156,22 +156,21 @@ class AutoGradingView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @param $index
+     * @param \app\models\gradeable\GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion $version version to display
+     * @param AutoGradedTestcase $testcase testcase to display
      * @param $popup_css_file
      * @param string $who
      * @param bool $show_hidden
      * @return string
      * @throws \Exception
      */
-    public function loadAutoChecks(Gradeable $gradeable, $index, $popup_css_file, $who, $show_hidden = false) {
-        $gradeable->loadResultDetails();
-        $testcase = $gradeable->getTestcases()[$index];
-
-        if ($testcase->isHidden() && !$show_hidden) {
+    public function loadAutoChecks(\app\models\gradeable\GradedGradeable $graded_gradeable, AutoGradedVersion $version, AutoGradedTestcase $testcase, $popup_css_file, $who, $show_hidden = false) {
+        if ($testcase->getTestcase()->isHidden() && !$show_hidden) {
             return "";
         }
 
+        $gradeable = $graded_gradeable->getGradeable();
         $checks = [];
 
         foreach ($testcase->getAutochecks() as $autocheck) {
@@ -252,9 +251,10 @@ class AutoGradingView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
             "checks" => $checks,
-            "index" => $index,
+            "display_version" => $version->getVersion(),
+            "index" => $testcase->getTestcase()->getIndex(),
             "who" => $who,
             "popup_css_file" => $popup_css_file,
         ]);
