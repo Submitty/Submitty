@@ -46,8 +46,7 @@
                    checked="true"
                 {% endif %}
                 onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
-                {# <input name="release_date" id="date_grade" class="date_picker" type="text" value="{{ fileReleaseDates[path] | date(date_format) }}"/> #}
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
@@ -79,7 +78,7 @@
 
 <script type="text/javascript">
 
-    window.onload = function () { 
+    window.onload = function () {
         // loop thru each div_viewer_xxx
 
         var jumpToScrollPostion = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPostion\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -88,7 +87,7 @@
             $('[id^=div_viewer_]').each(function() {
             var number = this.id.replace('div_viewer_', '').trim();
             var keyValuePairs = document.cookie.split(';');
-            
+
             for(var i = 0; i < keyValuePairs.length; i++) {
                 var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
                 var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
@@ -108,7 +107,7 @@
             $('[id^=div_viewer_]').each(function() {
             var number = this.id.replace('div_viewer_', '').trim();
             var keyValuePairs = document.cookie.split(';');
-            
+
             for(var i = 0; i < keyValuePairs.length; i++) {
                 var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
                 if (name === 'cm_'+number) {
@@ -118,7 +117,7 @@
         });
         }
     }
-    
+
     function openFileCourseMaterial(html_file, url_file) {
         var directory = "";
         if (url_file.includes("uploads")) {
