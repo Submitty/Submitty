@@ -14,6 +14,7 @@
         Current folder setting:</p>
         {{ folderPath~'/'~courseMaterial }}
         <input style='width: auto' type='text' id='input_provide_full_path' name='eg_config_path' value="" placeholder="(Optional)"/>
+        <br><input id="expand_zip_checkbox" type="checkbox"/><label>Unzip zip files</label>
     </fieldset>
     <br /> <br />
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -24,13 +25,14 @@
         </div>
     </div>
     <script type="text/javascript">
-        function makeSubmission(requestedPath) {
-            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", requestedPath);
+        function makeSubmission(expandZip,requestedPath) {
+            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", expandZip, requestedPath);
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button
+                var expandZip = document.getElementById("expand_zip_checkbox").value;
                 var requestedPath = document.getElementById("input_provide_full_path").value;
-                makeSubmission(requestedPath);
+                makeSubmission(expandZip, requestedPath);
                 e.stopPropagation();
             });
         });
