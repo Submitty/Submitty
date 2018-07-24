@@ -2704,6 +2704,10 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to insert
      */
     public function createGradeable(\app\models\gradeable\Gradeable $gradeable) {
+        $regrade_date=null;
+        if($gradeable->getRegradeRequestDate()!==null){
+            $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+        }
         $params = [
             $gradeable->getId(),
             $gradeable->getTitle(),
@@ -2753,7 +2757,8 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
-                $gradeable->getPeerGradeSet()
+                $gradeable->getPeerGradeSet(),
+                $regrade_date
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
