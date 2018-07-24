@@ -26,13 +26,13 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -55,34 +55,53 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     args['which'] = 'expected';
     var url = buildUrl(args);
 
+    let assertSuccess = function(data) {
+        if (data.status === 'fail') {
+            alert("Error loading diff: " + data.message);
+            return false;
+        } else if (data.status === 'error') {
+            alert("Internal server error: " + data.message);
+            return false;
+        }
+        return true;
+    }
+
     $.getJSON({
         url: url,
-        success: function(data) {
-            for(property in data.whitespaces){
-                list_white_spaces[property] = data.whitespaces[property];
+        success: function (response) {
+            if(!assertSuccess(response)) {
+                return;
+            }
+            for (property in response.data.whitespaces) {
+                list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
-            $(expected_div).html(data.html);
+            $(expected_div).html(response.data.html);
             args['which'] = 'actual';
             url = buildUrl(args);
             $.getJSON({
                 url: url,
-                success: function(data) {
-                    for(property in data.whitespaces){
-                        list_white_spaces[property] = data.whitespaces[property];
+                success: function (response) {
+                    if(!assertSuccess(response)) {
+                        return;
                     }
-                    for(property in list_white_spaces){
-                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    for (property in response.data.whitespaces) {
+                        list_white_spaces[property] = response.data.whitespaces[property];
+                    }
+                    for (property in list_white_spaces) {
+                        $('#' + helper_id).append('<span style=\"outline:1px blue solid;\">' + list_white_spaces[property] + "</span> = " + property + " ");
                     }
                     $(actual_div).empty();
-                    $(actual_div).html(data.html);
+                    $(actual_div).html(response.data.html);
                 },
-                error: function(e) {
-                    alert("Could not load diff, please refresh the page and try again.");}
+                error: function (e) {
+                    alert("Could not load diff, please refresh the page and try again.");
+                }
             });
         },
-        error: function(e) {
-            alert("Could not load diff, please refresh the page and try again.");}
+        error: function (e) {
+            alert("Could not load diff, please refresh the page and try again.");
+        }
     });
 
 }
