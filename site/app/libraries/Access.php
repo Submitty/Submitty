@@ -104,13 +104,24 @@ class Access {
      * @return bool True if they are allowed to do that action
      */
     public function canI(string $action, $args = []) {
+        $user = $args["user"] ?? $this->core->getUser();
+        return $this->canUser($user, $action, $args);
+    }
+
+    /**
+     * Check if a user is allowed to do an action
+     * @param User|null $user User to check access for
+     * @param string $action Name of the action (see Access::$permissions)
+     * @param array $args Any extra arguments that are required to check permissions
+     * @return bool True if they are allowed to do that action
+     */
+    public function canUser($user, string $action, $args) {
         if (!array_key_exists($action, $this->permissions)) {
             throw new InvalidArgumentException("Unknown action '$action'");
         }
         $checks = $this->permissions[$action];
 
         //Some things may be available when there is no user
-        $user = $args["user"] ?? $this->core->getUser();
         if ($user === null) {
             if (!($checks & self::ALLOW_LOGGED_OUT)) {
                 return false;
