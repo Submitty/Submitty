@@ -1594,6 +1594,19 @@ class SubmissionController extends AbstractController {
                         if ($res === true) {
                             $zip->extractTo($upload_path);
                             $zip->close();
+                            $zip_path = FileUtils::joinPaths($upload_path, basename($uploaded_files[1]["name"][$j], '.zip'));
+                            foreach (
+                                $iterator = new \RecursiveIteratorIterator(
+                                new \RecursiveDirectoryIterator($zip_path, \RecursiveDirectoryIterator::SKIP_DOTS),
+                                \RecursiveIteratorIterator::SELF_FIRST) as $item
+                            ) {
+                                if ($item->isDir()) {
+                                    mkdir($upload_path . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                                } else {
+                                    copy($item, $upload_path . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                                  }
+                            }
+                            FileUtils::recursiveRmdir($zip_path);
                         }
                     }
                     else
