@@ -313,7 +313,7 @@ class ElectronicGraderController extends GradingController {
                             $valid_graders = array();
                             foreach ($graders[$key] as $valid_grader) {
                                 /* @var User $valid_grader */
-                                if ($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()) {
+                                if ($this->core->getAccess()->canUser($valid_grader, "grading.grade", ["gradeable" => $gradeable])) {
                                     $valid_graders[] = $valid_grader->getDisplayedFirstName();
                                 }
                             }
