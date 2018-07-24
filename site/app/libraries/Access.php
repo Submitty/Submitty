@@ -246,6 +246,11 @@ class Access {
     public function checkGradingSection(Gradeable $gradeable) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
+        //If it's not a user's gradeable then you can't check grading section
+        if ($gradeable->getUser() === null && $gradeable->getTeam() === null) {
+            return true;
+        }
+
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
         if ($gradeable->getGradeStartDate() <= $now) {

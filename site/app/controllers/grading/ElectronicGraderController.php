@@ -313,7 +313,9 @@ class ElectronicGraderController extends GradingController {
                             $valid_graders = array();
                             foreach ($graders[$key] as $valid_grader) {
                                 /* @var User $valid_grader */
-                                if ($this->core->getAccess()->canUser($valid_grader, "grading.grade", ["gradeable" => $gradeable])) {
+                                //TODO: Change this to grading.grade when Kevin switches this to
+                                // the new model.   
+                                if ($this->core->getAccess()->canUser($valid_grader, "grading.status", ["gradeable" => $gradeable])) {
                                     $valid_graders[] = $valid_grader->getDisplayedFirstName();
                                 }
                             }
