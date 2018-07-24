@@ -3521,20 +3521,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var _enabled = false;
+	var _candraw = false;
 	var _penSize = void 0;
 	var _penColor = void 0;
 	var path = void 0;
-	var lines = void 0;
+	var lines = [];
 	
 	/**
 	 * Handle document.mousedown event
 	 */
-	function handleDocumentMousedown() {
+	function handleDocumentMousedown(e) {
 	  path = null;
 	  lines = [];
-	
-	  document.addEventListener('mousemove', handleDocumentMousemove);
-	  document.addEventListener('mouseup', handleDocumentMouseup);
+	  _candraw = true;
+	  savePoint(e.clientX, e.clientY);
+	  // document.addEventListener('pointermove', handleDocumentMousemove);
+	  // document.addEventListener('pointerup', handleDocumentMouseup);
 	}
 	
 	/**
@@ -3543,6 +3545,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Event} e The DOM event to be handled
 	 */
 	function handleDocumentMouseup(e) {
+	  _candraw = false;
 	  var svg = void 0;
 	  if (lines.length > 1 && (svg = (0, _utils.findSVGAtPoint)(e.clientX, e.clientY))) {
 	    var _getMetadata = (0, _utils.getMetadata)(svg),
@@ -3563,8 +3566,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  }
 	
-	  document.removeEventListener('mousemove', handleDocumentMousemove);
-	  document.removeEventListener('mouseup', handleDocumentMouseup);
+	  // document.removeEventListener('pointermove', handleDocumentMousemove);
+	  // document.removeEventListener('pointerup', handleDocumentMouseup);
 	}
 	
 	/**
@@ -3573,7 +3576,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Event} e The DOM event to be handled
 	 */
 	function handleDocumentMousemove(e) {
-	  savePoint(e.clientX, e.clientY);
+	  if (_candraw) {
+	    savePoint(e.clientX, e.clientY);
+	  }
 	}
 	
 	/**
@@ -3586,8 +3591,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (e.keyCode === 27) {
 	    lines = null;
 	    path.parentNode.removeChild(path);
-	    document.removeEventListener('mousemove', handleDocumentMousemove);
-	    document.removeEventListener('mouseup', handleDocumentMouseup);
+	    document.removeEventListener('pointermove', handleDocumentMousemove);
+	    document.removeEventListener('pointerup', handleDocumentMouseup);
 	  }
 	}
 	
@@ -3608,9 +3613,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  lines.push(point);
 	
-	  if (lines.length <= 1) {
-	    return;
-	  }
+	  // if (lines.length <= 1) {
+	  //   return;
+	  // }
 	
 	  if (path) {
 	    svg.removeChild(path);
@@ -3647,7 +3652,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _enabled = true;
-	  document.addEventListener('mousedown', handleDocumentMousedown);
+	  document.addEventListener('pointerdown', handleDocumentMousedown);
+	  document.addEventListener('pointermove', handleDocumentMousemove);
+	  document.addEventListener('pointerup', handleDocumentMouseup);
 	  document.addEventListener('keyup', handleDocumentKeyup);
 	  (0, _utils.disableUserSelect)();
 	}
@@ -3661,7 +3668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _enabled = false;
-	  document.removeEventListener('mousedown', handleDocumentMousedown);
+	  document.removeEventListener('pointerdown', handleDocumentMousedown);
 	  document.removeEventListener('keyup', handleDocumentKeyup);
 	  (0, _utils.enableUserSelect)();
 	}
@@ -4438,13 +4445,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  input.style.top = e.clientY + 'px';
 	  input.style.left = e.clientX + 'px';
 	  input.style.fontSize = _textSize + 'px';
-	
+	  input.style.zIndex = "41px";
 	  input.addEventListener('blur', handleInputBlur);
 	  input.addEventListener('keyup', handleInputKeyup);
-
-	  //TODO: Maybe add the entire source and build?
-	  input.style.zIndex = '50';
-
+	
 	  document.body.appendChild(input);
 	  input.focus();
 	}

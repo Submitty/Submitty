@@ -72,6 +72,7 @@ function render(gradeable_id, user_id, file_name) {
                 UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                     let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                     PAGE_HEIGHT = viewport.height;
+                    //This way you can drag the panel around by grabbing the side
                     let pages = document.getElementsByClassName('page');
                     for(let i = 0; i < pages.length; i++){
                         pages[i].addEventListener('mousedown', function(){
@@ -81,8 +82,20 @@ function render(gradeable_id, user_id, file_name) {
                         pages[i].addEventListener('mouseup', function(){
                             $("#submission_browser").draggable('enable');
                         });
+                        pages[i].addEventListener('pointermove', function(e){
+                            if(e.pointerType == "pen" || e.pointerType == "touch"){
+                                $("#submission_browser").css('overflow', 'hidden');
+                            } else {
+                                $("#submission_browser").css('overflow', 'auto');
+                            }
+                        });
+                        // pages[i].addEventListener('pointerdown', function(){
+                        //     $("#submission_browser").css('overflow', 'hidden');
+                        // });
+                        // pages[i].addEventListener('pointerup', function(){
+                        //     $("#submission_browser").css('overflow', 'auto');
+                        // });
                     }
-
                 })
             });
         }
@@ -211,7 +224,7 @@ function render(gradeable_id, user_id, file_name) {
         // }
 
         setPen(
-            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/size`) || 1,
+            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/size`) || 3,
             localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/color`) || '#000000'
         );
         //TODO: Add color selector
