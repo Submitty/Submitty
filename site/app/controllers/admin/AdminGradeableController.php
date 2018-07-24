@@ -895,7 +895,7 @@ class AdminGradeableController extends AbstractController {
         $result = $this->enqueueBuild($gradeable);
         if ($result !== null) {
             // TODO: what key should this get?
-            return [2, 'Build queue entry failed!'];
+            return [2, "Build queue entry failed: $result"];
         }
 
         return null;
@@ -1053,7 +1053,8 @@ class AdminGradeableController extends AbstractController {
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
-        if (!is_writable($fp) || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+        if ((!is_writable($fp) && file_exists($fp))
+            || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
             return "Failed to write to file {$fp}";
         }
         return null;
@@ -1073,7 +1074,8 @@ class AdminGradeableController extends AbstractController {
             "gradeable" => $g_id
         ];
 
-        if (!is_writable($config_build_file) || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+        if ((!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             return "Failed to write to file {$config_build_file}";
         }
         return null;
