@@ -1177,27 +1177,78 @@ class ElectronicGraderController extends GradingController {
     
 
     public function ajaxGetStudentOutput() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $who_id = $_REQUEST['who_id'];
-        $gradeable = $this->fetchGradeable($gradeable_id, $who_id);
-
-        $index = $_REQUEST['index'];
-
         //Turns off the header and footer so that it isn't displayed in the testcase output
-        //Don't re-enable. 
+        //Don't re-enable.
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        $return = "";
-
-        $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
-        if($this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $gradeable])){
-            //display hidden testcases only if the user can view the entirety of this gradeable.
-            $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-            $return = $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks', $gradeable, $index, $popup_css, $who_id, $can_view_hidden);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['who_id'] ?? '';
+        $version = $_REQUEST['version'] ?? null;
+        $index = $_REQUEST['index'] ?? '';
+        
+        if($gradeable_id === '') {
+            $this->core->getOutput()->renderString('Missing gradeable_id parameter');
+            return;
         }
-        //Returns the html to ajax.
-        echo($return);
+        if($submitter_id === '') {
+            $this->core->getOutput()->renderString('Missing who_id parameter');
+            return;
+        }
+        if($index === '') {
+            $this->core->getOutput()->renderString('Missing index parameter');
+            return;
+        } else if (!is_int($index) || $index < 0) {
+            $this->core->getOutput()->renderString('index parameter must be a non-negative integer');
+            return;
+        }
+        $index = intval($index);
+
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
+            if ($graded_gradeable === null) {
+                if($gradeable->isTeamAssignment()) {
+                    $this->core->getOutput()->renderString('Provided user was not on a team');
+                } else {
+                    $this->core->getOutput()->renderString('Failed to load graded gradeable from the database');
+                }
+                return;
+            }
+
+            if ($version === null) {
+                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
+                if ($version_instance === null) {
+                    $this->core->getOutput()->renderString('Invalid gradeable version');
+                    return;
+                }
+            } else {
+                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+                // No version instance, so no whitespace data
+                if ($version_instance === null) {
+                    $this->core->getOutput()->renderString('No version instance specified and no active version');
+                    return;
+                }
+            }
+
+            $testcase = $version_instance->getTestcases()[$index] ?? null;
+            if ($testcase === null) {
+                $this->core->getOutput()->renderString('Invalid testcase index');
+                return;
+            }
+
+            $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
+            if ($this->core->getAccess()->canI("autograding.load_checks", ["graded_gradeable" => $graded_gradeable])) {
+                //display hidden testcases only if the user can view the entirety of this gradeable.
+                $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["graded_gradeable" => $graded_gradeable]);
+                $this->core->getOutput()->renderOutput('AutoGrading', 'loadAutoChecks', $gradeable, $version, $testcase, $popup_css, $submitter_id, $can_view_hidden);
+            } else {
+                // TODO: streamline permission error strings
+                $this->core->getOutput()->renderString('You have insufficient permissions to access this command');
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderString('Invalid gradeable_id');
+        }
     }
 
     public function addOneMark() {
