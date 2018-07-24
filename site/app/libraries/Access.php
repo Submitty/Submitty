@@ -110,7 +110,7 @@ class Access {
         $checks = $this->permissions[$action];
 
         //Some things may be available when there is no user
-        $user = $this->core->getUser();
+        $user = $args["user"] ?? $this->core->getUser();
         if ($user === null) {
             if (!($checks & self::ALLOW_LOGGED_OUT)) {
                 return false;
