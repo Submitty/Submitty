@@ -79,6 +79,46 @@
 
 <script type="text/javascript">
 
+    window.onload = function () { 
+        // loop thru each div_viewer_xxx
+
+        var jumpToScrollPostion = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPostion\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        if (jumpToScrollPostion.length > 0 && jumpToScrollPostion != '-1') {
+
+            $('[id^=div_viewer_]').each(function() {
+            var number = this.id.replace('div_viewer_', '').trim();
+            var keyValuePairs = document.cookie.split(';');
+            
+            for(var i = 0; i < keyValuePairs.length; i++) {
+                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+                if (name === 'cm_'+number && value === '1') {
+                    openDivForCourseMaterials(number);
+                    document.cookie = 'cm_' + number + '='; // clean up cookie since we don't need this anymore
+                }
+            }
+        });
+            // jump to last location if scroll is enabled.
+            window.scrollTo(0, jumpToScrollPostion);
+            document.cookie = 'jumpToScrollPostion=-1';
+
+        }
+        else {
+            // clean up all cookies which are stated with "cm_";
+            $('[id^=div_viewer_]').each(function() {
+            var number = this.id.replace('div_viewer_', '').trim();
+            var keyValuePairs = document.cookie.split(';');
+            
+            for(var i = 0; i < keyValuePairs.length; i++) {
+                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                if (name === 'cm_'+number) {
+                    document.cookie = 'cm_' + number + '=';
+                }
+            }
+        });
+        }
+    }
+    
     function openFileCourseMaterial(html_file, url_file) {
         var directory = "";
         if (url_file.includes("uploads")) {

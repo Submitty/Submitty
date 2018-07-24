@@ -251,6 +251,22 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(form_action, file_name) {
+    var current_y_offset = window.pageYOffset;  
+    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+
+    $('[id^=div_viewer_]').each(function() {
+        var number = this.id.replace('div_viewer_', '').trim();
+        
+        var elem = $('#div_viewer_' + number);
+        if (elem.hasClass('open')) {
+            document.cookie = "cm_" +number+ "=1;";
+        }
+        else {
+            document.cookie = "cm_" +number+ "=0;";
+        }
+    });
+    
+    
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
