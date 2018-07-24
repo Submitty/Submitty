@@ -270,7 +270,10 @@ class AutoGradingView extends AbstractView {
         $total_score = max($total_score, 0);
 
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
-
+        $allow_regrade=false;
+        if($regrade_enabled==true && $gradeable->getRegradeRequestDate()!=null && Utils::compareNullableGt($gradeable->getRegradeRequestDate(), getdate(time()))){
+            $allow_regrade=true;
+        }
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
             "grader_names" => $grader_names,
@@ -281,7 +284,7 @@ class AutoGradingView extends AbstractView {
             "total_score" => $total_score,
             "total_max" => $total_max,
             "active_same_as_graded" => $active_same_as_graded,
-            "regrade_enabled" => $regrade_enabled,
+            "allow_regrade" => $allow_regrade,
             "regrade_message" => $regrade_message,
             "num_decimals" => $num_decimals
         ]);
