@@ -2774,8 +2774,9 @@ AND gc_id IN (
                   eg_late_days,
                   eg_precision,
                   eg_peer_grading,
-                  eg_peer_grade_set)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                  eg_peer_grade_set,
+                  eg_regrade_request_date)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
