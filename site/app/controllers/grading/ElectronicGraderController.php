@@ -1167,11 +1167,6 @@ class ElectronicGraderController extends GradingController {
     
 
     public function ajaxGetStudentOutput() {
-        //Turns off the header and footer so that it isn't displayed in the testcase output
-        //Don't re-enable.
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['who_id'] ?? '';
         $version = $_REQUEST['version'] ?? null;
