@@ -125,11 +125,7 @@ class GradedGradeable extends AbstractModel {
             }
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
-<<<<<<< HEAD
-        return $this->late_day_exceptions[$user->getId()];
-=======
         return $this->late_day_exceptions[$user->getId()] ?? 0;
->>>>>>> gradeable-model-refactor-submission-1
     }
 
     /* Intentionally Unimplemented accessor methods */
