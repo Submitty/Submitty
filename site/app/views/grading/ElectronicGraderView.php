@@ -39,7 +39,7 @@ class ElectronicGraderView extends AbstractView {
         bool $show_warnings) {
 
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
         $graded = 0;
@@ -222,7 +222,7 @@ class ElectronicGraderView extends AbstractView {
         $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
         $peer = false;
-        if ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
+        if ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
 
@@ -438,7 +438,7 @@ class ElectronicGraderView extends AbstractView {
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
         $peer = false;
-        if($this->core->getUser()->getGroup()==4 && $gradeable->getPeerGrading()) {
+        if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->getPeerGrading()) {
             $peer = true;
         }
 
