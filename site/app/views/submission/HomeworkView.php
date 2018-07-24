@@ -400,7 +400,9 @@ class HomeworkView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
-            'gradeable' => $gradeable,
+            'gradeable_id' => $gradeable->getId(),
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
         ]);
