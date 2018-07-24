@@ -1178,18 +1178,18 @@ class ElectronicGraderController extends GradingController {
         $index = $_REQUEST['index'] ?? '';
 
         if ($gradeable_id === '') {
-            $this->core->getOutput()->renderString('Missing gradeable_id parameter');
+            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
             return;
         }
         if ($submitter_id === '') {
-            $this->core->getOutput()->renderString('Missing who_id parameter');
+            $this->core->getOutput()->renderJsonFail('Missing who_id parameter');
             return;
         }
         if ($index === '') {
-            $this->core->getOutput()->renderString('Missing index parameter');
+            $this->core->getOutput()->renderJsonFail('Missing index parameter');
             return;
         } else if (!ctype_digit($index)) {
-            $this->core->getOutput()->renderString('index parameter must be a non-negative integer');
+            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
             return;
         }
         $index = intval($index);
@@ -1197,16 +1197,16 @@ class ElectronicGraderController extends GradingController {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderString('Invalid gradeable id');
+            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
             return;
         }
         try {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
             if ($graded_gradeable === null) {
                 if ($gradeable->isTeamAssignment()) {
-                    $this->core->getOutput()->renderString('Provided user was not on a team');
+                    $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
                 } else {
-                    $this->core->getOutput()->renderString('Failed to load graded gradeable from the database');
+                    $this->core->getOutput()->renderJsonError('Failed to load graded gradeable from the database');
                 }
                 return;
             }
@@ -1215,21 +1215,21 @@ class ElectronicGraderController extends GradingController {
                 $version = intval($version);
                 $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
                 if ($version_instance === null) {
-                    $this->core->getOutput()->renderString('Invalid gradeable version');
+                    $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
                     return;
                 }
             } else {
                 $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
                 // No version instance, so no whitespace data
                 if ($version_instance === null) {
-                    $this->core->getOutput()->renderString('No version instance specified and no active version');
+                    $this->core->getOutput()->renderJsonFail('No version instance specified and no active version');
                     return;
                 }
             }
 
             $testcase = $version_instance->getTestcases()[$index] ?? null;
             if ($testcase === null) {
-                $this->core->getOutput()->renderString('Invalid testcase index');
+                $this->core->getOutput()->renderJsonFail('Invalid testcase index');
                 return;
             }
 
@@ -1237,13 +1237,16 @@ class ElectronicGraderController extends GradingController {
             if ($this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
                 //display hidden testcases only if the user can view the entirety of this gradeable.
                 $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $graded_gradeable]);
-                $this->core->getOutput()->renderOutput('AutoGrading', 'loadAutoChecks', $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden);
+                $this->core->getOutput()->renderJsonSuccess(
+                    $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
+                        $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden)
+                );
             } else {
                 // TODO: streamline permission error strings
-                $this->core->getOutput()->renderString('You have insufficient permissions to access this command');
+                $this->core->getOutput()->renderJsonFail('You have insufficient permissions to access this command');
             }
         } catch (\Exception $e) {
-            $this->core->getOutput()->renderString($e->getMessage());
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
 

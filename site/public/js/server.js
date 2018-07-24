@@ -120,11 +120,15 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1)
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
-        $.ajax({
+        $.getJSON({
             url: url,
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Error getting file diff: ' + response.message);
+                    return;
+                }
                 $(div_name).empty();
-                $(div_name).html(data);
+                $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
             },
             error: function(e) {
