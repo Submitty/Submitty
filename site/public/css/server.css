@@ -1001,6 +1001,11 @@ table .instructor .two-options{
     text-align: right;
 }
 
+.popup-form .form-button-container .btn {
+    box-sizing: unset;
+    min-width: 4em;
+}
+
 .popup-form.decent div {
     width: initial;
     display: block;
