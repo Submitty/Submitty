@@ -440,7 +440,7 @@ class NavigationView extends AbstractView {
                 $title = "TA GRADE NOT AVAILABLE";
             }
         } else {
-            // This means either the user isn't on a team, or has no submissions yet
+            // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 // team assignment, no team
                 if (!$this->core->getUser()->accessFullGrading()) {
