@@ -126,7 +126,7 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # DAEMON_USER writes the results, and gives read-only access to the
 # PHP_USER.
 
-if [ cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHP_GROUP} ]; then
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHP_GROUP} ; then
 	addgroup ${DAEMONPHP_GROUP}
 else
 	echo "${DAEMONPHP_GROUP} already exists"
@@ -135,7 +135,7 @@ fi
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-if [ cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ]; then
+if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
 else
         echo "${COURSE_BUILDERS_GROUP} already exists"
@@ -151,11 +151,11 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    if [ cut -d ':' -f 1 /etc/passwd | grep -q {$PHP_USER} ]; then
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q {$PHP_USER} ; then
         adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
-    if [ cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ]; then
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
         adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
@@ -173,7 +173,7 @@ if [ ${WORKER} == 0 ]; then
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-if [ cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ];then
+if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 fi
 
