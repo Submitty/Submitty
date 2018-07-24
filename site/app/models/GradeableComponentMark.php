@@ -10,6 +10,8 @@ use app\libraries\Core;
  * @method int getGcId()
  * @method int getOrder()
  * @method float getPoints()
+ * @method string getNote()
+ * @method void setNote($note)
  * @method boolean getPublish()
  * @method boolean getHasMark()
  */
@@ -74,17 +76,10 @@ class GradeableComponentMark extends AbstractModel {
             return $this->core->getQueries()->deleteGradeableComponentMark($this);
         }
     }
-    public function setNote($temp_note) {
-        $this->note = urlencode($temp_note);
-    }
 
     //use this when inserting into the database
     public function getNoteNoDecode(){
         return ($this->note);
-    }
-
-    public function getNote() {
-        return(urldecode($this->note));
     }
 
     /**
@@ -110,7 +105,7 @@ class GradeableComponentMark extends AbstractModel {
     public function getGradedData() {
         return [
             "id" => $this->id,
-            "name" => $this->getNote(),
+            "name" => $this->note,
             "order" => $this->order,
             "points" => $this->points,
             "publish" => $this->publish,

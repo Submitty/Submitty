@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 6/25/2018
- * Time: 2:30 PM
- */
 
 namespace app\models\gradeable;
 
@@ -38,10 +32,10 @@ class AutoGradedGradeable extends AbstractModel {
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        $this->setActiveVersion($details['active_version'] ?? 0);
         if($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
+        $this->setActiveVersion($details['active_version'] ?? 0);
         $this->graded_gradeable = $graded_gradeable;
         $this->modified = false;
     }
@@ -108,7 +102,7 @@ class AutoGradedGradeable extends AbstractModel {
      */
     public function getNonHiddenPercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
+        if ($instance === null) {
             return NAN;
         }
         return $instance->getNonHiddenPercent($clamp);
@@ -122,12 +116,24 @@ class AutoGradedGradeable extends AbstractModel {
      */
     public function getTotalPercent($clamp = false) {
         $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
+        if ($instance === null) {
             return NAN;
         }
         return $instance->getTotalPercent($clamp);
     }
 
+    /**
+     * Gets the highest submitted version number
+     * @return int
+     */
+    public function getHighestVersion() {
+        $highest_version = 0;
+        foreach ($this->auto_graded_versions as $auto_graded_version) {
+            $highest_version = max($highest_version, $auto_graded_version->getVersion());
+        }
+        return $highest_version;
+    }
+    
     /**
      * Gets if the submitter has a version selected for grading
      * @return bool
@@ -152,7 +158,7 @@ class AutoGradedGradeable extends AbstractModel {
      */
     public function isQueued() {
         $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
+        if ($instance === null) {
             return false;
         }
         return $instance->isQueued();
@@ -164,7 +170,7 @@ class AutoGradedGradeable extends AbstractModel {
      */
     public function isGrading() {
         $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
+        if ($instance === null) {
             return false;
         }
         return $instance->isGrading();
@@ -177,7 +183,7 @@ class AutoGradedGradeable extends AbstractModel {
      */
     public function getQueuePosition() {
         $instance = $this->getActiveVersionInstance();
-        if($instance === null) {
+        if ($instance === null) {
             return GradingQueue::NOT_QUEUED;
         }
         return $instance->getQueuePosition();
