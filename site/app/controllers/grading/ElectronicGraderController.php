@@ -84,6 +84,8 @@ class ElectronicGraderController extends GradingController {
         $type = $_REQUEST['which'] ?? 'actual';
         $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? null;
 
+        // TODO: much of this checking/gradeable loading code is shared with ajaxGetStudentOutput
+        // TODO: When Converting the rest of the controller, look into merging this gradeable loading
         if ($gradeable_id === '') {
             $this->core->getOutput()->renderJsonFail('Must provide a gradeable_id parameter');
             return;
