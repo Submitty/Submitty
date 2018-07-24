@@ -45,7 +45,9 @@
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
                 {% endif %}
-                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
+                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
+                {# <input name="release_date" id="date_grade" class="date_picker" type="text" value="{{ fileReleaseDates[path] | date(date_format) }}"/> #}
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
@@ -76,6 +78,7 @@
 
 
 <script type="text/javascript">
+
     function openFileCourseMaterial(html_file, url_file) {
         var directory = "";
         if (url_file.includes("uploads")) {
@@ -95,6 +98,40 @@
             changePermission(path, '0');
         }
     }
+
+    function setNewDateTime(me, path) {
+        // pass filename to server to record the new date and time of the file to be released
+        var newDateTime = $(me).val();
+        //alert(newDateTime);
+        changeNewDateTime(path, newDateTime);
+    }
+
+    $(document).ready(function() {
+        $(function() {
+            $( ".date_picker" ).datetimepicker({
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
+                showButtonPanel: true,
+                showTimezone: false,
+                showMillisec: false,
+                showMicrosec: false,
+                beforeShow: function( input ) {
+                    setTimeout(function() {
+                        var buttonPane = $( input )
+                            .datepicker( "widget" )
+                            .find( ".ui-datepicker-buttonpane" );
+
+                        $( "<button>", {
+                            text: "Infinity",
+                            click: function() {
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
+                            }
+                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                    }, 1 );
+                }
+            });
+        });
+    });
 </script>
 
 
