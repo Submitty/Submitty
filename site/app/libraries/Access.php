@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use app\models\Gradeable;
+use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\GradeableComponent;
 use app\models\GradingSection;
@@ -215,15 +216,20 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_COMPONENT)) {
-            /* @var GradeableComponent|null $component */
+            /* @var GradeableComponent|Component|null $component */
             $component = $this->requireArg($args, "component");
             if ($component === null) {
                 return false;
             }
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
+                // TODO: Remove once new model is fully integrated
+                $condition = $component instanceof GradeableComponent
+                    ? !$component->getIsPeer()
+                    : !$component->isPeer();
+
                 //Make sure a component allows students to access it via peer grading
-                if (!$component->getIsPeer()) {
+                if ($condition) {
                     return false;
                 }
             }
