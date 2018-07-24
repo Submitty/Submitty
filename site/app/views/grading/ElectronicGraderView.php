@@ -21,6 +21,7 @@ class ElectronicGraderView extends AbstractView {
      * @param int $viewed_grade
      * @param string $section_type
      * @param int $regrade_requests
+     * @param bool $show_warnings
      * @return string
      */
     public function statusPage(
@@ -34,7 +35,8 @@ class ElectronicGraderView extends AbstractView {
         int $rotating_but_not_registered,
         int $viewed_grade,
         string $section_type,
-        int $regrade_requests) {
+        int $regrade_requests,
+        bool $show_warnings) {
 
         $peer = false;
         if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == 4) {
@@ -100,7 +102,7 @@ class ElectronicGraderView extends AbstractView {
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
-            if($section_type === "rotating_section" && $this->core->getUser()->accessFullGrading()){
+            if($section_type === "rotating_section" && $show_warnings){
                 if ($registered_but_not_rotating > 0){
                     array_push($warnings, "There are ".$registered_but_not_rotating." registered students without a rotating section.");
                 }
