@@ -118,7 +118,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1)
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'gradeable_version' : version});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
         $.ajax({
             url: url,

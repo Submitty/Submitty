@@ -3,7 +3,7 @@
 {% if num_visible_testcases == 1 %}
     <script type="text/javascript">
         $(document).ready(function() {
-            loadTestcaseOutput('testcase_0', '{{ gradeable_id }}', '{{ submitter_id }}', '0');
+            loadTestcaseOutput('testcase_0', '{{ gradeable_id }}', '{{ submitter_id }}', '0', '{{ display_version }}');
         });
     </script>
 {% endif %}
