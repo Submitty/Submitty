@@ -494,9 +494,9 @@ class DiffViewer {
                     }
                 }
             }
-            if($option == "with_unicode"){
+            if($option == self::SPECIAL_CHARS_UNICODE) {
                 $html .= '<span style="border: 1px solid blue">&#9166;</span>';
-            } else if($option == "with_escape"){
+            } else if($option == self::SPECIAL_CHARS_ESCAPE) {
                 $html .= '<span style="border: 1px solid blue">\\n</span>';
             }
             $html .= "</span></div>\n";

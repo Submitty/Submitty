@@ -40,11 +40,11 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'with_unicode'
+        args['option'] = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'with_escape'
+        args['option'] = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
