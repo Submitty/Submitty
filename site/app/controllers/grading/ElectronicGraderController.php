@@ -72,25 +72,6 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    private function fetchGradeable($gradeable_id, $who_id) {
-        // TODO: this is bad, but its the only way to do it until the new model
-        $users = [$who_id];
-        $team = $this->core->getQueries()->getTeamById($who_id);
-        if ($team !== null) {
-            $users = array_merge($team->getMembers(), $users);
-        }
-        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $users);
-        $gradeable = null;
-        foreach ($gradeables as $g) {
-            // Either this is the user requsted (non-team case) or its the gradeable instance for me or access grading
-            if ($g->getUser() === $who_id || $g->getUser()->getId() === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
-                $gradeable = $g;
-                break;
-            }
-        }
-        return $gradeable;
-    }
-
     /**
      * Method for getting whitespace information for the diff viewer
      */
