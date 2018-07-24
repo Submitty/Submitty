@@ -1232,9 +1232,9 @@ class ElectronicGraderController extends GradingController {
             }
 
             $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
-            if ($this->core->getAccess()->canI("autograding.load_checks", ["graded_gradeable" => $graded_gradeable])) {
+            if ($this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
                 //display hidden testcases only if the user can view the entirety of this gradeable.
-                $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["graded_gradeable" => $graded_gradeable]);
+                $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $graded_gradeable]);
                 $this->core->getOutput()->renderOutput('AutoGrading', 'loadAutoChecks', $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden);
             } else {
                 // TODO: streamline permission error strings
