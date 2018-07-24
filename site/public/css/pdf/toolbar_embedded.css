@@ -4,3 +4,51 @@ icon-selected {
     box-shadow: 0px 0px 3px 3px #7dfa78;
     background-color: #7dfa78;
 }
+
+#pdf_annotation_icons {
+    position:relative;
+    display: block;
+    float: left;
+    padding-top:3px;
+    padding-bottom:3px;
+    background-color: #edf6f6;
+    width: 40px;
+    border: solid 6px #e741ff;
+}
+
+#pdf_annotation_bar {
+    position:relative;
+    height: 284px;
+    width: 195px;
+    top: -90px;
+    left: 45%;
+    z-index:41;
+}
+
+.selection_panel {
+    float: right;
+    position: relative;
+    background: #edf6f6;
+    border: 3px solid #e741ff;
+    border-radius: .2em;
+    width: 130px;
+    height:100px;
+}
+.selection_panel:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    width: 0;
+    height: 0;
+    border: 0.563em solid transparent;
+    border-right-color: #e741ff;
+    border-left: 0;
+    margin-top: -0.562em;
+    margin-left:-0.562em;
+}
+
+#pen_selection{
+    display: none;
+    top: 30px;
+}

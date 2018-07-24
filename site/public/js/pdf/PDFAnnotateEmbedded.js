@@ -111,6 +111,7 @@ function render(gradeable_id, user_id, file_name) {
                         UI.disableText();
                         break;
                 }
+                $('.selection_panel').hide();
             }
             switch(option){
                 case 'pen':
@@ -135,8 +136,24 @@ function render(gradeable_id, user_id, file_name) {
                     UI.enableText();
                     break;
             }
-        }
+        } else {
+            switch(option){
+                case 'pen':
+                    $("#pen_selection").toggle();
+                    $("#pdf_annotation_icons").bind("drag", function(e, ui){
+                        let panel = $("#pen_selection");
+                        let new_top = $("#pdf_annotation_icons").css('top');
+                        new_top = parseInt(new_top.slice(0, -2)) + 30;
+                        new_top = new_top + "px";
+                        let new_left = $("#pdf_annotation_icons").css('left');
+                        panel.css({top: new_top, left: new_left});
+                    });
+                    break;
+                case 'text':
 
+                    break;
+            }
+        }
     }
 
     function zoom(option){
