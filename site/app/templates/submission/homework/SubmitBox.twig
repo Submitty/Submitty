@@ -16,7 +16,7 @@
                     <input type='radio' id="radio_student" name="submission_type">
                     Make Submission for a Student
                 {% endif %}
-                {% if num_parts == 1 and not is_vcs %}
+                {% if part_names|length == 1 and not is_vcs %}
                     <input type='radio' id="radio_bulk" name="submission_type">
                     Bulk Upload
                 {% endif %}

@@ -400,7 +400,9 @@ class HomeworkView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
-            'gradeable' => $gradeable,
+            'gradeable_id' => $gradeable->getId(),
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
         ]);
@@ -565,16 +567,16 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
-        $rendered_results = '';
+        $rendered_ta_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
-            $rendered_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
+            $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
                 $graded_gradeable->getTaGradedGradeable(), $regrade_available);
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
             'been_ta_graded' => $been_ta_graded,
-            'rendered_results' => $rendered_results
+            'rendered_ta_results' => $rendered_ta_results
         ]);
     }
 
