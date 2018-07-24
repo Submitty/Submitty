@@ -52,7 +52,7 @@
                 data-component_index="{{ c_index }}"
                 data-mark_index="{{ m_id }}"
                 class="mark-note {% if not editable %} mark-uneditable {% endif %}"
-            >{{ mark.name }}</textarea>
+            >{{ mark.name|escape }}</textarea>
             <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
                 <i class="fa fa-users icon-got-this-mark"></i>
             </span>
@@ -79,7 +79,7 @@
                 data-component_index="{{ c_index }}"
                 data-mark_index="{{ m_id }}"
                 class="mark-note {% if not editable %} mark-uneditable {% endif %}"
-            >{{ mark.name }}</textarea>
+            >{{ mark.name|escape }}</textarea>
             <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
                 <i class="fa fa-users icon-got-this-mark"></i>
             </span>

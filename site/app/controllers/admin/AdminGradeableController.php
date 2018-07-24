@@ -896,7 +896,7 @@ class AdminGradeableController extends AbstractController {
         $result = $this->enqueueBuild($gradeable);
         if ($result !== null) {
             // TODO: what key should this get?
-            return [2, 'Build queue entry failed!'];
+            return [2, "Build queue entry failed: $result"];
         }
 
         return null;
@@ -1054,7 +1054,8 @@ class AdminGradeableController extends AbstractController {
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
-        if (!is_writable($fp) || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+        if ((!is_writable($fp) && file_exists($fp))
+            || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
             return "Failed to write to file {$fp}";
         }
         return null;
@@ -1074,7 +1075,8 @@ class AdminGradeableController extends AbstractController {
             "gradeable" => $g_id
         ];
 
-        if (!is_writable($config_build_file) || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+        if ((!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             return "Failed to write to file {$config_build_file}";
         }
         return null;
@@ -1094,6 +1096,7 @@ class AdminGradeableController extends AbstractController {
         if ($result !== null) {
             die($result);
         }
+        $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
         $this->returnToNav();
     }
 
@@ -1104,34 +1107,62 @@ class AdminGradeableController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $dates = $gradeable->getDates();
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
-
+        $message = "";
+        $success = null;
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
                 $dates['grade_released_date'] = $now;
+                $message .= "Released grades for ";
+                $success = true;
+            } else {
+                $message .= "Grades already released for";
+                $success = false;
             }
         } else if ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
                 $dates['ta_view_start_date'] = $now;
+                $message .= "Opened TA access to ";
+                $success = true;
+            } else {
+                $message .= "TA access already open for ";
+                $success = false;
             }
         } else if ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
                 $dates['grade_start_date'] = $now;
+                $message .= "Opened grading for ";
+                $success = true;
+            } else {
+                $message .= "Grading already open for ";
+                $success = false;
             }
         } else if ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
                 $dates['submission_open_date'] = $now;
+                $message .= "Opened student access to ";
+                $success = true;
+            } else {
+                $message .= "Student access already open for ";
+                $success = false;
             }
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
+        if ($success === true) {
+            $this->core->addSuccessMessage($message.$g_id);
+        } else if ($success === false) {
+            $this->core->addErrorMessage($message.$g_id);
+        } else {
+            $this->core->addErrorMessage("Failed to update status of ".$g_id);
+        }
         $this->returnToNav();
+
     }
 
     //return to the navigation page
     private function returnToNav() {
-        $url = $this->core->buildUrl(array());
-        header('Location: ' . $url);
+        $this->core->redirect($this->core->buildUrl(array()));
     }
 
     private function redirectToEdit($gradeable_id) {
