@@ -79,6 +79,7 @@ class CourseMaterialsView extends AbstractView {
         $course_materials_array = array();
 
         //Get the expected course materials path and files
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $path_length = strlen($expected_path)+1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
@@ -96,6 +97,7 @@ class CourseMaterialsView extends AbstractView {
             "courseMaterialsArray" => $course_materials_array,
             'date_format' => 'Y-m-d H:i:sO',
             "folderPath" => $expected_path,
+            "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,

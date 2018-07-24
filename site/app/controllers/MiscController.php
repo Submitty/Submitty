@@ -27,6 +27,9 @@ class MiscController extends AbstractController {
             case 'delete_course_material_file':
                 $this->deleteCourseMaterialFile();
                 break;
+            case 'delete_course_material_folder':
+                $this->deleteCourseMaterialFolder();
+                break;
             case 'download_zip':
                 $this->downloadZip();
                 break;
@@ -259,6 +262,50 @@ class MiscController extends AbstractController {
                                                     'action' => 'view_course_materials_page')));
     }
 
+    private function deleteCourseMaterialFolder() {
+        // security check
+
+
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+        }
+
+
+        $path = $_GET['path'];
+
+        // remove entry from json file
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($fp);
+
+        if ($json != false)
+        {
+            $all_files = FileUtils::getAllFiles($path);
+            foreach($all_files as $file){
+                $filename = $file['path'];
+                unset($json[$filename]);
+            }
+
+            file_put_contents($fp, FileUtils::encodeJson($json));
+        }
+
+        if ( FileUtils::recursiveRmdir($path) )
+        {
+            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($path));
+        }
+
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+    }
 
     private function downloadFile($download_with_any_role = false) {
         // security check
