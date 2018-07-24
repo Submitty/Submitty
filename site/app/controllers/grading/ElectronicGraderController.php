@@ -120,6 +120,11 @@ class ElectronicGraderController extends GradingController {
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
+            return;
+        }
+        try {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
             if ($graded_gradeable === null) {
                 if($gradeable->isTeamAssignment()) {
@@ -168,8 +173,8 @@ class ElectronicGraderController extends GradingController {
             }
             $white_spaces = $diff_viewer->getWhiteSpaces();
             $this->core->getOutput()->renderJsonSuccess(['html' => $html, 'whitespaces' => $white_spaces]);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
 
@@ -1189,6 +1194,11 @@ class ElectronicGraderController extends GradingController {
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderString('Invalid gradeable id');
+            return;
+        }
+        try {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
             if ($graded_gradeable === null) {
                 if ($gradeable->isTeamAssignment()) {
@@ -1230,8 +1240,8 @@ class ElectronicGraderController extends GradingController {
                 // TODO: streamline permission error strings
                 $this->core->getOutput()->renderString('You have insufficient permissions to access this command');
             }
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderString('Invalid gradeable_id');
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderString($e->getMessage());
         }
     }
 
