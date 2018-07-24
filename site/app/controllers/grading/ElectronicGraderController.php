@@ -1057,9 +1057,8 @@ class ElectronicGraderController extends GradingController {
 
         //checks if user has permission
         if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $gradeable, "component" => $component])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
+            return;
         }
 
         //checks if a component has changed, i.e. a mark has been selected or unselected since last time
@@ -1159,9 +1158,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         $gradeable->resetUserViewedDate();
-        $response = array('status' => 'success', 'modified' => $mark_modified, 'all_false' => $all_false, 'database' => $debug, 'overwrite' => $overwrite, 'version_updated' => $version_updated);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        $this->core->getOutput()->renderJsonSuccess([
+            'modified' => $mark_modified,
+            'all_false' => $all_false,
+            'database' => $debug,
+            'overwrite' => $overwrite,
+            'version_updated' => $version_updated
+        ]);
     }
 
     

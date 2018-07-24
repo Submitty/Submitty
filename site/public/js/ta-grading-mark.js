@@ -261,7 +261,7 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
 }
 
 function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
         async: sync,
@@ -277,9 +277,14 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
             'marks' : marks,
             'num_existing_marks' : num_existing_marks,
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status === 'fail') {
+                console.error('Failed to save marks: ' + response.message);
+            } else if (response.status === 'error') {
+                console.error('Internal error while saving marks: ' + response.message);
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response);
             }
         },
         error: errorCallback
@@ -1067,8 +1072,13 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     gradedByElement.hide();
     savingElement.show();
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(data) {
-        data = JSON.parse(data);
+    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(response) {
+        if (response.status !== 'success') {
+            alert('Error saving marks! (' + response.message + ')');
+            return;
+        }
+
+        data = response.data;
         if (all_false === true) {
             //We've reset
             gradedByElement.text("Ungraded!");
