@@ -2,8 +2,9 @@
 
 namespace app\libraries;
 
-use app\models\Gradeable;
-use app\models\GradeableComponent;
+use app\models\gradeable\Component;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\GradingSection;
 use app\models\User;
 use InvalidArgumentException;
@@ -30,28 +31,30 @@ class Access {
      * Check that a given user is in the current user's grading section for a gradeable
      * Only applies to limited access graders
      */
-    const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADED_GRADEABLE;
     /**
      * Check that a given user is in the current user's peer grading assignment for a gradeable
      * Only applies to students
      */
-    const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADED_GRADEABLE;
     /** Require that the given gradeable have an active version / submission */
-    const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADED_GRADEABLE;
     /** Check that a valid CSRF token was passed in the request */
     const CHECK_CSRF                    = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
-    const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+    const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADED_GRADEABLE;
     /**
      * Check if the given component allows peer grading
      * Only applies to students
      */
-    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 11 | self::REQUIRE_ARG_COMPONENT;
+    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 11 | self::REQUIRE_ARG_GRADED_GRADEABLE;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
-    /** If the current set of flags requires the "gradeable" argument */
+    /** If the current set of flags requires the "component" argument */
     const REQUIRE_ARG_COMPONENT         = 1 << 25;
+    /** If the current set of flags requires the "graded_gradeable" argument */
+    const REQUIRE_ARG_GRADED_GRADEABLE  = 1 << 26;
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -145,40 +148,47 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
-                if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
+                if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
 
                     if (
                         //Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())
-                       ) {
+                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
+                    ) {
 
                         //Otherwise, you're not allowed
                         return false;
                     }
                 }
             }
+        }
+        if (self::checkBits($checks, self::REQUIRE_ARG_GRADED_GRADEABLE)) {
+            /* @var GradedGradeable|null $graded_gradeable */
+            $graded_gradeable = $this->requireArg($args, "graded_gradeable");
+            if ($graded_gradeable === null) {
+                return false;
+            }
 
             if (self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($gradeable->getActiveVersion() <= 0) {
+                if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
                     return false;
                 }
             }
 
             if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
-                if (!$this->checkGradingSection($gradeable)) {
+                if (!$this->checkGradingSection($graded_gradeable)) {
                     return false;
                 }
             }
 
             if (self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //If they're allowed to view their own
-                if (!($gradeable->getUser()->getId() === $user->getId() && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE))) {
+                if (!($graded_gradeable->getSubmitter()->hasUser($user) && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE))) {
                     //Check their peer assignment
-                    if (!$this->checkPeerAssignment($gradeable)) {
+                    if (!$this->checkPeerAssignment($graded_gradeable)) {
                         return false;
                     }
                 }
@@ -186,7 +196,7 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_COMPONENT)) {
-            /* @var GradeableComponent|null $component */
+            /* @var Component|null $component */
             $component = $this->requireArg($args, "component");
             if ($component === null) {
                 return false;
@@ -194,7 +204,7 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Make sure a component allows students to access it via peer grading
-                if (!$component->getIsPeer()) {
+                if (!$component->isPeer()) {
                     return false;
                 }
             }
@@ -228,11 +238,12 @@ class Access {
 
     /**
      * Check if a limited access grader has a user in their section
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return bool If they are
      */
-    public function checkGradingSection(Gradeable $gradeable) {
+    public function checkGradingSection(GradedGradeable $graded_gradeable) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $gradeable = $graded_gradeable->getGradeable();
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
@@ -244,11 +255,11 @@ class Access {
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
                 if ($gradeable->isTeamAssignment()) {
-                    if ($section->containsTeam($gradeable->getTeam())) {
+                    if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
                         return true;
                     }
                 } else {
-                    if ($section->containsUser($gradeable->getUser())) {
+                    if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
                         return true;
                     }
                 }
@@ -260,15 +271,17 @@ class Access {
 
     /**
      * Check if a student is allowed to peer grade another
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return bool
      */
-    public function checkPeerAssignment(Gradeable $gradeable) {
-        if (!$gradeable->getPeerGrading()) {
+    public function checkPeerAssignment(GradedGradeable $graded_gradeable) {
+        $gradeable = $graded_gradeable->getGradeable();
+        if (!$gradeable->isPeerGrading()) {
             return false;
         } else {
+            // TODO: Peer teams?
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
-            return in_array($gradeable->getUser()->getId(), $user_ids_to_grade);
+            return in_array($graded_gradeable->getSubmitter()->getUser()->getId(), $user_ids_to_grade);
         }
     }
 
