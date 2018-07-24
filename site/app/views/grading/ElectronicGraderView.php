@@ -128,17 +128,6 @@ class ElectronicGraderView extends AbstractView {
                     $section['graded'] = round($section['graded_components']/$num_components, 1);
                     $section['total'] = $section['total_components']/$num_components;
 
-                    if ($key === "NULL") {
-                        continue;
-                    }
-                    $valid_graders = array();
-                    foreach($section['graders'] as $valid_grader){
-                        /* @var User $valid_grader */
-                        if($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()){
-                            $valid_graders[] = $valid_grader->getDisplayedFirstName();
-                        }
-                    }
-                    $section["valid_graders"] = $valid_graders;
                 }
                 unset($section); // Clean up reference
 

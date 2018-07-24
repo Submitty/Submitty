@@ -291,33 +291,33 @@ class ElectronicGraderController extends GradingController {
                             'graded_components' => 0,
                             'graders' => array()
                         );
-                        if ($gradeable->isTeamAssignment()) {
-                            $sections[$key]['no_team'] = $no_team_users[$key];
-                                $sections[$key]['team'] = $team_users[$key];
-                        }
-                        if (isset($graders[$key])) {
-                            $sections[$key]['graders'] = $graders[$key];
-                        }
-                        if (isset($graded_components[$key])) {
-                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                        }
                     } else{
                         $sections[$key] = array(
                             'total_components' => 0,
                             'graded_components' => 0,
                             'graders' => array()
                         );
-                        if ($gradeable->isTeamAssignment()) {
-                            $sections[$key]['no_team'] = $no_team_users[$key];
-                            $sections[$key]['team'] = $team_users[$key];
-                        }
-                        if (isset($graded_components[$key])) {
-                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                        }
-                        if (isset($graders[$key])) {
-                            $sections[$key]['graders'] = $graders[$key];
+                    }
+                    if ($gradeable->isTeamAssignment()) {
+                        $sections[$key]['no_team'] = $no_team_users[$key];
+                        $sections[$key]['team'] = $team_users[$key];
+                    }
+                    if (isset($graded_components[$key])) {
+                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                        $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    }
+                    if (isset($graders[$key])) {
+                        $sections[$key]['graders'] = $graders[$key];
+
+                        if ($key !== "NULL") {
+                            $valid_graders = array();
+                            foreach ($graders[$key] as $valid_grader) {
+                                /* @var User $valid_grader */
+                                if ($valid_grader->getGroup() <= $gradeable->getMinimumGradingGroup()) {
+                                    $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                                }
+                            }
+                            $sections[$key]["valid_graders"] = $valid_graders;
                         }
                     }
                 }
