@@ -79,6 +79,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['who_id'] ?? '';
         $index = $_REQUEST['index'] ?? '';
+        $option = $_REQUEST['option'] ?? 'original';
         $version = $_REQUEST['version'] ?? null;
         $type = $_REQUEST['which'] ?? 'actual';
         $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? null;
@@ -95,23 +96,22 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
             return;
         }
-        if(!is_int($index) || $index < 0) {
+        if (!is_int($index) || $index < 0) {
             $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
             return;
         }
 
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
-        $option = $_REQUEST['option'] ?? 'original';
-        if(!DiffViewer::isValidSpecialCharsOption($option)) {
+        if (!DiffViewer::isValidSpecialCharsOption($option)) {
             $this->core->getOutput()->renderJsonFail('Invalid option parameter');
             return;
         }
-        
-        if(!DiffViewer::isValidType($type)) {
+
+        if (!DiffViewer::isValidType($type)) {
             $this->core->getOutput()->renderJsonFail('Invalid which parameter');
         }
 
-        if($autocheck_cnt === null) {
+        if ($autocheck_cnt === null) {
             $autocheck_cnt = 0;
         } else {
             $autocheck_cnt = intval($autocheck_cnt);
@@ -120,12 +120,16 @@ class ElectronicGraderController extends GradingController {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-            if($graded_gradeable === null) {
-                $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
+            if ($graded_gradeable === null) {
+                if($gradeable->isTeamAssignment()) {
+                    $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
+                } else {
+                    $this->core->getOutput()->renderJsonError('Failed to load graded gradeable from the database');
+                }
                 return;
             }
 
-            if($version === null) {
+            if ($version === null) {
                 $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
                 if ($version_instance === null) {
                     $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
@@ -134,14 +138,14 @@ class ElectronicGraderController extends GradingController {
             } else {
                 $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
                 // No version instance, so no whitespace data
-                if($version_instance === null) {
+                if ($version_instance === null) {
                     $this->core->getOutput()->renderJsonSuccess(['html' => '', 'whitespaces' => '']);
                     return;
                 }
             }
 
             $testcase = $version_instance->getTestcases()[$index] ?? null;
-            if($testcase === null) {
+            if ($testcase === null) {
                 $this->core->getOutput()->renderJsonFail('Invalid testcase index');
                 return;
             }
@@ -161,9 +165,9 @@ class ElectronicGraderController extends GradingController {
                 $html .= $diff_viewer->getDisplayExpected($option);
             }
             $white_spaces = $diff_viewer->getWhiteSpaces();
-            $this->core->getOutput()->renderJson(['html' => $html, 'whitespaces' => $white_spaces]);
+            $this->core->getOutput()->renderJsonSuccess(['html' => $html, 'whitespaces' => $white_spaces]);
         } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJson(['html' => '', 'whitespaces' => '', 'message' => 'Invalid gradeable id']);
+            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
         }
     }
 
