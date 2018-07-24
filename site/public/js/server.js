@@ -168,10 +168,16 @@ function editUserForm(user_id) {
                 });
             }
             if(registration_section === 'null' && json['user_group'] === 4) {
-                $('#student-error-message').css('display', 'block');
+                $('#user-form-student-error-message').css('display', 'block');
             }
             else {
-                $('#student-error-message').css('display', 'none');
+                $('#user-form-student-error-message').css('display', 'none');
+            }
+            if(json['user_group'] == 4) {
+                $('#user-form-assigned-sections').css('display', 'none');
+            }
+            else {
+                $('#user-form-assigned-sections').css('display', 'block');
             }
 
         },
@@ -196,7 +202,8 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#student-error-message').css('display', 'block');
+    $('#user-form-student-error-message').css('display', 'block');
+    $('#user-form-assigned-sections').css('display', 'none');
 }
 
 function extensionPopup(json){

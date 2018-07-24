@@ -1163,6 +1163,42 @@ end of styles used in the admin gradeable page
     text-align: center;
 }
 
+/* styles for the colors for the electronic grader details page */
+/* color for no grader */
+.grader-NULL {
+    color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+/* color for student/peer grading */
+.grader-4 {
+    color: #cc66ff; /* purple */
+}
+
+/* color for a limited access grader */
+.grader-3 {
+    color: #ffcc33;  /* yellow */
+}
+
+/* color for an instructor or full access grader */
+.grader-2,
+.grader-1 {
+    color: #33cc33;  /* green */
+}
+
+/* color for double graded */
+.grader-double {
+    color: #006699;  /* dark blue */
+}
+
+/* prevents line break in the graded questions column */
+.td-graded-questions {
+    white-space: nowrap;
+}
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }

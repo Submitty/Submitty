@@ -395,12 +395,12 @@ class NavigationView extends AbstractView {
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
             if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-                $ta_graded_gradeable->getUserViewedDate() === null &&
+                ($ta_graded_gradeable->getUserViewedDate() === null || $gradeable->getJustRegraded() === true) &&
                 $list_section === GradeableList::GRADED) {
                 //Graded and you haven't seen it yet
                 $class = "btn-success";
+                $gradeable->setJustRegraded(false);
             }
-
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $list_section == GradeableList::GRADED) {
@@ -475,12 +475,18 @@ class NavigationView extends AbstractView {
      */
     private function getGradeButton(Gradeable $gradeable, int $list_section) {
         //Location, location never changes
+        if($this->core->getUser()->accessAdmin()){
+            $view="all";
+        }
+        else{
+            $view=null;
+        }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()));
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId()));
+            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'view' => $view));
         } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId()));
+            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId(), 'view' => $view));
         } else {
             //Unknown type of gradeable
             $href = "";
