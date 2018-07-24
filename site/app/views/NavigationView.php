@@ -450,7 +450,7 @@ class NavigationView extends AbstractView {
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
                     if ($this->core->getUser()->accessFullGrading()) {
-                        // team assignment, no team (admin)
+                        // team assignment, no team (full access grader)
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
                     }
