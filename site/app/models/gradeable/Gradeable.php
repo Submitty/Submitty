@@ -32,7 +32,7 @@ use app\models\User;
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
- * @method \DateTime getMinGradingGroup()
+ * @method int getMinGradingGroup()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
