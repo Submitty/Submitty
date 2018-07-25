@@ -78,20 +78,6 @@ class Component extends AbstractModel {
     const PDF_PAGE_NONE = 0;
 
     /**
-     * Calls array_udiff on the provided component arrays with
-     *  a reference comparison
-     * @param Component[] $components1
-     * @param Component[] $components2
-     * @return Component[]
-     */
-    public static function array_diff(array $components1, array $components2) {
-        return array_udiff($components1, $components2,
-            function (Component $component1, Component $component2) {
-                return strcmp(spl_object_hash($component1), spl_object_hash($component2));
-            });
-    }
-
-    /**
      * Component constructor.
      * @param Core $core
      * @param Gradeable $gradeable
@@ -144,7 +130,7 @@ class Component extends AbstractModel {
      * @return Mark[]
      */
     public function getDeletedMarks() {
-        return Mark::array_diff($this->db_marks, $this->marks);
+        return array_udiff($this->db_marks, $this->marks, Utils::getCompareByReference());
     }
 
     /**
@@ -282,7 +268,7 @@ class Component extends AbstractModel {
 
         // Get the implied deleted marks from this operation and make sure that we aren't
         //  deleting any marks that are in use.
-        $deleted_marks = Mark::array_diff($this->marks, $marks);
+        $deleted_marks = array_udiff($this->marks, $marks, Utils::getCompareByReference());
         if (in_array(true, array_map(function (Mark $mark) {
                 return $mark->anyReceivers();
             }, $deleted_marks))) {
@@ -304,7 +290,7 @@ class Component extends AbstractModel {
      */
     public function forceDeleteMark(Mark $mark) {
         // Calculate our marks array without the provided mark
-        $new_marks = Mark::array_diff($this->marks, [$mark]);
+        $new_marks = array_udiff($this->marks, [$mark], Utils::getCompareByReference());
 
         // If it wasn't removed from our marks, it was either already deleted, or never belonged to us
         if (count($new_marks) === count($this->marks)) {

@@ -36,20 +36,6 @@ class Mark extends AbstractModel {
     private $any_receivers = false;
 
     /**
-     * Calls array_udiff on the provided mark arrays with
-     *  a reference comparison
-     * @param Mark[] $marks1
-     * @param Mark[] $marks2
-     * @return Mark[]
-     */
-    public static function array_diff(array $marks1, array $marks2) {
-        return array_udiff($marks1, $marks2,
-            function (Mark $mark1, Mark $mark2) {
-                return strcmp(spl_object_hash($mark1), spl_object_hash($mark2));
-            });
-    }
-
-    /**
      * Mark constructor.
      * @param Core $core
      * @param Component $component
