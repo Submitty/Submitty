@@ -1164,6 +1164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(true);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $graded_gradeable = $this->createMockGradedGradeable();
@@ -1183,6 +1184,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(false);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $return = $this->runController($core);
