@@ -82,13 +82,6 @@ function render(gradeable_id, user_id, file_name) {
                         pages[i].addEventListener('mouseup', function(){
                             $("#submission_browser").draggable('enable');
                         });
-                        // pages[i].addEventListener('pointermove', function(e){
-                        //     if(e.pointerType == "pen" || e.pointerType == "touch"){
-                        //         $("#submission_browser").css('overflow', 'hidden');
-                        //     } else {
-                        //         $("#submission_browser").css('overflow', 'auto');
-                        //     }
-                        // });
                     }
                 })
             });
@@ -147,17 +140,9 @@ function render(gradeable_id, user_id, file_name) {
             switch(option){
                 case 'pen':
                     $("#pen_selection").toggle();
-                    $("#pdf_annotation_icons").bind("drag", function(e, ui){
-                        let panel = $("#pen_selection");
-                        let new_top = $("#pdf_annotation_icons").css('top');
-                        new_top = parseInt(new_top.slice(0, -2)) + 30;
-                        new_top = new_top + "px";
-                        let new_left = $("#pdf_annotation_icons").css('left');
-                        panel.css({top: new_top, left: new_left});
-                    });
                     break;
                 case 'text':
-
+                    $("#text_selection").toggle();
                     break;
             }
         }
@@ -202,7 +187,7 @@ function render(gradeable_id, user_id, file_name) {
     function handleToolbarClick(e){
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
-    document.getElementById('pdf_annotation_bar').addEventListener('click', handleToolbarClick);
+    document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
 })();
 
 // Pen stuff
@@ -211,20 +196,10 @@ function render(gradeable_id, user_id, file_name) {
     let penColor;
 
     function initPen() {
-        //TODO: Add size selector
-        // let size = document.querySelector('.toolbar .pen-size');
-        // for (let i=0; i<20; i++) {
-        //     size.appendChild(new Option(i+1, i+1));
-        // }
-
         setPen(
-            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/size`) || 3,
-            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/color`) || '#ff0000'
+            localStorage.getItem('pen/size') || 3,
+            localStorage.getItem('pen/color') || '#ff0000'
         );
-        //TODO: Add color selector
-        // initColorPicker(document.querySelector('.pen-color'), penColor, function (value) {
-        //     setPen(penSize, value);
-        // });
     }
 
     function setPen(size, color) {
@@ -233,26 +208,13 @@ function render(gradeable_id, user_id, file_name) {
         if (penSize !== size) {
             modified = true;
             penSize = size;
-            // localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/size`, penSize);
-            // document.querySelector('.toolbar .pen-size').value = penSize;
+            localStorage.setItem('pen/size', penSize);
         }
 
         if (penColor !== color) {
             modified = true;
             penColor = color;
-            // localStorage.setItem(`${RENDER_OPTIONS.documentId}/pen/color`, penColor);
-
-            // let selected = document.querySelector('.toolbar .pen-color.color-selected');
-            // if (selected) {
-            //     selected.classList.remove('color-selected');
-            //     selected.removeAttribute('aria-selected');
-            // }
-            //
-            // selected = document.querySelector(`.toolbar .pen-color[data-color="${color}"]`);
-            // if (selected) {
-            //     selected.classList.add('color-selected');
-            //     selected.setAttribute('aria-selected', true);
-            // }
+            localStorage.setItem('pen/color', penColor);
         }
 
         if (modified) {
@@ -260,12 +222,12 @@ function render(gradeable_id, user_id, file_name) {
         }
     }
 
-    function handlePenSizeChange(e) {
-        setPen(e.target.value, penColor);
-    }
-
-    // document.querySelector('.toolbar .pen-size').addEventListener('change', handlePenSizeChange);
-
+    document.getElementById('pen_color_selector').addEventListener('change', function(e){
+        setPen(penSize, e.srcElement.value);
+    });
+    document.getElementById('pen_size_selector').addEventListener('change', function(e){
+        setPen(e.srcElement.value, penColor);
+    });
     initPen();
 })();
 
@@ -275,58 +237,36 @@ function render(gradeable_id, user_id, file_name) {
     let textColor;
 
     function initText() {
-        // let size = document.querySelector('.toolbar .text-size');
-        // [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96].forEach((s) => {
-        //     size.appendChild(new Option (s, s));
-        // });
-
-        setText(10, '#000000');
-
-        // initColorPicker(document.querySelector('.text-color'), textColor, function (value) {
-        //     setText(textSize, value);
-        // });
+        setText(
+            localStorage.getItem('text/size') || 12,
+            localStorage.getItem('text/color') || '#000001'
+        );
     }
 
     function setText(size, color) {
         let modified = false;
-
         if (textSize !== size) {
             modified = true;
             textSize = size;
-            localStorage.setItem(`${RENDER_OPTIONS.documentId}/text/size`, textSize);
-            // document.querySelector('.toolbar .text-size').value = textSize;
+            localStorage.setItem('text/size', textSize);
         }
 
         if (textColor !== color) {
             modified = true;
             textColor = color;
-            localStorage.setItem(`${RENDER_OPTIONS.documentId}/text/color`, textColor);
-
-            // let selected = document.querySelector('.toolbar .text-color.color-selected');
-            // if (selected) {
-            //     selected.classList.remove('color-selected');
-            //     selected.removeAttribute('aria-selected');
-            // }
-
-            // selected = document.querySelector(`.toolbar .text-color[data-color="${color}"]`);
-            // if (selected) {
-            //     selected.classList.add('color-selected');
-            //     selected.setAttribute('aria-selected', true);
-            // }
-
+            localStorage.setItem('text/color', textColor);
         }
 
-        // if (modified) {
+        if (modified) {
             UI.setText(textSize, textColor);
-        // }
+        }
     }
-
-    function handleTextSizeChange(e) {
-        setText(e.target.value, textColor);
-    }
-
-    // document.querySelector('.toolbar .text-size').addEventListener('change', handleTextSizeChange);
-
+    document.getElementById('text_color_selector').addEventListener('change', function(e){
+        setText(textSize, e.srcElement.value);
+    });
+    document.getElementById('text_size_selector').addEventListener('change', function(e){
+        setText(e.srcElement.value, textColor);
+    });
     initText();
 })();
 

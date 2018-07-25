@@ -3684,7 +3684,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _enabled = false;
-	  document.removeEventListener('pointerdown', handleDocumentPointerdown);
+	  if (navigator.userAgent.indexOf("Chrome") !== -1) {
+	    document.removeEventListener('touchstart', handleDocumentPointerdown);
+	    document.removeEventListener('touchmove', handleDocumentPointermoveChrome);
+	    document.removeEventListener('touchend', handleDocumentKeyupChrome);
+	    document.removeEventListener('mousedown', handleDocumentPointerdown);
+	    document.removeEventListener('mousemove', handleDocumentPointermove);
+	    document.removeEventListener('mouseup', handleDocumentPointerup);
+	  } else {
+	    document.removeEventListener('pointerdown', handleDocumentPointerdown);
+	    document.removeEventListener('pointermove', handleDocumentPointermove);
+	    document.removeEventListener('pointerup', handleDocumentPointerup);
+	  }
 	  document.removeEventListener('keyup', handleDocumentKeyup);
 	  (0, _utils.enableUserSelect)();
 	}

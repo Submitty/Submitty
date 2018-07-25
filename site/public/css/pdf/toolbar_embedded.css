@@ -62,6 +62,7 @@
 }
 
 .selection_panel {
+    display: none;
     left: 58px;
     position: absolute;
     background: #edf6f6;
@@ -84,7 +85,10 @@
     margin-left:-0.562em;
 }
 
-#pen_selection{
-    display: none;
+#pen_selection {
     top: 30px;
+}
+
+#text_selection {
+    top: 115px;
 }

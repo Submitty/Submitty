@@ -145,7 +145,8 @@
         loadFile(dir);
         $('#file_view').show();
         $("#grading_file_name").html(dir);
-        let offset = $("#directory_view").width();
+        let precision = $("#submission_browser").width()-$("#directory_view").width();
+        let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#directory_view").hide();
