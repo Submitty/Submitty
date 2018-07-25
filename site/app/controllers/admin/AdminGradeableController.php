@@ -317,7 +317,12 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === null) {
             return;
         }
-        $result = $this->updateRubric($gradeable, $_POST);
+        try {
+            $result = $this->updateRubric($gradeable, $_POST);
+        } catch (\Exception $e) {
+            $result = ['rubric' => 'Error saving rubric'];
+
+        }
 
         $response_data = [];
 
