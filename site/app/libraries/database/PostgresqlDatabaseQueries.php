@@ -1630,7 +1630,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     json_agg(EXISTS(
                       SELECT gc_id 
                       FROM gradeable_component_data 
-                      WHERE gc.gc_id=gc.gc_id)) AS array_any_grades,
+                      WHERE gc_id=gc.gc_id)) AS array_any_grades,
                   json_agg(gcm.array_id) AS array_mark_id,
                   json_agg(gcm.array_points) AS array_mark_points,
                   json_agg(gcm.array_title) AS array_mark_title,
