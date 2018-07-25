@@ -2683,6 +2683,7 @@ AND gc_id IN (
     }
 
     /**
+     * TODO: remove external usages of this method; it should be private
      * Deletes an array of components from the database and any
      *  data associated with them
      * @param array $components
@@ -2830,6 +2831,9 @@ AND gc_id IN (
             // Save the component
             $this->saveComponent($component);
         }
+
+        // Delete any components not being updated
+        $this->deleteComponents($gradeable->getDeletedComponents());
     }
 
     /**
