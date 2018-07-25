@@ -78,6 +78,20 @@ class Component extends AbstractModel {
     const PDF_PAGE_NONE = 0;
 
     /**
+     * Calls array_udiff on the provided component arrays with
+     *  a instance-level comparison
+     * @param Component[] $components1
+     * @param Component[] $components2
+     * @return Component[]
+     */
+    public static function array_diff(array $components1, array $components2) {
+        return array_udiff($components1, $components2,
+            function (Component &$component1, Component &$component2) {
+                return $component1 === $component2 ? 0 : -1;
+            });
+    }
+
+    /**
      * Component constructor.
      * @param Core $core
      * @param Gradeable $gradeable
@@ -130,10 +144,7 @@ class Component extends AbstractModel {
      * @return Mark[]
      */
     public function getDeletedMarks() {
-        return array_udiff($this->db_marks, $this->marks,
-            function (Mark &$mark1, Mark &$mark2) {
-                return $mark1 === $mark2;
-            });
+        return Mark::array_diff($this->db_marks, $this->marks);
     }
 
     /**
@@ -271,10 +282,7 @@ class Component extends AbstractModel {
 
         // Get the implied deleted marks from this operation and make sure that we aren't
         //  deleting any marks that are in use.
-        $deleted_marks = array_udiff($this->marks, $marks,
-            function (Mark &$mark1, Mark &$mark2) {
-                return $mark1 === $mark2;
-            });
+        $deleted_marks = Mark::array_diff($this->marks, $marks);
         if (in_array(true, array_map(function (Mark $mark) {
                 return $mark->anyReceivers();
             }, $deleted_marks))) {

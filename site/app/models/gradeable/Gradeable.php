@@ -259,10 +259,7 @@ class Gradeable extends AbstractModel {
      * @return Component[]
      */
     public function getDeletedComponents() {
-        return array_udiff($this->db_components, $this->components,
-            function (Component &$component1, Component &$component2) {
-                return $component1 === $component2;
-            });
+        return Component::array_diff($this->db_components, $this->components);
     }
 
     /**
@@ -648,10 +645,7 @@ class Gradeable extends AbstractModel {
 
         // Get the implied deleted components from this operation and ensure we aren't deleting any
         //  components that have grades already
-        $deleted_components = array_udiff($this->components, $this->components,
-            function (Component &$component1, Component &$component2) {
-                return $component1 === $component2;
-            });
+        $deleted_components = Component::array_diff($this->components, $this->components);
         if (in_array(true, array_map(function (Component $component) {
             return $component->anyGrades();
         }, $deleted_components))) {
