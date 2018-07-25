@@ -1588,6 +1588,8 @@ class SubmissionController extends AbstractController {
                         }
                         $is_zip_file = true;
                     }
+                    //cannot check if there are duplicates inside zip file, will overwrite
+                    //it is convenient for bulk uploads
                     if ($expand_zip == 'on' && $is_zip_file === true) {
                         $zip = new \ZipArchive();
                         $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
@@ -1601,10 +1603,12 @@ class SubmissionController extends AbstractController {
                                 \RecursiveIteratorIterator::SELF_FIRST) as $item
                             ) {
                                 if ($item->isDir()) {
-                                    mkdir($upload_path . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                                    if (!FileUtils::createDir($upload_path . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
+                                        return $this->uploadResult("Failed to make subfolder path.", false);
+                                    }
                                 } else {
                                     copy($item, $upload_path . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-                                  }
+                                }
                             }
                             FileUtils::recursiveRmdir($zip_path);
                         }

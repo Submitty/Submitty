@@ -875,7 +875,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, requested_path) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
     var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
     var formData = new FormData();
@@ -883,6 +883,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, requested_path) {
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
     formData.append('requested_path', requested_path);
+
+    var target_path = cmPath; // this one has slash at the end.
+    if (requested_path && requested_path.trim().length) {
+        target_path = cmPath + requested_path;
+    }
+
+    if (target_path[target_path.length-1] == '/')
+        target_path = target_path.slice(0, -1); // remove slash
 
 	var filesToBeAdded = false;
     // Files selected
@@ -904,12 +912,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, requested_path) {
                 return;
             }
 
-            var requested_path_without_slash = requested_path;
-
-            if (requested_path_without_slash[requested_path_without_slash.length-1] == '/')
-                requested_path_without_slash = requested_path_without_slash.slice(0, -1); // remove slash
-
-            var file = new File([""], requested_path_without_slash + "/" + file_array[i][j].name);
+            var file = new File([""], target_path + "/" + file_array[i][j].name);
             var k = fileExists(file, 1);
             // Check conflict here
             if ( k[0] == 1 )
