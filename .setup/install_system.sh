@@ -151,7 +151,7 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    if ! cut -d ':' -f 1 /etc/passwd | grep -q {$PHP_USER} ; then
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
         adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
