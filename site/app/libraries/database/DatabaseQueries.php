@@ -3053,8 +3053,7 @@ AND gc_id IN (
         // iterate through graded components and see if any need updating/creating
         foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
             foreach ($container->getGradedComponents() as $component_grade) {
-                // This means the component wasn't loaded from the database, ergo its new
-                if ($component_grade->getDbMarkIds() === null) {
+                if ($component_grade->isNew()) {
                     $this->createGradedComponent($component_grade);
                 } else {
                     $this->updateGradedComponent($component_grade);

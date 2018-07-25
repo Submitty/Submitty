@@ -175,6 +175,14 @@ class GradedComponent extends AbstractModel {
         return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
     }
 
+    /**
+     * Gets if this GradedComponent is new (not in db yet)
+     * @return bool
+     */
+    public function isNew() {
+        return $this->db_mark_ids === null;
+    }
+
     /* Overridden setters with validation */
 
     /**
