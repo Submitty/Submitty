@@ -587,7 +587,8 @@ class NavigationView extends AbstractView {
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fa fa-pencil",
-            "title_on_hover" => true
+            "title_on_hover" => true,
+            "aria_label" => "edit gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }
@@ -601,7 +602,8 @@ class NavigationView extends AbstractView {
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
             "class" => "fa fa-wrench",
-            "title_on_hover" => true
+            "title_on_hover" => true,
+            "aria_label" => "rebuild gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }
