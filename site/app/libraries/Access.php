@@ -273,7 +273,7 @@ class Access {
         list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
 
         //If it's not a user's gradeable then you can't check grading section
-        if ($new_graded_gradeable ?? $graded_gradeable === null) {
+        if (($new_graded_gradeable ?? $graded_gradeable) === null) {
             return true;
         }
 
