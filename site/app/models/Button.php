@@ -13,9 +13,10 @@ use app\libraries\Core;
  * @method bool isDisabled()
  * @method bool isTitleOnHover()
  * @method float|null getProgress()
+ * @method string|null getAriaLabel()
  */
 class Button extends AbstractModel {
-    /** @var string $title */
+    /** @var string|null $title */
     protected $title;
     /** @var string|null $subtitle */
     protected $subtitle;
