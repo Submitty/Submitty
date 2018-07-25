@@ -147,7 +147,7 @@ class SimpleGraderController extends GradingController  {
         //Are you currently showing all
         $show_all = ((isset($_GET['view']) && $_GET['view'] === "all") || $grading_count === 0) && $can_show_all;
         //Should the button be shown
-        $show_all_sections_button = $can_show_all && $grading_count > 0;
+        $show_all_sections_button = $can_show_all;
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
