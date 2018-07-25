@@ -340,6 +340,7 @@ class Gradeable extends AbstractModel {
         $submission_open_date = $dates['submission_open_date'];
         $submission_due_date = $dates['submission_due_date'];
         $late_days = $dates['late_days'];
+        $regrade_request_date = $dates['regrade_request_date'];
 
         $late_interval = null;
         if ($late_days < 0) {
@@ -391,6 +392,9 @@ class Gradeable extends AbstractModel {
                 }
                 if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
                     $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                }
+                if ($regrade_request_date !== null && Utils::compareNullableGt($grade_released_date, $regrade_request_date)) {
+                    $errors['regrade_request_date'] = 'Regrade Request date must be after Grades Released Date';
                 }
             } else {
                 if (Utils::compareNullableGt($max_due, $grade_released_date)) {

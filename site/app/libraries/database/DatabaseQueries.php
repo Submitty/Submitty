@@ -2834,6 +2834,10 @@ AND gc_id IN (
 
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
+            $regrade_date = null;
+            if($gradeable->getRegradeRequestDate() !== null){
+                $regrade_date = DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+            }
             $params = [
                 $gradeable->getTitle(),
                 $gradeable->getInstructionsUrl(),
@@ -2882,8 +2886,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
-                    $gradeable->getId(),
-                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate())
+                    $regrade_date,
+                    $gradeable->getId()
                 ];
                 $this->course_db->query("
                     UPDATE electronic_gradeable SET 
