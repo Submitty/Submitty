@@ -1430,6 +1430,7 @@ function dynamicScrollNextPage(element) {
     if($(element).data("dynamic_lock_load")) {
         return;
     }
+    $(".thread_list .fa-spinner").show();
     $(element).data("dynamic_lock_load", true);
     
     var urlPattern = $(element).data("urlPattern");
@@ -1458,9 +1459,10 @@ function dynamicScrollNextPage(element) {
                 var content = x.html;
                 var count = x.count;
                 content = `${content}`;
-                $(element).append(content);
+                $(element).find(".fa-spinner").before(content);
                 $(element).attr("next_page", parseInt(next_page) + 1);
                 $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
                 if(count == 0) {
                     // Don't load more
                     $(element).data("dynamic_lock_full", true);
@@ -1470,6 +1472,7 @@ function dynamicScrollNextPage(element) {
             },
             error: function(){
                 $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
                 window.alert("Something went wrong while trying to load more threads. Please try again.");
             }
     });
@@ -1546,6 +1549,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                jElement.attr("next_page", '2');
                jElement.data("dynamic_lock_load", false);
                jElement.data("dynamic_lock_full", false);
+               $(".thread_list .fa-spinner").hide();
                dynamicScrollLoadIfScrollVisible(jElement);
             },
             error: function(){
