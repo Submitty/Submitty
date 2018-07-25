@@ -2562,9 +2562,9 @@ AND gc_id IN (
             return;
         }
         // We only need the ids
-        $mark_ids = array_map(function (Mark $mark) {
+        $mark_ids = array_values(array_map(function (Mark $mark) {
             return $mark->getId();
-        }, $marks);
+        }, $marks));
         $place_holders = implode(',', array_fill(0, count($marks), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN ($place_holders)", $mark_ids);
@@ -2683,20 +2683,19 @@ AND gc_id IN (
     }
 
     /**
-     * TODO: remove external usages of this method; it should be private
      * Deletes an array of components from the database and any
      *  data associated with them
      * @param array $components
      */
-    public function deleteComponents(array $components) {
+    private function deleteComponents(array $components) {
         if (count($components) === 0) {
             return;
         }
 
         // We only want the ids in our array
-        $component_ids = array_map(function (Component $component) {
+        $component_ids = array_values(array_map(function (Component $component) {
             return $component->getId();
-        }, $components);
+        }, $components));
         $place_holders = implode(',', array_fill(0, count($components), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN ($place_holders)", $component_ids);
