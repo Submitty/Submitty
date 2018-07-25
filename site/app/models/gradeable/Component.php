@@ -69,6 +69,8 @@ class Component extends AbstractModel {
 
     /** @property @var Mark[] Array of marks loaded from the database */
     private $db_marks = [];
+    /** @property @var bool If any submitters have grades for this component */
+    private $any_grades = false;
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
     const PDF_PAGE_STUDENT = -1;
@@ -96,6 +98,7 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
+        $this->any_grades = ($details['any_grades'] ?? false) === true;
         $this->modified = false;
     }
 
@@ -140,6 +143,14 @@ class Component extends AbstractModel {
      */
     public function getGradingSet() {
         return $this->peer ? $this->gradeable->getPeerGradeSet() : 1;
+    }
+
+    /**
+     * Gets if any submitters have grades for this component yet
+     * @return bool
+     */
+    public function anyGrades() {
+        return $this->any_grades;
     }
 
     /* Overridden setters with validation */

@@ -1627,6 +1627,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gc_is_peer) AS array_peer,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
+                    json_agg(EXISTS(
+                      SELECT gc_id 
+                      FROM gradeable_component_data 
+                      WHERE gc.gc_id=gc.gc_id)) AS array_any_grades,
                   json_agg(gcm.array_id) AS array_mark_id,
                   json_agg(gcm.array_points) AS array_mark_points,
                   json_agg(gcm.array_title) AS array_mark_title,
@@ -1675,7 +1679,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'text',
                 'peer',
                 'order',
-                'page'
+                'page',
+                'any_grades'
             ];
             $mark_properties = [
                 'id',
