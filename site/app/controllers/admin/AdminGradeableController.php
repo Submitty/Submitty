@@ -855,7 +855,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'is_regrade_allowed' => true
+                'is_regrade_allowed' => $details['is_regrade_allowed'] === 'false'
             ]);
         } else {
             // Values for these electronic-only properties
@@ -951,7 +951,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading'
+            'peer_grading',
+            'is_regrade_allowed'
         ];
 
         // Date properties all need to be set at once

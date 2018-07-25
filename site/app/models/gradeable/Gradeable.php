@@ -70,7 +70,7 @@ use app\models\User;
  * @method Component[] getComponents()
  * @method bool getJustRegraded()
  * @method bool getIsRegradeAllowed()
- * @method void setIsRegradeAllowed()
+ * @method void setIsRegradeAllowed($is_regrade_allowed)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
