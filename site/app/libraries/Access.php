@@ -3,6 +3,9 @@
 namespace app\libraries;
 
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
 use app\models\GradingSection;
 use app\models\User;
@@ -154,23 +157,26 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
-            /* @var Gradeable|null $gradeable */
-            $gradeable = $this->requireArg($args, "gradeable");
-            if ($gradeable === null) {
-                return false;
+            //If we have a graded gradeable, it should have the regular gradeable
+            // in it already
+            if (array_key_exists("graded_gradeable", $args)) {
+                $g = $args["graded_gradeable"];
+            } else {
+                $g = $this->requireArg($args, "gradeable");
+                if ($g === null) {
+                    return false;
+                }
             }
 
-            //TODO: Remove this enormous hack when Kevin does the everything
-            /* @var \app\models\gradeable\Gradeable|null $newGradeable */
-            $newGradeable = null;
-            if ($gradeable instanceof \app\models\gradeable\Gradeable) {
-                /* @var \app\models\gradeable\Gradeable|null $newGradeable */
-                $newGradeable = $gradeable;
-            }
+            /* @var Gradeable|null $gradeable */
+            /* @var Gradeable|null $graded_gradeable */
+            /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+            /* @var GradedGradeable|null $new_graded_gradeable */
+            list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = self::resolveNewGradeable($g);
 
             if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
-                $minimum = $newGradeable ? $newGradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
+                $minimum = $new_gradeable ? $new_gradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
                 if (!$this->checkGroupPrivilege($group, $minimum)) {
 
                     if (
@@ -188,14 +194,14 @@ class Access {
             }
 
             if (self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($gradeable->getActiveVersion() <= 0) {
+                if (($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion()) <= 0) {
                     return false;
                 }
             }
 
             if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
-                if (!$this->checkGradingSection($gradeable)) {
+                if (!$this->checkGradingSection($new_graded_gradeable ?? $graded_gradeable)) {
                     return false;
                 }
             }
@@ -254,32 +260,38 @@ class Access {
 
     /**
      * Check if a limited access grader has a user in their section
-     * @param Gradeable $gradeable
+     * @param Gradeable|GradedGradeable $g
      * @return bool If they are
      */
-    public function checkGradingSection(Gradeable $gradeable) {
+    public function checkGradingSection($g) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
+        /* @var Gradeable|null $gradeable */
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = self::resolveNewGradeable($g);
+
         //If it's not a user's gradeable then you can't check grading section
-        if ($gradeable->getUser() === null && $gradeable->getTeam() === null) {
+        if (($new_gradeable)->getUser() === null && ($new_gradeable)->getTeam() === null) {
             return true;
         }
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if ($gradeable->getGradeStartDate() <= $now) {
+        if (($gradeable ?? $new_gradeable)->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
-            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
+            $sections = ($gradeable ?? $new_gradeable)->getGradingSectionsForUser($this->core->getUser());
 
 
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
-                if ($gradeable->isTeamAssignment()) {
-                    if ($section->containsTeam($gradeable->getTeam())) {
+                if (($gradeable ?? $new_gradeable)->isTeamAssignment()) {
+                    if ($section->containsTeam(($new_gradeable)->getTeam())) {
                         return true;
                     }
                 } else {
-                    if ($section->containsUser($gradeable->getUser())) {
+                    if ($section->containsUser(($new_gradeable)->getUser())) {
                         return true;
                     }
                 }
@@ -313,5 +325,58 @@ class Access {
         //Because access levels decrease as they get more powerful, this needs to be <=
         // If groups ever become non-sequential in the future, this needs to be replaced.
         return $check <= $minimum;
+    }
+
+    /**
+     * TODO: Remove this enormous hack when Kevin does the everything
+     * Get all the permutations of [Graded]Gradeables from an unknown type gradeable-like object
+     * Here are the classes that are currently supported:
+     * \app\models\Gradeable
+     * \app\models\gradeable\Gradeable
+     * \app\models\gradeable\GradedGradeable
+     * \app\models\gradeable\TaGradedGradeable
+     * \app\models\gradeable\AutoGradedGradeable
+     * @param mixed|null $g
+     * @return array
+     */
+    private static function resolveNewGradeable($g) {
+        $gradeable = null;
+        $graded_gradeable = null;
+        $new_gradeable = null;
+        $new_graded_gradeable = null;
+        if ($g !== null) {
+            if ($g instanceof GradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradeable();
+                $new_graded_gradeable = $g;
+            } else if ($g instanceof \app\models\gradeable\Gradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g;
+                $new_graded_gradeable = null;
+            } else if ($g instanceof Gradeable) {
+                $gradeable = $g;
+                $graded_gradeable = $g;
+                $new_gradeable = null;
+                $new_graded_gradeable = null;
+            } else if ($g instanceof TaGradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradedGradeable()->getGradeable();
+                $new_graded_gradeable = $g->getGradedGradeable();
+            } else if ($g instanceof AutoGradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradedGradeable()->getGradeable();
+                $new_graded_gradeable = $g->getGradedGradeable();
+            }
+        }
+
+        /* @var Gradeable|null $gradeable */
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        return [$gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable];
     }
 }

@@ -56,6 +56,14 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the graded gradeable instance this Ta grade belongs to
+     * @return GradedGradeable
+     */
+    public function getGradedGradeable() {
+        return $this->graded_gradeable;
+    }
+
+    /**
      * Gets the AutoGradedVersion instance for the active version
      * @return AutoGradedVersion
      */
