@@ -182,13 +182,21 @@ class NavigationView extends AbstractView {
                 /** @var Gradeable $gradeable */
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
-                $render_gradeables[] = [
-                    "id" => $gradeable->getId(),
-                    "name" => $gradeable->getTitle(),
-                    "url" => $gradeable->getInstructionsUrl(),
-                    "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section)
-                ];
+
+                // TODO: make a more elegant fix for this with the new access method
+                $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section);
+                $has_buttons = count(array_filter($buttons, function ($button) {
+                        return $button !== null;
+                    })) > 0;
+                if ($has_buttons) {
+                    $render_gradeables[] = [
+                        "id" => $gradeable->getId(),
+                        "name" => $gradeable->getTitle(),
+                        "url" => $gradeable->getInstructionsUrl(),
+                        "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
+                        "buttons" => $buttons
+                    ];
+                }
             }
 
             //Copy
