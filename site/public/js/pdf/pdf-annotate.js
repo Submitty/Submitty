@@ -3528,26 +3528,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	var lines = [];
 	
 	/**
-	 * Handle document.mousedown event
+	 * Handle document.touchdown or document.pointerdown event
 	 */
-	function handleDocumentMousedown(e) {
+	function handleDocumentPointerdown(e) {
 	  path = null;
 	  lines = [];
 	  _candraw = true;
-	  savePoint(e.clientX, e.clientY);
-	  // document.addEventListener('pointermove', handleDocumentMousemove);
-	  // document.addEventListener('pointerup', handleDocumentMouseup);
 	}
 	
 	/**
-	 * Handle document.mouseup event
+	 * Handle document.touchup or document.pointerup event
 	 *
 	 * @param {Event} e The DOM event to be handled
 	 */
-	function handleDocumentMouseup(e) {
+	function handleDocumentKeyupChrome(e) {
+	  saveToStorage(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+	}
+	
+	function handleDocumentPointerup(e) {
+	  saveToStorage(e.clientX, e.clientY);
+	}
+	
+	function saveToStorage(x, y) {
 	  _candraw = false;
 	  var svg = void 0;
-	  if (lines.length > 1 && (svg = (0, _utils.findSVGAtPoint)(e.clientX, e.clientY))) {
+	  if (lines.length > 1 && (svg = (0, _utils.findSVGAtPoint)(x, y))) {
 	    var _getMetadata = (0, _utils.getMetadata)(svg),
 	        documentId = _getMetadata.documentId,
 	        pageNumber = _getMetadata.pageNumber;
@@ -3565,9 +3570,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      (0, _appendChild.appendChild)(svg, annotation);
 	    });
 	  }
-	
-	  // document.removeEventListener('pointermove', handleDocumentMousemove);
-	  // document.removeEventListener('pointerup', handleDocumentMouseup);
 	}
 	
 	/**
@@ -3575,10 +3577,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Event} e The DOM event to be handled
 	 */
-	function handleDocumentMousemove(e) {
+	function handleDocumentPointermove(e) {
 	  if (_candraw) {
 	    savePoint(e.clientX, e.clientY);
 	  }
+	}
+	
+	function handleDocumentPointermoveChrome(e) {
+	  savePoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	}
 	
 	/**
@@ -3591,8 +3597,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (e.keyCode === 27) {
 	    lines = null;
 	    path.parentNode.removeChild(path);
-	    document.removeEventListener('pointermove', handleDocumentMousemove);
-	    document.removeEventListener('pointerup', handleDocumentMouseup);
+	    document.removeEventListener('pointermove', handleDocumentPointermove);
+	    document.removeEventListener('pointerup', handleDocumentPointerup);
 	  }
 	}
 	
@@ -3613,9 +3619,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  lines.push(point);
 	
-	  // if (lines.length <= 1) {
-	  //   return;
-	  // }
+	  if (lines.length <= 1) {
+	    return;
+	  }
 	
 	  if (path) {
 	    svg.removeChild(path);
@@ -3652,9 +3658,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _enabled = true;
-	  document.addEventListener('pointerdown', handleDocumentMousedown);
-	  document.addEventListener('pointermove', handleDocumentMousemove);
-	  document.addEventListener('pointerup', handleDocumentMouseup);
+	  // Chrome and Firefox has different behaviors with how pen works, so we need different events.
+	  if (navigator.userAgent.indexOf("Chrome") !== -1) {
+	    document.addEventListener('touchstart', handleDocumentPointerdown);
+	    document.addEventListener('touchmove', handleDocumentPointermoveChrome);
+	    document.addEventListener('touchend', handleDocumentKeyupChrome);
+	    document.addEventListener('mousedown', handleDocumentPointerdown);
+	    document.addEventListener('mousemove', handleDocumentPointermove);
+	    document.addEventListener('mouseup', handleDocumentPointerup);
+	  } else {
+	    document.addEventListener('pointerdown', handleDocumentPointerdown);
+	    document.addEventListener('pointermove', handleDocumentPointermove);
+	    document.addEventListener('pointerup', handleDocumentPointerup);
+	  }
 	  document.addEventListener('keyup', handleDocumentKeyup);
 	  (0, _utils.disableUserSelect)();
 	}
@@ -3668,7 +3684,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _enabled = false;
-	  document.removeEventListener('pointerdown', handleDocumentMousedown);
+	  document.removeEventListener('pointerdown', handleDocumentPointerdown);
 	  document.removeEventListener('keyup', handleDocumentKeyup);
 	  (0, _utils.enableUserSelect)();
 	}

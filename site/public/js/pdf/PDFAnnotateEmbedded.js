@@ -82,18 +82,12 @@ function render(gradeable_id, user_id, file_name) {
                         pages[i].addEventListener('mouseup', function(){
                             $("#submission_browser").draggable('enable');
                         });
-                        pages[i].addEventListener('pointermove', function(e){
-                            if(e.pointerType == "pen" || e.pointerType == "touch"){
-                                $("#submission_browser").css('overflow', 'hidden');
-                            } else {
-                                $("#submission_browser").css('overflow', 'auto');
-                            }
-                        });
-                        // pages[i].addEventListener('pointerdown', function(){
-                        //     $("#submission_browser").css('overflow', 'hidden');
-                        // });
-                        // pages[i].addEventListener('pointerup', function(){
-                        //     $("#submission_browser").css('overflow', 'auto');
+                        // pages[i].addEventListener('pointermove', function(e){
+                        //     if(e.pointerType == "pen" || e.pointerType == "touch"){
+                        //         $("#submission_browser").css('overflow', 'hidden');
+                        //     } else {
+                        //         $("#submission_browser").css('overflow', 'auto');
+                        //     }
                         // });
                     }
                 })
@@ -225,7 +219,7 @@ function render(gradeable_id, user_id, file_name) {
 
         setPen(
             localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/size`) || 3,
-            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/color`) || '#000000'
+            localStorage.getItem(`${RENDER_OPTIONS.documentId}/pen/color`) || '#ff0000'
         );
         //TODO: Add color selector
         // initColorPicker(document.querySelector('.pen-color'), penColor, function (value) {
