@@ -183,11 +183,7 @@ class SimpleGraderController extends GradingController  {
             return $section->getGraders();
         }, $sections);
 
-        if (count($student_ids) > 0) {
-            $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
-        } else {
-            $rows = [];
-        }
+        $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button);
     }
 
