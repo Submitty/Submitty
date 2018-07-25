@@ -2175,8 +2175,8 @@ AND gc_id IN (
       return count($this->course_db->rows()) > 0;
     }
 
-    public function getDisplayUserNameFromUserId($user_id){
-      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
+    public function getDisplayUserInfoFromUserId($user_id){
+      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_email from users where user_id = ?", array($user_id));
       $name_rows = $this->course_db->rows()[0];
       $last_name =  " " . $name_rows["user_lastname"];
       if(empty($name_rows["user_preferred_firstname"])){
@@ -2187,6 +2187,7 @@ AND gc_id IN (
       $ar = array();
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
+      $ar["user_email"] = $name_rows["user_email"];
       return $ar;
     }
 
