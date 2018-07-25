@@ -268,6 +268,9 @@ class Component extends AbstractModel {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
+
+        // Get the implied deleted marks from this operation and make sure that we aren't
+        //  deleting any marks that are in use.
         $deleted_marks = array_udiff($this->marks, $marks,
             function (Mark &$mark1, Mark &$mark2) {
                 return $mark1 === $mark2;
