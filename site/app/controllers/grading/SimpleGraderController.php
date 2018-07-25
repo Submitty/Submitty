@@ -76,7 +76,16 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;    
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
+            $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return;
         }
 
         //Figure out if we are getting users by rotating or registration section.
@@ -96,11 +105,10 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-        
         //Turn off header/footer so that we are using simple html.
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -159,7 +167,6 @@ class SimpleGraderController extends GradingController  {
         }
 
         $students = [];
-        $student_ids = [];
         foreach ($sections as $section) {
             $students = array_merge($students, $section->getUsers());
         }
@@ -266,9 +273,8 @@ class SimpleGraderController extends GradingController  {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $grader = $this->core->getUser();
 
-        //FIXME: permission check (not reusing other permission checks)
         //FIXME: returning html error message in a json-returning route
-        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
+        if (!$this->core->getAccess()->canI("grading.simple.upload_csv", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }

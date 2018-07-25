@@ -103,6 +103,7 @@ class Access {
         $this->permissions["grading.simple"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER;
         $this->permissions["grading.simple.grade"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.simple.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.simple.upload_csv"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
     }
 
     /**
@@ -200,8 +201,14 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
-                if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
-                    return false;
+                if (array_key_exists("section", $args)) {
+                    if (!$this->isSectionInGradingSections($new_gradeable ?? $gradeable, $args["section"], $user)) {
+                        return false;
+                    }
+                } else {
+                    if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                        return false;
+                    }
                 }
             }
 
@@ -297,6 +304,28 @@ class Access {
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Check if a section (by name) is one of the user's grading sections for a gradeable
+     * @param Gradeable|\app\models\gradeable\Gradeable $g
+     * @param string $section Section name
+     * @param User $user
+     * @return bool
+     */
+    public function isSectionInGradingSections($g, string $section, User $user) {
+        /* @var Gradeable|null $gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        list($gradeable,, $new_gradeable,) = $this->resolveNewGradeable($g);
+
+        $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
+        foreach ($sections as $check_section) {
+            /** @var GradingSection $check_section */
+            if ($check_section->getName() === $section) {
+                return true;
+            }
+        }
         return false;
     }
 
