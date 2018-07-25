@@ -1097,7 +1097,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
-     * @return DatabaseRowIterator Iterator to access each GradeableData
+     * @return \Iterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
@@ -1112,6 +1112,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         }
         if (count($gradeables_by_id) === 0) {
             throw new \InvalidArgumentException('Gradeable array must not be blank!');
+        }
+
+        // If one array is blank, and the other is null or also blank, don't get anything
+        if ($users === [] && $teams === null ||
+            $users === null && $teams === [] ||
+            $users === [] && $teams === []) {
+            return new \EmptyIterator();
         }
 
         // Make sure that our users/teams are arrays
