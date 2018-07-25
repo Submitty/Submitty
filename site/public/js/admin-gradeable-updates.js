@@ -57,6 +57,9 @@ $(document).ready(function () {
         }
     };
     $('input,select,textarea').change(function () {
+        if($(this).hasClass('ignore')) {
+            return;
+        }
         // If its rubric-related, then make different request
         if($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
             // ... but don't automatically save electronic rubric data
@@ -272,6 +275,7 @@ function saveRubric(redirect = true) {
         data: values,
         success: function (data, textStatus, xhr) {
             console.log('Request returned status code ' + xhr.status);
+            delete errors['rubric'];
             updateErrors();
             if(redirect) {
                 window.location.replace(buildUrl({
