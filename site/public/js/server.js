@@ -288,6 +288,15 @@ function newUploadCourseMaterialsForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-plagiarism-result-and-config-form");
+    $('[name="gradeable_title"]', form).html('');
+    $('[name="gradeable_title"]', form).append(gradeable_title);
+    $('[name="delete"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
     var form = $("#save-configuration-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
@@ -579,9 +588,16 @@ function toggleUsersPlagiarism(gradeable_id) {
 }
 
 
-function PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name) {
+function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#save-configuration-form");
     if(select_element_name == "language") {
+        
+        //
+        // Following code is used to set default window size for different languages
+        // that will appear in 'configureNewGradeableForPlagiarismForm'
+        // to change the default values, just change the val attribute for the language.
+        //
+
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
         }

@@ -36,8 +36,8 @@ def run_lichen_plagiarism(data):
 
     if len(data["prev_term_gradeables"]) != 0:
         prior_term_gradeables = []
-        for gradeable in data["prev_term_gradeables"]:
-            prior_term_gradeables.append(gradeable)     
+        for prior_term_gradeable in data["prev_term_gradeables"]:
+            prior_term_gradeables.append(prior_term_gradeable)     
 
     if len(data["ignore_submissions"]) != 0:
         ignore_submissions = []

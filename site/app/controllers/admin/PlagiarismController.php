@@ -30,6 +30,9 @@ class PlagiarismController extends AbstractController {
             case 'get_matches_for_clicked_match':
                 $this->ajaxGetMatchesForClickedMatch();
                 break;
+            case 'edit_plagiarism_saved_config':
+                $this->editPlagiarismSavedConfig();
+                break;    
             case 're_run_plagiarism':
                 $this->reRunPlagiarism();
                 break;
@@ -77,6 +80,7 @@ class PlagiarismController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'deletePlagiarismResultAndConfigForm');
         
     }
 
@@ -108,8 +112,7 @@ class PlagiarismController extends AbstractController {
         }
         
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches'); 
-        // $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'reRunPlagiarismForm', $semester, $course, $lichen_saved_configs);        
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');         
     }
 
     public function configureNewGradeableForPlagiarismForm() {
@@ -125,23 +128,37 @@ class PlagiarismController extends AbstractController {
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureNewGradeableForPlagiarismForm', $gradeable_ids_titles, $prior_term_gradeables);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null);
     }
 
     public function saveNewPlagiarismConfiguration() {
 
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
+
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'action' => 'configure_new_gradeable_for_plagiarism_form'));
+        if($_REQUEST['new_or_edit'] == "new") {
+            $gradeable_id= $_POST['gradeable_id'];
+        }
+
+        if ($_REQUEST['new_or_edit'] == "edit") {
+            $gradeable_id = $_REQUEST['gradeable_id'];
+            $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'gradeable_id'=> $gradeable_id,'action' => 'edit_plagiarism_saved_config'));
+        
+        }
         
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
         }
 
+        if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
+                $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
+                $this->core->redirect($return_url);
+        }
+
         $prev_gradeable_number = $_POST['prior_term_gradeables_number'];
         $ignore_submission_number = $_POST['ignore_submission_number'];
-        $gradeable_id = $_POST['gradeable_id'];
         $version_option = $_POST['version_option'];
         if ($version_option == "active_version") {
             $version_option = "active_version";
@@ -283,6 +300,19 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+
+        // if fails at following step, still provided code and cnfiguration get saved
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
+            $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Create the configuration again.");
+            $this->core->redirect($return_url);  
+        }
+
+        // if fails at following step, still provided code, cnfiguration, timestamp file get saved
+        
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
@@ -331,6 +361,14 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
             $this->core->redirect($return_url);   
         }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
+            $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Re-run the detector.");
+            $this->core->redirect($return_url);  
+        }
         
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
@@ -342,6 +380,24 @@ class PlagiarismController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    public function editPlagiarismSavedConfig() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $gradeable_id = $_REQUEST['gradeable_id'];       
+
+        $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
+
+        if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
+            $this->core->addErrorMessage("Saved configuration not found.");
+            $this->core->redirect($return_url);   
+        }
+
+        $saved_config= json_decode(file_get_contents("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json"),true);
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null , $prior_term_gradeables, $saved_config);
+        
+    }
+
     public function deletePlagiarismResultAndConfig() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
@@ -349,6 +405,10 @@ class PlagiarismController extends AbstractController {
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
 
         #check before enqueuing deleting request
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            $this->core->redirect($return_url);
+        }
         
         if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
                 $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
