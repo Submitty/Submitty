@@ -65,7 +65,10 @@ class Component extends AbstractModel {
     protected $page = -1;
 
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
-    protected $marks = array();
+    protected $marks = [];
+
+    /** @property @var Mark[] Array of marks loaded from the database */
+    private $db_marks = [];
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
     const PDF_PAGE_STUDENT = -1;
@@ -107,7 +110,8 @@ class Component extends AbstractModel {
     /**
      * Gets the mark object with the provided mark id
      * @param int $mark_id
-     * @return Mark|null The Mark with the provided id, or null if not found
+     * @return Mark|null The Mark with the provided id
+     * @throws \InvalidArgumentException If the provided mark id isn't part of this component
      */
     public function getMark($mark_id) {
         foreach($this->marks as $mark) {
@@ -116,6 +120,14 @@ class Component extends AbstractModel {
             }
         }
         throw new \InvalidArgumentException('Component did not contain provided mark id');
+    }
+
+    /**
+     * Gets an array of marks set to be deleted
+     * @return Mark[]
+     */
+    public function getDeletedMarks() {
+        return array_diff($this->db_marks, $this->marks);
     }
 
     /**
@@ -241,12 +253,29 @@ class Component extends AbstractModel {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
+        $deleted_marks = array_diff($this->marks, $marks);
+        if (in_array(true, array_map(function (Mark $mark) {
+                return $mark->anyReceivers();
+            }, $deleted_marks))) {
+            throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
+        }
+
         $this->marks = array_values($marks);
 
         // sort by order
-        usort($this->marks, function(Mark $a, Mark $b) {
+        usort($this->marks, function (Mark $a, Mark $b) {
             return $a->getOrder() - $b->getOrder();
         });
+    }
+
+    /**
+     * Sets the array of marks, only to be called from the database loading methods
+     * @param array $marks
+     * @internal
+     */
+    public function setMarksFromDb(array $marks) {
+        $this->setMarks($marks);
+        $this->db_marks = $marks;
     }
 
     /**

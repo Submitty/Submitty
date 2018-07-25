@@ -1729,7 +1729,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                             // Create the mark instance
                             $marks[] = new Mark($this->core, $component, $mark_data);
                         }
-                        $component->setMarks($marks);
+                        $component->setMarksFromDb($marks);
                     }
                 }
 
