@@ -645,7 +645,7 @@ class Gradeable extends AbstractModel {
 
         // Get the implied deleted components from this operation and ensure we aren't deleting any
         //  components that have grades already
-        $deleted_components = Component::array_diff($this->components, $this->components);
+        $deleted_components = Component::array_diff($this->components, $components);
         if (in_array(true, array_map(function (Component $component) {
             return $component->anyGrades();
         }, $deleted_components))) {
