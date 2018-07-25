@@ -285,7 +285,9 @@ function saveRubric(redirect = true) {
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
+            errors['rubric'] = data;
             updateErrors(data.responseText);
+            alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
         }
     });
 }
