@@ -2611,7 +2611,7 @@ AND gc_id IN (
     }
 
     /**
-     * Iterates through each mark in a component and updates/creates
+     * Iterates through each mark in a component and updates/creates/deletes
      *  it in the database as necessary.  Note: the component must
      *  already exist in the database to add new marks
      * @param Component $component
@@ -2620,26 +2620,29 @@ AND gc_id IN (
 
         // sort marks by order
         $marks = $component->getMarks();
-        usort($marks, function(Mark $a, Mark $b) {
+        usort($marks, function (Mark $a, Mark $b) {
             return $a->getOrder() - $b->getOrder();
         });
 
         $order = 0;
         foreach ($marks as $mark) {
             // rectify mark order
-            if($mark->getOrder() !== $order) {
+            if ($mark->getOrder() !== $order) {
                 $mark->setOrder($order);
             }
             ++$order;
 
             // New mark, so add it
-            if($mark->getId() < 1) {
+            if ($mark->getId() < 1) {
                 $this->createMark($mark, $component->getId());
             }
             if ($mark->isModified()) {
                 $this->updateMark($mark);
             }
         }
+
+        // Delete any marks not being updated
+        $this->deleteMarks($component->getDeletedMarks());
     }
 
     /**
@@ -2697,6 +2700,22 @@ AND gc_id IN (
 
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN ($place_holders)", $component_ids);
         $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN ($place_holders)", $component_ids);
+    }
+
+    /**
+     * Creates / updates a component and its marks in the database
+     * @param Component $component
+     */
+    public function saveComponent(Component $component) {
+        // New component, so add it
+        if ($component->getId() < 1) {
+            $this->createComponent($component);
+        } else {
+            $this->updateComponent($component);
+        }
+
+        // Then, update/create/delete its marks
+        $this->updateComponentMarks($component);
     }
 
     /**
@@ -2808,15 +2827,8 @@ AND gc_id IN (
             }
             ++$order;
 
-            // New component, so add it
-            if ($component->getId() < 1) {
-                $this->createComponent($component);
-            } else {
-                $this->updateComponent($component);
-            }
-
-            // Then, update/create its marks
-            $this->updateComponentMarks($component);
+            // Save the component
+            $this->saveComponent($component);
         }
     }
 
