@@ -979,7 +979,7 @@ class Gradeable extends AbstractModel {
      * Gets the total possible non-extra-credit ta points
      * @return float
      */
-    public function getTaNonExtraCreditPoints() {
+    public function getTaPoints() {
         $total = 0.0;
         foreach($this->getComponents() as $component) {
             $total += $component->getMaxValue();

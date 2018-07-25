@@ -249,7 +249,7 @@ class AutoGradingView extends AbstractView {
         }
         //get total score and max possible score
         $graded_score = $gradeable->getGradedTAPoints();
-        $graded_max = $gradeable->getTotalTANonExtraCreditPoints();
+        $graded_max = $gradeable->getTotalTAPoints();
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $has_autograding = false;
