@@ -298,6 +298,24 @@ class Component extends AbstractModel {
     }
 
     /**
+     * Deletes a mark from this component without checking if a submitter has received it yet
+     * @param Mark $mark
+     * @throws \InvalidArgumentException If this component doesn't own the provided mark
+     */
+    public function forceDeleteMark(Mark $mark) {
+        // Calculate our marks array without the provided mark
+        $new_marks = Mark::array_diff($this->marks, [$mark]);
+
+        // If it wasn't removed from our marks, it was either already deleted, or never belonged to us
+        if (count($new_marks) === count($this->marks)) {
+            throw new \InvalidArgumentException('Attempt to delete mark that did not belong to this component');
+        }
+
+        // Finally, set our array to the new one
+        $this->marks = $new_marks;
+    }
+
+    /**
      * Sets the array of marks, only to be called from the database loading methods
      * @param array $marks
      * @internal
