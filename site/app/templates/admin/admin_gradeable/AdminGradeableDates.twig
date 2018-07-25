@@ -35,7 +35,7 @@
     Grades Released Date (grades will be visible to students)
 
     <div class="electronic_file">
-        {% if '{{gradeable.getIsRegradeAllowed()}}' == 'true' %}
+        {% if is_regrade_allowed == true and regrade_enabled == true %}
             <input name="regrade_request_date" id="regrade_due_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
             Regrade Request Due Date (Regrade Requests must be sent by this date)
             <br />

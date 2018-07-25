@@ -274,7 +274,7 @@ class AutoGradingView extends AbstractView {
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
         $allow_regrade=false;
         if($gradeable->getRegradeRequestDate() !=null){
-            if($regrade_enabled==true && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
+            if($regrade_enabled==true && $gradeable->getIsRegradeAllowed() && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
                 $allow_regrade=true;
             }
         }

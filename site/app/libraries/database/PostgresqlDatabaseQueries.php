@@ -244,7 +244,7 @@ SELECT";
   eg.eg_max_team_size,
   eg.eg_team_lock_date,
   eg.eg_regrade_request_date,
-  eg.eg_is_regrade_allowed
+  eg.eg_is_regrade_allowed,
   eg.eg_use_ta_grading,
   eg.eg_student_view,
   eg.eg_student_submit,

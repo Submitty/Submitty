@@ -112,6 +112,8 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
+            'is_regrade_allowed' => $gradeable->getIsRegradeAllowed(),
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 
@@ -207,7 +209,8 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-
+            'is_regrade_allowed' => $gradeable->getIsRegradeAllowed(),
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
