@@ -667,6 +667,16 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets the array of the components, only called from the database
+     * @param Component[] $components
+     * @internal
+     */
+    public function setComponentsFromDatabase(array $components) {
+        $this->setComponents($components);
+        $this->db_components = $this->components;
+    }
+
+    /**
      * Sets the path to the autograding config
      * @param string $path Must not be blank
      */

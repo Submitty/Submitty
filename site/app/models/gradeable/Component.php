@@ -294,9 +294,9 @@ class Component extends AbstractModel {
      * @param array $marks
      * @internal
      */
-    public function setMarksFromDb(array $marks) {
+    public function setMarksFromDatabase(array $marks) {
         $this->setMarks($marks);
-        $this->db_marks = $marks;
+        $this->db_marks = $this->marks;
     }
 
     /**
