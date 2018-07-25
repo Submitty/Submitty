@@ -155,16 +155,25 @@ class Access {
                 return false;
             }
 
+            //TODO: Remove this enormous hack when Kevin does the everything
+            /* @var \app\models\gradeable\Gradeable|null $newGradeable */
+            $newGradeable = null;
+            if ($gradeable instanceof \app\models\gradeable\Gradeable) {
+                /* @var \app\models\gradeable\Gradeable|null $newGradeable */
+                $newGradeable = $gradeable;
+            }
+
             if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
-                if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
+                $minimum = $newGradeable ? $newGradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
+                if (!$this->checkGroupPrivilege($group, $minimum)) {
 
                     if (
                         //Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())
+                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
                        ) {
 
                         //Otherwise, you're not allowed
