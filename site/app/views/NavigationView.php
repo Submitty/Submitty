@@ -122,13 +122,13 @@ class NavigationView extends AbstractView {
         }
         else if (count($any_images_files)!==0 && $this->core->getUser()->accessGrading()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
-                    $top_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                        "title" => "View Student Photos",
-                        "class" => "btn btn-primary"
-                    ]);
-                }
+            if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                $top_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                    "title" => "View Student Photos",
+                    "class" => "btn btn-primary"
+                ]);
+            }
         }
 
         // ======================================================================================
