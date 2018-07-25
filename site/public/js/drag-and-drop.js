@@ -440,7 +440,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                             radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
                         }
                         form.find('input:radio')[radio_idx].checked = true;
-                        form.parent().find(".btn-success").focus();
+                        form.find(".btn-success").focus();
                     }
                     else { // if no previous submissions, no merging will be necessary
                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
