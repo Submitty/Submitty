@@ -120,6 +120,7 @@ class SimpleGraderController extends GradingController  {
             return;
         }
 
+        //If you can see the page, you can grade the page
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
@@ -199,12 +200,6 @@ class SimpleGraderController extends GradingController  {
         $grader = $this->core->getUser();
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
 
-        // FIXME: permission check
-        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
-
         $user = $this->core->getQueries()->getUserById($user_id);
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');
@@ -224,8 +219,13 @@ class SimpleGraderController extends GradingController  {
             return $response;
         }
 
-        // Get user data after permission checks
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+
+        //Make sure they're allowed to do this
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["graded_gradeable" => $graded_gradeable])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do this.");
+        }
+
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         foreach ($gradeable->getComponents() as $component) {
