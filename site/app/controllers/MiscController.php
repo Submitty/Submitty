@@ -241,7 +241,13 @@ class MiscController extends AbstractController {
 
         // delete the file from upload/course_materials
         $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
-        unlink($filename); //deletes the selected file from course_materials folder
+        if ( unlink($filename) )
+        {
+            $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($filename));
+        }
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
