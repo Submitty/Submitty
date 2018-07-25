@@ -106,7 +106,8 @@ class Access {
     }
 
     /**
-     * Check if the currently logged in user is allowed to do an action
+     * Check if the currently logged in user is allowed to do an action, shortcut of
+     * $access->canUser($core->getUser(), ...)
      * @param string $action Name of the action (see Access::$permissions)
      * @param array $args Any extra arguments that are required to check permissions
      * @return bool True if they are allowed to do that action
@@ -157,8 +158,6 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
-            //If we have a graded gradeable, it should have the regular gradeable
-            // in it already
             if (array_key_exists("graded_gradeable", $args)) {
                 $g = $args["graded_gradeable"];
             } else {
@@ -201,7 +200,7 @@ class Access {
 
             if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
-                if (!$this->checkGradingSection($new_graded_gradeable ?? $graded_gradeable)) {
+                if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
                     return false;
                 }
             }
@@ -210,7 +209,7 @@ class Access {
                 //If they're allowed to view their own
                 if (!$this->isGradedGradeableByUser($g, $user) && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE)) {
                     //Check their peer assignment
-                    if (!$this->checkPeerAssignment($new_graded_gradeable ?? $graded_gradeable)) {
+                    if (!$this->isGradedGradeableInPeerAssignment($new_graded_gradeable ?? $graded_gradeable, $user)) {
                         return false;
                     }
                 }
@@ -259,11 +258,12 @@ class Access {
     }
 
     /**
-     * Check if a limited access grader has a user in their section
+     * Check if a Graded Gradeable's submitter is in a user's grading sections
      * @param Gradeable|GradedGradeable $g
+     * @param User $user
      * @return bool If they are
      */
-    public function checkGradingSection($g) {
+    public function isGradedGradeableInGradingSections($g, User $user) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         /* @var Gradeable|null $gradeable */
@@ -281,7 +281,7 @@ class Access {
         // gradeable can be viewed by limited access graders.
         if (($new_gradeable ?? $gradeable)->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
-            $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($this->core->getUser());
+            $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
 
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
@@ -301,11 +301,12 @@ class Access {
     }
 
     /**
-     * Check if a student is allowed to peer grade another
-     * @param mixed $g
+     * Check if a Graded Gradeable is in a user's peer grading assignment
+     * @param mixed $g Graded Gradeable to be peer graded
+     * @param User $user User doing the peer grading
      * @return bool
      */
-    public function checkPeerAssignment($g) {
+    public function isGradedGradeableInPeerAssignment($g, User $user) {
         /* @var Gradeable|null $gradeable */
         /* @var Gradeable|null $graded_gradeable */
         /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
@@ -315,7 +316,7 @@ class Access {
         if (!($new_gradeable ? $new_gradeable->isPeerGrading() : $gradeable->getPeerGrading())) {
             return false;
         } else {
-            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($graded_gradeable ?? $gradeable)->getId(), $this->core->getUser()->getId());
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($graded_gradeable ?? $gradeable)->getId(), $user->getId());
             return in_array(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser()->getId(), $user_ids_to_grade);
         }
     }
@@ -338,7 +339,7 @@ class Access {
      * @param User $user User to check
      * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
      */
-    private function isGradedGradeableByUser($g, User $user) {
+    public function isGradedGradeableByUser($g, User $user) {
         /* @var Gradeable|null $graded_gradeable */
         /* @var GradedGradeable|null $new_graded_gradeable */
         list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($g);
@@ -359,15 +360,17 @@ class Access {
 
     /**
      * TODO: Remove this enormous hack when Kevin does the everything
-     * Get all the permutations of [Graded]Gradeables from an unknown type gradeable-like object
+     * Get all the permutations of [Graded]Gradeables from an unknown type gradeable-like object.
+     *
      * Here are the classes that are currently supported:
      * \app\models\Gradeable
      * \app\models\gradeable\Gradeable
      * \app\models\gradeable\GradedGradeable
      * \app\models\gradeable\TaGradedGradeable
      * \app\models\gradeable\AutoGradedGradeable
+     *
      * @param mixed|null $g
-     * @return array
+     * @return array [Gradeable|null, Gradeable|null, \app\models\gradeable\Gradeable|null, GradedGradeable|null]
      */
     private function resolveNewGradeable($g) {
         $gradeable = null;
