@@ -260,7 +260,7 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
     })
 }
 
-function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
+function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
     $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
@@ -269,7 +269,6 @@ function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, 
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id,
             'gradeable_component_id' : gradeable_component_id,
-            'num_mark' : num_mark,
             'active_version' : active_version,
             'custom_points' : custom_points,
             'custom_message' : custom_message,
@@ -1072,7 +1071,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     gradedByElement.hide();
     savingElement.show();
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(response) {
+    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(response) {
         if (response.status !== 'success') {
             alert('Error saving marks! (' + response.message + ')');
             return;

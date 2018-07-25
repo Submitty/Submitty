@@ -4,6 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\DiffViewer;
+use app\models\gradeable\Mark;
 use app\models\Team;
 use app\models\User;
 use \app\libraries\GradeableType;
@@ -1015,105 +1016,75 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
     }
 
+    /**
+     * TODO: split this into two methods: one which ONLY changes the marks assigned
+     * TODO:    and one that changes the title/point values of marks
+     */
     public function saveSingleComponent() {
-        $grader_id = $this->core->getUser()->getId();
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $overwrite = $_POST['overwrite'];
+
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+        $overwrite = $_POST['overwrite'] ?? '';
+        $component_id = $_POST['gradeable_component_id'] ?? '';
+        $custom_message = $_POST['custom_message'];
+        $custom_points = $_POST['custom_points'];
+
+        // Optional Parameters
+        $num_existing_marks = $_POST['num_existing_marks'] ?? PHP_INT_MAX;
+        $marks = $_POST['marks'] ?? [];
+
+
         $version_updated = "false"; //if the version is updated
 
-        //find the component
-        $component = null;
-        foreach ($gradeable->getComponents() as $question) {
-            if (is_array($question)) {
-                if ($question[0]->getId() == $_POST['gradeable_component_id']) {
-                    continue;
-                }
-                $found = false;
-                foreach ($question as $peer) {
-                    if ($peer->getGrader() === null) {
-                        $component = $peer;
-                        $found = true;
-                        break;
-                    }
-                    if ($peer->getGrader()->getId() == $grader_id) {
-                        $component = $peer;
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    $component = $this->core->getQueries()->getGradeableComponents($gradeable->getId())[$question[0]->getId()];
-                    $marks = $this->core->getQueries()->getGradeableComponentsMarks($question->getId());
-                    $component->setMarks($marks); //I think this does nothing
-                }
-                break;
-            } else if ($question->getId() == $_POST['gradeable_component_id']) {
-                $component = $question;
-                break;
-            }
+        $grader_id = $this->core->getUser()->getId();
+
+        $submitter_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            return;
         }
 
-        //checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $gradeable, "component" => $component])) {
+        // get the component
+        $component = $gradeable->getComponents()[$component_id] ?? null;
+        if ($component === null) {
+            $this->core->getOutput()->renderJsonFail('Invalid component id for this gradeable');
+            return;
+        }
+
+        // Get the gradeable for the submitter
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.save_one_component", ["gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
 
-        //checks if a component has changed, i.e. a mark has been selected or unselected since last time
-        //also checks if all the marks are false
-        $index = 0;
-        $temp_mark_selected = false;
-        $all_false = true;
-        $debug = "";
-        $mark_modified = false;
-        foreach ($component->getMarks() as $mark) {
-            if (isset($_POST['num_existing_marks'])) {
-                if ($index >= $_POST['num_existing_marks']) {
-                    break;
-                }
-            }
-            $temp_mark_selected = ($_POST['marks'][$index]['selected'] == 'true') ? true : false;
-            if($all_false === true && $temp_mark_selected === true) {
-                $all_false = false;
-            }
-            if($temp_mark_selected !== $mark->getHasMark()) {
-                $mark_modified = true;
-            }
-            $index++;
-        }
-        for ($i = $index; $i < $_POST['num_mark']; $i++) {
-            if ($_POST['marks'][$i]['selected'] == 'true') {
-                $all_false = false;
-                $mark_modified = true;
-                break;
-            }
-        }
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
-        if($all_false === true) {
-            if($_POST['custom_message'] != "" || floatval($_POST['custom_points']) != 0) {
-                $all_false = false;
-            }
-        }
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $this->core->getUser(), true);
 
-        if($mark_modified === false) {
-            if (array_key_exists('custom_message', $_POST) && $component->getComment() != $_POST['custom_message']) {
-                $mark_modified = true;
-            }
-            if (array_key_exists('custom_points', $_POST) && $component->getScore() != $_POST['custom_points']) {
-                $mark_modified = true;
-            }
-        }
-        //if no gradeable id exists adds one to the gradeable data
-        if($gradeable->getGdId() == null) {
-            $gradeable->saveGradeableData();
-        }
-        if($all_false === true) {
+
+
+
+        // TODO: ENDED HERE, NEED TO FIGURE OUT UPDATE GRADED COMPONENT, THE CONDITIONS TO DELETE GRADED COMOPNEONT AND LINES 1083 TO 1097
+
+
+
+
+
+
+
+
+
+        if ($all_false === true) {
             $component->deleteData($gradeable->getGdId());
             $debug = 'delete';
         } else {
-            //only change the component information is the mark was modified or componet and its gradeable are out of sync.
+            //only change the component information if the mark was modified or component and its gradeable are out of sync.
             if ($component->getGrader() === null || $overwrite === "true") {
                 $component->setGrader($this->core->getUser());
             }
@@ -1125,41 +1096,56 @@ class ElectronicGraderController extends GradingController {
             $debug = $component->saveGradeableComponentData($gradeable->getGdId());
         }
 
-        $index = 0;
         //delete marks that have been deleted
         // save existing marks
-        if (array_key_exists('marks', $_POST)) {
-            foreach ($_POST['marks'] as $post_mark) {
-                if (isset($_POST['num_existing_marks'])) {
-                    if ($index >= $_POST['num_existing_marks']) {
-                        break;
-                    }
-                }
-                $mark = null;
-                foreach ($component->getMarks() as $cmark) {
-                    if ($cmark->getId() == $post_mark['id']) {
-                        $mark = $cmark;
-                        break;
-                    }
-                }
-                if ($mark != null) {
-                    $mark->setId($post_mark['id']);
-                    $mark->setPoints($post_mark['points']);
-                    $mark->setNote($post_mark['note']);
-                    $mark->setOrder($post_mark['order']);
-                    $mark->setHasMark($post_mark['selected'] == 'true');
-                    $mark->save();
-                    if ($all_false === false) {
-                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
-                    }
-                    $index++;
-                }
+
+        $earned_mark_ids = [];
+        $all_marks = [];
+        foreach ($marks as $index => $post_mark) {
+            try {
+                $mark = $component->getMark($post_mark['id']);
+            } catch (\InvalidArgumentException $e) {
+                // This mean the mark didn't exist in the database, so the request is invalid
+            }
+
+            $all_mark_ids[] = $mark;
+            if ($post_mark['selected'] == 'true') {
+                $earned_mark_ids[] = $mark->getId();
+            }
+
+            // TODO: When the gradeable model checks against its current value before
+            // TODO:  assigning, remove these checks
+            if ($mark->getPoints() !== $post_mark['points']) {
+                $mark->setPoints($post_mark['points']);
+            }
+            if ($mark->getTitle() !== $post_mark['note']) {
+                $mark->setTitle($post_mark['note']);
+            }
+            if ($mark->getOrder() !== $post_mark['order']) {
+                $mark->setOrder($post_mark['order']);
             }
         }
 
-        $gradeable->resetUserViewedDate();
+        // Set marks to new mark list (if any deleted)
+        $component->setMarks($all_marks);
+
+        // Set the marks the submitter received
+        $graded_component->setMarkIds($earned_mark_ids);
+
+        // Reset the user viewed date since we updated the grade
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Check if any mark was changed
+        $any_mark_modified = in_array(true, array_map(function (Mark $mark) {
+            return $mark->isModified();
+        }, $component->getMarks()));
+
+        // Finally, save the changes to the database
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $this->core->getQueries()->saveComponent($component);
+
         $this->core->getOutput()->renderJsonSuccess([
-            'modified' => $mark_modified,
+            'modified' => $any_mark_modified,
             'all_false' => $all_false,
             'database' => $debug,
             'overwrite' => $overwrite,
