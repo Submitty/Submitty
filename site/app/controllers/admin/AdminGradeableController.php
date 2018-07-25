@@ -217,7 +217,6 @@ class AdminGradeableController extends AbstractController {
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
-            'is_regrade_allowed' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
@@ -855,7 +854,8 @@ class AdminGradeableController extends AbstractController {
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
+                'is_regrade_allowed' => true
             ]);
         } else {
             // Values for these electronic-only properties
@@ -867,7 +867,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
             ]);
         }
 

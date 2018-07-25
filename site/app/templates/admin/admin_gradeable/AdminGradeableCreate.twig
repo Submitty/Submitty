@@ -70,7 +70,13 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
     <br /><br />
-
+    Will regrade requests be enabled for this assignment?
+    <br />
+    <input type="radio" id="yes_is_regrade_allowed" name="is_regrade_allowed" value="true" class="bool_val auto_save"
+            {{ action != 'new' and gradeable.getIsRegradeAllowed() ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_is_regrade_allowed" name="is_regrade_allowed" value="false" class="bool_val auto_save"
+            {{ not (action != 'new' and gradeable.getIsRegradeAllowed()) ? 'checked' : '' }} /> No
+    <br /><br />
     {% if action == 'new' or action == 'template' %}
         Is this a team assignment?
     {% else %}

@@ -69,6 +69,8 @@ use app\models\User;
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
  * @method bool getJustRegraded()
+ * @method bool getIsRegradeAllowed()
+ * @method void setIsRegradeAllowed()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -175,6 +177,8 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
     /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
     protected $just_regraded = false;
+    /** @property @var boolean are regrade requests enabled for this assignment*/
+    protected $is_regrade_allowed = true;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -209,6 +213,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
+            $this->setIsRegradeAllowed($details['is_regrade_allowed']);
         }
 
         // Set dates last
