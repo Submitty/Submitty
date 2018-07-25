@@ -330,7 +330,7 @@ HTML;
 					</div>
 					<script type="text/javascript">
 						$(function(){
-							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
+							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
 						});
 					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
@@ -466,7 +466,6 @@ HTML;
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                "merge_thread_list" => $merge_thread_list,
                 "current_thread_date" => $current_thread_date,
                 "current_thread" => $currentThread
             ]);
