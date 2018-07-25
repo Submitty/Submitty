@@ -588,7 +588,7 @@ class ForumController extends AbstractController {
         }
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $pageNumber);
-        $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
+        $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
         $current_thread_title = "";
