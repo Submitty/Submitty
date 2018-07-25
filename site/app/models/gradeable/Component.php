@@ -86,8 +86,8 @@ class Component extends AbstractModel {
      */
     public static function array_diff(array $components1, array $components2) {
         return array_udiff($components1, $components2,
-            function (Component &$component1, Component &$component2) {
-                return $component1 === $component2 ? 0 : -1;
+            function (Component $component1, Component $component2) {
+                return strcmp(spl_object_hash($component1), spl_object_hash($component2));
             });
     }
 

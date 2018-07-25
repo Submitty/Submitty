@@ -44,8 +44,8 @@ class Mark extends AbstractModel {
      */
     public static function array_diff(array $marks1, array $marks2) {
         return array_udiff($marks1, $marks2,
-            function (Mark &$mark1, Mark &$mark2) {
-                return $mark1 === $mark2 ? 0 : -1;
+            function (Mark $mark1, Mark $mark2) {
+                return strcmp(spl_object_hash($mark1), spl_object_hash($mark2));
             });
     }
 
