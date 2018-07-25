@@ -1078,12 +1078,11 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
         }
 
         data = response.data;
-        if (all_false === true) {
-            //We've reset
+        if (data.component_reset === true) {
             gradedByElement.text("Ungraded!");
             component.grader = null;
         } else {
-            if (component.grader === null || (data.modified && (ungraded || overwrite === "true"))) {
+            if (component.grader === null || (data.any_mark_modified && (ungraded || overwrite === "true"))) {
                 if (component.grader === null) {
                     component.grader = {
                         id: ""
@@ -1098,7 +1097,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
         gradedByElement.show();
         savingElement.hide();
 
-        if(data['version_updated'] === "true") {
+        if(data.version_updated) {
             if ($('#wrong_version_' + c_index).length)
                 $('#wrong_version_' + c_index)[0].innerHTML = "";
         }
