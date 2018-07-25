@@ -168,10 +168,16 @@ function editUserForm(user_id) {
                 });
             }
             if(registration_section === 'null' && json['user_group'] === 4) {
-                $('#student-error-message').css('display', 'block');
+                $('#user-form-student-error-message').css('display', 'block');
             }
             else {
-                $('#student-error-message').css('display', 'none');
+                $('#user-form-student-error-message').css('display', 'none');
+            }
+            if(json['user_group'] == 4) {
+                $('#user-form-assigned-sections').css('display', 'none');
+            }
+            else {
+                $('#user-form-assigned-sections').css('display', 'block');
             }
 
         },
@@ -196,7 +202,8 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#student-error-message').css('display', 'block');
+    $('#user-form-student-error-message').css('display', 'block');
+    $('#user-form-assigned-sections').css('display', 'none');
 }
 
 function extensionPopup(json){
@@ -282,10 +289,27 @@ function passwordChange() {
 }
 
 function newUploadCourseMaterialsForm() {
+
+    createArray(1);
+
+    var fileList = document.getElementsByClassName("file-viewer-data");
+
+    var files = [];
+    for(var i=0;i<fileList.length;i++){
+        var file = fileList[i];
+        files.push(file.getAttribute('data-file_url'));
+        readPrevious(file.getAttribute('data-file_url'), 1);
+    }
+
     $('.popup-form').css('display', 'none');
     var form = $("#upload-course-materials-form");
+
+    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
+
 }
 
 function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
@@ -458,13 +482,13 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
     $('[name="code_box_2"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
@@ -484,7 +508,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                 $('[name="code_box_2"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
-                        $(this).css('background-color',"#FF0000");       
+                        $(this).css('background-color',"#FF0000");
                     }
                 });
                 $('[name="code_box_1"]').find('span').each(function(){
@@ -492,21 +516,21 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
-                }); 
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
+                });
                 $('[name="code_box_1"]').scrollTop(0);
                 var scroll_position=0;
                 $('[name="code_box_1"]').find('span').each(function(){
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_1"]').scrollTop(scroll_position);
             }
-              
+
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
@@ -515,13 +539,13 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
                 var x = event.pageX;
-                var y = event.pageY; 
+                var y = event.pageY;
                 $('#popup_to_show_matches_id').css('display', 'block');
                 var width = $('#popup_to_show_matches_id').width();
                 $('#popup_to_show_matches_id').css('top', y+5);
                 $('#popup_to_show_matches_id').css('left', x-width/2.00);
-                
-            } 
+
+            }
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
@@ -532,9 +556,9 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
                 });
                 $.each(data, function(i,match){
                     if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
@@ -543,12 +567,12 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                                 var attr = $(this).attr('name');
                                 if (typeof attr !== typeof undefined && attr !== false) {
                                     if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
-                                        $(this).css('background-color',"#FF0000");    
-                                    }      
+                                        $(this).css('background-color',"#FF0000");
+                                    }
                                 }
                             });
                         });
-                    }                    
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(0);
                 var scroll_position=0;
@@ -556,11 +580,11 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(scroll_position);
                 jQuery.ajaxSetup({async:true});
-            }   
+            }
         },
         error: function(e) {
             alert("Could not load submitted code, please refresh the page and try again.");
@@ -1049,6 +1073,21 @@ function openDiv(id) {
         elem.show();
         elem.addClass('open');
         $('#' + id + '-span').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return false;
+}
+
+function openDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
     }
     return false;
 }
@@ -2081,7 +2120,7 @@ function toggleRegradeRequests(){
     else {
         element.style.display = 'block';
     }
-    
+
 }
 function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
     var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
@@ -2114,6 +2153,10 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function changePermission(filename, checked) {
+    // send to server to handle file permission change
+    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+}
 
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport

@@ -883,6 +883,7 @@ function handleUploadCourseMaterials(csrf_token, requested_path) {
     formData.append('csrf_token', csrf_token);
     formData.append('requested_path', requested_path);
 
+	var filesToBeAdded = false;
     // Files selected
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -901,9 +902,31 @@ function handleUploadCourseMaterials(csrf_token, requested_path) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+
+            var requested_path_without_slash = requested_path;
+
+            if (requested_path_without_slash[requested_path_without_slash.length-1] == '/')
+                requested_path_without_slash = requested_path_without_slash.slice(0, -1); // remove slash
+
+            var file = new File([""], requested_path_without_slash + "/" + file_array[i][j].name);
+            var k = fileExists(file, 1);
+            // Check conflict here
+            if ( k[0] == 1 )
+            {
+                if(!confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                    continue;
+                }
+            }
+
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            filesToBeAdded = true;
         }
     }
+
+    if (filesToBeAdded == false){
+        return;
+    }
+
 
     $.ajax({
         url: submit_url,

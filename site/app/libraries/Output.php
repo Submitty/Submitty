@@ -123,6 +123,63 @@ class Output {
         $this->useFooter(false);
         $this->useHeader(false);
     }
+
+    /**
+     * Renders a json response for the "success" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param mixed|null $data Response data
+     */
+    public function renderJsonSuccess($data = null) {
+        $this->renderJson([
+            'status' => 'success',
+            'data' => $data
+        ]);
+    }
+
+    /**
+     * Renders a json response for the "fail" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param string $message A non-blank failure message
+     * @param mixed|null $data Response data
+     * @param array $extra Extra data merged into the response array
+     */
+    public function renderJsonFail($message, $data = null, $extra = []) {
+        $response = [
+            'status' => 'fail',
+            'message' => $message,
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+
+        // Merge $response second so it overwrites conflicting keys in $extra
+        $response = array_merge($extra, $response);
+        $this->renderJson($response);
+    }
+
+    /**
+     * Renders a json response for the "error" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param string $message A non-blank error message
+     * @param mixed|null $data Response data
+     * @param int $code Code to identify error case
+     */
+    public function renderJsonError($message, $data = null, $code = null) {
+        $response = [
+            'status' => 'error',
+            'message' => $message,
+            'data' => $data
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+        if ($code !== null) {
+            $response['code'] = $code;
+        }
+        $this->renderJson($response);
+    }
     
     public function renderString($string) {
         $this->output_buffer .= $string;
