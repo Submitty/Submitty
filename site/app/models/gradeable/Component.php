@@ -127,7 +127,10 @@ class Component extends AbstractModel {
      * @return Mark[]
      */
     public function getDeletedMarks() {
-        return array_diff($this->db_marks, $this->marks);
+        return array_udiff($this->db_marks, $this->marks,
+            function (Mark &$mark1, Mark &$mark2) {
+                return $mark1 === $mark2;
+            });
     }
 
     /**
@@ -247,20 +250,24 @@ class Component extends AbstractModel {
      * @param Mark[] $marks Must be an array of only Marks
      */
     public function setMarks(array $marks) {
+        $marks = array_values($marks);
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
-        $deleted_marks = array_diff($this->marks, $marks);
+        $deleted_marks = array_udiff($this->marks, $marks,
+            function (Mark &$mark1, Mark &$mark2) {
+                return $mark1 === $mark2;
+            });
         if (in_array(true, array_map(function (Mark $mark) {
                 return $mark->anyReceivers();
             }, $deleted_marks))) {
             throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
         }
 
-        $this->marks = array_values($marks);
+        $this->marks = $marks;
 
         // sort by order
         usort($this->marks, function (Mark $a, Mark $b) {
