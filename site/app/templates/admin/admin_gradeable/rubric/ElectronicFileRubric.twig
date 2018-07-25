@@ -40,6 +40,15 @@ Is this a PDF with a page assigned to each component?
                 {{ is_pdf_page_student ? 'checked' : '' }} /> Student
     </div>
 </fieldset>
+Are regrade requests allowed for this assignment
+<fieldset>
+    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true"
+            {{ is_regrade_allowed ? 'checked' : '' }} /> Yes
+    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false"
+            {{ not is_regrade_allowed ? 'checked' : '' }} /> No
+
+    <br />
+</fieldset>
 <table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
     <thead style="background: #E1E1E1;">
     <tr>
@@ -157,6 +166,7 @@ Is this a PDF with a page assigned to each component?
     $(document).ready(function() {
 
         let pdf_page = $('#yes_pdf_page').is(':checked');
+        let regrade_allowed = $('#regrade_allowed').is('checked');
         let pdf_page_student = $('#yes_pdf_page_student').is(':checked');
         disableElementChildren('.pdf_page_input', !pdf_page || pdf_page_student);
         disableElementChildren('#pdf_page', !pdf_page);

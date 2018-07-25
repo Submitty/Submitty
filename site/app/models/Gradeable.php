@@ -87,6 +87,7 @@ use app\libraries\Utils;
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
+ * @method \DateTime getRegradeRequestDate()
  * @method int getJustRegraded()
  */
 class Gradeable extends AbstractModel {
@@ -138,6 +139,9 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
+
+    /** @property @var \DateTime|null Date by when regrade requests can be submitted */
+    protected $regrade_request_date = null;
 
     /** @property @var bool */
     protected $ta_grades_released = false;
@@ -362,6 +366,7 @@ class Gradeable extends AbstractModel {
             //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_request_date = new \DateTime($details['eg_regrade_request_date'], $timezone);
             $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());

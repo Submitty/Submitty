@@ -217,6 +217,7 @@ class AdminGradeableController extends AbstractController {
             'default_late_days' => $default_late_days,
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
+            'is_regrade_allowed' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),

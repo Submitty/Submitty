@@ -5,6 +5,8 @@ namespace app\views;
 use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
+use app\libraries\DateUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -271,8 +273,10 @@ class AutoGradingView extends AbstractView {
 
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
         $allow_regrade=false;
-        if($regrade_enabled==true && $gradeable->getRegradeRequestDate()!=null && Utils::compareNullableGt($gradeable->getRegradeRequestDate(), getdate(time()))){
-            $allow_regrade=true;
+        if($gradeable->getRegradeRequestDate() !=null){
+            if($regrade_enabled==true && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
+                $allow_regrade=true;
+            }
         }
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
