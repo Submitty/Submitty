@@ -1560,11 +1560,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
-     * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     * @return \Iterator Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
     public function getGradeableConfigs($ids, $sort_keys = ['id']) {
+        if($ids === []) {
+            return new \EmptyIterator();
+        }
         if($ids === null) {
             $ids = [];
         }
