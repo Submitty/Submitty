@@ -79,7 +79,7 @@ class Component extends AbstractModel {
 
     /**
      * Calls array_udiff on the provided component arrays with
-     *  a instance-level comparison
+     *  a reference comparison
      * @param Component[] $components1
      * @param Component[] $components2
      * @return Component[]

@@ -37,7 +37,7 @@ class Mark extends AbstractModel {
 
     /**
      * Calls array_udiff on the provided mark arrays with
-     *  a instance-level comparison
+     *  a reference comparison
      * @param Mark[] $marks1
      * @param Mark[] $marks2
      * @return Mark[]
