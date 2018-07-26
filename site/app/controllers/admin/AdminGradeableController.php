@@ -112,7 +112,6 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
-            'is_regrade_allowed' => $gradeable->getIsRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
@@ -851,14 +850,13 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
-
+                'is_regrade_allowed' => $details['is_regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'is_regrade_allowed' => $details['is_regrade_allowed'] === 'false'
             ]);
         } else {
             // Values for these electronic-only properties

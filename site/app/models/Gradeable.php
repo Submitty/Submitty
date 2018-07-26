@@ -145,7 +145,7 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
 
     /** @property @var bool */
-    protected $is_regrade_allowed = false;
+    protected $is_regrade_allowed = true;
 
     /** @property @var bool */
     protected $ta_grades_released = false;
