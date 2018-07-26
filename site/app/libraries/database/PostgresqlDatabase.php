@@ -90,10 +90,16 @@ class PostgresqlDatabase extends AbstractDatabase {
                     $in_string = true;
                     $quot = $ch;
                 }
-                else if ($in_string && $ch == $quot && $text[$i-1] == "\\") {
-                    $element = substr($element, 0, -1).$ch;
+                else if ($in_string && $ch == "\\" && strlen($text) > $i) {
+                    //Insert literal next char
+                    $element .= $text[$i+1];
+                    $i ++;
                 }
-                else if ($in_string && $ch == $quot && $text[$i-1] != "\\") {
+                else if (!$in_string && $ch == "\\") {
+                    //Insert literal \
+                    $element .= $text[$i];
+                }
+                else if ($in_string && $ch == $quot) {
                     $in_string = false;
                     $have_string = true;
                 }

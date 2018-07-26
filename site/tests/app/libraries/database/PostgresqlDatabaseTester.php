@@ -125,6 +125,16 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(array(null, null, null), $database->fromDatabaseToPHPArray('{null, NULL, NuLl}'));
     }
 
+    public function testEscaping() {
+        $database = new PostgresqlDatabase();
+        $this->assertEquals(["\\"], $database->fromDatabaseToPHPArray('{\\}'));
+        $this->assertEquals(["\\"], $database->fromDatabaseToPHPArray('{"\\\\"}'));
+        $this->assertEquals(["a,b,c\\"], $database->fromDatabaseToPHPArray('{"a,b,c\\\\"}'));
+        $this->assertEquals(["a,b,c'"], $database->fromDatabaseToPHPArray('{"a,b,c\\\'"}'));
+        $this->assertEquals(["a,b,c\""], $database->fromDatabaseToPHPArray('{"a,b,c\\""}'));
+        $this->assertEquals([["a"],["b"],["c\""]], $database->fromDatabaseToPHPArray('{{a},{b},{"c\\""}}'));
+    }
+
     public function booleanConverts() {
         return array(
             array(true, 'true'),
