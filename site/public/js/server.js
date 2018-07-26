@@ -1545,7 +1545,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                var x = JSON.parse(r).html;
                x = `${x}`;
                var jElement = $(".thread_list");
-               jElement.html(x);
+               jElement.children(":not(.fa-spinner)").remove();
+               jElement.prepend(x);
                jElement.attr("next_page", '2');
                jElement.data("dynamic_lock_load", false);
                jElement.data("dynamic_lock_full", false);
