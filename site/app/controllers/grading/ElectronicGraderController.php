@@ -77,6 +77,90 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
+     * Gets a gradeable config from its id and renders a jsend response upon failure
+     * @param string $gradeable_id
+     * @return \app\models\gradeable\Gradeable|bool false if failed
+     */
+    private function tryGetGradeable(string $gradeable_id) {
+        if ($gradeable_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
+            return false;
+        }
+
+        // Get the gradeable
+        try {
+            return $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
+        }
+        return false;
+    }
+
+    private function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
+        if ($component_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
+            return false;
+        }
+        if (!ctype_digit($component_id)) {
+            $this->core->getOutput()->renderJsonFail('Invalid component_id parameter');
+            return false;
+        }
+
+        try {
+            return $gradeable->getComponent($component_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
+            return false;
+        }
+    }
+
+    /**
+     * Gets a user id from an anon id and renders a jsend response upon failure
+     * @param string $anon_id
+     * @return string|bool
+     */
+    private function tryGetUserIdFromAnonId(string $anon_id) {
+        if ($anon_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
+            return false;
+        }
+
+        try {
+            $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id] ?? null;
+            if ($user_id === null) {
+                $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
+                return false;
+            }
+            return $user_id;
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
+        }
+        return false;
+    }
+
+    /**
+     * Gets a graded gradeable for a given gradeable and submitter id and renders a jsend response upon failure
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string $submitter_id
+     * @return \app\models\gradeable\GradedGradeable|bool
+     */
+    private function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
+        try {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
+            if ($graded_gradeable === null) {
+                $this->core->getOutput()->renderJsonFail('User not on a team!');
+                return false;
+            }
+            return $graded_gradeable;
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
+        }
+        return false;
+    }
+
+    /**
      * Method for getting whitespace information for the diff viewer
      */
     public function ajaxRemoveEmpty() {
@@ -1044,22 +1128,6 @@ class ElectronicGraderController extends GradingController {
         $component_version = $_POST['active_version'] ?? null;
 
         // Validate required parameters
-        if ($gradeable_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
-            return;
-        }
-        if ($anon_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
-            return;
-        }
-        if ($component_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
-            return;
-        }
-        if (!ctype_digit($component_id)) {
-            $this->core->getOutput()->renderJsonFail('Invalid component_id parameter');
-            return;
-        }
         if ($custom_message === null) {
             $this->core->getOutput()->renderJsonFail('Missing custom_message parameter');
             return;
@@ -1082,7 +1150,6 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Parse the strings into ints/floats
-        $component_id = intval($component_id);
         $component_version = intval($component_version);
         $custom_points = floatval($custom_points);
 
@@ -1093,29 +1160,26 @@ class ElectronicGraderController extends GradingController {
         $grader = $this->core->getUser();
 
         // Get the gradeable
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
-            return;
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
         // get the component
-        try {
-            $component = $gradeable->getComponent($component_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
             return;
         }
 
-        // Get the gradeable for the submitter
-        $submitter_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-        if ($graded_gradeable === null) {
-            $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
             return;
         }
 
@@ -1402,50 +1466,6 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
         $comment = $_POST['gradeable_comment'] ?? '';
-
-        // Validate required parameters
-        if ($gradeable_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
-            return;
-        }
-        if ($anon_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
-            return;
-        }
-
-        // Get the user id
-        try {
-            $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id] ?? null;
-            if ($user_id === null) {
-                $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
-            }
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
-            return;
-        }
-
-        // Get the gradeable
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
-            return;
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
-            return;
-        }
-
-        // Get the graded gradeable
-        try {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id);
-            if ($graded_gradeable === null) {
-                $this->core->getOutput()->renderJsonFail('User not on a team!');
-                return;
-            }
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
-            return;
-        }
 
         // Check access
         if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $graded_gradeable])) {
