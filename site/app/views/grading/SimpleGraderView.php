@@ -34,7 +34,7 @@ class SimpleGraderView extends AbstractView {
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
         }
 
-        $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
+        $show_all_sections_button = $this->core->getUser()->accessFullGrading();
 
         $components_numeric = [];
         $components_text = [];

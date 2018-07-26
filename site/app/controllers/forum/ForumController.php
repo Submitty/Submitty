@@ -712,7 +712,7 @@ class ForumController extends AbstractController {
             }
             // Fetch additional information
             foreach ($output as &$_post) {
-                $_post['user_info'] = $this->core->getQueries()->getDisplayUserNameFromUserId($_post['user']);
+                $_post['user_info'] = $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
                 $_post['is_staff_post'] = $this->core->getQueries()->isStaffPost($_post['user']);
             }
         } else {
