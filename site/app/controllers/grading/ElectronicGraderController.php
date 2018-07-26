@@ -352,10 +352,11 @@ class ElectronicGraderController extends GradingController {
                                     }
                                 }
                                 $sections[$key]["valid_graders"] = $valid_graders;
-                           }
-                       }
-                   }
-              }
+                            }
+                        }
+                    }
+                }
+            }
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
