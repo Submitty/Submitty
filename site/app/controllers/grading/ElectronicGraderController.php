@@ -1409,7 +1409,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get the requested testcase
-        $testcase = $this->tryGetTestcase($version, $index);
+        $testcase = $this->tryGetTestcase($version_instance, $index);
         if ($testcase === false) {
             return;
         }
