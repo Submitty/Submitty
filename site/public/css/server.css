@@ -298,7 +298,7 @@ table tr.table-header {
     width: 100%;
     box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
-
+    overflow: hidden;
 }
 
 #header-text {
@@ -308,7 +308,7 @@ table tr.table-header {
 
     /*margin-top: 5px;*/
     margin-left: 20px;
-    width: 100%
+    width: 100%;
 }
 
 #header a,
@@ -333,7 +333,6 @@ table tr.table-header {
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
-
 }
 
 .content {
@@ -877,6 +876,10 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.td-open {
+    width: 10%;
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
@@ -995,6 +998,11 @@ table .instructor .two-options{
 
 .popup-form .form-button-container {
     text-align: right;
+}
+
+.popup-form .form-button-container .btn {
+    box-sizing: unset;
+    min-width: 4em;
 }
 
 .popup-form.decent div {
@@ -1159,6 +1167,42 @@ end of styles used in the admin gradeable page
     text-align: center;
 }
 
+/* styles for the colors for the electronic grader details page */
+/* color for no grader */
+.grader-NULL {
+    color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+/* color for student/peer grading */
+.grader-4 {
+    color: #cc66ff; /* purple */
+}
+
+/* color for a limited access grader */
+.grader-3 {
+    color: #ffcc33;  /* yellow */
+}
+
+/* color for an instructor or full access grader */
+.grader-2,
+.grader-1 {
+    color: #33cc33;  /* green */
+}
+
+/* color for double graded */
+.grader-double {
+    color: #006699;  /* dark blue */
+}
+
+/* prevents line break in the graded questions column */
+.td-graded-questions {
+    white-space: nowrap;
+}
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }

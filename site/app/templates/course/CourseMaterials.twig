@@ -1,3 +1,6 @@
+{% import _self as self %}
+<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
+
 <div class="content">
     {% if hasInstructorPermission %}
         <div style="float: right; margin-bottom: 20px;">
@@ -5,18 +8,73 @@
         </div>
     {% endif %}
     <h2>View Course Materials</h2>
-    {% for courseMaterial in courseMaterialsArray %}
-        <div class="name">{{courseMaterial}}
-        {% if '.zip' not in courseMaterial and '.docx' not in courseMaterial and '.xlsx' not in courseMaterial %}
-            <a onclick='openFileCourseMaterial("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-        {% endif %}
-        <a onclick='downloadFileWithAnyRole("{{ courseMaterial }}", "{{ folderPath~'/'~courseMaterial }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-        {% if hasInstructorPermission %}
-            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': courseMaterial, 'path': folderPath~'/'~courseMaterial }) }}", "{{ courseMaterial }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-        {% endif %}
-        </div>
-    {% endfor %}
+    <div class="inner-container" id="file-container">
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", hasInstructorPermission) }}
+    </div>
 </div>
+
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, hasInstructorPermission) %}
+    {# Files on top #}
+
+    {% for dir, path in files if path is not iterable %}
+        {% if hasInstructorPermission or fileShares[path] == "1" %}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {% endif %}
+    {% endfor %}
+
+    {# Directories underneath #}
+    {% for dir, path in files if path is iterable %}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission) }}
+    {% endfor %}
+{% endmacro %}
+
+
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, hasInstructorPermission) %}
+    <div>
+        <div class="file-viewer">
+            <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
+            {{ dir }}&nbsp;
+            {% set dirExtension = dir|split('.')[1] %}
+            {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
+                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+            {% endif %}
+            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            {% if hasInstructorPermission %}
+	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <input id="share_checkbox_{{ id }}" type="checkbox"
+                {% if ( (fileShares[path] == "1") )%}
+                   checked="true"
+                {% endif %}
+                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
+            {% endif %}
+        </div>
+        <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
+    </div>
+{% endmacro %}
+
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, hasInstructorPermission) %}
+    {% if indent == 0 %}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
+    {% else %}
+    <div>
+        <div class="div-viewer">
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
+                <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
+                {{ dir }}
+            </a>
+        </div>
+        <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
+
+            {# Recurse #}
+
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
+
+        </div>
+    </div>
+    {% endif %}
+{% endmacro %}
+
+
 <script type="text/javascript">
     function openFileCourseMaterial(html_file, url_file) {
         var directory = "";
@@ -25,6 +83,17 @@
         }
         window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
+    }
+
+    function shareToOther(id, path) {
+        // pass filename to server to record the permission of the file
+        var idName = "#share_checkbox_" + id;
+        if($(idName).is(':checked')) {
+            changePermission(path, '1');
+        }
+        else {
+            changePermission(path, '0');
+        }
     }
 </script>
 
