@@ -1399,19 +1399,73 @@ class ElectronicGraderController extends GradingController {
         return;
     }
     public function saveGeneralComment() {
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+        $comment = $_POST['gradeable_comment'] ?? '';
 
-        if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $gradeable])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
+        // Validate required parameters
+        if ($gradeable_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
+            return;
+        }
+        if ($anon_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
             return;
         }
 
-        $gradeable->setOverallComment($_POST['gradeable_comment']);
-        $gradeable->saveGradeableData();
-        $gradeable->resetUserViewedDate();
+        // Get the user id
+        try {
+            $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id] ?? null;
+            if ($user_id === null) {
+                $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
+            }
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
+            return;
+        }
+
+        // Get the gradeable
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
+            return;
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
+            return;
+        }
+
+        // Get the graded gradeable
+        try {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id);
+            if ($graded_gradeable === null) {
+                $this->core->getOutput()->renderJsonFail('User not on a team!');
+                return;
+            }
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
+            return;
+        }
+
+        // Check access
+        if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component general comment');
+            return;
+        }
+
+        // Get the Ta graded gradeable
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Set the comment
+        $ta_graded_gradeable->setOverallComment($comment);
+
+        // New info, so reset the user viewed date
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the graded gradeable
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 
     public function getMarkDetails() {
