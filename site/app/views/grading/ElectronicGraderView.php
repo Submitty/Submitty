@@ -237,7 +237,7 @@ class ElectronicGraderView extends AbstractView {
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
         }
 
-        $show_all_sections_button = $this->core->getUser()->accessFullGrading() && (!$this->core->getUser()->accessAdmin() || $grading_count !== 0);
+        $show_all_sections_button = $this->core->getUser()->accessFullGrading();
         $show_import_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $this->core->getUser()->accessAdmin() && $gradeable->isTeamAssignment() && (count($all_teams) == count($empty_teams));
 
@@ -335,7 +335,7 @@ class ElectronicGraderView extends AbstractView {
             if ($row->isTeamAssignment()) {
                 if ($row->getTeam() === null) {
                     $reg_section = ($row->getUser()->getRegistrationSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
-                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRegistrationSection();
+                    $rot_section = ($row->getUser()->getRotatingSection() === null) ? "NULL" : $row->getUser()->getRotatingSection();
                     $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getUser()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getMaxTeamSize()});";
                 } else {
                     $user_assignment_setting_json = json_encode($row->getTeam()->getAssignmentSettings($gradeable));
@@ -348,7 +348,7 @@ class ElectronicGraderView extends AbstractView {
             }
 
             //List of graded components
-            $info["graded_components"] = [];
+            $info["graded_groups"] = [];
             foreach ($row->getComponents() as $component) {
                 if (is_array($component)) {
                     foreach ($component as $cmpt) {
@@ -367,8 +367,13 @@ class ElectronicGraderView extends AbstractView {
                 } else {
                     $question = $component;
                 }
-                if ($question->getGrader() !== null && $question !== null) {
-                    $info["graded_components"][] = $question;
+                if ($question !== null) {
+                    if($question->getGrader() === null) {
+                        $info["graded_groups"][] = "NULL";
+                    }
+                    else {
+                        $info["graded_groups"][] = $question->getGrader()->getGroup();
+                    }
                 }
             }
 

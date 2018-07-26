@@ -26,6 +26,7 @@ $(function() {
         setRubricVisible(true);
         setSubmissionsVisible(true);
         setInfoVisible(true);
+        setRegradeVisible(true);
         resetModules();
         updateCookies();
     }
@@ -530,7 +531,7 @@ function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
     if (opened > 0 && index < getComponent(opened).marks.length) {
         var mark = getComponent(opened).marks[index];
-        selectMark($("#mark_id-" + opened + "-" + mark.id + "-check")[0]);
+        selectMark(opened, mark.id);
     }
 }
 
@@ -625,11 +626,6 @@ function validateInput(id, question_total, delta){
 function autoResizeComment(e){
     e.target.style.height ="";
     e.target.style.height = e.target.scrollHeight + "px";
-}
-
-function downloadZip(grade_id, user_id) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
-    return false;
 }
 
 function downloadFile(html_file, url_file) {

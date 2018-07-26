@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 7/2/2018
- * Time: 8:38 AM
- */
 
 namespace app\models\gradeable;
 
@@ -50,7 +44,7 @@ class SubmissionTextBox extends AbstractModel {
                 'width' => $image_details['image_width'] ?? 0,
                 'name' => $image_details['image_name']
             ];
-        }, $details['images']);
+        }, $details['images'] ?? []);
     }
 
     public function setFileName() {

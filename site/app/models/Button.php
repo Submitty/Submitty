@@ -36,7 +36,7 @@ class Button extends AbstractModel {
      */
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
-        $this->title    = $details["title"] ?? "";
+        $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
         $this->href     = $details["href"] ?? "";
         $this->class    = $details["class"] ?? "btn";

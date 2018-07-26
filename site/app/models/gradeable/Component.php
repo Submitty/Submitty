@@ -118,6 +118,15 @@ class Component extends AbstractModel {
         throw new \InvalidArgumentException('Component did not contain provided mark id');
     }
 
+    /**
+     * Gets the number of grades required for this component
+     *  to be considered 100% graded
+     * @return int
+     */
+    public function getGradingSet() {
+        return $this->peer ? $this->gradeable->getPeerGradeSet() : 1;
+    }
+
     /* Overridden setters with validation */
 
     /**
@@ -293,6 +302,14 @@ class Component extends AbstractModel {
 
     public function hasExtraCredit() {
         return $this->upper_clamp > $this->max_value;
+    }
+
+    /**
+     * Gets if this component is fully extra credit
+     * @return bool
+     */
+    public function isExtraCredit() {
+        return $this->max_value === $this->default && $this->hasExtraCredit();
     }
 
     // Numeric/Text

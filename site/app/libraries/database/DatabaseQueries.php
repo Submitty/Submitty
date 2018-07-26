@@ -1978,25 +1978,67 @@ ORDER BY gt.{$section_key}", $params);
     }
 
 	/**
-	 * Retrieves all courses (and details) that are accessible by $user_id
+	 * Retrieves all unarchived courses (and details) that are accessible by $user_id
 	 *
-	 * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
-	 * Instructors may access all of their courses
 	 * (u.user_id=? AND c.status=1) checks if a course is active
 	 * An active course may be accessed by all users
-	 * Inactive courses may only be accessed by the instructor
 	 *
 	 * @param string $user_id
 	 * @param string $submitty_path
-	 * @return array - courses (and their details) accessible by $user_id
+	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getStudentCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id, $submitty_path) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-WHERE (u.user_id=? AND u.user_group=1) OR (u.user_id=? AND c.status=1)
-ORDER BY u.course", array($user_id, $user_id));
+WHERE u.user_id=? AND c.status=1
+ORDER BY u.user_group ASC,
+         CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
+              ELSE 0
+         END DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
+              ELSE 1
+         END DESC,
+         u.course ASC", array($user_id));
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName($submitty_path);
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    /**
+     * Retrieves all archived courses (and details) that are accessible by $user_id
+     *
+     * (u.user_id=? AND u.user_group=1) checks if $user_id is an instructor
+     * Instructors may access all of their courses
+     * Inactive courses may only be accessed by the instructor
+     *
+     * @param string $user_id
+     * @param string $submitty_path
+     * @return array - archived courses (and their details) accessible by $user_id
+     */
+    public function getArchivedCoursesById($user_id, $submitty_path) {
+        $this->submitty_db->query("
+SELECT u.semester, u.course
+FROM courses_users u
+INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+WHERE u.user_id=? AND c.status=2 AND u.user_group=1
+ORDER BY u.user_group ASC,
+         CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
+              ELSE 0
+         END DESC,
+         CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
+              WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
+              WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
+              ELSE 1
+         END DESC,
+         u.course ASC", array($user_id));
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
@@ -2133,8 +2175,8 @@ AND gc_id IN (
       return count($this->course_db->rows()) > 0;
     }
 
-    public function getDisplayUserNameFromUserId($user_id){
-      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname from users where user_id = ?", array($user_id));
+    public function getDisplayUserInfoFromUserId($user_id){
+      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_email from users where user_id = ?", array($user_id));
       $name_rows = $this->course_db->rows()[0];
       $last_name =  " " . $name_rows["user_lastname"];
       if(empty($name_rows["user_preferred_firstname"])){
@@ -2145,6 +2187,7 @@ AND gc_id IN (
       $ar = array();
       $ar["first_name"] = $name;
       $ar["last_name"] = $last_name;
+      $ar["user_email"] = $name_rows["user_email"];
       return $ar;
     }
 
@@ -2394,7 +2437,7 @@ AND gc_id IN (
      * Gets all Gradeable instances for the given ids (or all if id is null)
      * @param string[]|null $ids ids of the gradeables to retrieve
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
-     * @return DatabaseRowIterator Iterates across array of Gradeables retrieved
+     * @return \Iterator Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
@@ -2454,7 +2497,7 @@ AND gc_id IN (
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
-     * @return DatabaseRowIterator Iterator to access each GradeableData
+     * @return \Iterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
@@ -2974,6 +3017,10 @@ AND gc_id IN (
         }
     }
 
+    /**
+     * Deletes a GradedComponent from the database
+     * @param GradedComponent $graded_component
+     */
     private function deleteGradedComponent(GradedComponent $graded_component) {
         // Only the db marks need to be deleted since the others haven't been applied to the database
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
@@ -2993,9 +3040,8 @@ AND gc_id IN (
      */
     private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
         // iterate through graded components and see if any need updating/creating
-        /** @var GradedComponent[] $component_grades */
-        foreach ($ta_graded_gradeable->getGradedComponents() as $component_grades) {
-            foreach ($component_grades as $component_grade) {
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            foreach ($container->getGradedComponents() as $component_grade) {
                 // This means the component wasn't loaded from the database, ergo its new
                 if ($component_grade->getDbMarkIds() === null) {
                     $this->createGradedComponent($component_grade);
