@@ -335,7 +335,7 @@ function compareOrder(mark1, mark2){
 }
 /**
  * Reload marks for a component and render them in the list
- * @param num 1-indexed component index
+ * @param {int} c_index 1-indexed component index
  */
 function updateMarksOnPage(c_index) {
     var gradeable = getGradeable();
