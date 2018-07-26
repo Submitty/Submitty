@@ -7,12 +7,13 @@ use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
+use app\models\GradingSection;
 use app\models\User;
 use app\controllers\GradingController;
 
 class SimpleGraderController extends GradingController  {
     public function run() {
-        if(!$this->core->getUser()->accessGrading()) {
+        if(!$this->core->getAccess()->canI("grading.simple")) {
             $this->core->getOutput()->showError("This account doesn't have access to grading");
         }
         switch ($_REQUEST['action']) {
@@ -75,7 +76,16 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;    
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
+            $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return;
         }
 
         //Figure out if we are getting users by rotating or registration section.
@@ -95,11 +105,10 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
             return;
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-        
         //Turn off header/footer so that we are using simple html.
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -119,31 +128,14 @@ class SimpleGraderController extends GradingController  {
             return;
         }
 
-        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
-
-        if ($this->core->getUser()->getGroup() > $gradeable->getMinGradingGroup()) {
+        //If you can see the page, you can grade the page
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-        $students = array();
-        if ($gradeable->isGradeByRegistration()) {
-            $section_key = "registration_section";
-            $sections = $this->core->getUser()->getGradingRegistrationSections();
-            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
-                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-            }
-            $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-        }
-        else {
-            $section_key = "rotating_section";
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
-                $this->core->getUser()->getId());
-            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
-                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
-            $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
-        }
+        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
+
         if(!isset($_GET['sort']) || $_GET['sort'] === "id"){
             $sort_key = "u.user_id";
         }
@@ -153,28 +145,34 @@ class SimpleGraderController extends GradingController  {
         else{
             $sort_key = "u.user_lastname";
         }
-        if(count($sections) === 0 && (!isset($_GET['view']) || $_GET['view'] !== "all")){
-            $_GET['view'] = "all";
-            $student_full = json_encode(array_map(function(User $user) {
-                return ['value' => $user->getId(),
-                    'label' => $user->getDisplayedFirstName() . ' '
-                        . $user->getLastName()
-                        . ' <' . $user->getId() . '>'];
-            }, $students));
-            $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, [], $student_full, $graders, $section_key);
-            return;
+
+        if ($gradeable->isGradeByRegistration()) {
+            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
+        } else {
+            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
         }
-        if ((isset($_GET['view']) && $_GET['view'] === "all") && (count($sections) === 0 && $this->core->getUser()->accessGrading())) {
-            //Checks to see if the Grader has access to all users in the course,
-            //Will only show the sections that they are graders for if not TA or Instructor
-            if($this->core->getUser()->getGroup() < 3) {
-                $_GET['view'] = "all";
-                $students = $this->core->getQueries()->getAllUsers($section_key);
-            } else {
-                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
+        //Can you show all
+        $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
+        //Are you currently showing all
+        $show_all = ((isset($_GET['view']) && $_GET['view'] === "all") || $grading_count === 0) && $can_show_all;
+        //Should the button be shown
+        $show_all_sections_button = $can_show_all;
+
+        //Checks to see if the Grader has access to all users in the course,
+        //Will only show the sections that they are graders for if not TA or Instructor
+        if($show_all) {
+            $sections = $gradeable->getAllGradingSections();
+        } else {
+            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
         }
-        $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
+
+        $students = [];
+        foreach ($sections as $section) {
+            $students = array_merge($students, $section->getUsers());
+        }
+        $student_ids = array_map(function(User $user) {
+            return $user->getId();
+        }, $students);
 
         $student_full = json_encode(array_map(function(User $user) {
             return ['value' => $user->getId(),
@@ -182,14 +180,20 @@ class SimpleGraderController extends GradingController  {
                     . $user->getLastName()
                     . ' <' . $user->getId() . '>'];
         }, $students));
-        if(isset($_GET['view']) && $_GET['view'] === "all"){
-           $_GET['view'] = null; 
+
+        if ($gradeable->isGradeByRegistration()) {
+            $section_key = "registration_section";
+        } else {
+            $section_key = "rotating_section";
         }
-        else{
-           $_GET['view'] = "all"; 
+
+        $graders = [];
+        foreach ($sections as $section) {
+            $graders[$section->getName()] = $section->getGraders();
         }
+
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button);
     }
 
     public function save($action) {
@@ -203,12 +207,6 @@ class SimpleGraderController extends GradingController  {
 
         $grader = $this->core->getUser();
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-
-        // FIXME: permission check
-        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-        }
 
         $user = $this->core->getQueries()->getUserById($user_id);
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
@@ -229,8 +227,13 @@ class SimpleGraderController extends GradingController  {
             return $response;
         }
 
-        // Get user data after permission checks
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+
+        //Make sure they're allowed to do this
+        if (!$this->core->getAccess()->canI("grading.simple.grade", ["graded_gradeable" => $graded_gradeable])) {
+            return $this->core->getOutput()->renderJsonFail("You do not have permission to do this.");
+        }
+
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         foreach ($gradeable->getComponents() as $component) {
@@ -271,9 +274,8 @@ class SimpleGraderController extends GradingController  {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $grader = $this->core->getUser();
 
-        //FIXME: permission check (not reusing other permission checks)
         //FIXME: returning html error message in a json-returning route
-        if ($grader->getGroup() > $gradeable->getMinGradingGroup()) {
+        if (!$this->core->getAccess()->canI("grading.simple.upload_csv", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
