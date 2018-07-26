@@ -3073,22 +3073,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _pen = __webpack_require__(34);
 	
-	var _arrow = __webpack_require__(35);
+	var _eraser = __webpack_require__(35);
 	
-	var _point = __webpack_require__(36);
+	var _arrow = __webpack_require__(36);
 	
-	var _rect = __webpack_require__(37);
+	var _point = __webpack_require__(37);
 	
-	var _circle = __webpack_require__(38);
+	var _rect = __webpack_require__(38);
 	
-	var _text = __webpack_require__(39);
+	var _circle = __webpack_require__(39);
 	
-	var _page = __webpack_require__(40);
+	var _text = __webpack_require__(40);
+	
+	var _page = __webpack_require__(41);
 	
 	exports.default = {
 	  addEventListener: _event.addEventListener, removeEventListener: _event.removeEventListener, fireEvent: _event.fireEvent,
 	  disableEdit: _edit.disableEdit, enableEdit: _edit.enableEdit,
 	  disablePen: _pen.disablePen, enablePen: _pen.enablePen, setPen: _pen.setPen,
+	  enableEraser: _eraser.enableEraser, disableEraser: _eraser.disableEraser,
 	  disablePoint: _point.disablePoint, enablePoint: _point.enablePoint,
 	  disableRect: _rect.disableRect, enableRect: _rect.enableRect,
 	  disableCircle: _circle.disableCircle, enableCircle: _circle.enableCircle, setCircle: _circle.setCircle, addCircle: _circle.addCircle,
@@ -3709,6 +3712,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.enableEraser = enableEraser;
+	exports.disableEraser = disableEraser;
+	
+	var _PDFJSAnnotate = __webpack_require__(1);
+	
+	var _PDFJSAnnotate2 = _interopRequireDefault(_PDFJSAnnotate);
+	
+	var _utils = __webpack_require__(6);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var _canerase = false;
+	
+	function handleDocumentMouseDown(e) {
+	  _canerase = true;
+	}
+	
+	function handleDocumentMouseUp(e) {
+	  _canerase = false;
+	}
+	
+	function handleDocumentMouseMove(e) {
+	  if (_canerase) {
+	    var target = (0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY);
+	    console.log(target);
+	  }
+	}
+	
+	function enableEraser() {
+	  document.addEventListener('mousemove', handleDocumentMouseMove);
+	  document.addEventListener('mousedown', handleDocumentMouseDown);
+	  document.addEventListener('mouseup', handleDocumentMouseUp);
+	}
+	
+	function disableEraser() {
+	  document.removeEventListener('mousemove', handleDocumentMouseMove);
+	}
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.setArrow = setArrow;
 	exports.enableArrow = enableArrow;
 	exports.disableArrow = disableArrow;
@@ -3903,7 +3953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4044,7 +4094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4299,7 +4349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4426,7 +4476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4472,7 +4522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  input.style.top = e.clientY + 'px';
 	  input.style.left = e.clientX + 'px';
 	  input.style.fontSize = _textSize + 'px';
-	  input.style.zIndex = "41px";
+	  input.style.zIndex = "41";
 	  input.addEventListener('blur', handleInputBlur);
 	  input.addEventListener('keyup', handleInputKeyup);
 	
@@ -4590,7 +4640,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
