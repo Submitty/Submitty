@@ -298,7 +298,7 @@ table tr.table-header {
     width: 100%;
     box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
-
+    overflow: hidden;
 }
 
 #header-text {
@@ -308,7 +308,7 @@ table tr.table-header {
 
     /*margin-top: 5px;*/
     margin-left: 20px;
-    width: 100%
+    width: 100%;
 }
 
 #header a,
@@ -333,7 +333,6 @@ table tr.table-header {
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
-
 }
 
 .content {
