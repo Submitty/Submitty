@@ -1044,30 +1044,47 @@ class ElectronicGraderController extends GradingController {
         $component_version = $_POST['active_version'] ?? null;
 
         // Validate required parameters
-        if($gradeable_id === '') {
+        if ($gradeable_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
             return;
         }
-        if($anon_id === '') {
+        if ($anon_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
             return;
         }
-        if($component_id === '') {
+        if ($component_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
             return;
         }
-        if($custom_message === null) {
+        if (!ctype_digit($component_id)) {
+            $this->core->getOutput()->renderJsonFail('Invalid component_id parameter');
+            return;
+        }
+        if ($custom_message === null) {
             $this->core->getOutput()->renderJsonFail('Missing custom_message parameter');
             return;
         }
-        if($custom_points === null) {
+        if ($custom_points === null) {
             $this->core->getOutput()->renderJsonFail('Missing custom_points parameter');
             return;
         }
-        if($component_version === null) {
-            $this->core->getOutput()->renderJsonFail('Missing component_version parameter');
+        if (!is_numeric($custom_points)) {
+            $this->core->getOutput()->renderJsonFail('Invalid custom_points parameter');
             return;
         }
+        if ($component_version === null) {
+            $this->core->getOutput()->renderJsonFail('Missing active_version parameter');
+            return;
+        }
+        if (!ctype_digit($component_version)) {
+            $this->core->getOutput()->renderJsonFail('Invalid active_version parameter');
+            return;
+        }
+
+        // Parse the strings into ints/floats
+        $component_id = intval($component_id);
+        $component_version = intval($component_version);
+        $custom_points = floatval($custom_points);
 
         // Optional Parameters
         $marks = $_POST['marks'] ?? [];
@@ -1075,16 +1092,21 @@ class ElectronicGraderController extends GradingController {
 
         $grader = $this->core->getUser();
 
+        // Get the gradeable
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
             return;
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
+            return;
         }
 
         // get the component
-        $component = $gradeable->getComponents()[$component_id] ?? null;
-        if ($component === null) {
+        try {
+            $component = $gradeable->getComponent($component_id);
+        } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
             return;
         }
@@ -1092,13 +1114,13 @@ class ElectronicGraderController extends GradingController {
         // Get the gradeable for the submitter
         $submitter_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-        if($graded_gradeable === null) {
+        if ($graded_gradeable === null) {
             $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
             return;
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.save_one_component", ["gradeable" => $gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_one_component", ["gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
@@ -1162,19 +1184,26 @@ class ElectronicGraderController extends GradingController {
         $earned_mark_ids = [];
         $all_marks = [];
         foreach ($marks as $index => $post_mark) {
-            $all_mark_ids[] = $mark = $component->getMark($post_mark['id']);
-            if ($post_mark['selected'] == 'true') {
+            // TODO: remove type parsing once/if this route starts accepting json
+            $id = intval($post_mark['id']);
+            $points = $post_mark['points'];
+            $note = $post_mark['note'];
+            $order = $post_mark['order'];
+            $selected = $post_mark['selected'] === 'true';
+
+            $all_marks[] = $mark = $component->getMark($id);
+            if ($selected) {
                 $earned_mark_ids[] = $mark->getId();
             }
 
-            if ($mark->getPoints() !== $post_mark['points']) {
-                $mark->setPoints($post_mark['points']);
+            if ($mark->getPoints() !== $points) {
+                $mark->setPoints($points);
             }
-            if ($mark->getTitle() !== $post_mark['note']) {
-                $mark->setTitle($post_mark['note']);
+            if ($mark->getTitle() !== $note) {
+                $mark->setTitle($note);
             }
-            if ($mark->getOrder() !== $post_mark['order']) {
-                $mark->setOrder($post_mark['order']);
+            if ($mark->getOrder() !== $order) {
+                $mark->setOrder($order);
             }
         }
 
