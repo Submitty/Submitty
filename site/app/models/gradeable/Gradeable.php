@@ -661,6 +661,25 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        // Calculate our components array without the provided component
+        $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
+
+        // If it wasn't removed from our components, it was either already deleted, or never belonged to us
+        if (count($new_components) === count($this->components)) {
+            throw new \InvalidArgumentException('Attempt to delete component that did not belong to this gradeable');
+        }
+
+        // Finally, set our array to the new one
+        $this->components = $new_components;
+    }
+
+    /**
      * Sets the array of the components, only called from the database
      * @param Component[] $components
      * @internal
