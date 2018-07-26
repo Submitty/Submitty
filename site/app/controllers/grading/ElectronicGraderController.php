@@ -1222,7 +1222,12 @@ class ElectronicGraderController extends GradingController {
 
             if ($version !== null) {
                 $version = intval($version);
-                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
+
+                // FIXME: Don't fall back onto the active version.  This is to keep this route compatible
+                // FIXME:   with the pages that use the old model still.
+                // First, try to get the requested version, but then fall back onto the active version
+                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ??
+                    $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance() ?? null;
                 if ($version_instance === null) {
                     $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
                     return;
