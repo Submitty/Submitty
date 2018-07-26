@@ -856,7 +856,7 @@ class AdminGradeableController extends AbstractController {
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => true
             ]);
         } else {
             // Values for these electronic-only properties
@@ -868,7 +868,7 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
+                'late_submission_allowed' => true
             ]);
         }
 

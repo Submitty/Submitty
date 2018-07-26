@@ -399,7 +399,7 @@ class Gradeable extends AbstractModel {
                     $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
                 }
                 if ($regrade_request_date !== null && Utils::compareNullableGt($grade_released_date, $regrade_request_date)) {
-                    $errors['regrade_request_date'] = 'Regrade Request date must be after Grades Released Date';
+                    $errors['regrade_request_date'] = 'Regrade Request Date must be after Grades Released Date';
                 }
             } else {
                 if (Utils::compareNullableGt($max_due, $grade_released_date)) {
