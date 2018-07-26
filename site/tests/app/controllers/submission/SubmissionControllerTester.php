@@ -84,6 +84,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         return $return;
     }
 
+    /**
+     * Helper method to generate a Mock generic submitter (not a user or a team).
+     *  It only has an id
+     * @param $id
+     * @return \PHPUnit\Framework\MockObject\MockObject
+     */
     protected function createMockSubmitter($id) {
         $return = $this->createMockModel(Submitter::class);
         $return->method("getId")->willReturn($id);
@@ -118,58 +124,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getAutogradingConfig')->willReturn($autograding_config);
         return $gradeable;
     }
-
-
-    /**
-     * Helper method to generate a graded gradeable.
-     *
-     * @param int    $highest_version
-     * @return \PHPUnit\Framework\MockObject\MockObject
-     */
-    private function createMockGradedGradeable($highest_version = 0) {
-        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
-        $graded_gradeable->method('getSubmitter')->willReturn($this->createMockSubmitter('testUser'));
-        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
-        $auto_graded_gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
-        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
-        return $graded_gradeable;
-    }
-
-    protected function createMockSubmitter($id) {
-        $return = $this->createMockModel(Submitter::class);
-        $return->method("getId")->willReturn($id);
-        return $return;
-    }
-
-    /**
-     * Helper method to generate a gradeable. We can use annotations in our testcases
-     * to set various aspects of the gradeable, namely @numParts, and @maxSize for
-     * highest version of submission, number of parts, and filesize respectively.
-     *
-     * @param int    $num_parts
-     * @param double $max_size
-     * @return \PHPUnit\Framework\MockObject\MockObject
-     */
-    private function createMockGradeable($num_parts = 1, $max_size = 1000000.) {
-        $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getId')->willReturn("test");
-        $gradeable->method('getTitle')->willReturn("Test Gradeable");
-        // $gradeable->method('getUser')->willReturn("testUser");
-        $gradeable->method('isStudentSubmit')->willReturn(true);
-        $gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE);
-
-        // Any future calls that get now are going to be later than this now
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
-        $gradeable->method('getTaViewStartDate')->willReturn($now);
-
-        $autograding_config = $this->createMockModel(AutogradingConfig::class);
-        $autograding_config->method('getNumParts')->willReturn(intval($num_parts));
-        $autograding_config->method('getMaxSubmissionSize')->willReturn($max_size);
-        $gradeable->method('getAutogradingConfig')->willReturn($autograding_config);
-        return $gradeable;
-    }
-
 
     /**
      * Helper method to generate a graded gradeable.
@@ -1210,6 +1164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(true);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $graded_gradeable = $this->createMockGradedGradeable();
@@ -1229,6 +1184,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(false);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $return = $this->runController($core);

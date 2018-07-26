@@ -130,10 +130,15 @@ class Output {
      * @param mixed|null $data Response data
      */
     public function renderJsonSuccess($data = null) {
-        $this->renderJson([
+        $response = [
             'status' => 'success',
             'data' => $data
-        ]);
+        ];
+
+        $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
     }
 
     /**
@@ -156,6 +161,9 @@ class Output {
         // Merge $response second so it overwrites conflicting keys in $extra
         $response = array_merge($extra, $response);
         $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
     }
 
     /**
@@ -179,6 +187,9 @@ class Output {
             $response['code'] = $code;
         }
         $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
     }
     
     public function renderString($string) {
