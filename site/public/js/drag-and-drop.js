@@ -917,7 +917,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             // Check conflict here
             if ( k[0] == 1 )
             {
-                if(!confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                var skip_confirmation = false;
+                if (expand_zip == 'on') {
+                    var extension = getFileExtension(file_array[i][j].name);
+                    if (extension.toLowerCase() == "zip") {
+                        skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
+                    }
+                }
+                if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
                     continue;
                 }
             }

@@ -534,7 +534,7 @@ class MiscController extends AbstractController {
             return;
         }
 
-        $file_name = $_GET['filename'];
+        $file_name = htmlspecialchars($_GET['filename']);
         $checked =  $_GET['checked'];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -573,8 +573,8 @@ class MiscController extends AbstractController {
             return;
         }
 
-        $file_name = $_GET['filename'];
-        $new_data_time = $_GET['newdatatime'];
+        $file_name = htmlspecialchars($_GET['filename']);
+        $new_data_time = htmlspecialchars($_GET['newdatatime']);
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
