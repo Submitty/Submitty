@@ -206,12 +206,16 @@
     {% endif %}
 </div>
 
+{% if core.getUser().accessGrading() %}
+    {% include 'submission/homework/PreviousSubmissionForm.twig' %}
+{% endif %}
+
 <script type="text/javascript">
     function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, path, count, merge_previous=merge_previous, clobber=clobber);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, path, count, merge_previous, clobber);
             moveNextInput(count);
         }
 
@@ -229,8 +233,8 @@
                 repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ gradeable.getComponents()|length }},
-                merge_previous=merge_previous,
-                clobber=clobber
+                merge_previous,
+                clobber
             );
         }
         else {
@@ -246,8 +250,8 @@
                 repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ gradeable.getComponents()|length }},
-                merge_previous=merge_previous,
-                clobber=clobber
+                merge_previous,
+                clobber
             );
         }
     }

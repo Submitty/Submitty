@@ -85,9 +85,9 @@ HTML;
 HTML;
 			foreach($data as $post) {
 				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
+				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -655,6 +655,7 @@ HTML;
 	}
 
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -665,9 +666,10 @@ HTML;
 		} else {
 			$edit_date = null;
 		}
-		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
-		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
+		$author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 
@@ -733,7 +735,12 @@ HTML;
 		$return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
-
+       if($first && $this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
+            $return .= <<<HTML
+                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
+HTML;
+}
 		if($this->core->getUser()->getGroup() <= 2){
 			$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
 			$visible_user_json = json_encode($visible_username);
