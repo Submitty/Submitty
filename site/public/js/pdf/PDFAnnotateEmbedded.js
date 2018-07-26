@@ -196,10 +196,12 @@ function render(gradeable_id, user_id, file_name) {
     let penColor;
 
     function initPen() {
-        setPen(
-            localStorage.getItem('pen/size') || 3,
-            localStorage.getItem('pen/color') || '#ff0000'
-        );
+        let init_size = localStorage.getItem('pen/size') || 3;
+        let init_color = localStorage.getItem('pen/color') || '#ff0000';
+        document.getElementById('pen_size_selector').value = init_size;
+        document.getElementById('pen_size_value').value = init_size;
+        document.getElementById('pen_color_selector').value = init_color;
+        setPen(init_size, init_color);
     }
 
     function setPen(size, color) {
@@ -223,6 +225,7 @@ function render(gradeable_id, user_id, file_name) {
     }
 
     document.getElementById('pen_color_selector').addEventListener('change', function(e){
+        this.value = e.srcElement.value;
         setPen(penSize, e.srcElement.value);
     });
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
@@ -237,10 +240,11 @@ function render(gradeable_id, user_id, file_name) {
     let textColor;
 
     function initText() {
-        setText(
-            localStorage.getItem('text/size') || 12,
-            localStorage.getItem('text/color') || '#000001'
-        );
+        let init_size = localStorage.getItem('text/size') || 12;
+        let init_color = localStorage.getItem('text/color') || '#000000';
+        document.getElementById('text_size_selector').value = init_size;
+        document.getElementById('text_color_selector').value = init_color;
+        setText(init_size, init_color);
     }
 
     function setText(size, color) {
