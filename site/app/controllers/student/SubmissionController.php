@@ -1241,12 +1241,16 @@ class SubmissionController extends AbstractController {
         return $return;
     }
 
-    private function uploadResultMessage($message, $success = true) {
+    private function uploadResultMessage($message, $success = true, $show_msg = true) {
         $return = array('success' => $success, 'error' => !$success, 'message' => $message);
         $this->core->getOutput()->renderJson($return);
 
-        $this->core->addSuccessMessage($message);
-
+        if ($show_msg == true) {
+            if ($success)
+                $this->core->addSuccessMessage($message);
+            else
+                $this->core->addErrorMessage($message);
+        }
         return $return;
     }
 
@@ -1383,7 +1387,7 @@ class SubmissionController extends AbstractController {
 
         if (empty($_POST)) {
            $max_size = ini_get('post_max_size');
-           return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+           return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
@@ -1505,7 +1509,7 @@ class SubmissionController extends AbstractController {
 
       if (empty($_POST)) {
          $max_size = ini_get('post_max_size');
-         return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+         return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
