@@ -335,7 +335,7 @@ function compareOrder(mark1, mark2){
 }
 /**
  * Reload marks for a component and render them in the list
- * @param num 1-indexed component index
+ * @param {int} c_index 1-indexed component index
  */
 function updateMarksOnPage(c_index) {
     var gradeable = getGradeable();
@@ -345,23 +345,24 @@ function updateMarksOnPage(c_index) {
     if(editModeEnabled==true){
         var sortableMarks=$('#marks-parent-'+c_index);
         var sortEvent = function (event, ui){
-            sortableMarks.on("sortchange", sortEvent);
-            var rows=sortableMarks.children(); 
+            var rows=sortableMarks.find("tr:not(.ui-sortable-placeholder)");
             var listValues = [];
             for(var i=0; i<rows.length; i++){
                 var row=rows[i];
                 var id=row.id;
-                if(row.dataset.mark_index!=undefined){
+                if(typeof(row.dataset.mark_index) !== 'undefined') {
                     getMark(c_index, row.dataset.mark_index).order=i;
+                    $(row).find(".mark-selector").text(i + 1);
                 }
             }
             getComponent(c_index).marks.sort(compareOrder);
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: false
         });
+        sortableMarks.on('sortchange', sortEvent);
         sortableMarks.disableSelection();
     }
     else{
@@ -369,10 +370,11 @@ function updateMarksOnPage(c_index) {
         var sortEvent = function (event, ui){
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: true 
         });
+        sortableMarks.off('sortchange');
     }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
@@ -488,7 +490,7 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                 data = JSON.parse(data);
                 mark.id = data.id;
                 getComponent(c_index).marks.push(mark);
-                parent.append(getMarkView(c_index, mark.id, mark.id, 1, editModeEnabled));
+                parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
             });
         }
     };
@@ -510,7 +512,7 @@ function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallbac
     parent.empty();
     for(var i=0; i<getComponent(c_index).marks.length; i++){
         var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        parent.append(getMarkView(c_index, current_mark_id, current_mark_id, i, editModeEnabled));
+        parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
     }
     ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false);
 }

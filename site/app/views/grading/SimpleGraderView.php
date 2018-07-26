@@ -15,9 +15,10 @@ class SimpleGraderView extends AbstractView {
      * @param GradedGradeable[] $graded_gradeables A full set of graded gradeables
      * @param array $graders
      * @param string $section_type
+     * @param bool $show_all_sections_button
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -28,14 +29,6 @@ class SimpleGraderView extends AbstractView {
         } else {
             $view = null;
         }
-        if ($gradeable->isGradeByRegistration()) {
-            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-        } else {
-            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
-        }
-
-        $show_all_sections_button = $this->core->getUser()->accessFullGrading();
-
         $components_numeric = [];
         $components_text = [];
 

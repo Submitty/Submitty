@@ -70,6 +70,9 @@
             {% if button.isTitleOnHover %}
                 title="{{ button.getTitle() }}"
             {% endif %}
+            {% if button.getAriaLabel() != null  %}
+                aria-label="{{ button.getAriaLabel() }}"
+            {% endif %}
         >
             {% if not button.isTitleOnHover() and button.getTitle() != null %}
                 {{ button.getTitle() }}
