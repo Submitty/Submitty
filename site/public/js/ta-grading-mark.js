@@ -345,14 +345,14 @@ function updateMarksOnPage(c_index) {
     if(editModeEnabled==true){
         var sortableMarks=$('#marks-parent-'+c_index);
         var sortEvent = function (event, ui){
-            sortableMarks.on("sortchange", sortEvent);
-            var rows=sortableMarks.children(); 
+            var rows=sortableMarks.find("tr:not(.ui-sortable-placeholder)");
             var listValues = [];
             for(var i=0; i<rows.length; i++){
                 var row=rows[i];
                 var id=row.id;
-                if(row.dataset.mark_index!=undefined){
+                if(typeof(row.dataset.mark_index) !== 'undefined') {
                     getMark(c_index, row.dataset.mark_index).order=i;
+                    $(row).find(".mark-selector").text(i + 1);
                 }
             }
             getComponent(c_index).marks.sort(compareOrder);
@@ -362,6 +362,7 @@ function updateMarksOnPage(c_index) {
             stop: sortEvent,
             disabled: false
         });
+        sortableMarks.on('sortchange', sortEvent);
         sortableMarks.disableSelection();
     }
     else{
@@ -373,6 +374,7 @@ function updateMarksOnPage(c_index) {
             stop: sortEvent,
             disabled: true 
         });
+        sortableMarks.off('sortchange');
     }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
