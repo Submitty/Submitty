@@ -44,7 +44,7 @@
     {% if action == 'lab' and core.getUser().accessAdmin() %}
         <br> <br>
         <input type="checkbox" id="show-grader" style="float: right;">
-        <label for="show-grader" style="float: right; margin-top: 3px;">Toggle Show Grader</label>
+        <label for="show-grader" style="float: right; margin-top: 3px;">Show Graders</label>
     {% endif %}
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
@@ -200,7 +200,9 @@
                 {% elseif component_grade.getScore() == 0.5 %}
                     style="background-color: #88d0f4;"
                 {% endif %}
-            ></td>
+            >
+                <p style="display: none;">{{component_grade.getGrader().getId()}} {{ component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+            </td>
         {% endif %}
     {% endfor %}
 {% endmacro %}
