@@ -26,6 +26,7 @@ $(function() {
         setRubricVisible(true);
         setSubmissionsVisible(true);
         setInfoVisible(true);
+        setRegradeVisible(true);
         resetModules();
         updateCookies();
     }
