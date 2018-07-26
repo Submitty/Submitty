@@ -358,7 +358,7 @@ function updateMarksOnPage(c_index) {
             getComponent(c_index).marks.sort(compareOrder);
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: false
         });
@@ -369,7 +369,7 @@ function updateMarksOnPage(c_index) {
         var sortEvent = function (event, ui){
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: true 
         });
