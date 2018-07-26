@@ -41,10 +41,13 @@
     {# Search box #}
     {% include "grading/simple/StudentSearch.twig" %}
 
-    {% if action == 'lab' and core.getUser().accessAdmin() %}
+    {% if action == 'lab' %}
         <br> <br>
-        <input type="checkbox" id="show-grader" style="float: right;">
-        <label for="show-grader" style="float: right; margin-top: 3px;">Show Graders</label>
+        <input type="checkbox" id="show-graders" style="float: right;">
+        <label for="show-graders" style="float: right; margin-top: 3px;">Show Graders</label>
+        <br> <br>
+        <input type="checkbox" id="show-dates" style="float: right;">
+        <label for="show-dates" style="float: right; margin-top: 3px;">Show Dates</label>
     {% endif %}
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
@@ -201,7 +204,9 @@
                     style="background-color: #88d0f4;"
                 {% endif %}
             >
-                <p style="display: none;">{{component_grade.getGrader().getId()}} {{ component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+                <p class="simple-grade-grader">{{ component_grade.getGrader().getId() }}</p>
+                <p class="simple-grade-date">{{ component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+
             </td>
         {% endif %}
     {% endfor %}

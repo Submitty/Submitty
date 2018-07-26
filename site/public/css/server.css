@@ -1233,3 +1233,8 @@ end of styles used in the admin gradeable page
     min-width: 400px;
     border-radius: 5px;
 }
+
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
+}
