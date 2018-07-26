@@ -14,6 +14,7 @@ class ImagesView extends AbstractView {
      * @return string
      */
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
+        $this->core->getOutput()->addBreadcrumb("Student Photos", $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')));
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
@@ -23,7 +24,7 @@ class ImagesView extends AbstractView {
             }
         }
 
-		
+
         //$images_data_array to contain base64_encoded image urls
         $images_data_array = array();
         //$images_names_array to contain the names of the images (rcs ids)
@@ -32,7 +33,7 @@ class ImagesView extends AbstractView {
 
         //Get the expected images path and png files to loop through
         $expected_images_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
-	
+
         $dir = new \DirectoryIterator($expected_images_path);
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && $fileinfo->getExtension() === "png") {

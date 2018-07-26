@@ -3,6 +3,9 @@
 namespace app\libraries;
 
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
 use app\models\GradingSection;
 use app\models\User;
@@ -69,47 +72,66 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
-        $this->permissions["grading.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
-        $this->permissions["grading.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.details"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
-        $this->permissions["grading.details.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.details.show_all_no_sections"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
-        $this->permissions["grading.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
-        $this->permissions["grading.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["grading.get_mark_data"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_COMPONENT_PEER_STUDENT;
-        $this->permissions["grading.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
-        $this->permissions["grading.add_one_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
-        $this->permissions["grading.delete_one_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
-        $this->permissions["grading.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
-        $this->permissions["grading.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
-        $this->permissions["grading.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.verify_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.details"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.details.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.details.show_all_no_sections"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.save_one_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
+        $this->permissions["grading.electronic.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["grading.electronic.get_mark_data"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_COMPONENT_PEER_STUDENT;
+        $this->permissions["grading.electronic.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.add_one_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.electronic.delete_one_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.electronic.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
+        $this->permissions["grading.electronic.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.verify_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
-        $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+
+
+        $this->permissions["grading.simple"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER;
+        $this->permissions["grading.simple.grade"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.simple.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.simple.upload_csv"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
     }
 
     /**
-     * Check if the currently logged in user is allowed to do an action
+     * Check if the currently logged in user is allowed to do an action, shortcut of
+     * $access->canUser($core->getUser(), ...)
      * @param string $action Name of the action (see Access::$permissions)
      * @param array $args Any extra arguments that are required to check permissions
      * @return bool True if they are allowed to do that action
      */
     public function canI(string $action, $args = []) {
+        $user = $args["user"] ?? $this->core->getUser();
+        return $this->canUser($user, $action, $args);
+    }
+
+    /**
+     * Check if a user is allowed to do an action
+     * @param User|null $user User to check access for
+     * @param string $action Name of the action (see Access::$permissions)
+     * @param array $args Any extra arguments that are required to check permissions
+     * @return bool True if they are allowed to do that action
+     */
+    public function canUser($user, string $action, $args) {
         if (!array_key_exists($action, $this->permissions)) {
             throw new InvalidArgumentException("Unknown action '$action'");
         }
         $checks = $this->permissions[$action];
 
         //Some things may be available when there is no user
-        $user = $this->core->getUser();
         if ($user === null) {
             if (!($checks & self::ALLOW_LOGGED_OUT)) {
                 return false;
@@ -137,22 +159,32 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
-            /* @var Gradeable|null $gradeable */
-            $gradeable = $this->requireArg($args, "gradeable");
-            if ($gradeable === null) {
-                return false;
+            if (array_key_exists("graded_gradeable", $args)) {
+                $g = $args["graded_gradeable"];
+            } else {
+                $g = $this->requireArg($args, "gradeable");
+                if ($g === null) {
+                    return false;
+                }
             }
+
+            /* @var Gradeable|null $gradeable */
+            /* @var Gradeable|null $graded_gradeable */
+            /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+            /* @var GradedGradeable|null $new_graded_gradeable */
+            list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
 
             if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
-                if (!$this->checkGroupPrivilege($group, $gradeable->getMinimumGradingGroup())) {
+                $minimum = $new_gradeable ? $new_gradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
+                if (!$this->checkGroupPrivilege($group, $minimum)) {
 
                     if (
                         //Full access graders are allowed to view submissions if there is no manual grading
-                        !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
+                        !($group === User::GROUP_FULL_ACCESS_GRADER && !($new_gradeable ?? $gradeable)->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->getPeerGrading())
+                        !($group === User::GROUP_STUDENT && ($new_gradeable ?? $gradeable)->isPeerGrading())
                        ) {
 
                         //Otherwise, you're not allowed
@@ -162,23 +194,29 @@ class Access {
             }
 
             if (self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($gradeable->getActiveVersion() <= 0) {
+                if (($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion()) <= 0) {
                     return false;
                 }
             }
 
             if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
-                if (!$this->checkGradingSection($gradeable)) {
-                    return false;
+                if (array_key_exists("section", $args)) {
+                    if (!$this->isSectionInGradingSections($new_gradeable ?? $gradeable, $args["section"], $user)) {
+                        return false;
+                    }
+                } else {
+                    if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                        return false;
+                    }
                 }
             }
 
             if (self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //If they're allowed to view their own
-                if (!($gradeable->getUser()->getId() === $user->getId() && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE))) {
+                if (!$this->isGradedGradeableByUser($g, $user) && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE)) {
                     //Check their peer assignment
-                    if (!$this->checkPeerAssignment($gradeable)) {
+                    if (!$this->isGradedGradeableInPeerAssignment($new_graded_gradeable ?? $graded_gradeable, $user)) {
                         return false;
                     }
                 }
@@ -227,28 +265,39 @@ class Access {
     }
 
     /**
-     * Check if a limited access grader has a user in their section
-     * @param Gradeable $gradeable
+     * Check if a Graded Gradeable's submitter is in a user's grading sections
+     * @param Gradeable|GradedGradeable $g
+     * @param User $user
      * @return bool If they are
      */
-    public function checkGradingSection(Gradeable $gradeable) {
+    public function isGradedGradeableInGradingSections($g, User $user) {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+
+        /* @var Gradeable|null $gradeable */
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
+
+        //If it's not a user's gradeable then you can't check grading section
+        if (($new_graded_gradeable ?? $graded_gradeable) === null) {
+            return true;
+        }
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if ($gradeable->getGradeStartDate() <= $now) {
+        if (($new_gradeable ?? $gradeable)->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
-            $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
-
+            $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
 
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
-                if ($gradeable->isTeamAssignment()) {
-                    if ($section->containsTeam($gradeable->getTeam())) {
+                if (($new_gradeable ?? $gradeable)->isTeamAssignment()) {
+                    if ($section->containsTeam(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getTeam())) {
                         return true;
                     }
                 } else {
-                    if ($section->containsUser($gradeable->getUser())) {
+                    if ($section->containsUser(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser())) {
                         return true;
                     }
                 }
@@ -259,16 +308,45 @@ class Access {
     }
 
     /**
-     * Check if a student is allowed to peer grade another
-     * @param Gradeable $gradeable
+     * Check if a section (by name) is one of the user's grading sections for a gradeable
+     * @param Gradeable|\app\models\gradeable\Gradeable $g
+     * @param string $section Section name
+     * @param User $user
      * @return bool
      */
-    public function checkPeerAssignment(Gradeable $gradeable) {
-        if (!$gradeable->getPeerGrading()) {
+    public function isSectionInGradingSections($g, string $section, User $user) {
+        /* @var Gradeable|null $gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        list($gradeable,, $new_gradeable,) = $this->resolveNewGradeable($g);
+
+        $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
+        foreach ($sections as $check_section) {
+            /** @var GradingSection $check_section */
+            if ($check_section->getName() === $section) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a Graded Gradeable is in a user's peer grading assignment
+     * @param mixed $g Graded Gradeable to be peer graded
+     * @param User $user User doing the peer grading
+     * @return bool
+     */
+    public function isGradedGradeableInPeerAssignment($g, User $user) {
+        /* @var Gradeable|null $gradeable */
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
+
+        if (!($new_gradeable ? $new_gradeable->isPeerGrading() : $gradeable->getPeerGrading())) {
             return false;
         } else {
-            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
-            return in_array($gradeable->getUser()->getId(), $user_ids_to_grade);
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($graded_gradeable ?? $gradeable)->getId(), $user->getId());
+            return in_array(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser()->getId(), $user_ids_to_grade);
         }
     }
 
@@ -282,5 +360,89 @@ class Access {
         //Because access levels decrease as they get more powerful, this needs to be <=
         // If groups ever become non-sequential in the future, this needs to be replaced.
         return $check <= $minimum;
+    }
+
+    /**
+     * Check if a User is one of the submitters of a Graded Gradeable
+     * @param mixed $g Graded Gradeable object
+     * @param User $user User to check
+     * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
+     */
+    public function isGradedGradeableByUser($g, User $user) {
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($g);
+
+        if ($graded_gradeable !== null) {
+            if ($graded_gradeable->getTeam() !== null) {
+                return $graded_gradeable->getTeam()->hasMember($user->getId());
+            }
+            return $graded_gradeable->getUser()->getId() === $user->getId();
+        } else if ($new_graded_gradeable !== null) {
+            if ($new_graded_gradeable->getSubmitter()->getTeam() !== null) {
+                return $new_graded_gradeable->getSubmitter()->getTeam()->hasMember($user->getId());
+            }
+            return $new_graded_gradeable->getSubmitter()->getUser()->getId() === $user->getId();
+        }
+        return false;
+    }
+
+    /**
+     * TODO: Remove this enormous hack when Kevin does the everything
+     * Get all the permutations of [Graded]Gradeables from an unknown type gradeable-like object.
+     *
+     * Here are the classes that are currently supported:
+     * \app\models\Gradeable
+     * \app\models\gradeable\Gradeable
+     * \app\models\gradeable\GradedGradeable
+     * \app\models\gradeable\TaGradedGradeable
+     * \app\models\gradeable\AutoGradedGradeable
+     *
+     * @param mixed|null $g
+     * @return array [Gradeable|null, Gradeable|null, \app\models\gradeable\Gradeable|null, GradedGradeable|null]
+     */
+    private function resolveNewGradeable($g) {
+        $gradeable = null;
+        $graded_gradeable = null;
+        $new_gradeable = null;
+        $new_graded_gradeable = null;
+        if ($g !== null) {
+            if ($g instanceof GradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradeable();
+                $new_graded_gradeable = $g;
+            } else if ($g instanceof \app\models\gradeable\Gradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g;
+                $new_graded_gradeable = null;
+            } else if ($g instanceof Gradeable) {
+                $gradeable = $g;
+                //Only counts as graded if it has a grade...
+                // If neither of these is true then it's just a generic Gradeable for no user
+                if ($g->beenTAgraded() || $g->beenAutograded()) {
+                    $graded_gradeable = $g;
+                }
+                $new_gradeable = null;
+                $new_graded_gradeable = null;
+            } else if ($g instanceof TaGradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradedGradeable()->getGradeable();
+                $new_graded_gradeable = $g->getGradedGradeable();
+            } else if ($g instanceof AutoGradedGradeable) {
+                $gradeable = null;
+                $graded_gradeable = null;
+                $new_gradeable = $g->getGradedGradeable()->getGradeable();
+                $new_graded_gradeable = $g->getGradedGradeable();
+            }
+        }
+
+        /* @var Gradeable|null $gradeable */
+        /* @var Gradeable|null $graded_gradeable */
+        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+        /* @var GradedGradeable|null $new_graded_gradeable */
+        return [$gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable];
     }
 }
