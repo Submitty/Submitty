@@ -166,7 +166,11 @@ class SubmissionController extends AbstractController {
             // FIXME    to nav with an error
         }
 
-        $version = $_REQUEST['gradeable_version'] ?? ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0);
+        // Attempt to put the version number to be in bounds of the gradeable
+        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+            $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
+        }
 
         $error = false;
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
