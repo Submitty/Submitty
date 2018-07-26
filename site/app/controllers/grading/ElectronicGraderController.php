@@ -1223,7 +1223,7 @@ class ElectronicGraderController extends GradingController {
             if ($version !== null) {
                 $version = intval($version);
 
-                // FIXME: Don't fall back onto the active version.  This is to keep this route compatible
+                // FIXME: Don't fall back onto the active version.  This default is only to keep this route compatible
                 // FIXME:   with the pages that use the old model still.
                 // First, try to get the requested version, but then fall back onto the active version
                 $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ??
