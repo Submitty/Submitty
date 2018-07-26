@@ -529,7 +529,7 @@ registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, functi
 
 function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
-    if (opened > 0 && index < getComponent(opened).marks.length && editModeEnabled==false) {
+    if (opened > 0 && index < getComponent(opened).marks.length) {
         var mark = getComponent(opened).marks[index];
         selectMark(opened, mark.id);
     }
