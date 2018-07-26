@@ -53,6 +53,12 @@ class TaGradedGradeable extends AbstractModel {
         $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
         $this->graded_gradeable->getGradeable()->setJustRegraded($details['just_regraded'] ?? false);
+
+        // Default to all blank components
+        foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
+            $this->graded_component_containers[$component->getId()] = new GradedComponentContainer($core, $this, $component);
+        }
+
         $this->modified = false;
     }
 
