@@ -243,6 +243,12 @@ class AutoGradingView extends AbstractView {
                 if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
+                if($component->getVerifier()!=null){
+                    $verifier_name = $component->getVerifier()->getDisplayedFirstName() . " " . $component->getVerifier()->getLastName();
+                    if (!in_array($verifier_name, $grader_names) && $component->getVerifier()->accessFullGrading()) {
+                        $grader_names[] = $verifier_name;
+                    }
+                }
             }
         } else {
             $grader_names = "Graded by Peer(s)";
