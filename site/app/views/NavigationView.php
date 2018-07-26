@@ -110,15 +110,25 @@ class NavigationView extends AbstractView {
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
-        if ($this->core->getUser()->accessGrading()) {
+        $images_course_path = $this->core->getConfig()->getCoursePath();
+        $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
+        $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+        if ($this->core->getUser()->getGroup()=== 1 && count($any_images_files)===0) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                "title" => "Upload Student Photos",
+                "class" => "btn btn-primary"
+            ]);
+        }
+        else if (count($any_images_files)!==0 && $this->core->getUser()->accessGrading()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
-                    $top_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                        "title" => "View Student Photos",
-                        "class" => "btn btn-primary"
-                    ]);
-                }
+            if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                $top_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                    "title" => "View Student Photos",
+                    "class" => "btn btn-primary"
+                ]);
+            }
         }
 
         // ======================================================================================

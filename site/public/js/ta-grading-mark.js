@@ -488,7 +488,7 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
                 data = JSON.parse(data);
                 mark.id = data.id;
                 getComponent(c_index).marks.push(mark);
-                parent.append(getMarkView(c_index, mark.id, mark.id, 1, editModeEnabled));
+                parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
             });
         }
     };
@@ -510,7 +510,7 @@ function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallbac
     parent.empty();
     for(var i=0; i<getComponent(c_index).marks.length; i++){
         var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        parent.append(getMarkView(c_index, current_mark_id, current_mark_id, i, editModeEnabled));
+        parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
     }
     ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false);
 }
