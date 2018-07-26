@@ -3002,17 +3002,18 @@ AND gc_id IN (
                 $graded_component->getComment(),
                 $graded_component->getGradedVersion(),
                 DateUtils::dateTimeToString($graded_component->getGradeTime()),
+                $graded_component->getGraderId(),
                 $graded_component->getTaGradedGradeable()->getId(),
-                $graded_component->getComponentId(),
-                $graded_component->getGraderId()
+                $graded_component->getComponentId()
             ];
             $query = "
                 UPDATE gradeable_component_data SET 
                   gcd_score=?,
                   gcd_component_comment=?,
                   gcd_graded_version=?,
-                  gcd_grade_time=?
-                WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+                  gcd_grade_time=?,
+                  gcd_grader_id=?
+                WHERE gd_id=? AND gc_id=?";
             $this->course_db->query($query, $params);
         }
     }
