@@ -4,7 +4,7 @@
 {% block body %}
     <p>
         Follow the instructions to download images of students on:<br>
-        <a href="http://submitty.org/instructor/student_photos">Student Photos</a><br><br>
+        <a href="http://submitty.org/instructor/photo_scraper">Photo Scraper</a><br><br>
         Upload images by zipping up multiple course sections together,<br>
         zipping up each course section, or uploading the png image(s).<br><br>
         Total files cannot exceed 10 mb or 10000 kb.<br><br>
@@ -38,6 +38,11 @@
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
     </script>
+{% endblock %}
+{% block form %}
+    <form method="post">
+        {{ parent() }}
+    </form>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
