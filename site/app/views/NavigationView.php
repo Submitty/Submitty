@@ -405,11 +405,10 @@ class NavigationView extends AbstractView {
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
             if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-                ($ta_graded_gradeable->getUserViewedDate() === null || $gradeable->getJustRegraded() === true) &&
+                $ta_graded_gradeable->getUserViewedDate() === null &&
                 $list_section === GradeableList::GRADED) {
                 //Graded and you haven't seen it yet
                 $class = "btn-success";
-                $gradeable->setJustRegraded(false);
             }
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
