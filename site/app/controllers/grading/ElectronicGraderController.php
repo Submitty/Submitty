@@ -4,6 +4,9 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\DiffViewer;
+use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\AutoGradedTestcase;
+use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\Mark;
@@ -76,8 +79,14 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
+
+    //
+    //  Below are methods that try to fetch model objects from request parameters and render JSEND responses
+    //      in the failure/error cases in addition to returning false.  The results of these methods should
+    //      be strict-type-checked against `false`
+    //
     /**
-     * Gets a gradeable config from its id and renders a jsend response upon failure
+     * Gets a gradeable config from its id and renders
      * @param string $gradeable_id
      * @return \app\models\gradeable\Gradeable|bool false if failed
      */
@@ -98,6 +107,12 @@ class ElectronicGraderController extends GradingController {
         return false;
     }
 
+    /**
+     * Gets a gradeable component from its id and a gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string $component_id
+     * @return Component|bool
+     */
     private function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
         if ($component_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
@@ -117,7 +132,7 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Gets a user id from an anon id and renders a jsend response upon failure
+     * Gets a user id from an anon id
      * @param string $anon_id
      * @return string|bool
      */
@@ -141,12 +156,16 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Gets a graded gradeable for a given gradeable and submitter id and renders a jsend response upon failure
+     * Gets a graded gradeable for a given gradeable and submitter id
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param string $submitter_id
      * @return \app\models\gradeable\GradedGradeable|bool
      */
     private function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
+        if ($submitter_id === '') {
+            $this->core->getOutput()->renderJsonFail('Must provide a who_id (user/team id) parameter');
+            return false;
+        }
         try {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
             if ($graded_gradeable === null) {
@@ -161,6 +180,104 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
+     * Gets a submission version for a given auto graded gradeable and version number
+     * @param AutoGradedGradeable $auto_graded_gradeable
+     * @param string $version
+     * @return AutoGradedVersion|bool
+     */
+    private function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version) {
+        if ($version !== '') {
+            $version = intval($version);
+            $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$version] ?? null;
+            if ($version_instance === null) {
+                $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
+                return false;
+            }
+        } else {
+            $version_instance = $auto_graded_gradeable->getActiveVersionInstance();
+            if ($version_instance === null) {
+                $this->core->getOutput()->renderJsonFail('No version instance specified and no active version');
+                return false;
+            }
+        }
+        return $version_instance;
+    }
+
+    /**
+     * Gets a testcase for a given version and testcase index
+     * @param AutoGradedVersion $version
+     * @param string $testcase_index
+     * @return AutoGradedTestcase|bool
+     */
+    private function tryGetTestcase(AutoGradedVersion $version, string $testcase_index) {
+        if ($testcase_index === '') {
+            $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
+            return false;
+        }
+        if (!ctype_digit($testcase_index)) {
+            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
+            return false;
+        }
+        $testcase_index = intval($testcase_index);
+        $testcase = $version->getTestcases()[$testcase_index] ?? null;
+        if ($testcase === null) {
+            $this->core->getOutput()->renderJsonFail('Invalid testcase index');
+            return false;
+        }
+        return $testcase;
+    }
+
+    /**
+     * Gets an autocheck for a given testcase and autocheck index
+     * @param AutoGradedTestcase $testcase
+     * @param string $autocheck_index
+     * @return \app\models\GradeableAutocheck|bool
+     */
+    private function tryGetAutocheck(AutoGradedTestcase $testcase, string $autocheck_index) {
+        if($autocheck_index === '') {
+            $this->core->getOutput()->renderJsonFail('Must provide an autocheck index parameter');
+            return false;
+        }
+        if (!ctype_digit($autocheck_index)) {
+            $this->core->getOutput()->renderJsonFail('autocheck index parameter must be a non-negative integer');
+            return false;
+        }
+        $autocheck_index = intval($autocheck_index);
+        try {
+            return $testcase->getAutocheck($autocheck_index);
+        } catch (\InvalidArgumentException $e){
+            $this->core->getOutput()->renderJsonFail('Invalid autocheck index parameter');
+            return false;
+        }
+    }
+
+    /**
+     * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
+     * @param string $option
+     * @return bool
+     */
+    private function validateDiffViewerOption(string $option) {
+        if (!DiffViewer::isValidSpecialCharsOption($option)) {
+            $this->core->getOutput()->renderJsonFail('Invalid diff viewer option parameter');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks that a given diff viewer type is valid using DiffViewer::isValidType
+     * @param string $type
+     * @return bool
+     */
+    private function validateDiffViewerType(string $type) {
+        if (!DiffViewer::isValidType($type)) {
+            $this->core->getOutput()->renderJsonFail('Invalid diff viewer type parameter');
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Method for getting whitespace information for the diff viewer
      */
     public function ajaxRemoveEmpty() {
@@ -168,91 +285,52 @@ class ElectronicGraderController extends GradingController {
         $submitter_id = $_REQUEST['who_id'] ?? '';
         $index = $_REQUEST['index'] ?? '';
         $option = $_REQUEST['option'] ?? 'original';
-        $version = $_REQUEST['version'] ?? null;
+        $version = $_REQUEST['version'] ?? '';
         $type = $_REQUEST['which'] ?? 'actual';
-        $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? null;
-
-        // TODO: much of this checking/gradeable loading code is shared with ajaxGetStudentOutput
-        // TODO: When Converting the rest of the controller, look into merging this gradeable loading
-        if ($gradeable_id === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide a gradeable_id parameter');
-            return;
-        }
-        if ($submitter_id === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide a who_id parameter');
-            return;
-        }
-        if ($index === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
-            return;
-        }
-        if (!ctype_digit($index)) {
-            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
-            return;
-        }
-        $index = intval($index);
+        $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? '0';
 
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
-        if (!DiffViewer::isValidSpecialCharsOption($option)) {
-            $this->core->getOutput()->renderJsonFail('Invalid option parameter');
+        if (!$this->validateDiffViewerOption($option)) {
             return;
         }
 
-        if (!DiffViewer::isValidType($type)) {
-            $this->core->getOutput()->renderJsonFail('Invalid which parameter');
-        }
-
-        if ($autocheck_cnt === null) {
-            $autocheck_cnt = 0;
-        } else {
-            $autocheck_cnt = intval($autocheck_cnt);
-        }
-
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
+        // Type can be either 'actual' or 'expected'
+        if (!$this->validateDiffViewerType($type)) {
             return;
         }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // get the requested version
+        $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
+        if ($version_instance === false) {
+            return;
+        }
+
+        // Get the requested testcase
+        $testcase = $this->tryGetTestcase($version_instance, $index);
+        if ($testcase === false) {
+            return;
+        }
+
+        // Get the requested autocheck
+        $autocheck = $this->tryGetAutocheck($testcase, $autocheck_cnt);
+        if ($autocheck === false) {
+            return;
+        }
+
         try {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-            if ($graded_gradeable === null) {
-                if($gradeable->isTeamAssignment()) {
-                    $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
-                } else {
-                    $this->core->getOutput()->renderJsonError('Failed to load graded gradeable from the database');
-                }
-                return;
-            }
-
-            if ($version !== null) {
-                $version = intval($version);
-                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ?? null;
-                if ($version_instance === null) {
-                    $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
-                    return;
-                }
-            } else {
-                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
-                // No version instance, so no whitespace data
-                if ($version_instance === null) {
-                    $this->core->getOutput()->renderJsonSuccess(['html' => '', 'whitespaces' => '']);
-                    return;
-                }
-            }
-
-            $testcase = $version_instance->getTestcases()[$index] ?? null;
-            if ($testcase === null) {
-                $this->core->getOutput()->renderJsonFail('Invalid testcase index');
-                return;
-            }
-            foreach ($testcase->getAutochecks() as $autocheck) {
-                $diff_viewer = $autocheck->getDiffViewer();
-                if ($autocheck_cnt <= 0) {
-                    break;
-                }
-                $autocheck_cnt -= 1;
-            }
+            $diff_viewer = $autocheck->getDiffViewer();
 
             //There are currently two views, the view of student's code and the expected view.
             $html = "";
@@ -1312,82 +1390,44 @@ class ElectronicGraderController extends GradingController {
         $version = $_REQUEST['version'] ?? null;
         $index = $_REQUEST['index'] ?? '';
 
-        if ($gradeable_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        if ($submitter_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing who_id parameter');
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
             return;
         }
-        if ($index === '') {
-            $this->core->getOutput()->renderJsonFail('Missing index parameter');
-            return;
-        } else if (!ctype_digit($index)) {
-            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
+
+        // get the requested version
+        $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
+        if ($version_instance === false) {
             return;
         }
-        $index = intval($index);
+
+        // Get the requested testcase
+        $testcase = $this->tryGetTestcase($version, $index);
+        if ($testcase === false) {
+            return;
+        }
+
+        // Check access
+        if (!$this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
+            // TODO: streamline permission error strings
+            $this->core->getOutput()->renderJsonFail('You have insufficient permissions to access this command');
+        }
 
         try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
-            return;
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
-            return;
-        }
-        try {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-            if ($graded_gradeable === null) {
-                if ($gradeable->isTeamAssignment()) {
-                    $this->core->getOutput()->renderJsonFail('Provided user was not on a team');
-                } else {
-                    $this->core->getOutput()->renderJsonError('Failed to load graded gradeable from the database');
-                }
-                return;
-            }
-
-            if ($version !== null) {
-                $version = intval($version);
-
-                // FIXME: Don't fall back onto the active version.  This default is only to keep this route compatible
-                // FIXME:   with the pages that use the old model still.
-                // First, try to get the requested version, but then fall back onto the active version
-                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$version] ??
-                    $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance() ?? null;
-                if ($version_instance === null) {
-                    $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
-                    return;
-                }
-            } else {
-                $version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
-                // No version instance, so no whitespace data
-                if ($version_instance === null) {
-                    $this->core->getOutput()->renderJsonFail('No version instance specified and no active version');
-                    return;
-                }
-            }
-
-            $testcase = $version_instance->getTestcases()[$index] ?? null;
-            if ($testcase === null) {
-                $this->core->getOutput()->renderJsonFail('Invalid testcase index');
-                return;
-            }
-
+            //display hidden testcases only if the user can view the entirety of this gradeable.
+            $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $graded_gradeable]);
             $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
-            if ($this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
-                //display hidden testcases only if the user can view the entirety of this gradeable.
-                $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $graded_gradeable]);
-                $this->core->getOutput()->renderJsonSuccess(
-                    $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
-                        $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden)
-                );
-            } else {
-                // TODO: streamline permission error strings
-                $this->core->getOutput()->renderJsonFail('You have insufficient permissions to access this command');
-            }
+            $this->core->getOutput()->renderJsonSuccess(
+                $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
+                    $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden)
+            );
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
@@ -1466,6 +1506,24 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
         $comment = $_POST['gradeable_comment'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
 
         // Check access
         if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $graded_gradeable])) {
