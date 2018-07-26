@@ -216,7 +216,10 @@ class NavigationView extends AbstractView {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section) : null;
-        $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
+
+        if ($this->hasGradeButton($gradeable)) {
+            $buttons[] = $this->getGradeButton($gradeable, $list_section);
+        }
 
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
