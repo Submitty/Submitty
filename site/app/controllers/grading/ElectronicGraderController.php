@@ -1241,6 +1241,8 @@ class ElectronicGraderController extends GradingController {
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Invalid gradeable id');
             return;
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
         }
         try {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
