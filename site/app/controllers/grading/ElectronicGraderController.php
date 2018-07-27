@@ -41,8 +41,11 @@ class ElectronicGraderController extends GradingController {
             case 'grade':
                 $this->showGrading();
                 break;
-            case 'save_graded_component':
+            case 'save_one_component':
                 $this->ajaxSaveSingleComponent();
+                break;
+            case 'save_graded_component':
+                $this->ajaxSaveGradedComponent();
                 break;
             case 'save_mark':
                 $this->ajaxSaveMark();
