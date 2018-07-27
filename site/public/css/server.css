@@ -1050,6 +1050,7 @@ table .instructor .two-options{
     margin-bottom: 60px;
 }
 
+/* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
 .cell-grade {
     cursor: pointer;
 }
@@ -1057,6 +1058,13 @@ table .instructor .two-options{
 .cell-grade {
     border-left: 1px solid #dddddd;
 }
+
+/* Makes the grade and time on checkpoint pages not visible at first */
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
+}
+
 
 .tooltip {
     position: relative;
@@ -1233,3 +1241,4 @@ end of styles used in the admin gradeable page
     min-width: 400px;
     border-radius: 5px;
 }
+
