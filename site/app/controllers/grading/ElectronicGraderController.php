@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
+use app\models\GradeableAutocheck;
 use app\models\Team;
 use app\models\User;
 use \app\libraries\GradeableType;
@@ -330,20 +331,24 @@ class ElectronicGraderController extends GradingController {
         }
 
         try {
-            $diff_viewer = $autocheck->getDiffViewer();
-
-            //There are currently two views, the view of student's code and the expected view.
-            $html = "";
-            if ($type === DiffViewer::ACTUAL) {
-                $html .= $diff_viewer->getDisplayActual($option);
-            } else {
-                $html .= $diff_viewer->getDisplayExpected($option);
-            }
-            $white_spaces = $diff_viewer->getWhiteSpaces();
-            $this->core->getOutput()->renderJsonSuccess(['html' => $html, 'whitespaces' => $white_spaces]);
+            $results = $this->removeEmpty($autocheck, $option, $type);
+            $this->core->getOutput()->renderJsonSuccess($results);
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    private function removeEmpty(GradeableAutocheck $autocheck, string $option, string $type) {
+        $diff_viewer = $autocheck->getDiffViewer();
+
+        //There are currently two views, the view of student's code and the expected view.
+        if ($type === DiffViewer::ACTUAL) {
+            $html = $diff_viewer->getDisplayActual($option);
+        } else {
+            $html = $diff_viewer->getDisplayExpected($option);
+        }
+        $white_spaces = $diff_viewer->getWhiteSpaces();
+        return ['html' => $html, 'whitespaces' => $white_spaces];
     }
 
     private function verifyGrader($verifyAll = false){
