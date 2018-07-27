@@ -72,9 +72,15 @@ function render(gradeable_id, user_id, file_name) {
                         let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                         PAGE_HEIGHT = viewport.height;
                     }).then(function(){
+                        // console.log("hi");
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
                             $("#submission_browser").draggable('disable');
+                            let selected = $(".tool-selected");
+                            if(selected.length != 0 && $(selected[0]).attr('value') != 'cursor'){
+                                $("#save_status").text("Changes not saved");
+                                $("#save_status").css("color", "red");
+                            }
                         });
                         document.getElementById('pageContainer'+page_id).addEventListener('mouseup', function(){
                             $("#submission_browser").draggable('enable');
@@ -166,8 +172,15 @@ function render(gradeable_id, user_id, file_name) {
     }
 
     function saveFile(){
+        $('#save_status').text("Saved");
+        $('#save_status').css('color', 'black');
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
         let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        // let count = 0;
+        // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
+        //     count+= JSON.parse(annotation_layer)[i]['lines'].length;
+        // }
+        // console.log(count);
         $.ajax({
             type: 'POST',
             url: url,
@@ -176,7 +189,7 @@ function render(gradeable_id, user_id, file_name) {
                 GENERAL_INFORMATION
             },
             success: function(data){
-                alert("Annotation successfully saved!");
+
             }
         });
     }

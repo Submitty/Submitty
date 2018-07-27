@@ -1180,16 +1180,18 @@ function openMark(c_index) {
         openClose(c_index);
     }
     let page = getComponent(c_index)['page'];
-    //841.89 os the pdf page height, 29 is the margin, 80 is the top part.
-    let files = $('.openable-element-submissions');
-    for(let i = 0; i < files.length; i++){
-        if(files[i].innerText.trim() == "upload.pdf"){
-            if($("#file_view").is(":visible")){
-                $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
-            } else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+    if(page){
+        //841.89 os the pdf page height, 29 is the margin, 80 is the top part.
+        let files = $('.openable-element-submissions');
+        for(let i = 0; i < files.length; i++){
+            if(files[i].innerText.trim() == "upload.pdf"){
+                if($("#file_view").is(":visible")){
                     $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
-                });
+                } else {
+                    expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+                        $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                    });
+                }
             }
         }
     }
