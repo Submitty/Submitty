@@ -149,29 +149,4 @@
             </div>
         </div>
     </form>
-    <script>
-        $(function() {
-            $("input,textarea").on("change", function() {
-                let formData = new FormData();
-                formData.append('csrf_token', csrfToken);
-                let entry;
-                if(this.type === "checkbox") {
-                    entry = $(this).is(":checked");
-                }
-                else {
-                    entry = this.value;
-                }
-                formData.append("name", this.name);
-                formData.append("entry", entry);
-
-                $.ajax({
-                    url: "{{ core.buildUrl({'component': 'admin', 'page': 'configuration', 'action': 'update'})|raw }}",
-                    data: formData,
-                    type: "POST",
-                    processData: false,
-                    contentType: false
-                });
-            });
-        });
-    </script>
 </div>

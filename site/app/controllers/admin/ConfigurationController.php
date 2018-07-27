@@ -71,33 +71,28 @@ class ConfigurationController extends AbstractController {
 
     public function updateConfiguration() {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         }
 
         if(!isset($_POST['name'])) {
-            $response = array('status' => 'fail', 'message' => 'Name of config value not provided');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Name of config value not provided');
         }
         $name = $_POST['name'];
 
         if(!isset($_POST['entry'])) {
-            $response = array('status' => 'fail', 'message' => 'Name of config entry not provided');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Name of config entry not provided');
         }
         $entry = $_POST['entry'];
 
         if($name === "course_name" && $entry === "") {
-            $response = array('status' => 'fail', 'message' => 'Course name cannot be blank');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
         }
 
         if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
-            $entry = $entry === "" ? intval($entry) : 0;
+            if(!ctype_digit($entry)) {
+                return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
+            }
+            $entry = intval($entry);
         }
 
         if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
@@ -110,10 +105,8 @@ class ConfigurationController extends AbstractController {
 
         $config_ini = $this->core->getConfig()->readCourseIni();
         $config_ini['course_details'][$name] = $entry;
-        $this->core->getConfig()->saveCourseIni($config_ini['course_details']);
+        $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
 
-        $response = array('status' => 'success', 'message' => 'Config updated');
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 }
