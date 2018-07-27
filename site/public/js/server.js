@@ -87,7 +87,7 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -99,7 +99,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'gradeable_version' : version});
 
         $.ajax({
             url: url,

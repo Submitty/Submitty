@@ -9,7 +9,6 @@ use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
-use app\models\GradeableList;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
 
@@ -155,64 +154,70 @@ class SubmissionController extends AbstractController {
 
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-
-        // FIXME: The GradeableList is constructed here for legacy purposes
-        // FIXME:   Replace with tryGetElectronicGradeable when converting homework view to new model
-        $gradeable_list = $this->core->loadModel(GradeableList::class);
-        /** @var \app\models\Gradeable $gradeable */
-        $gradeable = $gradeable_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
-        if ($gradeable !== null) {
-            $error = false;
-            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
-
-            // ORIGINAL
-            //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
-
-            // hiding entire page if user is not a grader and student cannot view
-            if (!$this->core->getUser()->accessGrading() && !$gradeable->getStudentView()) {
-                $message = "Students cannot view that gradeable.";
-                $this->core->addErrorMessage($message);
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            }
-
-            // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-            if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-                $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
-                return array('error' => true, 'message' => 'No gradeable with that id.');
-            }
-            else if ($gradeable->isTeamAssignment() && $gradeable->getTeam() === null && !$this->core->getUser()->accessAdmin()) {
-                $this->core->addErrorMessage('Must be on a team to access submission');
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-                return array('error' => true, 'message' => 'Must be on a team to access submission.');
-            }
-            else {
-                $loc = array('component' => 'student',
-                             'gradeable_id' => $gradeable->getId());
-                $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
-                if (!$gradeable->hasConfig()) {
-                    $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'unbuiltGradeable', $gradeable);
-                    $error = true;
-                }
-                else {
-                    $gradeable->loadResultDetails();
-                    $extensions = $gradeable->getLateDayExceptions();
-                    $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
-                    $late_days_use = max(0, $days_late - $extensions);
-                    if ($gradeable->taGradesReleased() && $gradeable->useTAGrading() && $gradeable->beenTAgraded()) {
-                        $gradeable->updateUserViewedDate();
-                    }
-                    $canViewWholeGradeable = false;
-                    $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                           'showGradeable', $gradeable, $late_days_use, $extensions, $canViewWholeGradeable);
-                }
-            }
-            return array('id' => $gradeable_id, 'error' => $error);
-        }
-        else {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        if ($graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
+            // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
+            // FIXME    to nav with an error
+        }
+
+        // Attempt to put the version number to be in bounds of the gradeable
+        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+            $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
+        }
+
+        $error = false;
+        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+
+        // ORIGINAL
+        //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
+
+        // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
+        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return array('error' => true, 'message' => 'No gradeable with that id.');
+        }
+        else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage('Must be on a team to access submission');
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => 'Must be on a team to access submission.');
+        }
+        else {
+            $loc = array('component' => 'student',
+                         'gradeable_id' => $gradeable->getId());
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            if (!$gradeable->hasAutogradingConfig()) {
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
+                                                       'unbuiltGradeable', $gradeable);
+                $error = true;
+            }
+            else {
+                $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
+                $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
+                $late_days_use = max(0, $days_late - $extensions);
+                if ($graded_gradeable !== null
+                    && $gradeable->isTaGradeReleased()
+                    && $gradeable->isTaGrading() 
+                    && $graded_gradeable->isTaGradingComplete()) {
+                    $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
+                    $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
+                }
+                $canViewWholeGradeable = false;
+
+                // If we get here, then we can safely construct the old model w/o checks
+                // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
+                $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+            }
+        }
+        return array('id' => $gradeable_id, 'error' => $error);
     }
 
     /**
@@ -273,39 +278,28 @@ class SubmissionController extends AbstractController {
                 return $return;
             }
         }
-        //This grabs the first user in the list. If there is more than one user
-        //in the list, we will use this user as the team leader.
-        $user_id = reset($user_ids);
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
-
-        //If this is a team assignment, we need to check that all users are on the same (or no) team.
-        //To do this, we just compare the leader's teamid to the team id of every other user.
-        if($gradeable->isTeamAssignment()){
-            $leader_team_id = "";
-            $leader_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user_id);
-            if($leader_team !== null){
-                $leader_team_id = $leader_team->getId();
-            }
-            foreach($user_ids as $id){
-                $user_team_id = "";
-                $user_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id);
-                if($user_team !== null){
-                    $user_team_id = $user_team->getId();
-                }
-                if($user_team_id !== $leader_team_id){
-                    $msg = "Inconsistent teams. One or more users are on different teams.";
-                    $return = array('success' => false, 'message' => $msg);
-                    $this->core->getOutput()->renderJson($return);
-                    return $return;
-                }
-            }
+        $graded_gradeables = [];
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, null) as $gg) {
+            $graded_gradeables[] = $gg;
         }
 
-        $highest_version = 0;
-        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        if (count($graded_gradeables) === 0) {
+            // No user was on a team
+            $msg = 'No user on a team';
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        } else if (count($graded_gradeables) > 0) {
+            // Not all users were on the same team
+            $msg = "Inconsistent teams. One or more users are on different teams.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
         }
+
+        $graded_gradeable = $graded_gradeables[0];
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
@@ -533,8 +527,8 @@ class SubmissionController extends AbstractController {
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
             $leader = $user_id;
-            $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
-            if ($team !== null) {
+            if ($graded_gradeable !== null) {
+                $team =  $graded_gradeable->getSubmitter()->getTeam();
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -546,6 +540,9 @@ class SubmissionController extends AbstractController {
                 // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
                 // TODO:    so its ok, but fragile
                 ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+
+                // Once team is created, load in the graded gradeable
+                $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
                 $team =  $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $leader);
                 $team_id = $team->getId();
                 $who_id = $team_id;
@@ -559,10 +556,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $new_version = 1;
-        if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
-        }
+        $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
@@ -829,8 +823,8 @@ class SubmissionController extends AbstractController {
         $who_id = $user_id;
         $team_id = "";
         if ($gradeable->isTeamAssignment()) {
-            $team = $graded_gradeable->getSubmitter()->getTeam();
-            if ($team !== null) {
+            if ($graded_gradeable !== null) {
+                $team = $graded_gradeable->getSubmitter()->getTeam();
                 $team_id = $team->getId();
                 $who_id = $team_id;
                 $user_id = "";
@@ -846,10 +840,7 @@ class SubmissionController extends AbstractController {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
-        $highest_version = 0;
-        if($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         $new_version = $highest_version + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
@@ -918,7 +909,7 @@ class SubmissionController extends AbstractController {
                 for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
                     $textbox_answer_val = $textbox_answer_array[$i];
                     if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]['filename'];
+                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]->getFileName();
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
@@ -1264,7 +1255,7 @@ class SubmissionController extends AbstractController {
         }
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, null);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
         $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
@@ -1289,10 +1280,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
 
-        $highest_version = 0;
-        if($graded_gradeable->getAutoGradedGradeable() !== null) {
-            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-        }
+        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         if ($new_version > $highest_version) {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
