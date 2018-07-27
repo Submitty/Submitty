@@ -1352,7 +1352,7 @@ class ElectronicGraderController extends GradingController {
 
         // Check if this graded component should be deleted
         if (count($graded_component->getMarkIds()) === 0
-            && $graded_component->getScore() === 0
+            && $graded_component->getScore() === 0.0
             && $graded_component->getComment() === '') {
             $ta_graded_gradeable->deleteGradedComponent($graded_component->getComponent(), $graded_component->getGrader());
             $graded_component = null;
