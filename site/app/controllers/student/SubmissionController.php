@@ -1379,7 +1379,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResultMessage("Invalid CSRF token.", false);
+            return $this->uploadResultMessage("Invalid CSRF token.", false, false);
         }
 
         $uploaded_files = array();
@@ -1501,7 +1501,7 @@ class SubmissionController extends AbstractController {
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResultMessage("Invalid CSRF token.", false);
+          return $this->uploadResultMessage("Invalid CSRF token.", false, false);
       }
 
       $expand_zip = "";
