@@ -171,7 +171,7 @@ function updateCheckpointCell(elem, setFull) {
 }
 
 function setupCheckboxCells() {
-    // Query for the <td> elements whose class attribute starts with "cell-"
+    // jQuery for the elements with the class cell-grade (those in the component columns)
     $("td.cell-grade").click(function() {
         var parent = $(this).parent();
         var elems = [];
