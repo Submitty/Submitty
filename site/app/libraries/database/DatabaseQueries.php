@@ -124,6 +124,9 @@ class DatabaseQueries {
      */
     public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber){
         // $blockNumber is 1 based index
+        if($blockNumber < 1) {
+            return array();
+        }
         $query_offset = ($blockNumber-1) * $blockSize;
 
         // Query Generation

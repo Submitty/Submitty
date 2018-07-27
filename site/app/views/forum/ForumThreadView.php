@@ -327,7 +327,7 @@ HTML;
 			$return .= <<<HTML
 
 				
-					<i class="fa fa-spinner fa-spin fa-3x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
 					<script type="text/javascript">
 						$(function(){

@@ -569,7 +569,7 @@ class ForumController extends AbstractController {
     }
 
     public function getThreads(){
-        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) && $_GET["page_number"] >= 1 ? (int)$_GET["page_number"] : -1;
+        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : -1;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
