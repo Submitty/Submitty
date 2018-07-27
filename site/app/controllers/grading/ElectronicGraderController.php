@@ -129,7 +129,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Invalid component_id parameter');
             return false;
         }
-
+        $component_id = intval($component_id);
         try {
             return $gradeable->getComponent($component_id);
         } catch (\InvalidArgumentException $e) {
@@ -153,7 +153,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Invalid mark_id parameter');
             return false;
         }
-
+        $mark_id = intval($mark_id);
         try {
             return $component->getMark($mark_id);
         } catch (\InvalidArgumentException $e) {
