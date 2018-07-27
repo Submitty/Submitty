@@ -91,9 +91,15 @@ class PostgresqlDatabase extends AbstractDatabase {
                     $quot = $ch;
                 }
                 else if ($in_string && $ch == "\\" && strlen($text) > $i) {
-                    //Insert literal next char
-                    $element .= $text[$i+1];
-                    $i ++;
+                    if ($text[$i+1] === "\\") {
+                        $element .= "\\";
+                        $i ++;
+                    } else if ($text[$i+1] === "\"") {
+                        $element .= "\"";
+                        $i ++;
+                    } else {
+                        $element .= $text[$i];
+                    }
                 }
                 else if (!$in_string && $ch == "\\") {
                     //Insert literal \
@@ -177,7 +183,8 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = $this->fromPHPToDatabaseArray($e);
             }
             else if (is_string($e)) {
-                $elements[] .= '"'. str_replace('"', '\"', $e) .'"';
+                //Turn every \ into \\ that's either preceding a " another \ or the end
+                $elements[] .= '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
             }
             else if (is_bool($e)) {
                 $elements[] .= ($e === true) ? "true" : "false";
