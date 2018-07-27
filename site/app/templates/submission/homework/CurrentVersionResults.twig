@@ -1,49 +1,50 @@
-{% if gradeable.hasIncentiveMessage() %}
-    <div class="sub" id="incentive_message" style="display: none;">
-        <p class='green-message'>{{ gradeable.getIncentiveMessage() }}</p>
-    </div>
-{% endif %}
+<div class="sub" id="incentive_message" style="display: none;">
+    <p class='green-message'>{{ incentive_message }}</p>
+</div>
 
 {# Submitted files #}
 <div class="sub">
     <h4>Submitted Files</h4>
     <div class="box half">
         {% for file in files %}
-            {{ file.relative_name }} ({{ file.size }}kb)
+            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
 
             {# download icon if student can download files #}
             {% if can_download %}
-                <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+                <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}")'>
+                    <i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
                 <br />
             {% endif %}
         {% endfor %}
         {% if can_download and files|length > 1 %}
             <br />
             <br />
-            Download all files: <a onclick='downloadZip("{{ gradeable.getId() }}", "{{ core.getUser().getId() }}", "{{ current_version.getVersion() }}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
+            Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
         {% endif %}
     </div>
     <div class="box half">
-        {% if gradeable.hasResults() %}
-            submission timestamp: {{ current_version.getSubmissionTime() }}<br />
-            days late: {{ current_version.getDaysLate() }} (before extensions)<br />
-            grading time: {{ results.grade_time }} seconds<br />
-            {% if results.num_autogrades > 1 %}
+        submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}<br />
+        days late: {{ days_late }} (before extensions)<br />
+        {% if results is defined %}
+            grading time: {{ grade_time }} seconds<br />
+            {% if num_autogrades > 1 %}
                 <br />
-                number of re-autogrades: {{ results.num_autogrades - 1 }}<br />
-                last re-autograde finished: {{  results.grading_finished }}<br />
+                number of re-autogrades: {{ num_autogrades - 1 }}<br />
+                last re-autograde finished: {{ grading_finished }}<br />
             {% else %}
-                queue wait time: {{ results.wait_time }} seconds<br />
+                queue wait time: {{ wait_time }} seconds<br />
             {% endif %}
-            {% if results.revision %}
+            {% if is_vcs %}
                 git commit hash:
-                {% if results.revision %}
-                    {{ results.revision[0:7] }}
+                {% if revision %}
+                    {{ revision[0:7] }}
                 {% else %}
                     None
                 {% endif %}
                 <br />
             {% endif %}
+        {% else %}
+            grading not complete
         {% endif %}
     </div>
 </div>
@@ -54,56 +55,34 @@
         <h4>Results</h4>
     {% endif %}
 
-
-    {% if gradeable.inBatchQueue() and gradeable.hasResults() %}
-        {% if gradeable.beingGradedBatchQueue() %}
-            <p class="red-message">
-                This submission is currently being regraded.
-            </p>
-        {% else %}
-            <p class="red-message">
-                This submission is currently in the queue to be regraded.
-            </p>
-        {% endif %}
-    {% endif %}
-
     {# Actual results #}
-    {% if gradeable.inInteractiveQueue() or (gradeable.inBatchQueue() and not gradeable.hasResults()) %}
-        {% if gradeable.beingGradedInteractiveQueue() or (not gradeable.hasResults() and gradeable.beingGradedBatchQueue()) %}
+    {% if in_queue or grading %}
+        {% if grading %}
             <p class="red-message">
                 This submission is currently being graded.
             </p>
         {% else %}
             <p class="red-message">
-                This submission is currently in the queue to be graded. Your submission is number {{ gradeable.getInteractiveQueuePosition() }} out of {{ gradeable.getInteractiveQueueTotal() }}.
+                This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
             </p>
         {% endif %}
         <script type="text/javascript">
-            checkRefreshSubmissionPage("{{ core.buildUrl({'component': 'student',
-                'page': 'submission',
-                'action': 'check_refresh',
-                'gradeable_id': gradeable.getId(),
-                'gradeable_version': gradeable.getCurrentVersionNumber()})|e("js") }}")
+            checkRefreshSubmissionPage("{{ check_refresh_submission_url|e('js') }}")
         </script>
-    {% elseif not gradeable.hasResults() %}
+    {% elseif results is not defined %}
         <p class="red-message">
             Something has gone wrong with grading this submission. Please contact your instructor about this.
         </p>
     {% else %}
         {# Has results! #}
-        {% if gradeable.hasIncentiveMessage() and gradeable.getActiveVersion() > 0 %}
-            {# FIXME:  Only doing this for the current version, not looking to see if any prior version meets the criteria #}
-            {# foreach (gradeable.getVersions() as version) { #}
-            {% if gradeable.getEarlyTotal() >= gradeable.getMinimumPoints() and current_version.getDaysEarly() > gradeable.getMinimumDaysEarly() %}
-                <script type="text/javascript">
-                    (function() {
-                        ('#incentive_message').show();
-                    })();
-                </script>
-            {% endif %}
+        {% if show_incentive_message %}
+            <script type="text/javascript">
+                (function() {
+                    ('#incentive_message').show();
+                })();
+            </script>
         {% endif %}
-
-        {{ render_template('AutoGrading', 'showResults', gradeable, canViewWholeGradeable) }}
     {% endif %}
-    {# /Actual results #}
+
+    {{ result_text|raw }}
 </div>
