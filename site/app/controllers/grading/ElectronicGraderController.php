@@ -1614,7 +1614,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxGetStudentOutput() {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['who_id'] ?? '';
-        $version = $_REQUEST['version'] ?? null;
+        $version = $_REQUEST['version'] ?? '';
         $index = $_REQUEST['index'] ?? '';
 
         // Get the gradeable
