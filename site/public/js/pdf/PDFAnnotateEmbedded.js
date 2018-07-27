@@ -67,8 +67,6 @@ function render(gradeable_id, user_id, file_name) {
                 for (let i=0; i<NUM_PAGES; i++) {
                     let page = UI.createPage(i+1);
                     viewer.appendChild(page);
-                }
-                for (let i=0; i<NUM_PAGES; i++) {
                     let page_id = i+1;
                     UI.renderPage(page_id, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                         let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
