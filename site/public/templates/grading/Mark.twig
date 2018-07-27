@@ -4,7 +4,11 @@
     class="{{ mark.publish ? "is_publish" : "" }}"
     data-component_index="{{ c_index }}"
     data-mark_index="{{ m_id }}"
-    onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
+    {% if editable %}
+        onclick="event.stopPropagation();"
+    {% else %}
+        onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
+    {% endif %}
 >
     <td
         colspan="1"
