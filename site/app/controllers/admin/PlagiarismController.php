@@ -9,12 +9,6 @@ use app\libraries\FileUtils;
 class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'compare':
-                $this->plagiarismCompare();
-                break;
-            case 'index':
-                $this->plagiarismIndex();
-                break;
             case 'configure_new_gradeable_for_plagiarism_form':
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
@@ -38,7 +32,10 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'delete_plagiarism_result_and_config':
                 $this->deletePlagiarismResultAndConfig();
-                break;     
+                break;
+            case 'check_refresh_lichen_mainpage':
+                $this->checkRefreshLichenMainPage();
+                break;         
             case 'show_plagiarism_result':
                 $this->showPlagiarismResult(); 
                 break;            
@@ -49,37 +46,28 @@ class PlagiarismController extends AbstractController {
         }
     }
 
-    public function plagiarismCompare() {
-        $semester = $_REQUEST['semester'];
-        $course = $_REQUEST['course'];
-        $assignment = $_REQUEST['assignment'];
-        $studenta = $_REQUEST['studenta'];
-        $studentb = $_REQUEST['studentb'];
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismCompare', $semester, $course, $assignment, $studenta, $studentb);
-    }
-
-    public function plagiarismIndex() {
-        $semester = $_REQUEST['semester'];
-        $course = $_REQUEST['course'];
-        $assignment = $_REQUEST['assignment'];
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex', $semester, $course, $assignment);
-    }
-
     public function plagiarismMainPage() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        
+
+        #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
+        $refresh_page =false;
+        if(isset($_REQUEST['refresh_page'])) {
+            $refresh_page = $_REQUEST['refresh_page'];            
+        }
+
+
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
         }
 
         $gradeables_with_plagiarism_result= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
+            if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeables_with_plagiarism_result[$i]);
             }
         }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page);
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'deletePlagiarismResultAndConfigForm');
         
     }
@@ -96,7 +84,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
+            $this->core->addErrorMessage("Lichen job is running for this gradeable. Refresh in a while.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
@@ -121,7 +109,7 @@ class PlagiarismController extends AbstractController {
         $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
-            if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission)) {
+            if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id_title['g_id'].".json")) {
                 unset($gradeable_ids_titles[$i]);
             }
         }       
@@ -320,7 +308,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
-        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
     private function enqueueLichenJob($job, $gradeable_id) {
@@ -377,7 +365,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Refresh after a while to see re-run results.");
-        $this->core->redirect($return_url);
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
     public function editPlagiarismSavedConfig() {
@@ -427,7 +415,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted in a while.");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
     }
 
     public function ajaxGetSubmissionConcatinated() {
@@ -748,6 +736,30 @@ class PlagiarismController extends AbstractController {
             $return = json_encode($return);
             echo($return);
         }    
+    }
+
+    /**
+     * Check if the results folder exists for a given gradeable and version results.json
+     * in the results/ directory. If the file exists, we output a string that the calling
+     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
+     */
+    public function checkRefreshLichenMainPage() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+
+        $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+        foreach ($gradeable_ids_titles as $gradeable_id_title) {
+            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+                $this->core->getOutput()->renderString("REFRESH_ME");
+                return;
+            }    
+        }
+        
+        $this->core->getOutput()->renderString("NO_REFRESH");
+        return;
     }
 
 }

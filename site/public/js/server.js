@@ -1032,6 +1032,35 @@ function check_server(url) {
     );
 }
 
+function checkRefreshLichenMainPage(url, semester, course) {
+    // refresh time for lichen main page
+    var refresh_time = 5000;
+    setTimeout(function() {
+        check_lichen_jobs(url, semester, course);
+    }, refresh_time);
+}
+
+function check_lichen_jobs(url, semester, course) {
+    $.post(url,
+        function(data) {
+            var last_data = localStorage.getItem("last_data");
+            if (data == "REFRESH_ME") {
+                last_data= "REFRESH_ME";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+            }
+            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+                last_data= "NO_REFRESH";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+            }
+            else {  
+                checkRefreshLichenMainPage(url, semester, course);
+            }
+        }
+    );
+}
+
 function downloadFile(file, path) {
     window.location = buildUrl({
         'component': 'misc',

@@ -5,41 +5,8 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 
 class PlagiarismView extends AbstractView {
-    public function plagiarismCompare($semester, $course, $assignment, $studenta, $studentb) {
-        if (strpos($semester, '.') || strpos($semester, '/')) throw new \InvalidArgumentException("Invalid semester");
-        if (strpos($course, '.') || strpos($course, '/')) throw new \InvalidArgumentException("Invalid course");
-        if (strpos($assignment, '.') || strpos($assignment, '/')) throw new \InvalidArgumentException("Invalid assignment");
-        if (strpos($studenta, '.') || strpos($studenta, '/')) throw new \InvalidArgumentException("Invalid assignment");
-        if (strpos($studentb, '.') || strpos($studentb, '/')) throw new \InvalidArgumentException("Invalid assignment");
-        $return = "";
-        $return .= <<<HTML
-<div class="content" style="height: 85vh">
-HTML;
-        $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/compare/" . $studenta . "_" . $studentb . ".html");
-        $return .= <<<HTML
-</div>
-HTML;
-        return $return;
-    }
 
-    public function plagiarismIndex($semester, $course, $assignment) {
-        if (strpos($semester, '.') || strpos($semester, '/')) throw new \InvalidArgumentException("Invalid semester");
-        if (strpos($course, '.') || strpos($course, '/')) throw new \InvalidArgumentException("Invalid course");
-        if (strpos($assignment, '.') || strpos($assignment, '/')) throw new \InvalidArgumentException("Invalid assignment");
-        $return = "";
-        $return .= <<<HTML
-<div class="content">
-<h1 class="centered">Lichen Plagiarism Detection - $assignment</h1>
-<br>
-HTML;
-        $return .= file_get_contents("/var/local/submitty/courses/$semester/$course/plagiarism/report/var/local/submitty/courses/$semester/$course/submissions/$assignment/index.html");
-        $return .= <<<HTML
-</div>
-HTML;
-        return $return;
-    }
-
-    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result) {
+    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result, $refresh_page) {
         $return = "";
         $return .= <<<HTML
 <div class="content">
@@ -49,28 +16,95 @@ HTML;
     </div><br /><br />
     <div class="sub">
     <center>
-    <table style="border-collapse: separate;border-spacing: 15px 10px;"><tr>
+    <table style="border-collapse: separate;border-spacing: 15px 10px;">
 HTML;
         $course_path = $this->core->getConfig()->getCoursePath();
         foreach ($gradeables_with_plagiarism_result as $gradeable) {
             $title = $gradeable['g_title'];
             $id = $gradeable['g_id'];
+        
             $delete_form_action = $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'delete_plagiarism_result_and_config', 'gradeable_id' => $id));
-            $timestamp = file_get_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$id.".lichenrun.timestamp"));
-            $return .= <<<HTML
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
-        </td>
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-        </td>
-        <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
-        </td>
-        <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fa fa-trash" aria-hidden="true"></i></a>
-        </td>
-        <td>
-            Last run: $timestamp
-        </td>
+            
+            if(file_exists($course_path."/lichen/ranking/".$id.".txt")) {
+                $timestamp = date("F d Y H:i:s.",filemtime($course_path."/lichen/ranking/".$id.".txt"));
+                $students = array_diff(scandir($course_path."/lichen/concatenated/".$id), array('.', '..'));
+                $submissions =0;
+                foreach($students as $student) {
+                    $submissions += count(array_diff(scandir($course_path."/lichen/concatenated/".$id."/".$student), array('.', '..')));
+                }
+                $students = count($students);    
+            }
+            else {
+                $timestamp = "N/A";
+                $students = "N/A";
+                $submissions = "N/A";
+            }
+
+            #lichen job in queue for this gradeable but processing not started
+            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
+                $return .= <<<HTML
+        <tr style="color:red;">
+            <td>$title
+            </td>
+            <td><i class="fa fa-pencil" aria-hidden="true"></i>
+            </td>
+            <td><i class="fa fa-refresh" aria-hidden="true"></i>
+            </td>
+            <td><i class="fa fa-trash" aria-hidden="true"></i>
+            </td>
+            <td>
+                Last run: $timestamp
+            </td>
+            <td>
+                $students students, $submissions submissions
+            </td>
         </tr>
 HTML;
+            }
+
+            #lichen job in processing stage for this gradeable but not completed
+            else if (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
+                $return .= <<<HTML
+        <tr style="color:green;">
+            <td>$title
+            </td>
+            <td><i class="fa fa-pencil" aria-hidden="true"></i>
+            </td>
+            <td><i class="fa fa-refresh" aria-hidden="true"></i>
+            </td>
+            <td><i class="fa fa-trash" aria-hidden="true"></i>
+            </td>
+            <td>
+                Last run: $timestamp
+            </td>
+            <td>
+                $students students, $submissions submissions
+            </td>
+        </tr>
+HTML;
+            }
+
+            #no lichen job
+            else {
+                $return .= <<<HTML
+        <tr>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
+            </td>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            </td>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+            </td>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            </td>
+            <td>
+                Last run: $timestamp
+            </td>
+            <td>
+                $students students, $submissions submissions
+            </td>
+        </tr>
+HTML;
+            }            
         }
 
         $return .= <<<HTML
@@ -78,6 +112,22 @@ HTML;
     </div>
 </div>    
 HTML;
+
+        $return .= <<<HTML
+<script type="text/javascript">
+    checkRefreshLichenMainPage("{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'check_refresh_lichen_mainpage'))}" ,"{$semester}", "{$course}");
+</script>
+HTML;
+        #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
+        if($refresh_page == "REFRESH_ME") {
+            $return .= <<<HTML
+<script type="text/javascript">
+    var last_data= "REFRESH_ME";
+    localStorage.setItem("last_data", last_data);
+</script>
+HTML;
+        }
+
         return $return;   
     }
 
