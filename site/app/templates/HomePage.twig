@@ -10,15 +10,15 @@
                     </tr>
                     <tr>
                         <td><b>First Name:</b> {{ user.getDisplayedFirstName() }} </td>
-                        <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                        <td><a onclick="userNameChange()" aria-label="Change Name"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                     </tr>
                     <tr>
                         <td><b>Last Name:</b> {{ user.getLastName() }} </td>
                     </tr>
                     {% if show_change_password %}
                         <tr>
-                            <td><b>Change Password</b></td>
-                            <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                            <td><b><label for="change_password">Change Password<label></b></td>
+                            <td><a onclick="passwordChange()" id="change_password"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                         </tr>
                     {% endif %}
                     </tbody>
