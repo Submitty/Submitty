@@ -41,8 +41,11 @@ class ElectronicGraderController extends GradingController {
             case 'grade':
                 $this->showGrading();
                 break;
-            case 'save_one_component':
-                $this->saveSingleComponentRequest();
+            case 'save_graded_component':
+                $this->ajaxSaveSingleComponent();
+                break;
+            case 'save_mark':
+                $this->ajaxSaveMark();
                 break;
             case 'save_general_comment':
                 $this->saveGeneralComment();
@@ -128,6 +131,30 @@ class ElectronicGraderController extends GradingController {
             return $gradeable->getComponent($component_id);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
+            return false;
+        }
+    }
+
+    /**
+     * Gets a mark from its id and a component
+     * @param Component $component
+     * @param string $mark_id
+     * @return Mark|bool
+     */
+    private function tryGetMark(Component $component, string $mark_id) {
+        if ($mark_id === '') {
+            $this->core->getOutput()->renderJsonFail('Missing mark_id parameter');
+            return false;
+        }
+        if (!ctype_digit($mark_id)) {
+            $this->core->getOutput()->renderJsonFail('Invalid mark_id parameter');
+            return false;
+        }
+
+        try {
+            return $component->getMark($mark_id);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Invalid mark_id for this component');
             return false;
         }
     }
@@ -1200,7 +1227,210 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
     }
 
-    public function saveSingleComponentRequest() {
+    /**
+     * Route for saving the marks the submitter received for a component
+     */
+    public function ajaxSaveGradedComponent() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+        $component_id = $_POST['gradeable_component_id'] ?? '';
+        $custom_message = $_POST['custom_message'] ?? null;
+        $custom_points = $_POST['custom_points'] ?? null;
+        $component_version = $_POST['active_version'] ?? null;
+
+        // Optional marks parameter
+        $marks = $_POST['marks'] ?? [];
+
+        // Validate required parameters
+        if ($custom_message === null) {
+            $this->core->getOutput()->renderJsonFail('Missing custom_message parameter');
+            return;
+        }
+        if ($custom_points === null) {
+            $this->core->getOutput()->renderJsonFail('Missing custom_points parameter');
+            return;
+        }
+        if (!is_numeric($custom_points)) {
+            $this->core->getOutput()->renderJsonFail('Invalid custom_points parameter');
+            return;
+        }
+        if ($component_version === null) {
+            $this->core->getOutput()->renderJsonFail('Missing active_version parameter');
+            return;
+        }
+        if (!ctype_digit($component_version)) {
+            $this->core->getOutput()->renderJsonFail('Invalid active_version parameter');
+            return;
+        }
+
+        // Parse the strings into ints/floats
+        $component_version = intval($component_version);
+        $custom_points = floatval($custom_points);
+
+        // Optional Parameters
+        $overwrite = ($_POST['overwrite'] ?? true) === true;
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $graded_gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Get / create the graded component
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
+                $custom_message, $marks, $component_version, $overwrite);
+            $this->core->getOutput()->renderJsonSuccess($results);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    private function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
+        // Only update the grader if we're set to overwrite it
+        if ($overwrite) {
+            $graded_component->setGrader($grader);
+        }
+        $version_updated = $graded_component->getGradedVersion() !== $component_version;
+        if ($version_updated) {
+            $graded_component->setGradedVersion($component_version);
+        }
+        $graded_component->setComment($custom_message);
+        $graded_component->setScore($custom_points);
+        $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+
+        // Set the marks the submitter received
+        $graded_component->setMarkIds($mark_ids);
+
+        // Check if this graded component should be deleted
+        if (count($graded_component->getMarkIds()) === 0
+            && $graded_component->getScore() === 0
+            && $graded_component->getComment() === '') {
+            $ta_graded_gradeable->deleteGradedComponent($graded_component->getComponent(), $graded_component->getGrader());
+            $graded_component = null;
+        }
+
+        // TODO: is this desirable
+        // Reset the user viewed date since we updated the grade
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the changes to the database
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+        // Response 'data'
+        return [
+            'component_reset' => $graded_component === null,
+            'version_updated' => $version_updated
+        ];
+    }
+
+    /**
+     * Route for saving a mark's title/point value
+     */
+    public function ajaxSaveMark() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['gradeable_component_id'] ?? '';
+        $mark_id = $_POST['mark_id'] ?? '';
+        $points = $_POST['points'] ?? '';
+        $title = $_POST['note'] ?? null;
+
+        // Validate required parameters
+        if ($title === null) {
+            $this->core->getOutput()->renderJsonFail('Missing title parameter');
+            return;
+        }
+        if ($points === null) {
+            $this->core->getOutput()->renderJsonFail('Missing points parameter');
+            return;
+        }
+        if (!is_numeric($points)) {
+            $this->core->getOutput()->renderJsonFail('Invalid points parameter');
+            return;
+        }
+
+        $points = floatval($points);
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // get the mark
+        $mark = $this->tryGetMark($component, $mark_id);
+        if ($mark === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("rubric.electronic.save_mark", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveMark($mark, $points, $title);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveMark(Mark $mark, float $points, string $title) {
+        if($mark->getPoints() !== $points) {
+            $mark->setPoints($points);
+        }
+        if($mark->getTitle() !== $title) {
+            $mark->setTitle($title);
+        }
+        $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
+    }
+
+    public function ajaxSaveSingleComponent() {
 
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
