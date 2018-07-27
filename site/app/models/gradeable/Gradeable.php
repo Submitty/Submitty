@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
 
@@ -32,7 +33,7 @@ use app\models\User;
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
- * @method \DateTime getMinGradingGroup()
+ * @method int getMinGradingGroup()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -67,7 +68,6 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
- * @method bool getJustRegraded()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -170,8 +170,6 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
-    protected $just_regraded = false;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -849,9 +847,6 @@ class Gradeable extends AbstractModel {
         }
         return $count;
     }
-    public function setJustRegraded($bool) {
-        $this->just_regraded=$bool;
-    }
 
     /**
      * Gets the number of text components if type is GradeableType::NUMERIC_TEXT
@@ -985,5 +980,137 @@ class Gradeable extends AbstractModel {
             $total += $component->getMaxValue();
         }
         return $total;
+    }
+
+    /**
+     * Get a list of all grading sections assigned to a given user
+     * @param User $user
+     * @return GradingSection[]
+     */
+    public function getGradingSectionsForUser(User $user) {
+        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+            $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
+            //TODO: Peer grading team assignments
+            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
+        } else {
+            $users = [];
+            $teams = [];
+
+            if ($this->isGradeByRegistration()) {
+                $section_names = $user->getGradingRegistrationSections();
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRegistrationSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRegistrationSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRegistrationSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRegistrationSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
+            } else {
+                $section_names = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $user->getId());
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRotatingSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRotatingSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRotatingSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRotatingSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
+            }
+
+            $sections = [];
+            foreach ($section_names as $section_name) {
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            }
+
+            return $sections;
+        }
+    }
+
+
+    /**
+     * Get a list of all grading sections
+     * @return GradingSection[]
+     */
+    public function getAllGradingSections() {
+        if ($this->isPeerGrading()) {
+            //Todo: What are all sections when you have peer grading?
+        }
+
+        $users = [];
+        $teams = [];
+
+        if ($this->isGradeByRegistration()) {
+            if ($this->isTeamAssignment()) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                foreach ($all_teams as $team) {
+                    /** @var Team $team */
+                    $teams[$team->getRegistrationSection()][] = $team;
+                }
+            } else {
+                $all_users = $this->core->getQueries()->getAllUsers();
+                foreach ($all_users as $user) {
+                    /** @var User $user */
+                    $users[$user->getRegistrationSection()][] = $user;
+                }
+            }
+            $section_names = $this->core->getQueries()->getRegistrationSections();
+            foreach ($section_names as $i => $section) {
+                $section_names[$i] = $section['sections_registration_id'];
+            }
+            $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
+        } else {
+            if ($this->isTeamAssignment()) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                foreach ($all_teams as $team) {
+                    /** @var Team $team */
+                    $teams[$team->getRotatingSection()][] = $team;
+                }
+            } else {
+                $all_users = $this->core->getQueries()->getAllUsers();
+                foreach ($all_users as $user) {
+                    /** @var User $user */
+                    $users[$user->getRotatingSection()][] = $user;
+                }
+            }
+            $section_names = $this->core->getQueries()->getRotatingSections();
+            foreach ($section_names as $i => $section) {
+                $section_names[$i] = $section['sections_rotating_id'];
+            }
+            $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
+        }
+
+        $sections = [];
+        foreach ($section_names as $section_name) {
+            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+        }
+
+        return $sections;
     }
 }

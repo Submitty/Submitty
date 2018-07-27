@@ -30,4 +30,35 @@ class BuildConfig(AbstractJob):
         build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
 
         with open(build_output, "w") as output_file:
-            subprocess.call([build_script, gradeable], stdout=output_file, stderr=output_file)
+            subprocess.call([build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+
+class RunLichen(AbstractJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+
+        lichen_script = '/usr/local/submitty/sbin/run_lichen_plagiarism.py'
+        lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
+
+        with open(lichen_output, "w") as output_file:
+            subprocess.call([lichen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+
+class DeleteLichenResult(AbstractJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+
+        lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
+
+        with open(lichen_output, "w") as output_file:
+            subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/config/lichen_"+semester+"_"+course+"_"+gradeable+".json", stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/ranking/"+gradeable+".txt", stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/provided_code/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/tokenized/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/concatenated/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/hashes/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/matches/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
+            subprocess.call("echo"+ " Deleted lichen plagiarism results and saved config for "+gradeable, stdout=op, stderr=op,shell=True)
+        

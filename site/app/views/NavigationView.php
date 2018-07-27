@@ -110,15 +110,25 @@ class NavigationView extends AbstractView {
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
-        if ($this->core->getUser()->accessGrading()) {
+        $images_course_path = $this->core->getConfig()->getCoursePath();
+        $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
+        $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+        if ($this->core->getUser()->getGroup()=== 1 && count($any_images_files)===0) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                "title" => "Upload Student Photos",
+                "class" => "btn btn-primary"
+            ]);
+        }
+        else if (count($any_images_files)!==0 && $this->core->getUser()->accessGrading()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
-                    $top_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                        "title" => "View Student Photos",
-                        "class" => "btn btn-primary"
-                    ]);
-                }
+            if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                $top_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                    "title" => "View Student Photos",
+                    "class" => "btn btn-primary"
+                ]);
+            }
         }
 
         // ======================================================================================
@@ -395,11 +405,10 @@ class NavigationView extends AbstractView {
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
             if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-                ($ta_graded_gradeable->getUserViewedDate() === null || $gradeable->getJustRegraded() === true) &&
+                $ta_graded_gradeable->getUserViewedDate() === null &&
                 $list_section === GradeableList::GRADED) {
                 //Graded and you haven't seen it yet
                 $class = "btn-success";
-                $gradeable->setJustRegraded(false);
             }
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
@@ -475,12 +484,18 @@ class NavigationView extends AbstractView {
      */
     private function getGradeButton(Gradeable $gradeable, int $list_section) {
         //Location, location never changes
+        if($this->core->getUser()->accessAdmin()){
+            $view="all";
+        }
+        else{
+            $view=null;
+        }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()));
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId()));
+            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'view' => $view));
         } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId()));
+            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId(), 'view' => $view));
         } else {
             //Unknown type of gradeable
             $href = "";
@@ -581,7 +596,8 @@ class NavigationView extends AbstractView {
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fa fa-pencil",
-            "title_on_hover" => true
+            "title_on_hover" => true,
+            "aria_label" => "edit gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }
@@ -595,7 +611,8 @@ class NavigationView extends AbstractView {
             "title" => "Rebuild",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
             "class" => "fa fa-wrench",
-            "title_on_hover" => true
+            "title_on_hover" => true,
+            "aria_label" => "rebuild gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }

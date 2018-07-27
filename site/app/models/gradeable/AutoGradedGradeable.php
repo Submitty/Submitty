@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 6/25/2018
- * Time: 2:30 PM
- */
 
 namespace app\models\gradeable;
 
@@ -59,6 +53,14 @@ class AutoGradedGradeable extends AbstractModel {
 //        $details['total_score'] = $total_score;
 
         return $details;
+    }
+
+    /**
+     * Gets the graded gradeable instance this auto graded gradeable belongs to
+     * @return GradedGradeable
+     */
+    public function getGradedGradeable() {
+        return $this->graded_gradeable;
     }
 
     /**
