@@ -72,7 +72,7 @@
             </script>
         </div>
     </div>
-    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
+    <div id="file_view" style="display: none; position: absolute; float: right; right: -100%; width:100%; ">
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
@@ -98,7 +98,8 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
+                alert("Please use the pdf viewer by clicking on the right arrow");
+                {#iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");#}
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
@@ -142,21 +143,22 @@
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        loadFile(dir);
+        let promise = loadFile(dir);
         $('#file_view').show();
         $("#grading_file_name").html(dir);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
         let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#directory_view").hide();
+        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+        return promise;
     }
 
     function loadFile(filename){
         let extension = filename.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').css('visibility', 'visible');
-            $.ajax({
+            return $.ajax({
                 type: 'POST',
                 url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
                 data: {
@@ -211,7 +213,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }}' onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
