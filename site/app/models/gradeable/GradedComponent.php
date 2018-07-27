@@ -200,20 +200,14 @@ class GradedComponent extends AbstractModel {
     /**
      * Sets the marks the submitter received for this component
      * @param int[] $mark_ids
+     * @throws \InvalidArgumentException If any provided mark did not exist in the component
      */
     public function setMarkIds(array $mark_ids) {
-        // This may seem redundant, but by fetching the marks from the component and calling setMarks, we
-        //  effectively filter out any of the invalid values in $mark_ids
-        $marks = [];
-        $actual_ids = [];
-        foreach ($this->component->getMarks() as $mark) {
-            if (in_array($mark->getId(), $mark_ids)) {
-                $marks[] = $mark;
-                $actual_ids[] = $mark->getId();
-            }
-        }
-        $this->marks = $marks;
-        $this->mark_ids = $actual_ids;
+        $component = $this->component;
+        $this->marks = array_map(function ($mark_id) use ($component) {
+            return $component->getMark($mark_id);
+        }, array_values($mark_ids));
+        $this->mark_ids = $mark_ids;
         $this->marks_modified = true;
     }
 
