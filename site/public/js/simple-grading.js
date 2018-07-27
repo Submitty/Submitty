@@ -194,7 +194,6 @@ function setupCheckboxCells() {
                     elem = $(elem);
                     elem.animate({"border-right-width": "0px"}, 400);                                   // animate the box
                     elem.attr("data-score", elem.data("score"));                                        // update the score
-
                 });
             },
             function() {
@@ -207,6 +206,7 @@ function setupCheckboxCells() {
         );
     });
 
+    // show all the hidden grades when this checkbox is clicked
     $("#show-graders").on("change", function() {
         if($(this).is(":checked")) {
             $(".simple-grade-grader").css("display", "block");
@@ -216,6 +216,7 @@ function setupCheckboxCells() {
         }
     });
 
+    // show all the hidden dates when that checkbox is clicked
     $("#show-dates").on("change", function() {
         if($(this).is(":checked")) {
             $(".simple-grade-date").css("display", "block");
