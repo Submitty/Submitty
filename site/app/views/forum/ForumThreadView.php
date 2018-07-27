@@ -556,8 +556,8 @@ HTML;
 							$titleDisplay .= "...";
 						}
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						if($thread["thread_related"]) {
-							$icon = '<i class="fas fa-comment-alt"></i>';
+						if($thread["current_user_posted"]) {
+							$icon = '<i class="fa fa-comments"></i> ';
 							$titleDisplay = $icon . $titleDisplay;
 						}
 						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
