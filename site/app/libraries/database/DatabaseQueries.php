@@ -115,39 +115,49 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
-    public function loadAnnouncements($categories_ids, $show_deleted = false){
-        assert(count($categories_ids) > 0);
-        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
-        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
+    /**
+     * Returns thread list along with their category information
+     * Filter based on categories, thread status and deleted status
+     * Order: Favourite and Announcements => Announcements only => Favourite only => Others
+     *
+     * @return ordered threads after filter
+     */
+    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber){
+        // $blockNumber is 1 based index
+        if($blockNumber < 1) {
+            return array();
+        }
+        $query_offset = ($blockNumber-1) * $blockSize;
+
+        // Query Generation
+        if(count($categories_ids) == 0) {
+            $query_multiple_qmarks = "NULL";
+        } else {
+            $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+        }
+        if(count($thread_status) == 0) {
+            $query_status = "true";
+        } else {
+            $query_status = "status in (?".str_repeat(",?", count($thread_status)-1).")";
+        }
+
         $query_delete = $show_deleted?"true":"deleted = false";
         $query_delete .= " and merged_thread_id = -1";
+        $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
-        return $this->course_db->rows();
-    }
+        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
-    public function loadAnnouncementsWithoutCategory($show_deleted = false){
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = true and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
-        return $this->course_db->rows();
-    }
+        // Parameters
+        $query_parameters   = array();
+        $query_parameters[] = $current_user;
+        $query_parameters[] = count($categories_ids);
+        $query_parameters   = array_merge($query_parameters, $categories_ids);
+        $query_parameters   = array_merge($query_parameters, $thread_status);
+        $query_parameters[] = $blockSize;
+        $query_parameters[] = $query_offset;
 
-    public function loadThreadsWithoutCategory($show_deleted = false){
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id ORDER BY t.id DESC");
-        return $this->course_db->rows();
-    }
-
-    public function loadThreads($categories_ids, $show_deleted = false) {
-        assert(count($categories_ids) > 0);
-        $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
-        $query_parameters = array_merge( array(count($categories_ids)), $categories_ids );
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
-
-        $this->course_db->query("SELECT t.*, array_to_string(array_agg(e.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM threads t, thread_categories e, categories_list w WHERE {$query_delete} and pinned = false and t.id = e.thread_id and e.category_id = w.category_id GROUP BY t.id HAVING ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN (".$query_multiple_qmarks.")) ORDER BY t.id DESC", $query_parameters);
+        // Execute
+        $this->course_db->query($query, $query_parameters);
         return $this->course_db->rows();
     }
 
@@ -239,9 +249,15 @@ class DatabaseQueries {
         return array("thread_id" => $id, "post_id" => $post_id);
     }
 
+    public function getThreadsBefore($timestamp, $page) {
+        // TODO: Handle request page wise
+        $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", array($timestamp));
+        return $this->course_db->rows();
+    }
+
     public function getThread($thread_id) {
-		$this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
-		return $this->course_db->rows();
+        $this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
+        return $this->course_db->rows();
     }
 
     public function getThreadTitle($thread_id){
@@ -2164,8 +2180,9 @@ AND gc_id IN (
         return count($result) > 0;
     }
 
-    public function existsAnnouncements(){
-        $this->course_db->query("SELECT MAX(id) FROM threads where deleted = false AND pinned = true");
+    public function existsAnnouncements($show_deleted = false){
+        $query_delete = $show_deleted?"true":"deleted = false";
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND pinned = true");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -2240,7 +2257,7 @@ AND gc_id IN (
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
       $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
-        $announcement_id = $this->existsAnnouncements();
+        $announcement_id = $this->existsAnnouncements($show_deleted);
         if($announcement_id == -1){
           $this->course_db->query("SELECT MAX(id) as max from threads WHERE {$query_delete} and pinned = false");
           $thread_id = $this->course_db->rows()[0]["max"];
@@ -2256,7 +2273,6 @@ AND gc_id IN (
       }
       
       $result_rows = $this->course_db->rows();
-
       if(count($result_rows) > 0){
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
       }
