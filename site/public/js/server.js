@@ -251,6 +251,22 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(form_action, file_name) {
+    var current_y_offset = window.pageYOffset;
+    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+
+    $('[id^=div_viewer_]').each(function() {
+        var number = this.id.replace('div_viewer_', '').trim();
+
+        var elem = $('#div_viewer_' + number);
+        if (elem.hasClass('open')) {
+            document.cookie = "cm_" +number+ "=1;";
+        }
+        else {
+            document.cookie = "cm_" +number+ "=0;";
+        }
+    });
+
+
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
@@ -2163,7 +2179,28 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+        }
+    })
 }
 
 // edited slightly from https://stackoverflow.com/a/40658647

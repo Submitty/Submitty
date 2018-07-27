@@ -1232,6 +1232,20 @@ class SubmissionController extends AbstractController {
         return $return;
     }
 
+    private function uploadResultMessage($message, $success = true, $show_msg = true) {
+        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
+        $this->core->getOutput()->renderJson($return);
+
+        if ($show_msg == true) {
+            if ($success)
+                $this->core->addSuccessMessage($message);
+            else
+                $this->core->addErrorMessage($message);
+        }
+        return $return;
+    }
+
+
     private function updateSubmissionVersion() {
         $ta = $_REQUEST['ta'] ?? false;
         if ($ta !== false) {
@@ -1356,16 +1370,16 @@ class SubmissionController extends AbstractController {
 
     private function ajaxUploadImagesFiles() {
         if($this->core->getUser()->getGroup() !== 1) {
-                 return $this->uploadResult("You have no permission to access this page", false);
+            return $this->uploadResultMessage("You have no permission to access this page", false);
         }
 
         if (empty($_POST)) {
            $max_size = ini_get('post_max_size');
-           return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+           return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token.", false);
+            return $this->uploadResultMessage("Invalid CSRF token.", false);
         }
 
         $uploaded_files = array();
@@ -1389,11 +1403,11 @@ class SubmissionController extends AbstractController {
 
         if (count($errors) > 0) {
             $error_text = implode("\n", $errors);
-            return $this->uploadResult("Upload Failed: ".$error_text, false);
+            return $this->uploadResultMessage("Upload Failed: ".$error_text, false);
         }
 
         if (empty($uploaded_files)) {
-            return $this->uploadResult("No files to be submitted.", false);
+            return $this->uploadResultMessage("No files to be submitted.", false);
         }
 
         $file_size = 0;
@@ -1402,14 +1416,14 @@ class SubmissionController extends AbstractController {
             for ($j = 0; $j < $count_item; $j++) {
                 if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                        return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
+                        return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = true;
                     $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
                 }
                 else {
                     if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                        return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+                        return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = false;
                     $file_size += $uploaded_files[1]["size"][$j];
@@ -1419,14 +1433,14 @@ class SubmissionController extends AbstractController {
 
         $max_size = 10485760;
         if ($file_size > $max_size) {
-            return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+            return $this->uploadResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
         }
 
         // creating uploads/student_images directory
 
         $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
         if (!FileUtils::createDir($upload_img_path)) {
-            return $this->uploadResult("Failed to make image path.", false);
+            return $this->uploadResultMessage("Failed to make image path.", false);
         }
 
         if (isset($uploaded_files[1])) {
@@ -1451,44 +1465,48 @@ class SubmissionController extends AbstractController {
                         // so we have that string hardcoded, otherwise we can just get the status string as
                         // normal.
                         $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                        return $this->uploadResult("Could not properly unpack zip file. Error message: ".$error_message.".", false);
+                        return $this->uploadResultMessage("Could not properly unpack zip file. Error message: ".$error_message.".", false);
                     }
                 }
                 else {
                     if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                            return $this->uploadResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
                         }
                     }
                     else {
-                        return $this->uploadResult("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
+                        return $this->uploadResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
                     }
                 }
                 // Is this really an error we should fail on?
                 if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                    return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
+                    return $this->uploadResultMessage("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
                 }
             }
         }
 
-        $this->core->addSuccessMessage("Successfully uploaded file(s)!");
-        return $this->uploadResult("Successfully uploaded!", true);
+        return $this->uploadResultMessage("Successfully uploaded!", true);
 
     }
 
     private function ajaxUploadCourseMaterialsFiles() {
       if($this->core->getUser()->getGroup() !== 1) {
-         return $this->uploadResult("You have no permission to access this page", false);
+         return $this->uploadResultMessage("You have no permission to access this page", false);
       }
 
       if (empty($_POST)) {
          $max_size = ini_get('post_max_size');
-         return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+         return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResult("Invalid CSRF token.", false);
+          return $this->uploadResultMessage("Invalid CSRF token.", false);
+      }
+
+      $expand_zip = "";
+      if (isset($_POST['expand_zip'])) {
+          $expand_zip = $_POST['expand_zip'];
       }
 
       $requested_path = "";
@@ -1498,7 +1516,7 @@ class SubmissionController extends AbstractController {
 
       $n = strpos($requested_path, '..');
       if ($n !== false) {
-          return $this->uploadResult(".. is not supported in the path.", false);
+          return $this->uploadResultMessage(".. is not supported in the path.", false);
       }
 
       $uploaded_files = array();
@@ -1521,18 +1539,18 @@ class SubmissionController extends AbstractController {
 
       if (count($errors) > 0) {
           $error_text = implode("\n", $errors);
-          return $this->uploadResult("Upload Failed: ".$error_text, false);
+          return $this->uploadResultMessage("Upload Failed: ".$error_text, false);
       }
 
       if (empty($uploaded_files)) {
-          return $this->uploadResult("No files to be submitted.", false);
+          return $this->uploadResultMessage("No files to be submitted.", false);
       }
 
       $file_size = 0;
       if (isset($uploaded_files[1])) {
           for ($j = 0; $j < $count_item; $j++) {
               if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                  return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+                  return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
               }
               $file_size += $uploaded_files[1]["size"][$j];
           }
@@ -1540,20 +1558,20 @@ class SubmissionController extends AbstractController {
 
       $max_size = 10485760;
       if ($file_size > $max_size) {
-          return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+          return $this->uploadResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
       }
 
       // creating uploads/course_materials directory
       $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
       if (!FileUtils::createDir($upload_path)) {
-          return $this->uploadResult("Failed to make image path.", false);
+          return $this->uploadResultMessage("Failed to make image path.", false);
       }
 
       // create nested path
       if (!empty($requested_path)) {
           $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
           if (!FileUtils::createDir($upload_nested_path, null, true)) {
-             return $this->uploadResult("Failed to make image path.", false);
+             return $this->uploadResultMessage("Failed to make image path.", false);
           }
           $upload_path = $upload_nested_path;
       }
@@ -1562,22 +1580,45 @@ class SubmissionController extends AbstractController {
           for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                        return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                    //
+                    $is_zip_file = false;
+
+                    if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                        if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                            return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
+                        }
+                        $is_zip_file = true;
                     }
+                    //cannot check if there are duplicates inside zip file, will overwrite
+                    //it is convenient for bulk uploads
+                    if ($expand_zip == 'on' && $is_zip_file === true) {
+                        $zip = new \ZipArchive();
+                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+                        if ($res === true) {
+                            $zip->extractTo($upload_path);
+                            $zip->close();
+                        }
+                    }
+                    else
+                    {
+                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
+                           return $this->uploadResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                      }
+                    }
+                    //
                 }
                 else {
-                    return $this->uploadResult("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
+                    return $this->uploadResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
                 }
             // Is this really an error we should fail on?
               if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                  return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
+                  return $this->uploadResultMessage("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
               }
           }
       }
 
 
-      return $this->uploadResult("Successfully uploaded!", true);
+      return $this->uploadResultMessage("Successfully uploaded!", true);
 
     }
 
