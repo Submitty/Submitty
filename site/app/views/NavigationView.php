@@ -451,15 +451,17 @@ class NavigationView extends AbstractView {
         } else {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
+                // access in the view... seems bad
+                $canVicariousSubmit = $this->core->getAccess()->canI('gradeable.submit_any', ['gradeable' => $gradeable]);
                 // team assignment, no team
-                if (!$this->core->getUser()->accessFullGrading()) {
+                if (!$canVicariousSubmit) {
                     $title = "MUST BE ON A TEAM TO SUBMIT";
                     $disabled = true;
                 }
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($this->core->getUser()->accessFullGrading()) {
-                        // team assignment, no team (full access grader)
+                    if ($canVicariousSubmit) {
+                        // team assignment, no team
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
                     }
