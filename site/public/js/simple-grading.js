@@ -194,6 +194,7 @@ function setupCheckboxCells() {
                     elem = $(elem);
                     elem.animate({"border-right-width": "0px"}, 400);                                   // animate the box
                     elem.attr("data-score", elem.data("score"));                                        // update the score
+
                 });
             },
             function() {
