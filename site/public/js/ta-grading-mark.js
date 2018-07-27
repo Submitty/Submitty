@@ -273,7 +273,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
             'custom_points' : custom_points,
             'custom_message' : custom_message,
             'overwrite' : overwrite,
-            'marks_ids' : mark_ids
+            'mark_ids' : mark_ids
         },
         success: function(response) {
             if (response.status === 'fail') {
