@@ -1433,6 +1433,9 @@ class ElectronicGraderController extends GradingController {
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
 
+    /**
+     * @deprecated
+     */
     public function ajaxSaveSingleComponent() {
 
         // Required parameters
@@ -1524,21 +1527,7 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * TODO: split this into two methods: one which ONLY changes the marks assigned
-     * TODO:    and one that changes the title/point values of marks
-     */
-    /**
-     * Saves a component and GradedComponent/TaGradedGradeable
-     * @param Component $component
-     * @param TaGradedGradeable $ta_graded_gradeable
-     * @param GradedComponent $graded_component
-     * @param User $grader
-     * @param $custom_message
-     * @param $custom_points
-     * @param $component_version
-     * @param $marks
-     * @param bool $overwrite If the grader should be overwritten
-     * @return array
+     * @deprecated
      */
     public function saveSingleComponent(Component $component, TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, $custom_message, $custom_points, $component_version, $marks, $overwrite) {
         //
