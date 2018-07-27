@@ -1242,7 +1242,7 @@ class ElectronicGraderController extends GradingController {
         $component_version = $_POST['active_version'] ?? null;
 
         // Optional marks parameter
-        $marks = $_POST['marks'] ?? [];
+        $marks = $_POST['mark_ids'] ?? [];
 
         // Validate required parameters
         if ($custom_message === null) {
@@ -1265,6 +1265,17 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Invalid active_version parameter');
             return;
         }
+
+        // Convert the mark ids to integers
+        $numeric_mark_ids = [];
+        foreach ($marks as $mark) {
+            if(!ctype_digit($mark)) {
+                $this->core->getOutput()->renderJsonFail('One of provided mark ids was invalid');
+                return;
+            }
+            $numeric_mark_ids[] = intval($mark);
+        }
+        $marks = $numeric_mark_ids;
 
         // Parse the strings into ints/floats
         $component_version = intval($component_version);
