@@ -260,6 +260,61 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
     })
 }
 
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback, errorCallback) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_graded_component'}),
+        async: async,
+        data: {
+            'gradeable_id' : gradeable_id,
+            'component_id' : component_id,
+            'anon_id' : anon_id,
+            'active_version' : active_version,
+            'custom_points' : custom_points,
+            'custom_message' : custom_message,
+            'overwrite' : overwrite,
+            'marks_ids' : mark_ids
+        },
+        success: function(response) {
+            if (response.status === 'fail') {
+                console.error('Failed to save component: ' + response.message);
+            } else if (response.status === 'error') {
+                console.error('Internal error while saving component: ' + response.message);
+            }
+            if (typeof(successCallback) === "function") {
+                successCallback(response);
+            }
+        },
+        error: errorCallback
+    })
+}
+
+function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, successCallback, errorCallback) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark'}),
+        async: async,
+        data: {
+            'gradeable_id' : gradeable_id,
+            'component_id' : component_id,
+            'mark_id' : mark_id,
+            'points' : points,
+            'note' : note
+        },
+        success: function(response) {
+            if (response.status === 'fail') {
+                console.error('Failed to save mark: ' + response.message);
+            } else if (response.status === 'error') {
+                console.error('Internal error while saving mark: ' + response.message);
+            }
+            if (typeof(successCallback) === "function") {
+                successCallback(response);
+            }
+        },
+        error: errorCallback
+    });
+}
+
 function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
     $.getJSON({
         type: "POST",
@@ -1077,7 +1132,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
             return;
         }
 
-        data = response.data;
+        let data = response.data;
         if (data.component_reset === true) {
             gradedByElement.text("Ungraded!");
             component.grader = null;

@@ -1236,7 +1236,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxSaveGradedComponent() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
-        $component_id = $_POST['gradeable_component_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['active_version'] ?? null;
@@ -1367,7 +1367,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxSaveMark() {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $component_id = $_POST['gradeable_component_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
         $mark_id = $_POST['mark_id'] ?? '';
         $points = $_POST['points'] ?? '';
         $title = $_POST['note'] ?? null;
