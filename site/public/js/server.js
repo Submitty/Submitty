@@ -288,6 +288,14 @@ function passwordChange() {
     $('[name="confirm_new_password"]', form).val("");
 }
 
+function closePopup(popup) {
+    //See if we have a close button that lets us click to close
+    var closer = $(popup).find(".close-button");
+    if (closer.length) {
+        closer.click();
+    }
+}
+
 function newUploadCourseMaterialsForm() {
 
     createArray(1);
