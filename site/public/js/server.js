@@ -87,7 +87,7 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -99,7 +99,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'gradeable_version' : version});
 
         $.ajax({
             url: url,
@@ -251,6 +251,22 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(form_action, file_name) {
+    var current_y_offset = window.pageYOffset;
+    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+
+    $('[id^=div_viewer_]').each(function() {
+        var number = this.id.replace('div_viewer_', '').trim();
+
+        var elem = $('#div_viewer_' + number);
+        if (elem.hasClass('open')) {
+            document.cookie = "cm_" +number+ "=1;";
+        }
+        else {
+            document.cookie = "cm_" +number+ "=0;";
+        }
+    });
+
+
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
@@ -320,8 +336,17 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-plagiarism-result-and-config-form");
+    $('[name="gradeable_title"]', form).html('');
+    $('[name="gradeable_title"]', form).append(gradeable_title);
+    $('[name="delete"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
     var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
@@ -332,63 +357,25 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
 
-function setRankingForGradeable() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    if(gradeable_id == ""){
-        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="code_box_1"]').empty();
-        $('[name="code_box_2"]').empty();
-    }
-    else {
-        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
-                'gradeable_id': gradeable_id});
-
-        $.ajax({
-            url: url,
-            success: function(data) {
-                var rankings = JSON.parse(data);
-                if(rankings.error){
-                    alert(rankings.error);
-                    return;
-                }
-                var append_options='<option value="">None</option>';
-                $.each(rankings, function(i,user_ranking_info){
-                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
-                });
-                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
-            },
-            error: function(e) {
-                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
-            }
-        })
-    }
-}
-
-function setUserSubmittedCode(changed) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
+function setUserSubmittedCode(gradeable_id, changed) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
     if(user_id_1 == ""){
-        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="code_box_1"]').empty();
         $('[name="code_box_2"]').empty();
     }
     else {
-        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
-            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty();
-            $('[name="code_box_2"]').empty();
+            $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="code_box_1"]').empty(); 
+            $('[name="code_box_2"]').empty(); 
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
@@ -422,7 +409,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
                             }
                         });
-                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
                         $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                     },
                     error: function(e) {
@@ -450,7 +437,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
                             });
                         }
-                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                        $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -459,7 +446,7 @@ function setUserSubmittedCode(changed) {
                 $('[name="code_box_2"]').empty();
             }
             if (changed == 'user_id_2') {
-                if (($('[name="user_id_2"]', form2).val()) == '') {
+                if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
@@ -480,8 +467,8 @@ function setUserSubmittedCode(changed) {
 
                 }
                 else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
@@ -506,17 +493,15 @@ function setUserSubmittedCode(changed) {
     }
 }
 
-function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
     var version_user_2='';
     var user_id_2='';
-    if($('[name="user_id_2"]', form2).val() != "") {
-        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    if($('[name="user_id_2"]', form).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
@@ -530,7 +515,6 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             $(this).css('background-color',"#ffa500");
         }
     });
-
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
     $.ajax({
@@ -574,7 +558,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -589,8 +573,8 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
-                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
-                setUserSubmittedCode('user_id_2');
+                $('[name="user_id_2"]', form).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode(gradeable_id, 'user_id_2');
                 $('[name="code_box_1"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false) {
@@ -632,31 +616,36 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     })
 }
 
-function toggleUsersPlagiarism() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function toggleUsersPlagiarism(gradeable_id) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
 
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
 
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
-    $('[name="user_id_1"]', form2).val(user_id_2);
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
+    $('[name="user_id_1"]', form).val(user_id_2);
     jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode('user_id_1');
-    $('[name="version_user_1"]', form2).val(version_user_2);
-    setUserSubmittedCode('version_user_1');
-    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    setUserSubmittedCode(gradeable_id ,'user_id_1');
+    $('[name="version_user_1"]', form).val(version_user_2);
+    setUserSubmittedCode(gradeable_id, 'version_user_1');
+    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
     jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode('user_id_2');
+    setUserSubmittedCode(gradeable_id, 'user_id_2');
 }
 
 
-function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#run-plagiarism-form");
+function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+    var form = $("#save-configuration-form");
     if(select_element_name == "language") {
+        
+        //
+        // Following code is used to set default window size for different languages
+        // that will appear in 'configureNewGradeableForPlagiarismForm'
+        // to change the default values, just change the val attribute for the language.
+        //
+
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
         }
@@ -2190,7 +2179,28 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+        }
+    })
 }
 
 // edited slightly from https://stackoverflow.com/a/40658647
