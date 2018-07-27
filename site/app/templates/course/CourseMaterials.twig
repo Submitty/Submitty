@@ -9,11 +9,11 @@
     {% endif %}
     <h2>View Course Materials</h2>
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", hasInstructorPermission) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", hasInstructorPermission, uploadFolderPath) }}
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, hasInstructorPermission) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, hasInstructorPermission, folderPath) %}
     {# Files on top #}
 
     {% for dir, path in files if path is not iterable %}
@@ -24,7 +24,7 @@
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission, folderPath ~ '/' ~ dir) }}
     {% endfor %}
 {% endmacro %}
 
@@ -34,27 +34,28 @@
         <div class="file-viewer">
             <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
-            {% set dirExtension = dir|split('.')[1] %}
+            {% set dirExtension = dir|split('.')|last %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
-                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if hasInstructorPermission %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
                 {% endif %}
-                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student</label>
+                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, hasInstructorPermission) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, hasInstructorPermission, folderPath) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission, folderPath) }}
     {% else %}
     <div>
         <div class="div-viewer">
@@ -62,12 +63,15 @@
                 <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
+            {% if hasInstructorPermission %}
+	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'uploads/course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+            {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission, folderPath) }}
 
         </div>
     </div>
@@ -76,6 +80,47 @@
 
 
 <script type="text/javascript">
+
+    window.onload = function () {
+        // loop thru each div_viewer_xxx
+
+        var jumpToScrollPostion = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPostion\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        if (jumpToScrollPostion.length > 0 && jumpToScrollPostion != '-1') {
+
+            $('[id^=div_viewer_]').each(function() {
+            var number = this.id.replace('div_viewer_', '').trim();
+            var keyValuePairs = document.cookie.split(';');
+
+            for(var i = 0; i < keyValuePairs.length; i++) {
+                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+                if (name === 'cm_'+number && value === '1') {
+                    openDivForCourseMaterials(number);
+                    document.cookie = 'cm_' + number + '='; // clean up cookie since we don't need this anymore
+                }
+            }
+        });
+            // jump to last location if scroll is enabled.
+            window.scrollTo(0, jumpToScrollPostion);
+            document.cookie = 'jumpToScrollPostion=-1';
+
+        }
+        else {
+            // clean up all cookies which are stated with "cm_";
+            $('[id^=div_viewer_]').each(function() {
+            var number = this.id.replace('div_viewer_', '').trim();
+            var keyValuePairs = document.cookie.split(';');
+
+            for(var i = 0; i < keyValuePairs.length; i++) {
+                var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('=')).trim();
+                if (name === 'cm_'+number) {
+                    document.cookie = 'cm_' + number + '=';
+                }
+            }
+        });
+        }
+    }
+
     function openFileCourseMaterial(html_file, url_file) {
         var directory = "";
         if (url_file.includes("uploads")) {
@@ -95,6 +140,40 @@
             changePermission(path, '0');
         }
     }
+
+    function setNewDateTime(me, path) {
+        // pass filename to server to record the new date and time of the file to be released
+        var newDateTime = $(me).val();
+        //alert(newDateTime);
+        changeNewDateTime(path, newDateTime);
+    }
+
+    $(document).ready(function() {
+        $(function() {
+            $( ".date_picker" ).datetimepicker({
+                dateFormat: 'yy-mm-dd',
+                timeFormat: "HH:mm:ssz",
+                showButtonPanel: true,
+                showTimezone: false,
+                showMillisec: false,
+                showMicrosec: false,
+                beforeShow: function( input ) {
+                    setTimeout(function() {
+                        var buttonPane = $( input )
+                            .datepicker( "widget" )
+                            .find( ".ui-datepicker-buttonpane" );
+
+                        $( "<button>", {
+                            text: "Infinity",
+                            click: function() {
+                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
+                            }
+                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                    }, 1 );
+                }
+            });
+        });
+    });
 </script>
 
 
