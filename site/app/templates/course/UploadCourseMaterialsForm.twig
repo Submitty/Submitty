@@ -12,8 +12,9 @@
         <p><br>Add folder(s) to the course_materials folder if necessary: <br>
         (ex: homework1 or homework1/classes/pokemon) <br><br>
         Current folder setting:</p>
-        {{ folderPath~'/'~courseMaterial }}
+         <label id="cm_path">{{ folderPath~'/'~courseMaterial }}</label>
         <input style='width: auto' type='text' id='input_provide_full_path' name='eg_config_path' value="" placeholder="(Optional)"/>
+        <br><input id="expand_zip_checkbox" type="checkbox" value="off"/><label>Unzip zip files (Note: If checked, will replace all folders/files)</label>
     </fieldset>
     <br /> <br />
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -24,13 +25,22 @@
         </div>
     </div>
     <script type="text/javascript">
-        function makeSubmission(requestedPath) {
-            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", requestedPath);
+        function makeSubmission(expandZip,cmPath, requestedPath) {
+            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", expandZip, cmPath, requestedPath);
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button
+
+                var cb = $("input#expand_zip_checkbox");
+                var expandZip = 'off';
+                if (cb.is(":checked")) {
+                    expandZip = 'on';
+                }
+
+                var cmPath = document.getElementById('cm_path').innerHTML;
+
                 var requestedPath = document.getElementById("input_provide_full_path").value;
-                makeSubmission(requestedPath);
+                makeSubmission(expandZip, cmPath, requestedPath);
                 e.stopPropagation();
             });
         });

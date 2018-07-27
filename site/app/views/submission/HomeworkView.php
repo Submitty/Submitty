@@ -534,6 +534,7 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
+            'has_manual_grading' => $gradeable->isTaGrading(),
             // TODO: change this to submitter ID when the MiscController uses new model
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
