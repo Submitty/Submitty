@@ -27,6 +27,9 @@ class MiscController extends AbstractController {
             case 'delete_course_material_file':
                 $this->deleteCourseMaterialFile();
                 break;
+            case 'delete_course_material_folder':
+                $this->deleteCourseMaterialFolder();
+                break;
             case 'download_zip':
                 $this->downloadZip();
                 break;
@@ -238,7 +241,13 @@ class MiscController extends AbstractController {
 
         // delete the file from upload/course_materials
         $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
-        unlink($filename); //deletes the selected file from course_materials folder
+        if ( unlink($filename) )
+        {
+            $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($filename));
+        }
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -259,6 +268,50 @@ class MiscController extends AbstractController {
                                                     'action' => 'view_course_materials_page')));
     }
 
+    private function deleteCourseMaterialFolder() {
+        // security check
+
+
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+        }
+
+
+        $path = $_GET['path'];
+
+        // remove entry from json file
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($fp);
+
+        if ($json != false)
+        {
+            $all_files = FileUtils::getAllFiles($path);
+            foreach($all_files as $file){
+                $filename = $file['path'];
+                unset($json[$filename]);
+            }
+
+            file_put_contents($fp, FileUtils::encodeJson($json));
+        }
+
+        if ( FileUtils::recursiveRmdir($path) )
+        {
+            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($path));
+        }
+
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+    }
 
     private function downloadFile($download_with_any_role = false) {
         // security check
@@ -464,7 +517,7 @@ class MiscController extends AbstractController {
     }
 
 
-  	public function modifyCourseMaterialsFilePermission() {
+	public function modifyCourseMaterialsFilePermission() {
 
         // security check
         if($this->core->getUser()->getGroup() !== 1) {
@@ -476,58 +529,65 @@ class MiscController extends AbstractController {
             return;
         }
 
-        if (!isset($_GET['filename']) || !isset($_GET['checked'])) {
+        if (!isset($_GET['filename']) ||
+            !isset($_GET['checked'])) {
             return;
         }
 
-        $file_name = $_GET['filename'];
+        $file_name = htmlspecialchars($_GET['filename']);
         $checked =  $_GET['checked'];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-        $release_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
         $json = FileUtils::readJsonFile($fp);
-        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_time);
+        if ($json != false) {
+            $release_datetime  = $json[$file_name]['release_datetime'];
+        }
+
+        if (!isset($release_datetime))
+        {
+            $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        }
+
+        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		    }
-
-        //refresh course materials page
-        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+		}
     }
 
-  	public function modifyCourseMaterialsFileTimeStamp() {
+	public function modifyCourseMaterialsFileTimeStamp() {
+
         if($this->core->getUser()->getGroup() !== 1) {
+            $message = "You do not have access to that page. ";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                            'page' => 'course_materials',
+                                            'action' => 'view_course_materials_page')));
            return;
         }
 
-        if (!isset($_POST['filename'])) {
+        if (!isset($_GET['filename']) ||
+            !isset($_GET['newdatatime'])) {
             return;
         }
 
-        $file_name = $_POST['filename'];
+        $file_name = htmlspecialchars($_GET['filename']);
+        $new_data_time = htmlspecialchars($_GET['newdatatime']);
 
-        if (!isset($_POST['timestamp'])) {
-            return;
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+        $checked = '0';
+        $json = FileUtils::readJsonFile($fp);
+        if ($json != false) {
+            $checked  = $json[$file_name]['checked'];
         }
 
-        $time_stamp = $_POST['timestamp'];
+        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
 
-        //$current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
-
-        //$course_materials_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials", $filename);
-
-        //if (!@unlink($course_materials_file_path)) {
-        //    return $this->uploadResult("Failed to delete the file {$filename} from the server.", false);
-        //}
-
-
-
-        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+        if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+            return "Failed to write to file {$fp}";
+		}
     }
 }

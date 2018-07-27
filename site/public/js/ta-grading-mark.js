@@ -122,7 +122,8 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
         c_index: c_index,
         m_index: m_index,
         m_id: m_id,
-        editable: editable
+        editable: editable,
+        editEnabled: editEnabled
     });
 }
 
@@ -773,6 +774,9 @@ function updateBadge(badge, current, total) {
  * @param m_id Unique mark id
  */
 function selectMark(c_index, m_id) {
+    if(editModeEnabled==true){
+        return;
+    }
     var skip = true; //if the table is all false initially, skip check marks.
     var mark_table = $('#marks-parent-'+c_index);
     mark_table.find('.mark').each(function() {

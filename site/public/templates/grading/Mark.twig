@@ -14,16 +14,19 @@
         colspan="1"
         class="mark-score-container"
     >
-        <span
-            id="mark_id-{{ c_index }}-{{ m_id }}-check"
-            onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
-            data-component_index="{{ c_index }}"
-            data-mark_index="{{ m_id }}"
-            class="{{ mark.has ? "mark-has" : "" }} mark mark-selector"
-            name="mark_icon_{{ c_index }}_{{ m_id }}"
-        >
+        {% if not editEnabled %}
+            <span
+                id="mark_id-{{ c_index }}-{{ m_id }}-check"
+                onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
+                data-component_index="{{ c_index }}"
+                data-mark_index="{{ m_id }}"
+                class="{{ mark.has ? "mark-has" : "" }} mark mark-selector"
+                name="mark_icon_{{ c_index }}_{{ m_id }}"
+            >
+
             {{ m_index + 1 }}
-        </span>
+            </span>
+        {% endif %}
         <input
             name="mark_points_{{ c_index }}_{{ m_id }}"
             type="number" onchange="updateMarkPoints(this);"
