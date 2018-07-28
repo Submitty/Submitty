@@ -819,9 +819,10 @@ class ForumController extends AbstractController {
     // DEMO FUNCTION
     private function notificationGenerator($announcement_name, $thread_id){
         $type = "forum";
+        $current_user = $this->core->getUser()->getId();
         $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id);
         $content = "New Announcement created on {$announcement_name}";
-        $this->core->getQueries()->pushNotificationToAllUserInCourse($type, json_encode($metadata), $content, true);
+        $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
     }
 
 }

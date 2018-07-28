@@ -507,7 +507,8 @@ CREATE TABLE notifications (
     type VARCHAR(255) NOT NULL,
     metadata TEXT NOT NULL,
     content TEXT NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
+    from_user_id VARCHAR(255) NOT NULL,
+    to_user_id VARCHAR(255) NOT NULL,
     created_at timestamp with time zone NOT NULL,
     seen_at timestamp with time zone
 );
@@ -1060,11 +1061,18 @@ ALTER TABLE ONLY regrade_discussion
     ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
 
 --
--- Name: notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: notifications_to_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY notifications
-    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT notifications_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: notifications_from_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY notifications
+    ADD CONSTRAINT notifications_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 --
 -- Name: notifications_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: -

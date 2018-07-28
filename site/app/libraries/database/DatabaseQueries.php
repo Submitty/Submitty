@@ -2362,32 +2362,33 @@ AND gc_id IN (
     /**
      * Generate notifcation rows
      *
+     * @param string $source_user_id     user_id of person who generated notification
      * @param string $type               Type of notification
      * @param string $metadata           Information about the notification
      * @param string $content            Text message of notification
      * @param string $target_users_query Query selection for list of users
      * @param string $additional_param   Additional parameters to be appended
      */
-    public function pushNotification($type, $metadata, $content, $target_users_query, $additional_param){
-        $params = array($type, $metadata, $content);
+    public function pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param){
+        $params = array($type, $metadata, $content, $source_user_id);
         $params = array_merge($params, $additional_param);
-        $this->course_db->query("INSERT INTO notifications(type, metadata, content, created_at, user_id)
-                    SELECT ?, ?, ?, current_timestamp, user_id FROM ({$target_users_query}) as u",
+        $this->course_db->query("INSERT INTO notifications(type, metadata, content, created_at, from_user_id, to_user_id)
+                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u",
                     $params);
     }
 
-    public function pushNotificationToAUser($type, $metadata, $content, $user_id){
+    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $user_id){
         $additional_param = array();
         $additional_param[] = $user_id;
         $target_users_query = "SELECT ?";
-        $this->pushNotification($type, $metadata, $content, $target_users_query, $additional_param);
+        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param);
     }
 
-    public function pushNotificationToAllUserInCourse($type, $metadata, $content, $ignore_self){
+    public function pushNotificationToAllUserInCourse($source_user_id, $type, $metadata, $content, $ignore_self){
         // TODO: Implement $ignore_self
         $additional_param = array();
         $target_users_query = "SELECT user_id FROM users";
-        $this->pushNotification($type, $metadata, $content, $target_users_query, $additional_param);
+        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param);
     }
 
     public function getUserNotifications($user_id, $show_all){
@@ -2399,7 +2400,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT id, type, metadata, content,
                 (case when seen_at is NULL then false else true end) as seen,
                 (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
-                FROM notifications WHERE user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
+                FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
         return $this->course_db->rows();
     }
 
@@ -2411,12 +2412,12 @@ AND gc_id IN (
             $type_query = "type = ?";
             $parameters[] = $type;
         }
-        $this->course_db->query("SELECT count(*) FROM notifications WHERE user_id = ? and seen_at is NULL and {$type_query}", $parameters);
+        $this->course_db->query("SELECT count(*) FROM notifications WHERE to_user_id = ? and seen_at is NULL and {$type_query}", $parameters);
         return $this->course_db->row()['count'];
     }
 
     public function markNotificationAsRead($user_id, $notification_id){
-        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp WHERE id = ? and user_id = ? and seen_at is NULL", array($notification_id, $user_id));
+        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp WHERE id = ? and to_user_id = ? and seen_at is NULL", array($notification_id, $user_id));
     }
 
     /**
