@@ -807,6 +807,12 @@ class ForumController extends AbstractController {
                             rename($child_post_dir, $parent_post_dir);
                         }
                     }
+                    // Notify thread author
+                    $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
+                    $child_thread_author = $child_thread['created_by'];
+                    $child_thread_title = $child_thread['title'];
+                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                    $this->notificationGenerator(array('type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author));
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
@@ -822,18 +828,27 @@ class ForumController extends AbstractController {
     private function notificationGenerator($details){
         $type = "forum";
         $current_user = $this->core->getUser()->getId();
-        $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
         switch ($details['type']) {
             case 'new_announcement':
                 $content = "New Announcement: ".$details['thread_title'];
+                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
+                $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
                 break;
             case 'updated_announcement':
                 $content = "Announcement: ".$details['thread_title'];
+                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
+                $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
+                break;
+            case 'merge_thread':
+                // TODO: Redirect to post itself
+                $content = "Thread Merged: '".mb_strimwidth($details['child_thread_title'], 0, 40, "...")."' got merged into '".mb_strimwidth($details['parent_thread_title'], 0, 40, "...")."'";
+                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['parent_thread_id']);
+                $target_user = $details['child_thread_author'];
+                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, false);
                 break;
             default:
                 return;
         }
-        $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
     }
 
 }

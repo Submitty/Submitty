@@ -2385,10 +2385,10 @@ AND gc_id IN (
                     $params);
     }
 
-    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $user_id, $ignore_self){
+    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $target_user_id, $ignore_self){
         $additional_param = array();
-        $additional_param[] = $user_id;
-        $target_users_query = "SELECT ?";
+        $additional_param[] = $target_user_id;
+        $target_users_query = "SELECT ?::text as user_id";
         $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self);
     }
 
