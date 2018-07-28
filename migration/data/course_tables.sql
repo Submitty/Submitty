@@ -498,13 +498,17 @@ CREATE TABLE regrade_discussion (
     deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+--
+-- Name: notifications_type_enum; Type: ENUM; Schema: public; Owner: -
+--
+CREATE TYPE notifications_type AS ENUM ('forum');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
 --
 CREATE TABLE notifications (
     id serial NOT NULL PRIMARY KEY,
-    type VARCHAR(255) NOT NULL,
+    type notifications_type NOT NULL,
     metadata TEXT NOT NULL,
     content TEXT NOT NULL,
     from_user_id VARCHAR(255) NOT NULL,
@@ -1073,14 +1077,6 @@ ALTER TABLE ONLY notifications
 
 ALTER TABLE ONLY notifications
     ADD CONSTRAINT notifications_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-
---
--- Name: notifications_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: -
---
-
--- ALTER TABLE ONLY notifications
---     ADD CONSTRAINT notifications_type_check CHECK (type IN ("forum"));
-
 
 -- Forum Key relationships
 
