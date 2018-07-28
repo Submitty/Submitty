@@ -2403,6 +2403,18 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function getUnreadNotificationsCount($user_id, $type){
+        $parameters = array($user_id);
+        if(is_null($type)){
+            $type_query = "true";
+        } else {
+            $type_query = "type = ?";
+            $parameters[] = $type;
+        }
+        $this->course_db->query("SELECT count(*) FROM notifications WHERE user_id = ? and seen_at is NULL and {$type_query}", $parameters);
+        return $this->course_db->row()['count'];
+    }
+
     public function markNotificationAsRead($user_id, $notification_id){
         $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp WHERE id = ? and user_id = ? and seen_at is NULL", array($notification_id, $user_id));
     }
