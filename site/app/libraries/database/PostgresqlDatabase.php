@@ -90,10 +90,22 @@ class PostgresqlDatabase extends AbstractDatabase {
                     $in_string = true;
                     $quot = $ch;
                 }
-                else if ($in_string && $ch == $quot && $text[$i-1] == "\\") {
-                    $element = substr($element, 0, -1).$ch;
+                else if ($in_string && $ch == "\\" && strlen($text) > $i) {
+                    if ($text[$i+1] === "\\") {
+                        $element .= "\\";
+                        $i ++;
+                    } else if ($text[$i+1] === "\"") {
+                        $element .= "\"";
+                        $i ++;
+                    } else {
+                        $element .= $text[$i];
+                    }
                 }
-                else if ($in_string && $ch == $quot && $text[$i-1] != "\\") {
+                else if (!$in_string && $ch == "\\") {
+                    //Insert literal \
+                    $element .= $text[$i];
+                }
+                else if ($in_string && $ch == $quot) {
                     $in_string = false;
                     $have_string = true;
                 }
@@ -171,7 +183,8 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = $this->fromPHPToDatabaseArray($e);
             }
             else if (is_string($e)) {
-                $elements[] .= '"'. str_replace('"', '\"', $e) .'"';
+                //Turn every \ into \\ that's either preceding a " another \ or the end
+                $elements[] .= '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
             }
             else if (is_bool($e)) {
                 $elements[] .= ($e === true) ? "true" : "false";

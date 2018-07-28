@@ -1,5 +1,5 @@
 <div class="content">
-    {% if gradeable.isTeamAssignment() %}
+    {% if team_assignment %}
         <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
     {% else %}
         <h2>Unassigned PDF Uploads</h2>
@@ -37,9 +37,9 @@
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             <div id="users_{{ loop.index }}">
                                 <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
-                                {% if gradeable.isTeamAssignment() %}
+                                {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
-                                    {% for i in 1..(gradeable.getMaxTeamSize() - 1) %}
+                                    {% for i in 1..(max_team_size - 1) %}
                                         <input type="text" id="bulk_user_id_{{ loop.index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
@@ -77,10 +77,10 @@
                 if (!confirm(message)) {
                     return;
                 }
-                deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", path, count);
+                deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", path, count);
                 moveNextInput(count);
             } else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -95,7 +95,7 @@
                 $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = {{ count_array|json_encode|raw }};
                 var path = js_count_array[count];
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }

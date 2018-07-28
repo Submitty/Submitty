@@ -78,6 +78,15 @@ class AutoGradedTestcase extends AbstractModel {
     }
 
     /**
+     * Gets if this grade has any additional data to show the user other than
+     *  the numeric grade (i.e DiffViewer)
+     * @return bool
+     */
+    public function hasAutochecks() {
+        return count($this->autochecks) > 0;
+    }
+
+    /**
      * Gets if the user can view this graded testcase
      * @return bool
      */
