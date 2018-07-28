@@ -556,6 +556,10 @@ HTML;
 							$titleDisplay .= "...";
 						}
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						if($thread["current_user_posted"]) {
+							$icon = '<i class="fa fa-comments"></i> ';
+							$titleDisplay = $icon . $titleDisplay;
+						}
 						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
