@@ -2390,6 +2390,23 @@ AND gc_id IN (
         $this->pushNotification($type, $metadata, $content, $target_users_query, $additional_param);
     }
 
+    public function getUserNotifications($user_id, $show_all){
+        if($show_all){
+            $seen_status_query = "true";
+        } else {
+            $seen_status_query = "seen_at is NULL";
+        }
+        $this->course_db->query("SELECT id, type, metadata, content,
+                (case when seen_at is NULL then false else true end) as seen,
+                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
+                FROM notifications WHERE user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
+        return $this->course_db->rows();
+    }
+
+    public function markNotificationAsRead($user_id, $notification_id){
+        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp WHERE id = ? and user_id = ? and seen_at is NULL", array($notification_id, $user_id));
+    }
+
     /**
      * Determines if a course is 'active' or if it was dropped.
      *

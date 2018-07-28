@@ -180,6 +180,16 @@ class NavigationView extends AbstractView {
         }
 
         // ======================================================================================
+        // NOTIFICATIONS BUTTON
+        // ======================================================================================
+
+        $top_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
+            "title" => "Notifications",
+            "class" => "btn btn-primary"
+        ]);
+
+        // ======================================================================================
         // INDEX OF ALL GRADEABLES
         // ======================================================================================
 
@@ -694,4 +704,13 @@ class NavigationView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
     }
 
+    public function listNotifications($notifications, $show_all) {
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+        return $this->core->getOutput()->renderTwigTemplate("Notifications.twig", [
+            'course' => $currentCourse,
+            'show_all' => $show_all,
+            'notifications' => $notifications
+        ]);
+    }
 }

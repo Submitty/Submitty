@@ -19,6 +19,9 @@ class NavigationController extends AbstractController {
             case 'no_access':
                 $this->noAccess();
                 break;
+            case 'notifications':
+                $this->notificationsHandler();
+                break;
             default:
                 $this->navigationPage();
                 break;
@@ -121,5 +124,42 @@ class NavigationController extends AbstractController {
         }
 
         return true;
+    }
+
+    private function getElapsedTime($elapsed_time, $actual_time){
+        if($elapsed_time < 60){
+            return "Less than a minute ago";
+        } else if($elapsed_time < 3600){
+            $minutes = floor($elapsed_time/60);
+            if($minutes == 1)
+                return "1 minute ago";
+            else
+                return "{$minutes} minutes ago";
+        } else if($elapsed_time < 3600*24){
+            $hours = floor($elapsed_time/3600);
+            if($hours == 1)
+                return "1 hour ago";
+            else
+                return "{$hours} hours ago";
+        } else {
+            return date_format(date_create($actual_time), "n/j g:i A");
+        }
+    }
+
+    private function notificationsHandler() {
+        $user_id = $this->core->getUser()->getId();
+        if(!empty($_GET['action']) && $_GET['action'] == 'mark_as_read') {
+            $this->core->getQueries()->markNotificationAsRead($user_id, $_GET['nid']);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+        } else {
+            // Show Notifications
+            $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
+            $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
+            foreach ($notifications as &$notification) {
+                $notification['url'] = $this->core->buildUrl(json_decode($notification['metadata']));
+                $notification['time'] = $this->getElapsedTime($notification['elapsed_time'], $notification['created_at']);
+            }
+            $this->core->getOutput()->renderOutput('Navigation', 'listNotifications', $notifications, $show_all);
+        }
     }
 }

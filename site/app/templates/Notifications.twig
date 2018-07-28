@@ -1,0 +1,45 @@
+<div class="content">
+    <div style="float: right; margin-bottom: 20px;">
+        {% if show_all %}
+            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
+        {% else %}
+            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
+        {% endif %}
+    </div>
+    <h2>Notifications</h2>
+    <table class="table table-bordered persist-area">
+                <tr class="info persist-header">
+                    <td colspan="8" style="text-align: center">Course: {{ course  }}</td>
+                </tr>
+                <tbody style="text-align: left;">
+                    {% for notification in notifications %}
+                        <tr>
+                            <td colspan="1">
+                                {% if notification.type == "forum" %}
+                                    <i class="fa fa-comments"></i>
+                                {% endif %}
+                            </td>
+                            <a>
+                                <td colspan="4">
+                                    {{ notification.content }}
+                                </td>
+                            </a>
+                            <td colspan="2">
+                                {{ notification.time }}
+                            </td>
+                            <td colspan="1">
+                                {% if not notification.seen %} 
+                                    <a class="btn btn-primary" href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_read", "nid": notification.id }) }}">Mark as read</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            {% if notifications is empty %}
+            <tr>
+                <td colspan="8">No notification found</td>
+            </tr>
+            {% endif %}        
+    </table>
+</div>
