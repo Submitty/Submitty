@@ -2411,6 +2411,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
+    public function getNotificationInfoById($user_id, $notification_id){
+        $this->course_db->query("SELECT metadata FROM notifications WHERE to_user_id = ? and id = ?", array($user_id, $notification_id));
+        return $this->course_db->row();
+    }
+
     public function getUnreadNotificationsCount($user_id, $type){
         $parameters = array($user_id);
         if(is_null($type)){

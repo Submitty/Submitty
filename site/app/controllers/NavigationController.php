@@ -149,18 +149,24 @@ class NavigationController extends AbstractController {
     private function notificationsHandler() {
         $user_id = $this->core->getUser()->getId();
         if(!empty($_GET['action'])){
-            if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+            if($_GET['action'] == 'open_notification' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+                if(!$_GET['seen']) {
+                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
+                }
+                $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
+                $this->core->redirect($this->core->buildUrl(json_decode($metadata)));
+            } else if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
             } else if($_GET['action'] == 'mark_all_as_seen') {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
         } else {
             // Show Notifications
             $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
             $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
             foreach ($notifications as &$notification) {
-                $notification['url'] = $this->core->buildUrl(json_decode($notification['metadata']));
                 $notification['time'] = $this->getElapsedTime($notification['elapsed_time'], $notification['created_at']);
             }
             $this->core->getOutput()->renderOutput('Navigation', 'listNotifications', $notifications, $show_all);

@@ -21,7 +21,7 @@
                                 {% endif %}
                             </td>
                             <td colspan="4">
-                                <a href="{{ notification.url }}">
+                                <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.id, "seen": notification.seen }) }}">
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.content }}
                                     </div>
