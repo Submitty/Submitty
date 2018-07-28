@@ -20,11 +20,13 @@
                                     <i class="fa fa-comments"></i>
                                 {% endif %}
                             </td>
-                            <a>
-                                <td colspan="4">
-                                    {{ notification.content }}
-                                </td>
-                            </a>
+                            <td colspan="4">
+                                <a href="{{ notification.url }}">
+                                    <div style="height: 100%; width: 100%;">
+                                        {{ notification.content }}
+                                    </div>
+                                </a>
+                            </td>
                             <td colspan="2">
                                 {{ notification.time }}
                             </td>
