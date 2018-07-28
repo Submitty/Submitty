@@ -2368,27 +2368,34 @@ AND gc_id IN (
      * @param string $content            Text message of notification
      * @param string $target_users_query Query selection for list of users
      * @param string $additional_param   Additional parameters to be appended
+     * @param bool   $ignore_self        Should ignore $source_user_id from target users
      */
-    public function pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param){
+    public function pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self){
         $params = array($type, $metadata, $content, $source_user_id);
         $params = array_merge($params, $additional_param);
+        if($ignore_self){
+            $ignore_self_query = "WHERE user_id <> ?";
+            $params[] = $source_user_id;
+        }
+        else {
+            $ignore_self_query = "";
+        }
         $this->course_db->query("INSERT INTO notifications(type, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u",
+                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     $params);
     }
 
-    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $user_id){
+    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $user_id, $ignore_self){
         $additional_param = array();
         $additional_param[] = $user_id;
         $target_users_query = "SELECT ?";
-        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param);
+        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self);
     }
 
     public function pushNotificationToAllUserInCourse($source_user_id, $type, $metadata, $content, $ignore_self){
-        // TODO: Implement $ignore_self
         $additional_param = array();
         $target_users_query = "SELECT user_id FROM users";
-        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param);
+        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self);
     }
 
     public function getUserNotifications($user_id, $show_all){
