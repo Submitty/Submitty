@@ -63,8 +63,8 @@ class MiscController extends AbstractController {
         // from this point on, is not a zip
         // do path and permissions checking
 
-        $dir = $_GET['dir'];
-        $path = $_GET['path'];
+        $dir = $_REQUEST['dir'];
+        $path = $_REQUEST['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
@@ -207,13 +207,13 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path'])));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
@@ -240,7 +240,7 @@ class MiscController extends AbstractController {
         }
 
         // delete the file from upload/course_materials
-        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
         if ( unlink($filename) )
         {
             $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
@@ -282,7 +282,7 @@ class MiscController extends AbstractController {
         }
 
 
-        $path = $_GET['path'];
+        $path = $_REQUEST['path'];
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -327,7 +327,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=\"{$filename}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
     }
 
     private function downloadZip() {
@@ -568,13 +568,13 @@ class MiscController extends AbstractController {
            return;
         }
 
-        if (!isset($_GET['filename']) ||
-            !isset($_GET['newdatatime'])) {
+        if (!isset($_REQUEST['filename']) ||
+            !isset($_REQUEST['newdatatime'])) {
             return;
         }
 
-        $file_name = htmlspecialchars($_GET['filename']);
-        $new_data_time = htmlspecialchars($_GET['newdatatime']);
+        $file_name = htmlspecialchars($_REQUEST['filename']);
+        $new_data_time = htmlspecialchars($_REQUEST['newdatatime']);
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
