@@ -330,7 +330,7 @@ class ForumController extends AbstractController {
 
                 }
                 if($announcment){
-                    $this->notificationGenerator($title, $id);
+                    $this->notificationGenerator(array('type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -393,6 +393,9 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
+            if($type) {
+                $this->notificationGenerator(array('type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
+            }
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
@@ -816,12 +819,20 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    // DEMO FUNCTION
-    private function notificationGenerator($announcement_name, $thread_id){
+    private function notificationGenerator($details){
         $type = "forum";
         $current_user = $this->core->getUser()->getId();
-        $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id);
-        $content = "New Announcement created on {$announcement_name}";
+        $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
+        switch ($details['type']) {
+            case 'new_announcement':
+                $content = "New Announcement: ".$details['thread_title'];
+                break;
+            case 'updated_announcement':
+                $content = "Announcement: ".$details['thread_title'];
+                break;
+            default:
+                return;
+        }
         $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
     }
 
