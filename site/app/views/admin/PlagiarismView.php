@@ -6,7 +6,7 @@ use app\libraries\FileUtils;
 
 class PlagiarismView extends AbstractView {
 
-    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result, $refresh_page) {
+    public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info) {
         $return = "";
         $return .= <<<HTML
 <div class="content">
@@ -39,6 +39,10 @@ HTML;
                 $students = "N/A";
                 $submissions = "N/A";
             }
+            $night_rerun_status= "";
+            if($nightly_rerun_info[$id] ==true) {
+                $night_rerun_status = "checked";
+            }
 
             #lichen job in queue for this gradeable but processing not started
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
@@ -57,6 +61,9 @@ HTML;
             </td>
             <td>
                 $students students, $submissions submissions
+            </td>
+            <td>
+                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
             </td>
         </tr>
 HTML;
@@ -80,6 +87,9 @@ HTML;
             <td>
                 $students students, $submissions submissions
             </td>
+            <td>
+                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
+            </td>
         </tr>
 HTML;
             }
@@ -101,6 +111,9 @@ HTML;
             </td>
             <td>
                 $students students, $submissions submissions
+            </td>
+            <td>
+                <label><input type="checkbox" onclick='window.location.href = buildUrl({"component":"admin", "page" :"plagiarism", "course":"{$course}", "semester": "{$semester}", "action": "toggle_nightly_rerun", "gradeable_id":"{$id}"});' {$night_rerun_status} >Nightly Re-run </label>
             </td>
         </tr>
 HTML;
@@ -141,6 +154,15 @@ HTML;
 
         $return .= <<<HTML
         <div class="sub">
+        <div style="float:right;">
+            <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Code is unique<br />
+            <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Code matches with many/all students<br />
+            <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Code matches with Provided code<br />
+            <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Code doesn't match with student selected on right<br />
+            <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> All code matching between left and right student<br />
+            <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Sub part of orange code showing actual match.<br />
+        </div>
+        <br><br><br><br><br><br><br>
         Gradeable: <b>$gradeable_title</b><br />
         <br>
         <form id="users_with_plagiarism">
@@ -150,7 +172,7 @@ HTML;
 HTML;
         foreach ($rankings as $ranking) {
             $return .= <<<HTML
-                <option value="{$ranking[1]}">$ranking[3]  ($ranking[0])</option>    
+                <option value="{$ranking[1]}">$ranking[3] $ranking[4] ($ranking[0])</option>    
 HTML;
         }
 
@@ -167,9 +189,9 @@ HTML;
                 <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>   
         </form><br />
-        <div name="code_box_1" style="float:left;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div name="code_box_1" style="float:left;width:48%;height:700px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
-        <div name="code_box_2" style="float:right;width:45%;height:500px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div name="code_box_2" style="float:right;width:48%;height:700px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
         </div>
 HTML;
