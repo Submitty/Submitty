@@ -329,6 +329,9 @@ class ForumController extends AbstractController {
                     }
 
                 }
+                if($announcment){
+                    $this->notificationGenerator($title, $id);
+                }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
         }
@@ -811,6 +814,14 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+    }
+
+    // DEMO FUNCTION
+    private function notificationGenerator($announcement_name, $thread_id){
+        $type = "forum";
+        $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id);
+        $content = "New Announcement created on {$announcement_name}";
+        $this->core->getQueries()->pushNotificationToAllUserInCourse($type, json_encode($metadata), $content, true);
     }
 
 }

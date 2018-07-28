@@ -2360,6 +2360,37 @@ AND gc_id IN (
     }
 
     /**
+     * Generate notifcation rows
+     *
+     * @param string $type               Type of notification
+     * @param string $metadata           Information about the notification
+     * @param string $content            Text message of notification
+     * @param string $target_users_query Query selection for list of users
+     * @param string $additional_param   Additional parameters to be appended
+     */
+    public function pushNotification($type, $metadata, $content, $target_users_query, $additional_param){
+        $params = array($type, $metadata, $content);
+        $params = array_merge($params, $additional_param);
+        $this->course_db->query("INSERT INTO notifications(type, metadata, content, created_at, user_id)
+                    SELECT ?, ?, ?, current_timestamp, user_id FROM ({$target_users_query}) as u",
+                    $params);
+    }
+
+    public function pushNotificationToAUser($type, $metadata, $content, $user_id){
+        $additional_param = array();
+        $additional_param[] = $user_id;
+        $target_users_query = "SELECT ?";
+        $this->pushNotification($type, $metadata, $content, $target_users_query, $additional_param);
+    }
+
+    public function pushNotificationToAllUserInCourse($type, $metadata, $content, $ignore_self){
+        // TODO: Implement $ignore_self
+        $additional_param = array();
+        $target_users_query = "SELECT user_id FROM users";
+        $this->pushNotification($type, $metadata, $content, $target_users_query, $additional_param);
+    }
+
+    /**
      * Determines if a course is 'active' or if it was dropped.
      *
      * This is used to filter out courses displayed on the home screen, for when
