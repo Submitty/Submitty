@@ -1,5 +1,6 @@
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
+         <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_all_as_seen"}) }}" class="btn btn-primary">Mark all as seen</a>
         {% if show_all %}
             <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
         {% else %}
@@ -29,7 +30,9 @@
                             </td>
                             <td colspan="1">
                                 {% if not notification.seen %} 
-                                    <a class="btn btn-primary" href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_read", "nid": notification.id }) }}">Mark as read</a>
+                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_seen", "nid": notification.id }) }}" title="Mark as seen">
+                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>

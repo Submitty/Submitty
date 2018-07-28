@@ -2416,8 +2416,23 @@ AND gc_id IN (
         return $this->course_db->row()['count'];
     }
 
-    public function markNotificationAsRead($user_id, $notification_id){
-        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp WHERE id = ? and to_user_id = ? and seen_at is NULL", array($notification_id, $user_id));
+    /**
+     * Marks $user_id notifications as seen
+     *
+     * @param sting $user_id
+     * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
+     */
+    public function markNotificationAsSeen($user_id, $notification_id){
+        $parameters = array();
+        $parameters[] = $user_id;
+        if($notification_id == -1) {
+            $id_query = "true";
+        } else {
+            $id_query = "id = ?";
+            $parameters[] = $notification_id;
+        }
+        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp
+                WHERE to_user_id = ? and seen_at is NULL and {$id_query}", $parameters);
     }
 
     /**

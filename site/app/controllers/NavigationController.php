@@ -148,8 +148,12 @@ class NavigationController extends AbstractController {
 
     private function notificationsHandler() {
         $user_id = $this->core->getUser()->getId();
-        if(!empty($_GET['action']) && $_GET['action'] == 'mark_as_read') {
-            $this->core->getQueries()->markNotificationAsRead($user_id, $_GET['nid']);
+        if(!empty($_GET['action'])){
+            if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
+            } else if($_GET['action'] == 'mark_all_as_seen') {
+                $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+            }
             $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
         } else {
             // Show Notifications
