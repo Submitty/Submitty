@@ -145,10 +145,11 @@ class DatabaseQueries {
         $query_delete .= " and merged_thread_id = -1";
         $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
+        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
         // Parameters
         $query_parameters   = array();
+        $query_parameters[] = $current_user;
         $query_parameters[] = $current_user;
         $query_parameters[] = count($categories_ids);
         $query_parameters   = array_merge($query_parameters, $categories_ids);
