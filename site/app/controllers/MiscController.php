@@ -36,6 +36,8 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'base64_encode_pdf':
+                $this->encodePDF();
             case 'modify_course_materials_file_permission':
                 $this->modifyCourseMaterialsFilePermission();
                 break;
@@ -197,6 +199,15 @@ class MiscController extends AbstractController {
         {
             return false;
         }
+    }
+
+    private function encodePDF(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $file_name = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        return $this->core->getOutput()->renderJson($pdf64);
     }
 
     private function displayFile() {
