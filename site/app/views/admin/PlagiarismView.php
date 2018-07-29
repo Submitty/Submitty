@@ -172,7 +172,7 @@ HTML;
 HTML;
         foreach ($rankings as $ranking) {
             $return .= <<<HTML
-                <option value="{$ranking[1]}">$ranking[3] $ranking[4] ($ranking[0])</option>    
+                <option value="{$ranking[1]}">$ranking[3] $ranking[4] &lt;$ranking[1]&gt; ($ranking[0])</option>    
 HTML;
         }
 
@@ -189,9 +189,9 @@ HTML;
                 <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>   
         </form><br />
-        <div name="code_box_1" style="float:left;width:48%;height:700px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div name="code_box_1" style="float:left;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
-        <div name="code_box_2" style="float:right;width:48%;height:700px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div name="code_box_2" style="float:right;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
         </div>
 HTML;
