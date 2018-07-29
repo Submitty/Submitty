@@ -382,6 +382,10 @@ class ForumController extends AbstractController {
                         move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                     }
                 }
+                // Notification to parent post author
+                $post = $this->core->getQueries()->getPost($parent_id);
+                $post_author = $post['author_user_id'];
+                $this->notificationGenerator(array('type' => 'reply', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
@@ -839,12 +843,19 @@ class ForumController extends AbstractController {
                 $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
                 $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
                 break;
+            case 'reply':
+                // TODO: Redirect to post itself
+                $content = "Reply: Your post '".mb_strimwidth(str_replace("\n", " ", $details['post_content']), 0, 40, "...")."' got new a reply from ".$current_user;
+                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
+                $target_user = $details['reply_to'];
+                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, true);
+                break;
             case 'merge_thread':
                 // TODO: Redirect to post itself
                 $content = "Thread Merged: '".mb_strimwidth($details['child_thread_title'], 0, 40, "...")."' got merged into '".mb_strimwidth($details['parent_thread_title'], 0, 40, "...")."'";
                 $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['parent_thread_id']);
                 $target_user = $details['child_thread_author'];
-                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, false);
+                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, true);
                 break;
             default:
                 return;
