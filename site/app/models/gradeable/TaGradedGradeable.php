@@ -325,6 +325,14 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Resets the user_viewed_date to be as if the student never saw the grade
+     */
+    public function resetUserViewedDate() {
+        $this->user_viewed_date = null;
+        $this->modified = true;
+    }
+
+    /**
      * Gets all of the graders
      * @return User[] indexed by user id
      */

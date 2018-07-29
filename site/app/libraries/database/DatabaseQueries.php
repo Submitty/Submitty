@@ -145,10 +145,11 @@ class DatabaseQueries {
         $query_delete .= " and merged_thread_id = -1";
         $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
+        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
         // Parameters
         $query_parameters   = array();
+        $query_parameters[] = $current_user;
         $query_parameters[] = $current_user;
         $query_parameters[] = count($categories_ids);
         $query_parameters   = array_merge($query_parameters, $categories_ids);
@@ -647,7 +648,7 @@ SELECT count(*) as cnt, {$section_key}
 FROM users
 {$where}
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')", $params);
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
@@ -2574,14 +2575,14 @@ AND gc_id IN (
      *  data associated with them
      * @param Mark[] $marks An array of marks to delete
      */
-    public function deleteMarks(array $marks) {
+    private function deleteMarks(array $marks) {
         if (count($marks) === 0) {
             return;
         }
         // We only need the ids
-        $mark_ids = array_map(function (Mark $mark) {
+        $mark_ids = array_values(array_map(function (Mark $mark) {
             return $mark->getId();
-        }, $marks);
+        }, $marks));
         $place_holders = implode(',', array_fill(0, count($marks), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN ($place_holders)", $mark_ids);
@@ -2628,7 +2629,7 @@ AND gc_id IN (
     }
 
     /**
-     * Iterates through each mark in a component and updates/creates
+     * Iterates through each mark in a component and updates/creates/deletes
      *  it in the database as necessary.  Note: the component must
      *  already exist in the database to add new marks
      * @param Component $component
@@ -2637,26 +2638,29 @@ AND gc_id IN (
 
         // sort marks by order
         $marks = $component->getMarks();
-        usort($marks, function(Mark $a, Mark $b) {
+        usort($marks, function (Mark $a, Mark $b) {
             return $a->getOrder() - $b->getOrder();
         });
 
         $order = 0;
         foreach ($marks as $mark) {
             // rectify mark order
-            if($mark->getOrder() !== $order) {
+            if ($mark->getOrder() !== $order) {
                 $mark->setOrder($order);
             }
             ++$order;
 
             // New mark, so add it
-            if($mark->getId() < 1) {
+            if ($mark->getId() < 1) {
                 $this->createMark($mark, $component->getId());
             }
             if ($mark->isModified()) {
                 $this->updateMark($mark);
             }
         }
+
+        // Delete any marks not being updated
+        $this->deleteMarks($component->getDeletedMarks());
     }
 
     /**
@@ -2701,19 +2705,35 @@ AND gc_id IN (
      *  data associated with them
      * @param array $components
      */
-    public function deleteComponents(array $components) {
+    private function deleteComponents(array $components) {
         if (count($components) === 0) {
             return;
         }
 
         // We only want the ids in our array
-        $component_ids = array_map(function (Component $component) {
+        $component_ids = array_values(array_map(function (Component $component) {
             return $component->getId();
-        }, $components);
+        }, $components));
         $place_holders = implode(',', array_fill(0, count($components), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN ($place_holders)", $component_ids);
         $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN ($place_holders)", $component_ids);
+    }
+
+    /**
+     * Creates / updates a component and its marks in the database
+     * @param Component $component
+     */
+    public function saveComponent(Component $component) {
+        // New component, so add it
+        if ($component->getId() < 1) {
+            $this->createComponent($component);
+        } else {
+            $this->updateComponent($component);
+        }
+
+        // Then, update/create/delete its marks
+        $this->updateComponentMarks($component);
     }
 
     /**
@@ -2825,16 +2845,12 @@ AND gc_id IN (
             }
             ++$order;
 
-            // New component, so add it
-            if ($component->getId() < 1) {
-                $this->createComponent($component);
-            } else {
-                $this->updateComponent($component);
-            }
-
-            // Then, update/create its marks
-            $this->updateComponentMarks($component);
+            // Save the component
+            $this->saveComponent($component);
         }
+
+        // Delete any components not being updated
+        $this->deleteComponents($gradeable->getDeletedComponents());
     }
 
     /**
@@ -3013,22 +3029,43 @@ AND gc_id IN (
      */
     private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
-            $params = [
-                $graded_component->getScore(),
-                $graded_component->getComment(),
-                $graded_component->getGradedVersion(),
-                DateUtils::dateTimeToString($graded_component->getGradeTime()),
-                $graded_component->getTaGradedGradeable()->getId(),
-                $graded_component->getComponentId(),
-                $graded_component->getGraderId()
-            ];
-            $query = "
-                UPDATE gradeable_component_data SET 
-                  gcd_score=?,
-                  gcd_component_comment=?,
-                  gcd_graded_version=?,
-                  gcd_grade_time=?
-                WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+            if(!$graded_component->getComponent()->isPeer()) {
+                $params = [
+                    $graded_component->getScore(),
+                    $graded_component->getComment(),
+                    $graded_component->getGradedVersion(),
+                    DateUtils::dateTimeToString($graded_component->getGradeTime()),
+                    $graded_component->getGraderId(),
+                    $graded_component->getTaGradedGradeable()->getId(),
+                    $graded_component->getComponentId()
+                ];
+                $query = "
+                    UPDATE gradeable_component_data SET 
+                      gcd_score=?,
+                      gcd_component_comment=?,
+                      gcd_graded_version=?,
+                      gcd_grade_time=?,
+                      gcd_grader_id=?
+                    WHERE gd_id=? AND gc_id=?";
+            }
+            else {
+                $params = [
+                  $graded_component->getScore(),
+                  $graded_component->getComment(),
+                  $graded_component->getGradedVersion(),
+                  DateUtils::dateTimeToString($graded_component->getGradeTime()),
+                  $graded_component->getTaGradedGradeable()->getId(),
+                  $graded_component->getComponentId(),
+                  $graded_component->getGraderId()
+                ];
+                $query = "
+                    UPDATE gradeable_component_data SET 
+                      gcd_score=?,
+                      gcd_component_comment=?,
+                      gcd_graded_version=?,
+                      gcd_grade_time=?,
+                    WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+            }
             $this->course_db->query($query, $params);
         }
     }
@@ -3058,8 +3095,7 @@ AND gc_id IN (
         // iterate through graded components and see if any need updating/creating
         foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
             foreach ($container->getGradedComponents() as $component_grade) {
-                // This means the component wasn't loaded from the database, ergo its new
-                if ($component_grade->getDbMarkIds() === null) {
+                if ($component_grade->isNew()) {
                     $this->createGradedComponent($component_grade);
                 } else {
                     $this->updateGradedComponent($component_grade);

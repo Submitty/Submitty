@@ -2,34 +2,34 @@
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 
 <div class="content">
-    {% if hasInstructorPermission %}
+    {% if userGroup == 1 %}
         <div style="float: right; margin-bottom: 20px;">
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Materials</a>
         </div>
     {% endif %}
     <h2>View Course Materials</h2>
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", hasInstructorPermission, uploadFolderPath) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath) }}
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, hasInstructorPermission, folderPath) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath) %}
     {# Files on top #}
 
     {% for dir, path in files if path is not iterable %}
-        {% if hasInstructorPermission or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, hasInstructorPermission) }}
+        {% if userGroup != 4 or fileShares[path] == "1" %}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, hasInstructorPermission, folderPath ~ '/' ~ dir) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, hasInstructorPermission) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
     <div>
         <div class="file-viewer">
             <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
@@ -39,7 +39,7 @@
                  <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
-            {% if hasInstructorPermission %}
+            {% if userGroup == 1 %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'uploads/course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
@@ -53,9 +53,9 @@
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, hasInstructorPermission, folderPath) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission, folderPath) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
     {% else %}
     <div>
         <div class="div-viewer">
@@ -63,7 +63,7 @@
                 <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
-            {% if hasInstructorPermission %}
+            {% if userGroup == 1 %}
 	            <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'uploads/course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
             {% endif %}
         </div>
@@ -71,7 +71,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, hasInstructorPermission, folderPath) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
 
         </div>
     </div>
