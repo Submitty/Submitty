@@ -165,7 +165,6 @@ class NavigationView extends AbstractView {
                 "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
                 "title" => "Discussion Forum",
                 "class" => "btn btn-primary",
-                "notifications_count" => $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), "forum")
             ]);
         }
         // ======================================================================================
@@ -187,7 +186,8 @@ class NavigationView extends AbstractView {
         $top_buttons[] = new Button($this->core, [
             "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
             "title" => "Notifications",
-            "class" => "btn btn-primary"
+            "class" => "btn btn-primary",
+            "notifications_count" => $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null)
         ]);
 
         // ======================================================================================
