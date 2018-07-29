@@ -126,7 +126,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Lichen job is running for this gradeable. Refresh in a while.");
+            $this->core->addErrorMessage("Lichen Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
@@ -350,7 +350,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);  
         }
 
-        $this->core->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
+        $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for ".$gradeable_id);
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
@@ -407,7 +407,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);  
         }
 
-        $this->core->addSuccessMessage("Refresh after a while to see re-run results.");
+        $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for ".$gradeable_id);
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
@@ -457,7 +457,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted in a while.");
+        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.")
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
     }
 
