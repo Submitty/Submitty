@@ -9,12 +9,6 @@ use app\libraries\FileUtils;
 class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'compare':
-                $this->plagiarismCompare();
-                break;
-            case 'index':
-                $this->plagiarismIndex();
-                break;
             case 'configure_new_gradeable_for_plagiarism_form':
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
@@ -38,7 +32,13 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'delete_plagiarism_result_and_config':
                 $this->deletePlagiarismResultAndConfig();
-                break;     
+                break;
+            case 'check_refresh_lichen_mainpage':
+                $this->checkRefreshLichenMainPage();
+                break;
+            case 'toggle_nightly_rerun':
+                $this->toggleNightlyRerun();
+                break;             
             case 'show_plagiarism_result':
                 $this->showPlagiarismResult(); 
                 break;            
@@ -49,37 +49,67 @@ class PlagiarismController extends AbstractController {
         }
     }
 
-    public function plagiarismCompare() {
-        $semester = $_REQUEST['semester'];
-        $course = $_REQUEST['course'];
-        $assignment = $_REQUEST['assignment'];
-        $studenta = $_REQUEST['studenta'];
-        $studentb = $_REQUEST['studentb'];
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismCompare', $semester, $course, $assignment, $studenta, $studentb);
-    }
-
-    public function plagiarismIndex() {
-        $semester = $_REQUEST['semester'];
-        $course = $_REQUEST['course'];
-        $assignment = $_REQUEST['assignment'];
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismIndex', $semester, $course, $assignment);
-    }
-
     public function plagiarismMainPage() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        
+
+        #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
+        $refresh_page ="NO_REFRESH";
+        if(isset($_REQUEST['refresh_page'])) {
+            $refresh_page = $_REQUEST['refresh_page'];            
+        }
+
+
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
         }
 
         $gradeables_with_plagiarism_result= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeables_with_plagiarism_result as $i => $gradeable_id_title) {
-            if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt")) {
+            if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id_title['g_id'].".txt") && !file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") && !file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 unset($gradeables_with_plagiarism_result[$i]);
             }
         }
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result);
+
+        $nightly_rerun_info_file ="/var/local/submitty/courses/".$semester."/".$course."/lichen/nightly_rerun.json";
+        if(!file_exists($nightly_rerun_info_file)) {
+            $nightly_rerun_info = array();
+            foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
+               $nightly_rerun_info[$gradeable_id_title['g_id']] = false; 
+            }
+            if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+                die("Failed to create nightly rerun info file");
+            }
+        }
+        else {
+            $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
+            foreach ($nightly_rerun_info as $gradeable_id => $nightly_rerun_status) {
+                $flag=0;
+                foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
+                   if($gradeable_id_title['g_id'] == $gradeable_id) {
+                        $flag=1;break;
+                   }
+                }
+                if ($flag == 0) {
+                    #implies plagiarism result for this gradeable are deleted
+                    unset($nightly_rerun_info[$gradeable_id]);
+                }
+            }
+
+            foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
+                if(!array_key_exists($gradeable_id_title['g_id'], $nightly_rerun_info)) {
+                    #implies plagiarism was run for this gradeable
+                    $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
+                }
+            }
+            if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+                die("Failed to create nightly rerun info file");
+            }   
+        }
+
+
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'deletePlagiarismResultAndConfigForm');
         
     }
@@ -96,7 +126,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
+            $this->core->addErrorMessage("Lichen Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
@@ -108,7 +138,8 @@ class PlagiarismController extends AbstractController {
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings,3);
         foreach($rankings as $i => $ranking) {
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());  
+            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
+            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getLastName());  
         }
         
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
@@ -121,7 +152,7 @@ class PlagiarismController extends AbstractController {
         $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
         $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach($gradeable_ids_titles as $i => $gradeable_id_title) {
-            if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission)) {
+            if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id_title['g_id'].".json")) {
                 unset($gradeable_ids_titles[$i]);
             }
         }       
@@ -319,8 +350,8 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);  
         }
 
-        $this->core->addSuccessMessage("Configuration created. Refresh after a while to view the plagiarism results.");
-        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester)));
+        $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for ".$gradeable_id);
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
     private function enqueueLichenJob($job, $gradeable_id) {
@@ -376,8 +407,8 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);  
         }
 
-        $this->core->addSuccessMessage("Refresh after a while to see re-run results.");
-        $this->core->redirect($return_url);
+        $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for ".$gradeable_id);
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
     public function editPlagiarismSavedConfig() {
@@ -426,8 +457,26 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted in a while.");
-        $this->core->redirect($return_url);   
+        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.")
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
+    }
+
+    public function toggleNightlyRerun() {
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester));
+
+        $nightly_rerun_info_file ="/var/local/submitty/courses/".$semester."/".$course."/lichen/nightly_rerun.json";
+
+        $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
+        $nightly_rerun_info[$gradeable_id] = !$nightly_rerun_info[$gradeable_id];
+        if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
+            $this->core->addErrorMessage("Failed to change nightly rerun for the gradeable");
+            $this->core->redirect($return_url);
+        } 
+        $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
+        $this->core->redirect($return_url);
     }
 
     public function ajaxGetSubmissionConcatinated() {
@@ -711,7 +760,8 @@ class PlagiarismController extends AbstractController {
 	    		}
 	    	}
 	    	foreach($return as $i => $match_user) {
-    			array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());  
+    			array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());
+                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getLastName());  
     		}
 	    	$return = json_encode($return);
 	        echo($return);
@@ -741,13 +791,39 @@ class PlagiarismController extends AbstractController {
                         foreach($match_info['matchingpositions'] as $matchingpos) {
                             array_push($matchingpositions, array("start"=> $matchingpos["start"] , "end"=>$matchingpos["end"]));
                         }
-                        array_push($return, array($match_info["username"],$match_info["version"], $matchingpositions));
+                        $first_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
+                        $last_name= $this->core->getQueries()->getUserById($match_info["username"])->getLastName();
+                        array_push($return, array($match_info["username"],$match_info["version"], $matchingpositions, $first_name, $last_name));
                     }
                 }
             }
             $return = json_encode($return);
             echo($return);
         }    
+    }
+
+    /**
+     * Check if the results folder exists for a given gradeable and version results.json
+     * in the results/ directory. If the file exists, we output a string that the calling
+     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
+     */
+    public function checkRefreshLichenMainPage() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $semester = $_REQUEST['semester'];
+        $course = $_REQUEST['course'];
+
+        $gradeable_ids_titles= $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+        foreach ($gradeable_ids_titles as $gradeable_id_title) {
+            if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
+                $this->core->getOutput()->renderString("REFRESH_ME");
+                return;
+            }    
+        }
+        
+        $this->core->getOutput()->renderString("NO_REFRESH");
+        return;
     }
 
 }
