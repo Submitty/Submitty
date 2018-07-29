@@ -528,7 +528,7 @@ class MiscController extends AbstractController {
     }
 
 
-	public function modifyCourseMaterialsFilePermission() {
+  	public function modifyCourseMaterialsFilePermission() {
 
         // security check
         if($this->core->getUser()->getGroup() !== 1) {
@@ -565,10 +565,10 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 
-	public function modifyCourseMaterialsFileTimeStamp() {
+    public function modifyCourseMaterialsFileTimeStamp() {
 
         if($this->core->getUser()->getGroup() !== 1) {
             $message = "You do not have access to that page. ";
@@ -599,6 +599,6 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 }
