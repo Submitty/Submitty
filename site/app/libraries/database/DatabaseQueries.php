@@ -122,7 +122,7 @@ class DatabaseQueries {
      *
      * @return ordered threads after filter
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber){
+    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockSize, $blockNumber){
         // $blockNumber is 1 based index
         if($blockNumber < 1) {
             return array();
@@ -142,10 +142,10 @@ class DatabaseQueries {
         }
 
         $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
+        $query_merge_thread = $show_merged_thread?"true":"merged_thread_id = -1";
         $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
+        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and {$query_merge_thread} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
         // Parameters
         $query_parameters   = array();
@@ -2281,7 +2281,7 @@ AND gc_id IN (
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
-        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1 and deleted = false", array($thread_id));
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1", array($thread_id));
         $result_rows = $this->course_db->rows();
         if(count($result_rows) == 0) {
             $message = "Can't find thread";
@@ -2317,7 +2317,7 @@ AND gc_id IN (
             $this->findChildren($child_root_post, $child_thread_id, $children);
 
             // $merged_post_id is PK of linking node and $merged_thread_id is immediate parent thread_id
-            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ?, deleted = true WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
+            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ? WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
             foreach($children as $post_id){
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }

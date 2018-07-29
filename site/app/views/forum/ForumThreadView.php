@@ -145,7 +145,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -227,10 +227,18 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	if($show_merged_thread) {
+		$show_merged_thread_class = "active";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0);";
+	} else {
+		$show_merged_thread_class = "";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1);";
+	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Merged Threads" onclick="{$show_merged_thread_action}">Show Merged Threads</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
@@ -574,6 +582,12 @@ HTML;
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
 							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
+						if($thread['merged_thread_id'] != -1) {
+							$return .= <<<HTML
+							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}

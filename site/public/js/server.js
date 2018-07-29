@@ -1589,6 +1589,11 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
+function alterShowMergeThreadStatus(newStatus) {
+    document.cookie = "show_merged_thread=" + newStatus + "; path=/;";
+    location.reload();
+}
+
 function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
