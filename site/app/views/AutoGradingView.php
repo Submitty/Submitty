@@ -3,6 +3,12 @@
 namespace app\views;
 
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedTestcase;
+use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\Component;
+use app\models\gradeable\Mark;
+use app\models\gradeable\TaGradedGradeable;
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
@@ -64,6 +70,88 @@ class AutoGradingView extends AbstractView {
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
             "has_badges" => $has_badges,
+        ]);
+    }
+
+    /**
+     * @param AutoGradedVersion $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
+    public function showResultsNew(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+        $graded_gradeable = $version_instance->getGradedGradeable();
+        $gradeable = $graded_gradeable->getGradeable();
+        $autograding_config = $gradeable->getAutogradingConfig();
+
+        $has_badges = false;
+        $nonhidden_earned = 0;
+        $nonhidden_max = 0;
+        $hidden_earned = 0;
+        $hidden_max = 0;
+        $show_hidden_breakdown = false;
+        $display_hidden = false;
+        $num_visible_testcases = 0;
+
+        $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
+            $testcase_config = $testcase->getTestcase();
+            return [
+                'name' => $testcase_config->getName(),
+                'hidden' => $testcase_config->isHidden(),
+                'details' => $testcase_config->getDetails(),
+                'has_points' => $testcase_config->getPoints() !== 0,
+                'extra_credit' => $testcase_config->isExtraCredit(),
+                'view_testcase_message' => $testcase_config->canViewTestcaseMessage(),
+                'points_total' => $testcase_config->getPoints(),
+
+                'has_extra_results' => $testcase->hasAutochecks(),
+                'points' => $testcase->getPoints(),
+                'can_view' => $testcase->canView(),
+                'testcase_message' => $testcase->getMessage()
+            ];
+        }, $version_instance->getTestcases());
+
+        if ($autograding_config->getTotalNonHidden() >= 0) {
+            $has_badges = true;
+
+            $nonhidden_earned = $version_instance->getNonHiddenPoints();
+            $nonhidden_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+            $hidden_earned = $version_instance->getTotalPoints();
+            $hidden_max = $autograding_config->getTotalNonExtraCredit();
+
+            $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
+
+            $display_hidden = false;
+            if ($gradeable->isTaGradeReleased()) {
+                foreach ($version_instance->getTestcases() as $testcase) {
+                    if (!$testcase->canView()) continue;
+                    if ($testcase->getTestcase()->isHidden()) {
+                        $display_hidden = true;
+                        break;
+                    }
+                }
+            }
+        }
+        foreach ($version_instance->getTestcases() as $testcase) {
+            if ($testcase->canView()) {
+                $num_visible_testcases++;
+            }
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResultsNew.twig", [
+            'gradeable_id' => $gradeable->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            "num_visible_testcases" => $num_visible_testcases,
+            "show_hidden_breakdown" => $show_hidden_breakdown,
+            "nonhidden_earned" => $nonhidden_earned,
+            "nonhidden_max" => $nonhidden_max,
+            "hidden_earned" => $hidden_earned,
+            "hidden_max" => $hidden_max,
+            "display_hidden" => $display_hidden,
+            "has_badges" => $has_badges,
+            'testcases' => $testcase_array,
+            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
+            "show_hidden" => $show_hidden,
+            'display_version' => $version_instance->getVersion()
         ]);
     }
 
@@ -284,6 +372,125 @@ class AutoGradingView extends AbstractView {
             "regrade_enabled" => $regrade_enabled,
             "regrade_message" => $regrade_message,
             "num_decimals" => $num_decimals
+        ]);
+    }
+
+    /**
+     * @param TaGradedGradeable $ta_graded_gradeable
+     * @param bool $regrade_available
+     * @return string
+     */
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available) {
+        $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
+        $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
+        $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
+        $grading_complete = true;
+        $active_same_as_graded = true;
+        foreach ($gradeable->getComponents() as $component) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if (!$container->isComplete()) {
+                $grading_complete = false;
+                continue;
+            }
+
+            if ($container->getGradedVersion() !== $active_version) {
+                $active_same_as_graded = false;
+            }
+        }
+
+        // Get the names of all full access or above graders
+        $grader_names = array_map(function (User $grader) {
+            return $grader->getDisplayedFirstName() . ' ' . $grader->getLastName();
+        }, $ta_graded_gradeable->getVisibleGraders());
+
+        // Special messages for peer / mentor-only grades
+        if ($gradeable->isPeerGrading()) {
+            $grader_names = ['Graded by Peer(s)'];
+        } else if (count($grader_names) === 0) {
+            // Non-peer assignment with only limited access graders
+            $grader_names = ['Graded by the ghosts among you'];
+        }
+
+        //get total score and max possible score
+        $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
+        $total_max = $graded_max = $gradeable->getTaNonExtraCreditPoints();
+
+        //change title if autograding exists or not
+        //display a sum of autograding and instructor points if both exist
+        $has_autograding = $gradeable->getAutogradingConfig()->anyVisibleTestcases();
+
+        // Todo: this is a modest amount of math for the view
+        // add total points if autograding and ta grading are the same version consistently
+        if ($version_instance !== null) {
+            $total_score += $version_instance->getTotalPoints();
+            $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+        }
+        $regrade_message = $this->core->getConfig()->getRegradeMessage();
+
+        //Clamp full gradeable score to zero
+        $total_score = max($total_score, 0);
+        $total_score = $gradeable->roundPointValue($total_score);
+
+        $late_days_url = $this->core->buildUrl([
+            'component' => 'student',
+            'page' => 'view_late_table',
+            'g_id' => $gradeable->getId()
+        ]);
+
+        // Get the number of decimal places for floats to display nicely
+        $num_decimals = 0;
+        $precision_parts = explode('.', strval($gradeable->getPrecision()));
+        if (count($precision_parts) > 1) {
+            // TODO: this hardcoded value will mean a weird precision value (like 1/3) won't appear ridiculous
+            $num_decimals = min(3, count($precision_parts[1]));
+        }
+
+        $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            return [
+                'title' => $component->getTitle(),
+                'extra_credit' => $component->isExtraCredit(),
+                'points_possible' => $component->getMaxValue(),
+                'student_comment' => $component->getStudentComment(),
+
+                'total_score' => $container->getTotalScore(),
+                'custom_mark_score' => $container->getScore(),
+                'comment' => $container->getComment(),
+                'graders' => array_map(function (User $grader) {
+                    return $grader->getLastName();
+                }, $container->getVisibleGraders()),
+                'marks' => array_map(function (Mark $mark) use ($container) {
+                    return [
+                        'title' => $mark->getTitle(),
+                        'points' => $mark->getPoints(),
+
+                        'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                        'earned' => $container->hasMark($mark),
+                    ];
+                }, $component->getMarks())
+            ];
+        }, $gradeable->getComponents());
+
+        return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
+            'been_ta_graded' => $ta_graded_gradeable->isComplete(),
+            'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
+            'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
+            'overall_comment' => $ta_graded_gradeable->getOverallComment(),
+            'is_peer' => $gradeable->isPeerGrading(),
+            'components' => $component_data,
+
+            'late_days_url' => $late_days_url,
+            'grader_names' => $grader_names,
+            'grading_complete' => $grading_complete,
+            'has_autograding' => $has_autograding,
+            'graded_score' => $graded_score,
+            'graded_max' => $graded_max,
+            'total_score' => $total_score,
+            'total_max' => $total_max,
+            'active_same_as_graded' => $active_same_as_graded,
+            'regrade_available' => $regrade_available,
+            'regrade_message' => $regrade_message,
+            'num_decimals' => $num_decimals
         ]);
     }
 }
