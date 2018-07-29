@@ -1,0 +1,109 @@
+{% import 'functions/Badge.twig' as Badge %}
+{% import _self as self %}
+
+{% if not been_ta_graded %}
+    <br>
+    <h3>This assignment has not been graded yet</h3>
+{% elseif not active_same_as_graded %}
+    <br>
+    <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+{% elseif not grading_complete %}
+    <br>
+    <h3>Grading not complete, please contact an instructor/grader</h3>
+{% else %}
+    <div class="sub">
+        {# Overview #}
+        <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
+            <p>Version #{{ ta_graded_version }} graded by: {{ grader_names|join(", ") }}</p>
+            <i>Any regrade requests are due within 7 days of posting</i>
+            <p>
+                {% if overall_comment|length != 0 %}
+                    <hr>
+                    Overall note from Grader:
+                    <span class='gradeable_comment'>{{ overall_comment }}</span>
+                {% endif %}
+            </p>
+        </div>
+        {% if any_late_days_used %}
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ late_days_url }}">Show my late days information</a>
+        {% endif %}
+        {# /Overview #}
+
+        {# Manual total #}
+        <div class="box">
+            <div class="box-title">
+                {{ Badge.render(graded_score, graded_max, false) }}
+                <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
+            </div>
+        </div>
+        {# /Manual total #}
+
+        {# Component boxes #}
+        {% for component in components %}
+            <div class="box">
+                <div class="box-title">
+                    {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+                    <h4>{{ component.title }}
+                        {% if not is_peer and component.graders|length != 0 %}
+                            <i>(Graded by: {{ component.graders|join(' / ') }})</i>
+                        {% endif %}
+                    </h4>
+                    <div style="float:left; word-break: break-word;">
+                        <p style="padding-bottom: 10px;">{{ component.student_comment }}</p>
+                        <p>
+                            <table class="gradeable_comment">
+                                {% for mark in component.marks if mark.show_mark %}
+                                    <tr>
+                                        <td>
+                                            {% if mark.earned %}
+                                                <i class="fa fa-check-square-o fa-1g"></i>
+                                            {% else %}
+                                                <i class="fa fa-square-o fa-1g"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ mark.points|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ mark.title }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% if component.total_score != 0 or component.comment != '' %}
+                                    <tr>
+                                        <td>
+                                            <i class="fa fa-check-square-o fa-1g"></i>
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ component.custom_mark_score|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ component.comment }}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {# /Component boxes #}
+
+        {# Total auto + manual #}
+        {% if has_autograding %}
+            <div class="box">
+                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                    {{ Badge.render(total_score, total_max, false) }}
+                    <h4>Total</h4>
+                </div>
+            </div>
+        {% endif %}
+        {# /Total auto + manual #}
+    </div>
+    {% if regrade_available %}
+    <div id="ShowRegradeRequestButton">
+        <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
+    </div>
+    {% endif %}
+{% endif %}
