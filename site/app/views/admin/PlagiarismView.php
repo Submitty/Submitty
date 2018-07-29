@@ -155,12 +155,12 @@ HTML;
         $return .= <<<HTML
         <div class="sub">
         <div style="float:right;">
-            <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Code is unique<br />
-            <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Code matches with many/all students<br />
-            <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Code matches with Provided code<br />
-            <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Code doesn't match with student selected on right<br />
-            <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> All code matching between left and right student<br />
-            <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Sub part of orange code showing actual match.<br />
+            <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Unique <br />
+            <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Common (matches many/all students) <br />
+            <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Matches instructor provided file <br />
+            <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Matches other student(s) <br />
+            <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> General match between selected users <br />
+            <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Specific match between selected users <br />
         </div>
         <br><br><br><br><br><br><br>
         Gradeable: <b>$gradeable_title</b><br />
