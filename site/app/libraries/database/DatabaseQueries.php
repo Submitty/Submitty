@@ -2575,14 +2575,14 @@ AND gc_id IN (
      *  data associated with them
      * @param Mark[] $marks An array of marks to delete
      */
-    public function deleteMarks(array $marks) {
+    private function deleteMarks(array $marks) {
         if (count($marks) === 0) {
             return;
         }
         // We only need the ids
-        $mark_ids = array_map(function (Mark $mark) {
+        $mark_ids = array_values(array_map(function (Mark $mark) {
             return $mark->getId();
-        }, $marks);
+        }, $marks));
         $place_holders = implode(',', array_fill(0, count($marks), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN ($place_holders)", $mark_ids);
@@ -2629,7 +2629,7 @@ AND gc_id IN (
     }
 
     /**
-     * Iterates through each mark in a component and updates/creates
+     * Iterates through each mark in a component and updates/creates/deletes
      *  it in the database as necessary.  Note: the component must
      *  already exist in the database to add new marks
      * @param Component $component
@@ -2638,26 +2638,29 @@ AND gc_id IN (
 
         // sort marks by order
         $marks = $component->getMarks();
-        usort($marks, function(Mark $a, Mark $b) {
+        usort($marks, function (Mark $a, Mark $b) {
             return $a->getOrder() - $b->getOrder();
         });
 
         $order = 0;
         foreach ($marks as $mark) {
             // rectify mark order
-            if($mark->getOrder() !== $order) {
+            if ($mark->getOrder() !== $order) {
                 $mark->setOrder($order);
             }
             ++$order;
 
             // New mark, so add it
-            if($mark->getId() < 1) {
+            if ($mark->getId() < 1) {
                 $this->createMark($mark, $component->getId());
             }
             if ($mark->isModified()) {
                 $this->updateMark($mark);
             }
         }
+
+        // Delete any marks not being updated
+        $this->deleteMarks($component->getDeletedMarks());
     }
 
     /**
@@ -2702,19 +2705,35 @@ AND gc_id IN (
      *  data associated with them
      * @param array $components
      */
-    public function deleteComponents(array $components) {
+    private function deleteComponents(array $components) {
         if (count($components) === 0) {
             return;
         }
 
         // We only want the ids in our array
-        $component_ids = array_map(function (Component $component) {
+        $component_ids = array_values(array_map(function (Component $component) {
             return $component->getId();
-        }, $components);
+        }, $components));
         $place_holders = implode(',', array_fill(0, count($components), '?'));
 
         $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN ($place_holders)", $component_ids);
         $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN ($place_holders)", $component_ids);
+    }
+
+    /**
+     * Creates / updates a component and its marks in the database
+     * @param Component $component
+     */
+    public function saveComponent(Component $component) {
+        // New component, so add it
+        if ($component->getId() < 1) {
+            $this->createComponent($component);
+        } else {
+            $this->updateComponent($component);
+        }
+
+        // Then, update/create/delete its marks
+        $this->updateComponentMarks($component);
     }
 
     /**
@@ -2826,16 +2845,12 @@ AND gc_id IN (
             }
             ++$order;
 
-            // New component, so add it
-            if ($component->getId() < 1) {
-                $this->createComponent($component);
-            } else {
-                $this->updateComponent($component);
-            }
-
-            // Then, update/create its marks
-            $this->updateComponentMarks($component);
+            // Save the component
+            $this->saveComponent($component);
         }
+
+        // Delete any components not being updated
+        $this->deleteComponents($gradeable->getDeletedComponents());
     }
 
     /**
@@ -3059,8 +3074,7 @@ AND gc_id IN (
         // iterate through graded components and see if any need updating/creating
         foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
             foreach ($container->getGradedComponents() as $component_grade) {
-                // This means the component wasn't loaded from the database, ergo its new
-                if ($component_grade->getDbMarkIds() === null) {
+                if ($component_grade->isNew()) {
                     $this->createGradedComponent($component_grade);
                 } else {
                     $this->updateGradedComponent($component_grade);

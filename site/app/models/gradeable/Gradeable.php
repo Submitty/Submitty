@@ -88,6 +88,8 @@ class Gradeable extends AbstractModel {
     protected $syllabus_bucket = "homework";
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
+    /** @property @var Component[] An array of all gradeable components loaded from the database */
+    private $db_components = [];
 
     /* (private) Lazy-loaded Properties */
 
@@ -248,6 +250,14 @@ class Gradeable extends AbstractModel {
             }
         }
         throw new \InvalidArgumentException('Component id did not exist in gradeable');
+    }
+
+    /**
+     * Gets an array of components set to be deleted
+     * @return Component[]
+     */
+    public function getDeletedComponents() {
+        return array_udiff($this->db_components, $this->components, Utils::getCompareByReference());
     }
 
     /**
@@ -624,17 +634,57 @@ class Gradeable extends AbstractModel {
      * @param Component[] $components Must be an array of only Component
      */
     public function setComponents(array $components) {
+        $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
-        $this->components = array_values($components);
+
+        // Get the implied deleted components from this operation and ensure we aren't deleting any
+        //  components that have grades already
+        $deleted_components = array_udiff($this->components, $components, Utils::getCompareByReference());
+        if (in_array(true, array_map(function (Component $component) {
+            return $component->anyGrades();
+        }, $deleted_components))) {
+            throw new \InvalidArgumentException('Call to setComponents implied deletion of component with grades');
+        }
+
+        $this->components = $components;
 
         // sort by order
-        usort($this->components, function(Component $a, Component $b) {
+        usort($this->components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
+    }
+
+    /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        // Calculate our components array without the provided component
+        $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
+
+        // If it wasn't removed from our components, it was either already deleted, or never belonged to us
+        if (count($new_components) === count($this->components)) {
+            throw new \InvalidArgumentException('Attempt to delete component that did not belong to this gradeable');
+        }
+
+        // Finally, set our array to the new one
+        $this->components = $new_components;
+    }
+
+    /**
+     * Sets the array of the components, only called from the database
+     * @param Component[] $components
+     * @internal
+     */
+    public function setComponentsFromDatabase(array $components) {
+        $this->setComponents($components);
+        $this->db_components = $this->components;
     }
 
     /**
