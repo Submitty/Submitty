@@ -1,0 +1,46 @@
+<script src="js/pdf/pdf.js"></script>
+<script src="js/pdf/pdf_viewer.js"></script>
+{#Somehow this is not working#}
+{#<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.550/pdf.js"></script>#}
+{#<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.550/pdf_viewer.js"></script>#}
+<script src="js/pdf/pdf-annotate.js"></script>
+<script src="js/pdf/initColorPicker.js" type="module"></script>
+{% if student_popup is defined %}
+    {#This is currently a hack to get the javascript working. There are
+      some duplicate codes in the JS but that's for later#}
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="js/pdf/PDFStudentView.js"></script>
+{% else %}
+    <script src="js/pdf/PDFAnnotateEmbedded.js"></script>
+{% endif %}
+
+<link rel="stylesheet" type="text/css" href="css/pdf/pdf_viewer.css"/>
+<style>
+    .annotationLayer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        cursor: url('https://www.bg-wiki.com/images/d/d3/Demon_Pen_icon.png'), auto;
+        cursor: default;
+    }
+
+    .pdfViewer .canvasWrapper {
+        box-shadow: 0 0 3px #bbb;
+    }
+    .pdfViewer .page {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div id="content-wrapper">
+    <div id="viewer" class="pdfViewer"></div>
+</div>
+
+<script>
+    if('{{ annotation_json | raw}}' != ""){
+        localStorage.setItem('{{ filename }}/annotations', '{{ annotation_json | raw}}');
+    }
+    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}');
+</script>

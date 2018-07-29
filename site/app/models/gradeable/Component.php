@@ -65,7 +65,12 @@ class Component extends AbstractModel {
     protected $page = -1;
 
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
-    protected $marks = array();
+    protected $marks = [];
+
+    /** @property @var Mark[] Array of marks loaded from the database */
+    private $db_marks = [];
+    /** @property @var bool If any submitters have grades for this component */
+    private $any_grades = false;
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
     const PDF_PAGE_STUDENT = -1;
@@ -93,6 +98,7 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
+        $this->any_grades = ($details['any_grades'] ?? false) === true;
         $this->modified = false;
     }
 
@@ -107,7 +113,8 @@ class Component extends AbstractModel {
     /**
      * Gets the mark object with the provided mark id
      * @param int $mark_id
-     * @return Mark|null The Mark with the provided id, or null if not found
+     * @return Mark|null The Mark with the provided id
+     * @throws \InvalidArgumentException If the provided mark id isn't part of this component
      */
     public function getMark($mark_id) {
         foreach($this->marks as $mark) {
@@ -119,12 +126,28 @@ class Component extends AbstractModel {
     }
 
     /**
+     * Gets an array of marks set to be deleted
+     * @return Mark[]
+     */
+    public function getDeletedMarks() {
+        return array_udiff($this->db_marks, $this->marks, Utils::getCompareByReference());
+    }
+
+    /**
      * Gets the number of grades required for this component
      *  to be considered 100% graded
      * @return int
      */
     public function getGradingSet() {
         return $this->peer ? $this->gradeable->getPeerGradeSet() : 1;
+    }
+
+    /**
+     * Gets if any submitters have grades for this component yet
+     * @return bool
+     */
+    public function anyGrades() {
+        return $this->any_grades;
     }
 
     /* Overridden setters with validation */
@@ -235,18 +258,57 @@ class Component extends AbstractModel {
      * @param Mark[] $marks Must be an array of only Marks
      */
     public function setMarks(array $marks) {
+        $marks = array_values($marks);
         // Make sure we're getting only marks
         foreach ($marks as $mark) {
             if (!($mark instanceof Mark)) {
                 throw new \InvalidArgumentException('Object in marks array wasn\'t a mark');
             }
         }
-        $this->marks = array_values($marks);
+
+        // Get the implied deleted marks from this operation and make sure that we aren't
+        //  deleting any marks that are in use.
+        $deleted_marks = array_udiff($this->marks, $marks, Utils::getCompareByReference());
+        if (in_array(true, array_map(function (Mark $mark) {
+                return $mark->anyReceivers();
+            }, $deleted_marks))) {
+            throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
+        }
+
+        $this->marks = $marks;
 
         // sort by order
-        usort($this->marks, function(Mark $a, Mark $b) {
+        usort($this->marks, function (Mark $a, Mark $b) {
             return $a->getOrder() - $b->getOrder();
         });
+    }
+
+    /**
+     * Deletes a mark from this component without checking if a submitter has received it yet
+     * @param Mark $mark
+     * @throws \InvalidArgumentException If this component doesn't own the provided mark
+     */
+    public function forceDeleteMark(Mark $mark) {
+        // Calculate our marks array without the provided mark
+        $new_marks = array_udiff($this->marks, [$mark], Utils::getCompareByReference());
+
+        // If it wasn't removed from our marks, it was either already deleted, or never belonged to us
+        if (count($new_marks) === count($this->marks)) {
+            throw new \InvalidArgumentException('Attempt to delete mark that did not belong to this component');
+        }
+
+        // Finally, set our array to the new one
+        $this->marks = $new_marks;
+    }
+
+    /**
+     * Sets the array of marks, only to be called from the database loading methods
+     * @param array $marks
+     * @internal
+     */
+    public function setMarksFromDatabase(array $marks) {
+        $this->setMarks($marks);
+        $this->db_marks = $this->marks;
     }
 
     /**
