@@ -173,7 +173,6 @@ HTML;
         foreach ($rankings as $ranking) {
             $return .= <<<HTML
                 <option value="{$ranking[1]}">$ranking[3] $ranking[4] &lt;$ranking[1]&gt; ($ranking[0])</option>    
-
 HTML;
         }
 

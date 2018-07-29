@@ -407,7 +407,6 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);  
         }
 
-
         $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for ".$gradeable_id);
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
@@ -457,7 +456,6 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage($ret);
             $this->core->redirect($return_url);   
         }
-
 
         $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.")
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
