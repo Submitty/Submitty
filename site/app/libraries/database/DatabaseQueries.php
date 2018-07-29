@@ -3029,22 +3029,43 @@ AND gc_id IN (
      */
     private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
-            $params = [
-                $graded_component->getScore(),
-                $graded_component->getComment(),
-                $graded_component->getGradedVersion(),
-                DateUtils::dateTimeToString($graded_component->getGradeTime()),
-                $graded_component->getTaGradedGradeable()->getId(),
-                $graded_component->getComponentId(),
-                $graded_component->getGraderId()
-            ];
-            $query = "
-                UPDATE gradeable_component_data SET 
-                  gcd_score=?,
-                  gcd_component_comment=?,
-                  gcd_graded_version=?,
-                  gcd_grade_time=?
-                WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+            if(!$graded_component->getComponent()->isPeer()) {
+                $params = [
+                    $graded_component->getScore(),
+                    $graded_component->getComment(),
+                    $graded_component->getGradedVersion(),
+                    DateUtils::dateTimeToString($graded_component->getGradeTime()),
+                    $graded_component->getGraderId(),
+                    $graded_component->getTaGradedGradeable()->getId(),
+                    $graded_component->getComponentId()
+                ];
+                $query = "
+                    UPDATE gradeable_component_data SET 
+                      gcd_score=?,
+                      gcd_component_comment=?,
+                      gcd_graded_version=?,
+                      gcd_grade_time=?,
+                      gcd_grader_id=?
+                    WHERE gd_id=? AND gc_id=?";
+            }
+            else {
+                $params = [
+                  $graded_component->getScore(),
+                  $graded_component->getComment(),
+                  $graded_component->getGradedVersion(),
+                  DateUtils::dateTimeToString($graded_component->getGradeTime()),
+                  $graded_component->getTaGradedGradeable()->getId(),
+                  $graded_component->getComponentId(),
+                  $graded_component->getGraderId()
+                ];
+                $query = "
+                    UPDATE gradeable_component_data SET 
+                      gcd_score=?,
+                      gcd_component_comment=?,
+                      gcd_graded_version=?,
+                      gcd_grade_time=?,
+                    WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
+            }
             $this->course_db->query($query, $params);
         }
     }
