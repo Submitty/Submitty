@@ -648,7 +648,7 @@ SELECT count(*) as cnt, {$section_key}
 FROM users
 {$where}
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')", $params);
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
