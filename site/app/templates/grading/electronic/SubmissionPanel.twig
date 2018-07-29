@@ -4,80 +4,80 @@
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow-x: hidden; overflow-y: auto">
     <div id="directory_view" style="position:relative; float:left;">
         <div class="draggable_content">
-        <span class="grading_label">Submissions and Results Browser</span>
-        <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
+            <span class="grading_label">Submissions and Results Browser</span>
+            <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
-        {# check if there are vcs files, if yes display the toggle button, else don't display it #}
-        {% if has_vcs_files %}
-            <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
-        {% endif %}
-
-        <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
-
-        <script type="text/javascript">
-            $(document).ready(function(){
-                //note the commented out code here along with the code where files are displayed that is commented out
-                //is intended to allow open and close to change dynamically on click
-                //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
-                $(".expand-button").on('click', function(){
-                    // $(this).attr('clicked-state', "clicked");
-                    // updateValue($(this), "Open", "Close");
-                    openAll( 'openable-element-', $(this).data('linked-type'))
-                    // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                    //     console.log('HELLLO');
-                    // });
-                })
-
-                var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
-                var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
-                $('#' + currentCodeStyleRadio).parent().addClass('active');
-                $('#' + currentCodeStyleRadio).prop('checked', true);
-            });
-        </script>
-
-        {% if not peer %}
-            <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
-        {% endif %}
-
-        <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
-            </label>
-            <label class="btn btn-secondary">
-                <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
-            </label>
-        </div>
-        <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto open </span>
-        <br />
-        {# Files #}
-        <div class="inner-container" id="file-container">
-            {{ self.display_files(self, submissions, "s", 0, "submissions") }}
-            {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
-                {{ self.display_files(self, checkout, "c", 0, "checkout") }}
+            {# check if there are vcs files, if yes display the toggle button, else don't display it #}
+            {% if has_vcs_files %}
+                <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
             {% endif %}
-            {{ self.display_files(self, results, "r", 0, "results") }}
+
+            <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    //note the commented out code here along with the code where files are displayed that is commented out
+                    //is intended to allow open and close to change dynamically on click
+                    //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
+                    $(".expand-button").on('click', function(){
+                        // $(this).attr('clicked-state', "clicked");
+                        // updateValue($(this), "Open", "Close");
+                        openAll( 'openable-element-', $(this).data('linked-type'))
+                        // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
+                        //     console.log('HELLLO');
+                        // });
+                    })
+
+                    var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+                    var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
+                    $('#' + currentCodeStyleRadio).parent().addClass('active');
+                    $('#' + currentCodeStyleRadio).prop('checked', true);
+                });
+            </script>
+
+            {% if not peer %}
+                <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+            {% endif %}
+
+            <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+                <label class="btn btn-secondary">
+                    <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
+                </label>
+            </div>
+            <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto open </span>
+            <br />
+            {# Files #}
+            <div class="inner-container" id="file-container">
+                {{ self.display_files(self, submissions, "s", 0, "submissions") }}
+                {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
+                    {{ self.display_files(self, checkout, "c", 0, "checkout") }}
+                {% endif %}
+                {{ self.display_files(self, results, "r", 0, "results") }}
+            </div>
+            {# /Files #}
+            <script type="text/javascript">
+                // $(document).ready(function(){
+                //     $(".openAllDiv").on('click', function(){
+                //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
+                //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
+                //             if(elem.data('clicked-state') == "wasntClicked"){
+                //                 updateValue(elem, "Open", "Close");
+                //             }
+                //         }
+                //     });
+                // });
+            </script>
         </div>
-        {# /Files #}
-        <script type="text/javascript">
-            // $(document).ready(function(){
-            //     $(".openAllDiv").on('click', function(){
-            //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
-            //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
-            //             if(elem.data('clicked-state') == "wasntClicked"){
-            //                 updateValue(elem, "Open", "Close");
-            //             }
-            //         }
-            //     });
-            // });
-        </script>
     </div>
-    </div>
-    <div id="file_view" style="position: absolute; float: right; right: -100%; width:100%; ">
+    <div id="file_view" style="display: none; position: absolute; float: right; right: -100%; width:100%; ">
+        <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30">No changes</strong>
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser</span>
         <br>
         <span class="grading_label" style="padding-top: 5px" id="grading_file_name"></span>
-        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Show file in full panel"></i></a>
-        <div id="file_viewer_full_panel" class="full_panel" data-file_name="" data-file_url=""></div>
+        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
     </div>
 </div>
 
@@ -99,7 +99,8 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");
+                alert("Please use the pdf viewer by clicking on the right arrow");
+                {#iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");#}
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
@@ -140,20 +141,51 @@
     }
 
     function expandFile(dir, path) {
-        $("#file_viewer_full_panel").empty();
-        $("#file_viewer_full_panel").attr("data-file_name", "");
-        $("#file_viewer_full_panel").attr("data-file_url", "");
-        $("#file_viewer_full_panel").attr("data-file_name", dir);
-        $("#file_viewer_full_panel").attr("data-file_url", path);
-        openFrame(dir, path, "full_panel");
+        if($('#viewer').length != 0){
+            $('#viewer').remove();
+        }
+        let promise = loadFile(dir);
+        $('#file_view').show();
         $("#grading_file_name").html(dir);
-        let offset = $("#directory_view").width();
+        let precision = $("#submission_browser").width()-$("#directory_view").width();
+        let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#directory_view").hide();
+        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+        return promise;
+    }
+
+    function loadFile(filename){
+        let extension = filename.split('.').pop();
+        if(extension == "pdf"){
+            $('#pdf_annotation_bar').css('visibility', 'visible');
+            return $.ajax({
+                type: 'POST',
+                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
+                data: {
+                    'gradeable_id': '{{ gradeable.getId() }}',
+                    'user_id': '{{ gradeable.getUser().getId() }}',
+                    'filename': filename
+                },
+                success: function(data){
+                    $('#file_view').append(data);
+                }
+            });
+        } else {
+            $('#file_view').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $("#file_viewer_full_panel").empty();
+            $("#file_viewer_full_panel").attr("data-file_name", "");
+            $("#file_viewer_full_panel").attr("data-file_url", "");
+            $("#file_viewer_full_panel").attr("data-file_name", dir);
+            $("#file_viewer_full_panel").attr("data-file_url", path);
+            openFrame(dir, path, "full_panel");
+        }
     }
 
     function collapseFile(){
+        //Removing these two to reset the full panel viewer.
+        $("#file_viewer_full_panel").remove();
+        $("#content-wrapper").remove();
         $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
@@ -161,6 +193,7 @@
         $("#directory_view").animate({'left': '-=' + offset1}, 200);
         $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
             $('#file_view').css('left', "");
+            $('#file_view').hide();
         });
     }
 
@@ -181,7 +214,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }}' onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>

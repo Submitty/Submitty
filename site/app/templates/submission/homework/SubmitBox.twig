@@ -2,8 +2,8 @@
 
 <div class="content">
     <div class="upperinfo">
-        <h2 class="upperinfo-left">New submission for: {{ gradeable.getName() }}</h2>
-        <h2 class="upperinfo-right">Due: {{ gradeable.getDueDate()|date("m/d/Y @ H:i") }}</h2>
+        <h2 class="upperinfo-left">New submission for: {{ gradeable_name }}</h2>
+        <h2 class="upperinfo-right">Due: {{ due_date|date("m/d/Y @ H:i") }}</h2>
     </div>
 
     {# Admin submission type selector #}
@@ -16,7 +16,7 @@
                     <input type='radio' id="radio_student" name="submission_type">
                     Make Submission for a Student
                 {% endif %}
-                {% if gradeable.getNumParts() == 1 and not gradeable.useVcsCheckout() %}
+                {% if part_names|length == 1 and not is_vcs %}
                     <input type='radio' id="radio_bulk" name="submission_type">
                     Bulk Upload
                 {% endif %}
@@ -27,7 +27,7 @@
                 </div>
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    user_id: <input type="text" id= "user_id" value ="" placeholder="{{ gradeable.getUser().getId() }}"/>
+                    user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
@@ -76,12 +76,12 @@
     {# /Admin submission type selector #}
 
     <div class="sub">
-        {% if gradeable.hasAssignmentMessage() %}
-            <p class='green-message'>{{ gradeable.getAssignmentMessage()|raw }}</p>
+        {% if has_assignment_message %}
+            <p class='green-message'>{{ assignment_message|raw }}</p>
         {% endif %}
     </div>
 
-    {% if gradeable.useVcsCheckout() %}
+    {% if is_vcs %}
         {#
             TODO: Build ability for students to specify their own repo url
             if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
@@ -98,22 +98,22 @@
         #}
         <h3>To access your Repository:</h3>
         <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-        <samp>git  clone  {{ gradeable.getRepositoryPath() }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        <samp>git  clone  {{ vcs_subdirectory }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 
             {# Text boxes #}
             {% for textbox in textboxes %}
-                {{ self.render_textbox(textbox) }}
+                {{ self.render_textbox(textbox, image_data, loop.index0) }}
             {% endfor %}
             {# /Text boxes #}
 
             {# Submit boxes #}
-            {% for part in gradeable.getPartNames() %}
+            {% for part in part_names %}
                 <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
-                        {% if gradeable.getNumParts() > 1 %}
+                        {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
@@ -130,8 +130,8 @@
             <form id="pdfPageStudent">
                 <div class="sub">
                     <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
-                    {% for component in gradeable.getComponents() %}
-                        <div>{{ component.getTitle() }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div><br />
+                    {% for component_name in component_names %}
+                        <div>{{ component_name }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div><br />
                     {% endfor %}
                 </div>
             </form>
@@ -147,7 +147,7 @@
         <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
         <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-        {% if gradeable.getCurrentVersionNumber() == gradeable.getHighestVersion() and gradeable.getCurrentVersionNumber() > 0 %}
+        {% if display_version == highest_version and display_version > 0 %}
             <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
 
             {% if core.getConfig().keepPreviousFiles() %}
@@ -169,10 +169,10 @@
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
-            var num_parts = {{ gradeable.getNumParts() }};
+            var num_parts = {{ part_names|length }};
             createArray(num_parts);
-            var assignment_version = {{ gradeable.getCurrentVersionNumber() }};
-            var highest_version = {{ gradeable.getHighestVersion() }};
+            var assignment_version = {{ display_version }};
+            var highest_version = {{ highest_version }};
             for (var i = 1; i <= num_parts; i++ ){
                 var dropzone = document.getElementById("upload" + i);
                 dropzone.addEventListener("click", clicked_on_box, false);
@@ -215,41 +215,41 @@
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, path, count, merge_previous, clobber);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, count, merge_previous, clobber);
             moveNextInput(count);
         }
 
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
-                {{ gradeable.getAllowedLateDays() }},
-                {{ gradeable.getHighestVersion() }},
-                {{ gradeable.getMaxSubmissions() }},
+                {{ allowed_late_days }},
+                {{ highest_version }},
+                {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
-                {{ gradeable.useVcsCheckout() ? "true" : "false" }},
-                {{ gradeable.getNumTextBoxes() }},
-                "{{ gradeable.getId() }}",
-                "{{ gradeable.getUser().getId() }}",
+                {{ is_vcs ? "true" : "false" }},
+                {{ num_text_boxes }},
+                "{{ gradeable_id }}",
+                "{{ user_id }}",
                 repo_id,
                 {{ student_page ? "true" : "false" }},
-                {{ gradeable.getComponents()|length }},
+                {{ component_names|length }},
                 merge_previous,
                 clobber
             );
         }
         else {
             handleSubmission({{ late_days_use }},
-                {{ gradeable.getAllowedLateDays() }},
+                {{ allowed_late_days }},
                 highest_version,
-                {{ gradeable.getMaxSubmissions() }},
+                {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
-                {{ gradeable.useVcsCheckout() ? "true" : "false" }},
-                {{ gradeable.getNumTextBoxes() }},
-                "{{ gradeable.getId() }}",
+                {{ is_vcs ? "true" : "false" }},
+                {{ num_text_boxes }},
+                "{{ gradeable_id }}",
                 user_id,
                 repo_id,
                 {{ student_page ? "true" : "false" }},
-                {{ gradeable.getComponents()|length }},
+                {{ component_names|length }},
                 merge_previous,
                 clobber
             );
@@ -273,34 +273,34 @@
                 num_pages = $("#num_pages").val();
             };
             // vcs upload
-            if ({{ gradeable.useVcsCheckout() ? "true" : "false" }}) {
+            if ({{ is_vcs ? "true" : "false" }}) {
                 repo_id = $("#repo_id").val();
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable.getId() }}", num_pages);
+                handleBulk("{{ gradeable_id }}", num_pages);
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ gradeable.getHighestVersion() }}, false, "", "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", "", repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
             }
             e.stopPropagation();
         });
     });
 </script>
 
-{% macro render_textbox(textbox) %}
+{% macro render_textbox(textbox, images, index) %}
     {% for image in textbox.images %}
-        <img src="{{ image.src }}"
-        {% if image.image_width > 0 %}
-            width="{{ image.image_width }}"
+        <img src="{{ attribute(images, image.name) }}"
+        {% if image.width > 0 %}
+            width="{{ image.width }}"
         {% endif %}
-        {% if image.image_height > 0 %}
-            height="{{ image.image_height }}"
+        {% if image.height > 0 %}
+            height="{{ image.height }}"
         {% endif %}
         />
     {% endfor %}
@@ -308,16 +308,16 @@
     <p style="max-width: 50em;">
         {{ textbox.label }}
         <br>
-        {% if textbox.rows == 0 %}
-            <input type="text" name="textbox_{{ textbox.index }}" id="textbox_{{ textbox.index }}" onKeyPress="handle_textbox_keypress();">
+        {% if textbox.row_count == 0 %}
+            <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
         {% else %}
-            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ textbox.index }}" id="textbox_{{ textbox.index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
             #}
             <script>
-                $("#textbox_{{ textbox.index }}").keydown(function(e) {
+                $("#textbox_{{ index }}").keydown(function(e) {
                     if(e.keyCode === 9) { // tab was pressed
                         // get caret position/selection
                         var start = this.selectionStart;
