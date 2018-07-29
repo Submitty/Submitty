@@ -655,6 +655,9 @@ class ForumController extends AbstractController {
             } else {
                 $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
             }
+            if(empty($posts)){
+                $this->core->addErrorMessage("No posts found for given threads.");
+            }
             
         } 
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
