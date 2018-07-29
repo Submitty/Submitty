@@ -174,7 +174,11 @@ class Access {
             /* @var GradedGradeable|null $new_graded_gradeable */
             list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
 
-            if (self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
+            //Check if they pass the gradeable-related checks. There are overrides at the end so
+            // we can't just immediately return false.
+            $gradeable_checks = true;
+
+            if ($gradeable_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 $minimum = $new_gradeable ? $new_gradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
                 if (!$this->checkGroupPrivilege($group, $minimum)) {
@@ -188,38 +192,45 @@ class Access {
                        ) {
 
                         //Otherwise, you're not allowed
-                        return false;
+                        $gradeable_checks = false;
                     }
                 }
             }
 
-            if (self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
+            if ($gradeable_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
                 if (($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion()) <= 0) {
-                    return false;
+                    $gradeable_checks = false;
                 }
             }
 
-            if (self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
+            if ($gradeable_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
                 if (array_key_exists("section", $args)) {
                     if (!$this->isSectionInGradingSections($new_gradeable ?? $gradeable, $args["section"], $user)) {
-                        return false;
+                        $gradeable_checks = false;
                     }
                 } else {
                     if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
-                        return false;
+                        $gradeable_checks = false;
                     }
                 }
             }
 
-            if (self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
-                //If they're allowed to view their own
-                if (!$this->isGradedGradeableByUser($g, $user) && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE)) {
-                    //Check their peer assignment
-                    if (!$this->isGradedGradeableInPeerAssignment($new_graded_gradeable ?? $graded_gradeable, $user)) {
-                        return false;
-                    }
+            if ($gradeable_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
+                //Check their peer assignment
+                if (!$this->isGradedGradeableInPeerAssignment($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                    $gradeable_checks = false;
                 }
+            }
+
+            //Sometimes they're allowed to view their own even if the other checks fail
+            if (!$gradeable_checks && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE) && $this->isGradedGradeableByUser($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                $gradeable_checks = true;
+            }
+
+            if (!$gradeable_checks) {
+                //Not allowed to do this action to this gradeable
+                return false;
             }
         }
 

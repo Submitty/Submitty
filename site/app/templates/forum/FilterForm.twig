@@ -24,7 +24,7 @@
             {% endif %}
         }
         $( document ).ready(function() {
-            $('#thread_category option').mousedown(function(e) {
+            $('#thread_category option, #thread_status_select option').mousedown(function(e) {
                 e.preventDefault();
                 var current_selection = $(this).prop('selected');
                 $(this).prop('selected', !current_selection);
@@ -33,6 +33,9 @@
             });
             {% for category in cookie_selected_categories %}
             $('#thread_category option[value="{{ category }}"]').prop('selected', true);
+            {% endfor %}
+            {% for status in cookie_selected_thread_status %}
+            $('#thread_status_select option[value="{{ status }}"]').prop('selected', true);
             {% endfor %}
 
             $("#tree").prop("checked", true);

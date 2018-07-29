@@ -133,12 +133,32 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
+      
+    private function fetchGradeable($gradeable_id, $who_id) {
+        // TODO: this is bad, but its the only way to do it until the new model
+        $users = [$who_id];
+        $team = $this->core->getQueries()->getTeamById($who_id);
+        if ($team !== null) {
+            $users = array_merge($team->getMembers(), $users);
+        }
+        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $users);
+        $gradeable = null;
+        foreach ($gradeables as $g) {
+            // Either this is the user requsted (non-team case) or its the gradeable instance for me or access grading
+            if ($g->getUser() === $who_id || $g->getUser()->getId() === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+                $gradeable = $g;
+                break;
+            }
+        }
+        return $gradeable;
+    }
 
     public function ajaxRemoveEmpty(){
         //This function shows the empty spaces in the diffViewer
         //TODO: Need to add checks?
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
+        $who_id = $_REQUEST['who_id'];
+        $gradeable = $this->fetchGradeable($gradeable_id, $who_id);
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
@@ -1167,7 +1187,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxGetStudentOutput() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        $gradeable = $this->fetchGradeable($gradeable_id, $who_id);
 
         $index = $_REQUEST['index'];
 

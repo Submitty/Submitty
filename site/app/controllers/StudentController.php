@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\models\GradeableList;
 use app\models\ClassJson;
 
 class StudentController extends AbstractController {
