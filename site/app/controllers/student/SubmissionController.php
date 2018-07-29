@@ -203,7 +203,7 @@ class SubmissionController extends AbstractController {
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
-                    && $gradeable->isTaGrading() 
+                    && $gradeable->isTaGrading()
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
@@ -1379,7 +1379,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResultMessage("Invalid CSRF token.", false);
+            return $this->uploadResultMessage("Invalid CSRF token.", false, false);
         }
 
         $uploaded_files = array();
@@ -1501,7 +1501,7 @@ class SubmissionController extends AbstractController {
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResultMessage("Invalid CSRF token.", false);
+          return $this->uploadResultMessage("Invalid CSRF token.", false, false);
       }
 
       $expand_zip = "";
@@ -1516,7 +1516,7 @@ class SubmissionController extends AbstractController {
 
       $n = strpos($requested_path, '..');
       if ($n !== false) {
-          return $this->uploadResultMessage(".. is not supported in the path.", false);
+          return $this->uploadResultMessage(".. is not supported in the path.", false, false);
       }
 
       $uploaded_files = array();

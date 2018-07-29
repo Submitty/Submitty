@@ -39,9 +39,6 @@ class TestForum(BaseTestCase):
             assert False
         assert 'page=view_thread' in self.driver.current_url
 
-    def wait_after_ajax(self):
-        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
-
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
         upload_button.send_keys(tfname)
