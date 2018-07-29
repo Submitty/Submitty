@@ -267,7 +267,9 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
-                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+                if($gradeable->useTAGrading()) {
+                    $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+                }
                 $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "7%",  "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
@@ -275,7 +277,9 @@ class ElectronicGraderView extends AbstractView {
                     $columns[] = ["width" => "8%",  "title" => "Viewed Grade",     "function" => "viewed_grade"];
                 }
             } else {
-                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+                if($gradeable->useTAGrading()) {
+                    $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+                }
                 $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
@@ -443,7 +447,7 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $return = "";
-
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
@@ -480,6 +484,12 @@ class ElectronicGraderView extends AbstractView {
         }
 
         return $return;
+    }
+
+    public function renderPDFBar(){
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
+
+        ]);
     }
 
     /**

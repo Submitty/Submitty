@@ -37,14 +37,24 @@
     <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
     <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
 
+
     {# Search box #}
     {% include "grading/simple/StudentSearch.twig" %}
+
+    {% if action == 'lab' and core.getUser().accessFullGrading() %}
+        <br> <br>
+        <input type="checkbox" id="show-graders" style="float: right;">
+        <label for="show-graders" style="float: right; margin-top: 3px;">Show Graders</label>
+        <br> <br>
+        <input type="checkbox" id="show-dates" style="float: right;">
+        <label for="show-dates" style="float: right; margin-top: 3px;">Show Dates Graded</label>
+    {% endif %}
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <br> <br> <br>
         <p style="float: right;">The CSV file should be formatted as such: <br />
             user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
-        <input class ="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
+        <input class="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
         <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
     {% endif %}
 
@@ -193,7 +203,13 @@
                 {% elseif component_grade.getScore() == 0.5 %}
                     style="background-color: #88d0f4;"
                 {% endif %}
-            ></td>
+            >
+                {% if core.getUser().accessFullGrading() %}
+                    <p class="simple-grade-grader">{{ component_grade.getGrader().getId() }}</p>
+                    <p class="simple-grade-date">{{ component_grade.getGradeTime() != null ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+                {% endif %}
+
+            </td>
         {% endif %}
     {% endfor %}
 {% endmacro %}

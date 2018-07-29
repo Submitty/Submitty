@@ -237,4 +237,16 @@ class Utils {
         }
         return $result;
     }
+
+    /**
+     * Gets a function to compare two objects by reference for functions like 'array_udiff'
+     *  Credit to method: https://stackoverflow.com/a/27830923/2972004
+     * As noted in the comments (and observed), simply comparing two references using `===` will not work
+     * @return \Closure
+     */
+    public static function getCompareByReference() {
+        return function ($a, $b) {
+            return strcmp(spl_object_hash($a), spl_object_hash($b));
+        };
+    }
 }
