@@ -29,6 +29,11 @@
         TA/Instructor Manual Grading Open Date (graders may begin grading)
 
         <br />
+
+        <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
+        TA/Instructor Manual Grading Due Date (grades must be in by)
+
+        <br />
     </div>
 
     <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
