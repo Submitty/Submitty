@@ -8,6 +8,7 @@ def up(config, conn, semester, course):
 
         if 'team_id' not in colnames:
             cursor.execute('ALTER TABLE regrade_requests ADD COLUMN team_id VARCHAR(255)')
+            cursor.execute('ALTER TABLE regrade_requests ADD CONSTRAINT regrade_requests_fk2 FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id)')
 
         cursor.execute('ALTER TABLE regrade_requests ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id)')
         cursor.execute('ALTER TABLE regrade_requests ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id)')
