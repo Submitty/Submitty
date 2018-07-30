@@ -177,7 +177,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         $('#save_status').text("Saved");
         $('#save_status').css('color', 'black');
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
         // let count = 0;
         // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
         //     count+= JSON.parse(annotation_layer)[i]['lines'].length;

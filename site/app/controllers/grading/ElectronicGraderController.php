@@ -119,7 +119,7 @@ class ElectronicGraderController extends GradingController {
         $dir_iter = new \DirectoryIterator(dirname($annotation_path.'/'));
         foreach ($dir_iter as $fileinfo) {
             if (!$fileinfo->isDot()) {
-                $annotation_jsons[] = file_get_contents($fileinfo->getPathname());
+                $annotation_jsons[$this->core->getUser()->getId()] = file_get_contents($fileinfo->getPathname());
             }
         }
         $annotation_json = is_file($annotation_path) ? file_get_contents($annotation_path) : "";
@@ -131,8 +131,8 @@ class ElectronicGraderController extends GradingController {
             'grader_id' => $this->core->getUser()->getId(),
             'user_id' => $user_id,
             'filename' => $filename,
-//            'annotation_jsons' => $annotation_jsons
-            'annotation_json' => '$'
+            'annotation_jsons' => $annotation_jsons
+//            'annotation_json' => $annotation_json
         ]);
     }
 
