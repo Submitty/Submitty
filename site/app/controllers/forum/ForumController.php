@@ -3,6 +3,7 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
@@ -330,7 +331,8 @@ class ForumController extends AbstractController {
 
                 }
                 if($announcment){
-                    $this->notificationGenerator(array('type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+                    $notification->pushNotificationToDatabase();
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -385,7 +387,8 @@ class ForumController extends AbstractController {
                 // Notification to parent post author
                 $post = $this->core->getQueries()->getPost($parent_id);
                 $post_author = $post['author_user_id'];
-                $this->notificationGenerator(array('type' => 'reply', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification->pushNotificationToDatabase();
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
@@ -398,7 +401,8 @@ class ForumController extends AbstractController {
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if($type) {
-                $this->notificationGenerator(array('type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
+                $notification->pushNotificationToDatabase();
             }
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
@@ -816,7 +820,8 @@ class ForumController extends AbstractController {
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $this->notificationGenerator(array('type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author));
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author));
+                    $notification->pushNotificationToDatabase();
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
@@ -828,38 +833,4 @@ class ForumController extends AbstractController {
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
-
-    private function notificationGenerator($details){
-        $type = "forum";
-        $current_user = $this->core->getUser()->getId();
-        switch ($details['type']) {
-            case 'new_announcement':
-                $content = "New Announcement: ".$details['thread_title'];
-                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
-                $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
-                break;
-            case 'updated_announcement':
-                $content = "Announcement: ".$details['thread_title'];
-                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
-                $this->core->getQueries()->pushNotificationToAllUserInCourse($current_user, $type, json_encode($metadata), $content, true);
-                break;
-            case 'reply':
-                // TODO: Redirect to post itself
-                $content = "Reply: Your post '".mb_strimwidth(str_replace("\n", " ", $details['post_content']), 0, 40, "...")."' got new a reply from ".$current_user;
-                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id']);
-                $target_user = $details['reply_to'];
-                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, true);
-                break;
-            case 'merge_thread':
-                // TODO: Redirect to post itself
-                $content = "Thread Merged: '".mb_strimwidth($details['child_thread_title'], 0, 40, "...")."' got merged into '".mb_strimwidth($details['parent_thread_title'], 0, 40, "...")."'";
-                $metadata = array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['parent_thread_id']);
-                $target_user = $details['child_thread_author'];
-                $this->core->getQueries()->pushNotificationToAUser($current_user, $type, json_encode($metadata), $content, $target_user, true);
-                break;
-            default:
-                return;
-        }
-    }
-
 }
