@@ -71,7 +71,7 @@ class ConfigurationController extends AbstractController {
 
     public function updateConfiguration() {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
+            return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         }
 
         if(!isset($_POST['name'])) {
@@ -94,16 +94,17 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-
-        if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
             $entry = $entry === "true" ? true : false;
         }
-
-        if($name === 'upload_message') {
+        else if($name === 'upload_message') {
             $entry = nl2br($entry);
         }
 
         $config_ini = $this->core->getConfig()->readCourseIni();
+        if(!isset($config_ini['course_details'][$name])) {
+            return $this->core->getOutput()->renderJsonFail('Not a valid config name');
+        }
         $config_ini['course_details'][$name] = $entry;
         $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
 
