@@ -290,7 +290,7 @@ class SubmissionController extends AbstractController {
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
-        } else if (count($graded_gradeables) > 0) {
+        } else if (count($graded_gradeables) > 1) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
