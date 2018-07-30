@@ -91,6 +91,26 @@ class Notification extends AbstractModel {
                 $this->setNotifySource($this->getCurrentUser());
                 $this->setNotifyTarget($details['reply_to']);
                 break;
+            case 'edited':
+                // TODO: Redirect to post itself(if exists)
+                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
+                $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($details['post_content'])."' got an edit from ".$this->getCurrentUser());
+                $this->setNotifySource($this->getCurrentUser());
+                $this->setNotifyTarget($details['reply_to']);
+                break;
+            case 'deleted':
+                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
+                $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($details['post_content'])."' was deleted by ".$this->getCurrentUser());
+                $this->setNotifySource($this->getCurrentUser());
+                $this->setNotifyTarget($details['reply_to']);
+                break;
+            case 'undeleted':
+                // TODO: Redirect to post itself(if exists)
+                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
+                $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($details['post_content'])."' has been undeleted by ".$this->getCurrentUser());
+                $this->setNotifySource($this->getCurrentUser());
+                $this->setNotifyTarget($details['reply_to']);
+                break;
             default:
                 return;
         }

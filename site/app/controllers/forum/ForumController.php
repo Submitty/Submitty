@@ -468,6 +468,10 @@ class ForumController extends AbstractController {
             } else {
                 $type = "post";
             }
+            $post = $this->core->getQueries()->getPost($post_id);
+            $post_author = $post['author_user_id'];
+            $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+            $notification->pushNotificationToDatabase();
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
@@ -486,6 +490,10 @@ class ForumController extends AbstractController {
             } else {
                 /// We want to reload same thread again, in both case (thread/post undelete)
                 $type = "post";
+                $post = $this->core->getQueries()->getPost($post_id);
+                $post_author = $post['author_user_id'];
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification->pushNotificationToDatabase();
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
             return $response;
@@ -498,6 +506,7 @@ class ForumController extends AbstractController {
             }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+            $any_changes = false;
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
@@ -506,22 +515,31 @@ class ForumController extends AbstractController {
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
                     $this->core->addSuccessMessage("{$type} updated successfully.");
+                    $any_changes = true;
                 } else {
                     $this->core->addErrorMessage("{$type} updation failed. Please try again.");
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
                     $this->core->addSuccessMessage("Thread and post updated successfully.");
+                    $any_changes = true;
                 } else {
                     $type = ($status_edit_thread)?"Thread":"Post";
                     $type_opposite = (!$status_edit_thread)?"Thread":"Post";
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
                         $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
+                        $any_changes = true;
                     } else {
                         $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
                     }
                 }
+            }
+            if($any_changes) {
+                $post = $this->core->getQueries()->getPost($post_id);
+                $post_author = $post['author_user_id'];
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification->pushNotificationToDatabase();
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
