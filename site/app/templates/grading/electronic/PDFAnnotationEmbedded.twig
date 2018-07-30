@@ -39,8 +39,9 @@
 </div>
 
 <script>
-    if('{{ annotation_json | raw}}' != ""){
-        localStorage.setItem('{{ filename }}/annotations', '{{ annotation_json | raw}}');
-    }
-    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}');
+    {#if('{{ annotation_json | raw}}' != ""){#}
+        {#localStorage.setItem('{{ filename }}/annotations', '{{ annotation_json | raw}}');#}
+    {#}#}
+    console.log({{ annotation_jsons }});
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
 </script>
