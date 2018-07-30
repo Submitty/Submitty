@@ -11,6 +11,7 @@ def up(config, conn, semester, course):
 
         cursor.execute('ALTER TABLE regrade_requests ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id)')
         cursor.execute('ALTER TABLE regrade_requests ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id)')
+        cursor.execute('ALTER TABLE regrade_requests ALTER COLUMN user_id DROP NOT NULL')
 
 
 
@@ -20,4 +21,4 @@ def down(config, conn, semester, course):
         cursor.execute('ALTER TABLE regrade_requests RENAME COLUMN user_id TO student_id')
 
         cursor.execute('ALTER TABLE regrade_requests DROP CONSTRAINT gradeable_user_unique')
-        cursor.execute('ALTER TABLE regrade_requests DROP CONSTRAINT gradeable_team_unique;')
+        cursor.execute('ALTER TABLE regrade_requests DROP CONSTRAINT gradeable_team_unique')
