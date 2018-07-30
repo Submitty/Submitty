@@ -457,7 +457,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             }
                             var append_options='<option value="">None</option>';
                             $.each(data, function(i,matching_users){
-                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' &lt;'+matching_users[0]+'&gt; (version:'+matching_users[1]+')</option>';
                             });
                         }
                         $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
@@ -581,7 +581,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -1071,6 +1071,35 @@ function check_server(url) {
     );
 }
 
+function checkRefreshLichenMainPage(url, semester, course) {
+    // refresh time for lichen main page
+    var refresh_time = 5000;
+    setTimeout(function() {
+        check_lichen_jobs(url, semester, course);
+    }, refresh_time);
+}
+
+function check_lichen_jobs(url, semester, course) {
+    $.post(url,
+        function(data) {
+            var last_data = localStorage.getItem("last_data");
+            if (data == "REFRESH_ME") {
+                last_data= "REFRESH_ME";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+            }
+            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+                last_data= "NO_REFRESH";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+            }
+            else {  
+                checkRefreshLichenMainPage(url, semester, course);
+            }
+        }
+    );
+}
+
 function downloadFile(file, path) {
     window.location = buildUrl({
         'component': 'misc',
@@ -1476,9 +1505,88 @@ function enableTabsInTextArea(jQuerySelector){
     });
 }
 
+
 function changeDisplayOptions(option, thread_id){
     document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+}
+
+function dynamicScrollNextPage(element) {
+    if($(element).data("dynamic_lock_full")) {
+        return;
+    }
+    if($(element).data("dynamic_lock_load")) {
+        return;
+    }
+    $(".thread_list .fa-spinner").show();
+    $(element).data("dynamic_lock_load", true);
+    
+    var urlPattern = $(element).data("urlPattern");
+    var currentThreadId = $(element).data("currentThreadId",);
+    var currentCategoriesId = $(element).data("currentCategoriesId",);
+    var course = $(element).data("course",);
+
+    var next_page = $(element).attr("next_page");  
+    var next_url = urlPattern.replace("{{#}}", next_page);
+           
+    var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
+    $.ajax({
+            url: next_url,
+            type: "POST",
+            data: {
+                thread_categories: categories_value,
+                thread_status: thread_status_value,
+                currentThreadId: currentThreadId,
+                currentCategoriesId: currentCategoriesId,
+            },
+            success: function(r){
+                var x = JSON.parse(r);
+                var content = x.html;
+                var count = x.count;
+                content = `${content}`;
+                $(element).find(".fa-spinner").before(content);
+                $(element).attr("next_page", parseInt(next_page) + 1);
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                if(count == 0) {
+                    // Don't load more
+                    $(element).data("dynamic_lock_full", true);
+                } else {
+                    dynamicScrollLoadIfScrollVisible($(element));
+                }
+            },
+            error: function(){
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                window.alert("Something went wrong while trying to load more threads. Please try again.");
+            }
+    });
+}
+
+function dynamicScrollLoadIfScrollVisible(jElement) {
+    if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
+        dynamicScrollNextPage(jElement[0]);
+    }
+}
+
+function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, currentCategoriesId, course) {
+    jElement.data("urlPattern",urlPattern);
+    jElement.data("currentThreadId", currentThreadId);
+    jElement.data("currentCategoriesId", currentCategoriesId);
+    jElement.data("course", course);
+
+    dynamicScrollLoadIfScrollVisible(jElement);
+    $(jElement).scroll(function(){ 
+        var element = $(this)[0];
+        var sensitivity = 3;
+        var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
+        if(isBottom) {
+            dynamicScrollNextPage(element);
+        }
+    });
 }
 
 function resetScrollPosition(id){
@@ -1510,7 +1618,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
     $.ajax({
             url: url,
             type: "POST",
@@ -1523,11 +1632,19 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
             success: function(r){
                var x = JSON.parse(r).html;
                x = `${x}`;
-               $(".thread_list").html(x);
+               var jElement = $(".thread_list");
+               jElement.children(":not(.fa-spinner)").remove();
+               jElement.prepend(x);
+               jElement.attr("next_page", '2');
+               jElement.data("dynamic_lock_load", false);
+               jElement.data("dynamic_lock_full", false);
+               $(".thread_list .fa-spinner").hide();
+               dynamicScrollLoadIfScrollVisible(jElement);
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
                document.cookie = course + "_forum_categories=;";
+               document.cookie = "forum_thread_status=;";
             }
     })
 }
@@ -1612,6 +1729,56 @@ function showHistory(post_id) {
             },
             error: function(){
                 window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
+}
+
+function loadMergeableThreads() {
+    var selectNode = $("[name='merge_thread_parent']");
+    var current_thead_date = selectNode.attr("current-thead-date");
+    if(!current_thead_date) {
+        // Already Loaded
+        return;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                current_thead_date: current_thead_date
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json.content.length == 0) {
+                    selectNode.closest('.form-body').text("Nothing to merge.");
+                } else {
+                    selectNode.empty();
+                    var options = [];
+                    for(var i = 0; i < json.content.length ; i++ ) {
+                        var row = json.content[i];
+                        var id = escapeSpecialChars(""+row.id);
+                        var title = escapeSpecialChars(row.title);
+                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
+                        options.push(element);
+                    }
+                    selectNode.append(options.join(''));
+                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
+                }
+                selectNode.attr("current-thead-date", "");
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to load threads list. Please try again.");
             }
     });
 }

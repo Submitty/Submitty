@@ -1,0 +1,94 @@
+/*WORK IN PROGRESS*/
+/*TODO: Add css behaviors to PDF annotation bar*/
+.tool-selected {
+    box-shadow: 0px 0px 3px 3px #7dfa78;
+    background-color: #7dfa78;
+}
+
+.toolbar-action, .toolbar-item {
+    text-align: center;
+    margin-left: 8px;
+    font-size: 25px;
+    margin-bottom: 8px;
+}
+
+.toolbar-item[value^="pen"] {
+    padding-bottom: 6px;
+    margin-left: 3px;
+    padding-right: 5px;
+    padding-left: 4px;
+}
+
+.toolbar-item[value^="cursor"] {
+    padding-right: 5px;
+    margin-left: 4px;
+    padding-left: 7px;
+    padding-bottom: 9px;
+}
+
+.toolbar-item[value^="rect"] {
+    margin-left: 3px;
+    padding-left: 2px;
+    padding-right: 1px;
+    padding-bottom: 4px;
+    padding-top: 2px;
+}
+
+.toolbar-item[value^="text"] {
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-left: 3px;
+    padding-bottom: 5px;
+}
+
+#pdf_annotation_icons {
+    position:relative;
+    display: block;
+    float: left;
+    padding-top:3px;
+    padding-bottom:3px;
+    background-color: #edf6f6;
+    width: 37px;
+    border: 5px solid #0088bf;
+}
+
+#pdf_annotation_bar {
+    position:relative;
+    height: 284px;
+    width: 52px;
+    bottom: 30px;
+    left: 50%;
+    z-index:41;
+}
+
+.selection_panel {
+    display: none;
+    left: 58px;
+    position: absolute;
+    background: #edf6f6;
+    border: 3px solid #0088bf;
+    border-radius: .2em;
+    width: 130px;
+    height:100px;
+}
+.selection_panel:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    width: 0;
+    height: 0;
+    border: 0.563em solid transparent;
+    border-right-color: #0088bf;
+    border-left: 0;
+    margin-top: -0.562em;
+    margin-left:-0.562em;
+}
+
+#pen_selection {
+    top: 30px;
+}
+
+#text_selection {
+    top: 115px;
+}

@@ -18,6 +18,9 @@ class StudentController extends AbstractController {
             case 'view_late_table':
                 $controller = new student\LateDaysTableController($this->core);
                 break;
+            case 'pdf':
+                $controller = new student\PDFController($this->core);
+                break;
             case 'submission':
             default:
                 $controller = new student\SubmissionController($this->core);

@@ -203,7 +203,7 @@ class SubmissionController extends AbstractController {
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
-                    && $gradeable->isTaGrading() 
+                    && $gradeable->isTaGrading()
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
@@ -290,7 +290,7 @@ class SubmissionController extends AbstractController {
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
-        } else if (count($graded_gradeables) > 0) {
+        } else if (count($graded_gradeables) > 1) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
@@ -1379,7 +1379,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResultMessage("Invalid CSRF token.", false);
+            return $this->uploadResultMessage("Invalid CSRF token.", false, false);
         }
 
         $uploaded_files = array();
@@ -1501,7 +1501,7 @@ class SubmissionController extends AbstractController {
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResultMessage("Invalid CSRF token.", false);
+          return $this->uploadResultMessage("Invalid CSRF token.", false, false);
       }
 
       $expand_zip = "";
@@ -1516,7 +1516,7 @@ class SubmissionController extends AbstractController {
 
       $n = strpos($requested_path, '..');
       if ($n !== false) {
-          return $this->uploadResultMessage(".. is not supported in the path.", false);
+          return $this->uploadResultMessage(".. is not supported in the path.", false, false);
       }
 
       $uploaded_files = array();
