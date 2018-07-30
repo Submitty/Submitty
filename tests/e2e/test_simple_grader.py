@@ -1,11 +1,25 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 class TestSimpleGrader(BaseTestCase):
     
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
+    @staticmethod
+    def get_next_lab_value(start_value):
+        if start_value == "0":
+            return "1"
+        elif start_value == "1":
+            return "0.5"
+        else:
+            return "0"
+            
+    
     # remove the need to pass pesky arguments from func
     # simplifies the writing of test cases, as variable names can be used instead of accessing kwargs
     def insert_kwargs(self, func, **kwargs):
@@ -18,20 +32,22 @@ class TestSimpleGrader(BaseTestCase):
         return func_with_args
 
     # template for creating simplegrader tests that test all
-    def run_tests(self, lab_reg_func=None, test_reg_func=None, lab_rot_func=None, test_rot_func=None):
+    def run_tests(self, lab_reg_func=None, test_reg_func=None, lab_rot_func=None, test_rot_func=None, users=[("instructor", "Quinn")]):
         def func_wrapper(func):
             def wrapped_func(gradeable_id, gradeable_name):
                 self.click_nav_gradeable_button("items_being_graded", gradeable_id, "grade", (By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format(gradeable_name)))
                 func()
                 self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
             return wrapped_func if func is not None else lambda *args: None
-
-        self.log_in(user_id="instructor", user_name="Quinn")
-        self.click_class("sample", "SAMPLE")
-        func_wrapper(lab_reg_func)("grading_lab", "Grading Lab")
-        func_wrapper(test_reg_func)("grading_test", "Grading Test")
-        func_wrapper(lab_rot_func)("grading_lab_rotating", "Grading Lab (Rotating Sections)")
-        func_wrapper(test_rot_func)("grading_test_rotating", "Grading Test (Rotating Sections)")
+        
+        for user in users:
+            self.log_in(user_id=user[0], user_name=user[1])
+            self.click_class("sample", "SAMPLE")
+            func_wrapper(lab_reg_func)("grading_lab", "Grading Lab")
+            func_wrapper(test_reg_func)("grading_test", "Grading Test")
+            func_wrapper(lab_rot_func)("grading_lab_rotating", "Grading Lab (Rotating Sections)")
+            func_wrapper(test_rot_func)("grading_test_rotating", "Grading Test (Rotating Sections)")
+            self.log_out()
 
     """
     TEST CASE FORMAT:
@@ -77,7 +93,38 @@ class TestSimpleGrader(BaseTestCase):
         rot_func = self.insert_kwargs(template_func, expected_text="Students Assigned to Rotating Section")
         self.run_tests(reg_func, reg_func, rot_func, rot_func)
 
-
+    # tests that the different people can grade the same cell (this has broken multiple times in the past)
+    def test_multiple_graders(self):
+        def template_func():
+            # grade the first cell (as good as any other)
+            grade_elem = self.driver.find_element_by_id("cell-0-0")
+            # attribute where data is stored is different for lab/numeric
+            attribute = "data-score" if is_lab else "value"
+            score = grade_elem.get_attribute(attribute)
+            # for lab, cycle the value
+            if is_lab:
+                next_score = TestSimpleGrader.get_next_lab_value(score)
+                grade_elem.click()
+            # for numeric, manually cycle using values that are not generated for sample courses
+            else:
+                next_score = "3.4" if score == "3.1" else "3.1"
+                grade_elem.clear()
+                grade_elem.send_keys(next_score)
+                grade_elem.send_keys(Keys.ARROW_RIGHT)
+            # wait until ajax is done, then refresh the page and wait until the element comes back with the updated data
+            self.wait_after_ajax()
+            self.driver.refresh()
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-0-0' and @{}='{}']".format(attribute, next_score))))
+            # if numeric, reset value so that test will continue to work as expected
+            if next_score == "3.4":
+                grade_elem = self.driver.find_element_by_id("cell-0-0")
+                grade_elem.clear()
+                grade_elem.send_keys("3.3")
+                grade_elem.send_keys(Keys.ARROW_RIGHT)
+        
+        lab_func = self.insert_kwargs(template_func, is_lab=True)
+        test_func = self.insert_kwargs(template_func, is_lab=False)
+        self.run_tests(lab_func, test_func, lab_func, test_func, users=[("instructor", "Quinn"), ("ta", "Jill")])
 
 if __name__ == "__main__":
     import unittest

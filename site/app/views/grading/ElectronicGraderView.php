@@ -447,7 +447,7 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $return = "";
-
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
@@ -484,6 +484,12 @@ class ElectronicGraderView extends AbstractView {
         }
 
         return $return;
+    }
+
+    public function renderPDFBar(){
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
+
+        ]);
     }
 
     /**
