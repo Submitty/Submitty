@@ -557,7 +557,9 @@ function updateValue(obj, option1, option2) {
 }
 function openAutoGrading(num){
     $('#tc_' + num).click();
-    $('#testcase_' + num)[0].style.display="block";
+    if($('#testcase_' + num)[0]!=null){
+        $('#testcase_' + num)[0].style.display="block";
+    }
 }
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
