@@ -51,7 +51,7 @@ class ElectronicGraderController extends GradingController {
                 $this->saveGeneralComment();
                 break;
             case 'get_mark_data':
-                $this->getMarkDetails();
+                $this->ajaxGetGradedComponent();
                 break;
             case 'get_gradeable_comment':
                 $this->getGradeableComment();
@@ -1585,63 +1585,72 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderJsonSuccess();
     }
 
-    public function getMarkDetails() {
-        //gets all the details from the database of a mark to readd it to the view
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+    protected function ajaxGetGradedComponent() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+        $anon_id = $_GET['anon_id'] ?? '';
+        $component_id = $_GET['component_id'] ?? '';
 
-        $component = null;
-        foreach ($gradeable->getComponents() as $question) {
-            if (is_array($question)) {
-                if ($question[0]->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-                foreach ($question as $cmpt) {
-                    if ($cmpt->getGrader() == null) {
-                        $component = $cmpt;
-                        break;
-                    }
-                    if ($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
-                        $component = $cmpt;
-                        break;
-                    }
-                }
-                break;
-            } else {
-                if ($question->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-                $component = $question;
-                break;
-            }
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
         }
 
-        if (!$this->core->getAccess()->canI("grading.electronic.get_mark_data", ["gradeable" => $gradeable, "component" => $component])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
         }
 
-        $return_data = array();
-        foreach ($component->getMarks() as $mark) {
-            $temp_array = array();
-            $temp_array['id'] = $mark->getId();
-            $temp_array['score'] = $mark->getPoints();
-            $temp_array['note'] = $mark->getNote();
-            $temp_array['has_mark'] = $mark->getHasMark();
-            $temp_array['is_publish'] = $mark->getPublish();
-            $temp_array['order'] = $mark->getOrder();
-            $return_data[] = $temp_array;
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
         }
-        $temp_array = array();
-        $temp_array['custom_score'] = $component->getScore();
-        $temp_array['custom_note'] = $component->getComment();
-        $return_data[] = $temp_array;
 
-        $response = array('status' => 'success', 'data' => $return_data);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.get_mark_data", ["gradeable" => $graded_gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component data');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Get / create the graded component
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $details = $this->getGradedComponent($graded_component);
+            $this->core->getOutput()->renderJsonSuccess($details);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    protected function getGradedComponent(GradedComponent $graded_component) {
+        $component_data = [];
+        $mark_data = [];
+        foreach ($graded_component->getComponent()->getMarks() as $mark) {
+            $data = $mark->toArray();
+            $data['has_mark'] = $graded_component->hasMark($mark);
+            $mark_data[] = $data;
+        }
+        $component_data['marks'] = $mark_data;
+        $component_data['score'] = $graded_component->getScore();
+        $component_data['comment'] = $graded_component->getComment();
+        return $component_data;
     }
 
     public function getGradeableComment() {
