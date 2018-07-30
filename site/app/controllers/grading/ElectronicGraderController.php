@@ -47,6 +47,9 @@ class ElectronicGraderController extends GradingController {
             case 'save_mark':
                 $this->ajaxSaveMark();
                 break;
+            case 'save_mark_order':
+                $this->ajaxSaveMarkOrder();
+                break;
             case 'save_general_comment':
                 $this->saveGeneralComment();
                 break;
@@ -1135,7 +1138,7 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    private function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
+    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
         // Only update the grader if we're set to overwrite it
         if ($overwrite) {
             $graded_component->setGrader($grader);
@@ -1243,6 +1246,61 @@ class ElectronicGraderController extends GradingController {
             $mark->setTitle($title);
         }
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
+    }
+
+    public function ajaxSaveMarkOrder() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $order = $_POST['order'] ?? [];
+
+        // Validate required parameters
+        if (count($order) === 0) {
+            $this->core->getOutput()->renderJsonFail('Missing order parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("rubric.electronic.save_mark", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveMarkOrder($component, $order);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveMarkOrder(Component $component, array $orders) {
+        foreach ($component->getMarks() as $mark) {
+            if (!isset($orders[$mark->getId()])) {
+                throw new \InvalidArgumentException('Missing mark id in order array');
+            }
+            $order = $orders[$mark->getId()];
+            if (!ctype_digit($order)) {
+                throw new \InvalidArgumentException('All order values must be non-negative integers');
+            }
+            $mark->setOrder(intval($order));
+        }
+        $this->core->getQueries()->saveComponent($component);
     }
 
     /**
