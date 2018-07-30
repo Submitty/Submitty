@@ -1348,9 +1348,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $mark_id = $_POST['mark_id'] ?? '';
         $points = $_POST['points'] ?? null;
-        $order = $_POST['order'] ?? null;
         $title = $_POST['note'] ?? null;
-        $selected = $_POST['selected'] ?? null; 
         // Validate required parameters
         if ($title === null) {
             $this->core->getOutput()->renderJsonFail('Missing title parameter');
@@ -1360,14 +1358,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Missing points parameter');
             return;
         }
-        if ($order === null) {
-            $this->core->getOutput()->renderJsonFail('Missing order parameter');
-            return;
-        }
-        if ($selected === null) {
-            $this->core->getOutput()->renderJsonFail('Missing selected parameter');
-            return;
-        }
+        echo($points);
         if (!is_numeric($points)) {
             $this->core->getOutput()->renderJsonFail('Invalid points parameter');
             return;
@@ -1406,17 +1397,13 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    public function saveMark(Mark $mark, float $points, string $title, bool $selected, int $order) {
+    public function saveMark(Mark $mark, float $points, string $title) {
         if($mark->getPoints() !== $points) {
             $mark->setPoints($points);
         }
         if($mark->getTitle() !== $title) {
             $mark->setTitle($title);
         }
-        if($mark->getOrder() !== $order) {
-            $mark->setOrder($order);
-        }
-        $mark->setHasMark($selected);
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
     /**
