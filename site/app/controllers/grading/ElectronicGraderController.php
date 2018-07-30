@@ -119,10 +119,11 @@ class ElectronicGraderController extends GradingController {
         $dir_iter = new \DirectoryIterator(dirname($annotation_path.'/'));
         foreach ($dir_iter as $fileinfo) {
             if (!$fileinfo->isDot()) {
-                $annotation_jsons[$this->core->getUser()->getId()] = file_get_contents($fileinfo->getPathname());
+                $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                $grader_id = explode('_', $grader_id)[1];
+                $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
             }
         }
-        $annotation_json = is_file($annotation_path) ? file_get_contents($annotation_path) : "";
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         //TODO: Add a new view
@@ -131,8 +132,7 @@ class ElectronicGraderController extends GradingController {
             'grader_id' => $this->core->getUser()->getId(),
             'user_id' => $user_id,
             'filename' => $filename,
-            'annotation_jsons' => $annotation_jsons
-//            'annotation_json' => $annotation_json
+            'annotation_jsons' => json_encode($annotation_jsons, 128)
         ]);
     }
 
