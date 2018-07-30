@@ -11,7 +11,7 @@ def up(config, conn, semester, course):
 			    type notifications_type NOT NULL,\
 			    metadata TEXT NOT NULL,\
 			    content TEXT NOT NULL,\
-			    from_user_id VARCHAR(255) NOT NULL,\
+			    from_user_id VARCHAR(255),\
 			    to_user_id VARCHAR(255) NOT NULL,\
 			    created_at timestamp with time zone NOT NULL,\
 			    seen_at timestamp with time zone\
