@@ -72,3 +72,14 @@ if [ -f "$mytempcurrentcourses" ]; then
     echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
     mv ${mytempcurrentcourses} ${originalcurrentcourses}
 fi
+
+#####################################
+# Installing & building PDF annotator
+
+pushd ${SUBMITTY_REPOSITORY}/../pdf-annotate.js
+npm install
+npm run-script build
+cp dist/pdf-annoate.js ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
+chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
+popd
