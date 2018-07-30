@@ -31,6 +31,7 @@ use app\models\User;
  * @method void setGradeByRegistration($grade_by_reg)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
+ * @method \DateTime getGradeDueDate()
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
@@ -157,6 +158,8 @@ class Gradeable extends AbstractModel {
     protected $ta_view_start_date = null;
     /** @property @var \DateTime The date that graders may start grading */
     protected $grade_start_date = null;
+    /** @property @var \DateTime The date that graders must have grades in by */
+    protected $grade_due_date = null;
     /** @property @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
     /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
@@ -216,6 +219,7 @@ class Gradeable extends AbstractModel {
     const date_properties = [
         'ta_view_start_date',
         'grade_start_date',
+        'grade_due_date',
         'grade_released_date',
         'team_lock_date',
         'submission_open_date',
@@ -339,6 +343,7 @@ class Gradeable extends AbstractModel {
 
         $ta_view_start_date = $dates['ta_view_start_date'];
         $grade_start_date = $dates['grade_start_date'];
+        $grade_due_date = $dates['grade_due_date'];
         $grade_released_date = $dates['grade_released_date'];
         $team_lock_date = $dates['team_lock_date'];
         $submission_open_date = $dates['submission_open_date'];
@@ -393,8 +398,11 @@ class Gradeable extends AbstractModel {
                 if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
                     $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 }
-                if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
-                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                if (Utils::compareNullableGt($grade_start_date, $grade_due_date)) {
+                    $errors['grade_due_date'] = 'Manual Grading Due Date must be no earlier than Manual Grading Open Date';
+                }
+                if (Utils::compareNullableGt($grade_due_date, $grade_released_date)) {
+                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Due Date';
                 }
             } else {
                 if (Utils::compareNullableGt($max_due, $grade_released_date)) {
@@ -408,12 +416,15 @@ class Gradeable extends AbstractModel {
             }
         } else {
 
-            // TA beta testing date <= manual grading open date <= grades released
+            // TA beta testing date <= manual grading open date <= manual grading due date <= grades released
             if (Utils::compareNullableGt($ta_view_start_date, $grade_start_date)) {
                 $errors['ta_view_start_date'] = 'TA Beta Testing date must be before the Grading Open Date';
             }
-            if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
-                $errors['grade_released_date'] = 'Grades Released Date must be later than the Grading Open Date';
+            if (Utils::compareNullableGt($grade_start_date, $grade_due_date)) {
+                $errors['grade_due_date'] = 'Grading Open Date must be before the Grades Due Date';
+            }
+            if (Utils::compareNullableGt($grade_due_date, $grade_released_date)) {
+                $errors['grade_released_date'] = 'Grades Released Date must be later than the Grades Due Date';
             }
         }
 
@@ -425,7 +436,7 @@ class Gradeable extends AbstractModel {
     /**
      * Sets the all of the dates of this gradeable
      * Validation: All parenthetical values are only relevant for electronic submission and drop out of this expression
-     *  ta_view_start_date <= (submission_open_date) <= (submission_due_date) <= (grade_start_date) <= grade_released_date
+     *  ta_view_start_date <= (submission_open_date) <= (submission_due_date) <= grade_start_date <= grade_due_date <= grade_released_date
      *      AND
      *  (submission_due_date + late days) <= grade_released_date
      *
@@ -443,14 +454,15 @@ class Gradeable extends AbstractModel {
 
         $this->ta_view_start_date = $dates['ta_view_start_date'];
         $this->grade_start_date = $dates['grade_start_date'];
+        $this->grade_due_date = $dates['grade_due_date'];
         $this->grade_released_date = $dates['grade_released_date'];
         $this->grade_locked_date = $dates['grade_locked_date'];
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->ta_grading) {
-                // No TA grading, but we must set this start date so the database
+                // No TA grading, but we must set this start date and due date so the database
                 //  doesn't complain when we update it
-                $this->grade_start_date = $dates['grade_released_date'];
+                $this->grade_start_date = $this->grade_due_date = $dates['grade_released_date'];
             }
 
             // Set team lock date even if not team assignment because it is NOT NULL in the db
@@ -512,6 +524,11 @@ class Gradeable extends AbstractModel {
 
     /** @internal */
     public function setGradeStartDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setGradeDueDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
