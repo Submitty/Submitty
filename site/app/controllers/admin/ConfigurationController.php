@@ -70,7 +70,7 @@ class ConfigurationController extends AbstractController {
     }
 
     public function updateConfiguration() {
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+        if (!$this->core->checkCsrfToken()) {
             return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         }
 
@@ -84,11 +84,12 @@ class ConfigurationController extends AbstractController {
         }
         $entry = $_POST['entry'];
 
-        if($name === "course_name" && $entry === "") {
-            return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
+        if($name === "course_name") {
+            if($entry === "") {
+                return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
+            }
         }
-
-        if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+        else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
             if(!ctype_digit($entry)) {
                 return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
             }
