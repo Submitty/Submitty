@@ -10,6 +10,8 @@ class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'configure_new_gradeable_for_plagiarism_form':
+                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
             case 'save_new_plagiarism_configuration':
