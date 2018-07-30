@@ -2,9 +2,6 @@
 namespace app\controllers\grading;
 use app\controllers\AbstractController;
 use app\libraries\DiffViewer;
-use app\models\gradeable\AutoGradedGradeable;
-use app\models\gradeable\AutoGradedTestcase;
-use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\Mark;
@@ -50,7 +47,7 @@ class ElectronicGraderController extends GradingController {
                 $this->saveGeneralComment();
                 break;
             case 'get_mark_data':
-                $this->getMarkDetails();
+                $this->ajaxGetGradedComponent();
                 break;
             case 'get_gradeable_comment':
                 $this->getGradeableComment();
@@ -100,7 +97,8 @@ class ElectronicGraderController extends GradingController {
      * @param string $gradeable_id
      * @return \app\models\gradeable\Gradeable|bool false if failed
      */
-    private function tryGetGradeable(string $gradeable_id) {
+    /*
+    protected function tryGetGradeable(string $gradeable_id) {
         if ($gradeable_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
             return false;
@@ -114,13 +112,14 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError('Failed to load gradeable');
         }
         return false;
-    }
+    }*/
     /**
      * Gets a gradeable component from its id and a gradeable
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param string $component_id
      * @return Component|bool
      */
+    /*
     private function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
         if ($component_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
@@ -144,6 +143,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $mark_id
      * @return Mark|bool
      */
+    /*
     private function tryGetMark(Component $component, string $mark_id) {
         if ($mark_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing mark_id parameter');
@@ -166,6 +166,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $anon_id
      * @return string|bool
      */
+    /*
     private function tryGetUserIdFromAnonId(string $anon_id) {
         if ($anon_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
@@ -189,6 +190,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $submitter_id
      * @return \app\models\gradeable\GradedGradeable|bool
      */
+    /*
     private function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
         if ($submitter_id === '') {
             $this->core->getOutput()->renderJsonFail('Must provide a who_id (user/team id) parameter');
@@ -212,6 +214,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $version
      * @return AutoGradedVersion|bool
      */
+    /*
     private function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version) {
         if ($version !== '') {
             $version = intval($version);
@@ -227,7 +230,7 @@ class ElectronicGraderController extends GradingController {
                 return false;
             }
         }
-    }
+    }*/
     public function savePDFAnnotation(){
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
@@ -306,6 +309,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $testcase_index
      * @return AutoGradedTestcase|bool
      */
+    /*
     private function tryGetTestcase(AutoGradedVersion $version, string $testcase_index) {
         if ($testcase_index === '') {
             $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
@@ -329,6 +333,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $autocheck_index
      * @return \app\models\GradeableAutocheck|bool
      */
+    /*
     private function tryGetAutocheck(AutoGradedTestcase $testcase, string $autocheck_index) {
         if($autocheck_index === '') {
             $this->core->getOutput()->renderJsonFail('Must provide an autocheck index parameter');
@@ -1345,6 +1350,7 @@ class ElectronicGraderController extends GradingController {
         $points = $_POST['points'] ?? null;
         $order = $_POST['order'] ?? null;
         $title = $_POST['note'] ?? null;
+        $selected = $_POST['selected'] ?? null; 
         // Validate required parameters
         if ($title === null) {
             $this->core->getOutput()->renderJsonFail('Missing title parameter');
@@ -1356,6 +1362,10 @@ class ElectronicGraderController extends GradingController {
         }
         if ($order === null) {
             $this->core->getOutput()->renderJsonFail('Missing order parameter');
+            return;
+        }
+        if ($selected === null) {
+            $this->core->getOutput()->renderJsonFail('Missing selected parameter');
             return;
         }
         if (!is_numeric($points)) {
@@ -1386,7 +1396,7 @@ class ElectronicGraderController extends GradingController {
         }
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveMark($mark, $points, $title, $order);
+            $this->saveMark($mark, $points, $title, $selected, $order);
             $response = $mark->getTitle();
             $this->core->getOutput()->renderJsonSuccess($response);
             return $response;
@@ -1396,7 +1406,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    public function saveMark(Mark $mark, float $points, string $title, int $order) {
+    public function saveMark(Mark $mark, float $points, string $title, bool $selected, int $order) {
         if($mark->getPoints() !== $points) {
             $mark->setPoints($points);
         }
@@ -1406,6 +1416,7 @@ class ElectronicGraderController extends GradingController {
         if($mark->getOrder() !== $order) {
             $mark->setOrder($order);
         }
+        $mark->setHasMark($selected);
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
     /**
@@ -1758,6 +1769,73 @@ class ElectronicGraderController extends GradingController {
         $response = array('status' => 'success', 'data' => $return_data);
         $this->core->getOutput()->renderJson($response);
         return $response;
+    }
+    protected function ajaxGetGradedComponent() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+        $anon_id = $_GET['anon_id'] ?? '';
+        $component_id = $_GET['component_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.get_mark_data", ["gradeable" => $graded_gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component data');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Get / create the graded component
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $details = $this->getGradedComponent($graded_component);
+            $this->core->getOutput()->renderJsonSuccess($details);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    protected function getGradedComponent(GradedComponent $graded_component) {
+        $component_data = [];
+        $mark_data = [];
+        foreach ($graded_component->getComponent()->getMarks() as $mark) {
+            $data = $mark->toArray();
+            $data['has_mark'] = $graded_component->hasMark($mark);
+            $mark_data[] = $data;
+        }
+        $component_data['marks'] = $mark_data;
+        $component_data['score'] = $graded_component->getScore();
+        $component_data['comment'] = $graded_component->getComment();
+        return $component_data;
     }
     public function getGradeableComment() {
         $gradeable_id = $_POST['gradeable_id'];
