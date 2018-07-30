@@ -180,17 +180,6 @@ class NavigationView extends AbstractView {
         }
 
         // ======================================================================================
-        // NOTIFICATIONS BUTTON
-        // ======================================================================================
-
-        $top_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
-            "title" => "Notifications",
-            "class" => "btn btn-primary",
-            "notifications_count" => $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null)
-        ]);
-
-        // ======================================================================================
         // INDEX OF ALL GRADEABLES
         // ======================================================================================
 
