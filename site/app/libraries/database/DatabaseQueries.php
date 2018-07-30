@@ -643,12 +643,18 @@ ORDER BY egd.g_version", array($g_id, $user_id));
             $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = $sections;
         }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
 {$where}
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderby}", $params);
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
@@ -669,6 +675,12 @@ ORDER BY {$section_key}", $params);
             $where = "WHERE {$section_key} IN ($placeholders)";
             $params = array_merge($params, $sections_keys);
         }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -680,7 +692,7 @@ AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id=?
 {$where}
 GROUP BY {$section_key}
-ORDER BY {$section_key}", $params);
+ORDER BY {$orderby}", $params);
 
         foreach ($this->course_db->rows() as $row) {
             $return[$row[$section_key]] = intval($row['cnt']);
@@ -700,6 +712,12 @@ ORDER BY {$section_key}", $params);
             $where = "WHERE {$section_key} IN ($placeholders)";
             $params = array_merge($params, $sections_keys);
         }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
         $this->course_db->query("
             SELECT COUNT(*) as cnt, {$section_key}
             FROM gradeable_teams
@@ -710,7 +728,7 @@ ORDER BY {$section_key}", $params);
                    AND electronic_gradeable_version.g_id=?
             {$where}
             GROUP BY {$section_key}
-            ORDER BY {$section_key}
+            ORDER BY {$orderby}
         ", $params);
 
         foreach ($this->course_db->rows() as $row) {
