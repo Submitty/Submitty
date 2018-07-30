@@ -1090,6 +1090,8 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
+                // Also set the grade due date so our dates are valid
+                $dates['grade_due_date'] = $now;
                 $dates['grade_released_date'] = $now;
                 $message .= "Released grades for ";
                 $success = true;
