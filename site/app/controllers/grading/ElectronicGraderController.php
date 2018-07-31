@@ -90,154 +90,25 @@ class ElectronicGraderController extends GradingController {
                 break;
         }
     }
-    //
-    //  Below are methods that try to fetch model objects from request parameters and render JSEND responses
-    //      in the failure/error cases in addition to returning false.  The results of these methods should
-    //      be strict-type-checked against `false`
-    //
+
     /**
-     * Gets a gradeable config from its id and renders
-     * @param string $gradeable_id
-     * @return \app\models\gradeable\Gradeable|bool false if failed
+     * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
+     * @param string $option
+     * @return bool
      */
-    /*
-    protected function tryGetGradeable(string $gradeable_id) {
-        if ($gradeable_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
+    private function validateDiffViewerOption(string $option) {
+        if (!DiffViewer::isValidSpecialCharsOption($option)) {
+            $this->core->getOutput()->renderJsonFail('Invalid diff viewer option parameter');
             return false;
         }
-        // Get the gradeable
-        try {
-            return $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load gradeable');
-        }
-        return false;
-    }*/
-    /**
-     * Gets a gradeable component from its id and a gradeable
-     * @param \app\models\gradeable\Gradeable $gradeable
-     * @param string $component_id
-     * @return Component|bool
-     */
-    /*
-    private function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
-        if ($component_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
-            return false;
-        }
-        if (!ctype_digit($component_id)) {
-            $this->core->getOutput()->renderJsonFail('Invalid component_id parameter');
-            return false;
-        }
-        $component_id = intval($component_id);
-        try {
-            return $gradeable->getComponent($component_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
-            return false;
-        }
+        return true;
     }
-    /**
-     * Gets a mark from its id and a component
-     * @param Component $component
-     * @param string $mark_id
-     * @return Mark|bool
-     */
-    /*
-    private function tryGetMark(Component $component, string $mark_id) {
-        if ($mark_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing mark_id parameter');
-            return false;
-        }
-        if (!ctype_digit($mark_id)) {
-            $this->core->getOutput()->renderJsonFail('Invalid mark_id parameter');
-            return false;
-        }
-        $mark_id = intval($mark_id);
-        try {
-            return $component->getMark($mark_id);
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail('Invalid mark_id for this component');
-            return false;
-        }
-    }
-    /**
-     * Gets a user id from an anon id
-     * @param string $anon_id
-     * @return string|bool
-     */
-    /*
-    private function tryGetUserIdFromAnonId(string $anon_id) {
-        if ($anon_id === '') {
-            $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
-            return false;
-        }
-        try {
-            $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id] ?? null;
-            if ($user_id === null) {
-                $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
-                return false;
-            }
-            return $user_id;
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
-        }
-        return false;
-    }
-    /**
-     * Gets a graded gradeable for a given gradeable and submitter id
-     * @param \app\models\gradeable\Gradeable $gradeable
-     * @param string $submitter_id
-     * @return \app\models\gradeable\GradedGradeable|bool
-     */
-    /*
-    private function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
-        if ($submitter_id === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide a who_id (user/team id) parameter');
-            return false;
-        }
-        try {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $submitter_id, $submitter_id);
-            if ($graded_gradeable === null) {
-                $this->core->getOutput()->renderJsonFail('User not on a team!');
-                return false;
-            }
-            return $graded_gradeable;
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
-        }
-        return false;
-    }
-    /**
-     * Gets a submission version for a given auto graded gradeable and version number
-     * @param AutoGradedGradeable $auto_graded_gradeable
-     * @param string $version
-     * @return AutoGradedVersion|bool
-     */
-    /*
-    private function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version) {
-        if ($version !== '') {
-            $version = intval($version);
-            $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$version] ?? null;
-            if ($version_instance === null) {
-                $this->core->getOutput()->renderJsonFail('Invalid gradeable version');
-                return false;
-            }
-        } else {
-            $version_instance = $auto_graded_gradeable->getActiveVersionInstance();
-            if ($version_instance === null) {
-                $this->core->getOutput()->renderJsonFail('No version instance specified and no active version');
-                return false;
-            }
-        }
-    }*/
+    
     public function savePDFAnnotation(){
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
         $annotation_info = $_POST['GENERAL_INFORMATION'];
+        $grader_id = $this->core->getUser()->getId();
         $course_path = $this->core->getConfig()->getCoursePath();
         $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $annotation_info['user_id'])->getActiveVersion();
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
@@ -255,7 +126,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->addErrorMessage("Creating annotation version folder failed");
             return false;
         }
-        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . '_annotation.json';
+        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
         return true;
     }
@@ -266,17 +137,28 @@ class ElectronicGraderController extends GradingController {
         $user_id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
         $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_annotation.json';
+        $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_' .$this->core->getUser()->getId().'.json';
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version, $annotation_file_name);
-        $annotation_json = is_file($annotation_path) ? file_get_contents($annotation_path) : "";
+        $annotation_jsons = [];
+        if(is_file($annotation_path)) {
+            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+            foreach ($dir_iter as $fileinfo) {
+                if (!$fileinfo->isDot()) {
+                    $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                    $grader_id = explode('_', $grader_id)[1];
+                    $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                }
+            }
+        }
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         //TODO: Add a new view
         return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
+            'grader_id' => $this->core->getUser()->getId(),
             'user_id' => $user_id,
             'filename' => $filename,
-            'annotation_json' => $annotation_json
+            'annotation_jsons' => json_encode($annotation_jsons, 128)
         ]);
     }
 
@@ -303,69 +185,6 @@ class ElectronicGraderController extends GradingController {
                 $gradeable = $g;
                 break;
             }
-        }
-        return $version_instance;
-    }
-    /**
-     * Gets a testcase for a given version and testcase index
-     * @param AutoGradedVersion $version
-     * @param string $testcase_index
-     * @return AutoGradedTestcase|bool
-     */
-    /*
-    private function tryGetTestcase(AutoGradedVersion $version, string $testcase_index) {
-        if ($testcase_index === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide an index parameter');
-            return false;
-        }
-        if (!ctype_digit($testcase_index)) {
-            $this->core->getOutput()->renderJsonFail('index parameter must be a non-negative integer');
-            return false;
-        }
-        $testcase_index = intval($testcase_index);
-        $testcase = $version->getTestcases()[$testcase_index] ?? null;
-        if ($testcase === null) {
-            $this->core->getOutput()->renderJsonFail('Invalid testcase index');
-            return false;
-        }
-        return $testcase;
-    }
-    /**
-     * Gets an autocheck for a given testcase and autocheck index
-     * @param AutoGradedTestcase $testcase
-     * @param string $autocheck_index
-     * @return \app\models\GradeableAutocheck|bool
-     */
-    /*
-    private function tryGetAutocheck(AutoGradedTestcase $testcase, string $autocheck_index) {
-        if($autocheck_index === '') {
-            $this->core->getOutput()->renderJsonFail('Must provide an autocheck index parameter');
-            return false;
-        }
-        if (!ctype_digit($autocheck_index)) {
-            $this->core->getOutput()->renderJsonFail('autocheck index parameter must be a non-negative integer');
-            return false;
-        }
-        $autocheck_index = intval($autocheck_index);
-        try {
-            return $testcase->getAutocheck($autocheck_index);
-        } catch (\InvalidArgumentException $e){
-            $this->core->getOutput()->renderJsonFail('Invalid autocheck index parameter');
-            return false;
-        }
-    }
-    /**
-     * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
-     * @param string $option
-     * @return bool
-     */
-    private function validateDiffViewerOption(string $option) {
-        if (!DiffViewer::isValidSpecialCharsOption($option)) {
-            $this->core->getOutput()->renderJsonFail('Invalid diff viewer option parameter');
-            return false;
-        }
-        return true;
-    }
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
      * @param string $type
