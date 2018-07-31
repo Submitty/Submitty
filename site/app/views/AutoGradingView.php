@@ -359,6 +359,7 @@ class AutoGradingView extends AbstractView {
 
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
 
+        $uploaded_files = $gradeable->getSubmittedFiles();
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
             "grader_names" => $grader_names,
@@ -371,7 +372,8 @@ class AutoGradingView extends AbstractView {
             "active_same_as_graded" => $active_same_as_graded,
             "regrade_enabled" => $regrade_enabled,
             "regrade_message" => $regrade_message,
-            "num_decimals" => $num_decimals
+            "num_decimals" => $num_decimals,
+            "uploaded_files" => $uploaded_files
         ]);
     }
 

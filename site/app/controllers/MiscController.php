@@ -36,6 +36,9 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'base64_encode_pdf':
+                $this->encodePDF();
+                break;
             case 'modify_course_materials_file_permission':
                 $this->modifyCourseMaterialsFilePermission();
                 break;
@@ -63,8 +66,8 @@ class MiscController extends AbstractController {
         // from this point on, is not a zip
         // do path and permissions checking
 
-        $dir = $_GET['dir'];
-        $path = $_GET['path'];
+        $dir = $_REQUEST['dir'];
+        $path = $_REQUEST['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
@@ -199,6 +202,15 @@ class MiscController extends AbstractController {
         }
     }
 
+    private function encodePDF(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $file_name = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        return $this->core->getOutput()->renderJson($pdf64);
+    }
+
     private function displayFile() {
         // security check
         $error_string="";
@@ -207,13 +219,13 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path'])));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
@@ -240,7 +252,7 @@ class MiscController extends AbstractController {
         }
 
         // delete the file from upload/course_materials
-        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
         if ( unlink($filename) )
         {
             $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
@@ -282,7 +294,7 @@ class MiscController extends AbstractController {
         }
 
 
-        $path = $_GET['path'];
+        $path = $_REQUEST['path'];
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -327,7 +339,7 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=\"{$filename}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
     }
 
     private function downloadZip() {
@@ -517,7 +529,7 @@ class MiscController extends AbstractController {
     }
 
 
-	public function modifyCourseMaterialsFilePermission() {
+  	public function modifyCourseMaterialsFilePermission() {
 
         // security check
         if($this->core->getUser()->getGroup() !== 1) {
@@ -554,10 +566,10 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 
-	public function modifyCourseMaterialsFileTimeStamp() {
+    public function modifyCourseMaterialsFileTimeStamp() {
 
         if($this->core->getUser()->getGroup() !== 1) {
             $message = "You do not have access to that page. ";
@@ -568,13 +580,13 @@ class MiscController extends AbstractController {
            return;
         }
 
-        if (!isset($_GET['filename']) ||
-            !isset($_GET['newdatatime'])) {
+        if (!isset($_REQUEST['filename']) ||
+            !isset($_REQUEST['newdatatime'])) {
             return;
         }
 
-        $file_name = htmlspecialchars($_GET['filename']);
-        $new_data_time = htmlspecialchars($_GET['newdatatime']);
+        $file_name = htmlspecialchars($_REQUEST['filename']);
+        $new_data_time = htmlspecialchars($_REQUEST['newdatatime']);
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
@@ -588,6 +600,6 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 }
