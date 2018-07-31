@@ -197,7 +197,8 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()])
+                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
+                    "has_build_error" => $gradeable->anyBuildErrors()
                 ];
             }
 
@@ -235,7 +236,6 @@ class NavigationView extends AbstractView {
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
-            $buttons[] = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable) : null;
             $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
         }
 
@@ -285,13 +285,6 @@ class NavigationView extends AbstractView {
         return $this->core->getUser()->accessAdmin();
     }
 
-    /**
-     * @param Gradeable $gradeable
-     * @return bool
-     */
-    private function hasRebuildButton(Gradeable $gradeable): bool {
-        return ($this->core->getUser()->accessAdmin()) && ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
-    }
 
     /**
      * @return bool
@@ -602,21 +595,6 @@ class NavigationView extends AbstractView {
             "class" => "fa fa-pencil",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getId()}"
-        ]);
-        return $button;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return Button|null
-     */
-    private function getRebuildButton(Gradeable $gradeable) {
-        $button = new Button($this->core, [
-            "title" => "Rebuild",
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
-            "class" => "fa fa-wrench",
-            "title_on_hover" => true,
-            "aria_label" => "rebuild gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }

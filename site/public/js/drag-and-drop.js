@@ -857,7 +857,6 @@ function handleDownloadImages(csrf_token) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
-            //window.location.reload(true);
         }
     });
 }
@@ -954,7 +953,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
-            window.location.reload(true);
         }
     });
 }
