@@ -270,7 +270,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
         $this->course_ini_path = $course_ini;
-        $this->course_ini = IniParser::readFile($this->course_ini_path);
+        $this->course_ini = $this->readCourseIni();
 
         if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
             throw new ConfigException("Missing config section 'database_details' in ini file");
@@ -404,5 +404,9 @@ class Config extends AbstractModel {
 
     public function saveCourseIni($save) {
         IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
+    }
+
+    public function readCourseIni() {
+        return IniParser::readFile($this->course_ini_path);
     }
 }

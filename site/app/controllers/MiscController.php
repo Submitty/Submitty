@@ -36,6 +36,9 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'base64_encode_pdf':
+                $this->encodePDF();
+                break;
             case 'modify_course_materials_file_permission':
                 $this->modifyCourseMaterialsFilePermission();
                 break;
@@ -197,6 +200,15 @@ class MiscController extends AbstractController {
         {
             return false;
         }
+    }
+
+    private function encodePDF(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $file_name = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        return $this->core->getOutput()->renderJson($pdf64);
     }
 
     private function displayFile() {
@@ -537,7 +549,7 @@ class MiscController extends AbstractController {
     }
 
 
-	public function modifyCourseMaterialsFilePermission() {
+  	public function modifyCourseMaterialsFilePermission() {
 
         // security check
         if($this->core->getUser()->getGroup() !== 1) {
@@ -574,10 +586,10 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 
-	public function modifyCourseMaterialsFileTimeStamp() {
+    public function modifyCourseMaterialsFileTimeStamp() {
 
         if($this->core->getUser()->getGroup() !== 1) {
             $message = "You do not have access to that page. ";
@@ -608,6 +620,6 @@ class MiscController extends AbstractController {
 
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
-		}
+        }
     }
 }
