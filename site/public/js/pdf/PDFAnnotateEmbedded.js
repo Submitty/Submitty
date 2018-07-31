@@ -3,6 +3,8 @@ let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
     documentId,
+    //User id in this case is the grader
+    userId: null,
     pdfDocument: null,
     // scale: parseFloat(localStorage.getItem(`${documentId}/scale`), 10) || 0.5,
     scale: 1,
@@ -41,7 +43,7 @@ document.getElementById('submission_browser').addEventListener('scroll', functio
     }
 });
 
-function render(gradeable_id, user_id, file_name) {
+function render(gradeable_id, user_id, grader_id, file_name) {
     let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
     $.ajax({
         type: 'POST',
@@ -56,7 +58,8 @@ function render(gradeable_id, user_id, file_name) {
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            documentId = file_name;
+            RENDER_OPTIONS.userId = grader_id;
+            // documentId = file_name;
             var pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
@@ -72,7 +75,6 @@ function render(gradeable_id, user_id, file_name) {
                         let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                         PAGE_HEIGHT = viewport.height;
                     }).then(function(){
-                        // console.log("hi");
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
                             $("#submission_browser").draggable('disable');
@@ -175,7 +177,7 @@ function render(gradeable_id, user_id, file_name) {
         $('#save_status').text("Saved");
         $('#save_status').css('color', 'black');
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
+        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
         // let count = 0;
         // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
         //     count+= JSON.parse(annotation_layer)[i]['lines'].length;
@@ -286,6 +288,10 @@ function render(gradeable_id, user_id, file_name) {
 
 //TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 $(window).unload(function() {
-    localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+    for(let i = 0; i < localStorage.length; i++){
+        if(localStorage.key(i).includes('annotations')){
+            localStorage.removeItem(localStorage.key(i));
+        }
+    }
 });
 
