@@ -2474,6 +2474,36 @@ AND gc_id IN (
     }
 
     /**
+     * Gets a user or team submitter by id
+     * @param string $id User or team id
+     * @return Submitter|null
+     */
+    public function getSubmitterById(string $id) {
+        $user = $this->core->getQueries()->getUserById($id);
+        if ($user !== null) {
+            return new Submitter($this->core, $user);
+        }
+        $team = $this->core->getQueries()->getTeamById($id);
+        if ($team !== null) {
+            return new Submitter($this->core, $team);
+        }
+        //TODO: Do we have other types of submitters?
+        return null;
+    }
+
+    /**
+     * Gets user or team submitters by id
+     * @param string[] $ids User or team ids
+     * @return Submitter|null
+     */
+    public function getSubmittersById(array $ids) {
+        //Get Submitter for each id in ids
+        return array_map(function($id) {
+            return $this->getSubmitterById($id);
+        }, $ids);
+    }
+
+    /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      * @param \app\models\gradeable\Gradeable $gradeable
@@ -2487,6 +2517,21 @@ AND gc_id IN (
             return $gg;
         }
         return null;
+    }
+
+    /**
+     * Gets a single GradedGradeable associated with the provided gradeable and
+     *  submitter.  Note: The user's team for this gradeable will be retrived if provided
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param $submitter|null The submitter to get data for
+     * @return GradedGradeable|null The GradedGradeable or null if none found
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
+     */
+    public function getGradedGradeableForSubmitter(\app\models\gradeable\Gradeable $gradeable, Submitter $submitter) {
+        //Either user or team is set, the other should be null
+        $user_id = $submitter->getUser() ? $submitter->getUser()->getId() : null;
+        $team_id = $submitter->getTeam() ? $submitter->getTeam()->getId() : null;
+        return $this->getGradedGradeable($gradeable, $user_id, $team_id);
     }
 
     /**
