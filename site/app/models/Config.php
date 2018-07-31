@@ -384,6 +384,13 @@ class Config extends AbstractModel {
     /**
      * @return bool
      */
+    public function displayRoomSeating() {
+        return $this->display_room_seating;
+    }
+
+    /**
+     * @return bool
+     */
     public function keepPreviousFiles() {
         return $this->keep_previous_files;
     }

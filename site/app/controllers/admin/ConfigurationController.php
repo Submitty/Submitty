@@ -33,6 +33,7 @@ class ConfigurationController extends AbstractController {
             'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
+            'display_room_seating'           => $this->core->getConfig()->displayRoomSeating(),
             'course_email'                   => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'                   => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
@@ -56,7 +57,8 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'regrade_enabled') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                       'display_custom_message', 'display_room_seating', 'regrade_enabled') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -95,7 +97,8 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message',
+                                      'display_room_seating', 'forum_enabled', 'regrade_enabled'))) {
             $entry = $entry === "true" ? true : false;
         }
         else if($name === 'upload_message') {
