@@ -2402,15 +2402,15 @@ AND gc_id IN (
         return $this->submitty_db->row()['active'];
 
     }
-    public function getRegradeRequestStatus($student_id, $gradeable_id){
-        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE student_id = ? AND gradeable_id = ? ", array($student_id, $gradeable_id));
+    public function getRegradeRequestStatus($user_id, $gradeable_id){
+        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", array($user_id, $gradeable_id));
         $result = ($this->course_db->row()) ? $row['status'] : 0;
         return $result;
     }
     public function insertNewRegradeRequest($gradeable_id, $student_id,$content){
         $params = array($gradeable_id, $student_id, -1);
         try{
-            $this->course_db->query("INSERT INTO regrade_requests(gradeable_id, timestamp, student_id, status) VALUES (?, current_timestamp, ?, ?)", $params);
+            $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, user_id, status) VALUES (?, current_timestamp, ?, ?)", $params);
             $regrade_id = $this->getRegradeRequestID($gradeable_id,$student_id);
             $this->insertNewRegradePost($regrade_id,$gradeable_id,$student_id,$content);
             return true;
@@ -2420,7 +2420,7 @@ AND gc_id IN (
         }
     }
     public function getNumberRegradeRequests($gradeable_id){
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE gradeable_id = ? AND status = -1", array($gradeable_id));
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1", array($gradeable_id));
         return ($this->course_db->row()['cnt']); 
     }
     public function getRegradeDiscussion($regrade_id){
@@ -2432,7 +2432,7 @@ AND gc_id IN (
         return $result;
     }
     public function getRegradeRequestID($gradeable_id,$student_id){
-        $row = $this->course_db->query("SELECT id FROM regrade_requests WHERE gradeable_id = ? AND student_id = ?", array($gradeable_id,$student_id));
+        $row = $this->course_db->query("SELECT id FROM regrade_requests WHERE g_id = ? AND user_id = ?", array($gradeable_id,$student_id));
         $result = ($this->course_db->row()) ? $row['id'] : -1;
         return $result;
     }
