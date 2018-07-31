@@ -188,6 +188,8 @@ class ElectronicGraderController extends GradingController {
                 $gradeable = $g;
                 break;
             }
+        }
+    }
             
 
     /**
