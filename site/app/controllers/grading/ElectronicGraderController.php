@@ -1617,6 +1617,7 @@ class ElectronicGraderController extends GradingController {
                 continue;
             }
             $order_counter = count($component->getMarks());
+            $order_counter++;
             $mark = new GradeableComponentMark($this->core);
             $mark->setGcId($component->getId());
             $mark->setPoints($points);

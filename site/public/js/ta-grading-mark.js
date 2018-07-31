@@ -146,7 +146,7 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
                     }
                     alert("There was an error fetching marks. Please report this message to your instructor and refresh the page: " + response.message);
                 }
-                if (typeof(successCallback) === "function") {
+                else if (typeof(successCallback) === "function") {
                     successCallback(response.data);
                 }
             },
@@ -268,6 +268,36 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
             alert("There was an error with saving the comment. Please refresh the page and try agian.");
         }
     })
+}
+
+// 'order' format: [ <mark0-id> : <order0>, <mark1-id> : <order1>, ... ]
+function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCallback, errorCallback) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark_order'}),
+        async: async,
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'order': order
+        },
+        success: function(response) {
+            if (response.status !== 'success') {
+                console.error('Failed to save mark order: ' + response.message);
+                if (typeof(errorCallback) === "function") {
+                    errorCallback(response.data);
+                }
+                alert("There was an error saving mark order. Please report this message to your instructor and refresh the page: " + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            alert("There was an error with fetching marks. Please refresh the page and try agian.");
+        }
+    });
 }
 
 function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback, errorCallback) {
