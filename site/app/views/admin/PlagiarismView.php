@@ -47,14 +47,10 @@ HTML;
             #lichen job in queue for this gradeable but processing not started
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
                 $return .= <<<HTML
-        <tr style="color:red;">
+        <tr style="color:grey;">
             <td>$title
             </td>
-            <td><i class="fa fa-pencil" aria-hidden="true"></i>
-            </td>
-            <td><i class="fa fa-refresh" aria-hidden="true"></i>
-            </td>
-            <td><i class="fa fa-trash" aria-hidden="true"></i>
+            <td colspan=3><i>in queue</i>
             </td>
             <td>
                 Last run: $timestamp
@@ -75,11 +71,7 @@ HTML;
         <tr style="color:green;">
             <td>$title
             </td>
-            <td><i class="fa fa-pencil" aria-hidden="true"></i>
-            </td>
-            <td><i class="fa fa-refresh" aria-hidden="true"></i>
-            </td>
-            <td><i class="fa fa-trash" aria-hidden="true"></i>
+            <td colspan=3><i>running</i>
             </td>
             <td>
                 Last run: $timestamp
