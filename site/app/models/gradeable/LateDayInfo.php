@@ -88,7 +88,7 @@ class LateDayInfo extends AbstractModel {
     }
 
     public function getLateDaysCharged() {
-        return $this->getLateDayExceptions() - $this->getDaysLate();
+        return max($this->getLateDayExceptions() - $this->getDaysLate(), $this->getLateDaysAllowed());
     }
 
     public function getDaysLate() {
