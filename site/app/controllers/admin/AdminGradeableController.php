@@ -927,7 +927,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading'
+            'peer_grading',
+            'late_submission_allowed'
         ];
 
         // Date properties all need to be set at once
@@ -954,7 +955,7 @@ class AdminGradeableController extends AbstractController {
         foreach ($details as $prop => $post_val) {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
-                $post_val = $post_val === 'true';
+                $post_val = $post_val === 'true' || $post_val === '1';
             }
 
             // Try to set the property

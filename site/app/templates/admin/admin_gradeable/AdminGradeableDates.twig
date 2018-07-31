@@ -41,6 +41,9 @@
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
         <br />
+
+        <input type="checkbox" id="late_submission_allowed" name="late_submission_allowed" {{ gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}/>
+        Should students be able to submit after the 'max due date'?
     </div>
 </div>
 
