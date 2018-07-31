@@ -50,11 +50,15 @@ class Access {
      * Only applies to students
      */
     const CHECK_COMPONENT_PEER_STUDENT  = 1 << 11 | self::REQUIRE_ARG_COMPONENT;
+    /** Check if they can access the given file and directory */
+    const CHECK_FILE_DIRECTORY          = 1 << 12 | self::REQUIRE_ARGS_FILE_DIR;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_COMPONENT         = 1 << 25;
+    /** If the current set of flags requires the "file" and "dir" arguments */
+    const REQUIRE_ARGS_FILE_DIR         = 1 << 26;
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -67,7 +71,14 @@ class Access {
      * @var Core
      */
     private $core;
+    /**
+     * @var int[] $permissions
+     */
     private $permissions = [];
+    /**
+     * @var array[] $directories
+     */
+    private $directories = null;
 
     public function __construct(Core $core) {
         $this->core = $core;
@@ -104,6 +115,62 @@ class Access {
         $this->permissions["grading.simple.grade"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.simple.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.simple.upload_csv"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
+
+
+        $this->permissions["file.access"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+
+        //Per-directory access permissions
+        $this->permissions["file.access.config_upload"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        //TODO: Timed access control
+        $this->permissions["file.access.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        //TODO: Check deleted posts
+        $this->permissions["file.access.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.annotations"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.checkout"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        //TODO: Can students see their results?
+        $this->permissions["file.access.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+
+    }
+
+    /**
+     * Load directory access paths
+     * Needs to be later because the constructor is called before the config is loaded
+     */
+    private function loadDirectories() {
+        $this->directories["config_upload"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/config_upload",
+            "permissions" => "file.access.config_upload"
+        ];
+        $this->directories["uploads"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/uploads",
+            "permissions" => "file.access.uploads"
+        ];
+        $this->directories["course_materials"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/uploads/course_materials",
+            "permissions" => "file.access.course_materials"
+        ];
+        $this->directories["forum_attachments"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/forum_attachments",
+            "permissions" => "file.access.forum_attachments"
+        ];
+        $this->directories["annotations"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/annotations",
+            "permissions" => "file.access.annotations"
+        ];
+        $this->directories["checkout"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/checkout",
+            "permissions" => "file.access.checkout"
+        ];
+        $this->directories["results"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/results",
+            "permissions" => "file.access.results"
+        ];
+        $this->directories["submissions"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
+            "permissions" => "file.access.submissions"
+        ];
     }
 
     /**
@@ -244,6 +311,36 @@ class Access {
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Make sure a component allows students to access it via peer grading
                 if (!$component->getIsPeer()) {
+                    return false;
+                }
+            }
+        }
+
+        //These are always done together
+        if (self::checkBits($checks, self::REQUIRE_ARGS_FILE_DIR)) {
+            $file = $this->requireArg($args, "file");
+            $dir = $this->requireArg($args, "dir");
+
+            if ($this->directories === null) {
+                $this->loadDirectories();
+            }
+            //This is not a valid directory
+            if (!array_key_exists($dir, $this->directories)) {
+                return false;
+            }
+
+            $info = $this->directories[$dir];
+
+            //If this is a generic file check, figure out what
+            if ($action !== $info["permissions"]) {
+                return $this->canUser($user, $info["permissions"], $args);
+            }
+
+            //Now check if they can access the file!
+
+            //No directory traversal
+            foreach (explode(DIRECTORY_SEPARATOR, $file) as $part) {
+                if ($part == ".." || $part == ".") {
                     return false;
                 }
             }
