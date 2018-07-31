@@ -38,7 +38,6 @@ class MiscController extends AbstractController {
                 break;
             case 'base64_encode_pdf':
                 $this->encodePDF();
-                break;
             case 'modify_course_materials_file_permission':
                 $this->modifyCourseMaterialsFilePermission();
                 break;

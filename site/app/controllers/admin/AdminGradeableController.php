@@ -1074,13 +1074,7 @@ class AdminGradeableController extends AbstractController {
             die($result);
         }
         $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
-        $this->core->redirect($this->core->buildUrl(array(
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'edit_gradeable_page',
-            'id' => $g_id,
-            'nav_tab' => '1'
-        )));
+        $this->returnToNav();
     }
 
     private function quickLink() {

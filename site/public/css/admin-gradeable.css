@@ -75,7 +75,7 @@ select {
 
 .nav-bar {
     cursor: pointer;
-    min-width: 150px;
+    width: 160px;
     vertical-align: center;
     padding-right: 10px;
     padding-left: 10px;
