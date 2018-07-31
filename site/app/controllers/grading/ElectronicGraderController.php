@@ -1398,68 +1398,13 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    /**
-     * Route for saving a mark's title/point value
-     */
-   /* public function ajaxSaveMark() {
-        // Required parameters
-        $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $component_id = $_POST['component_id'] ?? '';
-        $mark_id = $_POST['mark_id'] ?? '';
-        $points = $_POST['points'] ?? '';
-        $title = $_POST['note'] ?? null;
-        // Validate required parameters
-        if ($title === null) {
-            $this->core->getOutput()->renderJsonFail('Missing title parameter');
-            return;
-        }
-        if ($points === null) {
-            $this->core->getOutput()->renderJsonFail('Missing points parameter');
-            return;
-        }
-        if (!is_numeric($points)) {
-            $this->core->getOutput()->renderJsonFail('Invalid points parameter');
-            return;
-        }
-        $points = floatval($points);
-        // Get the gradeable
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-        // get the component
-        $component = $this->tryGetComponent($gradeable, $component_id);
-        if ($component === false) {
-            return;
-        }
-        // get the mark
-        $mark = $this->tryGetMark($component, $mark_id);
-        if ($mark === false) {
-            return;
-        }
-        // checks if user has permission
-        if (!$this->core->getAccess()->canI("rubric.electronic.save_mark", ["gradeable" => $gradeable])) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
-            return;
-        }
-        try {
-            // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveMark($mark, $points, $title);
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }*/
-
     public function saveMark(Mark $mark, float $points, string $title) {
-       // if($mark->getPoints() !== $points) {
+        if($mark->getPoints() !== $points) {
             $mark->setPoints($points);
-     //   }
-      //  if($mark->getTitle() !== $title) {
+        }
+        if($mark->getTitle() !== $title) {
             $mark->setTitle($title);
-     //   }
+        }
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
     public function ajaxSaveMarkOrder() {
@@ -1806,31 +1751,24 @@ class ElectronicGraderController extends GradingController {
         $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
         $component = null;
-       // echo("LOOKING FOR:");
-       // echo($_POST['gradeable_component_id']);
         foreach ($gradeable->getComponents() as $question) {
             if (is_array($question)) {
                 if ($question[0]->getId() != $_POST['gradeable_component_id']) {
-            //        echo("BREAKING HERE4!");
                     continue;
                 }
                 foreach ($question as $cmpt) {
                     if ($cmpt->getGrader() == null) {
                         $component = $cmpt;
-                  //      echo("BREAKING HERE1!");
                         break;
                     }
                     if ($cmpt->getGrader()->getId() == $this->core->getUser()->getId()) {
                         $component = $cmpt;
-                  //      echo("BREAKING HERE2!");
                         break;
                     }
                 }
                 break;
             } else {
                 if ($question->getId() != $_POST['gradeable_component_id']) {
-              //      echo($question->getId());
-              //      echo("BREAKING HERE3!");
                     continue;
                 }
                 $component = $question;

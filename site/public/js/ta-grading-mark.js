@@ -411,7 +411,8 @@ function updateMarksOnPage(c_index) {
     var component = getComponent(c_index);
     var parent = $('#marks-parent-'+c_index);
     var points = calculateMarksPoints(c_index);
-    if(editModeEnabled==true){
+    //Disabling reorder marks for now, renable by replacing the if statement with if(EditModeEnabled==true)
+    if(false){
         var sortableMarks=$('#marks-parent-'+c_index);
         var sortEvent = function (event, ui){
             var rows=sortableMarks.find("tr:not(.ui-sortable-placeholder)");
@@ -1018,11 +1019,11 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
     // If no open mark was found, then save general comment
     saveGeneralComment(sync, successCallback, errorCallback);
 }
-function saveMark(c_index, sync, successCallback, errorCallback) {
+function saveMark(c_index, sync, override, successCallback, errorCallback) {
     var gradeable = grading_data.gradeable;
     if(editModeEnabled){
         ajaxGetMarkData(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id , function(data){
-        saveMarkEditMode(c_index, sync, successCallback, errorCallback, data);
+        saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override);
        }); 
         return;
     }
@@ -1040,63 +1041,6 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
         
         var mark_data = new Array(arr_length);
         var existing_marks_num = 0;
-        // Gathers all the mark's data (ex. points, note, etc.)
-        //getComponent(c_index).marks.sort(compareOrder);
-        /*for(var m_index=0; m_index < arr_length; m_index++){
-            if(grading_data.gradeable.components[c_index-1].marks[m_index]==null){
-                grading_data.gradeable.components[c_index-1].marks.splice(m_index, 1);
-            }
-            else{
-                var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
-                var current_row = $('#mark_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
-                var info_mark   = $('#mark_info_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
-                var success     = true;
-                mark_data[m_index] = {
-                    id      : getMark(c_index, current_mark_id).id,
-                    points  : OPENEDMARKS[m_index].points,
-                    note    : OPENEDMARKS[m_index].name,
-                    selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                    order   : OPENEDMARKS[m_index].order
-                };
-                    calculatePercentageTotal();
-                    var gradedByElement = $('#graded-by-' + c_index);
-                    var savingElement = $('#graded-saving-' + c_index);
-                    var ungraded = gradedByElement.text() === "Ungraded!";
-                    console.log("CHECK MARK MODIFIED");
-                    console.log(getMark(c_index, getMark(c_index, current_mark_id).id).has);
-                    gradedByElement.hide();
-                    savingElement.show();
-                    console.log(OPENEDMARKS[m_index].order);
-                    console.log("COMPONNET INDEX");
-                    console.log(gradeable.components[c_index-1].id);
-                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, OPENEDMARKS[m_index].id, OPENEDMARKS[m_index].points, OPENEDMARKS[m_index].name, OPENEDMARKS[m_index].order, true, function(response) {
-                        if (response.status !== 'success') {
-                            alert('Error saving marks! (' + response.message + ')');
-                            return;
-                        }*/
-                        /*
-                        if (gradeable.components[c_index-1].hasGrade === false) {
-                            gradedByElement.text("Ungraded!");
-                            component.grader = null;
-                        } 
-                        else {
-                            component.grader.id = grading_data.your_user_id;
-                            gradedByElement.text("Graded by " + component.grader.id + "!");
-                        }
-                            //Just graded it
-                        gradedByElement.show();
-                        savingElement.hide();
-                        if (typeof(successCallback) === "function")
-                            successCallback(data);
-                            
-                    }, errorCallback ? errorCallback : function() {
-                        console.error("Something went wront with saving marks...");
-                        alert("There was an error with saving the grade. Please refresh the page and try agian.");
-                    });
-                }
-                //info_mark[0].style.display = '';
-                existing_marks_num++;
-            }*/
         var gradedByElement = $('#graded-by-' + c_index);
         var savingElement = $('#graded-saving-' + c_index);
         var ungraded = gradedByElement.text() === "Ungraded!";
@@ -1124,10 +1068,6 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
         }
         var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
         ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
-            /*if (response.status !== 'success') {
-                alert('Error saving marks! (' + response.message + ')');
-                return;
-            }*/
             if (gradeable.components[c_index-1].hasGrade === false) {
                 gradedByElement.text("Ungraded!");
                 component.grader = null;
@@ -1149,8 +1089,7 @@ function saveMark(c_index, sync, successCallback, errorCallback) {
     calculateMarksPoints(c_index);
 }
 
-function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
-    console.log("Check");
+function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override){
     var gradeable = getGradeable();
     var component = grading_data.gradeable.components[c_index-1];
     var arr_length = data['marks'].length;
@@ -1158,7 +1097,6 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
     // Gathers all the mark's data (ex. points, note, etc.)
-    //getComponent(c_index).marks.sort(compareOrder);
     for(var m_index=0; m_index < arr_length; m_index++){
         var current_question_text = $('#rubric-textarea-' + c_index);
         if(grading_data.gradeable.components[c_index-1].marks[m_index]==null){
@@ -1178,38 +1116,28 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
             var DB_note       = data['marks'][arr_length-m_index-1]['title'];
             var DB_order      = data['marks'][arr_length-m_index-1]['order'];
             var id = getMark(c_index, current_mark_id).id;
-            var points = getMark(c_index, getMark(c_index, current_mark_id).id).points;
-            var note = getMark(c_index, getMark(c_index, current_mark_id).id).name;
-            var selected = getMark(c_index, getMark(c_index, current_mark_id).id).has;
-            var order = getMark(c_index, getMark(c_index, current_mark_id).id).order;
-            var DBvsOR = (DB_m_id === OPENEDMARKS[m_index].id && (DB_score !== OPENEDMARKS[m_index].points || DB_note !== OPENEDMARKS[m_index].name || DB_order !== OPENEDMARKS[m_index].order));
+            var points = getMark(c_index, current_mark_id).points;
+            var note = getMark(c_index, current_mark_id).name;
+            var selected = getMark(c_index, current_mark_id).has;
+            var order = getMark(c_index, current_mark_id).order;
+            var DBvsOR = true;
+            var ORvsYours = true;
+            if(OPENEDMARKS.length>m_index){
+                DBvsOR = (DB_m_id === OPENEDMARKS[arr_length - m_index - 1].id && (DB_score !== OPENEDMARKS[arr_length - m_index - 1].points || DB_note !== OPENEDMARKS[arr_length - m_index - 1].name || DB_order !== OPENEDMARKS[arr_length - m_index - 1].order));  
+                ORvsYours = (id === OPENEDMARKS[arr_length - m_index - 1].id && (points !== OPENEDMARKS[arr_length - m_index - 1].points || note !== OPENEDMARKS[arr_length - m_index - 1].name || order !== OPENEDMARKS[arr_length - m_index - 1].order));              
+            }
             var DBvsYours = (DB_m_id === id && (DB_score !== points || DB_note !== note || DB_order !== order));
-            var ORvsYours = (id === OPENEDMARKS[m_index].id && (points !== OPENEDMARKS[m_index].points || note !== OPENEDMARKS[m_index].name || order !== OPENEDMARKS[m_index].order));
-         /*   console.log(DBvsOR);
-            console.log(DBvsYours);
-            console.log(ORvsYours);
-            console.log(data['marks'][m_index]['title']);
-            console.log(note);
-            console.log(OPENEDMARKS[m_index].points);*/
             if(DBvsOR && DBvsYours && ORvsYours){
                 //CONFLICT!
                 if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing. Would you like your changes to overwrite the other users?")){
-                    mark_data[m_index] = {
-                        id      : getMark(c_index, current_mark_id).id,
-                        points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-                        note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-                        selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                        order   : getMark(c_index, getMark(c_index, current_mark_id).id).order 
-                    };
                     calculatePercentageTotal();
-                    console.log(escapeHTML(getMark(c_index, current_mark_id).name));
                     var gradedByElement = $('#graded-by-' + c_index);
                     var savingElement = $('#graded-saving-' + c_index);
                     var ungraded = gradedByElement.text() === "Ungraded!";
                     var x=getMark(c_index, current_mark_id).points;
                     gradedByElement.hide();
                     savingElement.show();
-                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, getMark(c_index, current_mark_id).id).name), true, function(response) {
+                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
                     if (response.status !== 'success') {
                             alert('Error saving marks! (' + response.message + ')');
                             return;
@@ -1233,38 +1161,15 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
                         alert("There was an error with saving the grade. Please refresh the page and try agian.");
                     });
                 }
-                else{
-                    mark_data[m_index] = {
-                        id      : DB_m_id,
-                        points  : DB_score,
-                        note    : DB_note,
-                        selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                        order   : DB_order  
-                    };
-                }
             }
-            else if (DBvsYours && DBvsOR){
-                mark_data[m_index] = {
-                    id      : getMark(c_index, current_mark_id).id,
-                    points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-                    note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-                    selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                    order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
-                };
+            else if ((DBvsYours && DBvsOR) || override){
                 calculatePercentageTotal();
-                    console.log(escapeHTML(getMark(c_index, current_mark_id).name));
                     var gradedByElement = $('#graded-by-' + c_index);
                     var savingElement = $('#graded-saving-' + c_index);
                     var ungraded = gradedByElement.text() === "Ungraded!";
                     gradedByElement.hide();
                     savingElement.show();
-                    //console.log(escapeHTML(getMark(c_index, getMark(c_index, current_mark_id).id).name));
-                   // gradeable_id, user_id, component_id, mark_id, points, note, async, successCallback, errorCallback
-                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), false, function(response) {
-                        /*if (response.status !== 'success') {
-                            alert('Error saving marks! (' + response.message + ')');
-                            return;
-                        }*/
+                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
                         if (gradeable.components[c_index-1].hasGrade === false) {
                             gradedByElement.text("Ungraded!");
                             component.grader = null;
@@ -1283,60 +1188,42 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
                         alert("There was an error with saving the grade. Please refresh the page and try agian.");
                     });
             }
-            //info_mark[0].style.display = '';
             existing_marks_num++;
         }
         orderArray[getMark(c_index, current_mark_id).id]=getMark(c_index, current_mark_id).order;
     }
     var gradedByElement = $('#graded-by-' + c_index);
-        var savingElement = $('#graded-saving-' + c_index);
-        var ungraded = gradedByElement.text() === "Ungraded!";
-        gradedByElement.hide();
-        var current_row = $('#mark_custom_id-'+c_index);
+    var savingElement = $('#graded-saving-' + c_index);
+    var ungraded = gradedByElement.text() === "Ungraded!";
+   // gradedByElement.hide();
+    var current_row = $('#mark_custom_id-'+c_index);
 
-        var current_title = $('#title-' + c_index);
-        var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
-        var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    var current_title = $('#title-' + c_index);
+    var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
 
-        // Updates the total number of points and text
-        var current_question_text = $('#rubric-textarea-' + c_index);
-        var component = getComponent(c_index);
-        
-        var arr_length = mark_data.length;
-        var mark_ids = [];
-        for (var m_index = 0; m_index < arr_length; m_index++) {
-            var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
-            if ((getMark(c_index, current_mark_id).has) == true) {
-                mark_ids.push(current_mark_id);
-            }                
-        }
-        if(custom_message != "") {
-            custom_message = escapeHTML(custom_message);
-        }
-        var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-       /* ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
-            if (gradeable.components[c_index-1].hasGrade === false) {
-                gradedByElement.text("Ungraded!");
-                component.grader = null;
-            } 
-            else {
-                component.grader.id = grading_data.your_user_id;
-                gradedByElement.text("Graded by " + component.grader.id + "!");
-            }
-                //Just graded it
-            gradedByElement.show();
-            savingElement.hide();
-            if (typeof(successCallback) === "function")
-                successCallback(response);                           
-        }, errorCallback ? errorCallback : function() {
-            console.error("Something went wront with saving marks...");
-            alert("There was an error with saving the grade. Please refresh the page and try agian.");
-        });*/
+    // Updates the total number of points and text
+    var current_question_text = $('#rubric-textarea-' + c_index);
+    var component = getComponent(c_index);
+    
+    var arr_length = mark_data.length;
+    var mark_ids = [];
+    for (var m_index = 0; m_index < arr_length; m_index++) {
+        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+        if ((getMark(c_index, current_mark_id).has) == true) {
+            mark_ids.push(current_mark_id);
+        }                
+    }
+    if(custom_message != "") {
+        custom_message = escapeHTML(custom_message);
+    }
+    var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     calculateMarksPoints(c_index);
     var c=orderArray;
-    ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, orderArray, true, function(data){
-          //  console.log("data");
-    });
+    //TODO save the mark order
+   /* ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, orderArray, true, function(data){
+        console.log("data");
+    }); */
     var x=grading_data.gradeable.components[c_index-1].marks;
 }
 
@@ -1404,11 +1291,7 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
  */
 function openMark(c_index) {
     saveLastOpenedMark(true);
-    saveMark(c_index, true);
     updateMarksOnPage(c_index);
-    if(editModeEnabled==true){
-     //   $('#marks-extra-'+c_index)[0].style.display="block";
-    }
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== c_index) {
         openClose(c_index);
@@ -1441,11 +1324,7 @@ function closeMark(c_index, save) {
     if (findCurrentOpenedMark() !== c_index) {
         return;
     }
-
-   // if (true) {
-        saveLastOpenedMark(true);
-        saveMark(c_index, true);
-   // }
+    saveLastOpenedMark(true);
     updateMarksOnPage(c_index);
     setMarkVisible(c_index, false);
 }
