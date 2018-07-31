@@ -1122,7 +1122,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
             var order = getMark(c_index, current_mark_id).order;
             var DBvsOR = true;
             var ORvsYours = true;
-            if(OPENEDMARKS.length>m_index){
+            if(arr_length - m_index - 1 < OPENEDMARKS.length){
                 DBvsOR = (DB_m_id === OPENEDMARKS[arr_length - m_index - 1].id && (DB_score !== OPENEDMARKS[arr_length - m_index - 1].points || DB_note !== OPENEDMARKS[arr_length - m_index - 1].name || DB_order !== OPENEDMARKS[arr_length - m_index - 1].order));  
                 ORvsYours = (id === OPENEDMARKS[arr_length - m_index - 1].id && (points !== OPENEDMARKS[arr_length - m_index - 1].points || note !== OPENEDMARKS[arr_length - m_index - 1].name || order !== OPENEDMARKS[arr_length - m_index - 1].order));              
             }
