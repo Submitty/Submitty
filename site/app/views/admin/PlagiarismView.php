@@ -98,7 +98,13 @@ HTML;
             else {
                 $ranking_file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$id.".txt";
                 if(file_get_contents($ranking_file_path) == "") {
-                       $matches_and_topmatch= "0 students matched, N/A top match";
+                    $matches_and_topmatch= "0 students matched, N/A top match";
+                    
+                    $return .= <<<HTML
+        <tr>
+            <td>$title
+            </td>
+HTML;
                 }
                 else {
                     $content =file_get_contents($ranking_file_path);
@@ -106,12 +112,15 @@ HTML;
                     $rankings = preg_split('/ +/', $content);
                     $rankings = array_chunk($rankings,3);
                     $matches_and_topmatch = count($rankings)." students matched, ".$rankings[0][0]." top match";
-                }
-                
-                $return .= <<<HTML
+                    
+                    $return .= <<<HTML
         <tr>
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
             </td>
+HTML;
+                }
+                
+                $return .= <<<HTML
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
             </td>
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
