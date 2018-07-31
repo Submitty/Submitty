@@ -1184,7 +1184,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
     var gradeable = getGradeable();
     var component = grading_data.gradeable.components[c_index-1];
     var arr_length = data['marks'].length;
-    
+    var orderArray = [];
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
     // Gathers all the mark's data (ex. points, note, etc.)
@@ -1306,9 +1306,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
             //info_mark[0].style.display = '';
             existing_marks_num++;
         }
-        ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, grading_data.gradeable.components[c_index-1].marks[m_index].order), true, function(data){
-          //  console.log("data");
-        });
+        orderArray[getMark(c_index, current_mark_id).id]=getMark(c_index, getMark(c_index, current_mark_id).id).order;
     }
     var gradedByElement = $('#graded-by-' + c_index);
         var savingElement = $('#graded-saving-' + c_index);
@@ -1359,6 +1357,9 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data){
             alert("There was an error with saving the grade. Please refresh the page and try agian.");
         });
     calculateMarksPoints(c_index);
+    ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, orderArray, true, function(data){
+          //  console.log("data");
+        });
 }
 
 //finds what mark is currently open
