@@ -39,9 +39,8 @@
 </div>
 
 <script>
-    let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
-    for(let grader in annotations){
-        localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+    if('{{ annotation_json | raw}}' != ""){
+        localStorage.setItem('{{ filename }}/annotations', '{{ annotation_json | raw}}');
     }
-    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
+    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}');
 </script>
