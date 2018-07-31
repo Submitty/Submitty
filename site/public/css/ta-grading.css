@@ -391,7 +391,12 @@ progress::-webkit-progress-value {
 tr.is_publish {
     background-color: #81D4FA;
 }
-
+.stats-table{
+    border-spacing : 10px; 
+}
+.stats-table td {
+    padding: 3px;
+}
 .btn-large {
     width: 96%;
     margin-left: 2%;

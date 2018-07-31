@@ -767,7 +767,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
-public function getDoubleGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getDoubleGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
@@ -804,7 +804,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
-public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+    public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
@@ -1362,18 +1362,14 @@ VALUES (?, ?, ?)", $params);
      * @param GradeableComponent $component
      */
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
-        if($component->getVerifier() === null){
-            $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), null, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
-            $this->course_db->query("
+        $verifier = null;
+        if($component->getVerifier() !== null){
+            $verifier = $component->$getVerifier()->getId();
+        }
+        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $verifier, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+        $this->course_db->query("
 INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        }
-        else{
-            $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getVerifier()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
-            $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
-        }
     }
 
     // FIXME

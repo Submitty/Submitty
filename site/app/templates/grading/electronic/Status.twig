@@ -45,7 +45,7 @@
                     Current percentage of students grading done: {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                 {% else %}
                     By Grading Sections:
-                    <table cellspacing="10">
+                    <table class="stats-table">
                         <tr>
                             <th>Section</th>
                             <th>Graded</th>
@@ -56,10 +56,10 @@
                         {% set counter = 0 %}
                         {% for key, section in sections %}
                             <tr>
-                                <td style="padding: 0 10px 0 10px;">{{ key }}</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</td>
-                                <td style="padding: 0 10px 0 10px;">{{ section.doubleGraded }} / {{ section.total }} ({{ section.doubleGraded_percentage }}%)</td>
+                                <td>{{ key }}</td>
+                                <td>{{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)</td>
+                                <td>{{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}%)</td>
+                                <td>{{ section.doubleGraded }} / {{ section.total }} ({{ section.doubleGraded_percentage }}%)</td>
                             </tr>
                         {% endfor %}
                     </div>
