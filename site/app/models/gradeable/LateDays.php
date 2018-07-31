@@ -20,7 +20,7 @@ class LateDays extends AbstractModel {
     /** @property @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
     protected $late_day_info = [];
     /** @property @var array All entries for the user in the `late_days` table */
-    private $late_days_updates = 0;
+    protected $late_days_updates = [];
 
     const STATUS_NO_SUBMISSION = 0;
     const STATUS_GOOD = 1;
@@ -67,6 +67,14 @@ class LateDays extends AbstractModel {
     }
 
     /**
+     * Gets the user this late day info is for
+     * @return User
+     */
+    public function getUser() {
+        return $this->user;
+    }
+
+    /**
      * Gets the cumulative number of late days the user has used
      */
     public function getLateDaysUsed() {
@@ -78,6 +86,30 @@ class LateDays extends AbstractModel {
         return $total;
     }
 
+    public function getLateDaysRemaining() {
+        // Use 'now' because it is possible that there are changes that occur in the future
+        return $this->getLateDaysRemainingByContext(new \DateTime());
+    }
+
+    public function getLateDaysRemainingByContext(\DateTime $context) {
+        // Get the most recent update
+        $context_update = $this->getLateDaysUpdateByContext($context);
+
+        // TODO: we have to step through each array, constantly updating remaining with available and charged
+        // TODO: making sure it doesn't go below zero....
+
+        // Sum all late days charged since then, clamping to 0 each time
+        $remaining = 0;
+        /** @var LateDayInfo $info */
+        foreach ($this->late_day_info as $info) {
+            if ($info->getGradedGradeable()->getGradeable()->getSubmissionDueDate() < $context_update['since_timestamp']) {
+                continue;
+            }
+            $charged += $info->getLateDaysCharged();
+        }
+        return $available - $charged;
+    }
+
     /**
      * Gets the number of late days the user has available to them now
      *  Note: This value will not be negative
@@ -87,15 +119,23 @@ class LateDays extends AbstractModel {
         return $this->getLateDaysAvailableByContext(new \DateTime());
     }
 
+    public function getLateDaysAvailableByContext(\DateTime $context) {
+        return $this->getLateDaysUpdateByContext($context)['allowed_late_days'];
+    }
+
     /**
      * Gets the number of late days available to a student at a given time context
      *  Note: this is significant if a student has been penalized late days
      * @param \DateTime $context
-     * @return int
+     * @return array
      */
-    public function getLateDaysAvailableByContext(\DateTime $context) {
+    public function getLateDaysUpdateByContext(\DateTime $context) {
         if (count($this->late_days_updates) === 0) {
-            return $this->core->getConfig()->getDefaultStudentLateDays();
+            return [
+                'user_id' => $this->user->getId(),
+                'allowed_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
+                'since_timestamp' => new DateTime('1899-12-31') // seems early enough
+            ];
         }
 
         $i = 0;
@@ -106,7 +146,7 @@ class LateDays extends AbstractModel {
             }
             $this++;
         }
-        return $this->late_days_updates[$i]['allowed_late_days'];
+        return $this->late_days_updates[$i];
     }
 
     /**
