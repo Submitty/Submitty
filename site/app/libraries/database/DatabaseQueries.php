@@ -2806,6 +2806,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
+                $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet()
@@ -2827,10 +2828,11 @@ AND gc_id IN (
                   eg_student_any_version,
                   eg_config_path,
                   eg_late_days,
+                  eg_allow_late_submission,
                   eg_precision,
                   eg_peer_grading,
                   eg_peer_grade_set)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -2924,6 +2926,7 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
+                    $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
@@ -2945,6 +2948,7 @@ AND gc_id IN (
                       eg_student_any_version=?,
                       eg_config_path=?,
                       eg_late_days=?,
+                      eg_allow_late_submission=?,
                       eg_precision=?,
                       eg_peer_grading=?,
                       eg_peer_grade_set=?
