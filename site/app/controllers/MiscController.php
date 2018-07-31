@@ -200,22 +200,38 @@ class MiscController extends AbstractController {
     }
 
     private function displayFile() {
-        // security check
+        //Is this per-gradeable?
+        $path = $_REQUEST["path"];
+        $dir = $_REQUEST["dir"];
+
+        if (array_key_exists('gradeable_id', $_REQUEST)) {
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
+            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+        } else {
+            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path])) {
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+        }
+
         $error_string="";
         if (!$this->checkValidAccess(false,$error_string)) {
             $this->core->getOutput()->showError("You do not have access to this file ".$error_string);
             return false;
         }
 
-        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path'])));
+        $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($path)));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($path))) . '"');
             readfile($corrected_name);
-            $this->core->getOutput()->renderString($_REQUEST['path']);
+            $this->core->getOutput()->renderString($path);
         }
         else {
             $contents = file_get_contents($corrected_name);
@@ -529,13 +545,13 @@ class MiscController extends AbstractController {
             return;
         }
 
-        if (!isset($_GET['filename']) ||
-            !isset($_GET['checked'])) {
+        if (!isset($_REQUEST['filename']) ||
+            !isset($_REQUEST['checked'])) {
             return;
         }
 
-        $file_name = htmlspecialchars($_GET['filename']);
-        $checked =  $_GET['checked'];
+        $file_name = htmlspecialchars($_REQUEST['filename']);
+        $checked =  $_REQUEST['checked'];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
