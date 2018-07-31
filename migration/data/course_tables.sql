@@ -479,9 +479,10 @@ CREATE TABLE teams (
 --
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
-    gradeable_id VARCHAR(255) NOT NULL,
+    g_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    student_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
+    team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
 );
 
@@ -1065,8 +1066,9 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 
-ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("gradeable_id") REFERENCES "gradeable"("g_id");
-ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("student_id") REFERENCES "users"("user_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("g_id") REFERENCES "gradeable"("g_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY ("team_id") REFERENCES "gradeable_teams"("team_id");
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
@@ -1079,6 +1081,12 @@ ALTER TABLE ONLY thread_categories
 
 ALTER TABLE ONLY student_favorites
     ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
+
+ALTER TABLE ONLY regrade_requests
+    ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id);
+
+ALTER TABLE ONLY regrade_requests
+    ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
 
 -- End Forum Key relationships
 
