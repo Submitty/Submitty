@@ -1,6 +1,6 @@
 <div id="gradeable-dates">
     <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
-    TA Beta Testing Date (gradeable visible to TAs)
+    TA Beta Testing Date (visible to TAs)
 
     <br />
 
@@ -26,12 +26,12 @@
 
     <div class="manual_grading">
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
-        TA/Instructor Manual Grading Open Date (graders may begin grading)
+        TA/Instructor Manual Grading Open Date (grading may begin)
 
         <br />
 
         <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
-        TA/Instructor Manual Grading Due Date (grades must be in by)
+        TA/Instructor Manual Grading Due Date
 
         <br />
     </div>
