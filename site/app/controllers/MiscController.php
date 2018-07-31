@@ -88,7 +88,7 @@ class MiscController extends AbstractController {
         // END HACK
 
 
-        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments", "uploads/course_materials");
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments", "course_materials");
         if (!in_array($dir, $possible_directories)) {
             $error_string="not in possible directories list";
             return false;
