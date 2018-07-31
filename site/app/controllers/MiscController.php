@@ -218,12 +218,12 @@ class MiscController extends AbstractController {
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
         } else {
-            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path])) {
+            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -342,12 +342,12 @@ class MiscController extends AbstractController {
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
         } else {
-            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path])) {
+            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
