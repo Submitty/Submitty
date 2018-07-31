@@ -42,7 +42,7 @@
                             {% endif %}
                         </td>
                         {% for button in g_info.buttons %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : '' }}>{{ self.renderButton(button) }}</td>
+                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}

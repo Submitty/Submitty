@@ -94,6 +94,8 @@ class ElectronicGraderController extends GradingController {
                 break;
         }
     }
+
+
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
      * @param string $option
@@ -187,6 +189,7 @@ class ElectronicGraderController extends GradingController {
                 break;
             }
             
+
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
      * @param string $type

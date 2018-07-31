@@ -474,6 +474,7 @@ function updateMarksOnPage(c_index) {
         }
         //Clear extra marks
         getComponent(c_index).marks = [];
+        
         OPENEDMARKS.splice(0,OPENEDMARKS.length);
         // Add all marks back
         for (var m_index = 0; m_index < data.marks.length; m_index++) {
@@ -490,6 +491,7 @@ function updateMarksOnPage(c_index) {
             }
 
             getComponent(c_index).marks.push(mark);
+            
             OPENEDMARKS.push(mark);
             parent.append(getMarkView(c_index, m_index, mark.id, editModeEnabled));
             if((editModeEnabled==null || editModeEnabled==false)){
@@ -847,6 +849,7 @@ function selectMark(c_index, m_id) {
             return false;
         }
     });
+    
     var mark = getMark(c_index, m_id);
     mark.has = !mark.has;
 
