@@ -122,17 +122,17 @@ class Access {
         $this->permissions["file.access"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
 
         //Per-directory access permissions
-        $this->permissions["file.access.config_upload"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["file.access.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.config_upload"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["file.access.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
         //TODO: Timed access control
-        $this->permissions["file.access.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.course_materials"] = self::ALLOW_MIN_STUDENT;
         //TODO: Check deleted posts
-        $this->permissions["file.access.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["file.access.annotations"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["file.access.checkout"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.forum_attachments"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["file.access.annotations"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["file.access.checkout"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
         //TODO: Can students see their results?
-        $this->permissions["file.access.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["file.access.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.access.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["file.access.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
 
     }
 
@@ -339,112 +339,9 @@ class Access {
                 return false;
             }
 
-            $info = $this->directories[$dir];
-
             //Check if they can access the file!
-
-            //No directory traversal
-            foreach (explode(DIRECTORY_SEPARATOR, $file) as $part) {
-                if ($part == ".." || $part == ".") {
-                    return false;
-                }
-            }
-
-            //Make sure it starts with the dir base
-            if (!Utils::startsWith($file, $info["base"])) {
-                //This both prevents people from accessing files outside the base dir
-                // and lets us have relative paths. Convenient!
-                if ($file[0] === "/") {
-                    $file = substr($file, 1);
-                }
-
-                $relative_path = $file;
-                $file = $info["base"] . "/" . $file;
-            } else {
-                $relative_path = substr($file, strlen($info["base"]) + 1);
-            }
-
-            //If it doesn't exist we can't access it
-            if (!file_exists($file)) {
+            if (!$this->canUserReadFile($file, $dir, $user, $args)) {
                 return false;
-            }
-
-            //Check if the relative path starts with the right directory
-            $subpart_types = $info["subparts"];
-            $subpart_values = explode("/", $relative_path);
-
-            //Missing necessary directory path
-            if (count($subpart_values) <= count($subpart_types)) {
-                return false;
-            }
-            $end_path = implode("/", array_slice($subpart_values, count($subpart_types)));
-            $subpart_values = array_slice($subpart_values, 0, count($subpart_types));
-            $subpart_types[] = "path";
-            $subpart_values[] = $end_path;
-
-            //To array of [type, value]
-            $subparts = array_combine($subpart_types, $subpart_values);
-
-            //So we can extract parameters from the path
-            foreach ($subpart_types as $type) {
-                $value = $subparts[$type];
-                switch ($type) {
-                    case "gradeable":
-                        //If we already have a gradeable in the args, make sure this file actually belongs to it
-                        if (array_key_exists("gradeable", $args)) {
-                            //Check if the gradeable matches
-
-                            /* @var Gradeable|null $gradeable */
-                            /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-                            list($gradeable,, $new_gradeable,) = $this->resolveNewGradeable($args["gradeable"]);
-                            if (($new_gradeable ?? $gradeable)->getId() !== $value) {
-                                return false;
-                            }
-                        }
-                        $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
-                        break;
-                    case "submitter":
-                        $submitter = $this->core->getQueries()->getSubmitterById($value);
-                        if ($submitter !== null) {
-                            $args["submitter"] = $submitter;
-                            if (array_key_exists("gradeable", $subparts)) {
-                                //If we already have a graded gradeable in the args, make sure this file
-                                // actually belongs to it
-                                if (array_key_exists("graded_gradeable", $args)) {
-                                    /* @var Gradeable|null $graded_gradeable */
-                                    /* @var GradedGradeable|null $new_graded_gradeable */
-                                    list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($args["graded_gradeable"]);
-                                } else {
-                                    /* @var Gradeable|null $graded_gradeable */
-                                    /* @var GradedGradeable|null $new_graded_gradeable */
-                                    list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($args["gradeable"]);
-                                }
-
-                                if ($graded_gradeable ?? $new_graded_gradeable) {
-                                    if (!$this->isGradedGradeableBySubmitter($new_graded_gradeable ?? $graded_gradeable, $submitter)) {
-                                        return false;
-                                    }
-                                }
-
-                                $args["graded_gradeable"] = $this->core->getQueries()->getGradedGradeableForSubmitter($args["gradeable"], $submitter);
-                            }
-                        }
-                        break;
-                    case "version":
-                        $args["gradeable_version"] = (int)$value;
-                        break;
-                    case "thread":
-                        $args["thread"] = (int)$value;
-                        break;
-                    case "post":
-                        $args["post"] = (int)$value;
-                        break;
-                }
-            }
-
-            //If this is a generic file check, check the permissions on the directory
-            if ($action !== $info["permissions"]) {
-                return $this->canUser($user, $info["permissions"], $args);
             }
         }
 
@@ -695,5 +592,118 @@ class Access {
         /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
         /* @var GradedGradeable|null $new_graded_gradeable */
         return [$gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable];
+    }
+
+    /**
+     * @param string $file
+     * @param string $dir
+     * @param User $user
+     * @param array $args
+     * @return bool
+     */
+    public function canUserReadFile(string $file, string $dir, User $user, array $args = []) {
+        $info = $this->directories[$dir];
+
+        //No directory traversal
+        foreach (explode(DIRECTORY_SEPARATOR, $file) as $part) {
+            if ($part == ".." || $part == ".") {
+                return false;
+            }
+        }
+
+        //Make sure it starts with the dir base
+        if (!Utils::startsWith($file, $info["base"])) {
+            //This both prevents people from accessing files outside the base dir
+            // and lets us have relative paths. Convenient!
+            if ($file[0] === "/") {
+                $file = substr($file, 1);
+            }
+
+            $relative_path = $file;
+            $file = $info["base"] . "/" . $file;
+        } else {
+            $relative_path = substr($file, strlen($info["base"]) + 1);
+        }
+
+        //If it doesn't exist we can't access it
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        //Check if the relative path starts with the right directory
+        $subpart_types = $info["subparts"];
+        $subpart_values = explode("/", $relative_path);
+
+        //Missing necessary directory path
+        if (count($subpart_values) <= count($subpart_types)) {
+            return false;
+        }
+        $end_path = implode("/", array_slice($subpart_values, count($subpart_types)));
+        $subpart_values = array_slice($subpart_values, 0, count($subpart_types));
+        $subpart_types[] = "path";
+        $subpart_values[] = $end_path;
+
+        //To array of [type, value]
+        $subparts = array_combine($subpart_types, $subpart_values);
+
+        //So we can extract parameters from the path
+        foreach ($subpart_types as $type) {
+            $value = $subparts[$type];
+            switch ($type) {
+                case "gradeable":
+                    //If we already have a gradeable in the args, make sure this file actually belongs to it
+                    if (array_key_exists("gradeable", $args)) {
+                        //Check if the gradeable matches
+
+                        /* @var Gradeable|null $gradeable */
+                        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
+                        list($gradeable, , $new_gradeable,) = $this->resolveNewGradeable($args["gradeable"]);
+                        if (($new_gradeable ?? $gradeable)->getId() !== $value) {
+                            return false;
+                        }
+                    }
+                    $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
+                    break;
+                case "submitter":
+                    $submitter = $this->core->getQueries()->getSubmitterById($value);
+                    if ($submitter !== null) {
+                        $args["submitter"] = $submitter;
+                        if (array_key_exists("gradeable", $subparts)) {
+                            //If we already have a graded gradeable in the args, make sure this file
+                            // actually belongs to it
+                            if (array_key_exists("graded_gradeable", $args)) {
+                                /* @var Gradeable|null $graded_gradeable */
+                                /* @var GradedGradeable|null $new_graded_gradeable */
+                                list(, $graded_gradeable, , $new_graded_gradeable) = $this->resolveNewGradeable($args["graded_gradeable"]);
+                            } else {
+                                /* @var Gradeable|null $graded_gradeable */
+                                /* @var GradedGradeable|null $new_graded_gradeable */
+                                list(, $graded_gradeable, , $new_graded_gradeable) = $this->resolveNewGradeable($args["gradeable"]);
+                            }
+
+                            if ($graded_gradeable ?? $new_graded_gradeable) {
+                                if (!$this->isGradedGradeableBySubmitter($new_graded_gradeable ?? $graded_gradeable, $submitter)) {
+                                    return false;
+                                }
+                            }
+
+                            $args["graded_gradeable"] = $this->core->getQueries()->getGradedGradeableForSubmitter($args["gradeable"], $submitter);
+                        }
+                    }
+                    break;
+                case "version":
+                    $args["gradeable_version"] = (int)$value;
+                    break;
+                case "thread":
+                    $args["thread"] = (int)$value;
+                    break;
+                case "post":
+                    $args["post"] = (int)$value;
+                    break;
+            }
+        }
+
+        //If this is a generic file check, check the permissions on the directory
+        return $this->canUser($user, $info["permissions"], $args);
     }
 }
