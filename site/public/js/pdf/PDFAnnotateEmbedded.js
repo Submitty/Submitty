@@ -93,6 +93,16 @@ function render(gradeable_id, user_id, file_name) {
 }
 //Toolbar stuff
 (function (){
+    let active_toolbar = true;
+    const debounce = (fn, time, ...args) => {
+        if(active_toolbar){
+            fn(args);
+            active_toolbar = false;
+            setTimeout(function(){
+                active_toolbar = true;
+            }, time);
+        }
+    }
     function setActiveToolbarItem(option){
         let selected = $('.tool-selected');
         if(option != selected.attr('value')){
@@ -130,10 +140,10 @@ function render(gradeable_id, user_id, file_name) {
                     saveFile();
                     break;
                 case 'zoomin':
-                    zoom('in');
+                    debounce(zoom, 500, 'in');
                     break;
                 case 'zoomout':
-                    zoom('out');
+                    debounce(zoom, 500, 'out');
                     break;
                 case 'text':
                     UI.enableText();
@@ -157,8 +167,9 @@ function render(gradeable_id, user_id, file_name) {
         } else {
             RENDER_OPTIONS.scale -= 0.1;
         }
-
-        UI.renderPage(1, RENDER_OPTIONS);
+        for(let i = 0; i < RENDER_OPTIONS.pdfDocument.pdfInfo.numPages; i++){
+            UI.renderPage(i, RENDER_OPTIONS);
+        }
     }
 
     function clearCanvas(){
@@ -286,6 +297,9 @@ function render(gradeable_id, user_id, file_name) {
 
 //TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 $(window).unload(function() {
-    localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+    for(let i = 0; i < localStorage.length; i++){
+        if(localStorage.key(i).includes('annotations')){
+            localStorage.removeItem(localStorage.key(i));
+        }
+    }
 });
-
