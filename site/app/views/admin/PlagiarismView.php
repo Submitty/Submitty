@@ -402,7 +402,7 @@ HTML;
                 </div>    
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
-                <div style="width:20%;float:left">Threshold to be considered as Plagiarism:</div> 
+                                                                             <div style="width:20%;float:left">Threshold/Maximum number of students<br>(more than this number of students with matching code will be considered common code):</div>
                 <div style="width:70%;float:right">
                     <input type="text" name="threshold"/ value="{$threshold}" />
                 </div>    
