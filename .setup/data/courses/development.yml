@@ -18,6 +18,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
 
@@ -37,6 +38,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -56,6 +58,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -75,6 +78,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -94,6 +98,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -113,6 +118,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -132,6 +138,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -151,6 +158,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -170,6 +178,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -189,6 +198,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -208,6 +218,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -227,6 +238,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
   
@@ -246,6 +258,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
 
@@ -265,6 +278,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
 
@@ -284,6 +298,7 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0
 
@@ -303,5 +318,6 @@ gradeables:
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
   eg_max_random_submissions: 0

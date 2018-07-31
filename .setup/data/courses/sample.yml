@@ -67,6 +67,7 @@ gradeables:
   eg_submission_open_date: 9995-12-31 23:59:59
   eg_submission_due_date: 9996-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_bucket: homework
 
@@ -126,6 +127,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 9996-12-31 23:59:59
   eg_submission_open_date: 9995-12-31 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -189,6 +191,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 9996-12-31 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -252,6 +255,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 9996-12-31 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   eg_team_assignment: true
@@ -317,6 +321,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   eg_team_assignment: true
@@ -382,6 +387,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   eg_team_assignment: true
@@ -447,6 +453,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -510,6 +517,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -532,6 +540,7 @@ gradeables:
     gc_title: Question 2
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -551,6 +560,7 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 9996-12-31 23:59:59
@@ -570,6 +580,7 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -589,6 +600,7 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -608,6 +620,7 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -628,6 +641,7 @@ gradeables:
     gc_default: 0
     gc_max_value: 0
     gc_upper_clamp: 1
+  g_grade_due_date: 1972-01-01 23:59:59
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -649,6 +663,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 9996-12-31 23:59:59
@@ -670,6 +685,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -691,6 +707,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -712,6 +729,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
+  g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -734,6 +752,7 @@ gradeables:
     gc_title: Question 2
   - gc_is_text: true
     gc_title: Text 1
+  g_grade_due_date: 1972-01-01 23:59:59
   g_grade_released_date: 1972-01-01 23:59:59
   g_grade_start_date: 1971-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -753,6 +772,7 @@ gradeables:
         gcm_points: 0
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -817,6 +837,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -881,6 +902,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -944,6 +966,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   eg_lichen_sample_path: /usr/local/submitty/more_autograding_examples/cpp_cats/submissions
@@ -1018,6 +1041,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -1081,6 +1105,7 @@ gradeables:
         gcm_points: 5
   eg_submission_due_date: 1972-01-01 23:59:59
   eg_submission_open_date: 1971-01-01 23:59:59
+  g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
