@@ -153,6 +153,8 @@ class Config extends AbstractModel {
     protected $display_rainbow_grades_summary;
     /** @property @var bool */
     protected $display_custom_message;
+    /** @property @var bool */
+    protected $display_room_seating;
     /** @property @var string*/
     protected $course_email;
     /** @property @var string */
@@ -174,6 +176,8 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
+     * @param $semester
+     * @param $course
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
@@ -297,7 +301,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'display_room_seating');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -312,18 +316,6 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
-
-
-            // TEMPORARY WORKAROUND FOR BACKWARDS COMPATIBILITY OF
-            // CHANGED COURSE CONFIG VARIABLE.
-            // FIXME: THIS CAN BE REMOVED WITH THE NEXT MAJOR RELEASE
-            if (!isset($config[$section][$key]) &&
-                $key == "display_rainbow_grades_summary" &&
-                isset($config[$section]["display_iris_grades_summary"])) {
-              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
-            }
-            // END TEMPORARY WORKAROUND
-
 
             // DEFAULT FOR FORUM
             if (!isset($config[$section][$key]) &&
@@ -344,6 +336,11 @@ class Config extends AbstractModel {
                 $key == "private_repository") {
               $config[$section][$key] = "";
             }
+            if (!isset($config[$section][$key]) &&
+                $key == "display_room_seating") {
+                $config[$section][$key] = false;
+            }
+
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
