@@ -1212,6 +1212,11 @@ end of styles used in the admin gradeable page
     white-space: nowrap;
 }
 
+/* color for nav page edit button for rebuild error on gradeable */
+.edit-build-error {
+    color: red;
+}
+
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }
 .required::-moz-placeholder { color: red; }
