@@ -1339,6 +1339,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     /**
      * @param string             $gd_id
      * @param string             $grader_id
+     * @param string             $verifier_id
      * @param GradeableComponent $component
      */
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {

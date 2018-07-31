@@ -1358,7 +1358,6 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonFail('Missing points parameter');
             return;
         }
-        echo($points);
         if (!is_numeric($points)) {
             $this->core->getOutput()->renderJsonFail('Invalid points parameter');
             return;
@@ -1375,7 +1374,6 @@ class ElectronicGraderController extends GradingController {
             return;
         }
         // get the mark
-        echo($mark_id);
         $mark = $this->tryGetMark($component, $mark_id);
         if ($mark === false) {
             return;
@@ -1387,7 +1385,7 @@ class ElectronicGraderController extends GradingController {
         }
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveMark($mark, $points, $title, $selected, $order);
+            $this->saveMark($mark, $points, $title);
             $response = $mark->getTitle();
             $this->core->getOutput()->renderJsonSuccess($response);
             return $response;
@@ -1398,12 +1396,12 @@ class ElectronicGraderController extends GradingController {
         }
     }
     public function saveMark(Mark $mark, float $points, string $title) {
-        if($mark->getPoints() !== $points) {
+       // if($mark->getPoints() !== $points) {
             $mark->setPoints($points);
-        }
-        if($mark->getTitle() !== $title) {
+     //   }
+      //  if($mark->getTitle() !== $title) {
             $mark->setTitle($title);
-        }
+     //   }
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
     /**
@@ -1618,8 +1616,7 @@ class ElectronicGraderController extends GradingController {
             } else if ($component->getId() != $_POST['gradeable_component_id']) {
                 continue;
             }
-            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
-            $order_counter++;
+            $order_counter = count($component->getMarks());
             $mark = new GradeableComponentMark($this->core);
             $mark->setGcId($component->getId());
             $mark->setPoints($points);
