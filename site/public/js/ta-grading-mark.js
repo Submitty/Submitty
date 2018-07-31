@@ -278,7 +278,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCall
         data: {
             'gradeable_id': gradeable_id,
             'component_id': component_id,
-            'order': order
+            'order': JSON.stringify(order)
         },
         success: function(response) {
             if (response.status !== 'success') {
