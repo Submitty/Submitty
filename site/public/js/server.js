@@ -434,7 +434,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             }
                             var append_options='<option value="">None</option>';
                             $.each(data, function(i,matching_users){
-                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' (version:'+matching_users[1]+')</option>';
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' &lt;'+matching_users[0]+'&gt; (version:'+matching_users[1]+')</option>';
                             });
                         }
                         $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
@@ -558,7 +558,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' (version:'+match[1]+')</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);

@@ -10,6 +10,8 @@ class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'configure_new_gradeable_for_plagiarism_form':
+                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
             case 'save_new_plagiarism_configuration':
@@ -25,6 +27,8 @@ class PlagiarismController extends AbstractController {
                 $this->ajaxGetMatchesForClickedMatch();
                 break;
             case 'edit_plagiarism_saved_config':
+                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
                 $this->editPlagiarismSavedConfig();
                 break;    
             case 're_run_plagiarism':
@@ -40,6 +44,8 @@ class PlagiarismController extends AbstractController {
                 $this->toggleNightlyRerun();
                 break;             
             case 'show_plagiarism_result':
+                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult(); 
                 break;            
             default:
@@ -457,7 +463,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.")
+        $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.");
         $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
     }
 
