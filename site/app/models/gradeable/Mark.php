@@ -123,29 +123,4 @@ class Mark extends AbstractModel {
         }
         $this->modified = true;
     }
-    /**
-     * Sets that this mark has been selected
-     * @param bool $points Must be a bool.
-     */
-    public function setHasMark($selected) {
-        if (is_bool($selected)) {
-            $this->hasMark = $selected;
-        } else {
-            throw new \InvalidArgumentException('hasMark must be a boolean');
-        }
-        $this->modified = true;
-    }
-    /**
-     * Sets that this mark has been selected
-     * @param string|int $points Must be an integer.
-     */
-    public function setOrder($order) {
-        if (is_numeric($order)) {
-            $this->hasMark = $order;
-        } else {
-            throw new \InvalidArgumentException('order must be a boolean');
-        }
-        $this->modified = true;
-    }
-
 }

@@ -1490,24 +1490,20 @@ class ElectronicGraderController extends GradingController {
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveMarkOrder($component, $order);
-            $this->core->getOutput()->renderJsonSuccess();
+            $this->core->getOutput()->renderJsonSuccess($component->toArray());
         } catch (\InvalidArgumentException $e) {
-            echo("F1");
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
-            echo("F2");
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
     public function saveMarkOrder(Component $component, array $orders) {
         foreach ($component->getMarks() as $mark) {
             if (!isset($orders[$mark->getId()])) {
-                echo("F3");
                 throw new \InvalidArgumentException('Missing mark id in order array');
             }
             $order = $orders[$mark->getId()];
             if (!ctype_digit($order)) {
-                echo("F4");
                 throw new \InvalidArgumentException('All order values must be non-negative integers');
             }
             $mark->setOrder(intval($order));
