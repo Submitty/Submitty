@@ -278,7 +278,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCall
         data: {
             'gradeable_id': gradeable_id,
             'component_id': component_id,
-            'order': order
+            'order': JSON.stringify(order)
         },
         success: function(response) {
             if (response.status !== 'success') {
@@ -1093,7 +1093,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
     var gradeable = getGradeable();
     var component = grading_data.gradeable.components[c_index-1];
     var arr_length = data['marks'].length;
-    var orderArray = [];
+    var orderArray = {};
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
     // Gathers all the mark's data (ex. points, note, etc.)
