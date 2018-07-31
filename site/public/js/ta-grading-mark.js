@@ -269,6 +269,7 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
         }
     })
 }
+
 // 'order' format: [ <mark0-id> : <order0>, <mark1-id> : <order1>, ... ]
 function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCallback, errorCallback) {
     $.getJSON({
