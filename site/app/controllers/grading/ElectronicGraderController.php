@@ -116,12 +116,14 @@ class ElectronicGraderController extends GradingController {
         $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_' .$this->core->getUser()->getId().'.json';
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version, $annotation_file_name);
         $annotation_jsons = [];
-        $dir_iter = new \DirectoryIterator(dirname($annotation_path.'/'));
-        foreach ($dir_iter as $fileinfo) {
-            if (!$fileinfo->isDot()) {
-                $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                $grader_id = explode('_', $grader_id)[1];
-                $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+        if(is_file($annotation_path)) {
+            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+            foreach ($dir_iter as $fileinfo) {
+                if (!$fileinfo->isDot()) {
+                    $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                    $grader_id = explode('_', $grader_id)[1];
+                    $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                }
             }
         }
         $this->core->getOutput()->useFooter(false);
