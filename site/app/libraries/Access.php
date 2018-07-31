@@ -681,6 +681,8 @@ class Access {
                                 list(, $graded_gradeable, , $new_graded_gradeable) = $this->resolveNewGradeable($args["gradeable"]);
                             }
 
+                            //Check that the given graded gradeable is the same as the
+                            // one that this file is part of.
                             if ($graded_gradeable ?? $new_graded_gradeable) {
                                 if (!$this->isGradedGradeableBySubmitter($new_graded_gradeable ?? $graded_gradeable, $submitter)) {
                                     return false;
@@ -703,7 +705,9 @@ class Access {
             }
         }
 
-        //If this is a generic file check, check the permissions on the directory
+        //So now that we know the file is valid, we need to make sure they have the general
+        // permissions to access what the file is part of. Generally this is either a gradeable
+        // or just a basic "is user group" check
         return $this->canUser($user, $info["permissions"], $args);
     }
 }
