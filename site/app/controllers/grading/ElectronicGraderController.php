@@ -100,7 +100,7 @@ class ElectronicGraderController extends GradingController {
      * @param string $gradeable_id
      * @return \app\models\gradeable\Gradeable|bool false if failed
      */
-    /*
+    
     protected function tryGetGradeable(string $gradeable_id) {
         if ($gradeable_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing gradeable_id parameter');
@@ -115,15 +115,15 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError('Failed to load gradeable');
         }
         return false;
-    }*/
+    }
     /**
      * Gets a gradeable component from its id and a gradeable
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param string $component_id
      * @return Component|bool
      */
-    /*
-    private function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
+    
+    protected function tryGetComponent(\app\models\gradeable\Gradeable $gradeable, string $component_id) {
         if ($component_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing component_id parameter');
             return false;
@@ -146,8 +146,8 @@ class ElectronicGraderController extends GradingController {
      * @param string $mark_id
      * @return Mark|bool
      */
-    /*
-    private function tryGetMark(Component $component, string $mark_id) {
+    
+    protected function tryGetMark(Component $component, string $mark_id) {
         if ($mark_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing mark_id parameter');
             return false;
@@ -169,8 +169,8 @@ class ElectronicGraderController extends GradingController {
      * @param string $anon_id
      * @return string|bool
      */
-    /*
-    private function tryGetUserIdFromAnonId(string $anon_id) {
+    
+    protected function tryGetUserIdFromAnonId(string $anon_id) {
         if ($anon_id === '') {
             $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
             return false;
@@ -193,8 +193,8 @@ class ElectronicGraderController extends GradingController {
      * @param string $submitter_id
      * @return \app\models\gradeable\GradedGradeable|bool
      */
-    /*
-    private function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
+    
+    protected function tryGetGradedGradeable(\app\models\gradeable\Gradeable $gradeable, string $submitter_id) {
         if ($submitter_id === '') {
             $this->core->getOutput()->renderJsonFail('Must provide a who_id (user/team id) parameter');
             return false;
@@ -217,8 +217,8 @@ class ElectronicGraderController extends GradingController {
      * @param string $version
      * @return AutoGradedVersion|bool
      */
-    /*
-    private function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version) {
+    
+    protected function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version) {
         if ($version !== '') {
             $version = intval($version);
             $version_instance = $auto_graded_gradeable->getAutoGradedVersions()[$version] ?? null;
@@ -233,7 +233,7 @@ class ElectronicGraderController extends GradingController {
                 return false;
             }
         }
-    }*/
+    }
     public function savePDFAnnotation(){
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
