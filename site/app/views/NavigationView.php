@@ -90,6 +90,13 @@ class NavigationView extends AbstractView {
         }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
 
+        $seating_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'room_seating', $this->core->getUser()->getId() . ".html");
+        $seating_file_contents = "";
+        if (file_exists($seating_file_path)) {
+            $seating_file_contents = file_get_contents($seating_file_path);
+        }
+        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
@@ -107,7 +114,7 @@ class NavigationView extends AbstractView {
             ]);
         }
 
-	      // ======================================================================================
+        // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         $images_course_path = $this->core->getConfig()->getCoursePath();
@@ -147,19 +154,19 @@ class NavigationView extends AbstractView {
             ]);
 
         }
+
         // ======================================================================================
         // LATE DAYS TABLE BUTTON
         // ======================================================================================
-
         $top_buttons[] = new Button($this->core, [
             "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
             "title" => "Show my late days information",
             "class" => "btn btn-primary"
         ]);
+
         // ======================================================================================
         // FORUM BUTTON
         // ======================================================================================
-
         if ($this->core->getConfig()->isForumEnabled()) {
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
@@ -167,6 +174,7 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-primary"
             ]);
         }
+
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
@@ -212,7 +220,9 @@ class NavigationView extends AbstractView {
             "top_buttons" => $top_buttons,
             "sections" => $render_sections,
             "message_file_contents" => $message_file_contents,
-            "display_custom_message" => $display_custom_message
+            "display_custom_message" => $display_custom_message,
+            "seating_file_contents" => $seating_file_contents,
+            "display_room_seating" => $display_room_seating
         ]);
     }
 

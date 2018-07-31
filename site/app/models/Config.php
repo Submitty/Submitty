@@ -284,7 +284,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'display_room_seating', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -336,6 +336,7 @@ class Config extends AbstractModel {
                 $key == "private_repository") {
               $config[$section][$key] = "";
             }
+            // DEFAULT FOR DISPLAY_ROOM_SEATING
             if (!isset($config[$section][$key]) &&
                 $key == "display_room_seating") {
                 $config[$section][$key] = false;
