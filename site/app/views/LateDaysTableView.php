@@ -2,18 +2,18 @@
 
 namespace app\views;
 
+use app\models\gradeable\LateDays;
 use app\views\AbstractView;
 use app\views\admin\LateDayView;
 
 class LateDaysTableView extends AbstractView {
-    public function showLateTable($user_id, $g_id = NULL, $full_page) {
+    public function showLateTable(LateDays $late_days, string $hightlight_gradeable) {
         $student_gradeables = array();
         $status_array = array();
         $late_charged_array = array();
         $order_by = [
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
         ];
-        $late_update = $this->core->getQueries()->getLateDayUpdates($user_id);
         $total_late_used = 0;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $gradeable) {
             $student_gradeables[] = $gradeable;
@@ -29,15 +29,12 @@ class LateDaysTableView extends AbstractView {
             $template = "/LateDaysTablePlugin.twig";
         }
 
+
         return $this->core->getOutput()->renderTwigTemplate($template, [
-            "user_id" => $user_id,
-            "student_gradeables" => $student_gradeables,
-            "status_array" => $status_array,
-            "late_charged_array" => $late_charged_array,
-            "total_late_used" => $total_late_used,
-            "g_id" => $g_id,
-            "late_update" => $late_update,
-            "preferred_name" => $preferred_name
+            'initial_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
+            'late_day_info' => $late_days->toArray(),
+            'highlight_gradeable' => $hightlight_gradeable,
+            'preferred_name' => $late_days->getUser()->getPreferredFirstName()
         ]);
     }
 }
