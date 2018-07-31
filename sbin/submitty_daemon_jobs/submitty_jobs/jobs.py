@@ -29,8 +29,12 @@ class BuildConfig(AbstractJob):
         build_script = os.path.join(DATA_DIR, 'courses', semester, course, 'BUILD_{}.sh'.format(course))
         build_output = os.path.join(DATA_DIR, 'courses', semester, course, 'build_script_output.txt')
 
-        with open(build_output, "w") as output_file:
-            subprocess.call([build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        try:
+            with open(build_output, "w") as output_file:
+                subprocess.call([build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        except PermissionError:
+            print ("error, could not open "+output_file+" for writing")
+
 
 class RunLichen(AbstractJob):
     def run_job(self):
@@ -41,8 +45,12 @@ class RunLichen(AbstractJob):
         lichen_script = '/usr/local/submitty/sbin/run_lichen_plagiarism.py'
         lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
 
-        with open(lichen_output, "w") as output_file:
-            subprocess.call([lichen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        try:
+            with open(lichen_output, "w") as output_file:
+                subprocess.call([lichen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        except PermissionError:
+            print ("error, could not open "+output_file+" for writing")
+
 
 class DeleteLichenResult(AbstractJob):
     def run_job(self):
@@ -61,4 +69,4 @@ class DeleteLichenResult(AbstractJob):
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/hashes/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/matches/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("echo"+ " Deleted lichen plagiarism results and saved config for "+gradeable, stdout=op, stderr=op,shell=True)
-        
+
