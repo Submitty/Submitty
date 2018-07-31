@@ -50,11 +50,7 @@ HTML;
         <tr style="color:grey;">
             <td>$title
             </td>
-            <td><i>in queue</i>
-            </td>
-            <td><i>in queue</i>
-            </td>
-            <td><i>in queue</i>
+            <td colspan=3><i>in queue</i>
             </td>
             <td>
                 Last run: $timestamp
@@ -75,11 +71,7 @@ HTML;
         <tr style="color:green;">
             <td>$title
             </td>
-            <td><i>running</i>
-            </td>
-            <td><i>running</i>
-            </td>
-            <td><i>running</i>
+            <td colspan=3><i>running</i>
             </td>
             <td>
                 Last run: $timestamp
