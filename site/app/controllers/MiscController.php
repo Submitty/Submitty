@@ -217,12 +217,6 @@ class MiscController extends AbstractController {
             }
         }
 
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
-            $this->core->getOutput()->showError("You do not have access to this file ".$error_string);
-            return false;
-        }
-
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($path)));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
@@ -331,12 +325,22 @@ class MiscController extends AbstractController {
 
     private function downloadFile($download_with_any_role = false) {
         // security check
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string, $download_with_any_role)) {
-            $message = "You do not have access to that page. ".$error_string;
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        $path = $_REQUEST["path"];
+        $dir = $_REQUEST["dir"];
+
+        if (array_key_exists('gradeable_id', $_REQUEST)) {
+            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
+            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+        } else {
+            if (!$this->core->getAccess()->canI("file.access", ["dir" => $dir, "file" => $path])) {
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
         }
+
         $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
