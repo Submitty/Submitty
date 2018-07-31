@@ -11,6 +11,7 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\Team;
 use app\models\User;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use tests\BaseUnitTest;
 
@@ -38,7 +39,93 @@ class AccessTester extends BaseUnitTest {
     }
 
     public function testIsGradedGradeableInPeerAssignment() {
+        $user1 = $this->createMockModel(User::class);
+        $user2 = $this->createMockModel(User::class);
+        $user3 = $this->createMockModel(User::class);
+        $user1->method('getId')->willReturn("user1");
+        $user2->method('getId')->willReturn("user2");
+        $user3->method('getId')->willReturn("user3");
 
+        /* @var MockObject $queries */
+        $queries = $this->core->getQueries();
+        $queries->method('getPeerAssignment')->will(
+            $this->returnValueMap([
+                ["g1", "user1", ["user2", "user3"]],
+                ["g1", "user2", ["user1"]],
+                ["g1", "user3", []]
+            ])
+        );
+
+        //Old model
+        $g1 = $this->createMockModel(Gradeable::class);
+        $g1->method("getId")->willReturn("g1");
+        $g1->method("getUser")->willReturn($user1);
+        $g1->method("getTeam")->willReturn(null);
+        $g1->method("getPeerGrading")->willReturn(true);
+        $g1->method('beenTAGraded')->willReturn(true);
+        $g1->method('beenAutograded')->willReturn(true);
+
+        $g2 = $this->createMockModel(Gradeable::class);
+        $g2->method("getId")->willReturn("g1");
+        $g2->method("getUser")->willReturn($user2);
+        $g2->method("getTeam")->willReturn(null);
+        $g2->method("getPeerGrading")->willReturn(true);
+        $g2->method('beenTAGraded')->willReturn(true);
+        $g2->method('beenAutograded')->willReturn(true);
+
+        $g3 = $this->createMockModel(Gradeable::class);
+        $g3->method("getId")->willReturn("g1");
+        $g3->method("getUser")->willReturn($user3);
+        $g3->method("getTeam")->willReturn(null);
+        $g3->method("getPeerGrading")->willReturn(true);
+        $g3->method('beenTAGraded')->willReturn(true);
+        $g3->method('beenAutograded')->willReturn(true);
+
+        //New model
+        $su1 = new Submitter($this->core, $user1);
+        $ng1 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $ng1->method("getId")->willReturn("g1");
+        $ng1->method("isPeerGrading")->willReturn(true);
+        $gg1 = $this->createMockModel(GradedGradeable::class);
+        $gg1->method("getSubmitter")->willReturn($su1);
+        $gg1->method("getGradeable")->willReturn($ng1);
+
+        $su2 = new Submitter($this->core, $user2);
+        $ng2 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $ng2->method("getId")->willReturn("g1");
+        $ng2->method("isPeerGrading")->willReturn(true);
+        $gg2 = $this->createMockModel(GradedGradeable::class);
+        $gg2->method("getSubmitter")->willReturn($su2);
+        $gg2->method("getGradeable")->willReturn($ng2);
+
+        $su3 = new Submitter($this->core, $user3);
+        $ng3 = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $ng3->method("getId")->willReturn("g1");
+        $ng3->method("isPeerGrading")->willReturn(true);
+        $gg3 = $this->createMockModel(GradedGradeable::class);
+        $gg3->method("getSubmitter")->willReturn($su3);
+        $gg3->method("getGradeable")->willReturn($ng3);
+
+
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g1, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g2, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g3, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($g1, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g2, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g1, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g2, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $user3));
+
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg1, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg2, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg3, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg1, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg2, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg3, $user2));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg1, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg2, $user3));
+        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg3, $user3));
     }
 
     public function checkGroupPrivilegeProvider() {

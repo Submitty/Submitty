@@ -555,7 +555,7 @@ class Access {
         if (!($new_gradeable ? $new_gradeable->isPeerGrading() : $gradeable->getPeerGrading())) {
             return false;
         } else {
-            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($graded_gradeable ?? $gradeable)->getId(), $user->getId());
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($new_gradeable ?? $gradeable)->getId(), $user->getId());
             return in_array(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser()->getId(), $user_ids_to_grade);
         }
     }
