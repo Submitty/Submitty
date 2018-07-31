@@ -90,11 +90,13 @@ class NavigationView extends AbstractView {
         }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
 
-        $seating_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'room_seating', $this->core->getUser()->getId() . ".html");
+        $seating_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getUser()->getId() . ".json");
         $seating_file_contents = "";
         if (file_exists($seating_file_path)) {
             $seating_file_contents = file_get_contents($seating_file_path);
+            $user_seating_details = json_decode($seating_file_contents);
         }
+
         $display_room_seating = $this->core->getConfig()->displayRoomSeating();
 
         /* @var Button[] $top_buttons */

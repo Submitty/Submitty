@@ -82,14 +82,6 @@
             </div>
 
             <div class="option">
-                <div class="option-input"><input type="checkbox" name="display_room_seating" value="true" {{ fields['display_room_seating'] ? 'checked' : '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Display Room Seating</div>
-                    <div class="option-alt">Should room seating be displayed to students.</div>
-                </div>
-            </div>
-
-            <div class="option">
                 <div class="option-input"><input type="text" name="course_email" value="{{ fields['course_email'] }}" /></div>
                 <div class="option-desc">
                     <div class="option-title">Course Regrade</div>
@@ -148,11 +140,31 @@
                     <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
                 </div>
             </div>
+
             <div class="option">
                 <div class="option-input"><input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
                 <div class="option-desc">
                     <div class="option-title">Regrade Warning Message</div>
                     <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
+                </div>
+            </div>
+
+            <div class="option">
+                <div class="option-input">
+                    <select>
+                        <option value="NULL">
+                            --None--
+                        </option>
+                        {% for seating_option in gradeable_seating_options %}
+                            <option value="{{ seating_option['g_id'] }}">
+                                {{ seating_option['g_title'] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="option-desc">
+                    <div class="option-title">Room Seating gradeable to use</div>
+                    <div class="option-alt">The gradeable for which seating will be shown to students. (None to not display)</div>
                 </div>
             </div>
         </div>
