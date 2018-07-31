@@ -1466,7 +1466,8 @@ class ElectronicGraderController extends GradingController {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
-        $order = $_POST['order'] ?? [];
+        $order = json_decode($_POST['order'] ?? '[]', true);
+
         // Validate required parameters
         if (count($order) === 0) {
             $this->core->getOutput()->renderJsonFail('Missing order parameter');
@@ -1503,7 +1504,7 @@ class ElectronicGraderController extends GradingController {
                 throw new \InvalidArgumentException('Missing mark id in order array');
             }
             $order = $orders[$mark->getId()];
-            if (!ctype_digit($order)) {
+            if (!is_int($order) || $order < 0) {
                 throw new \InvalidArgumentException('All order values must be non-negative integers');
             }
             $mark->setOrder(intval($order));
