@@ -20,28 +20,30 @@ PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
 PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
 
 /*
-This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
+ * This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
+ * NOTE: Currently this is disabled because it causes too many bugs. Will re-enable if performance becomes a
+ * big issue.
  */
 let NUM_PAGES = 0;
-let renderedPages = [];
-let okToRender = false;
-document.getElementById('submission_browser').addEventListener('scroll', function (e) {
-    let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
-    let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
-
-    if (renderedPages.indexOf(visiblePageNum) == -1){
-        okToRender = true;
-        renderedPages.push(visiblePageNum);
-    } else {
-        okToRender = false;
-    }
-
-    if (visiblePage && okToRender) {
-        setTimeout(function () {
-            UI.renderPage(visiblePageNum, RENDER_OPTIONS);
-        });
-    }
-});
+// let renderedPages = [];
+// let okToRender = false;
+// document.getElementById('file_content').addEventListener('scroll', function (e) {
+//     let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
+//     let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
+//
+//     if (renderedPages.indexOf(visiblePageNum) == -1){
+//         okToRender = true;
+//         renderedPages.push(visiblePageNum);
+//     } else {
+//         okToRender = false;
+//     }
+//
+//     if (visiblePage && okToRender) {
+//         setTimeout(function () {
+//             UI.renderPage(visiblePageNum, RENDER_OPTIONS);
+//         });
+//     }
+// });
 
 function render(gradeable_id, user_id, grader_id, file_name) {
     let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
@@ -169,9 +171,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         } else {
             RENDER_OPTIONS.scale -= 0.1;
         }
-        for(let i = 0; i < RENDER_OPTIONS.pdfDocument.pdfInfo.numPages; i++){
-            UI.renderPage(i, RENDER_OPTIONS);
-        }
+        $('#zoom_percent').text(parseInt(RENDER_OPTIONS.scale*100)+"%");
+        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
     }
 
     function clearCanvas(){
@@ -248,11 +249,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
 
     document.getElementById('pen_color_selector').addEventListener('change', function(e){
-        this.value = e.srcElement.value;
-        setPen(penSize, e.srcElement.value);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setPen(penSize, value);
     });
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
-        setPen(e.srcElement.value, penColor);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setPen(value, penColor);
     });
     initPen();
 })();
