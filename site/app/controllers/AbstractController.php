@@ -27,6 +27,8 @@ abstract class AbstractController {
      *      should set the `$render_json` parameter to `false`.  The results of these methods should
      *      be strict-type-checked against `false`.  These methods should be called instead of database
      *      query methods for the entire controller layer
+     *
+     *  TODO: support more than just json responses (i.e. adding error messages to a redirect)
      */
 
     /**
