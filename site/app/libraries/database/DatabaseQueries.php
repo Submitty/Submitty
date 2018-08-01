@@ -2529,7 +2529,7 @@ AND gc_id IN (
     /**
      * Gets user or team submitters by id
      * @param string[] $ids User or team ids
-     * @return Submitter|null
+     * @return Submitter[]
      */
     public function getSubmittersById(array $ids) {
         //Get Submitter for each id in ids
@@ -2542,8 +2542,8 @@ AND gc_id IN (
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      * @param \app\models\gradeable\Gradeable $gradeable
-     * @param $user|null The id of the user to get data for
-     * @param $team|null The id of the team to get data for
+     * @param string|null $user The id of the user to get data for
+     * @param string|null $team The id of the team to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -2558,7 +2558,7 @@ AND gc_id IN (
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  submitter.  Note: The user's team for this gradeable will be retrived if provided
      * @param \app\models\gradeable\Gradeable $gradeable
-     * @param $submitter|null The submitter to get data for
+     * @param Submitter|null $submitter The submitter to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
