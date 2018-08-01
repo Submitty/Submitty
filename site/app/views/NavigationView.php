@@ -80,22 +80,37 @@ class NavigationView extends AbstractView {
 
     public function showGradeables($sections_to_list, $graded_gradeables) {
         // ======================================================================================
-        // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
+        // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
         // ======================================================================================
-        $message_file_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/" . $this->core->getUser()->getId() . "_message.html";
-        $message_file_contents = "";
-        if (file_exists($message_file_path)) {
-            $message_file_contents = file_get_contents($message_file_path);
-        }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
-
-        $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getUser()->getId() . ".json");
-        $seating_json = "";
-        if (file_exists($seating_json_path)) {
-            $seating_json = file_get_contents($seating_json_path);
-            $user_seating_details = json_decode($seating_json);
+        $message_file_contents = "";
+        if($display_custom_message) {
+            $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . "_message.html");
+            $display_custom_message = file_exists($message_file_path);
+            if ($display_custom_message) {
+                $message_file_contents = file_get_contents($message_file_path);
+            }
         }
+
+
+        // ======================================================================================
+        // DISPLAY ROOM SEATING (used to display room seating assignments)
+        // ======================================================================================
+        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+        $user_seating_details = null;
+        if($display_room_seating) {
+            $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getConfig()->getRoomSeatingGradeable(), $this->core->getUser()->getId() . ".json");
+            if (file_exists($seating_json_path)) {
+                $seating_json = file_get_contents($seating_json_path);
+                $user_seating_details = json_decode($seating_json);
+            }
+            else {
+                $user_seating_details = "See instructor for seating details";
+            }
+
+        }
+
 
         /* @var Button[] $top_buttons */
         $top_buttons = [];
@@ -220,7 +235,9 @@ class NavigationView extends AbstractView {
             "top_buttons" => $top_buttons,
             "sections" => $render_sections,
             "message_file_contents" => $message_file_contents,
-            "display_custom_message" => $display_custom_message
+            "display_custom_message" => $display_custom_message,
+            "user_seating_details" => $user_seating_details,
+            "display_room_seating" => $display_room_seating
         ]);
     }
 

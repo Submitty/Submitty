@@ -42,6 +42,7 @@ class ConfigurationController extends AbstractController {
             'room_seating_gradeable'         => $this->core->getConfig()->getRoomSeatingGradeable()
         );
 
+        // this is not displaying the value being stored in the config, should be fixed (also default value needs to be fixed)
         $fields['course_name'] = $this->core->getDisplayedCourseName();
 
         if (isset($_SESSION['request'])) {
@@ -87,11 +88,19 @@ class ConfigurationController extends AbstractController {
         }
         $entry = $_POST['entry'];
 
-        $gradeable_seating_options = $this->getGradeableSeatingOptions(); //use this to figure out if the gradeable chosen is valid
-
         if($name === "course_name") {
             if($entry === "") {
                 return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
+            }
+        }
+        else if($name === "room_seating_gradeable") {
+            $gradeable_seating_options = $this->getGradeableSeatingOptions();
+            $gradeable_ids = array();
+            foreach($gradeable_seating_options as $option) {
+                $gradeable_ids[] = $option['g_id'];
+            }
+            if(!in_array($entry, $gradeable_ids)) {
+                return $this->core->getOutput()->renderJsonFail('Invalid gradeable chosen for seating');
             }
         }
         else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {

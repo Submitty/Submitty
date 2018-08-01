@@ -397,6 +397,13 @@ class Config extends AbstractModel {
         return $this->display_rainbow_grades_summary;
     }
 
+    /**
+     * @return bool
+     */
+    public function displayRoomSeating() {
+        return $this->room_seating_gradeable !== "";
+    }
+
     public function getLogPath() {
         return $this->submitty_log_path;
     }
