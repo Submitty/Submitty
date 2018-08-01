@@ -1,5 +1,5 @@
 $(function() {
-    $("input,textarea").on("change", function() {
+    $("input,textarea,select").on("change", function() {
         var elem = this;
         let formData = new FormData();
         formData.append('csrf_token', csrfToken);

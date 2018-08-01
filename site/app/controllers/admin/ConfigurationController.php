@@ -3,11 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\IniParser;
-use app\libraries\Output;
-use phpDocumentor\Reflection\File;
 
 class ConfigurationController extends AbstractController {
     public function run() {

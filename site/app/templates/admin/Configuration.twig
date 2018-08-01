@@ -153,7 +153,7 @@
                 <div class="option-input">
                     <select name="room_seating_gradeable">
                         {% for seating_option in gradeable_seating_options %}
-                            <option value="{{ seating_option['g_id'] }}"{{ 1==2 ? ' selected' : ''}}>
+                            <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable'] == seating_option['g_id'] ? ' selected' : ''}}>
                                 {{ seating_option['g_title'] }}
                             </option>
                         {% endfor %}
