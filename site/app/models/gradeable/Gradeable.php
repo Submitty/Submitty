@@ -212,7 +212,6 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setIsRegradeAllowed($details['is_regrade_allowed']);
         }
 
         // Set dates last
@@ -1175,5 +1174,11 @@ class Gradeable extends AbstractModel {
         }
 
         return $sections;
+    }
+    public function getIsRegradeAllowed(){
+        if($this->regrade_request_date === null){
+            return true;
+        }
+        return false;
     }
 }

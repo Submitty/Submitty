@@ -208,7 +208,6 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-            'is_regrade_allowed' => $gradeable->getIsRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
@@ -828,7 +827,6 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
-                'is_regrade_allowed' => $details['is_regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
 
                 // TODO: properties that aren't supported yet
@@ -930,9 +928,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading',
-            'is_regrade_allowed'
-        ];
+            'peer_grading'
+            ];
 
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();

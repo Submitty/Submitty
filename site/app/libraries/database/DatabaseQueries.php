@@ -1339,6 +1339,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     /**
      * @param string             $gd_id
      * @param string             $grader_id
+     * @param string             $verifier_id
      * @param GradeableComponent $component
      */
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
@@ -2836,8 +2837,7 @@ AND gc_id IN (
                   eg_precision,
                   eg_peer_grading,
                   eg_peer_grade_set,
-                  eg_regrade_request_date,
-                  eg_is_regrade_allowed)
+                  eg_regrade_request_date)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
@@ -2940,7 +2940,6 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
                     $regrade_date,
-                    $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -2962,8 +2961,7 @@ AND gc_id IN (
                       eg_precision=?,
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,
-                      eg_regrade_request_date=?,
-                      eg_is_regrade_allowed=?
+                      eg_regrade_request_date=?
                     WHERE g_id=?", $params);
             }
         }
