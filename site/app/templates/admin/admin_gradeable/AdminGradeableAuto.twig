@@ -85,6 +85,9 @@
         </div>
         <br />
     </fieldset>
+    <br />
+    <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable</a>
+    <br /> <br />
     <h3>Build log:</h3>
     {% if cmake_output is null %}
         <pre>There is currently no build output.</pre>
