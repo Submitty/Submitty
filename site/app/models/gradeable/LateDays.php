@@ -92,22 +92,57 @@ class LateDays extends AbstractModel {
     }
 
     public function getLateDaysRemainingByContext(\DateTime $context) {
-        // Get the most recent update
-        $context_update = $this->getLateDaysUpdateByContext($context);
+        // make an array of 'due date events', which is an array of both the gradeables
+        //  and the late day updates in the `late_days` table
+        $late_day_events = array_merge(
+            array_map(function (LateDayInfo $info) {
+                return [
+                    'timestamp' => $info->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+                    'info' => $info
+                ];
+            }, $this->late_day_info),
+            array_map(function ($update) {
+                return [
+                    'timestamp' => $update['since_timestamp'],
+                    'update' => $update
+                ];
+            }, $this->late_days_updates));
 
-        // TODO: we have to step through each array, constantly updating remaining with available and charged
-        // TODO: making sure it doesn't go below zero....
+        // Sort by 'timestamp'
+        usort($late_day_events, function ($e1, $e2) {
+            return $e1['timestamp'] - $e2['timestamp'];
+        });
 
-        // Sum all late days charged since then, clamping to 0 each time
-        $remaining = 0;
-        /** @var LateDayInfo $info */
-        foreach ($this->late_day_info as $info) {
-            if ($info->getGradedGradeable()->getGradeable()->getSubmissionDueDate() < $context_update['since_timestamp']) {
-                continue;
+        // step through each event and keep a running count of the late days
+        $prev_late_days_available = $this->core->getConfig()->getDefaultStudentLateDays();
+        $late_days_remaining = $this->core->getConfig()->getDefaultStudentLateDays();
+        foreach ($late_day_events as $event) {
+            if ($event['timestamp'] > $context) {
+                break;
             }
-            $charged += $info->getLateDaysCharged();
+            if (isset($event['info'])) {
+                // gradeable event, so subtract the number of late days charged from
+                //  the running count
+                /** @var LateDayInfo $info */
+                $info = $event['info'];
+
+                // Due to the way getLateDaysCharged works, this subtraction should never make the
+                //  count go below zero (if it does, fix getLateDaysCharged)
+                $late_days_remaining -= $info->getLateDaysCharged();
+            } else if (isset($event['update'])) {
+                // Late days update event, so add the difference between the new and old
+                //  available count and add that to the late days remaining.
+                //  Clamp to 0 to ensure that subtractions don't make us go below zero
+                $new_late_days_available = $event['update']['allowed_late_days'];
+                $diff = $new_late_days_available - $prev_late_days_available;
+                $late_days_remaining = min(0, $late_days_remaining + $diff);
+            }
+            if ($late_days_remaining < 0) {
+                throw new \Error('Late days calculation failed due to logic error (LateDaysInfo::getLateDaysCharged)!');
+            }
         }
-        return $available - $charged;
+
+        return $late_days_remaining;
     }
 
     /**
