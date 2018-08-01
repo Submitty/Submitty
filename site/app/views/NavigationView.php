@@ -99,11 +99,20 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         $display_room_seating = $this->core->getConfig()->displayRoomSeating();
         $user_seating_details = null;
+        $gradeable_title = null;
         if($display_room_seating) {
-            $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getConfig()->getRoomSeatingGradeable(), $this->core->getUser()->getId() . ".json");
+            $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getConfig()->getRoomSeatingGradeableId(), $this->core->getUser()->getId() . ".json");
             if (file_exists($seating_json_path)) {
                 $seating_json = file_get_contents($seating_json_path);
                 $user_seating_details = json_decode($seating_json);
+                $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
+                $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+                foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
+                    if ($gradeable_id_and_title['g_id'] === $gradeable_id) {
+                        $gradeable_title = $gradeable_id_and_title['g_title'];
+                        break;
+                    }
+                }
             }
             else {
                 $user_seating_details = "See instructor for seating details";
@@ -237,7 +246,8 @@ class NavigationView extends AbstractView {
             "message_file_contents" => $message_file_contents,
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
-            "display_room_seating" => $display_room_seating
+            "display_room_seating" => $display_room_seating,
+            "gradeable_title" => $gradeable_title
         ]);
     }
 

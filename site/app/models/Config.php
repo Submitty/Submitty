@@ -49,7 +49,7 @@ use app\libraries\Utils;
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
- * @method string getRoomSeatingGradeable()
+ * @method string getRoomSeatingGradeableId()
  */
 
 class Config extends AbstractModel {
@@ -171,7 +171,7 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $regrade_message;
     /** @property @var string|null */
-    protected $room_seating_gradeable;
+    protected $room_seating_gradeable_id;
 
     /**
      * Config constructor.
@@ -285,7 +285,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'room_seating_gradeable', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -337,9 +337,9 @@ class Config extends AbstractModel {
                 $key == "private_repository") {
               $config[$section][$key] = "";
             }
-            // DEFAULT FOR ROOM_SEATING_GRADEABLE
+            // DEFAULT FOR ROOM_SEATING_GRADEABLE_ID
             if (!isset($config[$section][$key]) &&
-                $key == "room_seating_gradeable") {
+                $key == "room_seating_gradeable_id") {
                 $config[$section][$key] = "";
             }
 
@@ -401,7 +401,7 @@ class Config extends AbstractModel {
      * @return bool
      */
     public function displayRoomSeating() {
-        return $this->room_seating_gradeable !== "";
+        return $this->room_seating_gradeable_id !== "";
     }
 
     public function getLogPath() {

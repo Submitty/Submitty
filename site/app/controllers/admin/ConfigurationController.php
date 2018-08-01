@@ -39,7 +39,7 @@ class ConfigurationController extends AbstractController {
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
-            'room_seating_gradeable'         => $this->core->getConfig()->getRoomSeatingGradeable()
+            'room_seating_gradeable_id'         => $this->core->getConfig()->getRoomSeatingGradeableId()
         );
 
         // this is not displaying the value being stored in the config, should be fixed (also default value needs to be fixed)
@@ -93,7 +93,7 @@ class ConfigurationController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
             }
         }
-        else if($name === "room_seating_gradeable") {
+        else if($name === "room_seating_gradeable_id") {
             $gradeable_seating_options = $this->getGradeableSeatingOptions();
             $gradeable_ids = array();
             foreach($gradeable_seating_options as $option) {
@@ -109,8 +109,8 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message',
-                                      'display_room_seating', 'forum_enabled', 'regrade_enabled'))) {
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
             $entry = $entry === "true" ? true : false;
         }
         else if($name === 'upload_message') {
