@@ -4,11 +4,11 @@
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python ../submission/*.py",
             "command" : "python ../submission/*.py",
-            "points" : 0,
+            "points" : 5,
             "validation" : [
                 {
                     "method" : "diff",
-                    "actual_file" : "test00/STDOUT.txt",
+                    "actual_file" : "test01/STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "hw01part1_sol.txt"
                 }
