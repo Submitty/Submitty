@@ -21,6 +21,7 @@ use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\Notification;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;
@@ -2363,20 +2364,27 @@ AND gc_id IN (
     /**
      * Generate notifcation rows
      *
-     * @param string $source_user_id     user_id of person who generated notification
-     * @param string $type               Type of notification
-     * @param string $metadata           Information about the notification
-     * @param string $content            Text message of notification
-     * @param string $target_users_query Query selection for list of users
-     * @param string $additional_param   Additional parameters to be appended
-     * @param bool   $ignore_self        Should ignore $source_user_id from target users
+     * @param Notification $notification
      */
-    public function pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self){
-        $params = array($type, $metadata, $content, $source_user_id);
-        $params = array_merge($params, $additional_param);
-        if($ignore_self){
+    public function pushNotification($notification){
+        $params = array();
+        $params[] = $notification->getComponent();
+        $params[] = $notification->getNotifyMetadata();
+        $params[] = $notification->getNotifyContent();
+        $params[] = $notification->getNotifySource();
+
+        if(empty($notification->getNotifyTarget())) {
+            // Notify all users
+            $target_users_query = "SELECT user_id FROM users";
+        } else {
+            // To a specific user
+            $params[] = $notification->getNotifyTarget();
+            $target_users_query = "SELECT ?::text as user_id";
+        }
+
+        if($notification->getNotifyNotToSource()){
             $ignore_self_query = "WHERE user_id <> ?";
-            $params[] = $source_user_id;
+            $params[] = $notification->getNotifySource();
         }
         else {
             $ignore_self_query = "";
@@ -2386,19 +2394,13 @@ AND gc_id IN (
                     $params);
     }
 
-    public function pushNotificationToAUser($source_user_id, $type, $metadata, $content, $target_user_id, $ignore_self){
-        $additional_param = array();
-        $additional_param[] = $target_user_id;
-        $target_users_query = "SELECT ?::text as user_id";
-        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self);
-    }
-
-    public function pushNotificationToAllUserInCourse($source_user_id, $type, $metadata, $content, $ignore_self){
-        $additional_param = array();
-        $target_users_query = "SELECT user_id FROM users";
-        $this->pushNotification($source_user_id, $type, $metadata, $content, $target_users_query, $additional_param, $ignore_self);
-    }
-
+    /**
+     * Returns notifications for a user
+     *
+     * @param string $user_id
+     * @param bool $show_all
+     * @return array(Notification)
+     */
     public function getUserNotifications($user_id, $show_all){
         if($show_all){
             $seen_status_query = "true";
@@ -2409,7 +2411,21 @@ AND gc_id IN (
                 (case when seen_at is NULL then false else true end) as seen,
                 (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
                 FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
-        return $this->course_db->rows();
+        $rows = $this->course_db->rows();
+        $results = array();
+        foreach ($rows as $row) {
+            $results[] = new Notification($this->core, array(
+                    'view_only' => true,
+                    'id' => $row['id'],
+                    'component' => $row['type'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at']
+                ));
+        }
+        return $results;
     }
 
     public function getNotificationInfoById($user_id, $notification_id){

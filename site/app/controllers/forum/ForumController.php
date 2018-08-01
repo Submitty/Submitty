@@ -332,7 +332,7 @@ class ForumController extends AbstractController {
                 }
                 if($announcment){
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
-                    $notification->pushNotificationToDatabase();
+                    $this->core->getQueries()->pushNotification($notification);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -388,7 +388,7 @@ class ForumController extends AbstractController {
                 $post = $this->core->getQueries()->getPost($parent_id);
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $notification->pushNotificationToDatabase();
+                $this->core->getQueries()->pushNotification($notification);
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
@@ -402,7 +402,7 @@ class ForumController extends AbstractController {
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if($type) {
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
-                $notification->pushNotificationToDatabase();
+                $this->core->getQueries()->pushNotification($notification);
             }
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
@@ -471,7 +471,7 @@ class ForumController extends AbstractController {
             $post = $this->core->getQueries()->getPost($post_id);
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-            $notification->pushNotificationToDatabase();
+            $this->core->getQueries()->pushNotification($notification);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
@@ -493,7 +493,7 @@ class ForumController extends AbstractController {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $notification->pushNotificationToDatabase();
+                $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
             return $response;
@@ -539,7 +539,7 @@ class ForumController extends AbstractController {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $notification->pushNotificationToDatabase();
+                $this->core->getQueries()->pushNotification($notification);
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -839,7 +839,7 @@ class ForumController extends AbstractController {
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author));
-                    $notification->pushNotificationToDatabase();
+                    $this->core->getQueries()->pushNotification($notification);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {

@@ -7,15 +7,32 @@ use app\libraries\Core;
 /**
  * Class Notification
  *
- * @method string getComponent()
- * @method string getCurrentUser()
- * @method string getNotifySource()
- * @method string getNotifyTarget()
- * @method string getNotifyContent()
- * @method string getNotifyMetadata()
- * @method bool getNotifyNotToSource()
+ * @method void     setViewOnly($view_only)
+ * @method void     setId($id)
+ * @method void     setComponent($component)
+ * @method void     setSeen($isSeen)
+ * @method void     setElapsedTime($duration)
+ * @method void     setCreatedAt($time)
+ * @method void     setNotifyMetadata()
+ * @method void     setNotifyContent()
+ *
+ * @method bool     isViewOnly()
+ * @method int      getId()
+ * @method string   getComponent()
+ * @method bool     isSeen()
+ * @method real     getElapsedTime()
+ * @method string   getCreatedAt()
+ * @method string   getCurrentUser()
+ *
+ * @method string   getNotifySource()
+ * @method string   getNotifyTarget()
+ * @method string   getNotifyContent()
+ * @method string   getNotifyMetadata()
+ * @method bool     getNotifyNotToSource()
  */
 class Notification extends AbstractModel {
+    /** @property @var bool Notification fetched from DB */
+    protected $view_only;
 
     /** @property @var string Type of notification */
     protected $component;
@@ -30,8 +47,18 @@ class Notification extends AbstractModel {
     protected $notify_content;
     /** @property @var string Notification information about redirection link */
     protected $notify_metadata;
-    /** @property @var string Should $notify_source be ignored from $notify_target */
+    /** @property @var bool Should $notify_source be ignored from $notify_target */
     protected $notify_not_to_source;
+
+    /** @property @var int Notification ID */
+    protected $id;
+    /** @property @var bool Is notification already seen */
+    protected $seen;
+    /** @property @var real Time elapsed from creation of notification in secs */
+    protected $elapsed_time;
+    /** @property @var string Timestamp for creation of notification */
+    protected $created_at;
+
 
     /**
      * Notifications constructor.
@@ -44,17 +71,29 @@ class Notification extends AbstractModel {
         if (count($details) == 0) {
             return;
         }
-        $this->setNotifyNotToSource(true);
-        $this->setCurrentUser($this->core->getUser()->getId());
-        $this->setComponent($details['component']);
-        switch ($this->getComponent()) {
-            case 'forum':
-                $this->handleForum($details);
-                break;
-            default:
-                // Prevent notification to be pushed in database
-                $this->setComponent("invalid");
-                break;
+        if(!empty($details['view_only'])){
+            $this->setViewOnly(true);
+            $this->setId($details['id']);
+            $this->setSeen($details['seen']);
+            $this->setComponent($details['component']);
+            $this->setElapsedTime($details['elapsed_time']);
+            $this->setCreatedAt($details['created_at']);
+            $this->setNotifyMetadata($details['metadata']);
+            $this->setNotifyContent($details['content']);
+        } else {
+            $this->setViewOnly(false);
+            $this->setNotifyNotToSource(true);
+            $this->setCurrentUser($this->core->getUser()->getId());
+            $this->setComponent($details['component']);
+            switch ($this->getComponent()) {
+                case 'forum':
+                    $this->handleForum($details);
+                    break;
+                default:
+                    // Prevent notification to be pushed in database
+                    $this->setComponent("invalid");
+                    break;
+            }
         }
     }
 
@@ -116,32 +155,6 @@ class Notification extends AbstractModel {
         }
     }
 
-
-    /**
-     * Push to generated notifcation information to database
-     */
-    public function pushNotificationToDatabase() {
-        if(empty($this->getNotifyTarget())) {
-            // Notify all users
-            $this->core->getQueries()->pushNotificationToAllUserInCourse(
-                    $this->getNotifySource(),
-                    $this->getComponent(),
-                    $this->getNotifyMetadata(),
-                    $this->getNotifyContent(),
-                    $this->getNotifyNotToSource()
-                );
-        } else {
-            $this->core->getQueries()->pushNotificationToAUser(
-                    $this->getNotifySource(),
-                    $this->getComponent(),
-                    $this->getNotifyMetadata(),
-                    $this->getNotifyContent(),
-                    $this->getNotifyTarget(),
-                    $this->getNotifyNotToSource()
-                );
-        }
-    }
-
     /**
      * Trim long $message upto 40 character and filter newline
      *
@@ -150,5 +163,33 @@ class Notification extends AbstractModel {
      */
     private function textShortner($message) {
         return mb_strimwidth(str_replace("\n", " ", $message), 0, 40, "...");
+    }
+
+    /**
+     * Returns relative time if time is in last 24 hours
+     * else returns absolute time
+     *
+     * @return string $formatted_time
+     */
+    public function getNotifyTime() {
+        $elapsed_time = $this->getElapsedTime();
+        $actual_time = $this->getCreatedAt();
+        if($elapsed_time < 60){
+            return "Less than a minute ago";
+        } else if($elapsed_time < 3600){
+            $minutes = floor($elapsed_time/60);
+            if($minutes == 1)
+                return "1 minute ago";
+            else
+                return "{$minutes} minutes ago";
+        } else if($elapsed_time < 3600*24){
+            $hours = floor($elapsed_time/3600);
+            if($hours == 1)
+                return "1 hour ago";
+            else
+                return "{$hours} hours ago";
+        } else {
+            return date_format(date_create($actual_time), "n/j g:i A");
+        }
     }
 }
