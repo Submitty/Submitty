@@ -90,14 +90,12 @@ class NavigationView extends AbstractView {
         }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
 
-        $seating_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getUser()->getId() . ".json");
-        $seating_file_contents = "";
-        if (file_exists($seating_file_path)) {
-            $seating_file_contents = file_get_contents($seating_file_path);
-            $user_seating_details = json_decode($seating_file_contents);
+        $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getUser()->getId() . ".json");
+        $seating_json = "";
+        if (file_exists($seating_json_path)) {
+            $seating_json = file_get_contents($seating_json_path);
+            $user_seating_details = json_decode($seating_json);
         }
-
-        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
 
         /* @var Button[] $top_buttons */
         $top_buttons = [];
@@ -222,9 +220,7 @@ class NavigationView extends AbstractView {
             "top_buttons" => $top_buttons,
             "sections" => $render_sections,
             "message_file_contents" => $message_file_contents,
-            "display_custom_message" => $display_custom_message,
-            "seating_file_contents" => $seating_file_contents,
-            "display_room_seating" => $display_room_seating
+            "display_custom_message" => $display_custom_message
         ]);
     }
 

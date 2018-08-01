@@ -49,6 +49,7 @@ use app\libraries\Utils;
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
+ * @method string getRoomSeatingGradeable()
  */
 
 class Config extends AbstractModel {
@@ -153,8 +154,6 @@ class Config extends AbstractModel {
     protected $display_rainbow_grades_summary;
     /** @property @var bool */
     protected $display_custom_message;
-    /** @property @var bool */
-    protected $display_room_seating;
     /** @property @var string*/
     protected $course_email;
     /** @property @var string */
@@ -171,6 +170,8 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var string */
     protected $regrade_message;
+    /** @property @var string|null */
+    protected $room_seating_gradeable;
 
     /**
      * Config constructor.
@@ -284,7 +285,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'display_room_seating', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'room_seating_gradeable', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -301,7 +302,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'display_room_seating');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -336,10 +337,10 @@ class Config extends AbstractModel {
                 $key == "private_repository") {
               $config[$section][$key] = "";
             }
-            // DEFAULT FOR DISPLAY_ROOM_SEATING
+            // DEFAULT FOR ROOM_SEATING_GRADEABLE
             if (!isset($config[$section][$key]) &&
-                $key == "display_room_seating") {
-                $config[$section][$key] = false;
+                $key == "room_seating_gradeable") {
+                $config[$section][$key] = "";
             }
 
             if (!isset($config[$section][$key])) {
@@ -380,13 +381,6 @@ class Config extends AbstractModel {
      */
     public function displayCustomMessage() {
         return $this->display_custom_message;
-    }
-
-    /**
-     * @return bool
-     */
-    public function displayRoomSeating() {
-        return $this->display_room_seating;
     }
 
     /**

@@ -151,20 +151,17 @@
 
             <div class="option">
                 <div class="option-input">
-                    <select>
-                        <option value="NULL">
-                            --None--
-                        </option>
+                    <select name="room_seating_gradeable">
                         {% for seating_option in gradeable_seating_options %}
-                            <option value="{{ seating_option['g_id'] }}">
+                            <option value="{{ seating_option['g_id'] }}"{{ 1==2 ? ' selected' : ''}}>
                                 {{ seating_option['g_title'] }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="option-desc">
-                    <div class="option-title">Room Seating gradeable to use</div>
-                    <div class="option-alt">The gradeable for which seating will be shown to students. (None to not display)</div>
+                    <div class="option-title">Room Seating Gradeable to use</div>
+                    <div class="option-alt">The gradeable for which seating will be shown to students. (select --None-- to not display)</div>
                 </div>
             </div>
         </div>
