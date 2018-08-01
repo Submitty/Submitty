@@ -402,7 +402,7 @@ class Gradeable extends AbstractModel {
                     $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
                 }
                 if (Utils::compareNullableGt($grade_start_date, $grade_due_date)) {
-                    $errors['grade_due_date'] = 'Manual Grading Due Date must be no earlier than Manual Grading Open Date';
+                    $errors['grade_start_date'] = 'Manual Grading Open Date must be no later than Manual Grading Due Date';
                 }
                 if (Utils::compareNullableGt($grade_due_date, $grade_released_date)) {
                     $errors['grade_due_date'] = 'Manual Grading Due Date must be no later than the Grades Released Date';
