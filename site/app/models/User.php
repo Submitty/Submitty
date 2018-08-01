@@ -34,6 +34,17 @@ use app\libraries\Core;
  */
 class User extends AbstractModel {
 
+    /**
+     * Access groups, lower is more access
+     */
+
+    const GROUP_INSTRUCTOR            = 1;
+    const GROUP_FULL_ACCESS_GRADER    = 2;
+    const GROUP_LIMITED_ACCESS_GRADER = 3;
+    const GROUP_STUDENT               = 4;
+    /** Logged out */
+    const GROUP_NONE                  = 5;
+
     /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 

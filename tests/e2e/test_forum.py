@@ -39,9 +39,6 @@ class TestForum(BaseTestCase):
             assert False
         assert 'page=view_thread' in self.driver.current_url
 
-    def wait_after_ajax(self):
-        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
-
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
         upload_button.send_keys(tfname)
@@ -143,7 +140,7 @@ class TestForum(BaseTestCase):
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element_by_id("merge-threads")
         self.driver.find_element_by_xpath("//a[contains(text(),'Merge Threads')]").click()
-        cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Cancel')]")
+        cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Close')]")
         assert merge_threads_div.value_of_css_property("display") == "block"
         if parent_thread_title is None:
             cancel_button.click()

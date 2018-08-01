@@ -116,7 +116,7 @@ class AuthenticationController extends AbstractController {
             $this->core->addErrorMessage("Could not login using that user id or password");
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
-                    $redirect[$key] = $_REQUEST['old'][$value];
+                    $redirect[substr($key, 4)] = $value;
                 }
             }
             $this->core->redirect($this->core->buildUrl($redirect));

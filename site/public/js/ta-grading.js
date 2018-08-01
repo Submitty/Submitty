@@ -26,13 +26,13 @@ $(function() {
         setRubricVisible(true);
         setSubmissionsVisible(true);
         setInfoVisible(true);
+        setRegradeVisible(true);
         resetModules();
         updateCookies();
     }
    else{
         readCookies();
         updateCookies();
-        hideIfEmpty(".rubric_panel");
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
@@ -47,9 +47,11 @@ $(function() {
     $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
+    $('#pdf_annotation_bar').length != 0 && $('#pdf_annotation_bar').resizable("destroy"); //Same with PDF annotation.
 
     $(".draggable").on("dragstop", function(){
         $('#bar_wrapper').css({'z-index':'40'}); //Reset z-index after jquery drag
+        $('#pdf_annotation_bar').length != 0 && $('#pdf_annotation_bar').css({'z-index':'40'});
         updateCookies();
     });
 
@@ -121,6 +123,9 @@ function readCookies(){
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var pdf_annotation_bar_top = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var pdf_annotation_bar_left = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
     var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -163,6 +168,9 @@ function readCookies(){
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
+
+    (pdf_annotation_bar_top) ? $("#pdf_annotation_bar").css("top", pdf_annotation_bar_top):{};
+    (pdf_annotation_bar_left) ? $("#pdf_annotation_bar").css("left", pdf_annotation_bar_left):{};
 
     (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
@@ -251,6 +259,9 @@ function updateCookies(){
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
     document.cookie = "editMode=" + editModeEnabled + "; path=/;";
+
+    document.cookie = "pdf_annotation_bar_top=" + $("#pdf_annotation_bar").css("top") + "; path=/;";
+    document.cookie = "pdf_annotation_bar_left=" + $("#pdf_annotation_bar").css("left") + "; path=/;";
     var overwrite = "on";
     if ($('#overwrite-id').is(":checked")) {
         overwrite = "on";
@@ -377,7 +388,6 @@ function setAutogradingVisible(visible) {
 function setRubricVisible(visible) {
     $('.fa-pencil-square-o').toggleClass('icon-selected', visible);
     $("#grading_rubric").toggle(visible);
-    hideIfEmpty("#grading_rubric");
 }
 
 function setSubmissionsVisible(visible) {
@@ -429,7 +439,7 @@ function resetModules() {
     $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
     $('.fa-hand-paper-o').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
-    hideIfEmpty(".rubric_panel");
+    $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
     deleteCookies();
     updateCookies();
 }
@@ -533,7 +543,7 @@ function selectCurrentMarkCheck(index) {
     var opened = findCurrentOpenedMark();
     if (opened > 0 && index < getComponent(opened).marks.length) {
         var mark = getComponent(opened).marks[index];
-        selectMark($("#mark_id-" + opened + "-" + mark.id + "-check")[0]);
+        selectMark(opened, mark.id);
     }
 }
 
@@ -628,11 +638,6 @@ function validateInput(id, question_total, delta){
 function autoResizeComment(e){
     e.target.style.height ="";
     e.target.style.height = e.target.scrollHeight + "px";
-}
-
-function downloadZip(grade_id, user_id) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_zip', 'dir': 'submissions', 'gradeable_id': grade_id, 'user_id': user_id});
-    return false;
 }
 
 function downloadFile(html_file, url_file) {

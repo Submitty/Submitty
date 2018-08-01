@@ -62,10 +62,20 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     shift
 
     # Setting it up to allow SSH as root by default
-    mkdir -m 700 /root/.ssh
+    mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+
+    # Set up some convinence stuff for the root user on ssh
+     echo -e "
+
+# Convinence stuff for Submitty
+export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
+export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
+alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
     export VAGRANT=0
@@ -116,12 +126,20 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # DAEMON_USER writes the results, and gives read-only access to the
 # PHP_USER.
 
-addgroup ${DAEMONPHP_GROUP}
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHP_GROUP} ; then
+	addgroup ${DAEMONPHP_GROUP}
+else
+	echo "${DAEMONPHP_GROUP} already exists"
+fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-addgroup ${COURSE_BUILDERS_GROUP}
+if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
+        addgroup ${COURSE_BUILDERS_GROUP}
+else
+        echo "${COURSE_BUILDERS_GROUP} already exists"
+fi
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -133,9 +151,13 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
+        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
-    adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
+        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G www-data "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
@@ -151,7 +173,10 @@ if [ ${WORKER} == 0 ]; then
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
-adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
+    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+fi
+
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 # The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
 usermod -a -G www-data "${DAEMON_USER}"
@@ -183,12 +208,12 @@ pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
+pip3 install distro
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
 
-# (yes, we need to run Python2 for clang tokenizer)
-pip install clang
+# Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
@@ -460,7 +485,7 @@ if [ ! -d "${clangsrc}" ]; then
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
     pushd ${clangbuild}
-    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++
     popd > /dev/null
 
     # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)

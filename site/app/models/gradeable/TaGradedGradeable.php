@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mackek4
- * Date: 6/25/2018
- * Time: 2:30 PM
- */
 
 namespace app\models\gradeable;
 
@@ -13,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\models\User;
 
 /**
  * Class TaGradedGradeable
@@ -22,7 +17,7 @@ use app\models\AbstractModel;
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
- * @method array getGradedComponents()
+ * @method GradedComponentContainer[] getGradedComponentContainers()
  */
 class TaGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
@@ -33,8 +28,10 @@ class TaGradedGradeable extends AbstractModel {
     protected $overall_comment = "";
     /** @property @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
-    /** @property @var GradedComponent[][] The an array of arrays of GradedComponents, indexed by component id */
-    protected $graded_components = array();
+    /** @property @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
+    protected $graded_component_containers = [];
+    /** @property @var GradedComponent[] The components that have been marked for deletion */
+    private $deleted_graded_components = [];
 
 
     /**
@@ -42,19 +39,25 @@ class TaGradedGradeable extends AbstractModel {
      * @param Core $core
      * @param array $details A property-name-indexed array of values to construct with
      * @param GradedGradeable $graded_gradeable
-     * @throws \Exception If the 'user_viewed_date' in the $details array is an invalid DateTime/date-string
+     * @throws \InvalidArgumentException If any of the details are invalid or the graded gradeable is null
      */
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        if($graded_gradeable === null) {
+        if ($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
         $this->graded_gradeable = $graded_gradeable;
 
-        $this->setIdInternal($details['id']);
-        $this->setOverallComment($details['overall_comment']);
-        $this->setUserViewedDate($details['user_viewed_date']);
+        $this->setIdFromDatabase($details['id'] ?? 0);
+        $this->setOverallComment($details['overall_comment'] ?? '');
+        $this->setUserViewedDate($details['user_viewed_date'] ?? null);
+
+        // Default to all blank components
+        foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
+            $this->graded_component_containers[$component->getId()] = new GradedComponentContainer($core, $this, $component);
+        }
+
         $this->modified = false;
     }
 
@@ -68,8 +71,9 @@ class TaGradedGradeable extends AbstractModel {
         //  the graded gradeable instead of each component so if one grader  grades
         //  multiple components, their information only gets sent once
         $details['graders'] = [];
-        foreach ($this->graded_components as $graded_components) {
-            foreach($graded_components as $graded_component) {
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            foreach ($container->getGradedComponents() as $graded_component) {
                 if ($graded_component->getGrader() !== null) {
                     // Only set once if multiple components have the same grader
                     if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
@@ -92,6 +96,83 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets all component grades for a given component
+     * @param Component $component The component to get grades for
+     * @return GradedComponentContainer
+     */
+    public function getGradedComponentContainer(Component $component) {
+        $container = $this->graded_component_containers[$component->getId()] ?? null;
+        if ($container === null) {
+            throw new \InvalidArgumentException('Invalid component');
+        }
+        return $container;
+    }
+
+    /**
+     * Gets or creates a graded component based on the logic of GradedComponentContainer::getOrCreateGradedComponent
+     *  for the provided component
+     * @param Component $component
+     * @param User|null $grader The grader to look for
+     * @param bool $generate If a new graded component should be generated if none were found
+     * @return GradedComponent|null The graded component instance or null if not found
+     */
+    public function getOrCreateGradedComponent(Component $component, $grader = null, $generate = false) {
+        return $this->getGradedComponentContainer($component)->getOrCreateGradedComponent($grader, $generate);
+    }
+
+    /**
+     * Gets the graded component with the provided component and grader
+     * @param Component $component The component the grade is for
+     * @param User|null $grader The grader for this component
+     * @return GradedComponent|null
+     * @throws \InvalidArgumentException If $grader is null and $component is peer
+     */
+    public function getGradedComponent(Component $component, $grader = null) {
+        // The subset of the above function's features satisfy the
+        //  expected behavior for a normal getter
+        return $this->getOrCreateGradedComponent($component, $grader, false);
+    }
+
+    /**
+     * Gets the AutoGradedVersion for this grade
+     * @param bool $strict if true, all grades for this gradeable must have a consistent version
+     *                      otherwise, returns the first valid version number found
+     * @return AutoGradedVersion|null
+     */
+    public function getGradedVersionInstance($strict = true) {
+        $versions = $this->graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions();
+        $version_number = $this->getGradedVersion($strict);
+        // Get the version instance associated with the graded version
+        return $versions[$version_number] ?? null;
+    }
+
+    /**
+     * Gets the version number for the submission associated with this grade
+     * @param bool $strict if true, all grades for this gradeable must have a consistent version
+     *                      otherwise, return the first valid version number found
+     * @return bool|int
+     */
+    public function getGradedVersion($strict = true) {
+        $version = false;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $v = $container->getGradedVersion();
+            if ($v !== false && $strict !== true) {
+                return $v;
+            } else if ($v === false) {
+                return false;
+            }
+
+            if ($version === false) {
+                $version = $v;
+            } else if ($version !== $v) {
+                return false;
+            }
+        }
+        return $version;
+    }
+
+    /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
      */
@@ -100,111 +181,129 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the manual grading points the student earned
+     * @return int
+     */
+    public function getTotalScore() {
+        $points_earned = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $points_earned += $container->getTotalScore();
+        }
+        return $points_earned;
+    }
+
+    /**
      * Gets the percent of points the student has earned of the
      *  components that have been graded
      * @param bool $clamp True to clamp the result to 1.0
      * @return float percentage (0 to 1), or NAN if no grading started
      */
-    public function getGradedPercent($clamp = false) {
-        $points_earned = 0.0;
-        $points_possible = 0.0;
-
-        // Iterate through each component
-        /** @var GradedComponent[] $graded_component */
-        foreach ($this->graded_components as $graded_component) {
-            if (count($graded_component) > 0) {
-                $component_points_earned = 0.0;
-                // Iterate through each grader for this component
-                /** @var GradedComponent $component_grade */
-                foreach ($graded_component as $component_grade) {
-                    // Be sure to add the default so count-down gradeables don't become negative
-                    $component_points_earned += $component_grade->getComponent()->getDefault();
-
-                    // TODO: how should peer grades be calculated: now its an average
-                    $component_points_earned += $component_grade->getScore();
-                    foreach($component_grade->getMarks() as $mark) {
-                        $component_points_earned += $mark->getPoints();
-                    }
-                }
-                $points_earned += $component_points_earned / count($graded_component);
-                $points_possible += $graded_component[0]->getComponent()->getMaxValue();
-            }
-        }
-
-        return Utils::safeCalcPercent($points_earned, $points_possible, $clamp);
+    public function getTotalScorePercent($clamp = false) {
+        return Utils::safeCalcPercent($this->getTotalScore(),
+            $this->getGradedGradeable()->getGradeable()->getTaNonExtraCreditPoints(), $clamp);
     }
 
     /**
      * Gets how much of this submitter's submission has been graded
-     * @return float percentage (0 to 1), or NAN if no components
+     * @return float percentage (0 to 1) not clamped to 100%, or NAN if no component in gradeable
      */
     public function getPercentGraded() {
-        $components_graded = 0.0;
-        $components = $this->graded_gradeable->getGradeable()->getComponents();
-        $gradeable = $this->graded_gradeable->getGradeable();
-
-        $peer_component_count = array_sum(array_map(function (Component $component) {
-            return $component->isPeer() ? 1 : 0;
-        }, $components));
-        $ta_component_count = count($components) - $peer_component_count;
-
-        // For each peer component, there will be a certain number (set in gradeable) of peer graders
-        //  For each non-peer component, there must be one grade (ta/instructor)
-        $total_graders = $peer_component_count * $gradeable->getPeerGradeSet() + $ta_component_count;
-
-        // Get the number of component grades
-        foreach ($this->graded_components as $graded_component) {
-            $components_graded += count($graded_component);
+        $running_percent = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach($this->graded_component_containers as $container) {
+            $running_percent += $container->getPercentGraded();
         }
-
-        return Utils::safeCalcPercent($components_graded, $total_graders, true);
+        return Utils::safeCalcPercent($running_percent, count($this->graded_component_containers), false);
     }
 
     /**
-     * Sets the id of this grade data
-     * @param int $id
+     * Gets if this graded gradeable is completely graded
+     * @return bool
      */
-    private function setIdInternal($id) {
+    public function isComplete() {
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            if (!$container->isComplete()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Sets the id of this grade data (used from database methods)
+     * @param int $id
+     * @internal
+     */
+    public function setIdFromDatabase($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
         } else {
             throw new \InvalidArgumentException('Id must be a non-negative integer');
         }
+        // Reset the modified flag since this gets called once saved to db or constructor
+        $this->modified = false;
     }
 
     /**
-     * Sets the array of graded components for this gradeable data
-     * @param GradedComponent[][]|GradedComponent[] $graded_components
+     * Sets the array of graded component containers for this gradeable data
+     *  Note: only call from db methods for loading
+     * @param GradedComponentContainer[] $containers
+     * @internal
      */
-    public function setGradedComponents(array $graded_components) {
-
-        // Flatten the array if we are given a 2d array.  Don't trust the user to
-        //  give us properly indexed components
-        $graded_components_flat = [];
-        foreach($graded_components as $graded_component) {
-            if(is_array($graded_component)) {
-                $graded_components_flat = array_merge($graded_component, $graded_components_flat);
-            } else {
-                $graded_components_flat[] = $graded_component;
+    public function setGradedComponentContainersFromDatabase(array $containers) {
+        $containers_by_id = [];
+        foreach ($containers as $container) {
+            if (!($container instanceof GradedComponentContainer)) {
+                throw new \InvalidArgumentException('Graded Component Container array contained invalid type');
             }
-        }
-
-        // Next, setup the components to index by component id
-        $graded_components_by_id = [];
-        foreach ($graded_components_flat as $graded_component) {
-            if($graded_components)
-                if (!($graded_component instanceof GradedComponent)) {
-                    throw new \InvalidArgumentException('Graded Component array contained invalid type');
-                }
 
             // Index by component id
-            if(isset($graded_components_by_id[$graded_component->getComponentId()])) {
-                $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
-            } else {
-                $graded_components_by_id[$graded_component->getComponentId()] = [$graded_component];
+            $containers_by_id[$container->getComponent()->getId()] = $container;
+        }
+        $this->graded_component_containers = $containers_by_id;
+    }
+
+    /**
+     * Clears the array of graded components en-route to deletion
+     *  Note: only call from db methods for saving
+     * @internal
+     */
+    public function clearDeletedGradedComponents() {
+        $this->deleted_graded_components = [];
+    }
+
+    /**
+     * Deletes the GradedComponent(s) associated with the provided Component and grader
+     * @param Component $component The component to delete the grade for
+     * @param User|null $grader The grader to delete the grade for, or null to delete all grades
+     */
+    public function deleteGradedComponent(Component $component, User $grader = null) {
+        $container = $this->getGradedComponentContainer($component);
+
+        if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
+            // If the grader is null or we aren't peer grading, then delete all component grades for this component
+            $this->deleted_graded_components = array_merge($this->deleted_graded_components,
+                $container->getGradedComponents());
+
+            // Clear the container for this component
+            $container->setGradedComponents([]);
+        } else {
+            // Otherwise, only delete the component with the provided grader
+            $deleted_component = $container->removeGradedComponent($grader);
+            if ($deleted_component !== null) {
+                $this->deleted_graded_components[] = $deleted_component;
             }
         }
-        $this->graded_components = $graded_components_by_id;
+    }
+
+    /**
+     * Gets the GradedComponents marked for deletion via deleteGradedComponent
+     * @return GradedComponent[]
+     */
+    public function getDeletedGradedComponents() {
+        return $this->deleted_graded_components;
     }
 
     /**
@@ -225,6 +324,40 @@ class TaGradedGradeable extends AbstractModel {
         $this->modified = true;
     }
 
+    /**
+     * Resets the user_viewed_date to be as if the student never saw the grade
+     */
+    public function resetUserViewedDate() {
+        $this->user_viewed_date = null;
+        $this->modified = true;
+    }
+
+    /**
+     * Gets all of the graders
+     * @return User[] indexed by user id
+     */
+    public function getGraders() {
+        $graders = [];
+        /** @var GradedComponentContainer $container */
+        foreach($this->graded_component_containers as $container) {
+            $graders = array_merge($graders, $container->getGraders());
+        }
+        return $graders;
+    }
+
+    /**
+     * Gets all user-visible graders for this component
+     * @return User[] indexed by user id
+     */
+    public function getVisibleGraders() {
+        $graders = [];
+        /** @var GradedComponentContainer $container */
+        foreach($this->graded_component_containers as $container) {
+            $graders = array_merge($graders, $container->getVisibleGraders());
+        }
+        return $graders;
+    }
+
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
@@ -232,4 +365,8 @@ class TaGradedGradeable extends AbstractModel {
         throw new \BadFunctionCallException('Cannot set id of gradeable data');
     }
 
+    /** @internal */
+    public function setGradedComponentContainers(array $graded_component_containers) {
+        throw new \BadFunctionCallException('Cannot set graded component containers');
+    }
 }

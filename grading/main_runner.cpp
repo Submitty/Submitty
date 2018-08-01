@@ -92,7 +92,6 @@ int main(int argc, char *argv[]) {
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
     
     for (int x = 0; x < commands.size(); x++) {
-
       std::cout << "COMMAND " << commands[x] << std::endl;
 
       assert (commands[x] != "MISSING COMMAND");
@@ -116,7 +115,6 @@ int main(int argc, char *argv[]) {
                             config_json.value("resource_limits",nlohmann::json()),
                             config_json,
                             windowed); 
-
     }
 
     //TODO this should no longer be necessary.
