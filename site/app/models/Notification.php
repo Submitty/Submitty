@@ -105,54 +105,82 @@ class Notification extends AbstractModel {
     private function handleForum($details) {
         switch ($details['type']) {
             case 'new_announcement':
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("New Announcement: ".$details['thread_title']);
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget(null);
+                $this->actAsNewAnnouncementNotification($details['thread_id'], $details['thread_title']);
                 break;
             case 'updated_announcement':
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("Announcement: ".$details['thread_title']);
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget(null);
+                $this->actAsUpdatedAnnouncementNotification($details['thread_id'], $details['thread_title']);
                 break;
             case 'reply':
-                // TODO: Redirect to post itself
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("Reply: Your post '".$this->textShortner($details['post_content'])."' got new a reply from ".$this->getCurrentUser());
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget($details['reply_to']);
+                $this->actAsForumReplyNotification($details['thread_id'], $details['post_content'], $details['reply_to']);
                 break;
             case 'merge_thread':
-                // TODO: Redirect to post itself
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['parent_thread_id'])));
-                $this->setNotifyContent("Thread Merged: '".$this->textShortner($details['child_thread_title'])."' got merged into '".$this->textShortner($details['parent_thread_title'])."'");
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget($details['reply_to']);
+                $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['reply_to']);
                 break;
             case 'edited':
-                // TODO: Redirect to post itself(if exists)
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($details['post_content'])."' got an edit from ".$this->getCurrentUser());
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget($details['reply_to']);
+                $this->actAsForumEditedNotification($details['thread_id'],  $details['post_content'], $details['reply_to']);
                 break;
             case 'deleted':
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($details['post_content'])."' was deleted by ".$this->getCurrentUser());
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget($details['reply_to']);
+                $this->actAsForumDeletedNotification($details['thread_id'],  $details['post_content'], $details['reply_to']);
                 break;
             case 'undeleted':
-                // TODO: Redirect to post itself(if exists)
-                $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $details['thread_id'])));
-                $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($details['post_content'])."' has been undeleted by ".$this->getCurrentUser());
-                $this->setNotifySource($this->getCurrentUser());
-                $this->setNotifyTarget($details['reply_to']);
+                $this->actAsForumUndeletedNotification($details['thread_id'],  $details['post_content'], $details['reply_to']);
                 break;
             default:
                 return;
         }
+    }
+
+    private function actAsNewAnnouncementNotification($thread_id, $thread_title) {
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("New Announcement: ".$thread_title);
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget(null);
+    }
+
+    private function actAsUpdatedAnnouncementNotification($thread_id, $thread_title) {
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("Announcement: ".$thread_title);
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget(null);
+    }
+
+    private function actAsForumReplyNotification($thread_id, $post_content, $target) {
+        // TODO: Redirect to post itself
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".$this->getCurrentUser());
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget($target);
+    }
+
+    private function actAsForumMergeThreadNotification($parent_thread_id, $parent_thread_title, $child_thread_title, $target){
+        // TODO: Redirect to post itself
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id)));
+        $this->setNotifyContent("Thread Merged: '".$this->textShortner($child_thread_title)."' got merged into '".$this->textShortner($parent_thread_title)."'");
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget($target);
+    }
+
+    private function actAsForumEditedNotification($thread_id, $post_content, $target){
+        // TODO: Redirect to post itself(if exists)
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".$this->getCurrentUser());
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget($target);
+    }
+
+    private function actAsForumDeletedNotification($thread_id, $post_content, $target){
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".$this->getCurrentUser());
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget($target);
+    }
+
+    private function actAsForumUndeletedNotification($thread_id, $post_content, $target){
+        // TODO: Redirect to post itself(if exists)
+        $this->setNotifyMetadata(json_encode(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".$this->getCurrentUser());
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget($target);
     }
 
     /**
