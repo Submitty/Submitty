@@ -337,10 +337,9 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
         data: {
             'gradeable_id' : gradeable_id,
             'component_id' : component_id,
-            'gradeable_component_id' : component_id,
             'mark_id' : mark_id,
             'points' : points,
-            'note' : note,
+            'note' : note
         },
         success: function(response) {
             if (response.status === 'fail') {
@@ -352,7 +351,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
                 successCallback(response);
             }
         },
-        error: successCallback
+        error: errorCallback
     });
 }
 
