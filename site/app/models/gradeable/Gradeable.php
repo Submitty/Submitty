@@ -388,30 +388,30 @@ class Gradeable extends AbstractModel {
             if (Utils::compareNullableGt($submission_open_date, $submission_due_date)) {
                 $errors['submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
             }
-            if ($this->ta_grading) {
-                if ($grade_start_date === null) {
-                    $errors['grade_start_date'] = $invalid_format_message;
-                }
-                if ($grade_due_date === null) {
-                    $errors['grade_due_date'] = $invalid_format_message;
-                }
-//                if ($grade_locked_date === null) {
-//                    $errors['grade_locked_date'] = $invalid_format_message;
-//                }
-                if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
-                    $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
-                }
-                if (Utils::compareNullableGt($grade_start_date, $grade_due_date)) {
-                    $errors['grade_start_date'] = 'Manual Grading Open Date must be no later than Manual Grading Due Date';
-                }
-                if (Utils::compareNullableGt($grade_due_date, $grade_released_date)) {
-                    $errors['grade_due_date'] = 'Manual Grading Due Date must be no later than the Grades Released Date';
-                }
-            } else {
-                if (Utils::compareNullableGt($max_due, $grade_released_date)) {
-                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
-                }
+            if (Utils::compareNullableGt($max_due, $grade_released_date)) {
+                $errors['grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
             }
+
+            // Manual-only-type validation done if ta grading disabled so we know if we should fix dates
+            if ($grade_start_date === null) {
+                $errors['grade_start_date'] = $invalid_format_message;
+            }
+            if ($grade_due_date === null) {
+                $errors['grade_due_date'] = $invalid_format_message;
+            }
+//            if ($grade_locked_date === null) {
+//                $errors['grade_locked_date'] = $invalid_format_message;
+//            }
+            if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
+                $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
+            }
+            if (Utils::compareNullableGt($grade_start_date, $grade_due_date)) {
+                $errors['grade_start_date'] = 'Manual Grading Open Date must be no later than Manual Grading Due Date';
+            }
+            if (Utils::compareNullableGt($grade_due_date, $grade_released_date)) {
+                $errors['grade_due_date'] = 'Manual Grading Due Date must be no later than the Grades Released Date';
+            }
+
             if ($this->team_assignment) {
                 if ($team_lock_date === null) {
                     $errors['team_lock_date'] = $invalid_format_message;
@@ -454,7 +454,7 @@ class Gradeable extends AbstractModel {
         //  DON"T throw an exception, just overwrite the dates
         if (count($errors) !== 0) {
             if ($this->type === GradeableType::ELECTRONIC_FILE && !$this->ta_grading &&
-                (isset($errors['grade_start_date']) || isset($errors['grade_released_date']))) {
+                (isset($errors['grade_start_date']) || isset($errors['grade_due_date']))) {
                 // No TA grading, but we must set this start date and due date so the database
                 //  doesn't complain when we update it
                 $this->grade_start_date = $this->grade_due_date = $dates['grade_released_date'];
