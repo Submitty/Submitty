@@ -319,7 +319,12 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === null) {
             return;
         }
-        $result = $this->updateRubric($gradeable, $_POST);
+        try {
+            $result = $this->updateRubric($gradeable, $_POST);
+        } catch (\Exception $e) {
+            $result = ['rubric' => 'Error saving rubric'];
+
+        }
 
         $response_data = [];
 
@@ -444,8 +449,6 @@ class AdminGradeableController extends AbstractController {
 
         /** @var Component[] $new_components */
         $new_components = [];
-        /** @var Component[] $delete_components */
-        $delete_components = [];
 
         $update_component_peer = function (Component $component, $peer_grading_complete_score) {
             $component->setPoints([
@@ -524,8 +527,6 @@ class AdminGradeableController extends AbstractController {
                     self::parseEgComponent($old_component, $details, $x);
                     $old_component->setOrder($x);
                     $new_components[] = $old_component;
-                } else if ($num_old_components > $num_questions) {
-                    $delete_components[] = $old_component;
                 }
                 $x++;
             }
@@ -549,7 +550,6 @@ class AdminGradeableController extends AbstractController {
             foreach ($new_components as $comp) {
                 $marks = $comp->getMarks();
                 $new_marks = [];
-                $delete_marks = [];
 
                 if ($comp->getOrder() == -1) {
                     continue;
@@ -583,24 +583,11 @@ class AdminGradeableController extends AbstractController {
                             }
                         }
                     }
-
-                    //delete marks marked for deletion
-                    $gcm_ids_deletes = explode(",", $details['component_deleted_marks_' . $index]);
-                    foreach ($gcm_ids_deletes as $gcm_id_to_delete) {
-                        foreach ($marks as $mark) {
-                            if ($gcm_id_to_delete == $mark->getId()) {
-                                $delete_marks[] = $mark;
-                            }
-                        }
-                    }
                 }
                 $index++;
 
                 // Finally, set the new marks ...
                 $comp->setMarks($new_marks);
-
-                // ... And delete the ones marked for deletion
-                $this->core->getQueries()->deleteMarks($delete_marks);
             }
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
@@ -617,8 +604,6 @@ class AdminGradeableController extends AbstractController {
                     self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
                     $old_component->setOrder($x);
                     $new_components[] = $old_component;
-                } else if ($num_old_components > $num_checkpoints) {
-                    $delete_components[] = $old_component;
                 }
                 $x++;
             }
@@ -668,8 +653,6 @@ class AdminGradeableController extends AbstractController {
                     $old_numeric->setOrder($x);
                     $new_components[] = $old_numeric;
                     $start_index_numeric++;
-                } else if ($num_old_numerics > $num_numeric) {
-                    $delete_components[] = $old_numeric;
                 }
                 $x++;
             }
@@ -691,8 +674,6 @@ class AdminGradeableController extends AbstractController {
                     $old_text->setOrder($z + $x);
                     $new_components[] = $old_text;
                     $start_index_text++;
-                } else if ($num_old_texts > $num_text) {
-                    $delete_components[] = $old_text;
                 }
                 $x++;
             }
@@ -709,9 +690,6 @@ class AdminGradeableController extends AbstractController {
 
         // Finally, Set the components and update the gradeable
         $gradeable->setComponents($new_components);
-
-        // Delete the old ones
-        $this->core->getQueries()->deleteComponents($delete_components);
 
         // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
@@ -1100,7 +1078,13 @@ class AdminGradeableController extends AbstractController {
             die($result);
         }
         $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildUrl(array(
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'edit_gradeable_page',
+            'id' => $g_id,
+            'nav_tab' => '1'
+        )));
     }
 
     private function quickLink() {

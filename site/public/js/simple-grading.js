@@ -171,8 +171,8 @@ function updateCheckpointCell(elem, setFull) {
 }
 
 function setupCheckboxCells() {
-    // Query for the <td> elements whose class attribute starts with "cell-"
-    $("td[class^=cell-grade]").click(function() {
+    // jQuery for the elements with the class cell-grade (those in the component columns)
+    $("td.cell-grade").click(function() {
         var parent = $(this).parent();
         var elems = [];
         var scores = {};
@@ -205,6 +205,27 @@ function setupCheckboxCells() {
             }
         );
     });
+
+    // show all the hidden grades when this checkbox is clicked
+    $("#show-graders").on("change", function() {
+        if($(this).is(":checked")) {
+            $(".simple-grade-grader").css("display", "block");
+        }
+        else {
+            $(".simple-grade-grader").css("display", "none");
+        }
+    });
+
+    // show all the hidden dates when that checkbox is clicked
+    $("#show-dates").on("change", function() {
+        if($(this).is(":checked")) {
+            $(".simple-grade-date").css("display", "block");
+        }
+        else {
+            $(".simple-grade-date").css("display", "none");
+        }
+    });
+
 }
 
 function setupNumericTextCells() {
