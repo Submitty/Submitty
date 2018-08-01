@@ -147,7 +147,7 @@ class Access {
             // files. Possible values are "gradeable", "submitter", "version", "thread", and "post"
             // See canUserAccessFile to update that list
             "subparts" => ["gradeable", "submitter", "version"],
-            //Extra permissions checking to be done when doing various actions. When canUserAccess file is
+            //Extra permissions checking to be done when doing various actions. When canUserAccessFile is
             // called with a key from this array, canUser will be called with the value. Any parsed args from
             // the subparts array will be passed.
             "permissions" => [
@@ -161,18 +161,18 @@ class Access {
                 "file.read" => "file.read.submissions"
             ]
         ];
-        $this->directories["results"] = [
-            "base" => $this->core->getConfig()->getCoursePath() . "/results",
-            "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => [
-                "file.read" => "file.read.results"
-            ]
-        ];
         $this->directories["submissions"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
                 "file.read" => "file.read.submissions"
+            ]
+        ];
+        $this->directories["results"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/results",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "file.read" => "file.read.results"
             ]
         ];
         $this->directories["config_upload"] = [
