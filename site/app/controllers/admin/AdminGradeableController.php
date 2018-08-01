@@ -243,7 +243,7 @@ class AdminGradeableController extends AbstractController {
 
     /* Http request methods (i.e. ajax) */
 
-    private function tryGetGradeable($gradeable_id) {
+    protected function tryGetGradeable(string $gradeable_id, bool $render_json = true) {
         try {
             return $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch (\Exception $exception) {

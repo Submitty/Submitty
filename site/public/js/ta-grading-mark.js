@@ -329,7 +329,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
     })
 }
 
-function ajaxSaveMark(gradeable_id, user_id, component_id, mark_id, points, note, async, successCallback, errorCallback) {
+function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, successCallback, errorCallback) {
     $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark'}),
@@ -338,7 +338,6 @@ function ajaxSaveMark(gradeable_id, user_id, component_id, mark_id, points, note
             'gradeable_id' : gradeable_id,
             'component_id' : component_id,
             'gradeable_component_id' : component_id,
-            'anon_id' : user_id,
             'mark_id' : mark_id,
             'points' : points,
             'note' : note,
@@ -1141,7 +1140,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                     var x=getMark(c_index, current_mark_id).points;
                     gradedByElement.hide();
                     savingElement.show();
-                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
+                    ajaxSaveMark(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
                     if (response.status !== 'success') {
                             alert('Error saving marks! (' + response.message + ')');
                             return;
@@ -1173,7 +1172,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                     var ungraded = gradedByElement.text() === "Ungraded!";
                     gradedByElement.hide();
                     savingElement.show();
-                    ajaxSaveMark(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
+                    ajaxSaveMark(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
                         if (gradeable.components[c_index-1].hasGrade === false) {
                             gradedByElement.text("Ungraded!");
                             component.grader = null;
