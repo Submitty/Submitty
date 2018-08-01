@@ -55,6 +55,9 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+//        if(false) {
+            $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
+//        }
     }
 
     public function setInternalResources() {

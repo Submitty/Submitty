@@ -8,6 +8,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\gradeable\GradeableList;
 use app\libraries\FileUtils;
+use phpDocumentor\Reflection\File;
 
 class NavigationView extends AbstractView {
 
@@ -113,11 +114,14 @@ class NavigationView extends AbstractView {
                         break;
                     }
                 }
+
+                $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
+                                                            $this->core->getConfig()->getRoomSeatingGradeableId(), $user_seating_details->building, $user_seating_details->room, 'config.json');
+                $seating_config = file_get_contents($seating_config_path);
             }
             else {
                 $user_seating_details = "See instructor for seating details";
             }
-
         }
 
 
@@ -247,7 +251,8 @@ class NavigationView extends AbstractView {
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
             "display_room_seating" => $display_room_seating,
-            "gradeable_title" => $gradeable_title
+            "gradeable_title" => $gradeable_title,
+            "seating_config" => $seating_config
         ]);
     }
 
