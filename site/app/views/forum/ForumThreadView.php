@@ -154,7 +154,7 @@ HTML;
 		$threadExists = $this->core->getQueries()->threadExists();
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
-		$currentCategoryId = array();
+		$currentCategoriesIds = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
 		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
 

@@ -2282,7 +2282,13 @@ AND gc_id IN (
       $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
         $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
-        $thread_id = $this->course_db->rows()[0]["max"];
+        $rows = $this->course_db->rows();
+        if(!empty($rows)) {
+            $thread_id = $rows[0]["max"];
+        } else {
+            // No thread found, hence no posts found
+            return array();
+        }
       }
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
