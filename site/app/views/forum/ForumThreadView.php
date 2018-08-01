@@ -229,16 +229,18 @@ HTML;
 	}
 	if($show_merged_thread) {
 		$show_merged_thread_class = "active";
-		$show_merged_thread_action = "alterShowMergeThreadStatus(0);";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0, '{$currentCourse}');";
+		$show_merged_thread_title = "Hide Merged Threads";
 	} else {
 		$show_merged_thread_class = "";
-		$show_merged_thread_action = "alterShowMergeThreadStatus(1);";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1, '{$currentCourse}');";
+		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
-		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Merged Threads" onclick="{$show_merged_thread_action}">Show Merged Threads</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {

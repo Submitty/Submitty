@@ -1589,8 +1589,8 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function alterShowMergeThreadStatus(newStatus) {
-    document.cookie = "show_merged_thread=" + newStatus + "; path=/;";
+function alterShowMergeThreadStatus(newStatus, course) {
+    document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
     location.reload();
 }
 

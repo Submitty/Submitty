@@ -101,8 +101,8 @@ class ForumController extends AbstractController {
         return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
     }
 
-    private function showMergedThreads() {
-        return (isset($_COOKIE['show_merged_thread']) && $_COOKIE['show_merged_thread'] == "1");
+    private function showMergedThreads($currentCourse) {
+        return  (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
@@ -575,8 +575,8 @@ class ForumController extends AbstractController {
     public function getThreads(){
         $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : -1;
         $show_deleted = $this->showDeleted();
-        $show_merged_thread = $this->showMergedThreads();
         $currentCourse = $this->core->getConfig()->getCourse();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
         if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
@@ -628,7 +628,7 @@ class ForumController extends AbstractController {
 
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $show_merged_thread = $this->showMergedThreads();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, 1);
 
         $current_user = $this->core->getUser()->getId();

@@ -2206,7 +2206,7 @@ AND gc_id IN (
 
     public function existsAnnouncements($show_deleted = false){
         $query_delete = $show_deleted?"true":"deleted = false";
-        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND pinned = true");
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned = true");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -2281,13 +2281,8 @@ AND gc_id IN (
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
       $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
-        $announcement_id = $this->existsAnnouncements($show_deleted);
-        if($announcement_id == -1){
-          $this->course_db->query("SELECT MAX(id) as max from threads WHERE {$query_delete} and pinned = false");
-          $thread_id = $this->course_db->rows()[0]["max"];
-        } else {
-          $thread_id = $announcement_id;
-        }
+        $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+        $thread_id = $this->course_db->rows()[0]["max"];
       }
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
