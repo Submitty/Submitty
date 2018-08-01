@@ -337,7 +337,6 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
         data: {
             'gradeable_id' : gradeable_id,
             'component_id' : component_id,
-            'gradeable_component_id' : component_id,
             'mark_id' : mark_id,
             'points' : points,
             'note' : note,
@@ -352,6 +351,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
                 successCallback(response);
             }
         },
+        // FIXME: this feels ... wrong
         error: successCallback
     });
 }
