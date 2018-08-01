@@ -139,12 +139,12 @@
         window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
-
+    //TODO: Name better
     function expandFile(dir, path) {
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        let promise = loadFile(dir);
+        let promise = loadFile(dir, path);
         $('#file_view').show();
         $("#grading_file_name").html(dir);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
@@ -155,8 +155,8 @@
         return promise;
     }
 
-    function loadFile(filename){
-        let extension = filename.split('.').pop();
+    function loadFile(dir, path){
+        let extension = dir.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').css('visibility', 'visible');
             return $.ajax({
@@ -165,7 +165,7 @@
                 data: {
                     'gradeable_id': '{{ gradeable.getId() }}',
                     'user_id': '{{ gradeable.getUser().getId() }}',
-                    'filename': filename
+                    'filename': dir
                 },
                 success: function(data){
                     $('#file_view').append(data);
