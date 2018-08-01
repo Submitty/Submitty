@@ -943,13 +943,6 @@ class AdminGradeableController extends AbstractController {
                 $date_set = true;
             }
         }
-        if ($date_set) {
-            try {
-                $gradeable->setDates($dates);
-            } catch (ValidationException $e) {
-                $errors = array_merge($errors, $e->getDetails());
-            }
-        }
 
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
@@ -969,6 +962,16 @@ class AdminGradeableController extends AbstractController {
             } catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
+            }
+        }
+
+        // Set the dates last just in case the request contained parameters that
+        //  affect date validation
+        if ($date_set) {
+            try {
+                $gradeable->setDates($dates);
+            } catch (ValidationException $e) {
+                $errors = array_merge($errors, $e->getDetails());
             }
         }
 
