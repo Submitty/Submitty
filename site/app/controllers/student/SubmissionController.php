@@ -314,8 +314,8 @@ class SubmissionController extends AbstractController {
     * Its error checking has overlap with ajaxUploadSubmission.
     */
     private function ajaxBulkUpload() {
-        // make sure is admin
-        if (!$this->core->getUser()->accessGrading()) {
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -471,8 +471,9 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
+
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -694,8 +695,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
