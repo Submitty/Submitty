@@ -145,42 +145,58 @@ class Access {
         $this->directories["config_upload"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/config_upload",
             "subparts" => [],
-            "permissions" => "file.read.config_upload"
+            "permissions" => [
+                "file.read" => "file.read.config_upload"
+            ]
         ];
         $this->directories["uploads"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads",
             "subparts" => [],
-            "permissions" => "file.read.uploads"
+            "permissions" => [
+                "file.read" => "file.read.uploads"
+            ]
         ];
         $this->directories["course_materials"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads/course_materials",
             "subparts" => [],
-            "permissions" => "file.read.course_materials"
+            "permissions" => [
+                "file.read" => "file.read.course_materials"
+            ]
         ];
         $this->directories["forum_attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/forum_attachments",
             "subparts" => ["thread", "post"],
-            "permissions" => "file.read.forum_attachments"
+            "permissions" => [
+                "file.read" => "file.read.forum_attachments"
+            ]
         ];
         $this->directories["annotations"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/annotations",
             "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => "file.read.annotations"
+            "permissions" => [
+                "file.read" => "file.read.annotations"
+            ]
         ];
         $this->directories["checkout"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/checkout",
             "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => "file.read.checkout"
+            "permissions" => [
+                "file.read" => "file.read.checkout"
+            ]
         ];
         $this->directories["results"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/results",
             "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => "file.read.results"
+            "permissions" => [
+                "file.read" => "file.read.results"
+            ]
         ];
         $this->directories["submissions"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
             "subparts" => ["gradeable", "submitter", "version"],
-            "permissions" => "file.read.submissions"
+            "permissions" => [
+                "file.read" => "file.read.submissions"
+            ]
         ];
     }
 
@@ -341,7 +357,7 @@ class Access {
             }
 
             //Check if they can access the file!
-            if (!$this->canUserReadFile($file, $dir, $user, $args)) {
+            if (!$this->canUserAccessFile($action, $file, $dir, $user, $args)) {
                 return false;
             }
         }
@@ -596,13 +612,15 @@ class Access {
     }
 
     /**
-     * @param string $file
-     * @param string $dir
-     * @param User $user
-     * @param array $args
-     * @return bool
+     * Check if a user has permissions to access a file/directory by a particular action
+     * @param string $action Specific action, eg file.read
+     * @param string $file File path, can be either absolute or relative
+     * @param string $dir A directory name in $this->directories
+     * @param User $user User to check access
+     * @param array $args Additional arguments for specific checks
+     * @return bool True if they are allowed to access this file
      */
-    public function canUserReadFile(string $file, string $dir, User $user, array $args = []) {
+    public function canUserAccessFile(string $action, string $file, string $dir, User $user, array $args = []) {
         $info = $this->directories[$dir];
 
         //No directory traversal
@@ -706,9 +724,14 @@ class Access {
             }
         }
 
-        //So now that we know the file is valid, we need to make sure they have the general
-        // permissions to access what the file is part of. Generally this is either a gradeable
-        // or just a basic "is user group" check
-        return $this->canUser($user, $info["permissions"], $args);
+        //So now that we know the file is valid, we need to make sure they have the specific
+        // permissions to access what the file is part of. Generally this is either a
+        // gradeable check or a basic "is user group" check
+        if (array_key_exists("permissions", $info) && array_key_exists($action, $info["permissions"])) {
+            return $this->canUser($user, $info["permissions"][$action], $args);
+        }
+
+        //There isn't any extra permissions for this action, let em at it
+        return true;
     }
 }
