@@ -319,15 +319,15 @@ function changeEditorStyle(newStyle){
 
 //-----------------------------------------------------------------------------
 // Student navigation
-
+//TODO figure out why the confirms below are happening
 function gotoPrevStudent() {
     if(getGradeable()!=null){
         saveLastOpenedMark(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
         }, function () {
-            if (confirm("Could not save last mark, change student anyway?")) {
+        //    if (confirm("Could not save last mark, change student anyway?")) {
                 window.location = $("#prev-student")[0].dataset.href;
-            }
+       //     }
         });
     }
     else{
@@ -340,9 +340,9 @@ function gotoNextStudent() {
         saveLastOpenedMark(true, function () {
             window.location = $("#next-student")[0].dataset.href;
         }, function () {
-            if (confirm("Could not save last mark, change student anyway?")) {
+         //   if (confirm("Could not save last mark, change student anyway?")) {
                 window.location = $("#next-student")[0].dataset.href;
-            }
+         //   }
         });
     }
     else{
@@ -497,7 +497,7 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         openGeneralMessage();
         $('#title-general')[0].scrollIntoView();
     } else if (current === 1) {
-        closeMark(1);
+        closeMark(1, true);
     } else if (current === GENERAL_MESSAGE_ID) {
         openMark(numQuestions);
         $('#title-' + numQuestions)[0].scrollIntoView();
@@ -569,7 +569,9 @@ function updateValue(obj, option1, option2) {
 }
 function openAutoGrading(num){
     $('#tc_' + num).click();
-    $('#testcase_' + num)[0].style.display="block";
+    if($('#testcase_' + num)[0]!=null){
+        $('#testcase_' + num)[0].style.display="block";
+    }
 }
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
@@ -716,11 +718,20 @@ function adjustSize(name) {
 }
 //-----------------------------------------------------------------------------
 // Edit Mode
+//TODO save properly so that the mark can be reopened automatically
 function toggleEditMode(){
-    if(editModeEnabled==null){
+    var id=findCurrentOpenedMark();
+    var temp=editModeEnabled;
+    editModeEnabled=true;
+    if(findCurrentOpenedMark()>0){
+        toggleMark(id, true);        
+    }
+    if(temp==null){
         editModeEnabled=false;
     }
-    editModeEnabled=!editModeEnabled;
+    else{
+        editModeEnabled=!temp;
+    }
     if(findCurrentOpenedMark()>0){
         if(editModeEnabled==false){
             $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
@@ -728,8 +739,5 @@ function toggleEditMode(){
         if(editModeEnabled==true){
             $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
         }
-        var id=findCurrentOpenedMark();
-        saveMark(id, true);
-        updateMarksOnPage(id);
     }
 }
