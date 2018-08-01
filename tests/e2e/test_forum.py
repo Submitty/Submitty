@@ -1,10 +1,11 @@
 import tempfile
 import os
 import urllib
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 from .base_testcase import BaseTestCase
 
 class TestForum(BaseTestCase):
@@ -91,7 +92,18 @@ class TestForum(BaseTestCase):
     def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
         if move_to_thread is not None:
             self.view_thread(move_to_thread)
-        posts = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(string(),'{}')]".format(content))
+        loading_spinner = self.driver.find_element_by_xpath("//div[@id='thread_list']/i");
+        while True:
+            # Scroll down in thread list until required post is found
+            posts = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(string(),'{}')]".format(content))
+            if len(posts) > 0:
+                break
+            thread_list = self.driver.find_element_by_id("thread_list")
+            thread_list.send_keys(Keys.END)
+            if not loading_spinner.is_displayed():
+                break
+            self.wait_after_ajax()
+            assert not loading_spinner.is_displayed()
         if must_exists:
             assert len(posts) > 0
         if check_attachment is not None:
