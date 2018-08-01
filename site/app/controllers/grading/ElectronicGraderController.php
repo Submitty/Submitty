@@ -172,7 +172,6 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
-  
     private function fetchGradeable($gradeable_id, $who_id) {
         // TODO: this is bad, but its the only way to do it until the new model
         $users = [$who_id];

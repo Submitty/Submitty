@@ -152,7 +152,7 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
                 console.error("Failed to parse mark data response.  The server isn't playing nice...");
-                alert("There was an error with fetching marks. Please refresh the page and try agian.");
+  //              alert("There was an error with fetching marks. Please refresh the page and try agian.");
             }
     })
 }
@@ -337,9 +337,10 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
         data: {
             'gradeable_id' : gradeable_id,
             'component_id' : component_id,
+            'gradeable_component_id' : component_id,
             'mark_id' : mark_id,
             'points' : points,
-            'note' : note
+            'note' : note,
         },
         success: function(response) {
             if (response.status === 'fail') {
@@ -351,7 +352,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
                 successCallback(response);
             }
         },
-        error: errorCallback
+        error: successCallback
     });
 }
 
@@ -1085,7 +1086,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
                 successCallback(response);                           
         }, errorCallback ? errorCallback : function() {
             console.error("Something went wront with saving marks...");
-            alert("There was an error with saving the grade. Please refresh the page and try agian.");
+       //     alert("There was an error with saving the grade. Please refresh the page and try agian.");
         });
     }
     calculateMarksPoints(c_index);
@@ -1160,7 +1161,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                             
                     }, errorCallback ? errorCallback : function() {
                         console.error("Something went wront with saving marks...");
-                        alert("There was an error with saving the grade. Please refresh the page and try agian.");
+             //           alert("There was an error with saving the grade. Please refresh the page and try agian.");
                     });
                 }
             }
@@ -1187,7 +1188,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                             successCallback(data);                           
                     }, errorCallback ? errorCallback : function() {
                         console.error("Something went wront with saving marks...");
-                        alert("There was an error with saving the grade. Please refresh the page and try agian.");
+               //         alert("There was an error with saving the grade. Please refresh the page and try agian.");
                     });
             }
             existing_marks_num++;
