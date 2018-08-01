@@ -208,7 +208,12 @@ class DatabaseQueries {
 
     public function getFirstPostForThread($thread_id) {
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
-        return $this->course_db->rows()[0];
+        $rows = $this->course_db->rows();
+        if(count($rows) > 0) {
+            return $rows[0];
+        } else {
+            return null;
+        }
     }
 
     public function getPost($post_id){

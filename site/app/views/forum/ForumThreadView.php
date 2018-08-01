@@ -515,7 +515,13 @@ HTML;
 					$end = 10;
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						$date = date_create($first_post['timestamp']);
+						if(is_null($first_post)) {
+							// Thread without any posts(eg. Merged Thread)
+							$first_post = array('content' => "");
+							$date = null;
+						} else {
+							$date = date_create($first_post['timestamp']);
+						}
 						$class = "thread_box";
 						// $current_categories_ids should be subset of $thread["categories_ids"]
 						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
@@ -588,7 +594,7 @@ HTML;
 						if($thread['merged_thread_id'] != -1) {
 							$return .= <<<HTML
 							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
 HTML;
 						}
 						if (!isset($thread['status'])) {
@@ -623,8 +629,12 @@ HTML;
 							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
 HTML;
 						}
+						if(!is_null($date)) {
+							$return .= <<<HTML
+							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+HTML;
+						}
 						$return .= <<<HTML
-						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
 						<hr style="margin-top: 0px;margin-bottom:0px;">
