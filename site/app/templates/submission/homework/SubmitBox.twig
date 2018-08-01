@@ -204,7 +204,7 @@
     {% endif %}
 </div>
 
-{% if core.getUser().accessGrading() %}
+{% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}
 {% endif %}
 
