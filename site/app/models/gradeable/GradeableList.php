@@ -102,8 +102,8 @@ class GradeableList extends AbstractModel {
         $sort_array = array(
             'future_gradeables' => 'getGradeStartDate',
             'beta_gradeables' => 'getGradeStartDate',
-            'open_gradeables' => 'getDueDate',
-            'closed_gradeables' => 'getDueDate',
+            'open_gradeables' => 'getSubmissionDueDate',
+            'closed_gradeables' => 'getSubmissionDueDate',
             'grading_gradeables' => 'getGradeStartDate',
             'graded_gradeables' => 'getGradeReleasedDate'
         );

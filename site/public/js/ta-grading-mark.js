@@ -122,7 +122,8 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
         c_index: c_index,
         m_index: m_index,
         m_id: m_id,
-        editable: editable
+        editable: editable,
+        editEnabled: editEnabled
     });
 }
 
@@ -335,7 +336,7 @@ function compareOrder(mark1, mark2){
 }
 /**
  * Reload marks for a component and render them in the list
- * @param num 1-indexed component index
+ * @param {int} c_index 1-indexed component index
  */
 function updateMarksOnPage(c_index) {
     var gradeable = getGradeable();
@@ -345,23 +346,24 @@ function updateMarksOnPage(c_index) {
     if(editModeEnabled==true){
         var sortableMarks=$('#marks-parent-'+c_index);
         var sortEvent = function (event, ui){
-            sortableMarks.on("sortchange", sortEvent);
-            var rows=sortableMarks.children(); 
+            var rows=sortableMarks.find("tr:not(.ui-sortable-placeholder)");
             var listValues = [];
             for(var i=0; i<rows.length; i++){
                 var row=rows[i];
                 var id=row.id;
-                if(row.dataset.mark_index!=undefined){
+                if(typeof(row.dataset.mark_index) !== 'undefined') {
                     getMark(c_index, row.dataset.mark_index).order=i;
+                    $(row).find(".mark-selector").text(i + 1);
                 }
             }
             getComponent(c_index).marks.sort(compareOrder);
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: false
         });
+        sortableMarks.on('sortchange', sortEvent);
         sortableMarks.disableSelection();
     }
     else{
@@ -369,10 +371,11 @@ function updateMarksOnPage(c_index) {
         var sortEvent = function (event, ui){
         };
         sortableMarks.sortable( { 
-            items: '> tr:not(:first)',
+            items: 'tr:not(:first)',
             stop: sortEvent,
             disabled: true 
         });
+        sortableMarks.off('sortchange');
     }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
@@ -771,6 +774,9 @@ function updateBadge(badge, current, total) {
  * @param m_id Unique mark id
  */
 function selectMark(c_index, m_id) {
+    if(editModeEnabled==true){
+        return;
+    }
     var skip = true; //if the table is all false initially, skip check marks.
     var mark_table = $('#marks-parent-'+c_index);
     mark_table.find('.mark').each(function() {
@@ -826,7 +832,7 @@ function setMarkVisible(c_index, show) {
     var title           = $('#title-' + c_index);
  //   var cancel_button   = $('#title-cancel-' + c_index);
     var current_summary = $('#summary-' + c_index);
-
+    // Deprecated, saving for reference
     if (show) {
         // if the component has a page saved, open the PDF to that page
         // opening directories/frames based off of code in openDiv and openFrame functions
@@ -1178,6 +1184,22 @@ function openMark(c_index) {
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== c_index) {
         openClose(c_index);
+    }
+    let page = getComponent(c_index)['page'];
+    if(page){
+        //841.89 os the pdf page height, 29 is the margin, 80 is the top part.
+        let files = $('.openable-element-submissions');
+        for(let i = 0; i < files.length; i++){
+            if(files[i].innerText.trim() == "upload.pdf"){
+                if($("#file_view").is(":visible")){
+                    $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                } else {
+                    expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+                        $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                    });
+                }
+            }
+        }
     }
 }
 

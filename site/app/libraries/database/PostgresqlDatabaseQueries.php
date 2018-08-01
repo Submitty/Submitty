@@ -1661,11 +1661,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gc_is_peer) AS array_peer,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
+                    json_agg(EXISTS(
+                      SELECT gc_id 
+                      FROM gradeable_component_data 
+                      WHERE gc_id=gc.gc_id)) AS array_any_grades,
                   json_agg(gcm.array_id) AS array_mark_id,
                   json_agg(gcm.array_points) AS array_mark_points,
                   json_agg(gcm.array_title) AS array_mark_title,
                   json_agg(gcm.array_publish) AS array_mark_publish,
-                  json_agg(gcm.array_order) AS array_mark_order
+                  json_agg(gcm.array_order) AS array_mark_order,
+                  json_agg(gcm.array_any_receivers) AS array_mark_any_receivers
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
@@ -1674,8 +1679,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     json_agg(gcm_points) AS array_points,
                     json_agg(gcm_note) AS array_title,
                     json_agg(gcm_publish) AS array_publish,
-                    json_agg(gcm_order) AS array_order
-                    FROM gradeable_component_mark
+                    json_agg(gcm_order) AS array_order,
+                    json_agg(EXISTS(
+                      SELECT gcm_id 
+                      FROM gradeable_component_mark_data 
+                      WHERE gcm_id=in_gcm.gcm_id)) AS array_any_receivers
+                    FROM gradeable_component_mark AS in_gcm
                   GROUP BY gcm_gc_id
                 ) AS gcm ON gcm.gcm_gc_id=gc.gc_id
                 GROUP BY g_id
@@ -1704,14 +1713,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'text',
                 'peer',
                 'order',
-                'page'
+                'page',
+                'any_grades'
             ];
             $mark_properties = [
                 'id',
                 'points',
                 'title',
                 'publish',
-                'order'
+                'order',
+                'any_receivers'
             ];
             $component_mark_properties = array_map(function ($value) {
                 return 'mark_' . $value;
@@ -1757,7 +1768,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                             // Create the mark instance
                             $marks[] = new Mark($this->core, $component, $mark_data);
                         }
-                        $component->setMarks($marks);
+                        $component->setMarksFromDatabase($marks);
                     }
                 }
 
@@ -1765,7 +1776,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
 
             // Set the components
-            $gradeable->setComponents($components);
+            $gradeable->setComponentsFromDatabase($components);
 
             return $gradeable;
         };

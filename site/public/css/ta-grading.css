@@ -21,13 +21,13 @@
 }
 
 .grading_toolbar {
-    position:relative;
-    display: block;
-    float: left;
-    padding-top:3px;
-    padding-bottom:3px;
-    background-color: #edf6f6;
-}
+     position:relative;
+     display: block;
+     float: left;
+     padding-top:3px;
+     padding-bottom:3px;
+     background-color: #edf6f6;
+ }
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;

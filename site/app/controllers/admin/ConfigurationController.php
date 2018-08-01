@@ -24,13 +24,13 @@ class ConfigurationController extends AbstractController {
 
     public function viewConfiguration() {
         $fields = array(
-            'course_name'               => $this->core->getConfig()->getCourseName(),
-            'course_home_url'           => $this->core->getConfig()->getCourseHomeUrl(),
-            'default_hw_late_days'      => $this->core->getConfig()->getDefaultHwLateDays(),
-            'default_student_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
-            'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
-            'upload_message'            => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
+            'course_name'                    => $this->core->getConfig()->getCourseName(),
+            'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
+            'default_hw_late_days'           => $this->core->getConfig()->getDefaultHwLateDays(),
+            'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
+            'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
+            'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
+            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'    => $this->core->getConfig()->displayCustomMessage(),
             'course_email'              => $this->core->getConfig()->getCourseEmail(),
@@ -71,25 +71,19 @@ class ConfigurationController extends AbstractController {
     }
 
     public function updateConfiguration() {
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $_SESSION['request'] = $_POST;
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'configuration',
-                                                              'action' => 'view')));
+        if (!$this->core->checkCsrfToken()) {
+            return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         }
 
-        if (!isset($_POST['course_name']) || $_POST['course_name'] == "") {
-            $this->core->addErrorMessage("Course name can not be blank");
-            $_SESSION['request'] = $_POST;
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'configuration',
-                                                              'action' => 'view')));
+        if(!isset($_POST['name'])) {
+            return $this->core->getOutput()->renderJsonFail('Name of config value not provided');
         }
+        $name = $_POST['name'];
 
-        foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-            $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
+        if(!isset($_POST['entry'])) {
+            return $this->core->getOutput()->renderJsonFail('Name of config entry not provided');
         }
+        $entry = $_POST['entry'];
 
         foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled', 'verify_enabled') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
@@ -118,10 +112,31 @@ class ConfigurationController extends AbstractController {
         );
 
         $this->core->getConfig()->saveCourseIni($save_array);
+        if($name === "course_name") {
+            if($entry === "") {
+                return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
+            }
+        }
+        else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+            if(!ctype_digit($entry)) {
+                return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
+            }
+            $entry = intval($entry);
+        }
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+            $entry = $entry === "true" ? true : false;
+        }
+        else if($name === 'upload_message') {
+            $entry = nl2br($entry);
+        }
 
-        $this->core->addSuccessMessage("Site configuration updated");
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                          'page' => 'configuration',
-                                                          'action' => 'view')));
+        $config_ini = $this->core->getConfig()->readCourseIni();
+        if(!isset($config_ini['course_details'][$name])) {
+            return $this->core->getOutput()->renderJsonFail('Not a valid config name');
+        }
+        $config_ini['course_details'][$name] = $entry;
+        $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
+
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 }
