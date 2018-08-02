@@ -16,17 +16,13 @@ class PDFController extends AbstractController {
     }
 
     private function showAnnotatedPdf(){
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
         $gradeable_id = $_GET['gradeable_id'] ?? NULL;
         $user_id = $this->core->getUser()->getId();
         $filename = $_GET['file_name'] ?? NULL;
         $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
         $first_file = scandir($annotation_path)[2];
-        $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
         $annotation_jsons = [];
-        $pdf_url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'encodePDF'));
         if(is_dir($annotation_path)){
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
@@ -42,13 +38,6 @@ class PDFController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $gradeable_id,
-            'user_id' => $user_id,
-            'filename' => $filename,
-            'annotation_jsons' => json_encode($annotation_jsons),
-            'student_popup' => true,
-            'pdf_url_base' => $pdf_url
-        ]);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, true);
     }
 }

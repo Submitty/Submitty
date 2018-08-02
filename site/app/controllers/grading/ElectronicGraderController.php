@@ -130,16 +130,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        //TODO: Add a new view
-        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $gradeable_id,
-            'grader_id' => $this->core->getUser()->getId(),
-            'user_id' => $user_id,
-            'filename' => $filename,
-            'annotation_jsons' => json_encode($annotation_jsons, 128)
-        ]);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, false);
     }
 
     public function showPDFAnnotationFullPage(){
