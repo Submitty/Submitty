@@ -294,13 +294,15 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         
     tmp_work = os.path.join(tmp,"TMP_WORK")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submission")
+    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     
     os.mkdir(tmp_work)
     
     os.mkdir(tmp_work_test_input)
     os.mkdir(tmp_work_subission)
+    os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
     
     os.chdir(tmp_work)
@@ -315,7 +317,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
     #TODO what does this do?
-    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
+    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work_compiled,tmp_logs)
         
     # copy input files to tmp_work directory
     copy_contents_into(job_id,test_input_path,tmp_work_test_input,tmp_logs)
@@ -328,8 +330,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     #set the appropriate permissions for the newly created directories 
     #TODO replaces commented out code below
     add_permissions(os.path.join(tmp_work,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-    add_permissions(os.path.join(tmp_work,"submission"), stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-    add_permissions(os.path.join(tmp_work,"checkout"), stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_subission, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_compiled, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_checkout, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     #TODO this is how permissions used to be set. It was removed because of the way it interacts with the sticky bit.
     ## give the untrusted user read/write/execute permissions on the tmp directory & files
@@ -343,7 +346,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                                    item_name, USE_DOCKER, container, which_untrusted)
+                                                                                    item_name, USE_DOCKER, container, which_untrusted,
+                                                                                    job_id)
     ##################################################################################################
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")

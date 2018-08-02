@@ -2,8 +2,8 @@
     "testcases" : [
         {
             "title" : "Lab 1 Checkpoint 1",
-            "details" : "python ../submission/*.py",
-            "command" : "python ../submission/*.py",
+            "details" : "python *.py",
+            "command" : "python *.py",
             "points" : 5,
             "validation" : [
                 {

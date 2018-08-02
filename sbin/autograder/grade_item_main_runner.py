@@ -28,11 +28,13 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
-def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, container, which_untrusted):
+def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, container,
+                      which_untrusted, job_id):
 
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submission")
+    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
 
     queue_time_longstring = queue_obj["queue_time"]
@@ -48,25 +50,29 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         testcases = complete_config_obj["testcases"]
         # we start counting from one.
         for testcase_num in range(1, len(testcases)+1):
-            
             #make the tmp folder for this testcase.
             testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
 
-            #Set the permissions 
-            #TODO see if these can be made more strict. 
-            # try:
-            #   grade_item.add_permissions(testcase_folder, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-            # except Exception as e:
-            #   print(e)
-            #Navigate into the newly created testcase folder.
+            #copy the required files to the test directory
+            grade_item.copy_contents_into(job_id,tmp_work_test_input,testcase_folder,tmp_logs)
+            grade_item.copy_contents_into(job_id,tmp_work_subission ,testcase_folder,tmp_logs)
+            grade_item.copy_contents_into(job_id,tmp_work_compiled  ,testcase_folder,tmp_logs)
+            grade_item.copy_contents_into(job_id,tmp_work_checkout  ,testcase_folder,tmp_logs)
+
             os.chdir(testcase_folder)
 
             try:
                 if USE_DOCKER:
-                    runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                                      os.path.join(tmp_work, 'my_runner.out'), queue_obj['gradeable'],
-                                                      queue_obj['who'], str(queue_obj['version']), submission_string, testcase_num], stdout=logfile)
+                    runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work,
+                                                      container,
+                                                      os.path.join(tmp_work, 'my_runner.out'),
+                                                      queue_obj['gradeable'],
+                                                      queue_obj['who'],
+                                                      str(queue_obj['version']),
+                                                      submission_string,
+                                                      str(testcase_num)],
+                                                      stdout=logfile)
                 else:
                     print(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
