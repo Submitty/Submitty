@@ -241,9 +241,19 @@ class MiscController extends AbstractController {
     }
 
     private function deleteCourseMaterialFile() {
+        $error_string = "";
+
+        // QUICK FIX UNTIL NEW ACCESS
+        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
+        if (!Utils::startsWith($filename, $check)) {
+            $error_string = "Can't delete file not in course uploads";
+        }
+        // END QUICK FIX
+
         // security check
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
+        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
@@ -252,7 +262,8 @@ class MiscController extends AbstractController {
         }
 
         // delete the file from upload/course_materials
-        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+        // $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+
         if ( unlink($filename) )
         {
             $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
@@ -283,9 +294,18 @@ class MiscController extends AbstractController {
     private function deleteCourseMaterialFolder() {
         // security check
 
+        $error_string = "";
 
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
+        // QUICK FIX UNTIL NEW ACCESS
+        $path = $_REQUEST['path'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
+        if (!Utils::startsWith($path, $check)) {
+            $error_string = "Can't delete folder not in course uploads";
+        }
+        // END QUICK FIX
+
+        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
@@ -294,7 +314,7 @@ class MiscController extends AbstractController {
         }
 
 
-        $path = $_REQUEST['path'];
+        // $path = $_REQUEST['path'];
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
