@@ -146,21 +146,21 @@ class Access {
         $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
 
         //Per-directory access permissions
-        $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
         //TODO: Timed access control
-        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
         //TODO: Check deleted posts
-        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
         //TODO: Can students see their results?
-        $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION;
+        $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION | self::CHECK_FILE_DIRECTORY;
 
-        $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE;
-        $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["path.write.checkout"] = self::DENY_ALL;
-        $this->permissions["path.write.results"] = self::DENY_ALL;
-        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
     }
 
     /**
