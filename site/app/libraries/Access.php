@@ -47,13 +47,15 @@ class Access {
     const CHECK_CSRF                    = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
     const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+    /** Only allow access if the gradeable is our own */
+    const ALLOW_ONLY_SELF_GRADEABLE     = 1 << 11 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check if the given component allows peer grading
      * Only applies to students
      */
-    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 11 | self::REQUIRE_ARG_COMPONENT;
+    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
-    const CHECK_FILE_DIRECTORY          = 1 << 12 | self::REQUIRE_ARGS_FILE_DIR;
+    const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_FILE_DIR;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
@@ -68,6 +70,8 @@ class Access {
     const ALLOW_MIN_LIMITED_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
     const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
     const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
+
+    const DENY_ALL                      = -1;
 
     /**
      * @var Core
@@ -122,6 +126,7 @@ class Access {
         $this->permissions["gradeable.submit.everyone"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
 
         $this->permissions["file.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["file.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
 
         //Per-directory access permissions
         $this->permissions["file.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -131,8 +136,14 @@ class Access {
         $this->permissions["file.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         //TODO: Can students see their results?
         $this->permissions["file.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["file.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT  | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["file.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
 
+        $this->permissions["file.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE;
+        $this->permissions["file.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["file.write.checkout"] = self::DENY_ALL;
+        $this->permissions["file.write.results"] = self::DENY_ALL;
+        $this->permissions["file.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["file.write.forum_attachments"] = self::ALLOW_MIN_STUDENT;
     }
 
     /**
@@ -152,56 +163,64 @@ class Access {
             // called with a key from this array, canUser will be called with the value. Any parsed args from
             // the subparts array will be passed.
             "permissions" => [
-                "file.read" => "file.read.submissions"
+                "file.read" => "file.read.submissions",
+                "file.write" => "file.write.submissions",
             ]
         ];
         $this->directories["checkout"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/checkout",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.submissions"
+                "file.read" => "file.read.submissions",
+                "file.write" => "file.write.checkout",
             ]
         ];
         $this->directories["submissions"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.submissions"
+                "file.read" => "file.read.submissions",
+                "file.write" => "file.write.submissions",
             ]
         ];
         $this->directories["results"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/results",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.results"
+                "file.read" => "file.read.results",
+                "file.write" => "file.write.results",
             ]
         ];
         $this->directories["config_upload"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/config_upload",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.uploads"
+                "file.read" => "file.read.uploads",
+                "file.write" => "file.write.uploads",
             ]
         ];
         $this->directories["uploads"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.uploads"
+                "file.read" => "file.read.uploads",
+                "file.write" => "file.write.uploads",
             ]
         ];
         $this->directories["course_materials"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads/course_materials",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.course_materials"
+                "file.read" => "file.read.course_materials",
+                "file.write" => "file.write.course_materials",
             ]
         ];
         $this->directories["forum_attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/forum_attachments",
             "subparts" => ["thread", "post"],
             "permissions" => [
-                "file.read" => "file.read.forum_attachments"
+                "file.read" => "file.read.forum_attachments",
+                "file.write" => "file.write.forum_attachments",
             ]
         ];
     }
@@ -230,6 +249,11 @@ class Access {
             throw new InvalidArgumentException("Unknown action '$action'");
         }
         $checks = $this->permissions[$action];
+
+        //Because sometimes we need to explicitly deny permissions to everyone
+        if ($checks === self::DENY_ALL) {
+            return false;
+        }
 
         //Some things may be available when there is no user
         if ($user === null) {
@@ -326,6 +350,10 @@ class Access {
             //Sometimes they're allowed to view their own even if the other checks fail
             if (!$gradeable_checks && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE) && $this->isGradedGradeableByUser($new_graded_gradeable ?? $graded_gradeable, $user)) {
                 $gradeable_checks = true;
+            }
+
+            if ($gradeable_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                $gradeable_checks = false;
             }
 
             if (!$gradeable_checks) {
