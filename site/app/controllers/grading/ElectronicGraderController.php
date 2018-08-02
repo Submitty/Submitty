@@ -1423,46 +1423,57 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function addOneMark() {
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+    /**
+     * Route for adding a mark to a component
+     */
+    public function ajaxAddNewMark() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $points = $_POST['points'] ?? '';
+        $title = $_POST['note'] ?? null;
 
+        // Validate required parameters
+        if ($title === null) {
+            $this->core->getOutput()->renderJsonFail('Missing title parameter');
+            return;
+        }
+        if ($points === null) {
+            $this->core->getOutput()->renderJsonFail('Missing points parameter');
+            return;
+        }
+        if (!is_numeric($points)) {
+            $this->core->getOutput()->renderJsonFail('Invalid points parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_one_new_mark", ["gradeable" => $gradeable])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to add mark');
             return;
         }
 
-        $note = $_POST['note'];
-        $points = $_POST['points'];
-        foreach ($gradeable->getComponents() as $component) {
-            if(is_array($component)) {
-                if($component[0]->getId() != $_POST['gradeable_component_id']) {
-                    continue;
-                }
-            } else if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
-            }
-            $order_counter = $this->core->getQueries()->getGreatestGradeableComponentMarkOrder($component);
-            $order_counter++;
-            $mark = new GradeableComponentMark($this->core);
-            $mark->setGcId($component->getId());
-            $mark->setPoints($points);
-            $mark->setNote($note);
-            $mark->setOrder($order_counter);
-            $id = $mark->create();
-
-            $marks=$component->getMarks();
-            array_push($marks, $mark);
-            $component->setMarks($marks);
-
-            $response = ["id" => $id];
-            $this->core->getOutput()->renderJson($response);
-            return;
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component->addMark($title, $points);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $this->core->getOutput()->renderJson(["status" => "failure"]);
-        return;
     }
     public function deleteOneMark() {
         $gradeable_id = $_POST['gradeable_id'];
