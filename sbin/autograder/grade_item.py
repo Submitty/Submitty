@@ -252,6 +252,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     
 
+    if USE_DOCKER:
+        print("!!!!!!!!!!!!!!!!!!USING DOCKER!!!!!!!!!!!!!!!!!!!!!!!!")
+
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
@@ -304,7 +307,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.mkdir(tmp_work_subission)
     os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
-    
+
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
@@ -347,7 +350,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
                                                                                     item_name, USE_DOCKER, container, which_untrusted,
-                                                                                    job_id)
+                                                                                    job_id, grading_began)
     ##################################################################################################
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")

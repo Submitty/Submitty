@@ -28,14 +28,15 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     DAEMON_UID = OPEN_JSON['daemon_uid']
 
 
-def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, container,
-                      which_untrusted, job_id):
+def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, item_name, USE_DOCKER, OBSOLETE_CONTAINER,
+                      which_untrusted, job_id, grading_began):
 
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_subission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
+    my_runner = os.path.join(tmp_work,"my_runner.out")
 
     queue_time_longstring = queue_obj["queue_time"]
     waittime = queue_obj["waittime"]
@@ -59,32 +60,47 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             grade_item.copy_contents_into(job_id,tmp_work_subission ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_compiled  ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_checkout  ,testcase_folder,tmp_logs)
+            #copy the compiled runner to the test directory
+            shutil.copy(my_runner,testcase_folder)
+            my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
 
             os.chdir(testcase_folder)
 
             try:
                 if USE_DOCKER:
-                    runner_success = subprocess.call(['docker', 'exec', '-w', tmp_work,
-                                                      container,
-                                                      os.path.join(tmp_work, 'my_runner.out'),
-                                                      queue_obj['gradeable'],
-                                                      queue_obj['who'],
-                                                      str(queue_obj['version']),
-                                                      submission_string,
-                                                      str(testcase_num)],
-                                                      stdout=logfile)
+                    try:
+                        new_container = subprocess.check_output(['docker', 'run', '-t', '-d', '-v', testcase_folder + ':' + testcase_folder,
+                                                                 'ubuntu:custom']).decode('utf8').strip()
+                        dockerlaunch_done=dateutils.get_current_time()
+                        dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
+                        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,
+                                                        "docker container created for testcase {0}".format(testcase_num))
+
+
+                        runner_success = subprocess.call(['docker', 'exec', '-w', testcase_folder,
+                                                          new_container,
+                                                          my_testcase_runner,
+                                                          queue_obj['gradeable'],
+                                                          queue_obj['who'],
+                                                          str(queue_obj['version']),
+                                                          submission_string,
+                                                          str(testcase_num)],
+                                                          stdout=logfile)
+                    except Exception as e:
+                        print('An error occurred when grading by docker.')
+                        traceback.print_exc()
+                    finally:
+                      #TODO switch to using --rm on docker run.
+                      subprocess.call(['docker', 'rm', '-f', new_container])
+                      dockerdestroy_done=dateutils.get_current_time()
+                      dockerdestroy_time = (dockerdestroy_done-grading_began).total_seconds()
+                      grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"ddt:",dockerdestroy_time,
+                                                      "docker container for testcase {0} destroyed".format(testcase_num))
+                      print("removed docker {0}".format(new_container))
                 else:
-                    print(os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                      which_untrusted,
-                                                      os.path.join(tmp_work,"my_runner.out"),
-                                                      queue_obj["gradeable"],
-                                                      queue_obj["who"],
-                                                      str(queue_obj["version"]),
-                                                      submission_string,
-                                                      str(testcase_num))
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
-                                                      os.path.join(tmp_work,"my_runner.out"),
+                                                      my_testcase_runner,
                                                       queue_obj["gradeable"],
                                                       queue_obj["who"],
                                                       str(queue_obj["version"]),
