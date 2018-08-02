@@ -154,7 +154,7 @@
                     <select name="room_seating_gradeable_id">
                         {% for seating_option in gradeable_seating_options %}
                             <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
-                                {{ seating_option['g_title'] }}
+                                {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
                             </option>
                         {% endfor %}
                     </select>
