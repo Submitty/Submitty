@@ -24,7 +24,7 @@
             {% endif %}
         }
         $( document ).ready(function() {
-            $('#thread_category option').mousedown(function(e) {
+            $('#thread_category option, #thread_status_select option').mousedown(function(e) {
                 e.preventDefault();
                 var current_selection = $(this).prop('selected');
                 $(this).prop('selected', !current_selection);
@@ -33,6 +33,9 @@
             });
             {% for category in cookie_selected_categories %}
             $('#thread_category option[value="{{ category }}"]').prop('selected', true);
+            {% endfor %}
+            {% for status in cookie_selected_thread_status %}
+            $('#thread_status_select option[value="{{ status }}"]').prop('selected', true);
             {% endfor %}
 
             $("#tree").prop("checked", true);
@@ -48,6 +51,6 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    <a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option, #thread_status_select option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
-    <a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');">Close</a>
+    <a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option, #thread_status_select option').prop('selected', false); updateThreads(); $('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
+    <a class="btn btn-default close-button" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');">Close</a>
 {% endblock %}

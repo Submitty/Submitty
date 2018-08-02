@@ -78,7 +78,7 @@ class NavigationView extends AbstractView {
         ]);
     }
 
-    public function showGradeables($sections_to_list, $graded_gradeables) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -110,15 +110,25 @@ class NavigationView extends AbstractView {
 	      // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
-        if ($this->core->getUser()->accessGrading()) {
+        $images_course_path = $this->core->getConfig()->getCoursePath();
+        $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
+        $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+        if ($this->core->getUser()->getGroup()=== 1 && count($any_images_files)===0) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                "title" => "Upload Student Photos",
+                "class" => "btn btn-primary"
+            ]);
+        }
+        else if (count($any_images_files)!==0 && $this->core->getUser()->accessGrading()) {
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-                if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
-                    $top_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                        "title" => "View Student Photos",
-                        "class" => "btn btn-primary"
-                    ]);
-                }
+            if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                $top_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                    "title" => "View Student Photos",
+                    "class" => "btn btn-primary"
+                ]);
+            }
         }
 
         // ======================================================================================
@@ -187,7 +197,8 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section)
+                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
+                    "has_build_error" => $gradeable->anyBuildErrors()
                 ];
             }
 
@@ -210,31 +221,21 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable The graded gradeble instance, or null if no data yet
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section): array {
+    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
-        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section): null;
+        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
-	// full access graders & instructors are allowed to view submissions of assignments with no manual grading
-	$im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->getGroup() <= 2;
-
-	// limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
-	$im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
-
-	// students can only view the submissions & grading interface if its a peer grading assignment
-	$im_a_peer_grader = $this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading();
-
-        //Grade button if we can access grading
-        if ($im_allowed_to_view_submissions || $im_a_grader || $im_a_peer_grader) {
-            $buttons[] = $this->hasGradeButton($gradeable) ? $this->getGradeButton($gradeable, $list_section) : null;
+        if ($this->hasGradeButton($gradeable)) {
+            $buttons[] = $this->getGradeButton($gradeable, $list_section);
         }
 
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
-            $buttons[] = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable) : null;
             $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
         }
 
@@ -264,7 +265,17 @@ class NavigationView extends AbstractView {
      * @return bool
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
-        return $this->core->getUser()->accessGrading() || $gradeable->isPeerGrading();
+        // full access graders & instructors are allowed to view submissions of assignments with no manual grading
+        $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->getGroup() <= 2;
+
+        // limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
+        $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
+
+        // students can only view the submissions & grading interface if its a peer grading assignment
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading();
+
+        // TODO: look through this logic and put into new access system
+        return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
     }
 
     /**
@@ -274,13 +285,6 @@ class NavigationView extends AbstractView {
         return $this->core->getUser()->accessAdmin();
     }
 
-    /**
-     * @param Gradeable $gradeable
-     * @return bool
-     */
-    private function hasRebuildButton(Gradeable $gradeable): bool {
-        return ($this->core->getUser()->accessAdmin()) && ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
-    }
 
     /**
      * @return bool
@@ -343,9 +347,10 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return Button|null
      */
-    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section) {
+    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
@@ -395,11 +400,10 @@ class NavigationView extends AbstractView {
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
             if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-                ($ta_graded_gradeable->getUserViewedDate() === null || $gradeable->getJustRegraded() === true) &&
+                $ta_graded_gradeable->getUserViewedDate() === null &&
                 $list_section === GradeableList::GRADED) {
                 //Graded and you haven't seen it yet
                 $class = "btn-success";
-                $gradeable->setJustRegraded(false);
             }
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
@@ -440,15 +444,17 @@ class NavigationView extends AbstractView {
                 $title = "TA GRADE NOT AVAILABLE";
             }
         } else {
-            // This means either the user isn't on a team, or has no submissions yet
+            // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 // team assignment, no team
-                $title = "MUST BE ON A TEAM TO SUBMIT";
-                $disabled = true;
+                if (!$submit_everyone) {
+                    $title = "MUST BE ON A TEAM TO SUBMIT";
+                    $disabled = true;
+                }
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($this->core->getUser()->accessAdmin()) {
-                        // team assignment, no team (admin)
+                    if ($submit_everyone) {
+                        // team assignment, no team
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
                     }
@@ -587,21 +593,8 @@ class NavigationView extends AbstractView {
             "title" => "Edit",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fa fa-pencil",
-            "title_on_hover" => true
-        ]);
-        return $button;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return Button|null
-     */
-    private function getRebuildButton(Gradeable $gradeable) {
-        $button = new Button($this->core, [
-            "title" => "Rebuild",
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
-            "class" => "fa fa-wrench",
-            "title_on_hover" => true
+            "title_on_hover" => true,
+            "aria_label" => "edit gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }

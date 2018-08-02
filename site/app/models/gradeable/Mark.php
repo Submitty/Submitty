@@ -32,6 +32,9 @@ class Mark extends AbstractModel {
     /** @property @var bool If the student should be able to see this mark */
     protected $publish = false;
 
+    /** @property @var bool If any submitters have received this mark */
+    private $any_receivers = false;
+
     /**
      * Mark constructor.
      * @param Core $core
@@ -48,6 +51,7 @@ class Mark extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setOrder($details['order']);
         $this->setPublish($details['publish']);
+        $this->any_receivers = ($details['any_receivers'] ?? false) === true;
         $this->modified = false;
     }
 
@@ -57,6 +61,14 @@ class Mark extends AbstractModel {
      */
     public function getComponent() {
         return $this->component;
+    }
+
+    /**
+     * Gets if any submitter has received this mark
+     * @return bool
+     */
+    public function anyReceivers() {
+        return $this->any_receivers;
     }
 
     /* Overridden setters with validation */
