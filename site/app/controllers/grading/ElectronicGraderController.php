@@ -2,21 +2,16 @@
 
 namespace app\controllers\grading;
 
-use app\controllers\AbstractController;
 use app\libraries\DiffViewer;
 use app\models\gradeable\Component;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
 use app\models\Team;
 use app\models\User;
-use \app\libraries\GradeableType;
-use app\models\Gradeable;
-use app\models\GradeableComponent;
-use app\models\GradeableComponentMark;
 use app\libraries\FileUtils;
-use app\views\AutoGradingView;
 use app\controllers\GradingController;
 
 
@@ -185,7 +180,7 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Method for getting whitespace information for the diff viewer
+     * Route for getting whitespace information for the diff viewer
      */
     public function ajaxRemoveEmpty() {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -1320,6 +1315,9 @@ class ElectronicGraderController extends GradingController {
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
 
+    /**
+     * Route for saving a the order of marks in a component
+     */
     public function ajaxSaveMarkOrder() {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
@@ -1375,6 +1373,9 @@ class ElectronicGraderController extends GradingController {
         $this->core->getQueries()->saveComponent($component);
     }
 
+    /**
+     * Route for getting the student's program output for the diff-viewer
+     */
     public function ajaxGetStudentOutput() {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['who_id'] ?? '';
@@ -1578,6 +1579,9 @@ class ElectronicGraderController extends GradingController {
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
     }
 
+    /**
+     * Route for getting merged GradedComponent and Component data (similar to old model)
+     */
     protected function ajaxGetGradedComponent() {
         $gradeable_id = $_GET['gradeable_id'] ?? '';
         $anon_id = $_GET['anon_id'] ?? '';
