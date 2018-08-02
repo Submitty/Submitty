@@ -243,7 +243,8 @@ class AdminGradeableController extends AbstractController {
 
     /* Http request methods (i.e. ajax) */
 
-    private function tryGetGradeable($gradeable_id) {
+    // FIXME: replace with AbstractController::tryGetGradeable when this controller uses JSEND
+    private function tryGetGradeable_($gradeable_id) {
         try {
             return $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch (\Exception $exception) {
@@ -313,7 +314,7 @@ class AdminGradeableController extends AbstractController {
         // Assume something will go wrong
         http_response_code(500);
 
-        $gradeable = $this->tryGetGradeable($_REQUEST['id']);
+        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
         if ($gradeable === null) {
             return;
         }
@@ -696,7 +697,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGradersRequest() {
-        $gradeable = $this->tryGetGradeable($_REQUEST['id']);
+        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
         if ($gradeable === null) {
             return;
         }
@@ -1074,7 +1075,13 @@ class AdminGradeableController extends AbstractController {
             die($result);
         }
         $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildUrl(array(
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'edit_gradeable_page',
+            'id' => $g_id,
+            'nav_tab' => '1'
+        )));
     }
 
     private function quickLink() {

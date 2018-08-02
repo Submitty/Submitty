@@ -747,7 +747,7 @@ HTML;
 		$return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
-       if($first && $this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
+       if($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
             $return .= <<<HTML
                 <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fa fa-envelope" aria-hidden="true"></i></a>
                 <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
