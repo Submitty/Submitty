@@ -361,13 +361,11 @@ class AutoGradingView extends AbstractView {
 
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
         $allow_regrade=false;
-        $regrade_date=null;
-        if($gradeable->getRegradeRequestDate() !=null){
-            if($regrade_enabled==true && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
-                $allow_regrade=true;
-                $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
-            }
+        if($regrade_enabled==true && $gradeable->getIsRegradeAllowed() && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
+            $allow_regrade=true;
+            $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         }
+
         $uploaded_files = $gradeable->getSubmittedFiles();
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
@@ -438,7 +436,6 @@ class AutoGradingView extends AbstractView {
             $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
         }
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
-
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
         $total_score = $gradeable->roundPointValue($total_score);
@@ -448,7 +445,9 @@ class AutoGradingView extends AbstractView {
             'page' => 'view_late_table',
             'g_id' => $gradeable->getId()
         ]);
-
+        $is_regrade_allowed = $gradeable->getIsRegradeAllowed();
+        $regrade_date = $gradeable->getRegradeRequestDate();
+        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         // Get the number of decimal places for floats to display nicely
         $num_decimals = 0;
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
@@ -490,7 +489,7 @@ class AutoGradingView extends AbstractView {
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'is_peer' => $gradeable->isPeerGrading(),
             'components' => $component_data,
-
+            'regrade_date' => $regrade_date,
             'late_days_url' => $late_days_url,
             'grader_names' => $grader_names,
             'grading_complete' => $grading_complete,

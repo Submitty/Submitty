@@ -35,23 +35,20 @@
     Grades Released Date (grades will be visible to students)
 
     <div class="electronic_file">
+    {% if is_regrade_allowed != true or regrade_enabled != true %}
+        <div class="regrade_request_date" hidden>
+    {% else %}
         <div class="regrade_request_date">
-            <script type="text/javascript">
-            if(gradeable.getRegradeRequestDate() !== null && regrade_enabled === true){
-                </script>
-                    <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
-                    Regrade Request Due Date (Regrade Requests must be sent by this date)
-                    <br />
-            <script type="text/javascript">
-            }
-            </script>
+    {% endif %}
+            <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
+            Regrade Request Due Date (Regrade Requests must be sent by this date)
+            <br />
         </div>
         How many late days may students use on this assignment?
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
         <br />
     </div>
-
 </div>
 
 <script type="text/javascript">
