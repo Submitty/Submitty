@@ -5,8 +5,8 @@
     <br />
 
 
-    <div class="electronic_file">
-        <div class="team_yes">
+    <div class="electronic_file_dates">
+        <div class="team_yes_dates">
             <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
             Team Lock Date (Instructors can still manually manage teams)
 
@@ -24,7 +24,7 @@
         <br />
     </div>
 
-    <div class="manual_grading">
+    <div class="manual_grading_dates">
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
         TA/Instructor Manual Grading Open Date (grading may begin)
 
@@ -41,7 +41,7 @@
 
     <br />
 
-    <div class="electronic_file">
+    <div class="electronic_file_dates">
         How many late days may students use on this assignment?
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
@@ -50,6 +50,15 @@
 </div>
 
 <script type="text/javascript">
+    function updateDateDisplay() {
+        let elecDateBoxes = $('.electronic_file_dates input');
+        elecDateBoxes.prop('disabled', true);
+        if($('#radio_electronic_file').is(':checked')) {
+            elecDateBoxes.prop('disabled', false);
+            $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
+            $('#date_team_lock').prop('disabled', !{{ gradeable.isTeamAssignment() ? 'true' : 'false' }});
+        }
+    }
 
     $(document).ready(function() {
         $(function() {
@@ -76,6 +85,8 @@
                 }
             });
         });
+
+        updateDateDisplay();
     });
 
 </script>
