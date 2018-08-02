@@ -8,52 +8,106 @@
         The uploaded HTML must be simple enough to not conflict with any of Submitty's HTML, or else the site may experience issues.<br>
         Do not include any scripts in the HTML.
     </p>
+    <br>
+    <p>
+        Here is how the site will be laid out:
+        <div class="wrapper-example">
+            <div class="wrapper-top">Top Bar</div>
+            <div class="wrapper-center">
+                <div class="wrapper-left">Left<br>Sidebar</div>
+                <div class="wrapper-body">Submitty</div>
+                <div class="wrapper-right">Right<br>Sidebar</div>
+            </div>
+            <div class="wrapper-bottom">Bottom Bar</div>
+        </div>
+    </p>
 	<br>
-	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-		<input type="hidden" name="location" value="upper-left">
-		{{ html_files['up_left_file'] == null ? "Upload" : "Reupload" }} the html for the upper left: <input type="file" name="wrapper_upload">
-		<input type="submit" value="Upload" />
-        <br />
-	</form>
-	<br>
-	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-		<input type="hidden" name="location" value="upper-right">
-        {{ html_files['up_right_file'] == null ? "Upload" : "Reupload" }} the html for the upper right: <input type="file" name="wrapper_upload">
-		<input type="submit" value="Upload" />
-        <br />
-	</form>
-	<br>
-	<form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-		<input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-		<input type="hidden" name="location" value="lower-left">
-        {{ html_files['low_left_file'] == null ? "Upload" : "Reupload" }} the html for the lower left:
-        <input type="file" name="wrapper_upload">
-        <input type="submit" value="Upload" />
-        <br />
-	</form>
+    <table class="wrapper-upload">
+        <tr>
+            <th>Panel</th>
+            <th>Upload</th>
+            <th>Current File</th>
+        </tr>
+        <tr class="wrapper-top">
+            <td>Top Bar</td>
+            <td>
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="location" value="top">
+                    <input type="file" name="wrapper_upload">
+                    <input type="submit" class="btn btn-default" value="Upload" />
+                </form>
+            </td>
+            <td>
+                {% if html_files['top_bar'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-left'}) }}"></a>&nbsp;{{ html_files['top_bar']['path'] }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr class="wrapper-left">
+            <td>Left Sidebar</td>
+            <td>
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="location" value="left">
+                    <input type="file" name="wrapper_upload">
+                    <input type="submit" class="btn btn-default" value="Upload" />
+                </form>
+            </td>
+            <td>
+                {% if html_files['left_sidebar'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-right'}) }}"></a>&nbsp;{{ html_files['left_sidebar']['path'] }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr class="wrapper-right">
+            <td>Right Sidebar</td>
+            <td>
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="location" value="right">
+                    <input type="file" name="wrapper_upload">
+                    <input type="submit" class="btn btn-default" value="Upload" />
+                </form>
+            </td>
+            <td>
+                {% if html_files['right_sidebar'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ html_files['right_sidebar']['path'] }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr class="wrapper-bottom">
+            <td>Bottom Bar</td>
+            <td>
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="location" value="bottom">
+                    <input type="file" name="wrapper_upload">
+                    <input type="submit" class="btn btn-default" value="Upload" />
+                </form>
+            </td>
+            <td>
+                {% if html_files['bottom_bar'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ html_files['bottom_bar']['path'] }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr class="wrapper-css">
+            <td>Custom CSS</td>
+            <td>
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="location" value="css">
+                    <input type="file" name="wrapper_upload">
+                    <input type="submit" class="btn btn-default" value="Upload" />
+                </form>
+            </td>
+            <td>
+                {% if html_files['css'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ html_files['css']['path'] }}
+                {% endif %}
+            </td>
+        </tr>
+    </table>
 
 </div>
-
-{% if html_files|length > 0 %}
-    <div class="content">
-        <h2>Previous Uploads</h2>
-        <br>
-        <b>located in {{ target_dir }}</b>
-        {% if html_files['up_left_file'] != null %}
-            <br>
-            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-left'}) }}"></a>&nbsp;{{ html_files['up_left_file']['path'] }}
-        {% endif %}
-        {% if html_files['up_right_file'] != null %}
-            <br>
-            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-right'}) }}"></a>&nbsp;{{ html_files['up_right_file']['path'] }}
-        {% endif %}
-        {% if html_files['low_left_file'] != null %}
-            <br>
-            <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ html_files['low_left_file']['path'] }}
-        {% endif %}
-
-    </div>
-
-{% endif %}

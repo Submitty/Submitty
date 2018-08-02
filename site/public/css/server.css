@@ -1242,3 +1242,52 @@ end of styles used in the admin gradeable page
     border-radius: 5px;
 }
 
+.wrapper-example {
+    width: 400px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+}
+.wrapper-example .wrapper-center {
+    display: flex;
+    flex-grow: 2;
+    flex-direction: row;
+}
+.wrapper-example .wrapper-top,
+.wrapper-example .wrapper-left,
+.wrapper-example .wrapper-body,
+.wrapper-example .wrapper-right,
+.wrapper-example .wrapper-bottom {
+    flex-grow: 1;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.wrapper-example .wrapper-body {
+    flex-grow: 5;
+}
+.wrapper-top {
+    background-color: #ff9999;
+}
+.wrapper-left {
+    background-color: #ffff66;
+}
+.wrapper-body {
+    background-color: #ffffff;
+}
+.wrapper-right {
+    background-color: #99ff99;
+}
+.wrapper-bottom {
+    background-color: #99ccff;
+}
+.wrapper-upload th {
+    background-color: #f4f4f4;
+}
+
+.wrapper-upload td, .wrapper-upload th {
+    padding: 4px;
+    border: 1px solid #000;
+}
