@@ -691,12 +691,19 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Deletes a component from this gradeable without checking if grades exist for it yet.
-     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * Base method for deleting components.  This isn't exposed as public so
+     *  its make very clear that a delete component operation is being forceful.
      * @param Component $component
-     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     * @param bool $force true to delete the component if it has grades
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or
+     *          $force is false and the component has grades
      */
-    public function forceDeleteComponent(Component $component) {
+    private function deleteComponentInner(Component $component, bool $force = false) {
+        // Don't delete if the component has grades (and we aren't forcing)
+        if($component->anyGrades() && !$force) {
+            throw new \InvalidArgumentException('Attempt to delete a component with grades!');
+        }
+
         // Calculate our components array without the provided component
         $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
 
@@ -707,6 +714,25 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
+    }
+
+    /**
+     * Deletes a component from this gradeable
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or if the component has grades
+     */
+    public function deleteComponent(Component $component) {
+        $this->deleteComponentInner($component, false);
+    }
+
+    /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        $this->deleteComponentInner($component, true);
     }
 
     /**
