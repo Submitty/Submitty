@@ -1306,10 +1306,10 @@ function openMark(c_index) {
         for(let i = 0; i < files.length; i++){
             if(files[i].innerText.trim() == "upload.pdf"){
                 if($("#file_view").is(":visible")){
-                    $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                    $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
                 } else {
                     expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
-                        $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                        $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
                     });
                 }
             }
