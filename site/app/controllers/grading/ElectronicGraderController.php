@@ -1469,7 +1469,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $mark = $component->addMark($title, $points);
+            $mark = $component->addMark($title, $points, false);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
         } catch (\InvalidArgumentException $e) {

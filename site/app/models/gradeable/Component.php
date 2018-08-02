@@ -289,11 +289,12 @@ class Component extends AbstractModel {
      * @param float $points
      * @return Mark the created mark
      */
-    public function addMark(string $title, float $points) {
+    public function addMark(string $title, float $points, bool $publish) {
         $mark = new Mark($this->core, $this, [
             'title' => $title,
             'points' => $points,
             'order' => count($this->marks),
+            'publish' => $publish,
             'id' => 0
         ]);
         $this->marks[] = $mark;
