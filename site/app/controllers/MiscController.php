@@ -213,17 +213,17 @@ class MiscController extends AbstractController {
 
     private function displayFile() {
         //Is this per-gradeable?
-        $path = $_REQUEST["path"];
         $dir = $_REQUEST["dir"];
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
         } else {
-            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path])) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -251,20 +251,11 @@ class MiscController extends AbstractController {
     }
 
     private function deleteCourseMaterialFile() {
-        $error_string = "";
+        $dir = "course_materials";
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
-        // QUICK FIX UNTIL NEW ACCESS
-        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
-        if (!Utils::startsWith($filename, $check)) {
-            $error_string = "Can't delete file not in course uploads";
-        }
-        // END QUICK FIX
-
-        // security check
-        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
-            $message = "You do not have access to that page. ".$error_string;
+        if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
+            $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                                                     'page' => 'course_materials',
@@ -274,12 +265,12 @@ class MiscController extends AbstractController {
         // delete the file from upload/course_materials
         // $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
 
-        if ( unlink($filename) )
+        if ( unlink($path) )
         {
-            $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
+            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
         else{
-            $this->core->addErrorMessage("Failed to remove " . basename($filename));
+            $this->core->addErrorMessage("Failed to remove " . basename($path));
         }
 
         // remove entry from json file
@@ -288,7 +279,7 @@ class MiscController extends AbstractController {
         $json = FileUtils::readJsonFile($fp);
         if ($json != false)
         {
-            unset($json[$filename]);
+            unset($json[$path]);
 
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return "Failed to write to file {$fp}";
@@ -303,28 +294,16 @@ class MiscController extends AbstractController {
 
     private function deleteCourseMaterialFolder() {
         // security check
+        $dir = "course_materials";
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
-        $error_string = "";
-
-        // QUICK FIX UNTIL NEW ACCESS
-        $path = $_REQUEST['path'];
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
-        if (!Utils::startsWith($path, $check)) {
-            $error_string = "Can't delete folder not in course uploads";
-        }
-        // END QUICK FIX
-
-        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
-            $message = "You do not have access to that page. ".$error_string;
+        if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
+            $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                                                     'page' => 'course_materials',
                                                     'action' => 'view_course_materials_page')));
         }
-
-
-        // $path = $_REQUEST['path'];
 
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -362,12 +341,12 @@ class MiscController extends AbstractController {
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path, "gradeable" => $gradeable])) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
         } else {
-            if (!$this->core->getAccess()->canI("file.read", ["dir" => $dir, "file" => $path])) {
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }

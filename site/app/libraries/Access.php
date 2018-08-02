@@ -4,6 +4,7 @@ namespace app\libraries;
 
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
@@ -55,14 +56,14 @@ class Access {
      */
     const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
-    const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_FILE_DIR;
+    const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_COMPONENT         = 1 << 25;
-    /** If the current set of flags requires the "file" and "dir" arguments */
-    const REQUIRE_ARGS_FILE_DIR         = 1 << 26;
+    /** If the current set of flags requires the "dir" and "path" arguments */
+    const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -70,8 +71,7 @@ class Access {
     const ALLOW_MIN_LIMITED_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
     const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
     const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
-
-    const DENY_ALL                      = -1;
+    const DENY_ALL                        = -1;
 
     /**
      * @var Core
@@ -125,25 +125,25 @@ class Access {
 
         $this->permissions["gradeable.submit.everyone"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
 
-        $this->permissions["file.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["file.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
 
         //Per-directory access permissions
-        $this->permissions["file.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
         //TODO: Timed access control
-        $this->permissions["file.read.course_materials"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT;
         //TODO: Check deleted posts
-        $this->permissions["file.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         //TODO: Can students see their results?
-        $this->permissions["file.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["file.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION;
 
-        $this->permissions["file.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE;
-        $this->permissions["file.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["file.write.checkout"] = self::DENY_ALL;
-        $this->permissions["file.write.results"] = self::DENY_ALL;
-        $this->permissions["file.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["file.write.forum_attachments"] = self::ALLOW_MIN_STUDENT;
+        $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE;
+        $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["path.write.checkout"] = self::DENY_ALL;
+        $this->permissions["path.write.results"] = self::DENY_ALL;
+        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT;
     }
 
     /**
@@ -163,64 +163,64 @@ class Access {
             // called with a key from this array, canUser will be called with the value. Any parsed args from
             // the subparts array will be passed.
             "permissions" => [
-                "file.read" => "file.read.submissions",
-                "file.write" => "file.write.submissions",
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions",
             ]
         ];
         $this->directories["checkout"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/checkout",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.submissions",
-                "file.write" => "file.write.checkout",
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.checkout",
             ]
         ];
         $this->directories["submissions"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/submissions",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.submissions",
-                "file.write" => "file.write.submissions",
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions",
             ]
         ];
         $this->directories["results"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/results",
             "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
-                "file.read" => "file.read.results",
-                "file.write" => "file.write.results",
+                "path.read" => "path.read.results",
+                "path.write" => "path.write.results",
             ]
         ];
         $this->directories["config_upload"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/config_upload",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.uploads",
-                "file.write" => "file.write.uploads",
+                "path.read" => "path.read.uploads",
+                "path.write" => "path.write.uploads",
             ]
         ];
         $this->directories["uploads"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.uploads",
-                "file.write" => "file.write.uploads",
+                "path.read" => "path.read.uploads",
+                "path.write" => "path.write.uploads",
             ]
         ];
         $this->directories["course_materials"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/uploads/course_materials",
             "subparts" => [],
             "permissions" => [
-                "file.read" => "file.read.course_materials",
-                "file.write" => "file.write.course_materials",
+                "path.read" => "path.read.course_materials",
+                "path.write" => "path.write.course_materials",
             ]
         ];
         $this->directories["forum_attachments"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/forum_attachments",
             "subparts" => ["thread", "post"],
             "permissions" => [
-                "file.read" => "file.read.forum_attachments",
-                "file.write" => "file.write.forum_attachments",
+                "path.read" => "path.read.forum_attachments",
+                "path.write" => "path.write.forum_attachments",
             ]
         ];
     }
@@ -383,9 +383,9 @@ class Access {
         }
 
         //These are always done together
-        if (self::checkBits($checks, self::REQUIRE_ARGS_FILE_DIR)) {
-            $file = $this->requireArg($args, "file");
+        if (self::checkBits($checks, self::REQUIRE_ARGS_DIR_PATH)) {
             $dir = $this->requireArg($args, "dir");
+            $path = $this->requireArg($args, "path");
 
             if ($this->directories === null) {
                 $this->loadDirectories();
@@ -395,8 +395,8 @@ class Access {
                 return false;
             }
 
-            //Check if they can access the file!
-            if (!$this->canUserAccessFile($action, $file, $dir, $user, $args)) {
+            //Check if they can access the path!
+            if (!$this->canUserAccessPath($action, $path, $dir, $user, $args)) {
                 return false;
             }
         }
@@ -652,39 +652,29 @@ class Access {
 
     /**
      * Check if a user has permissions to access a file/directory by a particular action
-     * @param string $action Specific action, eg file.read
-     * @param string $file File path, can be either absolute or relative
+     * @param string $action Specific action, eg path.read
+     * @param string $path File path, can be either absolute or relative
      * @param string $dir A directory name in $this->directories
      * @param User $user User to check access
      * @param array $args Additional arguments for specific checks
      * @return bool True if they are allowed to access this file
      */
-    public function canUserAccessFile(string $action, string $file, string $dir, User $user, array $args = []) {
+    public function canUserAccessPath(string $action, string $path, string $dir, User $user, array $args = []) {
+        if ($this->directories === null) {
+            $this->loadDirectories();
+        }
+        if (!array_key_exists($dir, $this->directories)) {
+            return false;
+        }
+
         $info = $this->directories[$dir];
 
-        //No directory traversal
-        foreach (explode(DIRECTORY_SEPARATOR, $file) as $part) {
-            if ($part == ".." || $part == ".") {
-                return false;
-            }
-        }
-
-        //Make sure it starts with the dir base
-        if (!Utils::startsWith($file, $info["base"])) {
-            //This both prevents people from accessing files outside the base dir
-            // and lets us have relative paths. Convenient!
-            if ($file[0] === "/") {
-                $file = substr($file, 1);
-            }
-
-            $relative_path = $file;
-            $file = $info["base"] . "/" . $file;
-        } else {
-            $relative_path = substr($file, strlen($info["base"]) + 1);
-        }
+        //Get the real path
+        $path = $this->resolveDirPath($dir, $path);
+        $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't access it
-        if (!file_exists($file)) {
+        if (!file_exists($path)) {
             return false;
         }
 
@@ -772,5 +762,44 @@ class Access {
 
         //There isn't any extra permissions for this action, let em at it
         return true;
+    }
+
+    /**
+     * Resolve relative (and absolute) file paths for a directory
+     * @param string $dir Directory name
+     * @param string $path
+     * @return bool|string Absolute path of the file in that directory
+     */
+    public function resolveDirPath(string $dir, string $path) {
+        if ($this->directories === null) {
+            $this->loadDirectories();
+        }
+        if (!array_key_exists($dir, $this->directories)) {
+            throw new InvalidArgumentException("Unknown directory {$dir}");
+        }
+        $info = $this->directories[$dir];
+
+        //No directory traversal
+        $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
+        $parts = [];
+        foreach ($orig_parts as $part) {
+            if ($part !== ".." && $part !== ".") {
+                $parts[] = $part;
+            }
+        }
+        $path = implode(DIRECTORY_SEPARATOR, $parts);
+
+        //Make sure it starts with the dir base
+        if (!Utils::startsWith($path, $info["base"])) {
+            //This both prevents people from accessing files outside the base dir
+            // and lets us have relative paths. Convenient!
+            if ($path[0] === "/") {
+                $path = substr($path, 1);
+            }
+
+            $path = $info["base"] . "/" . $path;
+        }
+
+        return $path;
     }
 }
