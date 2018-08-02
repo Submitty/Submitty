@@ -158,7 +158,7 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
 }
 
 function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
         data: {
@@ -177,20 +177,19 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, error
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, successCallback, errorCallback) {
+function ajaxAddNewMark(gradeable_id, component, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
         console.error("Shouldn't add blank mark!");
     
-    $.ajax({
+    $.getJSON({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
+                'component_id' : component,
                 'note' : note,
                 'points' : points
             },
@@ -206,15 +205,14 @@ function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, su
         })
 }
 function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCallback, errorCallback) {
-    $.ajax({
+    $.getJson({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
-                'gradeable_component_mark_id' : mark
+                'component_id' : component,
+                'mark_id' : mark
             },
             success: function(data) {
                 if (typeof(successCallback) === "function") {
@@ -228,7 +226,7 @@ function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCal
         })
 }
 function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
         data: {
@@ -248,14 +246,13 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successC
 }
 
 function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
         async: sync,
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id,
-            'active_version' : active_version,
             'gradeable_comment' : gradeable_comment
         },
         success: function(data) {
@@ -505,8 +502,6 @@ function updateMarksOnPage(c_index) {
 function updateGeneralComment() {
     var gradeable = getGradeable();
     ajaxGetGeneralCommentData(gradeable.id, gradeable.user_id, function(data) {
-        data = JSON.parse(data);
-        
         $('#comment-id-general').val(data['data']);
     });
 }
@@ -550,8 +545,7 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 
             updateCookies();
 
-            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, note, points, false, function(data) {
-                data = JSON.parse(data);
+            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function(data) {
                 mark.id = data.id;
                 getComponent(c_index).marks.push(mark);
                 parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
@@ -997,7 +991,7 @@ function saveGeneralComment(sync, successCallback, errorCallback) {
     var overwrite = $('#overwrite-id').is(":checked");
     $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, gradeable_comment, sync, successCallback, errorCallback);
+    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
