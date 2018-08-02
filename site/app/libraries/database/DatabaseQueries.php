@@ -1339,6 +1339,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
     /**
      * @param string             $gd_id
      * @param string             $grader_id
+     * @param string             $verifier_id
      * @param GradeableComponent $component
      */
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
@@ -2759,6 +2760,10 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to insert
      */
     public function createGradeable(\app\models\gradeable\Gradeable $gradeable) {
+        $regrade_date=null;
+        if($gradeable->getRegradeRequestDate()!==null){
+            $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+        }
         $params = [
             $gradeable->getId(),
             $gradeable->getTitle(),
@@ -2883,6 +2888,10 @@ AND gc_id IN (
 
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
+            $regrade_date = null;
+            if($gradeable->getRegradeRequestDate() !== null){
+                $regrade_date = DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+            }
             $params = [
                 $gradeable->getTitle(),
                 $gradeable->getInstructionsUrl(),

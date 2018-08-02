@@ -79,7 +79,6 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
                 {{ not (action != 'new' and gradeable.getIsRegradeAllowed()) ? 'checked' : '' }} /> No
     {% endif %}
     <br /><br />
-
     {% if action == 'new' or action == 'template' %}
         Is this a team assignment?
     {% else %}

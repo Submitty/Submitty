@@ -1596,5 +1596,10 @@ class Gradeable extends AbstractModel {
         }
         return $pages;
     }
-
+public function getIsRegradeAllowed(){
+        if($this->regrade_request_date === null){
+            return true;
+        }
+        return false;
+    }
 }

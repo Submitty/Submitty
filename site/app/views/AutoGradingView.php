@@ -326,7 +326,7 @@ class AutoGradingView extends AbstractView {
         //find all names of instructors who graded part(s) of this assignment that are full access grader_names
         if (!$gradeable->getPeerGrading()) {
             foreach ($gradeable->getComponents() as $component) {
-                if ($component->getGrader() == NULL) {
+                if ($component->getGrader() === NULL) {
                     continue;
                 }
                 $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
@@ -351,7 +351,7 @@ class AutoGradingView extends AbstractView {
         }
         // Todo: this is a lot of math for the view
         //add total points if both autograding and instructor grading exist
-        $current = $gradeable->getCurrentVersion() == NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
+        $current = $gradeable->getCurrentVersion() === NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
         $total_score = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $graded_score;
         $total_max = $gradeable->getTotalAutograderNonExtraCreditPoints() + $graded_max;
         $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
