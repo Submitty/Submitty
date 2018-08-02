@@ -2931,9 +2931,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
-                    $regrade_date,
-                    $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed()),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
