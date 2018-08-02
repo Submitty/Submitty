@@ -155,7 +155,7 @@ class Access {
         }
 
         if (self::checkBits($checks, self::CHECK_CSRF)) {
-            if ($this->core->checkCsrfToken()) {
+            if (!$this->core->checkCsrfToken()) {
                 return false;
             }
         }
