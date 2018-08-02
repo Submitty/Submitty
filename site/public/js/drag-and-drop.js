@@ -392,64 +392,55 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                 data = JSON.parse(data);
                 if (data['success']) {
                     if(data['previous_submission']) { // if there is a previous submission, give the user merge options
-                        $(function() {
-                            var dialog = $('<div><p>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</p><br>\
-                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">only the new files</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">old files and new files -- old files with the same name will be renamed.</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">old files and new files -- old files with the same name will be overwritten.</label></div>')
-                                .dialog({
-                                open: function(event, ui) { // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
+                        var form = $("#previous-submission-form");
+                        var submitter = form.find(".submit-button");
+                        var closer = form.find(".close-button");
 
-                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-                                    var radio_idx;
-                                    if(localStorage.getItem("instructor-submit-option") === null) {
-                                        radio_idx = 0;
-                                    }
-                                    else {
-                                        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
-                                    }
-                                    $(this).find('input:radio')[radio_idx].checked = true;
-                                    $(this).parent().find(".btn-success").focus();
-                                },
-                                buttons: [
-                                    {
-                                        text: "Submit",
-                                        class: "btn btn-success",
-                                        click: function() { // on click, make submission based on which radio input was checked
-                                            if($("#instructor-submit-option-new").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "0");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                                            }
-                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "1");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                            }
-                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "2");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true, clobber=true);
-                                            }
-                                            dialog.dialog('destroy');
-                                        }
-                                    },
-                                    {
-                                        text: "Cancel",
-                                        class: "btn btn-danger",
-                                        click: function() {
-                                            if($("#instructor-submit-option-new").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "0");
-                                            }
-                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "1");
-                                            }
-                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "2");
-                                            }
-                                            dialog.dialog('destroy');
-                                        }
-                                    }
-                                ]
-                            });
+                        submitter.off('click');
+                        closer.off('click');
+
+                        submitter.on('click', function() { // on click, make submission based on which radio input was checked
+                            if($("#instructor-submit-option-new").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "0");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                            }
+                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "1");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true);
+                            }
+                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "2");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true, true);
+                            }
+                            form.css("display", "none");
                         });
+
+                        closer.on('click', function() {
+                            if($("#instructor-submit-option-new").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "0");
+                            }
+                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "1");
+                            }
+                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "2");
+                            }
+                            form.css("display", "none");
+                        });
+
+                        $('.popup-form').css('display', 'none');
+                        form.css("display", "block");
+
+                        // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
+                        var radio_idx;
+                        if(localStorage.getItem("instructor-submit-option") === null) {
+                            radio_idx = 0;
+                        }
+                        else {
+                            radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+                        }
+                        form.find('input:radio')[radio_idx].checked = true;
+                        form.find(".btn-success").focus();
                     }
                     else { // if no previous submissions, no merging will be necessary
                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
@@ -866,7 +857,6 @@ function handleDownloadImages(csrf_token) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
-            //window.location.reload(true);
         }
     });
 }
@@ -875,14 +865,24 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, requested_path) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
     var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
+    formData.append('expand_zip', expand_zip);
     formData.append('requested_path', requested_path);
 
+    var target_path = cmPath; // this one has slash at the end.
+    if (requested_path && requested_path.trim().length) {
+        target_path = cmPath + requested_path;
+    }
+
+    if (target_path[target_path.length-1] == '/')
+        target_path = target_path.slice(0, -1); // remove slash
+
+	var filesToBeAdded = false;
     // Files selected
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -901,9 +901,33 @@ function handleUploadCourseMaterials(csrf_token, requested_path) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+
+            var file = new File([""], target_path + "/" + file_array[i][j].name);
+            var k = fileExists(file, 1);
+            // Check conflict here
+            if ( k[0] == 1 )
+            {
+                var skip_confirmation = false;
+                if (expand_zip == 'on') {
+                    var extension = getFileExtension(file_array[i][j].name);
+                    if (extension.toLowerCase() == "zip") {
+                        skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
+                    }
+                }
+                if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                    continue;
+                }
+            }
+
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            filesToBeAdded = true;
         }
     }
+
+    if (filesToBeAdded == false){
+        return;
+    }
+
 
     $.ajax({
         url: submit_url,
@@ -929,7 +953,6 @@ function handleUploadCourseMaterials(csrf_token, requested_path) {
         },
         error: function(data) {
             window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
-            window.location.reload(true);
         }
     });
 }

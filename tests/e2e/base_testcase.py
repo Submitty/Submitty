@@ -137,6 +137,9 @@ class BaseTestCase(unittest.TestCase):
 
 
 
+    def wait_after_ajax(self):
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))    
+
     @staticmethod
     def wait_user_input():
         """
