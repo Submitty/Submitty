@@ -103,6 +103,7 @@ class NavigationView extends AbstractView {
         $seating_config = null;
         // If the instructor has selected a gradeable for room seating
         if($display_room_seating) {
+            $this->core->getOutput()->addRoomTemplatesTwigPath();
             // use the room seating gradeable id to find the title to display.
             $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
             $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();

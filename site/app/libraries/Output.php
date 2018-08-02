@@ -55,9 +55,6 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-//        if(false) {
-            $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
-//        }
     }
 
     public function setInternalResources() {
@@ -382,5 +379,9 @@ class Output {
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
+    }
+
+    public function addRoomTemplatesTwigPath() {
+        $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
     }
 }
