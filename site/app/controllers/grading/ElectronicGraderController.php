@@ -1446,14 +1446,19 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $mark = $component->addMark($title, $points, false);
-            $this->core->getQueries()->saveComponent($component);
+            $mark = $this->addNewMark($component, $title, $points);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+    
+    public function addNewMark(Component $component, string $title, float $points) {
+        $mark = $component->addMark($title, $points, false);
+        $this->core->getQueries()->saveComponent($component);
+        return $mark;
     }
 
     /**
@@ -1491,14 +1496,18 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $component->deleteMark($mark);
-            $this->core->getQueries()->saveComponent($component);
+            $this->deleteMark($mark);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    public function deleteMark(Mark $mark) {
+        $mark->getComponent()->deleteMark($mark);
+        $this->core->getQueries()->saveComponent($mark->getComponent());
     }
 
     /**
