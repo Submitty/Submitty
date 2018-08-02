@@ -1646,20 +1646,41 @@ class ElectronicGraderController extends GradingController {
         return $component_data;
     }
 
-    public function getGradeableComment() {
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
+    /**
+     * Route for getting the overall comment for the graded gradeable
+     */
+    public function ajaxGetOverallComment() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
 
-        if (!$this->core->getAccess()->canI("grading.electronic.get_gradeable_comment", ["gradeable" => $gradeable])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
         }
 
-        $response = array('status' => 'success', 'data' => $gradeable->getOverallComment());
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.get_gradeable_comment", ["gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save gradeable comment');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Once we've parsed the inputs and checked permissions, perform the operation
+        $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComment());
     }
 
     public function getUsersThatGotTheMark() {
