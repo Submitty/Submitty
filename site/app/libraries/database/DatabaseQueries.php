@@ -2814,7 +2814,7 @@ AND gc_id IN (
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet(),
-                $regrade_date,
+                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                 $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed())
             ];
             $this->course_db->query("
@@ -2837,7 +2837,8 @@ AND gc_id IN (
                   eg_precision,
                   eg_peer_grading,
                   eg_peer_grade_set,
-                  eg_regrade_request_date)
+                  eg_regrade_request_date,
+                  eg_is_regrade_allowed)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
@@ -2939,7 +2940,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
-                    $regrade_date,
+                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -2961,7 +2963,8 @@ AND gc_id IN (
                       eg_precision=?,
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,
-                      eg_regrade_request_date=?
+                      eg_regrade_request_date=?,
+                      eg_is_regrade_allowed=?
                     WHERE g_id=?", $params);
             }
         }
