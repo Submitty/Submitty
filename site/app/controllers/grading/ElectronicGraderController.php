@@ -1683,45 +1683,81 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComment());
     }
 
-    public function getUsersThatGotTheMark() {
-        $gradeable_id = $_POST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $gcm_id = $_POST['gradeable_component_mark_id'];
+    /**
+     * Route for getting all submitters that received a mark
+     */
+    public function ajaxGetSubmittersThatGotMark() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $mark_id = $_POST['mark_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // get the mark
+        $mark = $this->tryGetMark($component, $mark_id);
+        if ($mark === false) {
+            return;
+        }
+
+        // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.get_marked_users", ["gradeable" => $gradeable])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to view marked users');
+            return;
         }
 
-        $return_data = [];
-        $name_info = [];
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
-            } else {
-                foreach ($component->getMarks() as $mark) {
-                    if ($mark->getId() == $gcm_id) {
-                        $return_data = $this->core->getQueries()->getUsersWhoGotMark($component->getId(), $mark, $gradeable->isTeamAssignment());
-                        $name_info['question_name'] = $component->getTitle();
-                        $name_info['mark_note'] = $mark->getNote();
-                    }
-                }
-            }
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $results = $this->getSubmittersThatGotMark($mark, $grader);
+            $this->core->getOutput()->renderJsonSuccess($results);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-
-        $sections = array();
-        $this->getStats($gradeable, $sections);
-
-        $response = array('status' => 'success', 'data' => $return_data, 'sections' => $sections, 'name_info' => $name_info);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
     }
 
-    private function getStats($gradeable, &$sections, $graders=array(), $total_users=array(), $no_team_users=array(), $graded_components=array()) {
+    private function getSubmittersThatGotMark(Mark $mark, User $grader) {
+        // TODO: filter users based on who the grader is allowed to see
+        $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark);
+
+        $sections = array();
+        $this->getStats($mark->getComponent()->getGradeable(), $grader, $sections);
+
+        return [
+            'submitter_ids' => $submitter_ids,
+            'sections' => $sections
+        ];
+    }
+
+    /**
+     * Gets... stats
+     * FIXME: make this less gross
+     * @param Gradeable $gradeable
+     * @param User $grader
+     * @param $sections
+     * @param array $graders
+     * @param array $total_users
+     * @param array $no_team_users
+     * @param array $graded_components
+     */
+    private function getStats(Gradeable $gradeable, User $grader, &$sections, $graders=array(), $total_users=array(), $no_team_users=array(), $graded_components=array()) {
         $gradeable_id = $gradeable->getId();
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getAccess()->canI("grading.electronic.get_marked_users.full_stats")){
-                $sections = $this->core->getUser()->getGradingRegistrationSections();
+                $sections = $grader->getGradingRegistrationSections();
             }
             else {
                 $sections = $this->core->getQueries()->getRegistrationSections();
@@ -1736,7 +1772,7 @@ class ElectronicGraderController extends GradingController {
         }
         else {
             if(!$this->core->getAccess()->canI("grading.electronic.get_marked_users.full_stats")){
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $grader->getId());
             }
             else {
                 $sections = $this->core->getQueries()->getRotatingSections();
