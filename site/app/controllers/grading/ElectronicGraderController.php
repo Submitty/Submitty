@@ -43,22 +43,22 @@ class ElectronicGraderController extends GradingController {
                 $this->ajaxSaveMarkOrder();
                 break;
             case 'save_general_comment':
-                $this->saveGeneralComment();
+                $this->ajaxSaveOverallComment();
                 break;
             case 'get_mark_data':
                 $this->ajaxGetGradedComponent();
                 break;
             case 'get_gradeable_comment':
-                $this->getGradeableComment();
+                $this->ajaxGetOverallComment();
                 break;
             case 'get_marked_users':
-                $this->getUsersThatGotTheMark();
+                $this->ajaxGetSubmittersThatGotMark();
                 break;
             case 'add_one_new_mark':
-                $this->addOneMark();
+                $this->ajaxAddNewMark();
                 break;
             case 'delete_one_mark':
-                $this->deleteOneMark();
+                $this->ajaxDeleteMark();
                 break;
             case 'load_student_file':
                 $this->ajaxGetStudentOutput();
