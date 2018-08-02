@@ -49,7 +49,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
         }
         $all_directories = $gradeable->getSplitPdfFiles();
-        if ($this->core->getUser()->accessGrading() && count($all_directories) > 0) {
+        if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
             $return .= $this->renderBulkUploadBox($gradeable);
         }
 
