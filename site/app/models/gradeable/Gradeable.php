@@ -1256,7 +1256,7 @@ class Gradeable extends AbstractModel {
             $registration_section = $leader->getRegistrationSection();
         }
         if ($rotating_section < 0) {
-            $rotating_section = $leader->getRegistrationSection();
+            $rotating_section = $leader->getRotatingSection();
         }
 
         // Get our team id before creating the team
