@@ -65,17 +65,112 @@ class ElectronicGraderController extends GradingController {
             case 'remove_empty':
                 return $this->ajaxRemoveEmpty();
                 break;
+            case 'pdf_annotation_fullpage':
+                $this->showPDFAnnotationFullPage();
+                break;
+            case 'pdf_annotation_embedded':
+                $this->showEmbeddedPDFAnnotation();
+                break;
+            case 'save_pdf_annotation':
+                $this->savePDFAnnotation();
+                break;
             default:
                 $this->showStatus();
                 break;
         }
     }
 
+    public function savePDFAnnotation(){
+        //Save the annotation layer to a folder.
+        $annotation_layer = $_POST['annotation_layer'];
+        $annotation_info = $_POST['GENERAL_INFORMATION'];
+        $grader_id = $this->core->getUser()->getId();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $annotation_info['user_id'])->getActiveVersion();
+        $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
+        if(!FileUtils::createDir($annotation_gradeable_path) && !is_dir($annotation_gradeable_path)){
+            $this->core->addErrorMessage("Creating annotation gradeable folder failed");
+            return false;
+        }
+        $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $annotation_info['user_id']);
+        if(!FileUtils::createDir($annotation_user_path) && !is_dir($annotation_user_path)){
+            $this->core->addErrorMessage("Creating annotation user folder failed");
+            return false;
+        }
+        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
+        if(!FileUtils::createDir($annotation_version_path) && !is_dir($annotation_version_path)){
+            $this->core->addErrorMessage("Creating annotation version folder failed");
+            return false;
+        }
+        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
+        return true;
+    }
+
+    public function showEmbeddedPDFAnnotation(){
+        //This is the embedded pdf annotator that we built.
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $filename = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_' .$this->core->getUser()->getId().'.json';
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version, $annotation_file_name);
+        $annotation_jsons = [];
+        if(is_file($annotation_path)) {
+            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+            foreach ($dir_iter as $fileinfo) {
+                if (!$fileinfo->isDot()) {
+                    $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                    $grader_id = explode('_', $grader_id)[1];
+                    $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                }
+            }
+        }
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        //TODO: Add a new view
+        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+            'gradeable_id' => $gradeable_id,
+            'grader_id' => $this->core->getUser()->getId(),
+            'user_id' => $user_id,
+            'filename' => $filename,
+            'annotation_jsons' => json_encode($annotation_jsons, 128)
+        ]);
+    }
+
+    public function showPDFAnnotationFullPage(){
+        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
+        //a full-sized annotator, so keeping this in for now.
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
+    }
+      
+    private function fetchGradeable($gradeable_id, $who_id) {
+        // TODO: this is bad, but its the only way to do it until the new model
+        $users = [$who_id];
+        $team = $this->core->getQueries()->getTeamById($who_id);
+        if ($team !== null) {
+            $users = array_merge($team->getMembers(), $users);
+        }
+        $gradeables = $this->core->getQueries()->getGradeables($gradeable_id, $users);
+        $gradeable = null;
+        foreach ($gradeables as $g) {
+            // Either this is the user requsted (non-team case) or its the gradeable instance for me or access grading
+            if ($g->getUser() === $who_id || $g->getUser()->getId() === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+                $gradeable = $g;
+                break;
+            }
+        }
+        return $gradeable;
+    }
+
     public function ajaxRemoveEmpty(){
         //This function shows the empty spaces in the diffViewer
         //TODO: Need to add checks?
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $_REQUEST['who_id']);
+        $who_id = $_REQUEST['who_id'];
+        $gradeable = $this->fetchGradeable($gradeable_id, $who_id);
         $gradeable->loadResultDetails();
         $testcase = $gradeable->getTestcases()[$_REQUEST['index']];
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
@@ -1104,7 +1199,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxGetStudentOutput() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $who_id = $_REQUEST['who_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+        $gradeable = $this->fetchGradeable($gradeable_id, $who_id);
 
         $index = $_REQUEST['index'];
 

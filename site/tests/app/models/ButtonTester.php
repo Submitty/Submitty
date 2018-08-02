@@ -8,12 +8,14 @@ use tests\BaseUnitTest;
 class ButtonTester extends BaseUnitTest {
     public function testDefaults() {
         $button = new Button($this->createMockCore(), []);
-        $this->assertEquals('', $button->getTitle());
+        $this->assertNull($button->getTitle());
         $this->assertEquals('', $button->getHref());
         $this->assertEquals('btn', $button->getClass());
         $this->assertNull($button->getProgress());
         $this->assertNull($button->getSubtitle());
         $this->assertFalse($button->isDisabled());
+        $this->assertFalse($button->isTitleOnHover());
+        $this->assertNull($button->getAriaLabel());
     }
 
     public function testOverrides() {
@@ -23,7 +25,9 @@ class ButtonTester extends BaseUnitTest {
             'class' => 'test-btn',
             'progress' => 100,
             'subtitle' => 'blah blah',
-            'disabled' => true
+            'disabled' => true,
+            'title_on_hover' => true,
+            'aria_label' => "placeholder"
         ];
         $button = new Button($this->createMockCore(), $details);
         $this->assertEquals($details['title'], $button->getTitle());
@@ -32,6 +36,8 @@ class ButtonTester extends BaseUnitTest {
         $this->assertEquals($details['progress'], $button->getProgress());
         $this->assertEquals($details['subtitle'], $button->getSubtitle());
         $this->assertTrue($button->isDisabled());
+        $this->assertTrue($button->isTitleOnHover());
+        $this->assertEquals($details['aria_label'], $button->getAriaLabel());
     }
 
     public function testWrongTypeProgress() {

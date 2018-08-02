@@ -147,30 +147,37 @@ class FileUtils {
      * @param string $searchPath
      */
     public static function getAllFilesTrimSearchPath($searchPath, $pathLength) {
-      $iter = new \RecursiveDirectoryIterator($searchPath);
-      $files = array();
-      while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
-          if ($iter->isDot()) {
-              $iter->next();
-              continue;
-          }
-          else if ($iter->isFile()) {
-                $filename = $iter->getPathname();
-                array_push($files, substr($filename, $pathLength, strlen($filename)-$pathLength));
-          }
-          else if ($iter->isDir()) {
-            if (in_array($iter->getFilename(), array('__MACOSX'))) {
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $disallowed_files = array('.ds_store');
+
+        $iter = new \RecursiveDirectoryIterator($searchPath);
+        $files = array();
+        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
+            if ($iter->isDot()) {
                 $iter->next();
                 continue;
             }
-            $newFiles = FileUtils::getAllFilesTrimSearchPath($searchPath . '/' . $iter->getFilename(), $pathLength);
-            if (!empty($newFiles))
-                array_push($files, ...$newFiles);
+            else if ($iter->isFile()) {
+                if (in_array(strtolower($iter->getFilename()), $disallowed_files)) {
+                    $iter->next();
+                    continue;
+                }
+                $filename = $iter->getPathname();
+                array_push($files, substr($filename, $pathLength, strlen($filename)-$pathLength));
+            }
+            else if ($iter->isDir()) {
+                if (in_array(strtolower($iter->getFilename()), $disallowed_folders)) {
+                    $iter->next();
+                    continue;
+                }
+                $newFiles = FileUtils::getAllFilesTrimSearchPath($searchPath . '/' . $iter->getFilename(), $pathLength);
+                if (!empty($newFiles))
+                    array_push($files, ...$newFiles);
 
-          }
-          $iter->next();
-      }
-      return $files;
+            }
+            $iter->next();
+        }
+        return $files;
     }
 
     /**

@@ -40,6 +40,10 @@
                 <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
                 Regrade Request Due Date (Regrade Requests must be sent by this date)
                 <br />
+            {% else %}
+                <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}" style="display: none">
+                Regrade Request Due Date (Regrade Requests must be sent by this date)
+                <br />
             {% endif %}
         </div>
         How many late days may students use on this assignment?
