@@ -91,7 +91,6 @@ class TestForum(BaseTestCase):
             if not loading_spinner.is_displayed():
                 break
             self.wait_after_ajax()
-            print("AJAX WAIT COMPLET")
             assert not loading_spinner.is_displayed()
         return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
 

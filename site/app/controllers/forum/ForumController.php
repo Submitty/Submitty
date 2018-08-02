@@ -387,7 +387,7 @@ class ForumController extends AbstractController {
                 // Notification to parent post author
                 $post = $this->core->getQueries()->getPost($parent_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
@@ -492,7 +492,7 @@ class ForumController extends AbstractController {
                 $type = "post";
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
@@ -538,7 +538,7 @@ class ForumController extends AbstractController {
             if($any_changes) {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
@@ -819,7 +819,8 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
-                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
+                $child_root_post = -1;
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
                     $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
                     if(is_dir($child_thread_dir)) {
                         $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
@@ -838,7 +839,7 @@ class ForumController extends AbstractController {
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author));
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post));
                     $this->core->getQueries()->pushNotification($notification);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;

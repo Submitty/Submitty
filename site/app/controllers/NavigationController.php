@@ -8,6 +8,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\GradeableList;
+use app\models\Notification;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -135,7 +136,7 @@ class NavigationController extends AbstractController {
                     $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
                 }
                 $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
-                $this->core->redirect($this->core->buildUrl(json_decode($metadata)));
+                $this->core->redirect(Notification::getUrl($this->core, $metadata));
             } else if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
                 $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));

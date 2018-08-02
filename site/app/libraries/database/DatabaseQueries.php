@@ -2294,7 +2294,7 @@ AND gc_id IN (
         return $root_post;
     }
 
-    public function mergeThread($parent_thread_id, $child_thread_id, &$message){
+    public function mergeThread($parent_thread_id, $child_thread_id, &$message, &$child_root_post){
         try{
             $this->course_db->beginTransaction();
             $parent_thread_title = null;
