@@ -1114,7 +1114,7 @@ class ElectronicGraderController extends GradingController {
         $anon_id = $_POST['anon_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
-        $custom_points = $_POST['custom_points'] ?? 0;
+        $custom_points = $_POST['custom_points'] ?? null;
         $component_version = $_POST['active_version'] ?? null;
 
         // Optional marks parameter
@@ -1131,6 +1131,7 @@ class ElectronicGraderController extends GradingController {
         }
         if (!is_numeric($custom_points)) {
             $this->core->getOutput()->renderJsonFail('Invalid custom_points parameter');
+            return;
         }
         if ($component_version === null) {
             $this->core->getOutput()->renderJsonFail('Missing active_version parameter');
