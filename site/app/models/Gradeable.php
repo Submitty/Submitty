@@ -81,6 +81,7 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
+ * @method float getTotalTAPoints()
  * @method float getTotalPeerGradingPoints()
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
@@ -284,7 +285,7 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_points = 0;
+    protected $total_ta_grading_points = 0;
     
     protected $total_peer_grading_points = 0;
 
@@ -453,7 +454,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_points += $max_value;
+                    $this->total_ta_grading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -920,10 +921,6 @@ class Gradeable extends AbstractModel {
             }
         }
         return $points;
-    }
-
-    public function getTotalTAPoints() {
-        return $this->total_tagrading_points;
     }
 
     public function getTAViewDate(){
