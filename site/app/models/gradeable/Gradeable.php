@@ -1233,10 +1233,6 @@ class Gradeable extends AbstractModel {
      * @throws \Exception If creating directories for the team fails, or writing team history fails
      */
     public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
-        if (count($members) === 0) {
-            throw new \InvalidArgumentException('Team member list must not be blank');
-        }
-
         $all_members = $members;
         $all_members[] = $leader;
 
