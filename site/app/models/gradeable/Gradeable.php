@@ -670,6 +670,7 @@ class Gradeable extends AbstractModel {
      * @param bool $text
      * @param bool $peer
      * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
+     * @return Component the created component
      */
     public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
                                  float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
@@ -688,6 +689,7 @@ class Gradeable extends AbstractModel {
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
+        return $component;
     }
 
     /**

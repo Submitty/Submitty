@@ -287,6 +287,7 @@ class Component extends AbstractModel {
      * Adds a new mark to this component with the provided title and point value
      * @param string $title
      * @param float $points
+     * @return Mark the created mark
      */
     public function addMark(string $title, float $points) {
         $mark = new Mark($this->core, $this, [
@@ -296,6 +297,7 @@ class Component extends AbstractModel {
             'id' => 0
         ]);
         $this->marks[] = $mark;
+        return $mark;
     }
 
     /**
