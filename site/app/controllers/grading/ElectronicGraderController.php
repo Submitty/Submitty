@@ -1737,6 +1737,7 @@ class ElectronicGraderController extends GradingController {
         // TODO: filter users based on who the grader is allowed to see
         $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark);
 
+        // TODO: this function should not return this data...
         $sections = array();
         $this->getStats($mark->getComponent()->getGradeable(), $grader, $sections);
 
