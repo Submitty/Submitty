@@ -80,6 +80,12 @@ $(document).ready(function () {
         let data = {};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
+            if($(val).is(':radio') && !$(val).is(':checked')) {
+                return;
+            }
+            if($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
+                $(val).val('0');
+            }
             data[val.name] = $(val).val();
         };
 
