@@ -182,8 +182,8 @@ class MiscController extends AbstractController {
 
     private function downloadFile($download_with_any_role = false) {
         // security check
-        $path = $_REQUEST["path"];
         $dir = $_REQUEST["dir"];
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
