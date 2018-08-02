@@ -14,7 +14,12 @@ html {
 }
 
 body {
+    font-family: 'Source Sans Pro', sans-serif;
+    height: 100%;
+    position: relative;
+}
 
+#site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
 
@@ -27,10 +32,6 @@ body {
 
     background: linear-gradient(#0a6496, #b8d5e5);
     background-attachment: fixed;
-
-    font-family: 'Source Sans Pro', sans-serif;
-    height: 100%;
-    position: relative;
 }
 
 a, a:hover, a:link, a:visited {
@@ -291,7 +292,6 @@ table tr.table-header {
     min-height: 125px;
     height: auto;
     width: 100%;
-    box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
     overflow: hidden;
 }

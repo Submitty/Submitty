@@ -1,22 +1,23 @@
 {% import _self as self %}
-        {# Looks weird but this is actually a continuation of GlobalHeader.twig #}
-        <div id="push"></div>
+{# Looks mismatched because this is a continuation of GlobalHeader.twig #}
+                <div id="push"></div>
+                <div id="footer">
+                    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+                    <span id="github">
+                        <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
+                            <i class="fa fa-github fa-lg"></i>
+                        </a>
+                    </span>
+
+                    {% if is_debug %}
+                        <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                    {% endif %}
+                </div>
+            </div>
 {% if wrapper_enabled %}
         </div>
     </div>
 {% endif %}
-</div>
-<div id="footer">
-    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-    <span id="github">
-        <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
-            <i class="fa fa-github fa-lg"></i>
-        </a>
-    </span>
-
-    {% if is_debug %}
-    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
-    {% endif %}
 </div>
 {% if is_debug %}
     <div id='page-info'>
