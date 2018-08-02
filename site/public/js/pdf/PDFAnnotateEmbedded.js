@@ -109,11 +109,11 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
     function setActiveToolbarItem(option){
         let selected = $('.tool-selected');
+        let clicked_button = $("a[value="+option+"]");
         if(option != selected.attr('value')){
             //There are two classes for the icons; toolbar-action and toolbar-item.
             //toolbar-action are single use buttons such as download and clear
             //toolbar-item are continuous options such as pen, text, etc.
-            let clicked_button = $("a[value="+option+"]");
             if(!clicked_button.hasClass('toolbar-action')){
                 $(selected[0]).removeClass('tool-selected');
                 clicked_button.addClass('tool-selected');
@@ -149,11 +149,15 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 case 'zoomout':
                     debounce(zoom, 500, 'out');
                     break;
+                case 'zoomcustom':
+                    debounce(zoom, 500, 'custom');
+                    break;
                 case 'text':
                     UI.enableText();
                     break;
             }
         } else {
+            //For color and size select
             switch(option){
                 case 'pen':
                     $("#pen_selection").toggle();
@@ -165,14 +169,30 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
 
-    function zoom(option){
+    function zoom(option, custom_val){
+        let zoom_flag = true;
+        let zoom_level = RENDER_OPTIONS.scale;
         if(option == 'in'){
-            RENDER_OPTIONS.scale += 0.1;
+            zoom_level *= 1.5;
+        } else if(option == 'out'){
+            zoom_level /= 1.5;
         } else {
-            RENDER_OPTIONS.scale -= 0.1;
+            if(custom_val != null){
+                zoom_level = custom_val/100;
+            } else {
+                zoom_flag = false;
+            }
+            $('#zoom_selection').toggle();
         }
-        $('#zoom_percent').text(parseInt(RENDER_OPTIONS.scale*100)+"%");
-        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+        if(zoom_level > 10 || zoom_level < 0.25){
+            alert("Cannot zoom more");
+            return;
+        }
+        RENDER_OPTIONS.scale = zoom_level;
+        $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
+        if(zoom_flag){
+            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+        }
     }
 
     function clearCanvas(){
@@ -186,15 +206,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
 
     function saveFile(){
-        $('#save_status').text("Saved");
-        $('#save_status').css('color', 'black');
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
         let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
-        // let count = 0;
-        // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
-        //     count+= JSON.parse(annotation_layer)[i]['lines'].length;
-        // }
-        // console.log(count);
         $.ajax({
             type: 'POST',
             url: url,
@@ -203,7 +216,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 GENERAL_INFORMATION
             },
             success: function(data){
-
+                $('#save_status').text("Saved");
+                $('#save_status').css('color', 'black');
             }
         });
     }
@@ -212,6 +226,13 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    //TODO: Find a better home for this, shouldn't be here.
+    document.getElementById('reset_zoom').addEventListener('click', function(){
+        zoom('custom', 100);
+    });
+    document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
+        zoom('custom', e.target.value);
+    });
 })();
 
 // Pen stuff
@@ -291,10 +312,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
     document.getElementById('text_color_selector').addEventListener('change', function(e){
-        setText(textSize, e.srcElement.value);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setText(textSize, value);
     });
     document.getElementById('text_size_selector').addEventListener('change', function(e){
-        setText(e.srcElement.value, textColor);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setText(value, textColor);
     });
     initText();
 })();

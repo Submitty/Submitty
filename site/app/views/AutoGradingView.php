@@ -472,7 +472,7 @@ class AutoGradingView extends AbstractView {
                 }, $component->getMarks())
             ];
         }, $gradeable->getComponents());
-
+//        $uploaded_files = $ta_graded_gradeable->getGradedGradeable()->get
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
