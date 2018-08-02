@@ -16,7 +16,7 @@
   <canvas id="diagram" width="850" height="430">
     Your browser does not support the HTML5 canvas tag.
   </canvas>
-  <img id="image">
+  {#<img id="image">#}
   <pre id="seats"></pre>
 
   <script>
@@ -324,18 +324,18 @@
     render_zone_labels(config);
 
     // Render to image
-    document.getElementById("image").src = diagram.toDataURL();
+    // document.getElementById("image").src = diagram.toDataURL();
 
     // Print seats used
-    var temp = [];
-    for(var letter in used) {
-      temp.push(letter)
-    }
-    temp.sort();
-    container = document.getElementById("seats")
-    for(var index in temp) {
-      var letter = temp[index];
-      container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
-    }
+    // var temp = [];
+    // for(var letter in used) {
+    //   temp.push(letter)
+    // }
+    // temp.sort();
+    // container = document.getElementById("seats")
+    // for(var index in temp) {
+    //   var letter = temp[index];
+    //   container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
+    // }
   </script>
 </div>

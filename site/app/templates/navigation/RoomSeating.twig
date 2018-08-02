@@ -11,6 +11,10 @@
     </td></tr>
     <tr><td style="background-color:#ffffff;">
         {#<img src="zone_images/f17_csci1200_test01_DCC_308.png">#}
-        {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
+        {% if seating_config != null %}
+            {% include '@room_templates/'~user_seating_details.building~'/'~user_seating_details.room~'.twig' %}
+        {% else %}
+            No room template found for the room you have been assigned.
+        {% endif %}
     </td></tr>
 </table>

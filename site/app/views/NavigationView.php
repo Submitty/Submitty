@@ -101,26 +101,39 @@ class NavigationView extends AbstractView {
         $display_room_seating = $this->core->getConfig()->displayRoomSeating();
         $user_seating_details = null;
         $gradeable_title = null;
+        $seating_config = null;
+        // If the instructor has selected a gradeable for room seating
         if($display_room_seating) {
-            $seating_json_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $this->core->getConfig()->getRoomSeatingGradeableId(), $this->core->getUser()->getId() . ".json");
-            if (file_exists($seating_json_path)) {
-                $seating_json = file_get_contents($seating_json_path);
-                $user_seating_details = json_decode($seating_json);
-                $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
-                $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-                foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
-                    if ($gradeable_id_and_title['g_id'] === $gradeable_id) {
-                        $gradeable_title = $gradeable_id_and_title['g_title'];
-                        break;
-                    }
+            // use the room seating gradeable id to find the title to display.
+            $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
+            $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
+                if($gradeable_id_and_title['g_id'] === $gradeable_id) {
+                    $gradeable_title = $gradeable_id_and_title['g_title'];
+                    break;
                 }
+            }
+
+            $seating_user_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $gradeable_id, $this->core->getUser()->getId() . ".json");
+            // if the instructor has generated a report for the student for this gradeable
+            if(is_file($seating_user_path)) {
+                $user_seating_details = json_decode(file_get_contents($seating_user_path));
 
                 $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
-                                                            $this->core->getConfig()->getRoomSeatingGradeableId(), $user_seating_details->building, $user_seating_details->room, 'config.json');
-                $seating_config = file_get_contents($seating_config_path);
+                    $gradeable_id, $user_seating_details->building, $user_seating_details->room, 'config.json');
+                // if the report the instructor generated corresponds to a valid room config
+                if(is_file($seating_config_path)) {
+                    $seating_config = file_get_contents($seating_config_path);
+                }
             }
             else {
-                $user_seating_details = "See instructor for seating details";
+                // mimic the result format of json_decode when there is no file to decode
+                // and make each field the default value
+                $user_seating_details = new \stdClass();
+                $user_seating_details->building =
+                $user_seating_details->zone     =
+                $user_seating_details->row      =
+                $user_seating_details->seat     = "SEE INSTRUCTOR";
             }
         }
 

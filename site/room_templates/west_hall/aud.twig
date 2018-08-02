@@ -16,8 +16,8 @@
   <canvas id="diagram" width="1050" height="800">
     Your browser does not support the HTML5 canvas tag.
   </canvas>
-  <img id="image">
-  <pre id="seats"></pre>
+  {#<img id="image">#}
+  {#<pre id="seats"></pre>#}
 
   <script>
 
@@ -481,29 +481,29 @@
     render_zone_labels(config);
 
     // Render to image
-    document.getElementById("image").src = diagram.toDataURL();
+    // document.getElementById("image").src = diagram.toDataURL();
 
     // Print seats used
-    var temp = [];
-    for(var letter in used) {
-      temp.push(letter)
-    }
-    temp.sort();
-    container = document.getElementById("seats")
-    var total = 0;
-    for(var index in temp) {
-      var letter = temp[index];
-      container.innerHTML += letter + " WEST-HALL AUDITORIUM " + used[letter] + "\n";
-      total += used[letter];
-    }
-
-    // Get total number of seats
-    var all = 0;
-    all += sum_array(seats["left"]);
-    all += sum_array(seats["middle"]);
-    all += sum_array(seats["right"]);
-
-    container.innerHTML += "\nTOTAL: " + total + "\n";
-    container.innerHTML += "UNUSED: " + (all - total) + "\n";
+    // var temp = [];
+    // for(var letter in used) {
+    //   temp.push(letter)
+    // }
+    // temp.sort();
+    // container = document.getElementById("seats")
+    // var total = 0;
+    // for(var index in temp) {
+    //   var letter = temp[index];
+    //   container.innerHTML += letter + " WEST-HALL AUDITORIUM " + used[letter] + "\n";
+    //   total += used[letter];
+    // }
+    //
+    // // Get total number of seats
+    // var all = 0;
+    // all += sum_array(seats["left"]);
+    // all += sum_array(seats["middle"]);
+    // all += sum_array(seats["right"]);
+    //
+    // container.innerHTML += "\nTOTAL: " + total + "\n";
+    // container.innerHTML += "UNUSED: " + (all - total) + "\n";
   </script>
 </div>
