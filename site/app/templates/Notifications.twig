@@ -10,7 +10,13 @@
     <h2>Notifications</h2>
     <table class="table table-bordered persist-area">
                 <tr class="info persist-header">
-                    <td colspan="8" style="text-align: center">Course: {{ course  }}</td>
+                    <td colspan="8" style="text-align: center">
+                        {% if show_all %}
+                            All notifications
+                        {% else %}
+                            New notifications
+                        {% endif %}
+                    </td>
                 </tr>
                 <tbody style="text-align: left;">
                     {% for notification in notifications %}
@@ -43,7 +49,7 @@
 
             {% if notifications is empty %}
             <tr>
-                <td colspan="8">No notification found</td>
+                <td colspan="8">No notifications.</td>
             </tr>
             {% endif %}        
     </table>
