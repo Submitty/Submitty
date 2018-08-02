@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\models\GradeableList;
 use app\models\ClassJson;
 
 class StudentController extends AbstractController {
@@ -18,6 +17,9 @@ class StudentController extends AbstractController {
                 break;
             case 'view_late_table':
                 $controller = new student\LateDaysTableController($this->core);
+                break;
+            case 'pdf':
+                $controller = new student\PDFController($this->core);
                 break;
             case 'submission':
             default:

@@ -60,6 +60,9 @@ class ForumController extends AbstractController {
             case 'get_threads':
                 $this->getThreads();
                 break;
+            case 'get_history':
+                $this->getHistory();
+                break;
             case 'add_category':
                 $this->addNewCategory();
                 break;
@@ -74,6 +77,9 @@ class ForumController extends AbstractController {
                 break;
             case 'show_stats':
                 $this->showStats();
+                break;
+            case 'get_threads_before':
+                $this->getThreadsBefore();
                 break;
             case 'merge_thread':
                 $this->mergeThread();
@@ -287,6 +293,7 @@ class ForumController extends AbstractController {
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
@@ -304,7 +311,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -397,6 +404,34 @@ class ForumController extends AbstractController {
         return $response;
     }
 
+    private function checkPostEditAccess($post_id) {
+        if($this->core->getUser()->getGroup() <= 2){
+                // Instructor/full access ta
+                return true;
+        } else {
+            $post = $this->core->getQueries()->getPost($post_id);
+            if($post['author_user_id'] === $this->core->getUser()->getId()) {
+                // Original Author
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function checkThreadEditAccess($thread_id) {
+        if($this->core->getUser()->getGroup() <= 2){
+                // Instructor/full access ta
+                return true;
+        } else {
+            $post = $this->core->getQueries()->getThread($thread_id)[0];
+            if($post['created_by'] === $this->core->getUser()->getId()) {
+                // Original Author
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Alter content/delete/undelete post of a thread
      *
@@ -405,137 +440,122 @@ class ForumController extends AbstractController {
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      */
     public function alterPost($modifyType){
-        if($this->core->getUser()->getGroup() <= 2){
-
-            if($modifyType == 0) { //delete post or thread
-                $thread_id = $_POST["thread_id"];
-                $post_id = $_POST["post_id"];
-                $type = "";
-                if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
-                    $type = "thread";
+        if($modifyType == 0) { //delete post or thread
+            if(!($this->core->getUser()->getGroup() <= 2)) {
+                $error = "You do not have permissions to do that.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $response;
+            }
+            $thread_id = $_POST["thread_id"];
+            $post_id = $_POST["post_id"];
+            $type = "";
+            if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
+                $type = "thread";
+            } else {
+                $type = "post";
+            }
+            $this->core->getOutput()->renderJson($response = array('type' => $type));
+            return $response;
+        } else if($modifyType == 2) { //undelete post or thread
+            if(!($this->core->getUser()->getGroup() <= 2)) {
+                $error = "You do not have permissions to do that.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $response;
+            }
+            $thread_id = $_POST["thread_id"];
+            $post_id = $_POST["post_id"];
+            $type = "";
+            $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
+            if(is_null($result)) {
+                $error = "Parent post must be undeleted first.";
+                $this->core->getOutput()->renderJson($response = array('error' => $error));
+            } else {
+                /// We want to reload same thread again, in both case (thread/post undelete)
+                $type = "post";
+                $this->core->getOutput()->renderJson($response = array('type' => $type));
+            }
+            return $response;
+        } else if($modifyType == 1) { //edit post or thread
+            $thread_id = $_POST["edit_thread_id"];
+            $post_id = $_POST["edit_post_id"];
+            if(!($this->checkPostEditAccess($post_id))) {
+                $this->core->addErrorMessage("You do not have permissions to do that.");
+                return;
+            }
+            $status_edit_thread = $this->editThread();
+            $status_edit_post   = $this->editPost();
+             // Author of first post and thread must be same
+            if(is_null($status_edit_thread) && is_null($status_edit_post)) {
+                $this->core->addErrorMessage("No data submitted. Please try again.");
+            } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
+                $type = is_null($status_edit_thread)?"Post":"Thread";
+                if($status_edit_thread || $status_edit_post) {
+                    //$type is true
+                    $this->core->addSuccessMessage("{$type} updated successfully.");
                 } else {
-                    $type = "post";
+                    $this->core->addErrorMessage("{$type} updation failed. Please try again.");
                 }
-                $this->core->getOutput()->renderJson(array('type' => $type));
-            } else if($modifyType == 2) { //undelete post or thread
-                $thread_id = $_POST["thread_id"];
-                $post_id = $_POST["post_id"];
-                $type = "";
-                $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
-                if(is_null($result)) {
-                    $error = "Parent post must be undeleted first.";
-                    $this->core->getOutput()->renderJson(array('error' => $error));
-                    return;
+            } else {
+                if($status_edit_thread && $status_edit_post) {
+                    $this->core->addSuccessMessage("Thread and post updated successfully.");
                 } else {
-                    /// We want to reload same thread again, in both case (thread/post undelete)
-                    $type = "post";
-                    $this->core->getOutput()->renderJson(array('type' => $type));
-                }
-            } else if($modifyType == 1) { //edit post or thread
-                $status_edit_thread = $this->editThread();
-                $status_edit_post   = $this->editPost();
-                if(is_null($status_edit_thread) && is_null($status_edit_post)) {
-                    $this->core->addErrorMessage("No data submitted. Please try again.");
-                } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
-                    $type = is_null($status_edit_thread)?"Post":"Thread";
+                    $type = ($status_edit_thread)?"Thread":"Post";
+                    $type_opposite = (!$status_edit_thread)?"Thread":"Post";
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
-                        $this->core->addSuccessMessage("{$type} updated successfully.");       
+                        $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
                     } else {
-                        $this->core->addErrorMessage("{$type} updation failed. Please try again.");       
-                    }
-                } else {
-                    if($status_edit_thread && $status_edit_post) {
-                        $this->core->addSuccessMessage("Thread and post updated successfully.");       
-                    } else {
-                        $type = $status_edit_thread?"Thread":"Post";
-                        $type_opposite = $status_edit_thread?"Post":"Thread";
-                        if($status_edit_thread || $status_edit_post) {
-                            //$type is true
-                            $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
-                        } else {
-                            $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");       
-                        }
+                        $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
                     }
                 }
-                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
             }
-            $response = array('type' => $type);
-            $this->core->getOutput()->renderJson($response);
-            return $response;
-        } else {
-            $this->core->addErrorMessage("You do not have permissions to do that.");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
     }
 
     private function editThread(){
-        if($this->core->getUser()->getGroup() <= 2){
-            if(!empty($_POST["title"])) {
-                $thread_id = $_POST["edit_thread_id"];
-                $thread_title = $_POST["title"];
-                $categories_ids  = array();
-                if(!empty($_POST["cat"])) {
-                    foreach ($_POST["cat"] as $category_id) {
-                        $categories_ids[] = (int)$category_id;
-                    }
-                }
-                if(!$this->isValidCategories($categories_ids)) {
-                    return false;
-                }
-                return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids);
+        // Ensure authentication before call
+        if(!empty($_POST["title"])) {
+            $thread_id = $_POST["edit_thread_id"];
+            if(!$this->checkThreadEditAccess($thread_id)) {
+                return false;
             }
+            $thread_title = $_POST["title"];
+            $status = $_POST["thread_status"];
+            $categories_ids  = array();
+            if(!empty($_POST["cat"])) {
+                foreach ($_POST["cat"] as $category_id) {
+                    $categories_ids[] = (int)$category_id;
+                }
+            }
+            if(!$this->isValidCategories($categories_ids)) {
+                return false;
+            }
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status);
         }
         return null;
     }
 
     private function editPost(){
+        // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
-        if($this->core->getUser()->getGroup() <= 2){
-            if(!empty($new_post_content)) {
-                $post_id = $_POST["edit_post_id"];
-                $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
-                return $this->core->getQueries()->editPost($post_id, $new_post_content, $anon);
-            }
+        if(!empty($new_post_content)) {
+            $post_id = $_POST["edit_post_id"];
+            $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
+            $current_user = $this->core->getUser()->getId();
+            return $this->core->getQueries()->editPost($current_user, $post_id, $new_post_content, $anon);
         }
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted = false){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $blockNumber = 1){
+        $blockSize = 10;
         $current_user = $this->core->getUser()->getId();
-        if($this->isValidCategories($categories_ids)) {
-            $announce_threads = $this->core->getQueries()->loadAnnouncements($categories_ids, $show_deleted);
-            $reg_threads = $this->core->getQueries()->loadThreads($categories_ids, $show_deleted);
-        } else {
-            $announce_threads = $this->core->getQueries()->loadAnnouncementsWithoutCategory($show_deleted);
-            $reg_threads = $this->core->getQueries()->loadThreadsWithoutCategory($show_deleted);
+        if(!$this->isValidCategories($categories_ids)) {
+            // No filter for category
+            $categories_ids = array();
         }
-        $favorite_threads = $this->core->getQueries()->loadPinnedThreads($current_user);
-
-        $ordered_threads = array();
-        // Order : Favourite and Announcements => Announcements only => Favourite only => Others
-        foreach ($announce_threads as $thread) {
-            if(in_array($thread['id'], $favorite_threads)) {
-                $thread['favorite'] = true;
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($announce_threads as $thread) {
-            if(!in_array($thread['id'], $favorite_threads)) {
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($reg_threads as $thread) {
-            if(in_array($thread['id'], $favorite_threads)) {
-                $thread['favorite'] = true;
-                $ordered_threads[] = $thread;
-            }
-        }
-        foreach ($reg_threads as $thread) {
-            if(!in_array($thread['id'], $favorite_threads)) {
-                $ordered_threads[] = $thread;
-            }
-        }
-
+        $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber);
         foreach ($ordered_threads as &$thread) {
             $list = array();
             foreach(explode("|", $thread['categories_ids']) as $id ) {
@@ -549,20 +569,26 @@ class ForumController extends AbstractController {
     }
 
     public function getThreads(){
-
-	$show_deleted = $this->showDeleted();
-	$currentCourse = $this->core->getConfig()->getCourse();
+        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : -1;
+        $show_deleted = $this->showDeleted();
+        $currentCourse = $this->core->getConfig()->getCourse();
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
-	if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
+        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
+        if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
             $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
-	}
-	foreach ($categories_ids as &$id) {
+        }
+        if(empty($thread_status) && !empty($_COOKIE['forum_thread_status'])){
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        foreach ($categories_ids as &$id) {
             $id = (int)$id;
-	}
+        }
+        foreach ($thread_status as &$status) {
+            $status = (int)$status;
+        }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted);
-
-        $currentCategoriesIds = array_key_exists('currentCategoriesId', $_POST) ? explode("|", $_POST["currentCategoriesId"]) : array();
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $pageNumber);
+        $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
         $current_thread_title = "";
@@ -570,24 +596,34 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderJson(array("html" => $this->core->getOutput()->getOutput()));
+        return $this->core->getOutput()->renderJson(array(
+                "html" => $this->core->getOutput()->getOutput(),
+                "count" => count($threads)
+            ));
     }
 
     public function showThreads(){
         $user = $this->core->getUser()->getId();
-	$currentCourse = $this->core->getConfig()->getCourse();
-        $category_id = in_array('thread_category', $_POST) ? array($_POST['thread_category']) : -1;
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
         $category_id = array($category_id);
-	if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
-	    $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
-	}
-	foreach ($category_id as &$id) {
+        $thread_status = array();
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+            $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
+        }
+        if(!empty($_COOKIE['forum_thread_status'])){
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        foreach ($category_id as &$id) {
             $id = (int)$id;
-	}
-	
-	$max_thread = 0;
+        }
+        foreach ($thread_status as &$status) {
+            $status = (int)$status;
+        }
+
+        $max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted);
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status, 1);
 
         $current_user = $this->core->getUser()->getId();
 
@@ -611,7 +647,7 @@ class ForumController extends AbstractController {
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
-        
+
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $option, $max_thread);
     }
 
@@ -632,9 +668,41 @@ class ForumController extends AbstractController {
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
+    public function getHistory(){
+        $post_id = $_POST["post_id"];
+        $output = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            $_post = array();
+            $older_posts = $this->core->getQueries()->getPostHistory($post_id);
+            foreach ($older_posts as $post) {
+                $_post['user'] = $post["edit_author"];
+                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
+                $_post['post_time'] = date_format(date_create($post['edit_timestamp']),"n/j g:i A");
+                $output[] = $_post;
+            }
+            if(count($output) == 0) {
+                $current_post = $this->core->getQueries()->getPost($post_id);
+                // Current post
+                $_post['user'] = $current_post["author_user_id"];
+                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
+                $_post['post_time'] = date_format(date_create($current_post['timestamp']),"n/j g:i A");
+                $output[] = $_post;
+            }
+            // Fetch additional information
+            foreach ($output as &$_post) {
+                $_post['user_info'] = $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+                $_post['is_staff_post'] = $this->core->getQueries()->isStaffPost($_post['user']);
+            }
+        } else {
+            $output['error'] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($output);
+        return $output;
+    }
+
     public function getEditPostContent(){
         $post_id = $_POST["post_id"];
-        if($this->core->getUser()->getGroup() <= 2 && !empty($post_id)) {
+        if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
             $output = array();
             $output['user'] = $result["author_user_id"];
@@ -652,9 +720,10 @@ class ForumController extends AbstractController {
     }
 
     private function getThreadContent($thread_id, &$output){
-        $result = $this->core->getQueries()->getThreadTitle($thread_id);
+        $result = $this->core->getQueries()->getThread($thread_id)[0];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $output['thread_status'] = $result["status"];
     }
 
     public function showStats(){
@@ -692,6 +761,23 @@ class ForumController extends AbstractController {
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+    }
+
+    public function getThreadsBefore(){
+        $output = array();
+        if($this->core->getUser()->getGroup() <= 2){
+            if(!empty($_POST["current_thead_date"])){
+                $current_thead_date = $_POST["current_thead_date"];
+                $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
+                $output["content"] = $merge_thread_list;
+            } else {
+               $output["error"] = "No date provided. Please try again.";
+            }
+        } else {
+            $output["error"] = "You do not have permissions to do that.";
+        }
+        $this->core->getOutput()->renderJson($output);
+        return $output;
     }
 
     public function mergeThread(){

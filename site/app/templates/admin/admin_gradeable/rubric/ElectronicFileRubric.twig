@@ -71,8 +71,10 @@ Is this a PDF with a page assigned to each component?
                             <input type="hidden" name="mark_gcmid_{{ num }}_{{ mark.getOrder() }}" value="{{ mark.getId() }}">
                             <i class="fa fa-circle" aria-hidden="true"></i>
                             <input type="number" onchange="fixMarkPointValue(this);" class="points2" name="mark_points_{{ num }}_{{ mark.getOrder() }}"
-                                   value="{{ mark.getPoints() }}" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;">
-                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display">{{ mark.getTitle() }}</textarea>
+                                   value="{{ mark.getPoints() }}" step="{{ gradeable.getPrecision() }}" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"
+                                    {{ first ? 'readonly' : '' }}>
+                            <textarea rows="1" placeholder="Comment" name="mark_text_{{ num }}_{{ mark.getOrder() }}" class="comment_display"
+                                   {{ first ? 'style="background:transparent; border:none" readonly' : '' }}>{{ mark.getTitle() }}</textarea>
                             {% if not first %}
                                 <input type="checkbox" name="mark_publish_{{ num }}_{{ mark.getOrder() }}" {{ mark.getPublish() ? 'checked' : '' }}> Publish
                             {% endif %}
@@ -717,9 +719,9 @@ Is this a PDF with a page assigned to each component?
         </tr>');
         $("#rubric_add_mark_" + newQ).before(' \
             <div id="mark_id-'+newQ+'-0" name="mark_'+newQ+'" class="gradeable_display" style="background-color:#EBEBE4"> \
-            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;"> \
+            <i class="fa fa-circle" aria-hidden="true"></i> <input type="number" class="points2" name="mark_points_'+newQ+'_0" data-gcm_id="NEW" value="0" step="0.5" placeholder="±0.5" style="width:50px; resize:none; margin: 5px;" readonly> \
             <input type="hidden" name="mark_gcmid_'+newQ+'_0" value="NEW"> \
-            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" class="comment_display">No Credit</textarea> \
+            <textarea rows="1" placeholder="Comment" name="mark_text_'+newQ+'_0" class="comment_display" style="background:transparent; border:none" readonly>No Credit</textarea> \
             <a onclick="deleteMark(this)" hidden> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \
             <!--\
             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a> \

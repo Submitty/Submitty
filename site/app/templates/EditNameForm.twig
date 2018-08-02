@@ -1,0 +1,20 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-username-form{% endblock %}
+{% block title %}Specify Preferred First Name{% endblock %}
+{% block body %}
+    <p>{{ change_name_text }}</p>
+    <p>&emsp;</p>
+    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <div>
+        <input type="text" name="user_name_change" />
+    </div>
+{% endblock %}
+{% block form %}
+    <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

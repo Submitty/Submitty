@@ -26,13 +26,13 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -40,11 +40,11 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'with_unicode'
+        args['option'] = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'with_escape'
+        args['option'] = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
@@ -55,39 +55,58 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     args['which'] = 'expected';
     var url = buildUrl(args);
 
+    let assertSuccess = function(data) {
+        if (data.status === 'fail') {
+            alert("Error loading diff: " + data.message);
+            return false;
+        } else if (data.status === 'error') {
+            alert("Internal server error: " + data.message);
+            return false;
+        }
+        return true;
+    }
+
     $.getJSON({
         url: url,
-        success: function(data) {
-            for(property in data.whitespaces){
-                list_white_spaces[property] = data.whitespaces[property];
+        success: function (response) {
+            if(!assertSuccess(response)) {
+                return;
+            }
+            for (property in response.data.whitespaces) {
+                list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
-            $(expected_div).html(data.html);
+            $(expected_div).html(response.data.html);
             args['which'] = 'actual';
             url = buildUrl(args);
             $.getJSON({
                 url: url,
-                success: function(data) {
-                    for(property in data.whitespaces){
-                        list_white_spaces[property] = data.whitespaces[property];
+                success: function (response) {
+                    if(!assertSuccess(response)) {
+                        return;
                     }
-                    for(property in list_white_spaces){
-                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    for (property in response.data.whitespaces) {
+                        list_white_spaces[property] = response.data.whitespaces[property];
+                    }
+                    for (property in list_white_spaces) {
+                        $('#' + helper_id).append('<span style=\"outline:1px blue solid;\">' + list_white_spaces[property] + "</span> = " + property + " ");
                     }
                     $(actual_div).empty();
-                    $(actual_div).html(data.html);
+                    $(actual_div).html(response.data.html);
                 },
-                error: function(e) {
-                    alert("Could not load diff, please refresh the page and try again.");}
+                error: function (e) {
+                    alert("Could not load diff, please refresh the page and try again.");
+                }
             });
         },
-        error: function(e) {
-            alert("Could not load diff, please refresh the page and try again.");}
+        error: function (e) {
+            alert("Could not load diff, please refresh the page and try again.");
+        }
     });
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -99,13 +118,17 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
-        $.ajax({
+        $.getJSON({
             url: url,
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Error getting file diff: ' + response.message);
+                    return;
+                }
                 $(div_name).empty();
-                $(div_name).html(data);
+                $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
             },
             error: function(e) {
@@ -167,6 +190,18 @@ function editUserForm(user_id) {
                     $('#grs_' + val).prop('checked', true);
                 });
             }
+            if(registration_section === 'null' && json['user_group'] === 4) {
+                $('#user-form-student-error-message').css('display', 'block');
+            }
+            else {
+                $('#user-form-student-error-message').css('display', 'none');
+            }
+            if(json['user_group'] == 4) {
+                $('#user-form-assigned-sections').css('display', 'none');
+            }
+            else {
+                $('#user-form-assigned-sections').css('display', 'block');
+            }
 
         },
         error: function() {
@@ -190,6 +225,8 @@ function newUserForm() {
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+    $('#user-form-student-error-message').css('display', 'block');
+    $('#user-form-assigned-sections').css('display', 'none');
 }
 
 function extensionPopup(json){
@@ -236,6 +273,31 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     form.css("display", "block");
 }
 
+function newDeleteCourseMaterialForm(form_action, file_name) {
+    var current_y_offset = window.pageYOffset;
+    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+
+    $('[id^=div_viewer_]').each(function() {
+        var number = this.id.replace('div_viewer_', '').trim();
+
+        var elem = $('#div_viewer_' + number);
+        if (elem.hasClass('open')) {
+            document.cookie = "cm_" +number+ "=1;";
+        }
+        else {
+            document.cookie = "cm_" +number+ "=0;";
+        }
+    });
+
+
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-course-material-form");
+    $('[name="delete-course-material-message"]', form).html('');
+    $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
+    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
@@ -243,80 +305,105 @@ function newUploadImagesForm() {
     $('[name="upload"]', form).val(null);
 }
 
+function confirmExtension(option){
+    $('.popup-form').css('display', 'none');
+    $('input[name="option"]').val(option);
+    $('#excusedAbsenceForm').submit();
+    $('input[name="option"]').val(-1);
+}
+
+function userNameChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-username-form");
+    form.css("display", "block");
+    $('[name="user_name_change"]', form).val("");
+}
+
+function passwordChange() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#change-password-form");
+    form.css("display", "block");
+    $('[name="new_password"]', form).val("");
+    $('[name="confirm_new_password"]', form).val("");
+}
+
+function closePopup(popup) {
+    //See if we have a close button that lets us click to close
+    var closer = $(popup).find(".close-button");
+    if (closer.length) {
+        closer.click();
+    }
+}
+
+function newUploadCourseMaterialsForm() {
+
+    createArray(1);
+
+    var fileList = document.getElementsByClassName("file-viewer-data");
+
+    var files = [];
+    for(var i=0;i<fileList.length;i++){
+        var file = fileList[i];
+        files.push(file.getAttribute('data-file_url'));
+        readPrevious(file.getAttribute('data-file_url'), 1);
+    }
+
+    $('.popup-form').css('display', 'none');
+    var form = $("#upload-course-materials-form");
+
+    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
+
+    form.css("display", "block");
+    $('[name="upload"]', form).val(null);
+
+}
+
+function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-plagiarism-result-and-config-form");
+    $('[name="gradeable_title"]', form).html('');
+    $('[name="gradeable_title"]', form).append(gradeable_title);
+    $('[name="delete"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
     var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
-    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>'; 
+    to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
     $('[name="prev_gradeable_div"]', form).append(to_append);
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
 
-function setRankingForGradeable() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    if(gradeable_id == ""){
-        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="code_box_1"]').empty();
-        $('[name="code_box_2"]').empty();
-    }
-    else {
-        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
-                'gradeable_id': gradeable_id});
-
-        $.ajax({
-            url: url,
-            success: function(data) {
-                var rankings = JSON.parse(data);
-                if(rankings.error){
-                    alert(rankings.error);
-                    return;
-                }
-                var append_options='<option value="">None</option>';
-                $.each(rankings, function(i,user_ranking_info){
-                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
-                });
-                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
-            },
-            error: function(e) {
-                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
-            }
-        })
-    }    
-}
-
-function setUserSubmittedCode(changed) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
+function setUserSubmittedCode(gradeable_id, changed) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
     if(user_id_1 == ""){
-        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="code_box_1"]').empty();
         $('[name="code_box_2"]').empty();
     }
     else {
-        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
-            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
             $('[name="code_box_1"]').empty(); 
             $('[name="code_box_2"]').empty(); 
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
-                if( version_user_1 == '' || changed == 'user_id_1') {    
-                    version_user_1 = "max_matching";                
+                if( version_user_1 == '' || changed == 'user_id_1') {
+                    version_user_1 = "max_matching";
                 }
 
                 var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
@@ -345,7 +432,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
                             }
                         });
-                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
                         $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                     },
                     error: function(e) {
@@ -360,7 +447,7 @@ function setUserSubmittedCode(changed) {
                     success: function(data) {
                         if(data == "no_match_for_this_version") {
                             var append_options='<option value="">None</option>';
-                            $('[name="code_box_2"]').empty(); 
+                            $('[name="code_box_2"]').empty();
                         }
                         else {
                             data = JSON.parse(data);
@@ -370,10 +457,10 @@ function setUserSubmittedCode(changed) {
                             }
                             var append_options='<option value="">None</option>';
                             $.each(data, function(i,matching_users){
-                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' &lt;'+matching_users[0]+'&gt; (version:'+matching_users[1]+')</option>';
                             });
                         }
-                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                        $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -382,7 +469,7 @@ function setUserSubmittedCode(changed) {
                 $('[name="code_box_2"]').empty();
             }
             if (changed == 'user_id_2') {
-                if (($('[name="user_id_2"]', form2).val()) == '') {
+                if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
@@ -403,8 +490,8 @@ function setUserSubmittedCode(changed) {
 
                 }
                 else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
@@ -415,45 +502,42 @@ function setUserSubmittedCode(changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());  
+                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                             $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
                         }
                     })
-                        
+
                 }
-            }    
-        }    
-    }   
+            }
+        }
+    }
 }
 
-function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
     var version_user_2='';
     var user_id_2='';
-    if($('[name="user_id_2"]', form2).val() != "") {
-        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    if($('[name="user_id_2"]', form).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
     $('[name="code_box_2"]').find('span').each(function(){
         var attr = $(this).css('background-color');
         if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");    
+            $(this).css('background-color',"#ffa500");
         }
     });
-
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
     $.ajax({
@@ -471,7 +555,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                 $('[name="code_box_2"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
-                        $(this).css('background-color',"#FF0000");       
+                        $(this).css('background-color',"#FF0000");
                     }
                 });
                 $('[name="code_box_1"]').find('span').each(function(){
@@ -479,49 +563,49 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
-                }); 
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
+                });
                 $('[name="code_box_1"]').scrollTop(0);
                 var scroll_position=0;
                 $('[name="code_box_1"]').find('span').each(function(){
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_1"]').scrollTop(scroll_position);
             }
-              
+
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
                 var x = event.pageX;
-                var y = event.pageY; 
+                var y = event.pageY;
                 $('#popup_to_show_matches_id').css('display', 'block');
                 var width = $('#popup_to_show_matches_id').width();
                 $('#popup_to_show_matches_id').css('top', y+5);
                 $('#popup_to_show_matches_id').css('left', x-width/2.00);
-                
-            } 
+
+            }
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
-                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
-                setUserSubmittedCode('user_id_2');
+                $('[name="user_id_2"]', form).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode(gradeable_id, 'user_id_2');
                 $('[name="code_box_1"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false) {
                         attr= JSON.parse(attr);
                         if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");    
-                        }      
-                    }  
+                            $(this).css('background-color',"#FF0000");
+                        }
+                    }
                 });
                 $.each(data, function(i,match){
                     if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
@@ -530,12 +614,12 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                                 var attr = $(this).attr('name');
                                 if (typeof attr !== typeof undefined && attr !== false) {
                                     if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
-                                        $(this).css('background-color',"#FF0000");    
-                                    }      
+                                        $(this).css('background-color',"#FF0000");
+                                    }
                                 }
                             });
                         });
-                    }                    
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(0);
                 var scroll_position=0;
@@ -543,11 +627,11 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
                     if ($(this).css('background-color')=="rgb(255, 0, 0)") {
                         scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
                         return false;
-                    } 
+                    }
                 });
                 $('[name="code_box_2"]').scrollTop(scroll_position);
                 jQuery.ajaxSetup({async:true});
-            }   
+            }
         },
         error: function(e) {
             alert("Could not load submitted code, please refresh the page and try again.");
@@ -555,34 +639,39 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     })
 }
 
-function toggleUsersPlagiarism() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function toggleUsersPlagiarism(gradeable_id) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
 
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
 
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
-    $('[name="user_id_1"]', form2).val(user_id_2);
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
+    $('[name="user_id_1"]', form).val(user_id_2);
     jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode('user_id_1');
-    $('[name="version_user_1"]', form2).val(version_user_2);
-    setUserSubmittedCode('version_user_1');
-    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    setUserSubmittedCode(gradeable_id ,'user_id_1');
+    $('[name="version_user_1"]', form).val(version_user_2);
+    setUserSubmittedCode(gradeable_id, 'version_user_1');
+    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
     jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode('user_id_2');
+    setUserSubmittedCode(gradeable_id, 'user_id_2');
 }
 
 
-function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#run-plagiarism-form");
+function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+    var form = $("#save-configuration-form");
     if(select_element_name == "language") {
+        
+        //
+        // Following code is used to set default window size for different languages
+        // that will appear in 'configureNewGradeableForPlagiarismForm'
+        // to change the default values, just change the val attribute for the language.
+        //
+
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
-        } 
+        }
         else if ($('[name="language"]', form).val() == "cpp") {
             $('[name="sequence_length"]', form).val('2');
         }
@@ -595,7 +684,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
         var i = select_element_name.substring(9);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_sem != '') {
@@ -604,7 +693,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
                 if(selected_sem == sem) {
                     $.each(courses_gradeables, function(course,gradeables){
                         append_options += '<option value="'+ course +'">'+ course +'</option>';
-                    });     
+                    });
                 }
             });
             $('[name="prev_course_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
@@ -612,7 +701,7 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
     }
     else if(select_element_name.substring(0, 12) == "prev_course_") {
         var i = select_element_name.substring(12);
-        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val(); 
+        var selected_sem = $('[name="prev_sem_'+ i +'"]', form).val();
         var selected_course = $('[name="prev_course_'+ i +'"]', form).val();
         $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         if(selected_course != '') {
@@ -623,13 +712,13 @@ function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name)
                         if(selected_course == course) {
                             $.each(gradeables, function (index, gradeable) {
                                 append_options += '<option value="'+ gradeable +'">'+ gradeable +'</option>';
-                            });    
+                            });
                         }
-                    });     
+                    });
                 }
             });
             $('[name="prev_gradeable_'+ i +'"]', form).find('option').remove().end().append('<option value="">None</option>'+ append_options).val('');
-        } 
+        }
     }
 }
 
@@ -802,6 +891,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 source: student_full
             });
         }
+        members_div.find('[name="reg_section"]').val(reg_section);
+        members_div.find('[name="rot_section"]').val(rot_section);
     }
     else {
         $('[name="new_team_user_id"]', form).val("");
@@ -980,8 +1071,67 @@ function check_server(url) {
     );
 }
 
+function checkRefreshLichenMainPage(url, semester, course) {
+    // refresh time for lichen main page
+    var refresh_time = 5000;
+    setTimeout(function() {
+        check_lichen_jobs(url, semester, course);
+    }, refresh_time);
+}
+
+function check_lichen_jobs(url, semester, course) {
+    $.post(url,
+        function(data) {
+            var last_data = localStorage.getItem("last_data");
+            if (data == "REFRESH_ME") {
+                last_data= "REFRESH_ME";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+            }
+            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+                last_data= "NO_REFRESH";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+            }
+            else {  
+                checkRefreshLichenMainPage(url, semester, course);
+            }
+        }
+    );
+}
+
 function downloadFile(file, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': 'submissions', 'file': file, 'path': path});
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': 'submissions',
+        'file': file,
+        'path': path});
+}
+
+function downloadZip(grade_id, user_id, version = null) {
+    var url_components = {
+        'component': 'misc',
+        'page': 'download_zip',
+        'dir': 'submissions',
+        'gradeable_id': grade_id,
+        'user_id': user_id
+    };
+
+    if(version !== null) {
+        url_components['version'] = version;
+    }
+    window.location = buildUrl(url_components);
+    return false;
+}
+
+function downloadFileWithAnyRole(file_name, path) {
+    // Trim file without path
+    var file = file_name;
+    if (file.indexOf("/") != -1) {
+        file = file.substring(file.lastIndexOf('/')+1);
+    }
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
 }
 
 function changeColor(div, hexColor){
@@ -999,6 +1149,21 @@ function openDiv(id) {
         elem.show();
         elem.addClass('open');
         $('#' + id + '-span').removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return false;
+}
+
+function openDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
     }
     return false;
 }
@@ -1250,7 +1415,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
-    var form = $("#"+post_id+"-reply");
+    var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
             url: url,
@@ -1292,9 +1457,11 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
                     $("#title").val(thread_title);
+                    $("#thread_status").val(thread_status);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1305,11 +1472,13 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $(".cat-buttons").trigger("eventChangeCatClass");
                     $("#thread_form").prop("ignore-cat",false);
                     $("#category-selection-container").show();
+                    $("#thread_status").show();
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
+                    $("#thread_status").hide();
                 }
             },
             error: function(){
@@ -1336,9 +1505,88 @@ function enableTabsInTextArea(jQuerySelector){
     });
 }
 
+
 function changeDisplayOptions(option, thread_id){
     document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+}
+
+function dynamicScrollNextPage(element) {
+    if($(element).data("dynamic_lock_full")) {
+        return;
+    }
+    if($(element).data("dynamic_lock_load")) {
+        return;
+    }
+    $(".thread_list .fa-spinner").show();
+    $(element).data("dynamic_lock_load", true);
+    
+    var urlPattern = $(element).data("urlPattern");
+    var currentThreadId = $(element).data("currentThreadId",);
+    var currentCategoriesId = $(element).data("currentCategoriesId",);
+    var course = $(element).data("course",);
+
+    var next_page = $(element).attr("next_page");  
+    var next_url = urlPattern.replace("{{#}}", next_page);
+           
+    var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
+    $.ajax({
+            url: next_url,
+            type: "POST",
+            data: {
+                thread_categories: categories_value,
+                thread_status: thread_status_value,
+                currentThreadId: currentThreadId,
+                currentCategoriesId: currentCategoriesId,
+            },
+            success: function(r){
+                var x = JSON.parse(r);
+                var content = x.html;
+                var count = x.count;
+                content = `${content}`;
+                $(element).find(".fa-spinner").before(content);
+                $(element).attr("next_page", parseInt(next_page) + 1);
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                if(count == 0) {
+                    // Don't load more
+                    $(element).data("dynamic_lock_full", true);
+                } else {
+                    dynamicScrollLoadIfScrollVisible($(element));
+                }
+            },
+            error: function(){
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                window.alert("Something went wrong while trying to load more threads. Please try again.");
+            }
+    });
+}
+
+function dynamicScrollLoadIfScrollVisible(jElement) {
+    if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
+        dynamicScrollNextPage(jElement[0]);
+    }
+}
+
+function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, currentCategoriesId, course) {
+    jElement.data("urlPattern",urlPattern);
+    jElement.data("currentThreadId", currentThreadId);
+    jElement.data("currentCategoriesId", currentCategoriesId);
+    jElement.data("course", course);
+
+    dynamicScrollLoadIfScrollVisible(jElement);
+    $(jElement).scroll(function(){ 
+        var element = $(this)[0];
+        var sensitivity = 3;
+        var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
+        if(isBottom) {
+            dynamicScrollNextPage(element);
+        }
+    });
 }
 
 function resetScrollPosition(id){
@@ -1366,25 +1614,37 @@ function alterShowDeletedStatus(newStatus) {
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
                 thread_categories: categories_value,
+                thread_status: thread_status_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
                var x = JSON.parse(r).html;
                x = `${x}`;
-               $(".thread_list").html(x);
+               var jElement = $(".thread_list");
+               jElement.children(":not(.fa-spinner)").remove();
+               jElement.prepend(x);
+               jElement.attr("next_page", '2');
+               jElement.data("dynamic_lock_load", false);
+               jElement.data("dynamic_lock_full", false);
+               $(".thread_list .fa-spinner").hide();
+               dynamicScrollLoadIfScrollVisible(jElement);
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
                document.cookie = course + "_forum_categories=;";
+               document.cookie = "forum_thread_status=;";
             }
     })
 }
@@ -1396,6 +1656,131 @@ function replyPost(post_id){
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
+}
+
+function generateCodeMirrorBlocks(container_element) {
+    var codeSegments = container_element.querySelectorAll("[id=code]");
+    for (let element of codeSegments){
+        var editor0 = CodeMirror.fromTextArea(element, {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var lineCount = editor0.lineCount();
+    if (lineCount == 1) {
+        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    }
+    else {
+        editor0.setSize("100%", "auto");
+    }
+    editor0.setOption("theme", "eclipse");
+    editor0.refresh();
+    }
+}
+
+function showHistory(post_id) {
+    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                post_id: post_id
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                $("#popup-post-history").show();
+                $("#popup-post-history .post_box.history_box").remove();
+                var dummy_box = $($("#popup-post-history .post_box")[0]);
+                for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
+                    var post = json[i];
+                    box = dummy_box.clone();
+                    box.show();
+                    box.addClass("history_box");
+                    box.find(".post_content").html(post['content']);
+                    if(post.is_staff_post) {
+                        box.addClass("important");
+                    }
+
+                    var first_name = post['user_info']['first_name'].trim();
+                    var last_name = post['user_info']['last_name'].trim();
+                    var author_user_id = post['user'];
+                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
+                    var visible_user_json = JSON.stringify(visible_username);
+                    info_name = JSON.stringify(info_name);
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                    box.find("h7").before(user_button_code);
+                    $("#popup-post-history .form-body").prepend(box);
+                }
+                generateCodeMirrorBlocks($("#popup-post-history")[0]);
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
+}
+
+function loadMergeableThreads() {
+    var selectNode = $("[name='merge_thread_parent']");
+    var current_thead_date = selectNode.attr("current-thead-date");
+    if(!current_thead_date) {
+        // Already Loaded
+        return;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                current_thead_date: current_thead_date
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json.content.length == 0) {
+                    selectNode.closest('.form-body').text("Nothing to merge.");
+                } else {
+                    selectNode.empty();
+                    var options = [];
+                    for(var i = 0; i < json.content.length ; i++ ) {
+                        var row = json.content[i];
+                        var id = escapeSpecialChars(""+row.id);
+                        var title = escapeSpecialChars(row.title);
+                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
+                        options.push(element);
+                    }
+                    selectNode.append(options.join(''));
+                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
+                }
+                selectNode.attr("current-thead-date", "");
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to load threads list. Please try again.");
+            }
+    });
 }
 
 function addNewCategory(){
@@ -1731,7 +2116,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
                 window.location.replace(new_url);
             },
             error: function(){
-                window.alert("Something went wrong while trying to delete post. Please try again.");
+                window.alert("Something went wrong while trying to delete/undelete a post. Please try again.");
             }
         })
     }
@@ -1941,7 +2326,28 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+function toggleRegradeRequests(){
+    var element = document.getElementById("regradeBoxSection");
+    if (element.style.display === 'block') {
+        element.style.display = 'none';
+    }
+    else {
+        element.style.display = 'block';
+    }
 
+}
+function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            window.location.reload();
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
@@ -1961,6 +2367,31 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function changePermission(filename, checked) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+        }
+    })
+}
 
 // edited slightly from https://stackoverflow.com/a/40658647
 // returns a boolean value indicating whether or not the element is entirely in the viewport

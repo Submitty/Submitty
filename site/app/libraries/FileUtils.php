@@ -115,7 +115,6 @@ class FileUtils {
      */
     public static function recursiveCopy($src, $dst, $forceLowerCase = true) {
         $iter = new \RecursiveDirectoryIterator($src);
-        $files = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
             if ($iter->isDot()) {
                 $iter->next();
@@ -140,6 +139,45 @@ class FileUtils {
             }
             $iter->next();
         }
+    }
+
+    /**
+     * //todo
+     *
+     * @param string $searchPath
+     */
+    public static function getAllFilesTrimSearchPath($searchPath, $pathLength) {
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $disallowed_files = array('.ds_store');
+
+        $iter = new \RecursiveDirectoryIterator($searchPath);
+        $files = array();
+        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
+            if ($iter->isDot()) {
+                $iter->next();
+                continue;
+            }
+            else if ($iter->isFile()) {
+                if (in_array(strtolower($iter->getFilename()), $disallowed_files)) {
+                    $iter->next();
+                    continue;
+                }
+                $filename = $iter->getPathname();
+                array_push($files, substr($filename, $pathLength, strlen($filename)-$pathLength));
+            }
+            else if ($iter->isDir()) {
+                if (in_array(strtolower($iter->getFilename()), $disallowed_folders)) {
+                    $iter->next();
+                    continue;
+                }
+                $newFiles = FileUtils::getAllFilesTrimSearchPath($searchPath . '/' . $iter->getFilename(), $pathLength);
+                if (!empty($newFiles))
+                    array_push($files, ...$newFiles);
+
+            }
+            $iter->next();
+        }
+        return $files;
     }
 
     /**
@@ -447,7 +485,7 @@ class FileUtils {
 
         $filename = "/var/local/submitty/courses/gradeables_from_prior_terms.txt";
         if (file_exists($filename)) {
-        
+
           $file = fopen($filename, "r") or exit("Unable to open file!");
 
           while(!feof($file)){
@@ -464,8 +502,8 @@ class FileUtils {
                 }
                 array_push($gradeables, trim(trim($line," "),"\n"));
             }
-            $return[$sem][$course] = $gradeables;    
-            
+            $return[$sem][$course] = $gradeables;
+
           }
           fclose($file);
           uksort($return, function($semester_a, $semester_b) {
@@ -483,5 +521,3 @@ class FileUtils {
         return $return;
     }
 }
-
-

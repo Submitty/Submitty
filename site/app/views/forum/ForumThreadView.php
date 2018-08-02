@@ -85,9 +85,9 @@ HTML;
 HTML;
 			foreach($data as $post) {
 				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
+				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -141,21 +141,23 @@ HTML;
     }
 	
 	/** Shows Forums thread splash page, including all posts
-		for a specific thread, in addition to all of the threads
-		that have been created to be displayed in the left panel.
+		for a specific thread, in addition to head of the threads
+		that have been created after applying filter and to be
+		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}
 
 		$threadExists = $this->core->getQueries()->threadExists();
-		$thread_count = count($threads);
+		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
 		$currentCategoryId = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && $thread_count == 0 && !empty($_COOKIE[$currentCourse . '_forum_categories']);
+		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
+
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
@@ -164,7 +166,6 @@ HTML;
 
 		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
 		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/jquery-2.0.3.min.map.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
@@ -184,11 +185,10 @@ HTML;
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
-				$("form").areYouSure();
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
-
 				$(".post_reply_from").submit(publishPost);
+				$("form").areYouSure();
 			});
 
 		</script>
@@ -223,10 +223,9 @@ HTML;
 			</script>
 HTML;
 	}
-	if($thread_count > 0 || $threadFiltering) {
+	if($filteredThreadExists || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
-		$currentCategoriesIds_string  = implode("|", $currentCategoriesIds);
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
@@ -247,84 +246,45 @@ HTML;
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
-	$onChange = '';
-	if($threadExists) {
-		$onChange = <<<HTML
-		modifyThreadList({$currentThread}, '{$currentCategoriesIds_string}', '{$currentCourse}');
-HTML;
-	}
 	$return .= <<<HTML
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+HTML;
 
-		<div id="category_wrapper" class="popup-form" style="width: 50%;">
-			<label for="thread_category"><h3>Categories</h3></label><br/>
-			<i>For no filter, unselect all categories</i><br/>
-			<center>
-			<select id="thread_category" name="thread_category" class="form-control" multiple size="10" style="height: auto;">
-HTML;
-			for($i = 0; $i < count($categories); $i++){
-				$return .= <<<HTML
-					<option value="{$categories[$i]['category_id']}" style="color: {$categories[$i]['color']}">{$categories[$i]['category_desc']}</option>
-HTML;
-			}
 	$cookieSelectedCategories = '';
+	$cookieSelectedThreadStatus = '';
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
-				$cookieSelectedCategories .= <<<HTML
-					$('#thread_category option[value="{$selectedId}"]').prop('selected', true);
-HTML;
+				$cookieSelectedCategories[] = $selectedId;
 			}
 		}
 	}
-	$display_option_js = <<<HTML
-		$("#tree").prop("checked", true);
-HTML;
-	if(in_array($display_option, array("tree", "time", "alpha"))) {
-		$display_option_js = <<<HTML
-			$("#{$display_option}").prop("checked", true);
-HTML;
+	if(!empty($_COOKIE['forum_thread_status'])) {
+		foreach(explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+			if(in_array((int)$selectedStatus, array(-1,0,1))) {
+				$cookieSelectedThreadStatus[] = $selectedStatus;
+			}
+		}
 	}
-	$return .= <<<HTML
-				</select>
-				</center>
-				<br/>
-				<div  style="float: right; width: auto; margin-top: 10px;">
-					<a class="btn btn-default" title="Clear Filter" onclick="$('#thread_category option').prop('selected', false);{$onChange};$('#category_wrapper').css('display', 'none');"><i class="fa fa-eraser"></i> Clear Filter</a>
-					<a class="btn btn-default" title="Close Popup" onclick="$('#category_wrapper').css('display', 'none');"><i class="fa fa-times"> Close</i></a>
-				</div>
 
-				<script type="text/javascript">
-					$( document ).ready(function() {
-						$('#thread_category option').mousedown(function(e) {
-							e.preventDefault();
-							var current_selection = $(this).prop('selected');
-							$(this).prop('selected', !current_selection);
-							{$onChange}
-							return true;
-						});
-						{$cookieSelectedCategories}
-						{$display_option_js}
-					});
-				</script>
-			</div>
+	$return .= <<<HTML
 			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
 HTML;
-			$return .= <<<HTML
+        $return .= <<<HTML
 			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
 			<label for="radio">Hierarchical</label>  
 
 			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
 			<label for="radio2">Chronological</label>
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
+        if($this->core->getUser()->getGroup() <= 2){
+            $return .= <<<HTML
 			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
 			<label for="radio3">Alphabetical</label>
 HTML;
-	}
-	$return .= <<<HTML
+        }
+        $return .= <<<HTML
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
@@ -333,11 +293,12 @@ HTML;
 			</button>
 			</form>
 HTML;
-		$return .= <<<HTML
+        $return .= <<<HTML
 		</div>
 
 HTML;
-		if(!$threadExists){
+
+        if(!$threadExists){
 		$return .= <<<HTML
 					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
@@ -345,74 +306,34 @@ HTML;
 				</div>
 HTML;
 		} else {
-
-			if($this->core->getUser()->getGroup() <= 2){
-				$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-				$current_thead_date = date_create($current_thread_first_post["timestamp"]);
-				$merge_thread_list = array();
-				for($i = 0; $i < count($threads); $i++){
-					$first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-					$date = date_create($first_post['timestamp']);
-					if($current_thead_date>$date) {
-						array_push($merge_thread_list, $threads[$i]);
-					}
-				}
-
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                    "merge_thread_list" => $merge_thread_list,
-                    "current_thread" => $currentThread
-                ]);
-				$return .= <<<HTML
-				<div class="popup-form decent" id="edit-user-post">
-					<form id="thread_form" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'edit_post'))}">
-					 <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
-					 <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-					 <h3 id="edit_user_prompt"></h3>
-HTML;
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig",[
-								"show_title" => true,
-								"show_post" => true,
-								"post_content_placeholder" => "Enter your post here...",
-								"show_categories" => true,
-								"show_anon" => true,
-								"show_cancel_edit_form" => true,
-								"submit_label" => "Update Post",
-							]);
-						$return .= <<<HTML
-					</form>
-					<script type="text/javascript">
-						$("#thread_form").submit(function() {
-							if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
-								alert("At least one category must be selected.");
-								return false;
-							}
-						});
-					</script>
-				</div>
-HTML;
-			}
-
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list">
+					<div id="thread_list" class="thread_list" next_page='2'>
 HTML;
 				$activeThreadAnnouncement = false;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
+				$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 				if(count($activeThread) == 0) {
 					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 					$activeThreadTitle = $activeThread['title'];
 				}
-					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<<HTML
 
+				
+					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
+					<script type="text/javascript">
+						$(function(){
+							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
+						});
+					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
@@ -535,29 +456,34 @@ HTML;
 		}
 
 		$return .= <<<HTML
-	<script>
-		var codeSegments = document.querySelectorAll("[id=code]");
-		for (let element of codeSegments){
-			var editor0 = CodeMirror.fromTextArea(element, {
-            lineNumbers: true,
-            readOnly: true,
-            cursorHeight: 0.0,
-            lineWrapping: true
-	    });
-
-	    var lineCount = editor0.lineCount();
-	    if (lineCount == 1) {
-	        editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
-	    }
-	    else {
-	        editor0.setSize("100%", "auto");
-	    }
-	    editor0.setOption("theme", "eclipse");
-	    editor0.refresh(); 
-		}
-			
-	    </script>
+		<script>
+			$(function() {
+				generateCodeMirrorBlocks(document);
+			});
+		</script>
 HTML;
+
+        if($this->core->getUser()->getGroup() <= 2){
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thread_date = $current_thread_first_post["timestamp"];
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+                "current_thread_date" => $current_thread_date,
+                "current_thread" => $currentThread
+            ]);
+        }
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+            "categories" => $categories,
+            "current_thread" => $currentThread,
+            "current_category_ids" => $currentCategoriesIds,
+            "current_course" => $currentCourse,
+            "cookie_selected_categories" => $cookieSelectedCategories,
+            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+            "display_option" => $display_option,
+            "thread_exists" => $threadExists
+        ]);
 
 		return $return;
 	}
@@ -630,6 +556,10 @@ HTML;
 							$titleDisplay .= "...";
 						}
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						if($thread["current_user_posted"]) {
+							$icon = '<i class="fa fa-comments"></i> ';
+							$titleDisplay = $icon . $titleDisplay;
+						}
 						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
@@ -637,17 +567,32 @@ HTML;
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-							<i class="fa fa-star" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
-							<i class="fa fa-thumb-tack" style="position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
-
+						if (!isset($thread['status'])) {
+                            $thread['status'] = 0;
+                        }
+						if($thread['status'] !=0) {
+							if($thread['status'] == 1) {
+								$fa_icon = "fa-check-circle";
+								$fa_color = "palegreen";
+							} else {
+								$fa_icon = "fa-exclamation-circle";
+								$fa_color = "yellow";
+							}
+							$return .= <<<HTML
+							<i class="fa ${fa_icon}" style="padding-left:3px;position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
 						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
 							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -674,15 +619,69 @@ HTML;
 					return $return;
 	}
 
+	public function filter_post_content($original_post_content) {
+		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+
+		if(!empty($pre_post)){
+			$post_content = $pre_post;
+		}
+
+		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+		$accepted_schemes = array("https", "http");
+		$pos = 0;
+		if(count($result) > 0) {
+			foreach($result[1] as $url){
+				$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+				$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+				if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+				} else {
+					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+				}
+				if(!empty($pre_post)){
+					$post_content = $pre_post;
+				}
+				$pre_post = "";
+				$pos++;
+			}
+		}
+		//This code is for legacy posts that had an extra \r per newline
+		if(strpos($original_post_content, "\r") !== false){
+			$post_content = str_replace("\r","", $post_content);
+		}
+
+		//end link handling
+
+		//handle converting code segments
+
+		$codeBracketString = "&lbrack;&sol;code&rsqb;";
+		if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
+			$codeBracketString = "&NewLine;" . $codeBracketString;
+		}
+
+		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+		return $post_content;
+	}
+
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = date_create($post["timestamp"]);
-		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
-		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		if(!is_null($post["edit_timestamp"])) {
+			$edit_date = $function_date(date_create($post["edit_timestamp"]),"n/j g:i A");
+		} else {
+			$edit_date = null;
+		}
+		$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
+		$author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 
@@ -722,49 +721,7 @@ HTML;
 
 
         //convert legacy htmlentities being saved in db
-        $post_content = html_entity_decode($post["content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
-
-        if(!empty($pre_post)){
-            $post_content = $pre_post;
-        }
-			
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
-        $accepted_schemes = array("https", "http");
-        $pos = 0;
-        if(count($result) > 0) {
-            foreach($result[1] as $url){
-                $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
-                $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-            	if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
-                } else {
-            		$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
-                }
-                if(!empty($pre_post)){
-                	$post_content = $pre_post;
-				} 
-				$pre_post = "";
-                $pos++;
-            }
-        }
-        //This code is for legacy posts that had an extra \r per newline
-        if(strpos($post['content'], "\r") !== false){
-            $post_content = str_replace("\r","", $post_content);
-        }
-
-        //end link handling
-
-        //handle converting code segments
-
-        $codeBracketString = "&lbrack;&sol;code&rsqb;";
-        if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-            $codeBracketString = "&NewLine;" . $codeBracketString;
-        }
-
-        $post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
+        $post_content = $this->filter_post_content($post['content']);
 
 		//end code segment handling
 		$return .= <<<HTML
@@ -781,11 +738,21 @@ HTML;
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
+			if($this->core->getUser()->getGroup() <= 2) {
+				$return .= <<<HTML
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
+HTML;
+			}
 		}
 		$return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
-
+       if($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
+            $return .= <<<HTML
+                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
+HTML;
+}
 		if($this->core->getUser()->getGroup() <= 2){
 			$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
 			$visible_user_json = json_encode($visible_username);
@@ -801,17 +768,7 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2){
-			$wrapped_content = json_encode($post['content']);
-			$shouldEditThread = null;
-			$edit_button_title = "";
-			if($first) {
-				$shouldEditThread = "true";
-				$edit_button_title = "Edit thread and post";
-			} else {
-				$shouldEditThread = "false";
-				$edit_button_title = "Edit post";
-			}
+		if($this->core->getUser()->getGroup() <= 2) {
 			if($deleted){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
@@ -822,13 +779,37 @@ HTML;
 				$ud_button_icon = "fa-trash";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+HTML;
+		}
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
+			$shouldEditThread = null;
+			$edit_button_title = "";
+			if($first) {
+				$shouldEditThread = "true";
+				$edit_button_title = "Edit thread and post";
+			} else {
+				$shouldEditThread = "false";
+				$edit_button_title = "Edit post";
+			}
+			$return .= <<<HTML
 				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
 
 		$return .= <<<HTML
-		<h7 style="position:relative; right:5px;"><strong id="post_user_id">{$visible_username}</strong> {$function_date($date,"n/j g:i A")} </h7></span>
+		<h7 style="position:relative; right:5px;">
+			<strong id="post_user_id">{$visible_username}</strong>
+			{$function_date($date,"n/j g:i A")}
+HTML;
+		if(!is_null($edit_date)) {
+			$return .= <<<HTML
+			(<i>Last edit at {$edit_date}</i>)
+HTML;
+		}
+		$return .= <<<HTML
+		</h7>
+		</span>
 HTML;
 
 		if($post["has_attachment"]){
@@ -887,142 +868,21 @@ HTML;
 				$("form").areYouSure();
 			});
 		 </script>
+HTML;
+        if($this->core->getUser()->getGroup() <= 2){
+            $categories = $this->core->getQueries()->getCategories();
 
-		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
-HTML;
-		if($this->core->getUser()->getGroup() <= 2){
-			$categories = $this->core->getQueries()->getCategories();
-			$return .= <<<HTML
-			<div class="popup-form" id="category-list">
-				<h3>Categories</h3>
-				<span  style="float: right;">
-					<input id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
-					<button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
-						<i class="fa fa-plus-circle fa-1x"></i> Add category
-					</button>
-				</span>
-				<pre>(Drag to re-order)</pre><br>
-HTML;
-				if(count($categories) == 0) {
-					$return .= <<<HTML
-					<span class='category-list-no-element' style="margin-left: 1em;" >
-						No categories exists please create one.
-					</span>
-HTML;
-				}
+            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+            array_unshift($categories, $dummy_category);
 
-				$dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-				array_unshift($categories, $dummy_category);
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/CategoriesForm.twig", [
+                "categories" => $categories,
+                "category_colors" => $category_colors
+            ]);
+        }
 
-				$return .= <<<HTML
-				<ul id='ui-category-list' style="padding-left: 1em;">
-HTML;
-				// TODO: scrollbar
-				for($i = 0; $i < count($categories); $i++){
-						$additional_display = "";
-						$additional_class = "category-sortable";
-						if($i==0) {
-							// Dummy Category: On new category creation copy of dummy element will be append.
-							$additional_display = "display: none;";
-							$additional_class = "";
-						}
-						$return .= <<<HTML
-						<li id="categorylistitem-{$categories[$i]['category_id']}" class="{$additional_class}" style="color: {$categories[$i]['color']};{$additional_display}">
-							<i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
-							<span class="categorylistitem-desc">
-								<span>{$categories[$i]['category_desc']}</span>
-								<a class="post_button" title="Edit Category Description"><i class="fa fa-edit" aria-hidden="true"></i></a>
-							</span>
-							<span class="categorylistitem-editdesc" style="display: none;">
-								<input type="text" placeholder="New Description of Category" style="padding: 0;">
-								<a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
-								<a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
-							</span>
-							<div style="float: right;width: auto;">
-							<select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
-HTML;
-							foreach ($category_colors as $color_name => $color_code) {
-								$selected = "";
-								if($color_code == $categories[$i]['color']) {
-									$selected = 'selected="selected"';
-								}
-								$return .= <<<HTML
-								<option value="{$color_code}" style="color: white;background-color: {$color_code};" {$selected}>{$color_name}</option>
-HTML;
-							}
-							$return .= <<<HTML
-							</select>
-							&nbsp;
-							<a class="post_button" title="Delete Category"><i class="fa fa-trash" aria-hidden="true"></i></a>
-							</div>
-						</li>
-HTML;
-				}
-				$return .= <<<HTML
-				</ul>
-				<div  style="width: 100%; margin-top: 10px;">
-					<a style="float: right;" onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-danger">Close</a>
-				</div>
-				<script type="text/javascript">
-					$(function() {
-						$("#ui-category-list").sortable({
-							items : '.category-sortable',
-							handle: ".handle",
-							update: function (event, ui) {
-						        reorderCategories();
-						    }
-						});
-						$("#ui-category-list").find(".fa-trash").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_id = parseInt(item.attr('id').split("-")[1]);
-							var category_desc = item.find(".categorylistitem-desc span").text().trim();
-							deleteCategory(category_id, category_desc);
-						});
-						$("#ui-category-list").find(".fa-edit").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_desc = item.find(".categorylistitem-desc span").text().trim();
-							item.find(".categorylistitem-editdesc input").val(category_desc);
-							item.find(".categorylistitem-desc").hide();
-							item.find(".categorylistitem-editdesc").show();
-
-						});
-						$("#ui-category-list").find(".fa-times").click(function() {
-							var item = $(this).parent().parent().parent();
-							item.find(".categorylistitem-editdesc").hide();
-							item.find(".categorylistitem-desc").show();
-						});
-
-						$("#ui-category-list").find(".fa-check").click(function() {
-							var item = $(this).parent().parent().parent();
-							var category_id = parseInt(item.attr('id').split("-")[1]);
-							var category_desc_original = item.find(".categorylistitem-desc span").text().trim();
-							var category_desc = item.find("input").val().trim();
-							if(category_desc != category_desc_original) {
-								editCategory(category_id, category_desc, null);
-							}
-							item.find(".categorylistitem-editdesc").hide();
-							item.find(".categorylistitem-desc").show();
-						});
-						var refresh_color_select = function(element) {
-							$(element).css("background-color",$(element).val());
-						}
-						$(".category-color-picker").change(function(color) {
-							var category_id = parseInt($(this).parent().parent().attr('id').split("-")[1]);
-							var category_color = $(this).val();
-							editCategory(category_id, null, category_color);
-							refresh_color_select($(this));
-						});
-						$(".category-color-picker").each(function(){
-							refresh_color_select($(this));
-						});
-					});
-				</script>
-
-			</div>
-
-HTML;
-		}
 		$return .= <<<HTML
+		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
@@ -1059,6 +919,7 @@ HTML;
 					"post_box_id" => 1,
 					"attachment_script" => true,
 					"show_anon" => true,
+					"show_thread_status" => true,
 					"show_announcement" => true,
 					"show_editcat" => true,
 					"submit_label" => "Submit Post",

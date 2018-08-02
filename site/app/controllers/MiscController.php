@@ -21,28 +21,53 @@ class MiscController extends AbstractController {
             case 'download_file':
                 $this->downloadFile();
                 break;
+            case 'download_file_with_any_role':
+                $this->downloadFile(true);
+                break;
+            case 'delete_course_material_file':
+                $this->deleteCourseMaterialFile();
+                break;
+            case 'delete_course_material_folder':
+                $this->deleteCourseMaterialFolder();
+                break;
             case 'download_zip':
                 $this->downloadZip();
                 break;
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'base64_encode_pdf':
+                $this->encodePDF();
+                break;
+            case 'modify_course_materials_file_permission':
+                $this->modifyCourseMaterialsFilePermission();
+                break;
+            case 'modify_course_materials_file_time_stamp':
+                $this->modifyCourseMaterialsFileTimeStamp();
+                break;
         }
     }
 
     // function to check that this is a valid access request
-    private function checkValidAccess($is_zip, &$error_string) {
+    private function checkValidAccess($is_zip, &$error_string, $download_with_any_role = false, $gradeable = null) {
         $error_string="";
         // only allow zip if it's a grader
         if ($is_zip) {
-            $error_string="only graders may access zip files";
-            return ($this->core->getUser()->accessGrading());
+            $error_string="only graders may access zip files of other students";
+            $can_download = (
+                $gradeable !== null
+                && !$gradeable->useVcsCheckout()
+                && $gradeable->getStudentDownload()
+                && ($gradeable->getCurrentVersionNumber() === $gradeable->getActiveVersion() || $gradeable->getStudentAnyVersion())
+                && $this->core->getUser()->getId() === $_REQUEST['user_id']
+            );
+            return ($this->core->getUser()->accessGrading() || $can_download);
         }
         // from this point on, is not a zip
         // do path and permissions checking
 
-        $dir = $_GET['dir'];
-        $path = $_GET['path'];
+        $dir = $_REQUEST['dir'];
+        $path = $_REQUEST['path'];
 
         foreach (explode(DIRECTORY_SEPARATOR, $path) as $part) {
             if ($part == ".." || $part == ".") {
@@ -66,7 +91,7 @@ class MiscController extends AbstractController {
         // END HACK
 
 
-        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments");
+        $possible_directories = array("config_upload", "uploads", "submissions", "results", "checkout", "forum_attachments", "uploads/course_materials");
         if (!in_array($dir, $possible_directories)) {
             $error_string="not in possible directories list";
             return false;
@@ -75,7 +100,7 @@ class MiscController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $check = FileUtils::joinPaths($course_path, $dir);
         if (!Utils::startsWith($path, $check)) {
-            $error_string="does not start with course path";
+            $error_string= "does not start with course path";
             return false;
         }
         if (!file_exists($path)) {
@@ -167,9 +192,23 @@ class MiscController extends AbstractController {
             }
             return true;
         }
-        else {
+        else if ($download_with_any_role === true)
+        {
+            return true;
+        }
+        else
+        {
             return false;
         }
+    }
+
+    private function encodePDF(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        $user_id = $_POST['user_id'] ?? NULL;
+        $file_name = $_POST['filename'] ?? NULL;
+        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        return $this->core->getOutput()->renderJson($pdf64);
     }
 
     private function displayFile() {
@@ -180,13 +219,13 @@ class MiscController extends AbstractController {
             return false;
         }
 
-        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_GET['path'])));
+        $corrected_name = pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" .  basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path'])));
         $mime_type = FileUtils::getMimeType($corrected_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
             header("Content-type: ".$mime_type);
-            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))) . '"');
+            header('Content-Disposition: inline; filename="' . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))) . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($_REQUEST['path']);
         }
@@ -201,10 +240,115 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function downloadFile() {
+    private function deleteCourseMaterialFile() {
+        $error_string = "";
+
+        // QUICK FIX UNTIL NEW ACCESS
+        $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
+        if (!Utils::startsWith($filename, $check)) {
+            $error_string = "Can't delete file not in course uploads";
+        }
+        // END QUICK FIX
+
+        // security check
+        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+        }
+
+        // delete the file from upload/course_materials
+        // $filename = (pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+
+        if ( unlink($filename) )
+        {
+            $this->core->addSuccessMessage(basename($filename) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($filename));
+        }
+
+        // remove entry from json file
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+        $json = FileUtils::readJsonFile($fp);
+        if ($json != false)
+        {
+            unset($json[$filename]);
+
+            if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+                return "Failed to write to file {$fp}";
+            }
+        }
+
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+    }
+
+    private function deleteCourseMaterialFolder() {
+        // security check
+
+        $error_string = "";
+
+        // QUICK FIX UNTIL NEW ACCESS
+        $path = $_REQUEST['path'];
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $check = FileUtils::joinPaths($course_path, 'uploads/course_materials');
+        if (!Utils::startsWith($path, $check)) {
+            $error_string = "Can't delete folder not in course uploads";
+        }
+        // END QUICK FIX
+
+        if ($error_string !== '' || !$this->checkValidAccess(false,$error_string)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+        }
+
+
+        // $path = $_REQUEST['path'];
+
+        // remove entry from json file
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($fp);
+
+        if ($json != false)
+        {
+            $all_files = FileUtils::getAllFiles($path);
+            foreach($all_files as $file){
+                $filename = $file['path'];
+                unset($json[$filename]);
+            }
+
+            file_put_contents($fp, FileUtils::encodeJson($json));
+        }
+
+        if ( FileUtils::recursiveRmdir($path) )
+        {
+            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
+        }
+        else{
+            $this->core->addErrorMessage("Failed to remove " . basename($path));
+        }
+
+        //refresh course materials page
+        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                                    'page' => 'course_materials',
+                                                    'action' => 'view_course_materials_page')));
+    }
+
+    private function downloadFile($download_with_any_role = false) {
         // security check
         $error_string="";
-        if (!$this->checkValidAccess(false,$error_string)) {
+        if (!$this->checkValidAccess(false,$error_string, $download_with_any_role)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
@@ -215,17 +359,19 @@ class MiscController extends AbstractController {
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=\"{$filename}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_GET['path']))));
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
     }
 
     private function downloadZip() {
+        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
         // security check
         $error_string="";
-        if (!$this->checkValidAccess(true,$error_string)) {
+        if (!$this->checkValidAccess(true, $error_string, false, $gradeable)) {
             $message = "You do not have access to that page. ".$error_string;
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -233,23 +379,25 @@ class MiscController extends AbstractController {
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $gradeable->getActiveVersion();
+        $version = isset($_REQUEST['version']) ? $_REQUEST['version'] : $active_version;
         $folder_names = array();
         $folder_names[] = "submissions";
         $folder_names[] = "results";
         $folder_names[] = "checkout";
-        $submissions_path = FileUtils::joinPaths($gradeable_path, $folder_names[0], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
-        $results_path = FileUtils::joinPaths($gradeable_path, $folder_names[1], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
-        $checkout_path = FileUtils::joinPaths($gradeable_path, $folder_names[2], $gradeable->getId(), $gradeable->getUser()->getId(), $active_version);
+        $submissions_path = FileUtils::joinPaths($gradeable_path, $folder_names[0], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
+        $results_path = FileUtils::joinPaths($gradeable_path, $folder_names[1], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
+        $checkout_path = FileUtils::joinPaths($gradeable_path, $folder_names[2], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $paths = array();
         $paths[] = $submissions_path;
-        $paths[] = $results_path;
-        $paths[] = $checkout_path;
-        for ($x = 0; $x < 3; $x++) {
+        if($this->core->getUser()->accessGrading()) {
+            $paths[] = $results_path;
+            $paths[] = $checkout_path;
+        }
+        for ($x = 0; $x < count($paths); $x++) {
             if (is_dir($paths[$x])) {
                     $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($paths[$x]),
@@ -297,7 +445,9 @@ class MiscController extends AbstractController {
             $type = "all";
             $zip_file_name = $_REQUEST['gradeable_id'] . "_all_students_" . date("m-d-Y") . ".zip";
             if (!($this->core->getUser()->accessFullGrading())) {
-                throw new \InvalidArgumentException("It does not look like you're allowed to access this page.");
+                $message = "You do not have access to that page.";
+                $this->core->addErrorMessage($message);
+                $this->core->redirect($this->core->getConfig()->getSiteUrl());
             }
         }
         else
@@ -396,5 +546,80 @@ class MiscController extends AbstractController {
         header("Expires: 0");
         readfile("$zip_name");
         unlink($zip_name); //deletes the random zip file
+    }
+
+
+  	public function modifyCourseMaterialsFilePermission() {
+
+        // security check
+        if($this->core->getUser()->getGroup() !== 1) {
+            $message = "You do not have access to that page. ";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                            'page' => 'course_materials',
+                                            'action' => 'view_course_materials_page')));
+            return;
+        }
+
+        if (!isset($_GET['filename']) ||
+            !isset($_GET['checked'])) {
+            return;
+        }
+
+        $file_name = htmlspecialchars($_GET['filename']);
+        $checked =  $_GET['checked'];
+
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+        $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $json = FileUtils::readJsonFile($fp);
+        if ($json != false) {
+            $release_datetime  = $json[$file_name]['release_datetime'];
+        }
+
+        if (!isset($release_datetime))
+        {
+            $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        }
+
+        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
+
+        if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+            return "Failed to write to file {$fp}";
+        }
+    }
+
+    public function modifyCourseMaterialsFileTimeStamp() {
+
+        if($this->core->getUser()->getGroup() !== 1) {
+            $message = "You do not have access to that page. ";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                                            'page' => 'course_materials',
+                                            'action' => 'view_course_materials_page')));
+           return;
+        }
+
+        if (!isset($_REQUEST['filename']) ||
+            !isset($_REQUEST['newdatatime'])) {
+            return;
+        }
+
+        $file_name = htmlspecialchars($_REQUEST['filename']);
+        $new_data_time = htmlspecialchars($_REQUEST['newdatatime']);
+
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+        $checked = '0';
+        $json = FileUtils::readJsonFile($fp);
+        if ($json != false) {
+            $checked  = $json[$file_name]['checked'];
+        }
+
+        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
+
+        if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+            return "Failed to write to file {$fp}";
+        }
     }
 }

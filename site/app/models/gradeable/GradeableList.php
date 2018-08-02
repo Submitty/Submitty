@@ -1,9 +1,11 @@
 <?php
 
-namespace app\models;
+namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\GradeableType;
+use app\models\AbstractModel;
+use app\models\User;
 
 /**
  * Class GradeableList
@@ -61,12 +63,13 @@ class GradeableList extends AbstractModel {
      * GradeableList constructor.
      *
      * @param Core $core
-     * @param User $user
+     * @param User $user The user to filter gradeables by (null if current user)
+     * @throws \Exception if a Gradeable failed to load from the database
      */
     public function __construct(Core $core, User $user = null) {
         parent::__construct($core);
         $this->user = ($user === null) ? $this->core->getUser() : $user;
-        foreach ($this->core->getQueries()->getAllGradeables($this->user->getId()) as $gradeable) {
+        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             $this->gradeables[$gradeable->getId()] = $gradeable;
         }
 
@@ -76,20 +79,20 @@ class GradeableList extends AbstractModel {
             if ($gradeable->getGradeReleasedDate() <= $this->now) {
                 $this->graded_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->useTAGrading()) ||
+            else if ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
                     $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) &&
                     $gradeable->getGradeStartDate() <= $this->now) {
                 $this->grading_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                $gradeable->getOpenDate() <= $this->now && $gradeable->getDueDate() <= $this->now) {
+                $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getSubmissionDueDate() <= $this->now) {
                 $this->closed_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                $gradeable->getOpenDate() <= $this->now && $gradeable->getTAViewDate() <= $this->now) {
+                $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) {
                 $this->open_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($this->core->getUser()->accessGrading() && $gradeable->getTAViewDate() <= $this->now) {
+            else if ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {
                 $this->beta_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($this->core->getUser()->accessAdmin()) {
@@ -99,8 +102,8 @@ class GradeableList extends AbstractModel {
         $sort_array = array(
             'future_gradeables' => 'getGradeStartDate',
             'beta_gradeables' => 'getGradeStartDate',
-            'open_gradeables' => 'getDueDate',
-            'closed_gradeables' => 'getDueDate',
+            'open_gradeables' => 'getSubmissionDueDate',
+            'closed_gradeables' => 'getSubmissionDueDate',
             'grading_gradeables' => 'getGradeStartDate',
             'graded_gradeables' => 'getGradeReleasedDate'
         );
@@ -182,8 +185,8 @@ class GradeableList extends AbstractModel {
                 continue;
             }
             if ($this->core->getUser()->accessAdmin() ||
-                ($gradeable->getTAViewDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
-                $gradeable->getOpenDate() <= $this->now) {
+                ($gradeable->getTaViewStartDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
+                $gradeable->getSubmissionOpenDate() <= $this->now) {
                 $return[$gradeable->getId()] = $gradeable;
             }
         }
