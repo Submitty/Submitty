@@ -500,16 +500,16 @@ CREATE TABLE regrade_discussion (
 );
 
 --
--- Name: notifications_type_enum; Type: ENUM; Schema: public; Owner: -
+-- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_type AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
 --
 CREATE TABLE notifications (
     id serial NOT NULL PRIMARY KEY,
-    type notifications_type NOT NULL,
+    component notifications_component NOT NULL,
     metadata TEXT NOT NULL,
     content TEXT NOT NULL,
     from_user_id VARCHAR(255),

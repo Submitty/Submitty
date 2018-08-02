@@ -34,7 +34,7 @@ class Notification extends AbstractModel {
     /** @property @var bool Notification fetched from DB */
     protected $view_only;
 
-    /** @property @var string Type of notification */
+    /** @property @var string Type of component */
     protected $component;
     /** @property @var string Current logged in user */
     protected $current_user;

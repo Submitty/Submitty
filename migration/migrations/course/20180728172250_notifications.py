@@ -2,13 +2,13 @@ def up(config, conn, semester, course):
     with conn.cursor() as cursor:
         cursor.execute("DO $$\
 				BEGIN\
-				    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notifications_type') THEN\
-				        CREATE TYPE notifications_type AS ENUM ('forum');\
+				    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notifications_component') THEN\
+				        CREATE TYPE notifications_component AS ENUM ('forum');\
 				    END IF;\
 				END$$;")
         cursor.execute("CREATE TABLE IF NOT EXISTS notifications (\
 			    id serial NOT NULL PRIMARY KEY,\
-			    type notifications_type NOT NULL,\
+			    component notifications_component NOT NULL,\
 			    metadata TEXT NOT NULL,\
 			    content TEXT NOT NULL,\
 			    from_user_id VARCHAR(255),\

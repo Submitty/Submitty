@@ -2407,7 +2407,7 @@ AND gc_id IN (
         else {
             $ignore_self_query = "";
         }
-        $this->course_db->query("INSERT INTO notifications(type, metadata, content, created_at, from_user_id, to_user_id)
+        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     $params);
     }
@@ -2425,7 +2425,7 @@ AND gc_id IN (
         } else {
             $seen_status_query = "seen_at is NULL";
         }
-        $this->course_db->query("SELECT id, type, metadata, content,
+        $this->course_db->query("SELECT id, component, metadata, content,
                 (case when seen_at is NULL then false else true end) as seen,
                 (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
                 FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
@@ -2435,7 +2435,7 @@ AND gc_id IN (
             $results[] = new Notification($this->core, array(
                     'view_only' => true,
                     'id' => $row['id'],
-                    'component' => $row['type'],
+                    'component' => $row['component'],
                     'metadata' => $row['metadata'],
                     'content' => $row['content'],
                     'seen' => $row['seen'],
@@ -2451,15 +2451,15 @@ AND gc_id IN (
         return $this->course_db->row();
     }
 
-    public function getUnreadNotificationsCount($user_id, $type){
+    public function getUnreadNotificationsCount($user_id, $component){
         $parameters = array($user_id);
-        if(is_null($type)){
-            $type_query = "true";
+        if(is_null($component)){
+            $component_query = "true";
         } else {
-            $type_query = "type = ?";
-            $parameters[] = $type;
+            $component_query = "component = ?";
+            $parameters[] = $component;
         }
-        $this->course_db->query("SELECT count(*) FROM notifications WHERE to_user_id = ? and seen_at is NULL and {$type_query}", $parameters);
+        $this->course_db->query("SELECT count(*) FROM notifications WHERE to_user_id = ? and seen_at is NULL and {$component_query}", $parameters);
         return $this->course_db->row()['count'];
     }
 
