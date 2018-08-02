@@ -128,6 +128,7 @@ class Output {
      * Renders a json response for the "success" case
      *  (see http://submitty.org/developer/json_responses)
      * @param mixed|null $data Response data
+     * @return array the unencoded response
      */
     public function renderJsonSuccess($data = null) {
         $response = [
@@ -147,6 +148,7 @@ class Output {
      * @param string $message A non-blank failure message
      * @param mixed|null $data Response data
      * @param array $extra Extra data merged into the response array
+     * @return array the unencoded response
      */
     public function renderJsonFail($message, $data = null, $extra = []) {
         $response = [
@@ -172,6 +174,7 @@ class Output {
      * @param string $message A non-blank error message
      * @param mixed|null $data Response data
      * @param int $code Code to identify error case
+     * @return array the unencoded response
      */
     public function renderJsonError($message, $data = null, $code = null) {
         $response = [

@@ -78,7 +78,7 @@ class NavigationView extends AbstractView {
         ]);
     }
 
-    public function showGradeables($sections_to_list, $graded_gradeables) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -197,7 +197,7 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section),
+                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
             }
@@ -221,12 +221,13 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable The graded gradeble instance, or null if no data yet
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section): array {
+    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
-        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section) : null;
+        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
@@ -346,9 +347,10 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return Button|null
      */
-    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section) {
+    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
@@ -442,15 +444,17 @@ class NavigationView extends AbstractView {
                 $title = "TA GRADE NOT AVAILABLE";
             }
         } else {
-            // This means either the user isn't on a team, or has no submissions yet
+            // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 // team assignment, no team
-                $title = "MUST BE ON A TEAM TO SUBMIT";
-                $disabled = true;
+                if (!$submit_everyone) {
+                    $title = "MUST BE ON A TEAM TO SUBMIT";
+                    $disabled = true;
+                }
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($this->core->getUser()->accessAdmin()) {
-                        // team assignment, no team (admin)
+                    if ($submit_everyone) {
+                        // team assignment, no team
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
                     }
