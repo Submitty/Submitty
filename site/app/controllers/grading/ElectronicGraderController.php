@@ -638,15 +638,15 @@ class ElectronicGraderController extends GradingController {
     }
 
     public function importTeams() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
-        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
-
-        if ($gradeable == null) {
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
             $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
-            $this->core->redirect($return_url);
+            $this->core->redirect($this->core->buildUrl());
         }
+
+        $return_url = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id));
 
         if (!$this->core->getAccess()->canI("grading.electronic.import_teams", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to do that.");
@@ -654,7 +654,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($return_url);
         }
 
@@ -665,7 +665,7 @@ class ElectronicGraderController extends GradingController {
 
         $csv_file = $_FILES['upload_team']['tmp_name'];
         register_shutdown_function(
-            function() use ($csv_file) {
+            function () use ($csv_file) {
                 unlink($csv_file);
             }
         );
@@ -677,34 +677,34 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($return_url);
         }
 
-        $row_num=1;
-        $error_message="";
+        $row_num = 1;
+        $error_message = "";
         $new_teams_members = array();
-        foreach($contents as $content) {
+        foreach ($contents as $content) {
             $vals = str_getcsv($content);
             $vals = array_map('trim', $vals);
-            if(count($vals) != 6) {
+            if (count($vals) != 6) {
                 $error_message .= "ERROR on row {$row_num}, csv row do not follow specified format<br>";
                 continue;
             }
-            if($row_num == 1) {
+            if ($row_num == 1) {
                 $row_num += 1;
                 continue;
             }
             $team_id = $vals[3];
             $user_id = $vals[2];
-            
+
             if ($this->core->getQueries()->getUserById($user_id) === null) {
                 $error_message .= "ERROR on row {$row_num}, user_id doesn't exists<br>";
-                continue;    
+                continue;
             }
-            if(!array_key_exists($team_id, $new_teams_members)) {
+            if (!array_key_exists($team_id, $new_teams_members)) {
                 $new_teams_members[$team_id] = array();
             }
             array_push($new_teams_members[$team_id], $user_id);
         }
 
-        if($error_message != "") {
+        if ($error_message != "") {
             $this->core->addErrorMessage($error_message);
             $this->core->redirect($return_url);
         }
@@ -713,14 +713,18 @@ class ElectronicGraderController extends GradingController {
         if (!FileUtils::createDir($gradeable_path)) {
             $this->core->addErrorMessage("Failed to make folder for this assignment");
             $this->core->redirect($return_url);
-        }    
+        }
 
-        foreach($new_teams_members as $team_id => $members) {
+        foreach ($new_teams_members as $team_id => $members) {
             $leader_id = $members[0];
 
             $leader = $this->core->getQueries()->getUserById($leader_id);
-            $members = $this->core->getQueries()->getUserById(array_slice($members, 1));
-            $gradeable->createTeam($leader, $members);
+            $members = $this->core->getQueries()->getUsersById(array_slice($members, 1));
+            try {
+                $gradeable->createTeam($leader, $members);
+            } catch (\Exception $e) {
+                $this->core->addErrorMessage("Failed to create team ($leader_id): {$e->getMessage()}");
+            }
         }
 
         $this->core->addSuccessMessage("All Teams are imported to the gradeable");
@@ -759,14 +763,23 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $view = $_REQUEST['view'] ?? '';
+        $new_team = ($_POST['new_team'] ?? '') === 'true' ? true : false;
+        $leader_id = $_POST['new_team_user_id'] ?? '';
+        $team_id = $_POST['edit_team_team_id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false ){
+            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+            $this->core->redirect($this->core->buildUrl());
+        }
 
         $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
-        if (isset($_POST['view'])) $return_url .= "&view={$_POST['view']}";
+        if ($view !== '') $return_url .= "&view={$view}";
 
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($return_url);
         }
 
@@ -774,27 +787,35 @@ class ElectronicGraderController extends GradingController {
         $user_ids = array();
         for ($i = 0; $i < $num_users; $i++) {
             $id = trim(htmlentities($_POST["user_id_{$i}"]));
-            if (($id !== "") && !in_array($id, $user_ids)) {
-                if ($this->core->getQueries()->getUserById($id) === null) {
-                    $this->core->addErrorMessage("ERROR: {$id} is not a valid User ID");
-                    $this->core->redirect($return_url);
-                }
-                $user_ids[] = $id;
-                continue;
-            }
             if(in_array($id, $user_ids)) {
                 $this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }
+            // filter empty strings
+            if ($id !== "") {
+                $user_ids[] = $id;
+            }
         }
-        $new_team = $_POST['new_team'] === 'true' ? true : false;
+
+        // Load the user instances from the database
+        $users = $this->core->getQueries()->getUsersById($user_ids);
+        $invalid_members = array_diff($user_ids, array_keys($users));
+        if (count($invalid_members) > 0) {
+            $members_message = implode(', ', $invalid_members);
+            $this->core->addErrorMessage("ERROR: {$members_message} are not valid User IDs");
+            $this->core->redirect($return_url);
+        }
 
         if ($new_team) {
-            $members = array_merge([$_POST['new_team_user_id']], $user_ids);
-            $gradeable->createTeam($members);
+            $leader = $this->core->getQueries()->getUserById($leader_id);
+            try {
+                $gradeable->createTeam($leader, $users);
+            } catch (\Exception $e) {
+                $this->core->addErrorMessage("ERROR: {$e->getMessage()}");
+                $this->core->redirect($return_url);
+            }
         }
         else {
-            $team_id = $_POST['edit_team_team_id'];
             $team = $this->core->getQueries()->getTeamById($team_id);
             if ($team === null) {
                 $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
