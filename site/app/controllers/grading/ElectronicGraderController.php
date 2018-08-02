@@ -1520,7 +1520,11 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    public function saveGeneralComment() {
+
+    /**
+     * Route for saving the general comment for the gradeable
+     */
+    public function ajaxSaveOverallComment() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
         $comment = $_POST['gradeable_comment'] ?? '';
@@ -1552,6 +1556,18 @@ class ElectronicGraderController extends GradingController {
         // Get the Ta graded gradeable
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveOverallComment($ta_graded_gradeable, $comment);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveOverallComment(TaGradedGradeable $ta_graded_gradeable, string $comment) {
         // Set the comment
         $ta_graded_gradeable->setOverallComment($comment);
 
@@ -1560,8 +1576,6 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the graded gradeable
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-        $this->core->getOutput()->renderJsonSuccess();
     }
 
     protected function ajaxGetGradedComponent() {
