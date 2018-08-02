@@ -303,6 +303,7 @@ class ElectronicGraderController extends GradingController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
+     * TODO: refactor for new model
      */
     public function showStatus() {
         $gradeable_id = $_REQUEST['gradeable_id'];
@@ -637,6 +638,9 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
+    /**
+     * Imports teams from a csv file upload
+     */
     public function importTeams() {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
@@ -731,32 +735,48 @@ class ElectronicGraderController extends GradingController {
         $this->core->redirect($return_url);
     }
 
+    /**
+     * Exports team into a csv file and displays it to the user
+     */
     public function exportTeams() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+            $this->core->redirect($this->core->buildUrl());
+        }
 
         if (!$this->core->getAccess()->canI("grading.electronic.export_teams", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to do that.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
-        $all_teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+        $all_teams = $gradeable->getTeams();
         $nl = "\n";
-        $csvdata="First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section".$nl;
+        $csvdata = "First Name,Last Name,User ID,Team ID,Team Registration Section,Team Rotating Section" . $nl;
         foreach ($all_teams as $team) {
-            if( $team->getSize() != 0) {
-                foreach(($team->getMembers()) as $member_id) {
-                    $user = $this->core->getQueries()->getUserById($member_id);
-                    $csvdata .= $user->getDisplayedFirstName().",".$user->getLastName().",".$member_id.",".$team->getId().",".$team->getRegistrationSection().",".$team->getRotatingSection().$nl;
+            if ($team->getSize() != 0) {
+                foreach ($team->getMemberUsers() as $user) {
+                    $csvdata .= implode(',', [
+                        $user->getDisplayedFirstName(),
+                        $user->getLastName(),
+                        $user->getId(),
+                        $team->getId(),
+                        $team->getRegistrationSection(),
+                        $team->getRotatingSection()
+                    ]);
+                    $csvdata .= $nl;
                 }
-            }    
+            }
         }
-        $filename = "";
-        $filename = $this->core->getConfig()->getCourse()."_".$gradeable_id."_teams.csv";
+        $filename = $this->core->getConfig()->getCourse() . "_" . $gradeable_id . "_teams.csv";
         $this->core->getOutput()->renderFile($csvdata, $filename);
-        return $csvdata;
-    }    
+    }
 
+    /**
+     * Handle requests to create individual teams via the AdminTeamForm
+     */
     public function adminTeamSubmit() {
         if (!$this->core->getAccess()->canI("grading.electronic.submit_team_form")) {
             $this->core->addErrorMessage("You do not have permission to do that.");
@@ -875,6 +895,10 @@ class ElectronicGraderController extends GradingController {
         $this->core->redirect($return_url);
     }
 
+    /**
+     * Display the electronic grading page
+     * TODO: refactor for new model
+     */
     public function showGrading() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
