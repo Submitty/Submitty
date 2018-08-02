@@ -1609,7 +1609,7 @@ WHERE gcm_id=?", $params);
      * @param string $registration_section
      * @param int $rotating_section
      */
-    public function createTeamById(string $g_id, string $team_id, string $user_id, string $registration_section, int $rotating_section) {
+    public function createTeamById(string $g_id, string $team_id, string $user_id, $registration_section, $rotating_section) {
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
