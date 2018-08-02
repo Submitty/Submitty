@@ -573,7 +573,7 @@ class HomeworkView extends AbstractView {
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
             $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
-                $graded_gradeable->getTaGradedGradeable(), $regrade_available);
+                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
             'been_ta_graded' => $been_ta_graded,

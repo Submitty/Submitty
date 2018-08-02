@@ -27,6 +27,15 @@
         {% if any_late_days_used %}
             <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ late_days_url }}">Show my late days information</a>
         {% endif %}
+        <div class="box half" style="float: right; width: 25%; word-break: break-word">
+            View/Download submission with feedback:
+            <br />
+            {% for file in uploaded_files %}
+                {{ file.name }}
+                <a class="btn btn-primary">Download <i class="fa fa-download"></i></a>
+                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'view_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fa fa-window-restore"></i></a>
+            {% endfor %}
+        </div>
         {# /Overview #}
 
         {# Manual total #}
