@@ -586,12 +586,10 @@ function showMarklist(me) {
     var gradeable = getGradeable();
 
     var question_num = parseInt($(me).attr('id').split('-')[1]);
-    var order_num = parseInt($(me).attr('id').split('-')[2]);
+    var mark_id = parseInt($(me).attr('id').split('-')[2]);
     var gradeable_component_id = $('#marks-parent-' + question_num)[0].dataset.question_id;
     
-    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, order_num, function(data) {
-        data = JSON.parse(data);
-
+    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, mark_id, function(data) {
         // Calculate total and graded component amounts
         var graded = 0, total = 0;
         for (var x in data['sections']) {
@@ -600,22 +598,22 @@ function showMarklist(me) {
         }
 
         // Set information in the popup
-        $("#student-marklist-popup-question-name")[0].innerHTML = data['name_info']['question_name'];
-        $("#student-marklist-popup-mark-note")[0].innerHTML = data['name_info']['mark_note'];
+        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).innerHTML;
+        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").innerHTML;
         
-        $("#student-marklist-popup-student-amount")[0].innerHTML = data['data'].length;
+        $("#student-marklist-popup-student-amount")[0].innerHTML = data['submitter_ids'].length;
         $("#student-marklist-popup-graded-components")[0].innerHTML = graded;
         $("#student-marklist-popup-total-components")[0].innerHTML = total;
         
         // Create list of students
         var students_html = "";
-        for (var x = 0; x < data['data'].length; x++) {
-            var id = data['data'][x]['gd_user_id'] || data['data'][x]['gd_team_id'];
+        for (var x = 0; x < data['submitter_ids'].length; x++) {
+            var id = data['submitter_ids'][x];
 
             var href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id="+id);
             students_html +=
                 "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
-                id + (x != data['data'].length - 1 ? ", " : "") +
+                id + (x != data['submitter_ids'].length - 1 ? ", " : "") +
                 "</a>";
         }
         

@@ -11,7 +11,7 @@
 
         <span data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
-            <b>{{ component.name }}</b>
+            <b><span id="component_name-{{ c_index }}">{{ component.name }}</span></b>
 
             {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' class="version-warning">
