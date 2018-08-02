@@ -790,12 +790,12 @@ class ElectronicGraderController extends GradingController {
         $team_id = $_POST['edit_team_team_id'] ?? '';
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
-        if ($gradeable === false ){
+        if ($gradeable === false) {
             $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
             $this->core->redirect($this->core->buildUrl());
         }
 
-        $return_url = $this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details','gradeable_id'=>$gradeable_id));
+        $return_url = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id));
         if ($view !== '') $return_url .= "&view={$view}";
 
         if (!$gradeable->isTeamAssignment()) {
@@ -807,7 +807,7 @@ class ElectronicGraderController extends GradingController {
         $user_ids = array();
         for ($i = 0; $i < $num_users; $i++) {
             $id = trim(htmlentities($_POST["user_id_{$i}"]));
-            if(in_array($id, $user_ids)) {
+            if (in_array($id, $user_ids)) {
                 $this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }
@@ -834,8 +834,7 @@ class ElectronicGraderController extends GradingController {
                 $this->core->addErrorMessage("ERROR: {$e->getMessage()}");
                 $this->core->redirect($return_url);
             }
-        }
-        else {
+        } else {
             $team = $this->core->getQueries()->getTeamById($team_id);
             if ($team === null) {
                 $this->core->addErrorMessage("ERROR: {$team_id} is not a valid Team ID");
@@ -843,7 +842,7 @@ class ElectronicGraderController extends GradingController {
             }
             $team_members = $team->getMembers();
             $add_user_ids = array();
-            foreach($user_ids as $id) {
+            foreach ($user_ids as $id) {
                 if (!in_array($id, $team_members)) {
                     if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
                         $this->core->addErrorMessage("ERROR: {$id} is already on a team");
@@ -853,7 +852,7 @@ class ElectronicGraderController extends GradingController {
                 }
             }
             $remove_user_ids = array();
-            foreach($team_members as $id) {
+            foreach ($team_members as $id) {
                 if (!in_array($id, $user_ids)) {
                     $remove_user_ids[] = $id;
                 }
@@ -863,35 +862,36 @@ class ElectronicGraderController extends GradingController {
             $rot_section = $_POST['rot_section'] === "NULL" ? null : intval($_POST['rot_section']);
             $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section);
             $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section);
-            foreach($add_user_ids as $id) {
+            foreach ($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
             }
-            foreach($remove_user_ids as $id) {
+            foreach ($remove_user_ids as $id) {
                 $this->core->getQueries()->leaveTeam($team_id, $id);
             }
             $this->core->addSuccessMessage("Updated Team {$team_id}");
 
-            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
             $json = FileUtils::readJsonFile($settings_file);
             if ($json === false) {
                 $this->core->addErrorMessage("Failed to open settings file");
                 $this->core->redirect($return_url);
             }
-            foreach($add_user_ids as $id) {
+            foreach ($add_user_ids as $id) {
                 $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
-                                                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
+                    "admin_user" => $this->core->getUser()->getId(), "added_user" => $id);
             }
-            foreach($remove_user_ids as $id) {
+            foreach ($remove_user_ids as $id) {
                 $json["team_history"][] = array("action" => "admin_remove_user", "time" => $current_time,
-                                                    "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
+                    "admin_user" => $this->core->getUser()->getId(), "removed_user" => $id);
             }
             if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
                 $this->core->addErrorMessage("Failed to write to team history to settings file");
             }
-        }   
-        
+        }
+
+        $this->core->addSuccessMessage("Created New Team {$team_id}");
         $this->core->redirect($return_url);
     }
 
