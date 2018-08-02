@@ -363,10 +363,20 @@ class MiscController extends AbstractController {
 
     private function downloadZip() {
         $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-        // security check
-        $error_string="";
-        if (!$this->checkValidAccess(true, $error_string, false, $gradeable)) {
-            $message = "You do not have access to that page. ".$error_string;
+
+        $folder_names = array();
+        //See which directories we are allowed to read.
+        if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable])) {
+            //These two have the same check
+            $folder_names[] = "submissions";
+            $folder_names[] = "checkout";
+        }
+        if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable])) {
+            $folder_names[] = "results";
+        }
+        //No results, no download
+        if (count($folder_names) === 0) {
+            $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
@@ -381,21 +391,13 @@ class MiscController extends AbstractController {
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $gradeable->getActiveVersion();
         $version = isset($_REQUEST['version']) ? $_REQUEST['version'] : $active_version;
-        $folder_names = array();
-        $folder_names[] = "submissions";
-        $folder_names[] = "results";
-        $folder_names[] = "checkout";
-        $submissions_path = FileUtils::joinPaths($gradeable_path, $folder_names[0], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
-        $results_path = FileUtils::joinPaths($gradeable_path, $folder_names[1], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
-        $checkout_path = FileUtils::joinPaths($gradeable_path, $folder_names[2], $gradeable->getId(), $gradeable->getUser()->getId(), $version);
+
+        $paths = [];
+        foreach ($folder_names as $folder_name) {
+            $paths[] = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $gradeable->getUser()->getId(), $version);
+        }
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        $paths = array();
-        $paths[] = $submissions_path;
-        if($this->core->getUser()->accessGrading()) {
-            $paths[] = $results_path;
-            $paths[] = $checkout_path;
-        }
         for ($x = 0; $x < count($paths); $x++) {
             if (is_dir($paths[$x])) {
                     $files = new \RecursiveIteratorIterator(
