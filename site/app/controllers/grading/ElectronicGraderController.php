@@ -1475,33 +1475,49 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    public function deleteOneMark() {
-        $gradeable_id = $_POST['gradeable_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
 
-        if (!$this->core->getAccess()->canI("grading.electronic.delete_one_mark", ["gradeable" => $gradeable])) {
-            $response = array('status' => 'failure');
-            $this->core->getOutput()->renderJson($response);
+    /**
+     * Route for deleting a mark from a component
+     */
+    public function ajaxDeleteMark() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $mark_id = $_POST['mark_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
-        $gcm_id = $_POST['gradeable_component_mark_id'];
-        foreach ($gradeable->getComponents() as $component) {
-            if ($component->getId() != $_POST['gradeable_component_id']) {
-                continue;
-            } else {
-                foreach ($component->getMarks() as $mark) {
-                    if ($mark->getId() == $gcm_id) {
-                        $this->core->getQueries()->deleteGradeableComponentMark($mark);
-                        $this->core->getOutput()->renderJson(["status" => "success"]);
-                        return;
-                    }
-                }
-            }
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
         }
-        $this->core->getOutput()->renderJson(["status" => "failure"]);
-        return;
+
+        // get the mark
+        $mark = $this->tryGetMark($component, $mark_id);
+        if ($mark === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.delete_one_mark", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component->deleteMark($mark);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
     public function saveGeneralComment() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
