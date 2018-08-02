@@ -717,7 +717,10 @@ class ElectronicGraderController extends GradingController {
 
         foreach($new_teams_members as $team_id => $members) {
             $leader_id = $members[0];
-            ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader_id, $members);
+
+            $leader = $this->core->getQueries()->getUserById($leader_id);
+            $members = $this->core->getQueries()->getUserById(array_slice($members, 1));
+            $gradeable->createTeam($leader, $members);
         }
 
         $this->core->addSuccessMessage("All Teams are imported to the gradeable");
@@ -787,8 +790,8 @@ class ElectronicGraderController extends GradingController {
         $new_team = $_POST['new_team'] === 'true' ? true : false;
 
         if ($new_team) {
-            $leader = $_POST['new_team_user_id'];
-            ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+            $members = array_merge([$_POST['new_team_user_id']], $user_ids);
+            $gradeable->createTeam($members);
         }
         else {
             $team_id = $_POST['edit_team_team_id'];
@@ -849,77 +852,6 @@ class ElectronicGraderController extends GradingController {
         }   
         
         $this->core->redirect($return_url);
-    }
-
-    static public function createTeamWithLeaderAndUsers($core, $gradeable, $leader, $user_ids){
-        $team_leader_id = null;
-        $gradeable_id = $gradeable->getId();
-        foreach($user_ids as $id) {
-            if($id === "undefined" || $id === "")
-            {
-                continue;
-            }
-            if ($core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id) !== null) {
-                $core->addErrorMessage("ERROR: {$id} is already on a team");
-                return;
-            }
-            if ($id === $leader) {
-                $team_leader_id = $id;
-            }
-        }
-        if ($team_leader_id === null) {
-            $core->addErrorMessage("ERROR: {$team_leader_id} must be on the team");
-            return;
-        }
-
-        $registration_section = $core->getQueries()->getUserById($team_leader_id)->getRegistrationSection();
-        $rotating_section = $core->getQueries()->getUserById($team_leader_id)->getRotatingSection();
-
-        //overwrite sections if they are available in the post
-        if(isset($_POST['section']) && $_POST['section'] !== "NULL"){
-            if ($gradeable->isGradeByRegistration()) {
-                $registration_section = $_POST['section'] === "NULL" ? null : $_POST['section'];
-            }
-            else {
-                $rotating_section = $_POST['section'] === "NULL" ? null : intval($_POST['section']);
-            }
-        }
-
-        $team_id = $core->getQueries()->createTeam($gradeable_id, $team_leader_id, $registration_section, $rotating_section);
-        foreach($user_ids as $id) {
-            if($id === "undefined" or $id === ""){
-                continue;
-            }
-            $core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
-            if ($id !== $team_leader_id) $core->getQueries()->acceptTeamInvitation($team_id, $id);
-        }
-        $core->addSuccessMessage("Created New Team {$team_id}");
-
-        $gradeable_path = FileUtils::joinPaths($core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
-        if (!FileUtils::createDir($gradeable_path)) {
-            $core->addErrorMessage("Failed to make folder for this assignment");
-            return;
-        }
-
-        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
-        if (!FileUtils::createDir($user_path)) {
-            $core->addErrorMessage("Failed to make folder for this assignment for the team");
-            return;
-        }
-
-        $current_time = (new \DateTime('now', $core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$core->getConfig()->getTimezone()->getName();
-        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
-        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
-                                                    "admin_user" => $core->getUser()->getId(), "first_user" => $team_leader_id)));
-        foreach($user_ids as $id) {
-            if ($id !== $team_leader_id) {
-                $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
-                                                "admin_user" => $core->getUser()->getId(), "added_user" => $id);
-            }
-        }
-        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
-            $core->addErrorMessage("Failed to write to team history to settings file");
-        }
     }
 
     public function showGrading() {

@@ -1223,4 +1223,79 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
+
+    /**
+     * Creates a new team with the provided members
+     * @param User $leader The team leader (first user)
+     * @param User[] $members The team members (not including leader).
+     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader.
+     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader
+     * @throws \Exception If creating directories for the team fails, or writing team history fails
+     */
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+        if (count($members) === 0) {
+            throw new \InvalidArgumentException('Team member list must not be blank');
+        }
+
+        $all_members = $members;
+        $all_members[] = $leader;
+
+        // Validate parameters
+        $gradeable_id = $this->getId();
+        foreach ($all_members as $member) {
+            if (!($member instanceof User)) {
+                throw new \InvalidArgumentException('User array contained non-user object');
+            }
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $member->getId()) !== null) {
+                throw new \InvalidArgumentException("{$member->getId()} is already on a team");
+            }
+        }
+
+        // Inherit rotating/registration section from leader if not provided
+        if ($registration_section === '') {
+            $registration_section = $leader->getRegistrationSection();
+        }
+        if ($rotating_section < 0) {
+            $rotating_section = $leader->getRegistrationSection();
+        }
+
+        // Get our team id before creating the team
+        $team_id = $this->core->getQueries()->generateTeamId($leader->getId());
+
+        // Create the submission directory if it doesn't exist
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            throw new \Exception("Failed to make folder for this assignment");
+        }
+
+        // Create the team submission directory if it doesn't exist
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            throw new \Exception("Failed to make folder for this assignment for the team");
+        }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+            . " " . $this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+
+        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        foreach ($members as $member) {
+            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            throw new \Exception("Failed to write to team history to settings file");
+        }
+
+        // Create the team in the database only after the above operations succeed
+        $this->core->getQueries()->createTeamById($gradeable_id, $team_id, $leader->getId(), $registration_section, $rotating_section);
+
+        // Force the other team members to accept the invitation from this newly created team
+        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
+        foreach ($members as $i => $member) {
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+        }
+    }
 }
