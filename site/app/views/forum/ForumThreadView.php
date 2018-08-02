@@ -524,6 +524,11 @@ HTML;
 						} else {
 							$date = date_create($first_post['timestamp']);
 						}
+						if($thread['merged_thread_id'] != -1){
+							// For the merged threads
+							$thread['status'] = 0;
+						}
+
 						$class = "thread_box";
 						// $current_categories_ids should be subset of $thread["categories_ids"]
 						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
