@@ -675,14 +675,4 @@ class NavigationView extends AbstractView {
     public function deleteGradeableForm() {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
     }
-
-    public function listNotifications($notifications, $show_all) {
-        $currentCourse = $this->core->getConfig()->getCourse();
-        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
-        return $this->core->getOutput()->renderTwigTemplate("Notifications.twig", [
-            'course' => $currentCourse,
-            'show_all' => $show_all,
-            'notifications' => $notifications
-        ]);
-    }
 }
