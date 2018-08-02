@@ -13,6 +13,7 @@ import string
 import random
 import socket
 import zipfile
+import sys
 
 from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
@@ -144,7 +145,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
-    os.makedirs(tmp)
+    os.mkdir(tmp)
 
     which_machine=socket.gethostname()
 
@@ -247,8 +248,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
                               stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
 
-    add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
+    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+    
+
+    if USE_DOCKER:
+        print("!!!!!!!!!!!!!!!!!!USING DOCKER!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
@@ -291,38 +296,61 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("====================================\nRUNNER STARTS", file=f)
         
     tmp_work = os.path.join(tmp,"TMP_WORK")
-    os.makedirs(tmp_work)
+    tmp_work_test_input = os.path.join(tmp_work, "test_input")
+    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
+    tmp_work_checkout = os.path.join(tmp_work, "checkout")
+    
+    os.mkdir(tmp_work)
+    
+    os.mkdir(tmp_work_test_input)
+    os.mkdir(tmp_work_subission)
+    os.mkdir(tmp_work_compiled)
+    os.mkdir(tmp_work_checkout)
+
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
-    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
+    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_subission,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
-    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
+    #TODO what does this do?
+    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work_compiled,tmp_logs)
         
     # copy input files to tmp_work directory
-    copy_contents_into(job_id,test_input_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,test_input_path,tmp_work_test_input,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_work,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    #set the appropriate permissions for the newly created directories 
+    #TODO replaces commented out code below
+    add_permissions(os.path.join(tmp_work,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_subission, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_compiled, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_checkout, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+    #TODO this is how permissions used to be set. It was removed because of the way it interacts with the sticky bit.
+    ## give the untrusted user read/write/execute permissions on the tmp directory & files
+    # os.system('ls -al {0}'.format(tmp_work))
+    # add_permissions_recursive(tmp_work,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
 
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                                    item_name, USE_DOCKER, container, which_untrusted)
+                                                                                    item_name, USE_DOCKER, container, which_untrusted,
+                                                                                    job_id, grading_began)
     ##################################################################################################
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")
@@ -367,8 +395,18 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
+    add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+    #todo remove prints.
+    print("VALIDATING")
+    print('this is the command that was to be used: \n{0} {1} {2} {3} {4} {5} {6}'.format( 
+                                                 os.path.join(SUBMITTY_INSTALL_DIR,"sbin","untrusted_execute"),
+                                                 which_untrusted,
+                                                 os.path.join(tmp_work,"my_validator.out"),
+                                                 queue_obj["gradeable"],
+                                                 queue_obj["who"],
+                                                 str(queue_obj["version"]),
+                                                 submission_string))
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:

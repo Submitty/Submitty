@@ -31,8 +31,8 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
   }
   for (int f = 0; f < filenames.size(); f++) {
     if (!tc.isCompilation()) {
-      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
-      //filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      //filenames[f] = tc.getPrefix() + filenames[f];
+      //filenames[f] = tc.getPrefix() + filenames[f];
       //filenames[f] = replace_slash_with_double_underscore(filenames[f]);
     }
   }
@@ -47,7 +47,7 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     std::cout << "  file exists check: '" << filenames[f] << "' : ";
     std::vector<std::string> files;
     wildcard_expansion(files, filenames[f], std::cout);
-    wildcard_expansion(files, tc.getPrefix() + "_" + filenames[f], std::cout);
+    wildcard_expansion(files, tc.getPrefix() + filenames[f], std::cout);
     bool found = false;
     // loop over the available files
     for (int i = 0; i < files.size(); i++) {
@@ -162,7 +162,7 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
 
 
-  actual_file = tc.getPrefix() + "_" + actual_file;
+  actual_file = tc.getPrefix() + actual_file;
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
 
 
@@ -178,7 +178,7 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
   float difference = values[1];
   float similarity = 1 - difference;
 
-  std::string diff_file_name = tc.getPrefix() + "_" + std::to_string(autocheck_number) + "_difference.png";
+  std::string diff_file_name = tc.getPrefix() + std::to_string(autocheck_number) + "_difference.png";
 
   std::cout << "About to compose the images." << std::endl;
   std::string command2 = "compare " + actual_file + " " + expected_file + " -fuzz 10% -highlight-color red -lowlight-color none -compose src " + diff_file_name;
