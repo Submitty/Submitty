@@ -125,10 +125,6 @@ class NavigationView extends AbstractView {
                 if(is_file($seating_config_path)) {
                     $seating_config = file_get_contents($seating_config_path);
                 }
-
-                $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
-                                                            $this->core->getConfig()->getRoomSeatingGradeableId(), $user_seating_details->building, $user_seating_details->room, 'config.json');
-                $seating_config = file_get_contents($seating_config_path);
             }
             else {
                 // mimic the result format of json_decode when there is no file to decode
