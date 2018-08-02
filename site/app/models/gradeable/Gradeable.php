@@ -659,6 +659,38 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Adds a new component to this gradeable with the provided properties
+     * @param string $title
+     * @param string $ta_comment
+     * @param string $student_comment
+     * @param float $lower_clamp
+     * @param float $default
+     * @param float $max_value
+     * @param float $upper_clamp
+     * @param bool $text
+     * @param bool $peer
+     * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
+     */
+    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
+                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+        $component = new Component($this->core, $this, [
+            'title' => $title,
+            'ta_comment' => $ta_comment,
+            'student_comment' => $student_comment,
+            'lower_clamp' => $lower_clamp,
+            'default' => $default,
+            'max_value' => $max_value,
+            'upper_clamp' => $upper_clamp,
+            'text' => $text,
+            'peer' => $peer,
+            'page' => $pdf_page,
+            'id' => 0,
+            'order' => count($this->components)
+        ]);
+        $this->components[] = $component;
+    }
+
+    /**
      * Deletes a component from this gradeable without checking if grades exist for it yet.
      * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
      * @param Component $component

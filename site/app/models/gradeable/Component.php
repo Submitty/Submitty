@@ -284,6 +284,21 @@ class Component extends AbstractModel {
     }
 
     /**
+     * Adds a new mark to this component with the provided title and point value
+     * @param string $title
+     * @param float $points
+     */
+    public function addMark(string $title, float $points) {
+        $mark = new Mark($this->core, $this, [
+            'title' => $title,
+            'points' => $points,
+            'order' => count($this->marks),
+            'id' => 0
+        ]);
+        $this->marks[] = $mark;
+    }
+
+    /**
      * Deletes a mark from this component without checking if a submitter has received it yet
      * @param Mark $mark
      * @throws \InvalidArgumentException If this component doesn't own the provided mark
