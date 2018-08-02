@@ -8,7 +8,6 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\gradeable\GradeableList;
 use app\libraries\FileUtils;
-use phpDocumentor\Reflection\File;
 
 class NavigationView extends AbstractView {
 
@@ -88,7 +87,7 @@ class NavigationView extends AbstractView {
         $message_file_contents = "";
         if($display_custom_message) {
             $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . "_message.html");
-            $display_custom_message = file_exists($message_file_path);
+            $display_custom_message = is_file($message_file_path);
             if ($display_custom_message) {
                 $message_file_contents = file_get_contents($message_file_path);
             }
