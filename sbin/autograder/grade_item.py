@@ -390,6 +390,16 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+    #todo remove prints.
+    print("VALIDATING")
+    print('this is the command that was to be used: \n{0} {1} {2} {3} {4} {5} {6}'.format( 
+                                                 os.path.join(SUBMITTY_INSTALL_DIR,"sbin","untrusted_execute"),
+                                                 which_untrusted,
+                                                 os.path.join(tmp_work,"my_validator.out"),
+                                                 queue_obj["gradeable"],
+                                                 queue_obj["who"],
+                                                 str(queue_obj["version"]),
+                                                 submission_string))
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:

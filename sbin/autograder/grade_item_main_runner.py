@@ -46,7 +46,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         print ("LOGGING BEGIN my_runner.out",file=logfile)
         logfile.flush()
         testcases = complete_config_obj["testcases"]
-        for testcase_num in range(len(testcases)):
+        # we start counting from one.
+        for testcase_num in range(1, len(testcases)+1):
             
             #make the tmp folder for this testcase.
             testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))

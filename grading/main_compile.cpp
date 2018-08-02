@@ -157,8 +157,8 @@ int main(int argc, char *argv[]) {
             wildcard_expansion(files, pattern, std::cout);
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
-              std::string new_filename = my_testcase.getPrefix() + "_" + files[i];
-              //std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+              std::string new_filename = my_testcase.getPrefix() + files[i];
+              //std::string new_filename = my_testcase.getPrefix() + replace_slash_with_double_underscore(files[i]);
               if (new_filename.substr(new_filename.size() - 4,4) == ".cpp" && !special_flag) {
                 new_filename += ".txt";
               }
@@ -201,10 +201,10 @@ int main(int argc, char *argv[]) {
 
         // run the command, capturing STDOUT & STDERR
         int exit_no = execute(commands[j] +
-                              " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
-                              " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
+                              " 1>" + my_testcase.getPrefix() + "STDOUT" + which + ".txt" +
+                              " 2>" + my_testcase.getPrefix() + "STDERR" + which + ".txt",
                               actions,
-                              my_testcase.getPrefix() + "_execute_logfile.txt",
+                              my_testcase.getPrefix() + "execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()),
                               config_json,

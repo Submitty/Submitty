@@ -64,14 +64,15 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
 
   if(test_case_to_run != -1){
-    assert (test_case_to_run < tc->size());
+    //testcases begin counting at 1 and end at tc->size()
+    assert (test_case_to_run <= tc->size());
   }else{
     std::cout << "Running all testcases in a single run." << std::endl;
   }
 
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  for (unsigned int i = 1; i <= tc->size(); i++) {
 
-    TestCase my_testcase(config_json,i);
+    TestCase my_testcase(config_json,i-1);
 
     if (my_testcase.isFileCheck() || my_testcase.isCompilation()){
       continue;
@@ -82,11 +83,11 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "========================================================" << std::endl;
-    std::cout << "TEST #" << i+1 << std::endl;
+    std::cout << "TEST #" << i << std::endl;
 
 
-    std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
-    std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i],"actions");
+    std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i-1],"command");
+    std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
     assert (commands.size() > 0);
 
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
@@ -103,7 +104,7 @@ int main(int argc, char *argv[]) {
       }
       
       
-      std::string logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
+      std::string logfile = my_testcase.getPrefix() + "execute_logfile.txt";
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(commands[x]
                             +
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
     //   }
     // }
     std::cout << "========================================================" << std::endl;
-    std::cout << "FINISHED TEST #" << i+1 << std::endl;
+    std::cout << "FINISHED TEST #" << i << std::endl;
   }
   return 0;
 }
