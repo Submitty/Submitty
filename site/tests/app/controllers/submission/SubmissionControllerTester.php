@@ -793,11 +793,11 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Test that one must have at least grading access to delete split items
+     * Test that one must be at least a full access grader to delete split items
      */
     public function testDeleteSplitItemPermission() {
         $_REQUEST['action'] = 'delete_split';
-        $return = $this->runController($this->createMockCore(array('csrf_token' => true), array('access_grading' => false)));
+        $return = $this->runController($this->createMockCore(array('csrf_token' => true), array('access_full_grading' => false)));
         $this->assertTrue($return['error']);
         $this->assertFalse($return['success']);
         $this->assertEquals("You do not have access to that page.", $return['message']);
