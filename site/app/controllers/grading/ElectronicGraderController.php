@@ -1470,7 +1470,7 @@ class ElectronicGraderController extends GradingController {
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $mark = $component->addMark($title, $points);
-            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1515,6 +1515,7 @@ class ElectronicGraderController extends GradingController {
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component->deleteMark($mark);
+            $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
