@@ -99,6 +99,19 @@ class ElectronicGraderController extends GradingController {
         }
         return true;
     }
+
+    /**
+     * Checks that a given diff viewer type is valid using DiffViewer::isValidType
+     * @param string $type
+     * @return bool
+     */
+    private function validateDiffViewerType(string $type) {
+        if (!DiffViewer::isValidType($type)) {
+            $this->core->getOutput()->renderJsonFail('Invalid diff viewer type parameter');
+            return false;
+        }
+        return true;
+    }
     
     public function savePDFAnnotation(){
         //Save the annotation layer to a folder.
@@ -164,19 +177,6 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
-    }
-
-    /**
-     * Checks that a given diff viewer type is valid using DiffViewer::isValidType
-     * @param string $type
-     * @return bool
-     */
-    private function validateDiffViewerType(string $type) {
-        if (!DiffViewer::isValidType($type)) {
-            $this->core->getOutput()->renderJsonFail('Invalid diff viewer type parameter');
-            return false;
-        }
-        return true;
     }
 
     /**
