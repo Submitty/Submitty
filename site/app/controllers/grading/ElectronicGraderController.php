@@ -1294,6 +1294,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.add_one_new_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
             return;
         }
