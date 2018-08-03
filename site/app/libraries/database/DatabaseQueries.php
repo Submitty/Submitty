@@ -1605,8 +1605,9 @@ WHERE gcm_id=?", $params);
     public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
-        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5 - strlen($team_id_prefix)) . $team_id_prefix;
+        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5-strlen($team_id_prefix)) . $team_id_prefix;
         $team_id = "{$team_id_prefix}_{$user_id}";
+
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
         $this->course_db->query("INSERT INTO gradeable_teams (team_id, g_id, registration_section, rotating_section) VALUES(?,?,?,?)", $params);
         $this->course_db->query("INSERT INTO teams (team_id, user_id, state) VALUES(?,?,1)", array($team_id, $user_id));
