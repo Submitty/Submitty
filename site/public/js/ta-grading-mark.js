@@ -615,8 +615,8 @@ function showMarklist(me) {
         }
 
         // Set information in the popup
-        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).innerHTML;
-        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").innerHTML;
+        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).text();
+        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").val();
         
         $("#student-marklist-popup-student-amount")[0].innerHTML = data.submitter_ids.length;
         $("#student-marklist-popup-graded-components")[0].innerHTML = graded;
