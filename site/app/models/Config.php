@@ -29,7 +29,6 @@ use phpDocumentor\Reflection\File;
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
  * @method array getCourseDatabaseParams()
- * @method array getWrapperFiles()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -438,6 +437,11 @@ class Config extends AbstractModel {
     public function wrapperEnabled() {
         return $this->course_loaded
             && (count($this->wrapper_files) > 0);
+    }
+
+    public function getWrapperFiles() {
+        //Return empty if not logged in because we can't access them
+        return ($this->core->getUser() === null ? [] : $this->wrapper_files);
     }
 
     public function readCourseIni() {
