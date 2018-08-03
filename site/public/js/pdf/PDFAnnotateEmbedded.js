@@ -6,9 +6,8 @@ let RENDER_OPTIONS = {
     //User id in this case is the grader
     userId: null,
     pdfDocument: null,
-    // scale: parseFloat(localStorage.getItem(`${documentId}/scale`), 10) || 0.5,
-    scale: 1,
-    rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
+    scale: parseFloat(localStorage.getItem('scale')) || 1,
+    rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
 let GENERAL_INFORMATION = {
     user_id: "",
@@ -119,6 +118,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 clicked_button.addClass('tool-selected');
                 switch($(selected[0]).attr('value')){
                     case 'pen':
+                        $('#file_content').css('overflow', 'auto');
+                        $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
                     case 'cursor':
@@ -152,6 +153,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 case 'zoomcustom':
                     debounce(zoom, 500, 'custom');
                     break;
+                case 'rotate':
+                    debounce(rotate, 500);
+                    break;
                 case 'text':
                     UI.enableText();
                     break;
@@ -169,13 +173,19 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
 
+    function rotate(){
+        RENDER_OPTIONS.rotate += 90;
+        localStorage.setItem('rotate', RENDER_OPTIONS.rotate);
+        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+    }
+
     function zoom(option, custom_val){
         let zoom_flag = true;
         let zoom_level = RENDER_OPTIONS.scale;
         if(option == 'in'){
-            zoom_level *= 1.5;
+            zoom_level += 1;
         } else if(option == 'out'){
-            zoom_level /= 1.5;
+            zoom_level -= 1;
         } else {
             if(custom_val != null){
                 zoom_level = custom_val/100;
@@ -191,6 +201,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         RENDER_OPTIONS.scale = zoom_level;
         $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
         if(zoom_flag){
+            localStorage.setItem('scale', RENDER_OPTIONS.scale);
             render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
         }
     }
@@ -239,13 +250,17 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 (function () {
     let penSize;
     let penColor;
-
+    let scrollLock;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 3;
         let init_color = localStorage.getItem('pen/color') || '#ff0000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         document.getElementById('pen_color_selector').value = init_color;
+        if($('#scroll_lock_mode').is(':checked')) {
+            scrollLock = true;
+        }
+
         setPen(init_size, init_color);
     }
 
@@ -257,11 +272,14 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             penSize = size;
             localStorage.setItem('pen/size', penSize);
         }
-
         if (penColor !== color) {
             modified = true;
             penColor = color;
             localStorage.setItem('pen/color', penColor);
+        }
+
+        if (modified && scrollLock) {
+            $('#file_content').css('overflow', 'hidden');
         }
 
         if (modified) {
@@ -276,6 +294,15 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setPen(value, penColor);
+    });
+    document.getElementById('scroll_lock_mode').addEventListener('change', function(e){
+        if(!$('#scroll_lock_mode').is(':checked')){
+            $('#file_content').css('overflow', 'auto');
+            scrollLock = false;
+        } else {
+            $('#file_content').css('overflow', 'hidden');
+            scrollLock = true;
+        }
     });
     initPen();
 })();
