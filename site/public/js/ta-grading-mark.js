@@ -568,10 +568,8 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 
             updateCookies();
 
-            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function(data) {
-                mark.id = data.mark_id;
-                getComponent(c_index).marks.push(mark);
-                parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
+            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function() {
+                updateMarksOnPage(c_index);
             });
         }
     };
@@ -1175,7 +1173,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
             var DBvsYours = (DB_m_id === id && (DB_score !== points || DB_note !== note || DB_order !== order));
             if(DBvsOR && DBvsYours && ORvsYours){
                 //CONFLICT!
-                if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing. Would you like your changes to overwrite the other users?")){
+                if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing). Would you like your changes to overwrite the other users?")){
                     calculatePercentageTotal();
                     var gradedByElement = $('#graded-by-' + c_index);
                     var savingElement = $('#graded-saving-' + c_index);
