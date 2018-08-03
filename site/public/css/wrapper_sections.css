@@ -1,19 +1,21 @@
 #container {
     display: flex;
-    width: 100%;
-    margin: 0 0 -60px 0;
     flex-direction: column;
 }
 
-#container #upper-container, #container #lower-container {
+#container #center-container {
     display: flex;
     flex-direction: row;
 }
 
-#container #upper-left-container, #container #lower-left-container {
-    min-width: 20%;
+#site-body {
+    flex-grow: 2;
 }
 
-#container #upper-right-container, #container #lower-right-container {
-    flex-grow: 2;
+#container iframe#upper-container, #container iframe#lower-container {
+    height: 60px;
+}
+
+#container iframe#left-container, #container iframe#right-container {
+    width: 200px;
 }

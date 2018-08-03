@@ -1,24 +1,39 @@
 {% import _self as self %}
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
-                <div id="push"></div>
-                <div id="footer">
-                    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-                    <span id="github">
-                        <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
-                            <i class="fa fa-github fa-lg"></i>
-                        </a>
-                    </span>
+            <div id="push"></div>
+            <div id="footer">
+                <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+                <span id="github">
+                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
+                        <i class="fa fa-github fa-lg"></i>
+                    </a>
+                </span>
 
-                    {% if is_debug %}
-                        <a href="#" onClick="togglePageDetails();">Show Page Details</a>
-                    {% endif %}
-                </div>
+                {% if is_debug %}
+                    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                {% endif %}
             </div>
-{% if wrapper_enabled %}
-        </div>
-    </div>
-{% endif %}
-</div>
+        </div> {# /#site-body #}
+        {% if wrapper_files['right_sidebar'] != null %}
+            {#<div id="upper-left-container">#}
+            {# uploaded homepage redirect can go here? #}
+            <iframe id="right-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/right_sidebar.html" frameborder="0"></iframe>
+            {#{{ include('@site_uploads/upper-left.html') }}#}
+            {#</div>#}
+        {% else %}
+            <div id="empty-container"></div>
+        {% endif %}
+    </div> {# /#center-container #}
+    {% if wrapper_files['bottom_bar'] != null %}
+        {#<div id="upper-left-container">#}
+        {# uploaded homepage redirect can go here? #}
+        <iframe id="lower-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/bottom_bar.html" frameborder="0"></iframe>
+        {#{{ include('@site_uploads/upper-left.html') }}#}
+        {#</div>#}
+    {% else %}
+        <div id="empty-container"></div>
+    {% endif %}
+</div> {# /#container #}
 {% if is_debug %}
     <div id='page-info'>
         Runtime: {{ runtime }}<br /><br />

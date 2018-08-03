@@ -7,36 +7,31 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 
 class WrapperController extends AbstractController {
+
+    const WRAPPER_FILES = [
+        'top_bar',
+        'left_sidebar',
+        'right_sidebar',
+        'bottom_bar'
+    ];
+
 	public function run() {
 		switch($_REQUEST['action']) {
             case 'process_upload_html':
                 $this->processUploadHTML();
+                break;
             case 'delete_uploaded_html':
                 $this->deleteUploadedHTML();
+                break;
 			case 'show_page':
 			default:
 				$this->uploadWrapperPage();
+				break;
 		}
 	}
 
 	private function uploadWrapperPage() {
-	    $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site');
-	    $all_files = FileUtils::getAllFiles($target_dir);
-	    $html_files = array();
-	    foreach($all_files as $file) {
-	        if($file['name'] === 'upper-left.html') {
-	            $html_files['up_left_file'] = $file;
-            }
-            else if($file['name'] === 'upper-right.html') {
-	            $html_files['up_right_file'] = $file;
-            }
-            else if($file['name'] === 'lower-left.html') {
-	            $html_files['low_left_file'] = $file;
-            }
-        }
-
-
-		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $target_dir, $html_files);
+		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $this->core->getConfig()->getWrapperFiles());
 	}
 
 	private function processUploadHTML() {
@@ -59,7 +54,7 @@ class WrapperController extends AbstractController {
                 'action' => 'show_page')));
         }
 
-        if(!isset($_POST['location']) && ($_POST['location'] !== 'upper-left' || $_POST['location'] !== 'upper-right' || $_POST['location'] !== 'lower-left')) {
+        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
@@ -79,7 +74,7 @@ class WrapperController extends AbstractController {
 
     private function deleteUploadedHTML() {
 
-        if(!isset($_REQUEST['filename']) && ($_REQUEST['filename'] !== 'upper-left' || $_REQUEST['filename'] !== 'upper-right' || $_REQUEST['filename'] !== 'lower-left')) {
+        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid filename");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));

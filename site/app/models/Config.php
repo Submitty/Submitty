@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -28,6 +29,7 @@ use phpDocumentor\Reflection\File;
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
  * @method array getCourseDatabaseParams()
+ * @method array getWrapperFiles()
  * @method string getCourseName()
  * @method string getCourseHomeUrl()
  * @method integer getDefaultHwLateDays()
@@ -308,10 +310,14 @@ class Config extends AbstractModel {
         }
 
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
+
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
-        $this->wrapper_files['up_left_html'] = FileUtils::joinPaths($wrapper_files_path, 'upper-left.html');
-        $this->wrapper_files['up_right_html'] = FileUtils::joinPaths($wrapper_files_path, 'upper-right.html');
-        $this->wrapper_files['low_left_html'] = FileUtils::joinPaths($wrapper_files_path, 'lower-left.html');
+        foreach (WrapperController::WRAPPER_FILES as $file) {
+            $path = FileUtils::joinPaths($wrapper_files_path, $file) . ".html";
+            if (file_exists($path)) {
+                $this->wrapper_files[$file] = $path;
+            }
+        }
 
         $this->course_loaded = true;
     }
@@ -419,9 +425,7 @@ class Config extends AbstractModel {
 
     public function wrapperEnabled() {
         return $this->course_loaded
-            && (file_exists($this->wrapper_files['up_left_html'])
-            ||  file_exists($this->wrapper_files['up_right_html'])
-            ||  file_exists($this->wrapper_files['low_left_html']));
+            && (count($this->wrapper_files) > 0);
     }
 
     public function readCourseIni() {

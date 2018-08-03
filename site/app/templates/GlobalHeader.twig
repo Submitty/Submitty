@@ -23,37 +23,26 @@
     {% endfor %}
 </div>
 <div id="container">
-    {% if wrapper_enabled %}
-        <div id="upper-container">
-            {% if wrapper_files_exist['up_left_html'] %}
-                <div id="upper-left-container">
-                    {# uploaded homepage redirect can go here? #}
-                    {{ include('@site_uploads/upper-left.html') }}
-                </div>
-            {% else %}
-                <div id="empty-container"></div>
-            {% endif %}
-            {% if wrapper_files_exist['up_right_html'] %}
-                <div id="upper-right-container">
-                    {# uploaded banner can go here? #}
-                    {{ include('@site_uploads/upper-right.html') }}
-                </div>
-            {% else %}
-                <div id="empty-container"></div>
-            {% endif %}
-        </div>
-        <div id="lower-container">
-            {% if wrapper_files_exist['low_left_html'] %}
-                <div id="lower-left-container">
-                    {# uploaded sidebar can go here? #}
-                    {{ include('@site_uploads/lower-left.html') }}
-                </div>
-            {% else %}
-                <div id="empty-container"></div>
-            {% endif %}
-            <div id="lower-right-container">
+    {% if wrapper_files['top_bar'] != null %}
+        {#<div id="upper-left-container">#}
+            {# uploaded homepage redirect can go here? #}
+            <iframe id="upper-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/top_bar.html" frameborder="0"></iframe>
+            {#{{ include('@site_uploads/upper-left.html') }}#}
+        {#</div>#}
+    {% else %}
+        <div id="empty-container"></div>
     {% endif %}
-                <div id="site-body">
+    <div id="center-container">
+        {% if wrapper_files['left_sidebar'] != null %}
+            {#<div id="lower-left-container">#}
+                {# uploaded sidebar can go here? #}
+                <iframe id="left-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/left_sidebar.html" frameborder="0"></iframe>
+                {#{{ include('@site_uploads/lower-left.html') }}#}
+            {#</div>#}
+        {% else %}
+            <div id="empty-container"></div>
+        {% endif %}
+            <div id="site-body">
                 {% if nav_urls|length > 0 %}
                     <div id="nav">
                         <ul>
@@ -65,7 +54,7 @@
                         </ul>
                     </div>
                 {% endif %}
-                    <div id="header">
+                <div id="header">
                         <div id="header-text">
                             <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
                             <h2>
