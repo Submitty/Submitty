@@ -5,8 +5,8 @@
     <br />
 
 
-    <div class="electronic_file_dates">
-        <div class="team_yes_dates">
+    <div class="electronic_file electronic_file_dates">
+        <div class="team_yes team_yes_dates">
             <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
             Team Lock Date (Instructors can still manually manage teams)
 
@@ -24,7 +24,7 @@
         <br />
     </div>
 
-    <div class="manual_grading_dates">
+    <div class="manual_grading manual_grading_dates">
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
         TA/Instructor Manual Grading Open Date (grading may begin)
 
@@ -41,15 +41,23 @@
 
     <br />
 
-    <div class="electronic_file_dates">
+    <div class="electronic_file electronic_file_dates">
         How many late days may students use on this assignment?
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
         <br />
     </div>
+
+    <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
+    <span id="gray_date_warning" hidden>Warning, grayed-out dates above may not be backed by real data or may not represent the most up-to-date data</span>
 </div>
 
 <script type="text/javascript">
+    function showAllDates() {
+        $('#gradeable-dates').find('div,input').show();
+        $('#gray_date_warning').show();
+    }
+
     function updateDateDisplay() {
         let elecDateBoxes = $('.electronic_file_dates input');
         elecDateBoxes.prop('disabled', true);
