@@ -120,7 +120,7 @@ class NavigationView extends AbstractView {
                 $user_seating_details = json_decode(file_get_contents($seating_user_path));
 
                 $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
-                    $gradeable_id, $user_seating_details->building, $user_seating_details->room, 'config.json');
+                    $gradeable_id, $user_seating_details->building, $user_seating_details->room.'.json');
                 // if the report the instructor generated corresponds to a valid room config
                 if(is_file($seating_config_path)) {
                     $seating_config = file_get_contents($seating_config_path);
