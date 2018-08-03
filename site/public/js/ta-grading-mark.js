@@ -645,7 +645,14 @@ function checkMarks(c_index) {
             return false;
         }
     });
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        all_false = false;
+        first_mark.toggleClass("mark-has", false);
+        getMark(c_index, targetId).has = false;
+        return false;
+    }
     if(all_false === false) {
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
@@ -851,7 +858,11 @@ function selectMark(c_index, m_id) {
     
     var mark = getMark(c_index, m_id);
     mark.has = !mark.has;
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        skip = false;
+    }
     //actually checks the mark then checks if the first mark is still valid
     var check = $("#mark_id-" + c_index + "-" + m_id + "-check");
     check.toggleClass("mark-has", mark.has);
@@ -1052,6 +1063,9 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
 
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
+        if (typeof custom_points != 'number') {
+            custom_points=0;
+        }
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
 
         // Updates the total number of points and text
