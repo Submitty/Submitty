@@ -261,9 +261,6 @@ class Output {
     }
 
     public function getOutput() {
-        if($this->core->getConfig()->wrapperEnabled()) {
-            $this->addInternalCss('wrapper_sections.css');
-        }
         $return = "";
         $return .= $this->renderHeader();
         $return .= $this->output_buffer;

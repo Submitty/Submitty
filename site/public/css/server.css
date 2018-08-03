@@ -347,6 +347,10 @@ table tr.table-header {
     z-index: 20;
 }
 
+#push {
+    flex-grow: 1;
+}
+
 #push, #footer {
     height: 20px;
 }
@@ -1241,6 +1245,35 @@ end of styles used in the admin gradeable page
     min-width: 400px;
     border-radius: 5px;
 }
+
+/* Site Wrapper */
+
+#container {
+    display: flex;
+    flex-direction: column;
+}
+
+#container #center-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#site-body {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+#container iframe#upper-container, #container iframe#lower-container {
+    height: 60px;
+}
+
+#container iframe#left-container, #container iframe#right-container {
+    width: 200px;
+}
+
+/* Site Wrapper View */
 
 .wrapper-example {
     width: 400px;
