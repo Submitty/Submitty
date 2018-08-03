@@ -14,14 +14,8 @@ def up(config, conn, semester, course):
         
         config = configparser.ConfigParser()
         config.read(str(config_file))
-        print ("thing",str(config_file))
-        print ("my_config",config)
 
-        if not config.has_section('course_details'):
-            print ("ARCH")
-
-        print (config.sections())
-        
+        # set a bunch of (mostly old) defaults
         if not config.has_option('course_details','forum_enabled'):
             config.set('course_details','forum_enabled','false')
         if not config.has_option('course_details','regrade_enabled'):
@@ -30,9 +24,11 @@ def up(config, conn, semester, course):
             config.set('course_details','regrade_message',"Frivolous regrade requests may result in a grade deduction or loss of late days")
         if not config.has_option('course_details','private_repository'):
             config.set('course_details','private_repository','""')
+        # the newest default
         if not config.has_option('course_details','room_seating_gradeable_id'):
             config.set('course_details','room_seating_gradeable_id','""')
-        
+
+        # write out the file
         with open(str(config_file),'w') as configfile:
             config.write(configfile)
         
