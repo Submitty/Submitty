@@ -318,7 +318,7 @@ class Config extends AbstractModel {
 
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
         foreach (WrapperController::WRAPPER_FILES as $file) {
-            $path = FileUtils::joinPaths($wrapper_files_path, $file) . ".html";
+            $path = FileUtils::joinPaths($wrapper_files_path, $file);
             if (file_exists($path)) {
                 $this->wrapper_files[$file] = $path;
             }

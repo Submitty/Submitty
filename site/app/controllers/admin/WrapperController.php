@@ -9,10 +9,11 @@ use app\libraries\Utils;
 class WrapperController extends AbstractController {
 
     const WRAPPER_FILES = [
-        'top_bar',
-        'left_sidebar',
-        'right_sidebar',
-        'bottom_bar'
+        'top_bar.html',
+        'left_sidebar.html',
+        'right_sidebar.html',
+        'bottom_bar.html',
+        'override.css'
     ];
 
 	public function run() {
@@ -35,7 +36,7 @@ class WrapperController extends AbstractController {
 	}
 
 	private function processUploadHTML() {
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+        if (!isset($_REQUEST['csrf_token']) || !$this->core->checkCsrfToken($_REQUEST['csrf_token'])) {
             $this->core->addErrorMessage("Upload failed: Invalid CSRF token");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
@@ -48,18 +49,13 @@ class WrapperController extends AbstractController {
         }
         $upload = $_FILES['wrapper_upload'];
 
-        if(!Utils::endsWith($upload['name'],'.html')) {
-            $this->core->addErrorMessage("Upload failed: Invalid file: Not an html file");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
-        }
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
+        if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
-        $filename = $_POST['location'].'.html';
+        $filename = $_REQUEST['location'];
 
         if (!@copy($upload['tmp_name'], FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename))) {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
@@ -74,12 +70,12 @@ class WrapperController extends AbstractController {
 
     private function deleteUploadedHTML() {
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
-            $this->core->addErrorMessage("Upload failed: Invalid filename");
+        if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
+            $this->core->addErrorMessage("Delete failed: Invalid filename");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
-        $filename = $_REQUEST['filename'].'.html';
+        $filename = $_REQUEST['location'];
 
 	    $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 

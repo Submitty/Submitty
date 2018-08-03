@@ -1265,11 +1265,11 @@ end of styles used in the admin gradeable page
     flex-direction: column;
 }
 
-#container iframe#upper-container, #container iframe#lower-container {
+#container iframe#top_bar, #container iframe#bottom_bar {
     height: 60px;
 }
 
-#container iframe#left-container, #container iframe#right-container {
+#container iframe#left_sidebar, #container iframe#right_sidebar {
     width: 200px;
 }
 

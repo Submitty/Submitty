@@ -33,14 +33,14 @@
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="top_bar">
+                    <input type="hidden" name="location" value="top_bar.html">
                     <input type="file" name="wrapper_upload">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
             <td>
-                {% if wrapper_files['top_bar'] != null %}
-                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-left'}) }}"></a>&nbsp;{{ wrapper_files['top_bar'] }}
+                {% if wrapper_files['top_bar.html'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'top_bar.html'}) }}"></a>&nbsp;{{ wrapper_files['top_bar.html'] }}
                 {% endif %}
             </td>
         </tr>
@@ -49,14 +49,14 @@
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="left_sidebar">
+                    <input type="hidden" name="location" value="left_sidebar.html">
                     <input type="file" name="wrapper_upload">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
             <td>
-                {% if wrapper_files['left_sidebar'] != null %}
-                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'upper-right'}) }}"></a>&nbsp;{{ wrapper_files['left_sidebar'] }}
+                {% if wrapper_files['left_sidebar.html'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'location': 'left_sidebar.html'}) }}"></a>&nbsp;{{ wrapper_files['left_sidebar.html'] }}
                 {% endif %}
             </td>
         </tr>
@@ -65,14 +65,14 @@
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="right_sidebar">
+                    <input type="hidden" name="location" value="right_sidebar.html">
                     <input type="file" name="wrapper_upload">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
             <td>
-                {% if wrapper_files['right_sidebar'] != null %}
-                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ wrapper_files['right_sidebar'] }}
+                {% if wrapper_files['right_sidebar.html'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'location': 'right_sidebar.html'}) }}"></a>&nbsp;{{ wrapper_files['right_sidebar.html'] }}
                 {% endif %}
             </td>
         </tr>
@@ -81,14 +81,14 @@
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="bottom_bar">
+                    <input type="hidden" name="location" value="bottom_bar.html">
                     <input type="file" name="wrapper_upload">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
             <td>
-                {% if wrapper_files['bottom_bar'] != null %}
-                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ wrapper_files['bottom_bar'] }}
+                {% if wrapper_files['bottom_bar.html'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'location': 'bottom_bar.html'}) }}"></a>&nbsp;{{ wrapper_files['bottom_bar.html'] }}
                 {% endif %}
             </td>
         </tr>
@@ -97,14 +97,14 @@
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="css">
+                    <input type="hidden" name="location" value="override.css">
                     <input type="file" name="wrapper_upload">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
             <td>
-                {% if wrapper_files['css'] != null %}
-                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'filename': 'lower-left'}) }}"></a>&nbsp;{{ wrapper_files['css'] }}
+                {% if wrapper_files['override.css'] != null %}
+                    <a class="fa fa-trash" href="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html', 'location': 'override.css'}) }}"></a>&nbsp;{{ wrapper_files['override.css'] }}
                 {% endif %}
             </td>
         </tr>
