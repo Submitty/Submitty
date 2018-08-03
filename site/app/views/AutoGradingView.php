@@ -358,14 +358,9 @@ class AutoGradingView extends AbstractView {
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
-
+        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
-        $allow_regrade=false;
-        if($regrade_enabled==true && $gradeable->isRegradeAllowed() && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))){
-            $allow_regrade=true;
-            $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
-        }
-
+        $allow_regrade= $gradeable->isRegradeCurrentlyAllowed();
         $uploaded_files = $gradeable->getSubmittedFiles();
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
