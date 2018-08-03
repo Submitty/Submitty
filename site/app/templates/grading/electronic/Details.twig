@@ -213,7 +213,7 @@
                 {% set contents = "Regrade Requested" %}
                 {% set btn_class = "btn-danger" %}
             {% else %}
-                {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
+                {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTAPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
         {% else %}
@@ -261,7 +261,7 @@
             {% set score = score + component.getScore() %}
         {% endfor %}
 
-        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
+        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingPoints() %}
         {% set btn_class = "btn-default" %}
     {% endif %}
     <td>
@@ -336,7 +336,7 @@
         {% set graded = 0 %}
     {% endif %}
 
-    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTANonExtraCreditPoints() %}
+    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTAPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
             <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
@@ -356,9 +356,9 @@
     {% endfor %}
     {#
         instead of autograding_score it should be total autograding possible
-        I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
+        I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
     #}
-    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingNonExtraCredit() %}
+    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
             <div>{{ graded }} / {{ total_possible }}</div>

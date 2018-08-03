@@ -49,6 +49,7 @@ use app\libraries\Utils;
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
+ * @method string getRoomSeatingGradeableId()
  */
 
 class Config extends AbstractModel {
@@ -169,11 +170,15 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var string */
     protected $regrade_message;
+    /** @property @var string|null */
+    protected $room_seating_gradeable_id;
 
     /**
      * Config constructor.
      *
      * @param Core   $core
+     * @param $semester
+     * @param $course
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
@@ -280,7 +285,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -312,38 +317,6 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
-
-
-            // TEMPORARY WORKAROUND FOR BACKWARDS COMPATIBILITY OF
-            // CHANGED COURSE CONFIG VARIABLE.
-            // FIXME: THIS CAN BE REMOVED WITH THE NEXT MAJOR RELEASE
-            if (!isset($config[$section][$key]) &&
-                $key == "display_rainbow_grades_summary" &&
-                isset($config[$section]["display_iris_grades_summary"])) {
-              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
-            }
-            // END TEMPORARY WORKAROUND
-
-
-            // DEFAULT FOR FORUM
-            if (!isset($config[$section][$key]) &&
-                $key == "forum_enabled") {
-              $config[$section][$key] = false;
-            }
-            // DEFAULT FOR REGRADE ENABLED
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_enabled") {
-              $config[$section][$key] = false;
-            }
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_message") {
-              $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
-            }
-            // DEFAULT FOR PRIVATE_REPOSITORY
-            if (!isset($config[$section][$key]) &&
-                $key == "private_repository") {
-              $config[$section][$key] = "";
-            }
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
@@ -396,6 +369,13 @@ class Config extends AbstractModel {
      */
     public function displayRainbowGradesSummary() {
         return $this->display_rainbow_grades_summary;
+    }
+
+    /**
+     * @return bool
+     */
+    public function displayRoomSeating() {
+        return $this->room_seating_gradeable_id !== "";
     }
 
     public function getLogPath() {

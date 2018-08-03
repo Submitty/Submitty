@@ -6,7 +6,7 @@ other way to make the code neater.
 const { UI } = PDFAnnotate;
 let documentId = 'example.pdf';
 let PAGE_HEIGHT;
-let RENDER_OPTIONS = {
+const RENDER_OPTIONS = {
     documentId,
     pdfDocument: null,
     // scale: parseFloat(localStorage.getItem(`${documentId}/scale`), 10) || 0.5,
@@ -49,7 +49,7 @@ window.addEventListener('scroll', function (e) {
 function render(gradeable_id, user_id, file_name, url) {
     $.ajax({
         type: 'POST',
-        url: 'http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=base64_encode_pdf',
+        url: url,
         data: {
             gradeable_id: gradeable_id,
             user_id: user_id,
@@ -75,7 +75,6 @@ function render(gradeable_id, user_id, file_name, url) {
                 }
 
                 UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
-                    console.log(annotations);
                     let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                     PAGE_HEIGHT = viewport.height;
                 })
