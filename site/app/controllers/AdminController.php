@@ -48,6 +48,7 @@ class AdminController extends AbstractController {
                 $controller = new PlagiarismController($this->core);
                 break;
             case 'wrapper':
+                $this->core->getOutput()->addBreadcrumb("Site Theme");
                 $controller = new WrapperController($this->core);
                 break;
             default:
