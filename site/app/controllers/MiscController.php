@@ -18,6 +18,9 @@ class MiscController extends AbstractController {
             case 'display_file':
                 $this->displayFile();
                 break;
+            case 'read_file':
+                $this->readFile();
+                break;
             case 'download_file':
                 $this->downloadFile();
                 break;
@@ -343,6 +346,20 @@ class MiscController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                                                     'page' => 'course_materials',
                                                     'action' => 'view_course_materials_page')));
+    }
+
+    private function readFile($download_with_any_role = false) {
+        // security check
+        $error_string="";
+        if (!$this->checkValidAccess(false,$error_string, $download_with_any_role)) {
+            $message = "You do not have access to that page. ".$error_string;
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+        $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
     }
 
     private function downloadFile($download_with_any_role = false) {
