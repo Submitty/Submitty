@@ -409,8 +409,8 @@ class Gradeable extends AbstractModel {
             if ($prev_property !== null) {
                 if ($date_values[$prev_property] !== null && $date_values[$property] !== null) {
                     if ($date_values[$prev_property] > $date_values[$property]) {
-                        $errors[$property] = self::date_display_names[$property] . ' Date must come before '
-                            . self::date_display_names[$prev_property] . ' Date';
+                        $errors[$prev_property] = self::date_display_names[$prev_property] . ' Date must come before '
+                            . self::date_display_names[$property] . ' Date';
                     }
                 }
             }
@@ -420,6 +420,24 @@ class Gradeable extends AbstractModel {
         return $errors;
     }
 
+    private function getDateValidationSet() {
+        if ($this->type === GradeableType::ELECTRONIC_FILE) {
+            if (!$this->isStudentSubmit()) {
+                if ($this->isTaGrading()) {
+                    return self::date_properties_elec_exam;
+                } else {
+                    return self::date_properties_bare;
+                }
+            } else if ($this->isTaGrading()) {
+                return self::date_properties_elec_ta;
+            } else {
+                return self::date_properties_elec_no_ta;
+            }
+        } else {
+            return self::date_properties_simple;
+        }
+    }
+
     /**
      * Asserts that the provided set of dates are valid for this gradeable's configuration
      * @param \DateTime[] $dates
@@ -427,21 +445,9 @@ class Gradeable extends AbstractModel {
     private function assertDates(array $dates) {
         // Get the date set we validate against
         $errors = [];
-        if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            if (!$this->isStudentSubmit()) {
-                if($this->isTaGrading()) {
-                    $date_set = self::date_properties_elec_exam;
-                } else {
-                    $date_set = self::date_properties_bare;
-                }
-            } else if ($this->isTaGrading()) {
-                $date_set = self::date_properties_elec_ta;
-            } else {
-                $date_set = self::date_properties_elec_no_ta;
-            }
-        } else {
-            $date_set = self::date_properties_simple;
-        }
+
+        // Get the date set for validation
+        $date_set = $this->getDateValidationSet();
 
         // Get the validation errors
         $errors = array_merge($errors, self::validateDateSet($date_set, $dates));
@@ -453,6 +459,7 @@ class Gradeable extends AbstractModel {
         $submission_due_date = $dates['submission_due_date'];
         if ($this->type === GradeableType::ELECTRONIC_FILE && $this->isStudentSubmit() && $submission_due_date !== null) {
             $late_days = intval($dates['late_days'] ?? 0);
+            /** @noinspection PhpUnhandledExceptionInspection */
             $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
             if ($max_due_date > $dates['grade_released_date']) {
                 $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
@@ -469,11 +476,54 @@ class Gradeable extends AbstractModel {
      * Takes a complete set of dates relevant to this gradeable and, depending on the gradeable's settings,
      *  coerces all dates to satisfy the database date constraints.  The behavior of this function is undefined
      *  if called before `assertDates`
-     * @param \DateTime[] $dates
-     * @return \DateTime[]
+     * @param \DateTime[] $dates Array of dates, indexed by property name
+     * @return \DateTime[] Array of dates, indexed by property name
      */
     private function coerceDates(array $dates) {
-        return $dates; // TODO:
+        // Takes an array of date properties (in order) and date values (indexed by property)
+        //  and returns the modified date values to comply with the provided order, using
+        //  a compare function, which returns true when first parameter should be coerced
+        //  into the second parameter.
+        $coerce_dates = function(array $date_properties, array $black_list, array $date_values, $compare) {
+            // coerce them to be in increasing order (and fill in nulls)
+            foreach ($date_properties as $i => $property) {
+                // Don't coerce the first date
+                if ($i === 0) {
+                    continue;
+                }
+
+                // Don't coerce a date on the black list
+                if(in_array($property, $black_list)) {
+                    continue;
+                }
+
+                // Get a value for the date to compare against
+                $prev_date = $date_values[$date_properties[$i-1]];
+
+                // This may be null / not set
+                $date = $date_values[$property] ?? null;
+
+                // Coerce the date if it is out of bounds
+                if ($date === null || $compare($date, $prev_date)) {
+                    $date_values[$property] = $prev_date;
+                }
+            }
+            return $date_values;
+        };
+
+        // Blacklist the dates checked by validation
+        $black_list = $this->getDateValidationSet();
+
+		// First coerce in the forward direction, then in the reverse direction
+		return $coerce_dates(array_reverse(self::date_properties), $black_list,
+            $coerce_dates(self::date_properties, $black_list, $dates,
+                function (\DateTime $val, \DateTime $cmp) {
+                    return $val < $cmp;
+                }),
+            function(\DateTime $val, \DateTime $cmp) {
+                return $val > $cmp;
+            }
+        );
     }
 
     /**
